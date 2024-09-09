@@ -66,26 +66,12 @@ const Layout = () => {
                     </Link>
                   </li>
                   <li onClick={LogOut}>
-                    <Link to="/login" className="text-white hover:text-gray-400" onClick={toggleMenu}>
+                    <Link to="/" className="text-white hover:text-gray-400" onClick={toggleMenu}>
                       LogOut
                     </Link>
                   </li>
                 </>
-              ) : (
-                // Links for unauthenticated users
-                <>
-                  <li>
-                    <Link to="/login" className="text-white hover:text-gray-400" onClick={toggleMenu}>
-                      LogIn
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/signup" className="text-white hover:text-gray-400" onClick={toggleMenu}>
-                      SignUp
-                    </Link>
-                  </li>
-                </>
-              )}
+              ) : null }
             </ul>
           </div>
         </div>

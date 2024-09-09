@@ -6,7 +6,7 @@ import { useAuthContext } from '../Hooks/useAuthContext'; // Adjust the import p
 const ProtectedRoute = ({ element, ...rest }) => {
   const { user } = useAuthContext();
 
-  return user ? element : <Navigate to="/login" replace />;
+  return user ? element ||  <Navigate to="/dashboard" /> : <Navigate to="/" replace />;
 };
 
 export default ProtectedRoute;

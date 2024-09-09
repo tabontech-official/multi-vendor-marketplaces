@@ -21,10 +21,7 @@ const Dashboard = () => {
 
           {/* Buttons Section */}
           <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
-            <label htmlFor="actions" className="text-sm text-gray-700">More Action:</label>
-            <select id="actions" name="actions" className="p-2 border border-gray-300 rounded-md">
-              <option value="bulk-edit">Bulk Edit</option>
-            </select>
+            
             <button className="bg-[#52c058] text-white py-2 px-4 rounded-md hover:bg-[#3a9a47] transition duration-300 ease-in-out flex items-center space-x-2">
               <HiPlus className="w-5 h-5" />
               <Link to="/add-listing" className="ml-2">
@@ -37,12 +34,7 @@ const Dashboard = () => {
         <div className="flex flex-col md:flex-row justify-between items-start mt-4">
           {/* Filters Section */}
           <div className="flex flex-col space-y-4 w-full md:w-1/3">
-            <div>
-              <label htmlFor="sort-by" className="text-sm text-gray-700">Sort By:</label>
-              <select id="sort-by" name="sort-by" className="p-2 border border-gray-300 rounded-md">
-                <option value="recent-added">Recently Added</option>
-              </select>
-            </div>
+          
             <div>
               <label htmlFor="filter-by" className="text-sm text-gray-700">Filter By:</label>
               <select id="filter-by" name="filter-by" className="p-2 border border-gray-300 rounded-md">
@@ -57,16 +49,7 @@ const Dashboard = () => {
           </div>
 
           {/* Bulk Action and Export Button */}
-          <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
-            <label htmlFor="bulk-action" className="text-sm text-gray-700">Bulk Action:</label>
-            <select id="bulk-action" name="bulk-action" className="p-2 border border-gray-300 rounded-md">
-              <option value="bulk-edit">Bulk Edit</option>
-              <option value="export-details">Export Details</option>
-            </select>
-            <button className="bg-[#52c058] text-white py-2 px-4 rounded-md hover:bg-[#3a9a47] transition duration-300 ease-in-out">
-              Export Details
-            </button>
-          </div>
+         
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-center p-4 border-b-2 border-gray-200">
@@ -80,18 +63,7 @@ const Dashboard = () => {
           </div>
 
           {/* Entries Selector */}
-          <div className="flex items-center space-x-2">
-            <label htmlFor="values" className="text-sm text-gray-700">Show Entries:</label>
-            <select 
-              id="values" 
-              name="values" 
-              className="p-2 border border-gray-300 rounded-md"
-            >
-              <option value="15">15</option>
-              <option value="30">30</option>
-              <option value="50">50</option>
-            </select>
-          </div>
+          
         </div>
 
         <div className="overflow-x-auto p-4">

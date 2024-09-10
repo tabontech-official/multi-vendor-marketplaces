@@ -39,7 +39,7 @@ const [location , setlocation] = useState('')
   return (
     <main className="flex flex-col items-center min-h-screen bg-gray-100 p-8">
       <div className="w-full max-w-6xl bg-white p-8 rounded-lg border border-gray-300 shadow-lg">
-        <h1 className="text-3xl font-semibold mb-6 text-gray-800">Add Product</h1>
+        <h1 className="text-3xl font-semibold mb-6 text-gray-800">Add Listings</h1>
         
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Form Layout: Two Columns */}

@@ -29,7 +29,7 @@ const AccountPage = () => {
   };
 
   return (
-    <main className="w-full p-8 h-screen flex justify-center items-center bg-gray-100">
+    <main className="w-full p-8 flex justify-center items-center bg-gray-100">
       <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg rounded-lg p-6">
         <h1 className="text-2xl font-semibold mb-4 text-center text-gray-800">Account Settings</h1>
         <form onSubmit={handleSubmit} className="space-y-6">

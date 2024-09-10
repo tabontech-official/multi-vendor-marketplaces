@@ -1,9 +1,8 @@
+// src/AddEquipmentForm.js
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 
-
-const AddProductForm = () => {
-  // State hooks for product details
+const AddNewEquipmentForm = () => {
+  // State hooks for form fields
   const [location, setLocation] = useState('');
   const [equipmentName, setEquipmentName] = useState('');
   const [brandName, setBrandName] = useState('');
@@ -15,38 +14,19 @@ const AddProductForm = () => {
   const [shipping, setShipping] = useState('');
   const [training, setTraining] = useState('');
 
-
   // Handler for form submission
   const handleSubmit = async (e) => {
-  console.log(location,equipmentName,brandName,salePrice,equipmentType,certification,yearManufactured,yearsWarranty,shipping,training)
     e.preventDefault();
-    // Handle form submission
-
-    // try {
-    //   const response = await fetch('https://medspaa.vercel.app/listing/addList',{
-    //     method:"POST",
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({location,equipmentName,brandName,salePrice,equipmentType,certification,yearManufactured,yearsWarranty,shipping,training})
-    //     })
-   
-    //     const json = response.json()
-   
-    //     if(response.ok){
-    //      console.log(json)
-    //     }
-    // } catch (error) {
-    //   console.log(error.error)
-    // }
-   
+    // Here you would typically handle form submission logic
+    console.log({ location, equipmentName, brandName, salePrice, equipmentType, certification, yearManufactured, yearsWarranty, shipping, training });
   };
 
   return (
     <main className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-4xl bg-white p-8 rounded-lg border  shadow-lg  border-blue-500">
-        <h1 className="text-3xl font-semibold mb-6 text-gray-800 text-center">Listing New Equipment</h1>
-        
+      <div className="w-full max-w-4xl bg-white p-8 rounded-lg border shadow-lg border-blue-500">
+        <h1 className="text-3xl font-semibold mb-6 text-gray-800 text-center">Add New Equipment Listing</h1>
+
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Product Details Form */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Location */}
             <div className="flex flex-col">
@@ -149,7 +129,7 @@ const AddProductForm = () => {
               <input
                 type="number"
                 id="yearManufactured"
-               min={0}
+                min={0}
                 value={yearManufactured}
                 onChange={(e) => setYearManufactured(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
@@ -208,12 +188,13 @@ const AddProductForm = () => {
             </div>
           </section>
 
-
           {/* Submit Button */}
           <div className="flex justify-center mt-6">
-          <button className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md  transition duration-300 ease-in-out flex items-center space-x-2" type='submit'>
-                Add Listings
-        
+            <button
+              className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+              type="submit"
+            >
+              Add Equipment Listing
             </button>
           </div>
         </form>
@@ -222,4 +203,4 @@ const AddProductForm = () => {
   );
 };
 
-export default AddProductForm;
+export default AddNewEquipmentForm;

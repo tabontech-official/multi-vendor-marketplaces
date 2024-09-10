@@ -1,10 +1,14 @@
+// src/pages/Auth.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from './Hooks/useAuthContext';
-
+import Dashboard from './pages/Dashboard';
 
 const Auth = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { dispatch, user } = useAuthContext(); // Ensure this is getting user and dispatch correctly
+
   const [activeTab, setActiveTab] = useState('login');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -13,8 +17,6 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const { dispatch , user} = useAuthContext();
-  const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -53,7 +55,7 @@ const Auth = () => {
 
       if (response.ok) {
         setSuccess('Registration successful! Please log in.');
-        setActiveTab('login')
+        setActiveTab('login');
       } else {
         setError(json.error || 'An error occurred during registration.');
       }
@@ -92,7 +94,8 @@ const Auth = () => {
         localStorage.setItem('userid', json.data.shopifyId);
         dispatch({ type: 'LOGIN', payload: json });
         setSuccess('Login successful!');
-        navigate('/dashboard')
+        const redirectTo = new URLSearchParams(location.search).get('redirect') || '/dashboard';
+        navigate(redirectTo);
       } else {
         setError(json.error || 'An error occurred during login.');
       }
@@ -101,11 +104,13 @@ const Auth = () => {
     }
   };
 
-  return user ? (
-    <Dashboard />
-  ) : (
-    <section className="bg-white dark:bg-gray-900 border-blue-500">
-      <div className="container flex items-center justify-center min-h-screen px-6 mx-auto">
+  if (user) {
+    return <Dashboard />; // Redirect to dashboard if the user is already logged in
+  }
+
+  return (
+    <section className="bg-white dark:bg-gray-900 border-blue-500 mt-20">
+      <div className="container flex items-center justify-center px-6 mx-auto">
         <div className="w-full max-w-md">
           <div className="flex justify-center mx-auto">
             <img
@@ -114,7 +119,6 @@ const Auth = () => {
               alt="Logo"
             />
           </div>
-
           <div className="flex items-center justify-center mt-6">
             <button
               type="button"
@@ -127,7 +131,6 @@ const Auth = () => {
             >
               Login
             </button>
-
             <button
               type="button"
               onClick={() => setActiveTab('signup')}
@@ -140,7 +143,6 @@ const Auth = () => {
               Sign Up
             </button>
           </div>
-
           <div className="mt-8">
             {activeTab === 'login' ? (
               <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-blue-500 dark:border-gray-600">
@@ -160,7 +162,6 @@ const Auth = () => {
                       aria-required="true"
                     />
                   </div>
-
                   <div className="relative flex items-center mb-4">
                     <span className="absolute">
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 mx-3 text-gray-300 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -176,19 +177,16 @@ const Auth = () => {
                       aria-required="true"
                     />
                   </div>
-
                   {error && (
                     <div className="mb-4 text-red-500 dark:text-red-400">
                       {error}
                     </div>
                   )}
-
                   {success && (
                     <div className="mb-4 text-green-500 dark:text-green-400">
                       {success}
                     </div>
                   )}
-
                   <button
                     type="submit"
                     className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50"
@@ -215,7 +213,6 @@ const Auth = () => {
                       aria-required="true"
                     />
                   </div>
-
                   <div className="relative flex items-center mb-4">
                     <span className="absolute">
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 mx-3 text-gray-300 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -231,7 +228,6 @@ const Auth = () => {
                       aria-required="true"
                     />
                   </div>
-
                   <div className="relative flex items-center mb-4">
                     <span className="absolute">
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 mx-3 text-gray-300 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -247,7 +243,6 @@ const Auth = () => {
                       aria-required="true"
                     />
                   </div>
-
                   <div className="relative flex items-center mb-4">
                     <span className="absolute">
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 mx-3 text-gray-300 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -263,7 +258,6 @@ const Auth = () => {
                       aria-required="true"
                     />
                   </div>
-
                   <div className="relative flex items-center mb-6">
                     <span className="absolute">
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 mx-3 text-gray-300 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -279,19 +273,16 @@ const Auth = () => {
                       aria-required="true"
                     />
                   </div>
-
                   {error && (
                     <div className="mb-4 text-red-500 dark:text-red-400">
                       {error}
                     </div>
                   )}
-
                   {success && (
                     <div className="mb-4 text-green-500 dark:text-green-400">
                       {success}
                     </div>
                   )}
-
                   <button
                     type="submit"
                     className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50"
@@ -309,3 +300,4 @@ const Auth = () => {
 };
 
 export default Auth;
+

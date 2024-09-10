@@ -9,7 +9,9 @@ import AddProductForm from './pages/add-product';
 import PrivateRoute from './context api/protectedRoutes';
 import { useAuthContext } from './Hooks/useAuthContext';
 import AccountPage from './pages/account';
-import Home from './Home';
+import Home from './AuthForms';
+import Auth from './AuthForms';
+
 
 const App = () => {
   const { user } = useAuthContext();
@@ -18,7 +20,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/"  element={<Layout />} >
-        <Route index  user  element={<Home />} />
+        <Route index  user  element={<Auth />} />
         <Route path="/add-listing" element={<PrivateRoute element={<AddProductForm />} />} />
         <Route path="/edit-account" element={<PrivateRoute element={<AccountPage />} />} />
         <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />

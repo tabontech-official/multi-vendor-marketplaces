@@ -92,6 +92,7 @@ const AddProductForm = () => {
               <input
                 type="number"
                 id="salePrice"
+                min={0}
                 value={salePrice}
                 onChange={(e) => setSalePrice(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
@@ -148,6 +149,7 @@ const AddProductForm = () => {
               <input
                 type="number"
                 id="yearManufactured"
+               min={0}
                 value={yearManufactured}
                 onChange={(e) => setYearManufactured(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
@@ -160,6 +162,7 @@ const AddProductForm = () => {
               <label htmlFor="yearsWarranty" className="text-gray-700 text-sm font-medium mb-1">Years Warranty *</label>
               <input
                 type="number"
+                min={0}
                 id="yearsWarranty"
                 value={yearsWarranty}
                 onChange={(e) => setYearsWarranty(e.target.value)}

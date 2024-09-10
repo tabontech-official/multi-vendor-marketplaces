@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { FaBars, FaTimes } from 'react-icons/fa'; // Import hamburger and close icons
+import { FaBars, FaTimes } from 'react-icons/fa'; 
 import { useAuthContext } from '../Hooks/useAuthContext';
 
 const Layout = () => {
-  const { user , dispatch} = useAuthContext(); // Get user from context
+  const { user , dispatch} = useAuthContext(); 
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -20,11 +20,10 @@ const Layout = () => {
 
       if (userid) {
         const response = await fetch(`https://medspaa.vercel.app/auth/logout/${userid}`, {
-          method: 'POST', // Assuming you need POST for logout
+          method: 'POST',
         });
         const json = await response.json();
         if (response.ok) {
-          console.log(json);
           localStorage.removeItem('usertoken');
           localStorage.removeItem('userid');
           dispatch({ type: "LOGOUT" });

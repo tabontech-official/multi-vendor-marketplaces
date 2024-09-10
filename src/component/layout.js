@@ -24,7 +24,6 @@ const Layout = () => {
         });
         const json = await response.json();
         if (response.ok) {
-          console.log(json);
           localStorage.removeItem('usertoken');
           localStorage.removeItem('userid');
           dispatch({ type: "LOGOUT" });

@@ -94,7 +94,7 @@ const Auth = () => {
         setSuccess('Login successful!');
         navigate('/dashboard')
       } else {
-        setError(json.message || 'An error occurred during login.');
+        setError(json.error || 'An error occurred during login.');
       }
     } catch (error) {
       setError('An error occurred. Please try again.');

@@ -1,287 +1,216 @@
 import React, { useState } from 'react';
-import VariantDetails from './add-variants';
+import { Link } from 'react-router-dom';
+
+
 const AddProductForm = () => {
   // State hooks for product details
-  const [productType, setProductType] = useState('');
-  const [productName, setProductName] = useState('');
+  const [location, setLocation] = useState('');
+  const [equipmentName, setEquipmentName] = useState('');
   const [brandName, setBrandName] = useState('');
-  const [description, setDescription] = useState('');
-  const [shippingDetails, setShippingDetails] = useState(false);
-  const[Price , setPrice ] = useState('0')
-const [date , setDate] = useState('')
-const [Warranty, setWarranty] = useState('');
-const [Scope , setScope] = useState('')
-const [contact , setContact ] = useState('')
-const [location , setlocation] = useState('')
+  const [salePrice, setSalePrice] = useState('');
+  const [equipmentType, setEquipmentType] = useState('');
+  const [certification, setCertification] = useState('');
+  const [yearManufactured, setYearManufactured] = useState('');
+  const [yearsWarranty, setYearsWarranty] = useState('');
+  const [shipping, setShipping] = useState('');
+  const [training, setTraining] = useState('');
 
-  // State hooks for additional details
-  const [images, setImages] = useState([]);
-  const [otherDetails, setOtherDetails] = useState({
-    certification: '',
-    yearPurchased: '',
-    // Add other fields as needed
-  });
 
   // Handler for form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+  console.log(location,equipmentName,brandName,salePrice,equipmentType,certification,yearManufactured,yearsWarranty,shipping,training)
     e.preventDefault();
     // Handle form submission
-    console.log({
-      productType,
-      productName,
-      brandName,
-      description,
-      images,
-      otherDetails,
-    });
+
+    // try {
+    //   const response = await fetch('https://medspaa.vercel.app/listing/addList',{
+    //     method:"POST",
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({location,equipmentName,brandName,salePrice,equipmentType,certification,yearManufactured,yearsWarranty,shipping,training})
+    //     })
+   
+    //     const json = response.json()
+   
+    //     if(response.ok){
+    //      console.log(json)
+    //     }
+    // } catch (error) {
+    //   console.log(error.error)
+    // }
+   
   };
 
   return (
-    <main className="flex flex-col items-center min-h-screen bg-gray-100 p-8">
-      <div className="w-full max-w-6xl bg-white p-8 rounded-lg border border-gray-300 shadow-lg">
-        <h1 className="text-3xl font-semibold mb-6 text-gray-800">Add Listings</h1>
+    <main className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-lg border  shadow-lg  border-blue-500">
+        <h1 className="text-3xl font-semibold mb-6 text-gray-800 text-center">Listing New Equipment</h1>
         
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Form Layout: Two Columns */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Product Details Form */}
-            <section className="space-y-6">
-              <h2 className="text-2xl font-semibold text-gray-700">PRODUCT DETAILS</h2>
-              <p className="text-gray-600">Add product details here</p>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Product Details Form */}
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Location */}
+            <div className="flex flex-col">
+              <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location *</label>
+              <input
+                type="text"
+                id="location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                required
+              />
+            </div>
 
-              {/* Choose Product */}
-              <div>
-                <label htmlFor="Choose-Product" className="block text-gray-600 text-sm font-medium mb-2">CHOOSE PRODUCT *</label>
-                <select
-                  id="Choose-Product"
-                  name="Choose-Product"
-                  value={productType}
-                  onChange={(e) => setProductType(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                >
-                  <option value="">Select a product</option>
-                  <option value="normal">Normal Product</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              
-              {/* Product Name */}
-              <div>
-                <label htmlFor="Product-Name" className="block text-gray-600 text-sm font-medium mb-2">PRODUCT NAME *</label>
-                <input
-                  type="text"
-                  id="Product-Name"
-                  value={productName}
-                  onChange={(e) => setProductName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-              
-              {/* Brand Name */}
-              <div>
-                <label htmlFor="BRAND-NAME" className="block text-gray-600 text-sm font-medium mb-2">BRAND NAME</label>
-                <input
-                  type="text"
-                  id="BRAND-NAME"
-                  value={brandName}
-                  onChange={(e) => setBrandName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              
-              {/* Product Type */}
-              <div>
-                <label htmlFor="PRODUCT-TYPE" className="block text-gray-600 text-sm font-medium mb-2">PRODUCT TYPE *</label>
-                <select
-                  id="PRODUCT-TYPE"
-                  name="PRODUCT-TYPE"
-                  value={productType}
-                  onChange={(e) => setProductType(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                >
-                  <option value="">Select a type</option>
-                  <option value="Business to purchase">Business to purchase</option>
-                  <option value="Business to Sale">Business to Sale</option>
-                  <option value="New Equipment">New Equipment</option>
-                  <option value="Provider available">Provider available</option>
-                  <option value="Provider Needed">Provider Needed</option>
-                  <option value="Spa Room for Rent">Spa Room for Rent</option>
-                  <option value="Used Equipment">Used Equipment</option>
-                </select> 
-              </div>
-              
-              {/* Description */}
-              <div>
-                <label htmlFor="description" className="block text-gray-600 text-sm font-medium mb-2">DESCRIPTION</label>
-                <textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows="4"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Enter product description here"
-                />
-              </div>
+            {/* Equipment Name */}
+            <div className="flex flex-col">
+              <label htmlFor="equipmentName" className="text-gray-700 text-sm font-medium mb-1">Equipment Name *</label>
+              <input
+                type="text"
+                id="equipmentName"
+                value={equipmentName}
+                onChange={(e) => setEquipmentName(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                required
+              />
+            </div>
 
-             
+            {/* Brand Name */}
+            <div className="flex flex-col">
+              <label htmlFor="brandName" className="text-gray-700 text-sm font-medium mb-1">Brand Name</label>
+              <input
+                type="text"
+                id="brandName"
+                value={brandName}
+                onChange={(e) => setBrandName(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+              />
+            </div>
 
-              <div className="flex flex-col space-y-4">
-      {/* Checkbox and Label */}
-      <div className="flex items-center space-x-3">
-        <input
-          type="checkbox"
-          id="shipping-details"
-          checked={shippingDetails}
-          onClick={()=> setShippingDetails(!shippingDetails)}
-          className="h-5 w-5 text-green-500 border-gray-300 rounded focus:ring-2 focus:ring-green-500"
-        />
-        <label
-          htmlFor="shipping-details"
-          className="text-gray-600 text-sm font-medium"
-        >
-          Shipping Details
-        </label>
-      </div>
+            {/* Sale Price */}
+            <div className="flex flex-col">
+              <label htmlFor="salePrice" className="text-gray-700 text-sm font-medium mb-1">Sale Price *</label>
+              <input
+                type="number"
+                id="salePrice"
+                value={salePrice}
+                onChange={(e) => setSalePrice(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                required
+              />
+            </div>
 
+            {/* Equipment Type */}
+            <div className="flex flex-col">
+              <label htmlFor="equipmentType" className="text-gray-700 text-sm font-medium mb-1">Equipment Type *</label>
+              <select
+                id="equipmentType"
+                name="equipmentType"
+                value={equipmentType}
+                onChange={(e) => setEquipmentType(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                required
+              >
+                <option value="">Select a type</option>
+                <option value="Skin care">Skin Care</option>
+                <option value="Body shaping">Body Shaping</option>
+                <option value="Laser Hair removal">Laser Hair Removal</option>
+                <option value="Laser skin care">Laser Skin Care</option>
+                <option value="Laser tattoo removal">Laser Tattoo Removal</option>
+                <option value="Lab equipment">Lab Equipment</option>
+                <option value="Other aesthetic device">Other Aesthetic Device</option>
+                <option value="Other Medical device">Other Medical Device</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Small tools">Small Tools</option>
+              </select>
+            </div>
 
-      <div>
-                <label htmlFor="Price" className="block text-gray-600 text-sm font-medium mb-2">PRICE </label>
-                <input
-                  type="number"
-                  id="Price"
-                  value={Price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
+            {/* Certification */}
+            <div className="flex flex-col">
+              <label htmlFor="certification" className="text-gray-700 text-sm font-medium mb-1">Certification *</label>
+              <select
+                id="certification"
+                name="certification"
+                value={certification}
+                onChange={(e) => setCertification(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                required
+              >
+                <option value="">Select an option</option>
+                <option value="FDA Approved">FDA Approved</option>
+                <option value="FDA Registered">FDA Registered</option>
+                <option value="No FDA Certification">No FDA Certification</option>
+              </select>
+            </div>
 
-              <div>
-                <label htmlFor="Date" className="block text-gray-600 text-sm font-medium mb-2">Year Purchased </label>
-                <input
-                  type="date"
-                  id="Date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
+            {/* Year Manufactured */}
+            <div className="flex flex-col">
+              <label htmlFor="yearManufactured" className="text-gray-700 text-sm font-medium mb-1">Year Manufactured *</label>
+              <input
+                type="number"
+                id="yearManufactured"
+                value={yearManufactured}
+                onChange={(e) => setYearManufactured(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                required
+              />
+            </div>
 
-              <div>
-                <label htmlFor="Warranty" className="block text-gray-600 text-sm font-medium mb-2">Still Under Warranty *</label>
-                <select
-                  id="Warranty"
-                  name="Warranty"
-                  value={Warranty}
-                  onChange={(e) => setWarranty(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                >
-                  <option value="">Select a type</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-              </div>
+            {/* Years Warranty */}
+            <div className="flex flex-col">
+              <label htmlFor="yearsWarranty" className="text-gray-700 text-sm font-medium mb-1">Years Warranty *</label>
+              <input
+                type="number"
+                id="yearsWarranty"
+                value={yearsWarranty}
+                onChange={(e) => setYearsWarranty(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                required
+              />
+            </div>
 
-              <div>
-                <label htmlFor="Scope" className="block text-gray-600 text-sm font-medium mb-2">Device Scope  *</label>
-                <select
-                  id="Scope"
-                  name="Scope"
-                  value={Scope}
-                  onChange={(e) => setScope(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                >
-                  <option value="">Select a type</option>
-                  <option value="Yes">Skin Care</option>
-                  <option value="No">Skin Resurfacing</option>
-                  <option value="Yes">Body Sculpting</option>
-                </select>
-              </div>
+            {/* Shipping */}
+            <div className="flex flex-col">
+              <label htmlFor="shipping" className="text-gray-700 text-sm font-medium mb-1">Shipping *</label>
+              <select
+                id="shipping"
+                name="shipping"
+                value={shipping}
+                onChange={(e) => setShipping(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                required
+              >
+                <option value="">Select an option</option>
+                <option value="Free">Free</option>
+                <option value="at cost">At Cost</option>
+                <option value="pick up available">Pick Up Available</option>
+              </select>
+            </div>
 
-              <div>
-                <label htmlFor="description" className="block text-gray-600 text-sm font-medium mb-2">Contact Details</label>
-                <textarea
-                  id="description"
-                  value={contact}
-                  onChange={(e) => setContact(e.target.value)}
-                  rows="4"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Enter Contact Details here"
-                />
-              </div>
+            {/* Training */}
+            <div className="flex flex-col">
+              <label htmlFor="training" className="text-gray-700 text-sm font-medium mb-1">Training *</label>
+              <select
+                id="training"
+                name="training"
+                value={training}
+                onChange={(e) => setTraining(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                required
+              >
+                <option value="">Select an option</option>
+                <option value="Available on site">Available On Site</option>
+                <option value="video training">Video Training</option>
+                <option value="No training">No Training</option>
+              </select>
+            </div>
+          </section>
 
-
-              <div>
-                <label htmlFor="location" className="block text-gray-600 text-sm font-medium mb-2">Location *</label>
-                <input
-                  type="text"
-                  id="location"
-                  value={location}
-                  onChange={(e) => setlocation(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-
-
-
-    </div>
-
-            </section>
-
-            {/* Additional Details Form */}
-            <section className="space-y-6">
-              <h2 className="text-2xl font-semibold text-gray-700">ADDITIONAL DETAILS</h2>
-              <p className="text-gray-600">Add additional details here</p>
-
-              {/* Images Upload */}
-              <div>
-                <label htmlFor="images" className="block text-gray-600 text-sm font-medium mb-2">UPLOAD IMAGES</label>
-                <input
-                  type="file"
-                  id="images"
-                  multiple
-                  onChange={(e) => setImages(Array.from(e.target.files))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-
-              {/* Additional Fields */}
-              {/* Certification */}
-              <div>
-                <label htmlFor="certification" className="block text-gray-600 text-sm font-medium mb-2">CERTIFICATION *</label>
-                <select
-                  id="certification"
-                  name="certification"
-                  value={otherDetails.certification}
-                  onChange={(e) => setOtherDetails({ ...otherDetails, certification: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                >
-                  <option value="">Select an option</option>
-                  <option value="certified">FDA Approved</option>
-                  <option value="not_certified">FDA Registered</option>
-                  <option value="not_certified">CE European Certification</option>
-                </select>
-              </div>
-
-              <VariantDetails/>
-
-              {/* Add more fields as needed here */}
-            </section>
-          </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end mt-6">
-            <button
-              type="submit"
-              className="bg-[#52c058] text-white py-2 px-4 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              Add Product
+          <div className="flex justify-center mt-6">
+          <button className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md  transition duration-300 ease-in-out flex items-center space-x-2" type='submit'>
+                Add Listings
+        
             </button>
           </div>
         </form>

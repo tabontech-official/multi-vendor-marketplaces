@@ -27,7 +27,8 @@ const LoginForm = () => {
 
       if (response.ok) {
         dispatch({ type: 'LOGIN', payload: json });
-        localStorage.setItem('user', JSON.stringify(json)); // Store the entire user object if necessary
+        localStorage.setItem('usertoken', json.token); // Store the entire user object if necessary
+        localStorage.setItem('userid', json.data.shopifyId );
         navigate('/dashboard');
       } else {
         // Handle server errors
@@ -42,7 +43,7 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-blue-500 dark:border-gray-600">
+    <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-blue-500 dark:border-blue-500">
       <form onSubmit={handleSubmit}>
         <div className="relative flex items-center mb-4">
           <span className="absolute">
@@ -53,7 +54,7 @@ const LoginForm = () => {
 
           <input
             type="email"
-            className="block w-full py-3 text-gray-700 bg-white border rounded-lg px-11 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+            className="block w-full py-3 text-gray-700 bg-white border border-blue-500 rounded-lg px-11 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
             placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -69,7 +70,7 @@ const LoginForm = () => {
 
           <input
             type="password"
-            className="block w-full px-10 py-3 text-gray-700 bg-white border rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+            className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -90,8 +91,6 @@ const LoginForm = () => {
           {loading ? <FaSpinner className="animate-spin w-5 h-5 mx-auto" /> : 'Log In'}
         </button>
       </form>
-
-      
     </div>
   );
 };

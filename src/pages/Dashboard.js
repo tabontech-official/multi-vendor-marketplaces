@@ -19,7 +19,7 @@ const Dashboard = () => {
           </div>
 
           <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
-            <button className="bg-[#52c058] text-white py-2 px-4 rounded-md hover:bg-[#3a9a47] transition duration-300 ease-in-out flex items-center space-x-2">
+            <button className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md  transition duration-300 ease-in-out flex items-center space-x-2">
               <HiPlus className="w-5 h-5" />
               <Link to="/add-listing" className="ml-2">
                 Add Listings

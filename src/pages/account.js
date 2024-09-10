@@ -29,10 +29,9 @@ const AccountPage = () => {
   };
 
   return (
-    <main className="w-full p-8 ">
-        
-      <div className="max-w-lg mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-2xl font-semibold mb-4">Account Settings</h1>
+    <main className="w-full p-8 h-screen flex justify-center items-center bg-gray-100">
+      <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg rounded-lg p-6">
+        <h1 className="text-2xl font-semibold mb-4 text-center text-gray-800">Account Settings</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Profile Image Section */}
           <div className="flex items-center space-x-4">
@@ -40,9 +39,9 @@ const AccountPage = () => {
               <img 
                 src={formData.profileImage || 'https://via.placeholder.com/150'}
                 alt="Profile"
-                className="w-32 h-32 rounded-full object-cover  md:none"
+                className="w-32 h-32 rounded-full object-cover border-2 border-blue-500"
               />
-              <label htmlFor="profileImage" className="absolute bottom-0 right-0 bg-gray-800 text-white p-1 rounded-full cursor-pointer">
+              <label htmlFor="profileImage" className="absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full cursor-pointer hover:bg-blue-600 transition">
                 <HiCamera className="w-6 h-6" />
                 <input
                   type="file"
@@ -55,105 +54,33 @@ const AccountPage = () => {
               </label>
             </div>
             <div>
-              <h2 className="text-lg font-semibold">Profile Image</h2>
+              <h2 className="text-lg font-semibold text-gray-700">Profile Image</h2>
               <p className="text-gray-600">Click the icon to upload or change your profile image.</p>
             </div>
           </div>
 
           {/* Form Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="zip" className="block text-sm font-medium text-gray-700">Zip Code</label>
-              <input
-                type="text"
-                id="zip"
-                name="zip"
-                value={formData.zip}
-                onChange={handleChange}
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country</label>
-              <input
-                type="text"
-                id="country"
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+            {['email', 'password', 'phone', 'address', 'zip', 'country', 'city'].map((field) => (
+              <div key={field} className="flex flex-col">
+                <label htmlFor={field} className="block text-sm font-medium text-gray-700 capitalize">{field.replace(/^\w/, c => c.toUpperCase())}</label>
+                <input
+                  type={field === 'password' ? 'password' : 'text'}
+                  id={field}
+                  name={field}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            ))}
           </div>
 
           {/* Submit Button */}
           <div className="flex justify-end">
             <button
               type="submit"
-              className="bg-[#52c058] text-white py-2 px-6 rounded-md hover:bg-[#3a9a47] transition duration-300 ease-in-out"
+              className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out"
             >
               Save Changes
             </button>

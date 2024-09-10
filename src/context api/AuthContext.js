@@ -17,7 +17,7 @@ export const authReducer = (state, action) => {
 
 const InitialState = ()=>{
   try {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem('usertoken');
    if(storedUser){
     return{user:storedUser}
    }
@@ -33,7 +33,7 @@ export const AuthContextProvider = ({ children }) => {
 
   useEffect(() => {
       try {
-       localStorage.setItem("user",JSON.stringify(state.user))
+       localStorage.setItem("usertoken",JSON.stringify(state.user))
       } catch (error) {
         console.error('Failed to parse user from local storage:', error);
       }

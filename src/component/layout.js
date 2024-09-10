@@ -15,11 +15,26 @@ const Layout = () => {
 
 
   const LogOut =async()=>{
-       fetch('https://medspaa.vercel.app/auth/logout/shopifyId',{
-        
-       })
-     localStorage.removeItem('user')
-     dispatch({type:"LOGOUT"})
+    try {
+      const userid = localStorage.getItem('userid');
+
+      if (userid) {
+        const response = await fetch(`https://medspaa.vercel.app/auth/logout/${userid}`, {
+          method: 'POST', // Assuming you need POST for logout
+        });
+        const json = await response.json();
+        if (response.ok) {
+          console.log(json);
+          localStorage.removeItem('usertoken');
+          localStorage.removeItem('userid');
+          dispatch({ type: "LOGOUT" });
+        } else {
+          console.error('Logout failed:', json);
+        }
+      }
+    } catch (error) {
+      console.error('Error during logout:', error.error);
+    }
   }
 
   return (

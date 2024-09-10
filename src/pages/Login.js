@@ -91,11 +91,7 @@ const LoginForm = () => {
         </button>
       </form>
 
-      <div className="mt-6 text-center">
-        <Link to="/signup" className="text-sm text-blue-500 hover:underline dark:text-blue-400">
-          Don’t have an account? Sign Up
-        </Link>
-      </div>
+      
     </div>
   );
 };

@@ -14,7 +14,10 @@ const Layout = () => {
   };
 
 
-  const LogOut =()=>{
+  const LogOut =async()=>{
+       fetch('https://medspaa.vercel.app/auth/logout/shopifyId',{
+        
+       })
      localStorage.removeItem('user')
      dispatch({type:"LOGOUT"})
   }

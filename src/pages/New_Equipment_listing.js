@@ -1,4 +1,3 @@
-// src/AddEquipmentForm.js
 import React, { useState } from 'react';
 
 const AddNewEquipmentForm = () => {
@@ -13,16 +12,22 @@ const AddNewEquipmentForm = () => {
   const [yearsWarranty, setYearsWarranty] = useState('');
   const [shipping, setShipping] = useState('');
   const [training, setTraining] = useState('');
+  const [image, setImage] = useState(null);
 
   // Handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Here you would typically handle form submission logic
-    console.log({ location, equipmentName, brandName, salePrice, equipmentType, certification, yearManufactured, yearsWarranty, shipping, training });
+    console.log({ location, equipmentName, brandName, salePrice, equipmentType, certification, yearManufactured, yearsWarranty, shipping, training, image });
+  };
+
+  // Handler for image file change
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
   };
 
   return (
-    <main className="flex items-center justify-center bg-gray-100 p-20  max-sm:p-5">
+    <main className="flex items-center justify-center bg-gray-100 p-10 max-sm:p-5">
       <div className="w-full max-w-4xl bg-white p-8 rounded-lg border shadow-lg border-blue-500">
         <h1 className="text-3xl font-semibold mb-6 text-gray-800 text-center">Add New Equipment Listing</h1>
 
@@ -36,7 +41,7 @@ const AddNewEquipmentForm = () => {
                 id="location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
             </div>
@@ -49,7 +54,7 @@ const AddNewEquipmentForm = () => {
                 id="equipmentName"
                 value={equipmentName}
                 onChange={(e) => setEquipmentName(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
             </div>
@@ -62,7 +67,7 @@ const AddNewEquipmentForm = () => {
                 id="brandName"
                 value={brandName}
                 onChange={(e) => setBrandName(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
             </div>
 
@@ -75,7 +80,7 @@ const AddNewEquipmentForm = () => {
                 min={0}
                 value={salePrice}
                 onChange={(e) => setSalePrice(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
             </div>
@@ -88,7 +93,7 @@ const AddNewEquipmentForm = () => {
                 name="equipmentType"
                 value={equipmentType}
                 onChange={(e) => setEquipmentType(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               >
                 <option value="">Select a type</option>
@@ -113,7 +118,7 @@ const AddNewEquipmentForm = () => {
                 name="certification"
                 value={certification}
                 onChange={(e) => setCertification(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               >
                 <option value="">Select an option</option>
@@ -132,7 +137,7 @@ const AddNewEquipmentForm = () => {
                 min={0}
                 value={yearManufactured}
                 onChange={(e) => setYearManufactured(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
             </div>
@@ -146,7 +151,7 @@ const AddNewEquipmentForm = () => {
                 id="yearsWarranty"
                 value={yearsWarranty}
                 onChange={(e) => setYearsWarranty(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
             </div>
@@ -159,7 +164,7 @@ const AddNewEquipmentForm = () => {
                 name="shipping"
                 value={shipping}
                 onChange={(e) => setShipping(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               >
                 <option value="">Select an option</option>
@@ -177,7 +182,7 @@ const AddNewEquipmentForm = () => {
                 name="training"
                 value={training}
                 onChange={(e) => setTraining(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               >
                 <option value="">Select an option</option>
@@ -186,16 +191,24 @@ const AddNewEquipmentForm = () => {
                 <option value="No training">No Training</option>
               </select>
             </div>
+
+            {/* Image Upload */}
+            <div className="flex flex-col">
+              <label htmlFor="image" className="text-gray-700 text-sm font-medium mb-1">Equipment Image</label>
+              <input
+                type="file"
+                id="image"
+                onChange={handleImageChange}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </section>
 
           {/* Submit Button */}
           <div className="flex justify-center mt-6">
-            <button
-              className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              type="submit"
-            >
-              Add Equipment Listing
-            </button>
+          <button class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+            Add Listing
+</button>
           </div>
         </form>
       </div>

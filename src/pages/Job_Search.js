@@ -1,4 +1,3 @@
-// src/AddProviderSearchForm.js
 import React, { useState } from 'react';
 
 const AddProviderSearchForm = () => {
@@ -9,7 +8,7 @@ const AddProviderSearchForm = () => {
   const [jobOfferType, setJobOfferType] = useState('');
   const [offeredSalary, setOfferedSalary] = useState('');
   const [positionDescription, setPositionDescription] = useState('');
-
+  const [image, setImage] = useState(null);
   // Handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,8 +22,13 @@ const AddProviderSearchForm = () => {
     });
   };
 
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
+  };
+
+
   return (
-    <main className="flex items-center justify-center bg-gray-100   sm:p-8 lg:p-20 ">
+    <main className="flex items-center justify-center bg-gray-100 p-6 sm:p-8 lg:p-12">
       <div className="w-full max-w-lg lg:max-w-4xl bg-white p-6 sm:p-8 lg:p-10 rounded-lg border shadow-lg border-blue-500">
         <h1 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-800 text-center">Provider Search Listing</h1>
 
@@ -40,6 +44,7 @@ const AddProviderSearchForm = () => {
                 onChange={(e) => setLocation(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
+                aria-required="true"
               />
             </div>
 
@@ -52,10 +57,11 @@ const AddProviderSearchForm = () => {
                 onChange={(e) => setQualification(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
+                aria-required="true"
               >
                 <option value="">Select a qualification</option>
                 <option value="Medical Director">Medical Director</option>
-                <option value="ARPN Nurse practitioner">ARPN Nurse Practitioner</option>
+                <option value="ARPN Nurse Practitioner">ARPN Nurse Practitioner</option>
                 <option value="Registered Nurse">Registered Nurse</option>
                 <option value="Medical Assistant">Medical Assistant</option>
                 <option value="Aesthetician">Aesthetician</option>
@@ -74,6 +80,7 @@ const AddProviderSearchForm = () => {
                 onChange={(e) => setJobType(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
+                aria-required="true"
               >
                 <option value="">Select a job type</option>
                 <option value="Full-Time">Full-Time</option>
@@ -90,16 +97,17 @@ const AddProviderSearchForm = () => {
                 onChange={(e) => setJobOfferType(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
+                aria-required="true"
               >
                 <option value="">Select job offer type</option>
                 <option value="Employee W2">Employee W2</option>
-                <option value="Freelance provider 1099">Freelance Provider 1099</option>
+                <option value="Freelance Provider 1099">Freelance Provider 1099</option>
               </select>
             </div>
 
             {/* Offered Yearly Salary */}
             <div className="flex flex-col">
-              <label htmlFor="offeredSalary" className="text-gray-700 text-sm font-medium mb-1">Offered Yearly Salary ($$) *</label>
+              <label htmlFor="offeredSalary" className="text-gray-700 text-sm font-medium mb-1">Offered Yearly Salary ($) *</label>
               <input
                 type="number"
                 id="offeredSalary"
@@ -108,11 +116,12 @@ const AddProviderSearchForm = () => {
                 onChange={(e) => setOfferedSalary(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
+                aria-required="true"
               />
             </div>
 
             {/* Offered Position Description */}
-            <div className="flex flex-col col-span-1 md:col-span-2">
+            <div className="flex flex-col col-span-1 ">
               <label htmlFor="positionDescription" className="text-gray-700 text-sm font-medium mb-1">Offered Position Description *</label>
               <textarea
                 id="positionDescription"
@@ -121,18 +130,27 @@ const AddProviderSearchForm = () => {
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 rows="4"
                 required
+                aria-required="true"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label htmlFor="image" className="text-gray-700 text-sm font-medium mb-1">Equipment Image</label>
+              <input
+                type="file"
+                id="image"
+                onChange={handleImageChange}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </section>
 
           {/* Submit Button */}
           <div className="flex justify-center mt-6">
-            <button
-              className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              type="submit"
-            >
-              Submit Provider Search Listing
-            </button>
+           
+            <button class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+            Submit Provider Search Listing
+</button>
           </div>
         </form>
       </div>

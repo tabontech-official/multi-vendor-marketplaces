@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const Used_EquipmentForm = () => {
-  // State hooks for product details
+  // State hooks for form fields
   const [location, setLocation] = useState('');
   const [equipmentName, setEquipmentName] = useState('');
   const [brandName, setBrandName] = useState('');
@@ -13,18 +13,33 @@ const Used_EquipmentForm = () => {
   const [warranty, setWarranty] = useState('');
   const [reasonForSelling, setReasonForSelling] = useState('');
   const [shipping, setShipping] = useState('');
+  const [image, setImage] = useState(null); // State for image upload
 
   // Handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission
-    console.log({ location, equipmentName, brandName, askingPrice, acceptOffers, equipmentType, certification, yearPurchased, warranty, reasonForSelling, shipping });
+    console.log({ location, equipmentName, brandName, askingPrice, acceptOffers, equipmentType, certification, yearPurchased, warranty, reasonForSelling, shipping, image });
     // Uncomment the following lines to handle form submission
     // try {
+    //   const formData = new FormData();
+    //   formData.append('location', location);
+    //   formData.append('equipmentName', equipmentName);
+    //   formData.append('brandName', brandName);
+    //   formData.append('askingPrice', askingPrice);
+    //   formData.append('acceptOffers', acceptOffers);
+    //   formData.append('equipmentType', equipmentType);
+    //   formData.append('certification', certification);
+    //   formData.append('yearPurchased', yearPurchased);
+    //   formData.append('warranty', warranty);
+    //   formData.append('reasonForSelling', reasonForSelling);
+    //   formData.append('shipping', shipping);
+    //   if (image) {
+    //     formData.append('image', image);
+    //   }
     //   const response = await fetch('https://your-api-endpoint.com/listing/addList', {
     //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ location, equipmentName, brandName, askingPrice, acceptOffers, equipmentType, certification, yearPurchased, warranty, reasonForSelling, shipping })
+    //     body: formData,
     //   });
     //   const json = await response.json();
     //   if (response.ok) {
@@ -36,13 +51,24 @@ const Used_EquipmentForm = () => {
   };
 
   return (
-    <main className="flex items-center justify-center  bg-gray-100 p-10 max-sm:p-5">
+    <main className="flex items-center justify-center bg-gray-100 p-10 max-sm:p-5">
       <div className="w-full max-w-4xl bg-white p-8 rounded-lg border shadow-lg border-blue-500">
         <h1 className="text-3xl font-semibold mb-6 text-gray-800 text-center">Add Used Equipment Listing</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Product Details Form */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Image Upload */}
+            <div className="flex flex-col">
+              <label htmlFor="image" className="text-gray-700 text-sm font-medium mb-1">Image</label>
+              <input
+                type="file"
+                id="image"
+                onChange={(e) => setImage(e.target.files[0])}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+            </div>
+
             {/* Location */}
             <div className="flex flex-col">
               <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location *</label>
@@ -51,7 +77,7 @@ const Used_EquipmentForm = () => {
                 id="location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
             </div>
@@ -64,7 +90,7 @@ const Used_EquipmentForm = () => {
                 id="equipmentName"
                 value={equipmentName}
                 onChange={(e) => setEquipmentName(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
             </div>
@@ -77,7 +103,7 @@ const Used_EquipmentForm = () => {
                 id="brandName"
                 value={brandName}
                 onChange={(e) => setBrandName(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
             </div>
 
@@ -90,7 +116,7 @@ const Used_EquipmentForm = () => {
                 min={0}
                 value={askingPrice}
                 onChange={(e) => setAskingPrice(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
             </div>
@@ -103,7 +129,7 @@ const Used_EquipmentForm = () => {
                 name="acceptOffers"
                 value={acceptOffers}
                 onChange={(e) => setAcceptOffers(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               >
                 <option value="">Select an option</option>
@@ -120,7 +146,7 @@ const Used_EquipmentForm = () => {
                 name="equipmentType"
                 value={equipmentType}
                 onChange={(e) => setEquipmentType(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               >
                 <option value="">Select a type</option>
@@ -145,7 +171,7 @@ const Used_EquipmentForm = () => {
                 name="certification"
                 value={certification}
                 onChange={(e) => setCertification(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               >
                 <option value="">Select an option</option>
@@ -164,7 +190,7 @@ const Used_EquipmentForm = () => {
                 min={0}
                 value={yearPurchased}
                 onChange={(e) => setYearPurchased(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
             </div>
@@ -177,7 +203,7 @@ const Used_EquipmentForm = () => {
                 name="warranty"
                 value={warranty}
                 onChange={(e) => setWarranty(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               >
                 <option value="">Select an option</option>
@@ -194,7 +220,7 @@ const Used_EquipmentForm = () => {
                 id="reasonForSelling"
                 value={reasonForSelling}
                 onChange={(e) => setReasonForSelling(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
             </div>
@@ -207,7 +233,7 @@ const Used_EquipmentForm = () => {
                 name="shipping"
                 value={shipping}
                 onChange={(e) => setShipping(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               >
                 <option value="">Select an option</option>
@@ -220,12 +246,12 @@ const Used_EquipmentForm = () => {
 
           {/* Submit Button */}
           <div className="flex justify-center mt-6">
-            <button
-              className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              type='submit'
-            >
-              Add Listing
-            </button>
+           
+          
+            <button class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+            Add Listing
+</button>
+            
           </div>
         </form>
       </div>

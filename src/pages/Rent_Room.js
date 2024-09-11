@@ -1,4 +1,3 @@
-// src/AddRoomForRentForm.js
 import React, { useState } from 'react';
 
 const AddRoomForRentForm = () => {
@@ -12,7 +11,7 @@ const AddRoomForRentForm = () => {
   const [rentalTerms, setRentalTerms] = useState('');
   const [wifiAvailable, setWifiAvailable] = useState('');
   const [otherDetails, setOtherDetails] = useState('');
-
+  const [image, setImage] = useState(null);
   // Handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,14 +31,19 @@ const AddRoomForRentForm = () => {
   // Handler to toggle allowed uses
   const handleAllowedUsesChange = (e) => {
     const { value, checked } = e.target;
-    setAllowedUses(prev => 
+    setAllowedUses(prev =>
       checked ? [...prev, value] : prev.filter(item => item !== value)
     );
   };
 
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
+  };
+
+
   return (
-    <main className="flex items-center justify-center bg-gray-100 p-10 max-sm:p-5">
-      <div className="w-full max-w-3xl bg-white p-8 rounded-lg border shadow-lg border-blue-500">
+    <main className="flex items-center justify-center bg-gray-100 p-6 md:p-8 lg:p-10">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-lg border shadow-lg border-blue-500">
         <h1 className="text-2xl font-semibold mb-6 text-gray-800 text-center">Room for Rent Listing</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -54,6 +58,7 @@ const AddRoomForRentForm = () => {
                 onChange={(e) => setLocation(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
+                aria-required="true"
               />
             </div>
 
@@ -68,6 +73,7 @@ const AddRoomForRentForm = () => {
                 onChange={(e) => setRoomSize(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
+                aria-required="true"
               />
             </div>
 
@@ -82,6 +88,7 @@ const AddRoomForRentForm = () => {
                 onChange={(e) => setMonthlyRent(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
+                aria-required="true"
               />
             </div>
 
@@ -96,6 +103,7 @@ const AddRoomForRentForm = () => {
                 onChange={(e) => setDeposit(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
+                aria-required="true"
               />
             </div>
 
@@ -110,6 +118,7 @@ const AddRoomForRentForm = () => {
                 onChange={(e) => setInsurance(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
+                aria-required="true"
               />
             </div>
 
@@ -122,6 +131,7 @@ const AddRoomForRentForm = () => {
                 onChange={(e) => setRentalTerms(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
+                aria-required="true"
               >
                 <option value="">Select rental terms</option>
                 <option value="Monthly">Monthly</option>
@@ -139,6 +149,7 @@ const AddRoomForRentForm = () => {
                 onChange={(e) => setWifiAvailable(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
+                aria-required="true"
               >
                 <option value="">Select option</option>
                 <option value="Yes">Yes</option>
@@ -173,9 +184,18 @@ const AddRoomForRentForm = () => {
                 ))}
               </div>
             </div>
+            <div className="flex flex-col">
+              <label htmlFor="image" className="text-gray-700 text-sm font-medium mb-1">Equipment Image</label>
+              <input
+                type="file"
+                id="image"
+                onChange={handleImageChange}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
             {/* Other Details */}
-            <div className="flex flex-col col-span-1 lg:col-span-3">
+            <div className="flex flex-col col-span-1 ">
               <label htmlFor="otherDetails" className="text-gray-700 text-sm font-medium mb-1">Other Details</label>
               <textarea
                 id="otherDetails"
@@ -189,13 +209,11 @@ const AddRoomForRentForm = () => {
 
           {/* Submit Button */}
           <div className="flex justify-center mt-6">
-            <button
-              className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              type="submit"
-            >
-              Submit Listing
-            </button>
-          </div>
+           
+           <button class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+           Submit  Listing
+</button>
+         </div>
         </form>
       </div>
     </main>

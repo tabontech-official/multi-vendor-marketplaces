@@ -10,7 +10,7 @@ const AccountPage = () => {
     zip: '',
     country: '',
     city: '',
-    profileImage: ''
+    profileImage: 'https://shopify-digital-delivery.s3.amazonaws.com/shop_logo/59235/vRlqYxKteX848.png'
   });
 
   const handleChange = (e) => {
@@ -39,7 +39,7 @@ const AccountPage = () => {
               <img 
                 src={formData.profileImage || 'https://via.placeholder.com/150'}
                 alt="Profile"
-                className=" w-40 h-32 rounded-full object-cover border-2 border-blue-500"
+                className=" w-40 h-32 rounded-full object-cover border-2  border-blue-500"
               />
               <label htmlFor="profileImage" className="absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full cursor-pointer hover:bg-blue-600 transition">
                 <HiCamera className="w-6 h-6" />

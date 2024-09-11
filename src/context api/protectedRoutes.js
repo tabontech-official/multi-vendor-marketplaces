@@ -17,7 +17,7 @@ const ProtectedRoute = ({ element, ...rest }) => {
   return user ? (
     element
   ) : (
-    <Navigate to={'/dashboard'} replace />
+    <Navigate to={'/'} replace />
   );
 };
 

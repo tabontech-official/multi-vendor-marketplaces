@@ -55,6 +55,7 @@ const Auth = () => {
 
       if (response.ok) {
         setSuccess('Registration successful! Please log in.');
+        const redirectTo = new URLSearchParams(location.search).get('redirect') || '/dashboard';
         setActiveTab('login');
       } else {
         setError(json.error || 'An error occurred during registration.');
@@ -64,45 +65,47 @@ const Auth = () => {
     }
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+  
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setError('');
+  setSuccess('');
 
-    if (!email || !password) {
-      setError('All fields are required.');
-      return;
+  if (!email || !password) {
+    setError('All fields are required.');
+    return;
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    setError('Please enter a valid email address.');
+    return;
+  }
+
+  try {
+    const response = await fetch('https://medspaa.vercel.app/auth/signIn', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const json = await response.json();
+    const path = localStorage.getItem('path') || '/'; // Default to '/' if path is not found
+
+    if (response.ok) {
+      localStorage.setItem('usertoken', json.token);
+      localStorage.setItem('userid', json.data.shopifyId);
+      dispatch({ type: 'LOGIN', payload: json });
+      setSuccess('Login successful!');
+      navigate(path);
+      localStorage.removeItem('path');
+    } else {
+      setError(json.error || 'An error occurred during login.');
     }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      setError('Please enter a valid email address.');
-      return;
-    }
-
-    try {
-      const response = await fetch('https://medspaa.vercel.app/auth/signIn', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const json = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('usertoken', json.token);
-        localStorage.setItem('userid', json.data.shopifyId);
-        dispatch({ type: 'LOGIN', payload: json });
-        setSuccess('Login successful!');
-        const redirectTo = new URLSearchParams(location.search).get('redirect') || '/dashboard';
-        navigate(redirectTo);
-      } else {
-        setError(json.error || 'An error occurred during login.');
-      }
-    } catch (error) {
-      setError('An error occurred. Please try again.');
-    }
-  };
+  } catch (error) {
+    setError('An error occurred. Please try again.');
+  }
+};
 
   if (user) {
     return <Dashboard />; // Redirect to dashboard if the user is already logged in

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const CategorySelector = () => {
   return (
-    <main className=" p-8 flex justify-center items-center bg-gray-100 h-full">
+    <main className="  flex justify-center items-center bg-gray-100 h-full p-20 max-sm:p-10">
       <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg rounded-lg p-6">
         <h1 className="text-2xl font-semibold mb-6 text-center text-gray-800">Post a Listing</h1>
         <div className="space-y-4">

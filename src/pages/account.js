@@ -29,7 +29,7 @@ const AccountPage = () => {
   };
 
   return (
-    <main className="w-full p-8 flex justify-center items-center bg-gray-100">
+    <main className="w-full p-8 flex justify-center items-center bg-gray-100 mt-10">
       <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg rounded-lg p-6">
         <h1 className="text-2xl font-semibold mb-4 text-center text-gray-800">Account Settings</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -39,7 +39,7 @@ const AccountPage = () => {
               <img 
                 src={formData.profileImage || 'https://via.placeholder.com/150'}
                 alt="Profile"
-                className="w-32 h-32 rounded-full object-cover border-2 border-blue-500"
+                className=" w-40 h-32 rounded-full object-cover border-2 border-blue-500"
               />
               <label htmlFor="profileImage" className="absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full cursor-pointer hover:bg-blue-600 transition">
                 <HiCamera className="w-6 h-6" />

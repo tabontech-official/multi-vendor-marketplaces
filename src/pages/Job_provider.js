@@ -1,4 +1,3 @@
-
 // src/AddProviderSearchForm.js
 import React, { useState } from 'react';
 
@@ -14,7 +13,6 @@ const AddProviderSearchForm = () => {
   // Handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically handle form submission logic
     console.log({
       location,
       qualification,
@@ -26,9 +24,9 @@ const AddProviderSearchForm = () => {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-4xl bg-white p-8 rounded-lg border shadow-lg border-blue-500">
-        <h1 className="text-3xl font-semibold mb-6 text-gray-800 text-center">Provider Search Listing</h1>
+    <main className="flex items-center justify-center bg-gray-100 p-6 sm:p-8 md:p-8 lg:p-20 ">
+      <div className="w-full max-w-full lg:max-w-4xl bg-white p-6 sm:p-8 lg:p-10 rounded-lg border shadow-lg border-blue-500">
+        <h1 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-800 text-center">Provider Search Listing</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -114,7 +112,7 @@ const AddProviderSearchForm = () => {
             </div>
 
             {/* Offered Position Description */}
-            <div className="flex flex-col col-span-2">
+            <div className="flex flex-col col-span-1 md:col-span-2">
               <label htmlFor="positionDescription" className="text-gray-700 text-sm font-medium mb-1">Offered Position Description *</label>
               <textarea
                 id="positionDescription"

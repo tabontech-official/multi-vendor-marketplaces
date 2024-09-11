@@ -22,7 +22,7 @@ const AddNewEquipmentForm = () => {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+    <main className="flex items-center justify-center bg-gray-100 p-20  max-sm:p-5">
       <div className="w-full max-w-4xl bg-white p-8 rounded-lg border shadow-lg border-blue-500">
         <h1 className="text-3xl font-semibold mb-6 text-gray-800 text-center">Add New Equipment Listing</h1>
 

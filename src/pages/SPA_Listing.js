@@ -1,4 +1,3 @@
-// src/AddBusinessForm.js
 import React, { useState } from 'react';
 
 const AddBusinessForm = () => {
@@ -45,14 +44,15 @@ const AddBusinessForm = () => {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-4xl bg-white p-8 rounded-lg border shadow-lg border-blue-500">
+    <main className="flex items-center justify-center bg-gray-100 p-20  max-sm:p-5">
+      <div className="w-full max-w-6xl bg-white p-8 rounded-lg border shadow-lg border-blue-500">
         <h1 className="text-3xl font-semibold mb-6 text-gray-800 text-center">Add Business Listing</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Use Flexbox for form layout */}
+          <section className="flex flex-wrap gap-6">
             {/* Location */}
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location *</label>
               <input
                 type="text"
@@ -65,20 +65,20 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Business Description */}
-            <div className="flex flex-col col-span-2">
+            <div className="flex flex-col flex-2">
               <label htmlFor="businessDescription" className="text-gray-700 text-sm font-medium mb-1">Business Description *</label>
               <textarea
                 id="businessDescription"
                 value={businessDescription}
                 onChange={(e) => setBusinessDescription(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                rows="4"
+                rows="3"
                 required
               />
             </div>
 
             {/* Asking Price */}
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <label htmlFor="askingPrice" className="text-gray-700 text-sm font-medium mb-1">Asking Price ($$) *</label>
               <input
                 type="number"
@@ -92,7 +92,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Established Year */}
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <label htmlFor="establishedYear" className="text-gray-700 text-sm font-medium mb-1">Established in (Year) *</label>
               <input
                 type="number"
@@ -107,7 +107,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Number of Employees/Providers */}
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <label htmlFor="numEmployees" className="text-gray-700 text-sm font-medium mb-1">Number of Employees/Providers *</label>
               <input
                 type="number"
@@ -121,7 +121,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Monthly Rent */}
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <label htmlFor="monthlyRent" className="text-gray-700 text-sm font-medium mb-1">Location Monthly Rent including Sale Taxes ($$) *</label>
               <input
                 type="number"
@@ -135,7 +135,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Lease Expiration Date */}
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <label htmlFor="leaseExpiration" className="text-gray-700 text-sm font-medium mb-1">Lease Expiration Date *</label>
               <input
                 type="date"
@@ -148,7 +148,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Business Location Size */}
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <label htmlFor="locationSize" className="text-gray-700 text-sm font-medium mb-1">Business Location Size (Square Feet) *</label>
               <input
                 type="number"
@@ -162,7 +162,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Gross Yearly Revenue */}
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <label htmlFor="grossYearlyRevenue" className="text-gray-700 text-sm font-medium mb-1">Gross Yearly Revenue ($$) *</label>
               <input
                 type="number"
@@ -176,7 +176,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Cash Flow */}
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <label htmlFor="cashFlow" className="text-gray-700 text-sm font-medium mb-1">Cash Flow ($$) *</label>
               <input
                 type="number"
@@ -190,7 +190,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Products Inventory */}
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <label htmlFor="productsInventory" className="text-gray-700 text-sm font-medium mb-1">Products Inventory ($$) *</label>
               <input
                 type="number"
@@ -204,7 +204,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Equipment Value */}
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1">
               <label htmlFor="equipmentValue" className="text-gray-700 text-sm font-medium mb-1">Equipment Value ($$) *</label>
               <input
                 type="number"
@@ -218,7 +218,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Reason for Selling */}
-            <div className="flex flex-col col-span-2">
+            <div className="flex flex-col flex-2">
               <label htmlFor="reasonForSelling" className="text-gray-700 text-sm font-medium mb-1">Reason for Selling *</label>
               <textarea
                 id="reasonForSelling"
@@ -231,7 +231,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* List of Devices */}
-            <div className="flex flex-col col-span-2">
+            <div className="flex flex-col flex-2">
               <label htmlFor="listOfDevices" className="text-gray-700 text-sm font-medium mb-1">List of Devices *</label>
               <textarea
                 id="listOfDevices"
@@ -244,7 +244,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Offered Services */}
-            <div className="flex flex-col col-span-2">
+            <div className="flex flex-col flex-2">
               <label htmlFor="offeredServices" className="text-gray-700 text-sm font-medium mb-1">Offered Services *</label>
               <textarea
                 id="offeredServices"
@@ -257,7 +257,7 @@ const AddBusinessForm = () => {
             </div>
 
             {/* Support and Training */}
-            <div className="flex flex-col col-span-2">
+            <div className="flex flex-col flex-2">
               <label htmlFor="supportAndTraining" className="text-gray-700 text-sm font-medium mb-1">Support and Training Offered (Time) *</label>
               <textarea
                 id="supportAndTraining"
@@ -273,7 +273,7 @@ const AddBusinessForm = () => {
           {/* Submit Button */}
           <div className="flex justify-center mt-6">
             <button
-              className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+              className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out"
               type="submit"
             >
               Add Business Listing

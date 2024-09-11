@@ -19,14 +19,13 @@ const Dashboard = () => {
           </div>
 
           <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
-            <button className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md  transition duration-300 ease-in-out flex items-center space-x-2">
-              <HiPlus className="w-5 h-5" />
-              <Link to="/Categories" className="ml-2">
-                Add Listings
-              </Link>
-            </button>
-          </div>
-        </div>
+      <Link to="/Categories" className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
+        <HiPlus className="w-5 h-5" />
+        <span>Add Listings</span>
+      </Link>
+    </div>
+
+    </div>
 
         <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
           {/* Combined Filters and Search */}

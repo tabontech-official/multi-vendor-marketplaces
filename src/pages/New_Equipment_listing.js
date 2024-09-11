@@ -3,13 +3,13 @@ import React, { useState } from 'react';
 const AddNewEquipmentForm = () => {
   // State hooks for form fields
   const [location, setLocation] = useState('');
-  const [equipmentName, setEquipmentName] = useState('');
-  const [brandName, setBrandName] = useState('');
-  const [salePrice, setSalePrice] = useState('');
-  const [equipmentType, setEquipmentType] = useState('');
+  const [name, setName] = useState('');
+  const [brand, setBrand] = useState('');
+  const [sale_price, setSalePrice] = useState('');
+  const [equipment_type, setEquipmentType] = useState('');
   const [certification, setCertification] = useState('');
-  const [yearManufactured, setYearManufactured] = useState('');
-  const [yearsWarranty, setYearsWarranty] = useState('');
+  const [year_manufactured, setYearManufactured] = useState('');
+  const [warranty, setWarranty] = useState('');
   const [shipping, setShipping] = useState('');
   const [training, setTraining] = useState('');
   const [image, setImage] = useState(null);
@@ -19,44 +19,42 @@ const AddNewEquipmentForm = () => {
     e.preventDefault();
   
     // Create a new FormData object
-    // const formData = new FormData();
+    const formData = new FormData();
   
-    // // Append the image file if it exists
-    // if (image) {
-    //   formData.append('file', image);  // Adjust 'file' to the expected form field name for the file
-    // }
+    // Append the image file if it exists
+    if (image) {
+      formData.append('image', image);  // Adjust 'file' to the expected form field name for the file
+    }
   
-    // // Append other fields
-    // formData.append('location', location);
-    // formData.append('equipmentName', equipmentName);
-    // formData.append('brandName', brandName);
-    // formData.append('salePrice', salePrice);
-    // formData.append('equipmentType', equipmentType);
-    // formData.append('certification', certification);
-    // formData.append('yearManufactured', yearManufactured);
-    // formData.append('yearsWarranty', yearsWarranty);
-    // formData.append('shipping', shipping);
-    // formData.append('training', training);
-    // for (let [key, value] of formData.entries()) {
-    //   console.log(`${key}: ${value}`);
-    // }
-    // console.log(formData)
-    // try {
-    //   const response = await fetch("https://medspaa.vercel.app/product/addNewEquipments", {
-    //     method: "POST",
-    //     body: formData
-    //   });
+    // Append other fields
+    formData.append('location', location);
+    formData.append('name', name);
+    formData.append('brand', brand);
+    formData.append('sale_price', sale_price);
+    formData.append('equipment_type', equipment_type);
+    formData.append('certification', certification);
+    formData.append('year_manufactured', year_manufactured);
+    formData.append('warranty', warranty);
+    formData.append('shipping', shipping);
+    formData.append('training', training);
+
+    try {
+      const response = await fetch("https://medspaa.vercel.app/product/addNewEquipments", {
+        method: "POST",
+        body: formData
+      });
   
-    //   const json = await response.json();
+      const json = await response.json();
   
-    //   if (response.ok) {
-    //     console.log(json);
-    //   } else {
-    //     console.error('Failed to submit:', json);
-    //   }
-    // } catch (error) {
-    //   console.error('Error:', error);
-    // }
+      if (response.ok) {
+         alert("Product has been added")
+        console.log(json);
+      } else {
+        console.error('Failed to submit:', json);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
   
   // Handler for image file change
@@ -86,12 +84,12 @@ const AddNewEquipmentForm = () => {
 
             {/* Equipment Name */}
             <div className="flex flex-col">
-              <label htmlFor="equipmentName" className="text-gray-700 text-sm font-medium mb-1">Equipment Name *</label>
+              <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Equipment Name *</label>
               <input
                 type="text"
-                id="equipmentName"
-                value={equipmentName}
-                onChange={(e) => setEquipmentName(e.target.value)}
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
@@ -99,24 +97,24 @@ const AddNewEquipmentForm = () => {
 
             {/* Brand Name */}
             <div className="flex flex-col">
-              <label htmlFor="brandName" className="text-gray-700 text-sm font-medium mb-1">Brand Name</label>
+              <label htmlFor="brand" className="text-gray-700 text-sm font-medium mb-1">Brand Name</label>
               <input
                 type="text"
-                id="brandName"
-                value={brandName}
-                onChange={(e) => setBrandName(e.target.value)}
+                id="brand"
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
             </div>
 
             {/* Sale Price */}
             <div className="flex flex-col">
-              <label htmlFor="salePrice" className="text-gray-700 text-sm font-medium mb-1">Sale Price *</label>
+              <label htmlFor="sale_price" className="text-gray-700 text-sm font-medium mb-1">Sale Price *</label>
               <input
                 type="number"
-                id="salePrice"
+                id="sale_price"
                 min={0}
-                value={salePrice}
+                value={sale_price}
                 onChange={(e) => setSalePrice(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
@@ -125,11 +123,11 @@ const AddNewEquipmentForm = () => {
 
             {/* Equipment Type */}
             <div className="flex flex-col">
-              <label htmlFor="equipmentType" className="text-gray-700 text-sm font-medium mb-1">Equipment Type *</label>
+              <label htmlFor="equipment_type" className="text-gray-700 text-sm font-medium mb-1">Equipment Type *</label>
               <select
-                id="equipmentType"
-                name="equipmentType"
-                value={equipmentType}
+                id="equipment_type"
+                name="equipment_type"
+                value={equipment_type}
                 onChange={(e) => setEquipmentType(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
@@ -168,27 +166,27 @@ const AddNewEquipmentForm = () => {
 
             {/* Year Manufactured */}
             <div className="flex flex-col">
-              <label htmlFor="yearManufactured" className="text-gray-700 text-sm font-medium mb-1">Year Manufactured *</label>
+              <label htmlFor="year_manufactured" className="text-gray-700 text-sm font-medium mb-1">Year Manufactured *</label>
               <input
                 type="number"
-                id="yearManufactured"
+                id="year_manufactured"
                 min={0}
-                value={yearManufactured}
+                value={year_manufactured}
                 onChange={(e) => setYearManufactured(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
             </div>
 
-            {/* Years Warranty */}
+            {/* Warranty */}
             <div className="flex flex-col">
-              <label htmlFor="yearsWarranty" className="text-gray-700 text-sm font-medium mb-1">Years Warranty *</label>
+              <label htmlFor="warranty" className="text-gray-700 text-sm font-medium mb-1">Warranty *</label>
               <input
                 type="number"
                 min={0}
-                id="yearsWarranty"
-                value={yearsWarranty}
-                onChange={(e) => setYearsWarranty(e.target.value)}
+                id="warranty"
+                value={warranty}
+                onChange={(e) => setWarranty(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
               />
@@ -244,9 +242,9 @@ const AddNewEquipmentForm = () => {
 
           {/* Submit Button */}
           <div className="flex justify-center mt-6">
-          <button class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
-            Add Listing
-</button>
+            <button className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+              Add Listing
+            </button>
           </div>
         </form>
       </div>

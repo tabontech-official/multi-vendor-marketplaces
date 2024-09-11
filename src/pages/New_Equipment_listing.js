@@ -17,10 +17,48 @@ const AddNewEquipmentForm = () => {
   // Handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically handle form submission logic
-    console.log({ location, equipmentName, brandName, salePrice, equipmentType, certification, yearManufactured, yearsWarranty, shipping, training, image });
+  
+    // Create a new FormData object
+    // const formData = new FormData();
+  
+    // // Append the image file if it exists
+    // if (image) {
+    //   formData.append('file', image);  // Adjust 'file' to the expected form field name for the file
+    // }
+  
+    // // Append other fields
+    // formData.append('location', location);
+    // formData.append('equipmentName', equipmentName);
+    // formData.append('brandName', brandName);
+    // formData.append('salePrice', salePrice);
+    // formData.append('equipmentType', equipmentType);
+    // formData.append('certification', certification);
+    // formData.append('yearManufactured', yearManufactured);
+    // formData.append('yearsWarranty', yearsWarranty);
+    // formData.append('shipping', shipping);
+    // formData.append('training', training);
+    // for (let [key, value] of formData.entries()) {
+    //   console.log(`${key}: ${value}`);
+    // }
+    // console.log(formData)
+    // try {
+    //   const response = await fetch("https://medspaa.vercel.app/product/addNewEquipments", {
+    //     method: "POST",
+    //     body: formData
+    //   });
+  
+    //   const json = await response.json();
+  
+    //   if (response.ok) {
+    //     console.log(json);
+    //   } else {
+    //     console.error('Failed to submit:', json);
+    //   }
+    // } catch (error) {
+    //   console.error('Error:', error);
+    // }
   };
-
+  
   // Handler for image file change
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);

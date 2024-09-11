@@ -94,7 +94,7 @@ const handleLogin = async (e) => {
 
     if (response.ok) {
       localStorage.setItem('usertoken', json.token);
-      localStorage.setItem('userid', json.data.shopifyId);
+      localStorage.setItem('userid', json.data._id);
       dispatch({ type: 'LOGIN', payload: json });
       setSuccess('Login successful!');
       navigate(path);

@@ -148,7 +148,7 @@ const handleLogin = async (e) => {
           </div>
           <div className="mt-8">
             {activeTab === 'login' ? (
-              <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-blue-500 dark:border-gray-600">
+              <div className="bg-white dark:bg-gray-900 p-6  shadow-lg border border-blue-500 dark:border-gray-600">
                 <form onSubmit={handleLogin}>
                   <div className="relative flex items-center mb-4">
                     <span className="absolute">
@@ -158,7 +158,7 @@ const handleLogin = async (e) => {
                     </span>
                     <input
                       type="email"
-                      className="block w-full py-3 text-gray-700 bg-white border border-blue-500 rounded-lg px-11 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                      className="block w-full py-3 text-gray-700 bg-white border border-blue-500  px-11 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
                       placeholder="Email address"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -173,7 +173,7 @@ const handleLogin = async (e) => {
                     </span>
                     <input
                       type="password"
-                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500  dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -192,14 +192,14 @@ const handleLogin = async (e) => {
                   )}
                   <button
                     type="submit"
-                    className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50"
+                    className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500  hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50"
                   >
                     Login
                   </button>
                 </form>
               </div>
             ) : (
-              <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-blue-500 dark:border-gray-600">
+              <div className="bg-white dark:bg-gray-900 p-6  shadow-lg border border-blue-500 dark:border-gray-600">
                 <form onSubmit={handleSignup}>
                   <div className="relative flex items-center mb-4">
                     <span className="absolute">
@@ -209,7 +209,7 @@ const handleLogin = async (e) => {
                     </span>
                     <input
                       type="text"
-                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500  dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
                       placeholder="First Name"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
@@ -224,7 +224,7 @@ const handleLogin = async (e) => {
                     </span>
                     <input
                       type="text"
-                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500  dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
                       placeholder="Last Name"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
@@ -239,7 +239,7 @@ const handleLogin = async (e) => {
                     </span>
                     <input
                       type="email"
-                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500  dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
                       placeholder="Email address"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -254,7 +254,7 @@ const handleLogin = async (e) => {
                     </span>
                     <input
                       type="password"
-                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500  dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -269,7 +269,7 @@ const handleLogin = async (e) => {
                     </span>
                     <input
                       type="password"
-                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500  dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
                       placeholder="Confirm Password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
@@ -288,7 +288,7 @@ const handleLogin = async (e) => {
                   )}
                   <button
                     type="submit"
-                    className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50"
+                    className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500  hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50"
                   >
                     {activeTab === 'login' ? 'Login' : 'Sign Up'}
                   </button>

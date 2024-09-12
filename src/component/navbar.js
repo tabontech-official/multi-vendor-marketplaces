@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa'; 
 import { useAuthContext } from '../Hooks/useAuthContext';
 
@@ -7,7 +7,7 @@ const Navbar = ()=>{
 
     const {user , dispatch} = useAuthContext()
     const [isOpen, setIsOpen] = useState(false);
-
+     const navigate = useNavigate()
     const toggleMenu = () => {
       setIsOpen(!isOpen);
     };
@@ -25,6 +25,8 @@ const Navbar = ()=>{
               localStorage.removeItem('usertoken');
               localStorage.removeItem('userid');
               dispatch({ type: "LOGOUT" });
+              navigate("/")
+              
             } else {
               console.error('Logout failed:', json);
             }

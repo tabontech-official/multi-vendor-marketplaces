@@ -14,14 +14,14 @@ const categories = [
 const CategorySelector = () => {
   return (
     <main className="flex justify-center items-center bg-gray-100 p-20 max-sm:p-5">
-      <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg rounded-lg p-8">
+      <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg  p-8">
         <h1 className="text-3xl font-semibold mb-8 text-center text-gray-800">Choose a Category</h1>
         <div className="space-y-4">
           {categories.map(({ path, label, icon }) => (
             <Link
               to={path}
               key={path}
-              className="block w-full py-3 px-4 text-white bg-blue-500 border-b-4 border-blue-700 hover:bg-blue-400 hover:border-blue-500 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+              className="block w-full py-3 px-4 text-white bg-blue-500 border-b-4 border-blue-700 hover:bg-blue-400 hover:border-blue-500  shadow-lg transition-transform transform hover:scale-105"
             >
               <div className="flex items-center space-x-4">
                 {icon}

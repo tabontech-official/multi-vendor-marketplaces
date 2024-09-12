@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import { FaTrash } from 'react-icons/fa';
+import RTC from '../component/editor';
+import { convertToRaw, EditorState } from "draft-js";
+
 
 const AddNewEquipmentForm = () => {
   // State hooks for form fields
@@ -12,11 +16,24 @@ const AddNewEquipmentForm = () => {
   const [warranty, setWarranty] = useState('');
   const [shipping, setShipping] = useState('');
   const [training, setTraining] = useState('');
-  const [image, setImage] = useState(null);
+  const [file, setImage] = useState();
+  const [imageName, setImageName] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const[Enabled , setEnabled] = useState(false)
   const [loading, setLoading] = useState(false); // New state for loading
+  const [showRemoveOption, setShowRemoveOption] = useState(false); // State to show/hide remove option
 
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const [description, setText] = useState("");
+
+
+  const onEditorStateChange = (newEditorState) => {
+    setEditorState(newEditorState);
+    const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
+    setText(currentText);
+  };
+console.log(description)
   // Handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,8 +45,8 @@ const AddNewEquipmentForm = () => {
     const formData = new FormData();
   
     // Append the image file if it exists
-    if (image) {
-      formData.append('image', image);  // Adjust 'file' to the expected form field name for the file
+    if (file) {
+      formData.append('image', file);
     }
   
     // Append other fields
@@ -43,6 +60,7 @@ const AddNewEquipmentForm = () => {
     formData.append('warranty', warranty);
     formData.append('shipping', shipping);
     formData.append('training', training);
+    formData.append('description', description); // Append description field
 
     try {
       const response = await fetch("https://medspaa.vercel.app/product/addNewEquipments", {
@@ -55,19 +73,21 @@ const AddNewEquipmentForm = () => {
       if (response.ok) {
         setSuccess(json.message);
         setError('');
-        // Clear form fields
-        setLocation('');
-        setBrand('');
-        setName('');
-        setEquipmentType('');
-        setCertification('');
-        setShipping('');
-        setTraining('');
-        setYearManufactured('');
-        setSalePrice('');
-        setWarranty('');
-        setImage(null); // Clear the image file
-        e.target.reset();
+        // // Clear form fields
+        // setLocation('');
+        // setBrand('');
+        // setName('');
+        // setEquipmentType('');
+        // setCertification('');
+        // setShipping('');
+        // setTraining('');
+        // setYearManufactured('');
+        // setSalePrice('');
+        // setWarranty('');
+        // setImage(null); // Clear the image file
+        // setText(''); // Clear description
+        // setImageName(''); // Clear image name
+        // e.target.reset();
       } else {
         setSuccess('');
         setError(json.error);
@@ -75,6 +95,7 @@ const AddNewEquipmentForm = () => {
     } catch (error) {
       setSuccess('');
       setError('An unexpected error occurred.');
+      console.log(error)
     } finally {
       setLoading(false); // Set loading to false after operation completes
     }
@@ -82,217 +103,298 @@ const AddNewEquipmentForm = () => {
   
   // Handler for image file change
   const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
+    const file = e.target.files[0];
+    setImage(file);
+    setImageName(file.name);
+  };
+
+  // Handler to remove image
+  const handleRemoveImage = () => {
+    setImage(null);
+    setImageName('');
+    setShowRemoveOption(false); // Hide the remove option after removing the image
   };
 
   return (
-    <main className="flex items-center justify-center bg-gray-100 p-10 max-sm:p-5">
-      <div className="w-full max-w-4xl bg-white p-8 rounded-lg border shadow-lg border-blue-500">
-        <h1 className="text-3xl font-semibold mb-6 text-gray-800 text-center">Add New Equipment Listing</h1>
+    <main className="bg-gray-100 min-h-screen p-8 flex-row">
+      <h1 className="text-4xl font-bold mb-4">Add New Equipment Listing</h1>
+      <p className="text-lg mb-8 text-gray-700">Here you can add products to your store.</p>
+      <div className="mb-4">
+            {error && <div className="text-red-500">{error}</div>}
+            {success && <div className="text-green-500">{success}</div>}
+          </div>
+      <div className="flex flex-col lg:flex-row flex-1">
+        
+        <div className="flex-1 bg-white px-8  py-4 shadow-md lg:mr-8 mb-8 lg:mb-0">
+          {/* Show error and success messages */}
+          
+          <h1 className='text-2xl font-semibold mb-4'>Product Details</h1>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Product Details */}
+            <div className="grid grid-cols-1 gap-6">
+              {/* Location */}
+              <div className="flex flex-col">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location *</label>
+                <input
+                  type="text"
+                  id="location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
 
-        {/* Show error and success messages */}
-        <div className="mb-4">
-          {error && <div className="text-red-500 dark:text-red-400">{error}</div>}
-          {success && <div className="text-green-500 dark:text-green-400">{success}</div>}
+              {/* Equipment Name */}
+              <div className="flex flex-col">
+                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Title *</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+
+              {/* Description */}
+          
+              <div className='mb-4'>
+               <RTC  name={"Description"}
+                editorState={editorState}
+                onEditorStateChange={onEditorStateChange}
+                />
+           </div>
+
+              {/* Brand Name */}
+              <div className="flex flex-col mt-4">
+                <label htmlFor="brand" className="text-gray-700 text-sm font-medium mb-1">Brand Name</label>
+                <input
+                  type="text"
+                  id="brand"
+                  value={brand}
+                  onChange={(e) => setBrand(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
+              </div>
+
+              {/* Sale Price */}
+              <div className="flex flex-col">
+                <label htmlFor="sale_price" className="text-gray-700 text-sm font-medium mb-1">Sale Price $ *</label>
+                <input
+                  type="text"
+                  id="sale_price"
+                  min={0}
+                  value={sale_price}
+                  onChange={(e) => setSalePrice(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+
+              {/* Equipment Type */}
+              <div className="flex flex-col">
+                <label htmlFor="equipment_type" className="text-gray-700 text-sm font-medium mb-1">Equipment Type *</label>
+                <select
+                  id="equipment_type"
+                  name="equipment_type"
+                  value={equipment_type}
+                  onChange={(e) => setEquipmentType(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                >
+                  <option value="">Select a type</option>
+                  <option value="Skin care">Skin Care</option>
+                  <option value="Body shaping">Body Shaping</option>
+                  <option value="Laser Hair removal">Laser Hair Removal</option>
+                  <option value="Laser skin care">Laser Skin Care</option>
+                  <option value="Laser tattoo removal">Laser Tattoo Removal</option>
+                  <option value="Lab equipment">Lab Equipment</option>
+                  <option value="Other aesthetic device">Other Aesthetic Device</option>
+                  <option value="Other Medical device">Other Medical Device</option>
+                  <option value="Furniture">Furniture</option>
+                  <option value="Small tools">Small Tools</option>
+                </select>
+              </div>
+
+              {/* Certification */}
+              <div className="flex flex-col">
+                <label htmlFor="certification" className="text-gray-700 text-sm font-medium mb-1">Certification *</label>
+                <select
+                  id="certification"
+                  name="certification"
+                  value={certification}
+                  onChange={(e) => setCertification(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                >
+                  <option value="">Select certification</option>
+                  <option value="CE Certification">CE Certification</option>
+                  <option value="FDA Certification">FDA Certification</option>
+                </select>
+              </div>
+
+              {/* Year Manufactured */}
+              <div className="flex flex-col">
+                <label htmlFor="year_manufactured" className="text-gray-700 text-sm font-medium mb-1">Year Manufactured *</label>
+                <input
+                  type="text"
+                  id="year_manufactured"
+                  min={0}
+                  value={year_manufactured}
+                  onChange={(e) => setYearManufactured(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+
+              {/* Warranty */}
+              <div className="flex flex-col">
+                <label htmlFor="warranty" className="text-gray-700 text-sm font-medium mb-1">Warranty *</label>
+                <input
+                  type="text"
+                  min={0}
+                  id="warranty"
+                  value={warranty}
+                  onChange={(e) => setWarranty(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+
+              {/* Shipping */}
+              <div className="flex flex-col">
+                <label htmlFor="shipping" className="text-gray-700 text-sm font-medium mb-1">Shipping *</label>
+                <input
+                  type="text"
+                  id="shipping"
+                  value={shipping}
+                  onChange={(e) => setShipping(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+
+              {/* Training */}
+              <div className="flex flex-col">
+                <label htmlFor="training" className="text-gray-700 text-sm font-medium mb-1">Training *</label>
+                <input
+                  type="text"
+                  id="training"
+                  value={training}
+                  onChange={(e) => setTraining(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+            </div>
+          </form>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Location */}
-            <div className="flex flex-col">
-              <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location *</label>
-              <input
-                type="text"
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                required
-              />
+        {/* Image Upload */}
+        <div className="lg:w-1/3 lg:pl-8 flex-1">
+          <h2 className="text-2xl font-semibold mb-4">Equipment Image</h2>
+          <p className="text-gray-600 mb-4">
+            Here you can upload images of the Equipment. 
+          </p>
+          <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
+            <p className="text-sm text-gray-500 mb-2">Example: logo192.png</p>
+           
+            {/* Image Preview */}
+            {file ? (
+              <div className="flex items-center mb-4">
+                <img
+                  src={URL.createObjectURL(file) }
+                  alt="Preview"
+                  className="border border-gray-300 w-24 h-24 object-cover"
+                />
+                <div className="ml-4 flex flex-1 items-center">
+                  <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowRemoveOption(!showRemoveOption);
+                      setEnabled(!Enabled);
+                    }}
+                    className="text-gray-500 hover:text-gray-700 text-3xl"
+                  >
+                    &#8230;
+                  </button>
+                  {showRemoveOption && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="text-red-500 hover:text-red-700 text-sm ml-4"
+                    >
+                     <FaTrash/>
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : <div className="flex items-center mb-4">
+            <img
+              src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png" }
+              alt="Preview"
+              className="border border-gray-300 w-24 h-24 object-cover"
+            />
+            <div className="ml-4 flex flex-1 items-center">
+              <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+          
+           
             </div>
-
-            {/* Equipment Name */}
-            <div className="flex flex-col">
-              <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Equipment Name *</label>
-              <input
-                type="text"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                required
-              />
-            </div>
-
-            {/* Brand Name */}
-            <div className="flex flex-col">
-              <label htmlFor="brand" className="text-gray-700 text-sm font-medium mb-1">Brand Name</label>
-              <input
-                type="text"
-                id="brand"
-                value={brand}
-                onChange={(e) => setBrand(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              />
-            </div>
-
-            {/* Sale Price */}
-            <div className="flex flex-col">
-              <label htmlFor="sale_price" className="text-gray-700 text-sm font-medium mb-1">Sale Price *</label>
-              <input
-                type="number"
-                id="sale_price"
-                min={0}
-                value={sale_price}
-                onChange={(e) => setSalePrice(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                required
-              />
-            </div>
-
-            {/* Equipment Type */}
-            <div className="flex flex-col">
-              <label htmlFor="equipment_type" className="text-gray-700 text-sm font-medium mb-1">Equipment Type *</label>
-              <select
-                id="equipment_type"
-                name="equipment_type"
-                value={equipment_type}
-                onChange={(e) => setEquipmentType(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                required
-              >
-                <option value="">Select a type</option>
-                <option value="Skin care">Skin Care</option>
-                <option value="Body shaping">Body Shaping</option>
-                <option value="Laser Hair removal">Laser Hair Removal</option>
-                <option value="Laser skin care">Laser Skin Care</option>
-                <option value="Laser tattoo removal">Laser Tattoo Removal</option>
-                <option value="Lab equipment">Lab Equipment</option>
-                <option value="Other aesthetic device">Other Aesthetic Device</option>
-                <option value="Other Medical device">Other Medical Device</option>
-                <option value="Furniture">Furniture</option>
-                <option value="Small tools">Small Tools</option>
-              </select>
-            </div>
-
-            {/* Certification */}
-            <div className="flex flex-col">
-              <label htmlFor="certification" className="text-gray-700 text-sm font-medium mb-1">Certification *</label>
-              <select
-                id="certification"
-                name="certification"
-                value={certification}
-                onChange={(e) => setCertification(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                required
-              >
-                <option value="">Select an option</option>
-                <option value="FDA Approved">FDA Approved</option>
-                <option value="FDA Registered">FDA Registered</option>
-                <option value="No FDA Certification">No FDA Certification</option>
-              </select>
-            </div>
-
-            {/* Year Manufactured */}
-            <div className="flex flex-col">
-              <label htmlFor="year_manufactured" className="text-gray-700 text-sm font-medium mb-1">Year Manufactured *</label>
-              <input
-                type="number"
-                id="year_manufactured"
-                min={0}
-                value={year_manufactured}
-                onChange={(e) => setYearManufactured(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                required
-              />
-            </div>
-
-            {/* Warranty */}
-            <div className="flex flex-col">
-              <label htmlFor="warranty" className="text-gray-700 text-sm font-medium mb-1">Warranty *</label>
-              <input
-                type="number"
-                min={0}
-                id="warranty"
-                value={warranty}
-                onChange={(e) => setWarranty(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                required
-              />
-            </div>
-
-            {/* Shipping */}
-            <div className="flex flex-col">
-              <label htmlFor="shipping" className="text-gray-700 text-sm font-medium mb-1">Shipping *</label>
-              <input
-                type="text"
-                id="shipping"
-                value={shipping}
-                onChange={(e) => setShipping(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                required
-              />
-            </div>
-
-            {/* Training */}
-            <div className="flex flex-col">
-              <label htmlFor="training" className="text-gray-700 text-sm font-medium mb-1">Training *</label>
-              <input
-                type="text"
-                id="training"
-                value={training}
-                onChange={(e) => setTraining(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                required
-              />
-            </div>
-
-            {/* Image Upload */}
-            <div className="flex flex-col">
-              <label htmlFor="image" className="text-gray-700 text-sm font-medium mb-1">Image (optional)</label>
-              <input
-                type="file"
-                id="image"
-                onChange={handleImageChange}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              />
-            </div>
-          </section>
-
-          {/* Submit Button */}
-          <div className="flex justify-center">
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600 disabled:opacity-50 flex items-center"
-            >
-              {loading ? (
-                <svg
-                  className="w-5 h-5 mr-2 text-white animate-spin"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 1116 0A8 8 0 014 12zm2-1a6 6 0 1012 0A6 6 0 006 11z"
-                  ></path>
-                </svg>
-              ) : (
-                'Submit'
-              )}
-            </button>
+          </div> }
+            
+            <input
+              type="file"
+              id="image"
+              onChange={handleImageChange}
+              className="py-2 px-4"
+            />
           </div>
-        </form>
+          <p className="text-sm text-gray-500">
+            Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
+          </p>
+         
+        </div>
+      </div>
+ 
+      {/* Submit Button */}
+
+
+
+      <hr className="border-t border-gray-500 my-4" />
+      <div className="mt-8">
+        <button
+          type="submit"
+          onClick={handleSubmit}
+          className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
+          disabled={loading}
+        >
+          {loading && (
+            <svg
+              className="w-5 h-5 mr-3 text-white animate-spin"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4h-4z"
+              />
+            </svg>
+          )}
+          {loading ? 'Submitting...' : 'Save Changes'}
+        </button>
       </div>
     </main>
   );

@@ -13,11 +13,17 @@ const AddNewEquipmentForm = () => {
   const [shipping, setShipping] = useState('');
   const [training, setTraining] = useState('');
   const [image, setImage] = useState(null);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // New state for loading
 
   // Handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    setError('');
+    setSuccess('');
+    setLoading(true); // Set loading to true
+
     // Create a new FormData object
     const formData = new FormData();
   
@@ -47,13 +53,30 @@ const AddNewEquipmentForm = () => {
       const json = await response.json();
   
       if (response.ok) {
-         alert("Product has been added")
-        console.log(json);
+        setSuccess(json.message);
+        setError('');
+        // Clear form fields
+        setLocation('');
+        setBrand('');
+        setName('');
+        setEquipmentType('');
+        setCertification('');
+        setShipping('');
+        setTraining('');
+        setYearManufactured('');
+        setSalePrice('');
+        setWarranty('');
+        setImage(null); // Clear the image file
+        e.target.reset();
       } else {
-        console.error('Failed to submit:', json);
+        setSuccess('');
+        setError(json.error);
       }
     } catch (error) {
-      console.error('Error:', error);
+      setSuccess('');
+      setError('An unexpected error occurred.');
+    } finally {
+      setLoading(false); // Set loading to false after operation completes
     }
   };
   
@@ -66,6 +89,12 @@ const AddNewEquipmentForm = () => {
     <main className="flex items-center justify-center bg-gray-100 p-10 max-sm:p-5">
       <div className="w-full max-w-4xl bg-white p-8 rounded-lg border shadow-lg border-blue-500">
         <h1 className="text-3xl font-semibold mb-6 text-gray-800 text-center">Add New Equipment Listing</h1>
+
+        {/* Show error and success messages */}
+        <div className="mb-4">
+          {error && <div className="text-red-500 dark:text-red-400">{error}</div>}
+          {success && <div className="text-green-500 dark:text-green-400">{success}</div>}
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -195,55 +224,72 @@ const AddNewEquipmentForm = () => {
             {/* Shipping */}
             <div className="flex flex-col">
               <label htmlFor="shipping" className="text-gray-700 text-sm font-medium mb-1">Shipping *</label>
-              <select
+              <input
+                type="text"
                 id="shipping"
-                name="shipping"
                 value={shipping}
                 onChange={(e) => setShipping(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
-              >
-                <option value="">Select an option</option>
-                <option value="Free">Free</option>
-                <option value="at cost">At Cost</option>
-                <option value="pick up available">Pick Up Available</option>
-              </select>
+              />
             </div>
 
             {/* Training */}
             <div className="flex flex-col">
               <label htmlFor="training" className="text-gray-700 text-sm font-medium mb-1">Training *</label>
-              <select
+              <input
+                type="text"
                 id="training"
-                name="training"
                 value={training}
                 onChange={(e) => setTraining(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 required
-              >
-                <option value="">Select an option</option>
-                <option value="Available on site">Available On Site</option>
-                <option value="video training">Video Training</option>
-                <option value="No training">No Training</option>
-              </select>
+              />
             </div>
 
             {/* Image Upload */}
             <div className="flex flex-col">
-              <label htmlFor="image" className="text-gray-700 text-sm font-medium mb-1">Equipment Image</label>
+              <label htmlFor="image" className="text-gray-700 text-sm font-medium mb-1">Image (optional)</label>
               <input
                 type="file"
                 id="image"
                 onChange={handleImageChange}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
               />
             </div>
           </section>
 
           {/* Submit Button */}
-          <div className="flex justify-center mt-6">
-            <button className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
-              Add Listing
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600 disabled:opacity-50 flex items-center"
+            >
+              {loading ? (
+                <svg
+                  className="w-5 h-5 mr-2 text-white animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 1116 0A8 8 0 014 12zm2-1a6 6 0 1012 0A6 6 0 006 11z"
+                  ></path>
+                </svg>
+              ) : (
+                'Submit'
+              )}
             </button>
           </div>
         </form>

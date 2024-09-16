@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { HiDotsVertical, HiPlus, HiX } from 'react-icons/hi';
+import { HiDotsVertical, HiPlus, HiX , HiTrash } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
@@ -120,7 +120,7 @@ const Dashboard = () => {
 
 
           {/* Search Bar */}
-          <div className="flex items-center w-2/4 md:ml-auto justify-end">
+          <div className="flex items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
             <input 
               type="text" 
               placeholder="Search..." 
@@ -187,7 +187,7 @@ const Dashboard = () => {
                               onClick={() => onDelete(product.id_2)} 
                               className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
                             >
-                              Delete
+                            <HiTrash/>
                             </button>
                           </li>
                         </ul>

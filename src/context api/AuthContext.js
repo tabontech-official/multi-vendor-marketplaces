@@ -22,7 +22,6 @@ const InitialState = ()=>{
     return{user:storedUser}
    }
   } catch (error) {
-    console.error('Failed to parse user from local storage:', error);
     return{user:null}
   }
 }
@@ -38,8 +37,6 @@ export const AuthContextProvider = ({ children }) => {
         console.error('Failed to parse user from local storage:', error);
       }
   }, [])
-
-  console.log('AuthContext state:', state);
 
   return (
     <AuthContext.Provider value={{ ...state, dispatch }}>

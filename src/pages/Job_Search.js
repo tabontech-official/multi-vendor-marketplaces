@@ -1,30 +1,32 @@
 import React, { useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor'; // Assuming RTC is the rich text editor
-import { convertToRaw, EditorState } from "draft-js";
+import { EditorState } from "draft-js";
 
 const AddJobSearchForm = () => {
   // State hooks for form fields
   const [location, setLocation] = useState('');
-  const [qualification, setQualification] = useState('');
-  const [jobType, setJobType] = useState('');
-  const [jobOfferType, setJobOfferType] = useState('');
-  const [offeredSalary, setOfferedSalary] = useState('');
-  const [positionDescription, setPositionDescription] = useState('');
-  const [CV, setCv] = useState(null);
-  const [cvName, setCvName] = useState('');
+  const [name, setName] = useState('');
+  const [qualificationRequested, setQualificationRequested] = useState(''); // Changed state name
+  const [availability, setAvailability] = useState('');
+  const [requestedYearlySalary, setRequestedYearlySalary] = useState('');
+  const [positionRequestedDescription, setPositionRequestedDescription] = useState('');
+  const [imageName, setImageName] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // New state for loading
-  const [showRemoveOption, setShowRemoveOption] = useState(false); // State to show/hide remove option
+  const [loading, setLoading] = useState(false);
+  const [showRemoveOption, setShowRemoveOption] = useState(false);
+  const [Enabled , setEnabled] = useState(false);
+  const [file, setImage] = useState();
+
+  
 
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
-  const [description, setText] = useState("");
 
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
     const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
-    setText(currentText);
+    setPositionRequestedDescription(currentText);
   };
 
   // Handler for form submission
@@ -32,45 +34,48 @@ const AddJobSearchForm = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setLoading(true); // Set loading to true
+    setLoading(true);
 
-    // Create a new FormData object
+    // Create FormData object
     const formData = new FormData();
-  
-    // Append the CV file if it exists
-    if (CV) {
-      formData.append('cv', CV);
+
+    // Append the image file if it exists
+    if (file) {
+      formData.append('image', file);
     }
-  
+
     // Append other fields
     formData.append('location', location);
-    formData.append('qualification', qualification);
-    formData.append('jobType', jobType);
-    formData.append('jobOfferType', jobOfferType);
-    formData.append('offeredSalary', offeredSalary);
-    formData.append('positionDescription', positionDescription); // Append position description field
+    formData.append('name', name);
+    formData.append('qualification', qualificationRequested); // Updated field name
+    formData.append('availability', availability);
+    formData.append('requestedYearlySalary', requestedYearlySalary);
+    formData.append('positionRequestedDescription', positionRequestedDescription);
+
+    // Append userId
+    const id = localStorage.getItem('userid');
+    formData.append('userId', id);
 
     try {
-      const response = await fetch("https://medspaa.vercel.app/product/addNewEquipments", {
+      const response = await fetch("https://medspaa.vercel.app/product/addJob", {
         method: "POST",
         body: formData
       });
-  
+
       const json = await response.json();
-  
+
       if (response.ok) {
         setSuccess(json.message);
         setError('');
         // Clear form fields
         setLocation('');
-        setQualification('');
-        setJobType('');
-        setJobOfferType('');
-        setOfferedSalary('');
-        setPositionDescription('');
-        setCv(null); // Clear the CV file
-        setText(''); // Clear description
-        setCvName(''); // Clear CV name
+        setName('');
+        setQualificationRequested(''); // Clear qualification requested
+        setAvailability('');
+        setRequestedYearlySalary('');
+        setPositionRequestedDescription('');
+        setImage(null);
+        setImageName('');
       } else {
         setSuccess('');
         setError(json.error);
@@ -80,27 +85,27 @@ const AddJobSearchForm = () => {
       setError('An unexpected error occurred.');
       console.log(error);
     } finally {
-      setLoading(false); // Set loading to false after operation completes
+      setLoading(false);
     }
   };
 
-  // Handler for CV file change
-  const handleCvChange = (e) => {
+  // Handler for image file change
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setCv(file);
-    setCvName(file.name);
+    setImage(file);
+    setImageName(file.name);
   };
 
-  // Handler to remove CV
-  const handleRemoveCv = () => {
-    setCv(null);
-    setCvName('');
-    setShowRemoveOption(false); // Hide the remove option after removing the CV
+  // Handler to remove image
+  const handleRemoveImage = () => {
+    setImage(null);
+    setImageName('');
+    setShowRemoveOption(false);
   };
 
   return (
     <main className="bg-gray-100 min-h-screen p-8 flex-row">
-      <h1 className="text-4xl font-bold mb-4">Add New Job Listing</h1>
+      <h1 className="text-4xl font-bold mb-4">Provider Job Search Listing</h1>
       <p className="text-lg mb-8 text-gray-700">Here you can add job listings to your site.</p>
       <div className="mb-4">
         {error && <div className="text-red-500">{error}</div>}
@@ -126,154 +131,197 @@ const AddJobSearchForm = () => {
                 />
               </div>
 
-              {/* Qualification */}
+              {/* Name */}
               <div className="flex flex-col">
-                <label htmlFor="qualification" className="text-gray-700 text-sm font-medium mb-1">Qualification *</label>
+                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Name *</label>
                 <input
                   type="text"
-                  id="qualification"
-                  value={qualification}
-                  onChange={(e) => setQualification(e.target.value)}
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
               </div>
 
+              {/* Qualification Requested */}
+              <div className="flex flex-col">
+                <label htmlFor="qualificationRequested" className="text-gray-700 text-sm font-medium mb-1">Qualification Requested *</label>
+                <select
+                  id="qualificationRequested"
+                  value={qualificationRequested}
+                  onChange={(e) => setQualificationRequested(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                >
+                  <option value="">Select Qualification</option>
+                  <option value="Medical Director">Medical Director</option>
+                  <option value="ARPN Nurse practitioner">ARPN Nurse practitioner</option>
+                  <option value="Registered Nurse">Registered Nurse</option>
+                  <option value="Medical Assistant">Medical Assistant</option>
+                  <option value="Aesthetician">Aesthetician</option>
+                  <option value="Laser Technician">Laser Technician</option>
+                  <option value="Massage therapist">Massage therapist</option>
+                  <option value="Front desk clerk">Front desk clerk</option>
+                </select>
+              </div>
+
+              {/* Availability */}
+              <div className="flex flex-col">
+                <label htmlFor="availability" className="text-gray-700 text-sm font-medium mb-1">Availability *</label>
+                <input
+                  type="text"
+                  id="availability"
+                  value={availability}
+                  onChange={(e) => setAvailability(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+
+              {/* Requested Yearly Salary */}
+              <div className="flex flex-col">
+                <label htmlFor="requestedYearlySalary" className="text-gray-700 text-sm font-medium mb-1">Requested Yearly Salary *</label>
+                <input
+                  type="number"
+                  id="requestedYearlySalary"
+                  min={0}
+                  value={requestedYearlySalary}
+                  onChange={(e) => setRequestedYearlySalary(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+             
+
               {/* Position Description */}
+              <div className='mb-4'>
               <RTC 
-              name={"Offered Position Description"}
+                name={"Position Requested Description"}
                 editorState={editorState}
                 onEditorStateChange={onEditorStateChange}
               />
+               </div>
 
-              {/* Job Type */}
-              <div className="flex flex-col mt-4">
-                <label htmlFor="jobType" className="text-gray-700 text-sm font-medium mb-1">Job Type</label>
-                <input
-                  type="text"
+
+                  {/* Job Type */}
+                  <div className="flex flex-col mt-4">
+                <label htmlFor="jobType" className="text-gray-700 text-sm font-medium mb-1">Job Type *</label>
+                <select
                   id="jobType"
-                  value={jobType}
-                  onChange={(e) => setJobType(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                />
-              </div>
-
-              {/* Job Offer Type */}
-              <div className="flex flex-col">
-                <label htmlFor="jobOfferType" className="text-gray-700 text-sm font-medium mb-1">Job Offer Type *</label>
-                <input
-                  type="text"
-                  id="jobOfferType"
-                  value={jobOfferType}
-                  onChange={(e) => setJobOfferType(e.target.value)}
+                  value={availability}
+                  onChange={(e) => setAvailability(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
-                />
+                >
+                  <option value="">Select Job Type</option>
+                  <option value="Full-Time">Full-Time</option>
+                  <option value="Part-time">Part-time</option>
+                </select>
               </div>
-
-              {/* Offered Salary */}
-              <div className="flex flex-col">
-                <label htmlFor="offeredSalary" className="text-gray-700 text-sm font-medium mb-1">Offered Salary *</label>
-                <input
-                  type="text"
-                  id="offeredSalary"
-                  min={0}
-                  value={offeredSalary}
-                  onChange={(e) => setOfferedSalary(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  required
-                />
-              </div>
+            
             </div>
           </form>
         </div>
 
-        {/* CV Upload */}
+        {/* Image Upload */}
         <div className="lg:w-1/3 lg:pl-8 flex-1">
-          <h2 className="text-2xl font-semibold mb-4">RESUME</h2>
+          <h2 className="text-2xl font-semibold mb-4">Equipment Image</h2>
           <p className="text-gray-600 mb-4">
-            Here you can upload the Resume for the job listing.
+            Here you can upload images of the Equipment. 
           </p>
           <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
-            <p className="text-sm text-gray-500 mb-2">Example: resume.pdf</p>
+            <p className="text-sm text-gray-500 mb-2">Example: logo192.png</p>
            
-            {/* CV Preview */}
-            {CV ? (
+            {/* Image Preview */}
+            {file ? (
               <div className="flex items-center mb-4">
-                <p className="text-sm text-gray-700 flex-1">{cvName}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowRemoveOption(!showRemoveOption);
-                  }}
-                  className="text-gray-500 hover:text-gray-700 text-3xl"
-                >
-                  &#8230;
-                </button>
-                {showRemoveOption && (
+                <img
+                  src={URL.createObjectURL(file) }
+                  alt="Preview"
+                  className="border border-gray-300 w-24 h-24 object-cover"
+                />
+                <div className="ml-4 flex flex-1 items-center">
+                  <p className="text-sm text-gray-700 flex-1">{imageName}</p>
                   <button
                     type="button"
-                    onClick={handleRemoveCv}
-                    className="text-red-500 hover:text-red-700 text-sm ml-4"
+                    onClick={() => {
+                      setShowRemoveOption(!showRemoveOption);
+                      setEnabled(!Enabled);
+                    }}
+                    className="text-gray-500 hover:text-gray-700 text-3xl"
                   >
-                    <FaTrash />
+                    &#8230;
                   </button>
-                )}
+                  {showRemoveOption && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="text-red-500 hover:text-red-700 text-sm ml-4"
+                    >
+                      <FaTrash/>
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="flex items-center mb-4">
-                <p className="text-sm text-gray-700 flex-1">No Resume uploaded</p>
+                <img
+                  src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png" }
+                  alt="Preview"
+                  className="border border-gray-300 w-24 h-24 object-cover"
+                />
+                <div className="ml-4 flex flex-1 items-center">
+                  <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+                </div>
               </div>
             )}
             
             <input
               type="file"
-              id="cv"
-              onChange={handleCvChange}
+              id="image"
+              onChange={handleImageChange}
               className="py-2 px-4"
             />
           </div>
           <p className="text-sm text-gray-500">
-            Note: The Resume can be uploaded in PDF format only.
+            Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
           </p>
-         
         </div>
       </div>
- 
+
       {/* Submit Button */}
       <hr className="border-t border-gray-500 my-4" />
-      <div className="mt-8">
-        <button
-          type="submit"
-          onClick={handleSubmit}
-          className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
-          disabled={loading}
-        >
-          {loading && (
-            <svg
-              className="w-5 h-5 mr-3 text-white animate-spin"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4h-4z"
-              />
-            </svg>
-          )}
-          {loading ? 'Submitting...' : 'Save Changes'}
-        </button>
-      </div>
+      <button
+        type="submit"
+        onClick={handleSubmit}
+        className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
+        disabled={loading}
+      >
+        {loading && (
+          <svg
+            className="w-5 h-5 mr-3 text-white animate-spin"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4h-4z"
+            />
+          </svg>
+        )}
+        {loading ? 'Submitting...' : 'Save Changes'}
+      </button>
     </main>
   );
 };

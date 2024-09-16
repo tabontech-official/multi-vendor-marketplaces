@@ -3,7 +3,6 @@ import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
 import { convertToRaw, EditorState } from "draft-js";
 
-
 const AddNewEquipmentForm = () => {
   // State hooks for form fields
   const [location, setLocation] = useState('');
@@ -20,27 +19,27 @@ const AddNewEquipmentForm = () => {
   const [imageName, setImageName] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
-  const[Enabled , setEnabled] = useState(false)
+  const [Enabled , setEnabled] = useState(false);
   const [loading, setLoading] = useState(false); // New state for loading
   const [showRemoveOption, setShowRemoveOption] = useState(false); // State to show/hide remove option
 
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [description, setText] = useState("");
 
-
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
     const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
     setText(currentText);
   };
-console.log(description)
+
   // Handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
     setLoading(true); // Set loading to true
-
+    const id = localStorage.getItem('userid');
+   
     // Create a new FormData object
     const formData = new FormData();
   
@@ -61,6 +60,7 @@ console.log(description)
     formData.append('shipping', shipping);
     formData.append('training', training);
     formData.append('description', description); // Append description field
+    formData.append('userId', id);
 
     try {
       const response = await fetch("https://medspaa.vercel.app/product/addNewEquipments", {
@@ -73,21 +73,21 @@ console.log(description)
       if (response.ok) {
         setSuccess(json.message);
         setError('');
-        // // Clear form fields
-        // setLocation('');
-        // setBrand('');
-        // setName('');
-        // setEquipmentType('');
-        // setCertification('');
-        // setShipping('');
-        // setTraining('');
-        // setYearManufactured('');
-        // setSalePrice('');
-        // setWarranty('');
-        // setImage(null); // Clear the image file
-        // setText(''); // Clear description
-        // setImageName(''); // Clear image name
-        // e.target.reset();
+        // Clear form fields
+        setLocation('');
+        setBrand('');
+        setName('');
+        setEquipmentType('');
+        setCertification('');
+        setShipping('');
+        setTraining('');
+        setYearManufactured('');
+        setSalePrice('');
+        setWarranty('');
+        setImage(null); // Clear the image file
+        setText(''); // Clear description
+        setImageName(''); // Clear image name
+
       } else {
         setSuccess('');
         setError(json.error);
@@ -95,7 +95,7 @@ console.log(description)
     } catch (error) {
       setSuccess('');
       setError('An unexpected error occurred.');
-      console.log(error)
+      console.log(error);
     } finally {
       setLoading(false); // Set loading to false after operation completes
     }
@@ -120,12 +120,12 @@ console.log(description)
       <h1 className="text-4xl font-bold mb-4">Add New Equipment Listing</h1>
       <p className="text-lg mb-8 text-gray-700">Here you can add products to your store.</p>
       <div className="mb-4">
-            {error && <div className="text-red-500">{error}</div>}
-            {success && <div className="text-green-500">{success}</div>}
-          </div>
+        {error && <div className="text-red-500">{error}</div>}
+        {success && <div className="text-green-500">{success}</div>}
+      </div>
       <div className="flex flex-col lg:flex-row flex-1">
         
-        <div className="flex-1 bg-white px-8  py-4 shadow-md lg:mr-8 mb-8 lg:mb-0">
+        <div className="flex-1 bg-white px-8 py-4 shadow-md lg:mr-8 mb-8 lg:mb-0">
           {/* Show error and success messages */}
           
           <h1 className='text-2xl font-semibold mb-4'>Product Details</h1>
@@ -159,13 +159,13 @@ console.log(description)
               </div>
 
               {/* Description */}
-          
               <div className='mb-4'>
-               <RTC  name={"Description"}
-                editorState={editorState}
-                onEditorStateChange={onEditorStateChange}
+                <RTC
+                  name={"Description"}
+                  editorState={editorState}
+                  onEditorStateChange={onEditorStateChange}
                 />
-           </div>
+              </div>
 
               {/* Brand Name */}
               <div className="flex flex-col mt-4">
@@ -183,7 +183,7 @@ console.log(description)
               <div className="flex flex-col">
                 <label htmlFor="sale_price" className="text-gray-700 text-sm font-medium mb-1">Sale Price $ *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="sale_price"
                   min={0}
                   value={sale_price}
@@ -239,7 +239,7 @@ console.log(description)
               <div className="flex flex-col">
                 <label htmlFor="year_manufactured" className="text-gray-700 text-sm font-medium mb-1">Year Manufactured *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="year_manufactured"
                   min={0}
                   value={year_manufactured}
@@ -266,27 +266,35 @@ console.log(description)
               {/* Shipping */}
               <div className="flex flex-col">
                 <label htmlFor="shipping" className="text-gray-700 text-sm font-medium mb-1">Shipping *</label>
-                <input
-                  type="text"
+                <select
                   id="shipping"
                   value={shipping}
                   onChange={(e) => setShipping(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
-                />
+                >
+                  <option value="">Select shipping option</option>
+                  <option value="Free">Free</option>
+                  <option value="At cost">At Cost</option>
+                  <option value="Pick up available">Pick Up Available</option>
+                </select>
               </div>
 
               {/* Training */}
               <div className="flex flex-col">
                 <label htmlFor="training" className="text-gray-700 text-sm font-medium mb-1">Training *</label>
-                <input
-                  type="text"
+                <select
                   id="training"
                   value={training}
                   onChange={(e) => setTraining(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
-                />
+                >
+                  <option value="">Select training option</option>
+                  <option value="Available on site">Available On Site</option>
+                  <option value="Video training">Video Training</option>
+                  <option value="No training">No Training</option>
+                </select>
               </div>
             </div>
           </form>
@@ -327,23 +335,23 @@ console.log(description)
                       onClick={handleRemoveImage}
                       className="text-red-500 hover:text-red-700 text-sm ml-4"
                     >
-                     <FaTrash/>
+                      <FaTrash/>
                     </button>
                   )}
                 </div>
               </div>
-            ) : <div className="flex items-center mb-4">
-            <img
-              src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png" }
-              alt="Preview"
-              className="border border-gray-300 w-24 h-24 object-cover"
-            />
-            <div className="ml-4 flex flex-1 items-center">
-              <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-          
-           
-            </div>
-          </div> }
+            ) : (
+              <div className="flex items-center mb-4">
+                <img
+                  src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png" }
+                  alt="Preview"
+                  className="border border-gray-300 w-24 h-24 object-cover"
+                />
+                <div className="ml-4 flex flex-1 items-center">
+                  <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+                </div>
+              </div>
+            )}
             
             <input
               type="file"
@@ -355,14 +363,10 @@ console.log(description)
           <p className="text-sm text-gray-500">
             Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
           </p>
-         
         </div>
       </div>
- 
+
       {/* Submit Button */}
-
-
-
       <hr className="border-t border-gray-500 my-4" />
       <div className="mt-8">
         <button

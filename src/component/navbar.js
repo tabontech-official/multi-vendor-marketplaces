@@ -73,7 +73,7 @@ const Navbar = ()=>{
                 <>
                   <li>
                     <Link to="/edit-account" className="text-white hover:text-gray-400" onClick={toggleMenu}>
-                      Account
+                     My Account
                     </Link>
                   </li>
                   <li>

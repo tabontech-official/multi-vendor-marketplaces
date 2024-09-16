@@ -1,0 +1,1 @@
+https://medspaa.vercel.app/auth/user/UserId

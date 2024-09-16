@@ -37,6 +37,7 @@ const PostEquipmentForm = () => {
     setError('');
     setSuccess('');
     setLoading(true);
+    const id = localStorage.getItem('userid')
 
     const formData = new FormData();
   
@@ -55,6 +56,8 @@ const PostEquipmentForm = () => {
     formData.append('warranty', warranty);
     formData.append('reason_for_selling', reasonForSelling);
     formData.append('shipping', shipping);
+    formData.append('description', description)
+    formData.append('userId',id)
 
     try {
       const response = await fetch("https://medspaa.vercel.app/product/addEquipment", {
@@ -156,7 +159,7 @@ const PostEquipmentForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="askingPrice" className="text-gray-700 text-sm font-medium mb-1">Asking Price $ *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="askingPrice"
                   min={0}
                   value={askingPrice}
@@ -219,7 +222,7 @@ const PostEquipmentForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="yearPurchased" className="text-gray-700 text-sm font-medium mb-1">Year Purchased *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="yearPurchased"
                   min={0}
                   value={yearPurchased}
@@ -231,42 +234,53 @@ const PostEquipmentForm = () => {
 
               <div className="flex flex-col">
                 <label htmlFor="warranty" className="text-gray-700 text-sm font-medium mb-1">Warranty *</label>
-                <input
-                  type="text"
+                <select
                   id="warranty"
-                  min={0}
                   value={warranty}
                   onChange={(e) => setWarranty(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
-                />
+                >
+                  <option value="">Select a warranty</option>
+                  <option value="No warranty, as it is">No warranty, as it is</option>
+                  <option value="Still under manufacturer warranty">Still under manufacturer warranty</option>
+                  <option value="6 month warranty">6 month warranty</option>
+                </select>
               </div>
 
               <div className="flex flex-col">
                 <label htmlFor="reasonForSelling" className="text-gray-700 text-sm font-medium mb-1">Reason for Selling *</label>
-                <input
-                  type="text"
+                <select
                   id="reasonForSelling"
                   value={reasonForSelling}
                   onChange={(e) => setReasonForSelling(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
-                />
+                >
+                  <option value="">Select reason</option>
+                  <option value="Upgrading">Upgrading</option>
+                  <option value="No longer needed">No longer needed</option>
+                  <option value="Business closure">Business closure</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
               <div className="flex flex-col">
                 <label htmlFor="shipping" className="text-gray-700 text-sm font-medium mb-1">Shipping *</label>
-                <input
-                  type="text"
+                <select
                   id="shipping"
                   value={shipping}
                   onChange={(e) => setShipping(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
-                />
+                >
+                  <option value="">Select shipping option</option>
+                  <option value="available at cost">Available at cost</option>
+                  <option value="free shipping">Free shipping</option>
+                  <option value="pick up only">Pick up only</option>
+                </select>
               </div>
 
-          
             </div>
           </form>
         </div>

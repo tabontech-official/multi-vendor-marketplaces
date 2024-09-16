@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
-import { convertToRaw, EditorState } from "draft-js";
+import { EditorState } from "draft-js";
 
 const PostRentalForm = () => {
   // State hooks for form fields
@@ -10,9 +10,9 @@ const PostRentalForm = () => {
   const [monthlyRent, setMonthlyRent] = useState('');
   const [deposit, setDeposit] = useState('');
   const [minimumInsuranceRequested, setMinimumInsuranceRequested] = useState('');
-  const [typeOfUseAllowed, setTypeOfUseAllowed] = useState('');
+  const [typeOfUseAllowed, setTypeOfUseAllowed] = useState([]);
   const [rentalTerms, setRentalTerms] = useState('');
-  const [wifiAvailable, setWifiAvailable] = useState('');
+  const [wifiAvailable, setWifiAvailable] = useState();
   const [otherDetails, setOtherDetails] = useState('');
   const [image, setImage] = useState(null); // State for image upload
   const [imageName, setImageName] = useState('');
@@ -38,7 +38,7 @@ const PostRentalForm = () => {
     setLoading(true);
 
     const formData = new FormData();
-  
+    const id = localStorage.getItem('userid');
     if (image) {
       formData.append('image', image);
     }
@@ -48,14 +48,14 @@ const PostRentalForm = () => {
     formData.append('monthlyRent', monthlyRent);
     formData.append('deposit', deposit);
     formData.append('minimumInsuranceRequested', minimumInsuranceRequested);
-    formData.append('typeOfUseAllowed', typeOfUseAllowed);
+    formData.append('typeOfUseAllowed', JSON.stringify(typeOfUseAllowed)); // Updated field
     formData.append('rentalTerms', rentalTerms);
     formData.append('wifiAvailable', wifiAvailable);
-    formData.append('otherDetails', otherDetails);
-    formData.append('description', description);
+    formData.append('otherDetails', description);
+    formData.append('userId', id);
 
     try {
-      const response = await fetch("https://yourapi.com/rental/post", {
+      const response = await fetch("https://medspaa.vercel.app/product/addRoom", {
         method: "POST",
         body: formData
       });
@@ -93,6 +93,14 @@ const PostRentalForm = () => {
     setShowRemoveOption(false);
   };
 
+  // Handler for type of use allowed change
+  const handleTypeOfUseAllowedChange = (e) => {
+    const { value, checked } = e.target;
+    setTypeOfUseAllowed(prev =>
+      checked ? [...prev, value] : prev.filter(type => type !== value)
+    );
+  };
+
   return (
     <main className="bg-gray-100 min-h-screen p-8 flex-row">
       <h1 className="text-4xl font-bold mb-4">Add Rent Room Listing</h1>
@@ -123,7 +131,7 @@ const PostRentalForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="roomSize" className="text-gray-700 text-sm font-medium mb-1">Room Size *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="roomSize"
                   value={roomSize}
                   onChange={(e) => setRoomSize(e.target.value)}
@@ -131,17 +139,19 @@ const PostRentalForm = () => {
                   required
                 />
               </div>
-          <div className='mb-4'>
-              <RTC 
-                 name={"Other Details"}
+
+              <div className='mb-4'>
+                <RTC 
+                  name={"Other Details"}
                   editorState={editorState}
                   onEditorStateChange={onEditorStateChange}
                 />
-</div>
+              </div>
+
               <div className="flex flex-col">
-                <label htmlFor="monthlyRent" className="text-gray-700 text-sm font-medium mb-1">Monthly Rent *</label>
+                <label htmlFor="monthlyRent" className="text-gray-700 text-sm font-medium mb-1">Monthly Rent $ *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="monthlyRent"
                   min={0}
                   value={monthlyRent}
@@ -152,9 +162,9 @@ const PostRentalForm = () => {
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="deposit" className="text-gray-700 text-sm font-medium mb-1">Deposit *</label>
+                <label htmlFor="deposit" className="text-gray-700 text-sm font-medium mb-1">Deposit $ *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="deposit"
                   min={0}
                   value={deposit}
@@ -165,9 +175,9 @@ const PostRentalForm = () => {
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="minimumInsuranceRequested" className="text-gray-700 text-sm font-medium mb-1">Minimum Insurance Requested *</label>
+                <label htmlFor="minimumInsuranceRequested" className="text-gray-700 text-sm font-medium mb-1">Minimum Insurance Requested $ *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="minimumInsuranceRequested"
                   value={minimumInsuranceRequested}
                   onChange={(e) => setMinimumInsuranceRequested(e.target.value)}
@@ -178,41 +188,51 @@ const PostRentalForm = () => {
 
               <div className="flex flex-col">
                 <label htmlFor="typeOfUseAllowed" className="text-gray-700 text-sm font-medium mb-1">Type of Use Allowed *</label>
-                <input
-                  type="text"
-                  id="typeOfUseAllowed"
-                  value={typeOfUseAllowed}
-                  onChange={(e) => setTypeOfUseAllowed(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  required
-                />
+                <div id="typeOfUseAllowed" className="flex flex-col">
+                  {['Skin care', 'Medical aesthetic', 'Massage therapy', 'General Medical', 'Permanent Makeup', 'Nails', 'Eyelashes', 'Wax'].map((option) => (
+                    <label key={option} className="inline-flex items-center">
+                      <input
+                        type="checkbox"
+                        value={option}
+                        checked={typeOfUseAllowed.includes(option)}
+                        onChange={handleTypeOfUseAllowedChange}
+                        className="form-checkbox"
+                      />
+                      <span className="ml-2 text-gray-700">{option}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <div className="flex flex-col">
                 <label htmlFor="rentalTerms" className="text-gray-700 text-sm font-medium mb-1">Rental Terms *</label>
-                <input
-                  type="text"
+                <select
                   id="rentalTerms"
                   value={rentalTerms}
                   onChange={(e) => setRentalTerms(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
-                />
+                >
+                  <option value="">Select Rental Term</option>
+                  <option value="Monthly to month">Monthly to month</option>
+                  <option value="6 months">6 months</option>
+                  <option value="12 months">12 months</option>
+                </select>
               </div>
-
               <div className="flex flex-col">
-                <label htmlFor="wifiAvailable" className="text-gray-700 text-sm font-medium mb-1">Wi-Fi Available *</label>
-                <input
-                  type="text"
-                  id="wifiAvailable"
-                  value={wifiAvailable}
-                  onChange={(e) => setWifiAvailable(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  required
-                />
-              </div>
-
-             
+  <label htmlFor="wifiAvailable" className="text-gray-700 text-sm font-medium mb-1">Wi-Fi Available *</label>
+  <select
+    id="wifiAvailable"
+    value={wifiAvailable}
+    onChange={(e) => setWifiAvailable(e.target.value === 'true')} // Convert string to boolean
+    className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+    required
+  >
+    <option value="">Select Wi-Fi Availability</option>
+    <option value="true">True</option>
+    <option value="false">False</option>
+  </select>
+</div>
 
             </div>
           </form>

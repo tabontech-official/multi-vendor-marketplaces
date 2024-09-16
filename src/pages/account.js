@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HiCamera } from 'react-icons/hi'; // Import the camera icon for profile image upload
 
 const AccountPage = () => {
@@ -10,8 +10,64 @@ const AccountPage = () => {
     zip: '',
     country: '',
     city: '',
-    profileImage: 'https://shopify-digital-delivery.s3.amazonaws.com/shop_logo/59235/vRlqYxKteX848.png'
+    profileImage: 'https://sp-seller.webkul.com/img/store_logo/icon-user.png'
   });
+  const [loading, setLoading] = useState(true); // Optional: handle loading state
+  const [error, setError] = useState(null); // Optional: handle error state
+  
+  useEffect(() => {
+    let isMounted = true; // Flag to track if the component is mounted
+
+    const fetchUserData = async () => {
+      const id = localStorage.getItem('userid');
+      
+      if (!id) {
+        console.error('User ID not found in localStorage.');
+        setError('User ID not found.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`https://medspaa.vercel.app/auth/user/${id}`, {
+          method: 'GET',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data)
+          if (isMounted) { // Only update state if the component is still mounted
+            setFormData({
+              email: data.email || '',
+              phone: data.phone || '',
+              address: data.address || '',
+              zip: data.zip || '',
+              country: data.country || '',
+              city: data.city || '',
+              profileImage: data.profileImage || 'https://sp-seller.webkul.com/img/store_logo/icon-user.png'
+            });
+          }
+        } else {
+          console.error('Failed to fetch user data. Status:', response.status);
+          setError(`Failed to fetch user data. Status: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setError('Error fetching user data.');
+      } finally {
+        if (isMounted) {
+          setLoading(false); // Update loading state
+        }
+      }
+    };
+
+    fetchUserData();
+
+    // Cleanup function to set the flag to false
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,15 +78,47 @@ const AccountPage = () => {
     setFormData({ ...formData, profileImage: URL.createObjectURL(e.target.files[0]) });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log(formData);
+
+    const userId = localStorage.getItem('userid');
+    if (!userId) {
+      console.error('User ID not found in localStorage.');
+      return;
+    }
+
+    // Prepare the data to be sent
+    const data = {
+      email: formData.email,
+      password: formData.password,
+      phone: formData.phone,
+      address: formData.address,
+      zip: formData.zip,
+      country: formData.country,
+      city: formData.city,
+    };
+
+    // Prepare the request
+    try {
+      const response = await fetch(`https://medspaa.vercel.app/auth/editProfile/${userId}`, {
+        method: 'PUT', // Assuming the method should be PUT for updates
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Profile updated successfully:', result);
+      } else {
+        console.error('Failed to update profile. Status:', response.status);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
   };
 
   return (
     <main className="w-full p-8 flex justify-center items-center bg-gray-100 mt-10">
-      <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg  p-6">
+      <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg p-6">
         <h1 className="text-2xl font-semibold mb-4 text-center text-gray-800">Account Settings</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Profile Image Section */}
@@ -39,7 +127,7 @@ const AccountPage = () => {
               <img 
                 src={formData.profileImage || 'https://via.placeholder.com/150'}
                 alt="Profile"
-                className=" w-40 h-32 rounded-full object-cover border-2  border-blue-500"
+                className="w-40 h-32 rounded-full object-cover border-2 border-blue-500"
               />
               <label htmlFor="profileImage" className="absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full cursor-pointer hover:bg-blue-600 transition">
                 <HiCamera className="w-6 h-6" />

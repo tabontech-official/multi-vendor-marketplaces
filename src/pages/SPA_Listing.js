@@ -38,6 +38,7 @@ const AddBusinessListingForm = () => {
 
   // Handler for form submission
   const handleSubmit = async (e) => {
+    const id = localStorage.getItem("userid")
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -56,9 +57,9 @@ const AddBusinessListingForm = () => {
     formData.append('businessDescription', businessDescription);
     formData.append('askingPrice', askingPrice);
     formData.append('establishedYear', establishedYear);
-    formData.append('numEmployees', numEmployees);
-    formData.append('monthlyRent', monthlyRent);
-    formData.append('leaseExpiration', leaseExpiration);
+    formData.append('numberOfEmployees', numEmployees); // Consistent naming
+    formData.append('locationMonthlyRent', monthlyRent); // Consistent naming
+    formData.append('leaseExpirationDate', leaseExpiration); // Consistent naming
     formData.append('locationSize', locationSize);
     formData.append('grossYearlyRevenue', grossYearlyRevenue);
     formData.append('cashFlow', cashFlow);
@@ -68,10 +69,9 @@ const AddBusinessListingForm = () => {
     formData.append('listOfDevices', listOfDevices);
     formData.append('offeredServices', offeredServices);
     formData.append('supportAndTraining', supportAndTraining);
-    formData.append('description', descriptionText); // Append description field
-
+    formData.append('userId', id);
     try {
-      const response = await fetch('https://your-api-endpoint.com/business/addNewListing', {
+      const response = await fetch('https://medspaa.vercel.app/product/addBusiness', {
         method: 'POST',
         body: formData,
       });
@@ -170,7 +170,7 @@ const AddBusinessListingForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="askingPrice" className="text-gray-700 text-sm font-medium mb-1">Asking Price $ *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="askingPrice"
                   min={0}
                   value={askingPrice}
@@ -184,7 +184,7 @@ const AddBusinessListingForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="establishedYear" className="text-gray-700 text-sm font-medium mb-1">Established Year *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="establishedYear"
                   value={establishedYear}
                   onChange={(e) => setEstablishedYear(e.target.value)}
@@ -197,7 +197,7 @@ const AddBusinessListingForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="numEmployees" className="text-gray-700 text-sm font-medium mb-1">Number of Employees *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="numEmployees"
                   value={numEmployees}
                   onChange={(e) => setNumEmployees(e.target.value)}

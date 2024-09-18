@@ -226,11 +226,12 @@ const AddJobSearchForm = () => {
 
         {/* Image Upload */}
         <div className="lg:w-1/3 lg:pl-8 flex-1">
-          <h2 className="text-2xl font-semibold mb-4">Equipment Image</h2>
-          <p className="text-gray-600 mb-4">
-            Here you can upload images of the Equipment. 
-          </p>
+        
           <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
+          <h2 className="text-2xl font-semibold mb-4">Resume</h2>
+          <p className="text-gray-600 mb-4">
+            Here you can upload resume.
+          </p>
             <p className="text-sm text-gray-500 mb-2">Example: logo192.png</p>
            
             {/* Image Preview */}
@@ -320,7 +321,7 @@ const AddJobSearchForm = () => {
             />
           </svg>
         )}
-        {loading ? 'Submitting...' : 'Save Changes'}
+        {loading ? 'Submitting...' : 'Post Listing'}
       </button>
     </main>
   );

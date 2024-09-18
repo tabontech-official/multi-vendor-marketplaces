@@ -17,7 +17,6 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
@@ -48,7 +47,7 @@ const Auth = () => {
       const response = await fetch('https://medspaa.vercel.app/auth/signUp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, email, password }),
+        body: JSON.stringify({ firstName, lastName, email, password}),
       });
 
       const json = await response.json();
@@ -93,6 +92,7 @@ const handleLogin = async (e) => {
     const path = localStorage.getItem('path') || '/'; // Default to '/' if path is not found
 
     if (response.ok) {
+      console.log(json)
       localStorage.setItem('usertoken', json.token);
       localStorage.setItem('userid', json.data._id);
       dispatch({ type: 'LOGIN', payload: json });

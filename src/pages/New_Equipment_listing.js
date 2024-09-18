@@ -302,11 +302,12 @@ const AddNewEquipmentForm = () => {
 
         {/* Image Upload */}
         <div className="lg:w-1/3 lg:pl-8 flex-1">
+         
+          <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
           <h2 className="text-2xl font-semibold mb-4">Equipment Image</h2>
           <p className="text-gray-600 mb-4">
             Here you can upload images of the Equipment. 
           </p>
-          <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
             <p className="text-sm text-gray-500 mb-2">Example: logo192.png</p>
            
             {/* Image Preview */}
@@ -325,7 +326,7 @@ const AddNewEquipmentForm = () => {
                       setShowRemoveOption(!showRemoveOption);
                       setEnabled(!Enabled);
                     }}
-                    className="text-gray-500 hover:text-gray-700 text-3xl"
+                    className="text-gray-500 hover:text-gray-700  "
                   >
                     &#8230;
                   </button>
@@ -357,7 +358,6 @@ const AddNewEquipmentForm = () => {
               type="file"
               id="image"
               onChange={handleImageChange}
-              className="py-2 px-4"
             />
           </div>
           <p className="text-sm text-gray-500">
@@ -397,7 +397,7 @@ const AddNewEquipmentForm = () => {
               />
             </svg>
           )}
-          {loading ? 'Submitting...' : 'Save Changes'}
+          {loading ? 'Submitting...' : 'Post Listing'}
         </button>
       </div>
     </main>

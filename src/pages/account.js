@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { HiCamera } from 'react-icons/hi'; // Import the camera icon for profile image upload
 
 const AccountPage = () => {
+ 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -14,6 +15,7 @@ const AccountPage = () => {
   });
   const [loading, setLoading] = useState(true); // Optional: handle loading state
   const [error, setError] = useState(null); // Optional: handle error state
+  const [info , setInfo] = useState('')
   
   useEffect(() => {
     let isMounted = true; // Flag to track if the component is mounted
@@ -35,6 +37,7 @@ const AccountPage = () => {
 
         if (response.ok) {
           const data = await response.json();
+          setInfo(data)
           console.log(data)
           if (isMounted) { // Only update state if the component is still mounted
             setFormData({
@@ -156,7 +159,6 @@ const AccountPage = () => {
                   type={field === 'password' ? 'password' : 'text'}
                   id={field}
                   name={field}
-                  value={formData[field]}
                   onChange={handleChange}
                   className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />

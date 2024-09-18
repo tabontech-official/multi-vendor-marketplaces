@@ -12,24 +12,20 @@ const Navbar = ()=>{
       setIsOpen(!isOpen);
     };
   
-    const LogOut =async()=>{
+    const LogOut = ()=>{
         try {
           const userid = localStorage.getItem('userid');
     
           if (userid) {
-            const response = await fetch(`https://medspaa.vercel.app/auth/logout/${userid}`, {
+            const response =  fetch(`https://medspaa.vercel.app/auth/logout/${userid}`, {
               method: 'POST',
             });
-            const json = await response.json();
-            if (response.ok) {
-              localStorage.removeItem('usertoken');
-              localStorage.removeItem('userid');
-              dispatch({ type: "LOGOUT" });
-              navigate("/")
+
+            
+        dispatch({ type: "LOGOUT" })
+          
               
-            } else {
-              console.error('Logout failed:', json);
-            }
+
           }
         } catch (error) {
           console.error('Error during logout:', error.error);
@@ -82,7 +78,7 @@ const Navbar = ()=>{
                     </Link>
                   </li>
                   <li onClick={LogOut}>
-                    <Link to="/" className="text-white hover:text-gray-400" onClick={toggleMenu}>
+                    <Link to="/Login" className="text-white hover:text-gray-400" onClick={toggleMenu}>
                       LogOut
                     </Link>
                   </li>

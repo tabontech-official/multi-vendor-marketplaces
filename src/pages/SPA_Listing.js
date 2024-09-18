@@ -54,7 +54,7 @@ const AddBusinessListingForm = () => {
 
     // Append other fields
     formData.append('location', location);
-    formData.append('businessDescription', businessDescription);
+    formData.append('businessDescription', descriptionText);
     formData.append('askingPrice', askingPrice);
     formData.append('establishedYear', establishedYear);
     formData.append('numberOfEmployees', numEmployees); // Consistent naming
@@ -156,15 +156,12 @@ const AddBusinessListingForm = () => {
               </div>
 
               {/* Business Description */}
-              <div className="flex flex-col">
-                <label htmlFor="businessDescription" className="text-gray-700 text-sm font-medium mb-1">Business Description</label>
-                <textarea
-                  id="businessDescription"
-                  value={businessDescription}
-                  onChange={(e) => setBusinessDescription(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm h-32"
+              <div className='mb-4'>
+               <RTC  name={"Business Description"}
+                editorState={editorState}
+                onEditorStateChange={onEditorStateChange}
                 />
-              </div>
+           </div>
 
               {/* Asking Price */}
               <div className="flex flex-col">
@@ -350,11 +347,12 @@ const AddBusinessListingForm = () => {
 
         {/* Image Upload */}
         <div className="lg:w-1/3 lg:pl-8 flex-1">
+         
+          <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
           <h2 className="text-2xl font-semibold mb-4">Business Image</h2>
           <p className="text-gray-600 mb-4">
             Here you can upload an image related to the business.
           </p>
-          <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
             <p className="text-sm text-gray-500 mb-2">Example: logo192.png</p>
             {/* Image Preview */}
             {image ? (
@@ -440,7 +438,7 @@ const AddBusinessListingForm = () => {
               />
             </svg>
           )}
-          Submit
+        Post Listing
         </button>
       </div>
     </main>

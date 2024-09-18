@@ -16,16 +16,19 @@ import AddBusinessForm from './pages/SPA_Listing';
 import AddJobSearchForm from './pages/Job_Search';
 import AddProviderSearchForm from './pages/Job_provider';
 import AddRoomForRentForm from './pages/Rent_Room';
+import { useAuthContext } from './Hooks/useAuthContext';
 
 const App = () => {
 
+  const { user } = useAuthContext();
 
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Layout />} >
-          <Route index element={<Auth />} />
-          <Route path="/Rent_Room_listing" element={<PrivateRoute element={<AddRoomForRentForm/>} />} />
+        <Route path="/" element={ <Layout />} >
+        <Route index element={<PrivateRoute element={<Dashboard />} />} />
+        <Route path="/Login" element={!user ? <Auth /> : <Dashboard />} />
+        <Route path="/Rent_Room_listing" element={<PrivateRoute element={<AddRoomForRentForm/>} />} />
           <Route path="/Job_Provider_listing" element={<PrivateRoute element={<AddProviderSearchForm/>} />} />
           <Route path="/Job_Search_listing" element={<PrivateRoute element={<AddJobSearchForm/>} />} />
           <Route path="/Business_Equipment_listing" element={<PrivateRoute element={<AddBusinessForm/>} />} />

@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { HiNewspaper, HiCube, HiOfficeBuilding, HiSearch, HiBriefcase, HiHome } from 'react-icons/hi';
 
 const categories = [
-  { path: '/New_Equipment_listing', label: 'Post New Equipments for Sale', icon: <HiNewspaper className="w-6 h-6" /> },
   { path: '/Used_Equipment_Listing', label: 'Post Used Equipments for Sale', icon: <HiCube className="w-6 h-6" /> },
+  { path: '/New_Equipment_listing', label: 'Post New Equipments for Sale', icon: <HiNewspaper className="w-6 h-6" /> },
   { path: '/Business_Equipment_listing', label: 'Post SPA Business for Sale', icon: <HiOfficeBuilding className="w-6 h-6" /> },
   { path: '/Job_Search_listing', label: 'Post Provider Job Search', icon: <HiSearch className="w-6 h-6" /> },
   { path: '/Job_Provider_listing', label: 'Post Provider Job Offer', icon: <HiBriefcase className="w-6 h-6" /> },

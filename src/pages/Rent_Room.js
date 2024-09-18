@@ -239,11 +239,12 @@ const PostRentalForm = () => {
         </div>
 
         <div className="lg:w-1/3 lg:pl-8 flex-1">
+        
+          <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
           <h2 className="text-2xl font-semibold mb-4">Room Picture</h2>
           <p className="text-gray-600 mb-4">
             Upload an image of the property. Recommended size: 1024x1024 and less than 15MB.
           </p>
-          <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
             <p className="text-sm text-gray-500 mb-2">Example: property.png</p>
 
             {/* Image Preview */}
@@ -327,7 +328,7 @@ const PostRentalForm = () => {
               />
             </svg>
           )}
-          {loading ? 'Submitting...' : 'Post Rental Property'}
+          {loading ? 'Submitting...' : 'Post Listing'}
         </button>
       </div>
     </main>

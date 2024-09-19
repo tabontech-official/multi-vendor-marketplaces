@@ -49,7 +49,7 @@ const PostEquipmentForm = () => {
     formData.append('name', equipmentName);
     formData.append('brand', brandName);
     formData.append('asking_price', askingPrice);
-    formData.append('accept_Offers', acceptOffers);
+    formData.append('accept_offers', acceptOffers);
     formData.append('equipment_type', equipmentType);
     formData.append('certification', certification);
     formData.append('year_purchased', yearPurchased);

@@ -9,7 +9,7 @@ const PostEquipmentForm = () => {
   const [equipmentName, setEquipmentName] = useState('');
   const [brandName, setBrandName] = useState('');
   const [askingPrice, setAskingPrice] = useState('');
-  const [acceptOffers, setAcceptOffers] = useState('');
+  const [acceptOffers, setAcceptOffers] = useState(false);
   const [equipmentType, setEquipmentType] = useState('');
   const [certification, setCertification] = useState('');
   const [yearPurchased, setYearPurchased] = useState('');
@@ -22,7 +22,7 @@ const PostEquipmentForm = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showRemoveOption, setShowRemoveOption] = useState(false);
-  const [description , setText] = useState("")
+  const [description, setText] = useState("");
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const onEditorStateChange = (newEditorState) => {
@@ -37,10 +37,10 @@ const PostEquipmentForm = () => {
     setError('');
     setSuccess('');
     setLoading(true);
-    const id = localStorage.getItem('userid')
+    const id = localStorage.getItem('userid');
 
     const formData = new FormData();
-  
+
     if (image) {
       formData.append('image', image);
     }
@@ -56,8 +56,8 @@ const PostEquipmentForm = () => {
     formData.append('warranty', warranty);
     formData.append('reason_for_selling', reasonForSelling);
     formData.append('shipping', shipping);
-    formData.append('description', description)
-    formData.append('userId',id)
+    formData.append('description', description);
+    formData.append('userId', id);
 
     try {
       const response = await fetch("https://medspaa.vercel.app/product/addEquipment", {
@@ -88,7 +88,7 @@ const PostEquipmentForm = () => {
     const file = e.target.files[0];
     setImage(file);
     setImageName(file.name);
-    setShowRemoveOption(true); // Show remove option when an image is selected
+    setShowRemoveOption(true);
   };
 
   // Handler to remove image
@@ -100,7 +100,7 @@ const PostEquipmentForm = () => {
 
   return (
     <main className="bg-gray-100 min-h-screen p-8 flex-row">
-      <h1 className="text-4xl font-bold mb-4">Add Used Equipment Listing </h1>
+      <h1 className="text-4xl font-bold mb-4">Add Used Equipment Listing</h1>
       <p className="text-lg mb-8 text-gray-700">Use this form to list your Used equipment.</p>
       <div className="mb-4">
         {error && <div className="text-red-500">{error}</div>}
@@ -136,13 +136,13 @@ const PostEquipmentForm = () => {
                   required
                 />
               </div>
+              
               <div className='mb-4'>
-               <RTC  name={"Description"}
-                editorState={editorState}
-                onEditorStateChange={onEditorStateChange}
+                <RTC name={"Description"}
+                  editorState={editorState}
+                  onEditorStateChange={onEditorStateChange}
                 />
-           </div>
-            
+              </div>
 
               <div className="flex flex-col mt-4">
                 <label htmlFor="brandName" className="text-gray-700 text-sm font-medium mb-1">Brand Name *</label>
@@ -171,14 +171,17 @@ const PostEquipmentForm = () => {
 
               <div className="flex flex-col">
                 <label htmlFor="acceptOffers" className="text-gray-700 text-sm font-medium mb-1">Accept Offers *</label>
-                <input
-                  type="text"
+                <select
                   id="acceptOffers"
                   value={acceptOffers}
-                  onChange={(e) => setAcceptOffers(e.target.value)}
+                  onChange={(e) => setAcceptOffers(e.target.value === 'true')}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
-                />
+                >
+                  <option value="">Select an option</option>
+                  <option value="true">True</option>
+                  <option value="false">False</option>
+                </select>
               </div>
 
               <div className="flex flex-col">
@@ -288,71 +291,71 @@ const PostEquipmentForm = () => {
         <div className="lg:w-1/3 lg:pl-8 flex-1">
          
         <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
-  <h2 className="text-2xl font-semibold mb-4">Equipment Image</h2>
-  <p className="text-gray-600 mb-4">
-    Upload an image of the equipment. Recommended size: 1024x1024 and less than 15MB.
-  </p>
-  <p className="text-sm text-gray-500 mb-2">Example: equipment.png</p>
-
-  {/* Image Preview */}
-  {image ? (
-    <div className="flex items-center mb-4">
-      <img
-        src={URL.createObjectURL(image)}
-        alt="Preview"
-        className="border border-gray-300 w-24 h-24 object-cover"
-      />
-      <div className="ml-4 flex flex-1 items-center">
-        <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-        <button
-          type="button"
-          onClick={() => {
-            setShowRemoveOption(!showRemoveOption);
-          }}
-          className="text-gray-500 hover:text-gray-700 text-3xl"
-        >
-          &#8230;
-        </button>
-        {showRemoveOption && (
-          <button
-            type="button"
-            onClick={handleRemoveImage}
-            className="text-red-500 hover:text-red-700 text-sm ml-4"
-          >
-            <FaTrash />
-          </button>
-        )}
-      </div>
-    </div>
-  ) : (
-    <div className="flex items-center mb-4">
-      <img
-        src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
-        alt="Preview"
-        className="border border-gray-300 w-24 h-24 object-cover"
-      />
-      <div className="ml-4 flex flex-1 items-center">
-        <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-      </div>
-    </div>
-  )}
-
-  <button
-    onClick={() => document.getElementById('imageUpload').click()}
-    className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
-  >
-    Upload Image
-  </button>
-  <input
-    type="file"
-    id="imageUpload"
-    onChange={handleImageChange}
-    className="hidden"
-  />
-</div>
-<p className="text-sm text-gray-500">
-            Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
+          <h2 className="text-2xl font-semibold mb-4">Equipment Image</h2>
+          <p className="text-gray-600 mb-4">
+            Upload an image of the equipment. Recommended size: 1024x1024 and less than 15MB.
           </p>
+          <p className="text-sm text-gray-500 mb-2">Example: equipment.png</p>
+
+          {/* Image Preview */}
+          {image ? (
+            <div className="flex items-center mb-4">
+              <img
+                src={URL.createObjectURL(image)}
+                alt="Preview"
+                className="border border-gray-300 w-24 h-24 object-cover"
+              />
+              <div className="ml-4 flex flex-1 items-center">
+                <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRemoveOption(!showRemoveOption);
+                  }}
+                  className="text-gray-500 hover:text-gray-700 text-3xl"
+                >
+                  &#8230;
+                </button>
+                {showRemoveOption && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="text-red-500 hover:text-red-700 text-sm ml-4"
+                  >
+                    <FaTrash />
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center mb-4">
+              <img
+                src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
+                alt="Preview"
+                className="border border-gray-300 w-24 h-24 object-cover"
+              />
+              <div className="ml-4 flex flex-1 items-center">
+                <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => document.getElementById('imageUpload').click()}
+            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
+          >
+            Upload Image
+          </button>
+          <input
+            type="file"
+            id="imageUpload"
+            onChange={handleImageChange}
+            className="hidden"
+          />
+        </div>
+        <p className="text-sm text-gray-500">
+          Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
+        </p>
 
         </div>
       </div>

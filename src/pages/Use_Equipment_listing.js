@@ -22,13 +22,13 @@ const PostEquipmentForm = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showRemoveOption, setShowRemoveOption] = useState(false);
-  const [description, setText] = useState("");
+  const [description, setDescription] = useState("");
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
-    const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
-    setText(currentText);
+    const currentText = JSON.stringify(convertToRaw(newEditorState.getCurrentContent()));
+    setDescription(currentText);
   };
 
   // Handler for form submission
@@ -295,7 +295,6 @@ const PostEquipmentForm = () => {
           <p className="text-gray-600 mb-4">
             Upload an image of the equipment. Recommended size: 1024x1024 and less than 15MB.
           </p>
-          <p className="text-sm text-gray-500 mb-2">Example: equipment.png</p>
 
           {/* Image Preview */}
           {image ? (

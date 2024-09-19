@@ -34,7 +34,7 @@ export const AuthContextProvider = ({ children }) => {
 
   useEffect(() => {
       try {
-       localStorage.setItem("usertoken",JSON.stringify(state.user))
+       localStorage.setItem("usertoken",state.user)
       } catch (error) {
         console.error('Failed to parse user from local storage:', error);
       }

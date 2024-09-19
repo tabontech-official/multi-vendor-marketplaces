@@ -150,13 +150,13 @@ const {user} = useAuthContext()
       <div className="p-4">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
-            <tr>
+            <tr className=' items-center'>
 
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRODUCT ID</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRODUCT NAME</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRICE</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
+              <th className=" py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 mb-4">
@@ -166,7 +166,7 @@ const {user} = useAuthContext()
               </tr>
             ) : (
               filteredProducts.map((product, index) => (
-                <tr key={product.product_id}>
+                <tr key={product.product_id} >
       
                   <td className="px-6 py-4 whitespace-nowrap">{product.product_id}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{product.title}</td>

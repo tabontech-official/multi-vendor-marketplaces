@@ -248,67 +248,74 @@ const AddNewJobForm = () => {
      {/* Image Upload */}
      <div className="lg:w-1/3 lg:pl-8 flex-1">
           
-          <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
-          <h2 className="text-2xl font-semibold mb-4">Resume</h2>
-          <p className="text-gray-600 mb-4">
-            Here you can upload resume.
-          </p>
-            <p className="text-sm text-gray-500 mb-2">Example: logo192.png</p>
-           
-            {/* Image Preview */}
-            {file ? (
-              <div className="flex items-center mb-4">
-                <img
-                  src={URL.createObjectURL(file) }
-                  alt="Preview"
-                  className="border border-gray-300 w-24 h-24 object-cover"
-                />
-                <div className="ml-4 flex flex-1 items-center">
-                  <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowRemoveOption(!showRemoveOption);
-                      setEnabled(!Enabled);
-                    }}
-                    className="text-gray-500 hover:text-gray-700 text-3xl"
-                  >
-                    &#8230;
-                  </button>
-                  {showRemoveOption && (
-                    <button
-                      type="button"
-                      onClick={handleRemoveImage}
-                      className="text-red-500 hover:text-red-700 text-sm ml-4"
-                    >
-                      <FaTrash/>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center mb-4">
-                <img
-                  src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png" }
-                  alt="Preview"
-                  className="border border-gray-300 w-24 h-24 object-cover"
-                />
-                <div className="ml-4 flex flex-1 items-center">
-                  <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-                </div>
-              </div>
-            )}
             
-            <input
-              type="file"
-              id="image"
-              onChange={handleImageChange}
-              className="py-2 px-4"
-            />
-          </div>
-          <p className="text-sm text-gray-500">
+     <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
+  <h2 className="text-2xl font-semibold mb-4">Resume</h2>
+  <p className="text-gray-600 mb-4">
+    Upload an image of the equipment. Recommended size: 1024x1024 and less than 15MB.
+  </p>
+  <p className="text-sm text-gray-500 mb-2">Example: equipment.png</p>
+  
+  {/* Image Preview */}
+  {file ? (
+    <div className="flex items-center mb-4">
+      <img
+        src={URL.createObjectURL(file)}
+        alt="Preview"
+        className="border border-gray-300 w-24 h-24 object-cover"
+      />
+      <div className="ml-4 flex flex-1 items-center">
+        <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+        <button
+          type="button"
+          onClick={() => {
+            setShowRemoveOption(!showRemoveOption);
+          }}
+          className="text-gray-500 hover:text-gray-700 text-3xl"
+        >
+          &#8230;
+        </button>
+        {showRemoveOption && (
+          <button
+            type="button"
+            onClick={handleRemoveImage}
+            className="text-red-500 hover:text-red-700 text-sm ml-4"
+          >
+            <FaTrash />
+          </button>
+        )}
+      </div>
+    </div>
+  ) : (
+    <div className="flex items-center mb-4">
+      <img
+        src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
+        alt="Preview"
+        className="border border-gray-300 w-24 h-24 object-cover"
+      />
+      <div className="ml-4 flex flex-1 items-center">
+        <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+      </div>
+    </div>
+  )}
+
+  <button
+    onClick={() => document.getElementById('imageUpload').click()}
+    className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
+  >
+    Upload Resume
+  </button>
+  <input
+    type="file"
+    id="imageUpload"
+    onChange={handleImageChange}
+    className="hidden"
+  />
+</div>
+<p className="text-sm text-gray-500">
             Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
           </p>
+        
         </div>
       </div>
     </main>

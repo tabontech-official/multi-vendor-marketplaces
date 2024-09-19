@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { HiCamera } from 'react-icons/hi'; // Import the camera icon for profile image upload
+import { HiCamera } from 'react-icons/hi';
 
 const AccountPage = () => {
- 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -13,16 +12,16 @@ const AccountPage = () => {
     city: '',
     profileImage: 'https://sp-seller.webkul.com/img/store_logo/icon-user.png'
   });
-  const [loading, setLoading] = useState(true); // Optional: handle loading state
-  const [error, setError] = useState(null); // Optional: handle error state
-  const [info , setInfo] = useState('')
-  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [info, setInfo] = useState('');
+
   useEffect(() => {
-    let isMounted = true; // Flag to track if the component is mounted
+    let isMounted = true;
 
     const fetchUserData = async () => {
       const id = localStorage.getItem('userid');
-      
+
       if (!id) {
         console.error('User ID not found in localStorage.');
         setError('User ID not found.');
@@ -37,11 +36,12 @@ const AccountPage = () => {
 
         if (response.ok) {
           const data = await response.json();
-          setInfo(data)
-          console.log(data)
-          if (isMounted) { // Only update state if the component is still mounted
+          setInfo(data);
+          console.log(data);
+          if (isMounted) {
             setFormData({
               email: data.email || '',
+              password: data.password || '', // Add password here
               phone: data.phone || '',
               address: data.address || '',
               zip: data.zip || '',
@@ -59,14 +59,13 @@ const AccountPage = () => {
         setError('Error fetching user data.');
       } finally {
         if (isMounted) {
-          setLoading(false); // Update loading state
+          setLoading(false);
         }
       }
     };
 
     fetchUserData();
 
-    // Cleanup function to set the flag to false
     return () => {
       isMounted = false;
     };
@@ -90,7 +89,6 @@ const AccountPage = () => {
       return;
     }
 
-    // Prepare the data to be sent
     const data = {
       email: formData.email,
       password: formData.password,
@@ -101,11 +99,13 @@ const AccountPage = () => {
       city: formData.city,
     };
 
-    // Prepare the request
     try {
       const response = await fetch(`https://medspaa.vercel.app/auth/editProfile/${userId}`, {
-        method: 'PUT', // Assuming the method should be PUT for updates
+        method: 'PUT',
         body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.ok) {
@@ -128,7 +128,7 @@ const AccountPage = () => {
           <div className="flex items-center space-x-4">
             <div className="relative">
               <img 
-                src={formData.profileImage || 'https://via.placeholder.com/150'}
+                src={formData.profileImage}
                 alt="Profile"
                 className="w-40 h-32 rounded-full object-cover border-2 border-blue-500"
               />
@@ -158,6 +158,7 @@ const AccountPage = () => {
                 <input
                   type={field === 'password' ? 'password' : 'text'}
                   id={field}
+                  value={formData[field]} // Use formData instead of info
                   name={field}
                   onChange={handleChange}
                   className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { HiDotsVertical, HiPlus, HiX , HiTrash } from 'react-icons/hi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../Hooks/useAuthContext';
+
 const Dashboard = () => {
+  const navigate = useNavigate()
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -11,6 +13,28 @@ const {user} = useAuthContext()
   const toggleDropdown = (index) => {
     setOpenDropdown(openDropdown === index ? null : index);
   };
+
+
+  const OnEdit = (product) => {
+    let formPage = '';
+  
+    switch (product.product_type) {
+      case 'used Equipment':
+        formPage = 'Used_Equipment_Listing'; // Replace with the actual form path
+        break;
+      case 'newEquipment':
+        formPage = '/newEquipmentForm'; // Replace with the actual form path
+        break;
+      // Add more cases as needed for other product types
+      default:
+        console.error('Unknown product type:', product.product_type);
+        return; // Exit if the product type is unknown
+    }
+  
+    // Use navigate to redirect to the determined form page, passing the product data if needed
+    navigate(formPage, { state: { product } });
+  };
+  
 
   const onDelete = async (id) => {
     try {
@@ -115,10 +139,7 @@ const {user} = useAuthContext()
         {/* Combined Filters and Search */}
         <div className="flex flex-col md:flex-row md:items-center w-full md:ml-auto md:space-x-4">
           {/* Filter By Dropdown */}
-           
-
-
-
+          
           {/* Search Bar */}
           <div className="flex items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
             <input 
@@ -152,11 +173,12 @@ const {user} = useAuthContext()
           <thead className="bg-gray-100">
             <tr className=' items-center'>
 
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRODUCT ID</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRODUCT NAME</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRICE</th>
               <th className=" py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
+              <th className=" py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
+
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 mb-4">
@@ -167,8 +189,6 @@ const {user} = useAuthContext()
             ) : (
               filteredProducts.map((product, index) => (
                 <tr key={product.product_id} >
-      
-                  <td className="px-6 py-4 whitespace-nowrap">{product.product_id}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{product.title}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
                   <td className="px-6 py-4 whitespace-nowrap">${product.asking_price.toFixed(2)}</td>
@@ -182,6 +202,14 @@ const {user} = useAuthContext()
                     {openDropdown === index && (
                       <div className="absolute  w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
                         <ul className="py-1">
+                        <li>
+                            <button 
+                              className="block px-4 w-1/4 py-2 text-center text-gray-700 hover:bg-gray-100"
+                                onClick={() => OnEdit(product)}
+                                >
+                             Edit
+                            </button>
+                          </li>
                           <li>
                             <button 
                               onClick={() => onDelete(product.id_2)} 
@@ -190,6 +218,7 @@ const {user} = useAuthContext()
                              Delete
                             </button>
                           </li>
+                          
                         </ul>
                       </div>
                     )}

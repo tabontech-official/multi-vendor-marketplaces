@@ -10,11 +10,12 @@ const AccountPage = () => {
     zip: '',
     country: '',
     city: '',
-    profileImage: 'https://sp-seller.webkul.com/img/store_logo/icon-user.png'
+    profileImage: 'https://sp-seller.webkul.com/img/store_logo/icon-user.png',
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [info, setInfo] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -25,7 +26,6 @@ const AccountPage = () => {
       if (!id) {
         console.error('User ID not found in localStorage.');
         setError('User ID not found.');
-        setLoading(false);
         return;
       }
 
@@ -37,17 +37,16 @@ const AccountPage = () => {
         if (response.ok) {
           const data = await response.json();
           setInfo(data);
-          console.log(data);
           if (isMounted) {
             setFormData({
               email: data.email || '',
-              password: data.password || '', // Add password here
+              password: data.password || '',
               phone: data.phone || '',
               address: data.address || '',
               zip: data.zip || '',
               country: data.country || '',
               city: data.city || '',
-              profileImage: data.profileImage || 'https://sp-seller.webkul.com/img/store_logo/icon-user.png'
+              profileImage: data.profileImage || 'https://sp-seller.webkul.com/img/store_logo/icon-user.png',
             });
           }
         } else {
@@ -57,10 +56,6 @@ const AccountPage = () => {
       } catch (error) {
         console.error('Error fetching user data:', error);
         setError('Error fetching user data.');
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
       }
     };
 
@@ -82,10 +77,12 @@ const AccountPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const userId = localStorage.getItem('userid');
     if (!userId) {
       console.error('User ID not found in localStorage.');
+      setLoading(false);
       return;
     }
 
@@ -109,25 +106,30 @@ const AccountPage = () => {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log('Profile updated successfully:', result);
+        const responseData = await response.json();
+        setSuccess(responseData.message);
       } else {
         console.error('Failed to update profile. Status:', response.status);
       }
     } catch (error) {
       console.error('Error updating profile:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <main className="w-full p-8 flex justify-center items-center bg-gray-100 mt-10">
       <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg p-6">
+        <div className="mb-4">
+          {success && <div className="text-green-500 text-lg font-semibold">{success}</div>}
+        </div>
         <h1 className="text-2xl font-semibold mb-4 text-center text-gray-800">Account Settings</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Profile Image Section */}
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <img 
+              <img
                 src={formData.profileImage}
                 alt="Profile"
                 className="w-40 h-32 rounded-full object-cover border-2 border-blue-500"
@@ -156,9 +158,9 @@ const AccountPage = () => {
               <div key={field} className="flex flex-col">
                 <label htmlFor={field} className="block text-sm font-medium text-gray-700 capitalize">{field.replace(/^\w/, c => c.toUpperCase())}</label>
                 <input
-                  type={field === 'password' ? 'password' : 'text'}
+                  type={field === 'zip' ? 'number' : field === 'password' ? 'password' : 'text'}
                   id={field}
-                  value={formData[field]} // Use formData instead of info
+                  value={formData[field]}
                   name={field}
                   onChange={handleChange}
                   className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -171,9 +173,20 @@ const AccountPage = () => {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out"
+              className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center"
+              disabled={loading}
             >
-              Save Changes
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  Loading...
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </button>
           </div>
         </form>

@@ -1,11 +1,11 @@
 // src/App.js
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import EditProfile from './pages/EditProfile';
 import Layout from './component/layout';
-import Used_EquipmentForm from './pages/Use_Equipment_listing';
+import Used_EquipmentForm from './pages/Used_Equipment_Listing';
 import PrivateRoute from './context api/protectedRoutes';
 import AccountPage from './pages/account';
 import Auth from './AuthForms';
@@ -17,11 +17,31 @@ import AddJobSearchForm from './pages/Job_Search';
 import AddProviderSearchForm from './pages/Job_provider';
 import AddRoomForRentForm from './pages/Rent_Room';
 import { useAuthContext } from './Hooks/useAuthContext';
+import { useEffect } from 'react';
+import { jwtDecode } from "jwt-decode";
 
 const App = () => {
+  function isTokenExpired(token) { 
+    if (!token) return true; // No token means it's expired 
+    const decoded = jwtDecode(token); 
+    return decoded.exp * 1000 < Date.now(); // exp is in seconds, convert to milliseconds 
+} 
+  useEffect(()=>{
+    function checkTokenAndRemove() { 
+      const token = localStorage.getItem('usertoken'); 
+      if (isTokenExpired(token)) { 
+        localStorage.removeItem('usertoken'); 
+          localStorage.removeItem('userid'); 
+          console.log('Token expired and removed from local storage.'); 
+      } else { 
+          console.log('Token is valid.'); 
+      } 
+  } 
+  checkTokenAndRemove()
+   
+  })
 
   const { user } = useAuthContext();
-
   return (
     <Router>
       <Routes>

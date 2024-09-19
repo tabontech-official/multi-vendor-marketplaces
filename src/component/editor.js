@@ -13,9 +13,9 @@ export default function RTC({ editorState, onEditorStateChange, name }) {
         <div>
           <Editor
             editorState={editorState}
-            toolbarClassName="custom-toolbar " // Toolbar border
+            toolbarClassName="toolbarClassName custom-toolbar " // Toolbar border
             wrapperClassName="wrapperClassName"
-            editorClassName="custom-editor border border-gray-300 rounded-b" // Custom editor class
+            editorClassName="editorClassName custom-editor border border-gray-300 rounded-b" // Custom editor class
             onEditorStateChange={onEditorStateChange}
             mention={{
               separator: " ",

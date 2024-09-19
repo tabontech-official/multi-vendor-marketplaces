@@ -67,14 +67,20 @@ const Navbar = ()=>{
               {user ? (
                 // Links for authenticated users
                 <>
+                 
                   <li>
-                    <Link to="/edit-account" className="text-white hover:text-gray-400" onClick={toggleMenu}>
+                  <Link to="/dashboard" className="text-white hover:text-gray-400" onClick={toggleMenu}>
+                      Dashboard
+                    </Link>
+                  </li>
+                  <li>
+                  <Link to="/edit-account" className="text-white hover:text-gray-400" onClick={toggleMenu}>
                      My Account
                     </Link>
                   </li>
                   <li>
-                    <Link to="/dashboard" className="text-white hover:text-gray-400" onClick={toggleMenu}>
-                      Dashboard
+                  <Link to="/dashboard" className="text-white hover:text-gray-400" onClick={toggleMenu}>
+                      My Subscriptions
                     </Link>
                   </li>
                   <li onClick={LogOut}>

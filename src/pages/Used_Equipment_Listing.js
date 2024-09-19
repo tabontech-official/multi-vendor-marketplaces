@@ -24,15 +24,17 @@ const PostEquipmentForm = () => {
   const [showRemoveOption, setShowRemoveOption] = useState(false);
   const [description, setDescription] = useState("");
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
+ 
 
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
-    const currentText = JSON.stringify(convertToRaw(newEditorState.getCurrentContent()));
+    const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
     setDescription(currentText);
   };
 
   // Handler for form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e , status) => {
+   console.log(status)
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -58,6 +60,7 @@ const PostEquipmentForm = () => {
     formData.append('shipping', shipping);
     formData.append('description', description);
     formData.append('userId', id);
+    formData.append('status',status)
 
     try {
       const response = await fetch("https://medspaa.vercel.app/product/addEquipment", {
@@ -360,11 +363,11 @@ const PostEquipmentForm = () => {
       </div>
 
       <hr className="border-t border-gray-500 my-4" />
-      <div className="mt-8">
+      <div className="mt-8 flex ">
         <button
           type="submit"
-          onClick={handleSubmit}
-          className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
+          onClick={(e)=>handleSubmit(e,'active')}
+          className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
           {loading && (
@@ -389,7 +392,39 @@ const PostEquipmentForm = () => {
               />
             </svg>
           )}
-          {loading ? 'Submitting...' : 'Post Listing'}
+          {loading ? 'Publishing...' : 'Publish'}
+        </button>
+
+        <button
+          type="submit"
+          onClick={(e)=>handleSubmit(e,'inactive')}
+          className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
+
+          disabled={loading}
+        >
+          {loading && (
+            <svg
+              className="w-5 h-5 mr-3 text-white animate-spin"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4h-4z"
+              />
+            </svg>
+          )}
+          {loading ? 'Submitting...' : 'Draft'}
         </button>
       </div>
     </main>

@@ -30,11 +30,13 @@ const AddJobSearchForm = () => {
   };
 
   // Handler for form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e , status) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setLoading(true);
+    if(status == "active"){
+      setLoading(true);
+    }
 
     // Create FormData object
     const formData = new FormData();
@@ -51,7 +53,7 @@ const AddJobSearchForm = () => {
     formData.append('availability', availability);
     formData.append('requestedYearlySalary', requestedYearlySalary);
     formData.append('positionRequestedDescription', positionRequestedDescription);
-
+     formData.append("status", status)
     // Append userId
     const id = localStorage.getItem('userid');
     formData.append('userId', id);
@@ -65,7 +67,11 @@ const AddJobSearchForm = () => {
       const json = await response.json();
 
       if (response.ok) {
-        setSuccess(json.message);
+        if(status == "active"){
+          setSuccess(json.message);
+        }else{
+          setSuccess("Your post drafted sucessfully")
+        }
         setError('');
         // Clear form fields
         setLocation('');
@@ -302,7 +308,8 @@ const AddJobSearchForm = () => {
       <div className="mt-8 flex ">
         <button
           type="submit"
-          onClick={handleSubmit}
+          onClick={(e)=>{handleSubmit(e,"active")}}
+
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
@@ -333,34 +340,13 @@ const AddJobSearchForm = () => {
 
         <button
           type="submit"
-          onClick={handleSubmit}
+          onClick={(e)=>{handleSubmit(e,"active")}}
+
           className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
 
-          disabled={loading}
+          
         >
-          {loading && (
-            <svg
-              className="w-5 h-5 mr-3 text-white animate-spin"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4h-4z"
-              />
-            </svg>
-          )}
-          {loading ? 'Submitting...' : 'Draft'}
+         Draft
         </button>
       </div>
     </main>

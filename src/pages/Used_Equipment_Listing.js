@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
-import { convertToRaw, EditorState } from "draft-js";
+import { convertToRaw, EditorState , ContentState } from "draft-js";
+import { useLocation } from 'react-router-dom';
 
 const PostEquipmentForm = () => {
   // State hooks for form fields
-  const [location, setLocation] = useState('');
+  const [Location, setLocation] = useState('');
   const [equipmentName, setEquipmentName] = useState('');
   const [brandName, setBrandName] = useState('');
   const [askingPrice, setAskingPrice] = useState('');
-  const [acceptOffers, setAcceptOffers] = useState(false);
+  const [acceptOffers, setAcceptOffers] = useState("");
   const [equipmentType, setEquipmentType] = useState('');
   const [certification, setCertification] = useState('');
   const [yearPurchased, setYearPurchased] = useState('');
@@ -23,22 +24,64 @@ const PostEquipmentForm = () => {
   const [loading, setLoading] = useState(false);
   const [showRemoveOption, setShowRemoveOption] = useState(false);
   const [description, setDescription] = useState("");
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
- 
+  const [editorState, setEditorState] = useState();
+  const location = useLocation();
+  const [isEditing, setIsEditing] = useState(false); // New state for editing mode
+
+  const { product } = location.state || {};
+ console.log(product)
+
+  useEffect(() => {
+    if (product) {
+      setIsEditing(true);
+      setLocation(product.equipment.location);
+      setEquipmentName(product.equipment.name);
+      setBrandName(product.equipment.brand); // Assuming `brand` is part of the product object
+      setAskingPrice(product.equipment.asking_price);
+      setAcceptOffers(product.equipment.accept_offers);
+      setEquipmentType(product.equipment.equipment_type);
+      setCertification(product.equipment.certification);
+      setYearPurchased(product.equipment.year_purchased);
+      setWarranty(product.equipment.warranty);
+      setReasonForSelling(product.equipment.reason_for_selling);
+      setShipping(product.equipment.shipping);
+     
+      setDescription(product.equipment.description);
+      if (typeof description === 'string') {
+        // If it's a plain string, convert it to ContentState
+        const contentState = ContentState.createFromText(description);
+        setEditorState(EditorState.createWithContent(contentState));
+      } else if (description) {
+        // If it's already a ContentState or something similar, use it directly
+        setEditorState(EditorState.createWithContent(convertToRaw(description)));
+      } else {
+        // Handle case where description is undefined or null
+        setEditorState(EditorState.createEmpty());
+      }
+    if(product.image){
+      setImage(product.image.src);
+    }
+        setImageName("image"); // Set image name from URL
+    }
+  });
 
   const onEditorStateChange = (newEditorState) => {
+    console.log(newEditorState)
     setEditorState(newEditorState);
     const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
     setDescription(currentText);
   };
 
   // Handler for form submission
-  const handleSubmit = async (e , status) => {
-   console.log(status)
+  const handleSubmit = async (e, status) => { 
+    console.log(status)
     e.preventDefault();
     setError('');
     setSuccess('');
-    setLoading(true);
+    if(status == "active"){
+      setLoading(true);
+    }
+
     const id = localStorage.getItem('userid');
 
     const formData = new FormData();
@@ -47,7 +90,7 @@ const PostEquipmentForm = () => {
       formData.append('image', image);
     }
 
-    formData.append('location', location);
+    formData.append('location', Location);
     formData.append('name', equipmentName);
     formData.append('brand', brandName);
     formData.append('asking_price', askingPrice);
@@ -60,18 +103,22 @@ const PostEquipmentForm = () => {
     formData.append('shipping', shipping);
     formData.append('description', description);
     formData.append('userId', id);
-    formData.append('status',status)
+    formData.append('status', status);
 
     try {
-      const response = await fetch("https://medspaa.vercel.app/product/addEquipment", {
-        method: "POST",
+      const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateEquipment/${product.id}` : "https://medspaa.vercel.app/product/addEquipment", {
+        method: isEditing ? "PUT" : "POST",
         body: formData
       });
 
       const json = await response.json();
 
       if (response.ok) {
-        setSuccess(json.message);
+        if(status == "active"){
+          setSuccess(json.message);
+        }else{
+          setSuccess("Your post drafted sucessfully")
+        }
         setError('');
       } else {
         setSuccess('');
@@ -88,10 +135,13 @@ const PostEquipmentForm = () => {
 
   // Handler for image file change
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setImage(file);
-    setImageName(file.name);
-    setShowRemoveOption(true);
+    const file = e.target.files[0]; // Get the first file
+
+    if (file) {
+      const src = URL.createObjectURL(file); // Create a URL for the selected file
+      setImage(src); // Set the image preview URL
+      setImageName(file.name); // Set the name of the image
+    }
   };
 
   // Handler to remove image
@@ -121,7 +171,7 @@ const PostEquipmentForm = () => {
                 <input
                   type="text"
                   id="location"
-                  value={location}
+                  value={Location}
                   onChange={(e) => setLocation(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
@@ -303,7 +353,7 @@ const PostEquipmentForm = () => {
           {image ? (
             <div className="flex items-center mb-4">
               <img
-                src={URL.createObjectURL(image)}
+                src={image}
                 alt="Preview"
                 className="border border-gray-300 w-24 h-24 object-cover"
               />
@@ -364,9 +414,9 @@ const PostEquipmentForm = () => {
 
       <hr className="border-t border-gray-500 my-4" />
       <div className="mt-8 flex ">
-        <button
+      <button
           type="submit"
-          onClick={(e)=>handleSubmit(e,'active')}
+          onClick={(e) => handleSubmit(e, 'active')}
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
@@ -388,43 +438,22 @@ const PostEquipmentForm = () => {
               <path
                 className="opacity-75"
                 fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4h-4z"
+                d="M4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0z"
               />
             </svg>
           )}
-          {loading ? 'Publishing...' : 'Publish'}
+          {isEditing ? "Update" : "Publish"}
         </button>
 
         <button
           type="submit"
-          onClick={(e)=>handleSubmit(e,'inactive')}
+          onClick={(e) => handleSubmit(e, 'inactive')}
           className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
 
-          disabled={loading}
+         
         >
-          {loading && (
-            <svg
-              className="w-5 h-5 mr-3 text-white animate-spin"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4h-4z"
-              />
-            </svg>
-          )}
-          {loading ? 'Submitting...' : 'Draft'}
+          
+          Draft
         </button>
       </div>
     </main>

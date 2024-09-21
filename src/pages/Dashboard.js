@@ -1,57 +1,54 @@
 import React, { useEffect, useState } from 'react';
-import { HiDotsVertical, HiPlus, HiX , HiTrash } from 'react-icons/hi';
+import { HiDotsVertical, HiPlus, HiX } from 'react-icons/hi';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../Hooks/useAuthContext';
 
 const Dashboard = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [searchVal, setSearchVal] = useState('');
-const {user} = useAuthContext()
+  const { user } = useAuthContext();
+
   const toggleDropdown = (index) => {
     setOpenDropdown(openDropdown === index ? null : index);
   };
 
-
   const OnEdit = (product) => {
     let formPage = '';
-  
+
     switch (product.product_type) {
       case 'used Equipment':
-        formPage = 'Used_Equipment_Listing'; // Replace with the actual form path
+        formPage = 'Used_Equipment_Listing';
         break;
-      case 'newEquipment':
-        formPage = '/newEquipmentForm'; // Replace with the actual form path
+      case 'New Equipment':
+        formPage = 'New_Equipment_listing';
         break;
-      // Add more cases as needed for other product types
       default:
         console.error('Unknown product type:', product.product_type);
-        return; // Exit if the product type is unknown
+        return;
     }
-  
-    // Use navigate to redirect to the determined form page, passing the product data if needed
+
     navigate(formPage, { state: { product } });
   };
-  
 
   const onDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this listing?");
+    if (!confirmDelete) {
+      return;
+    }
+
     try {
       const response = await fetch(`https://medspaa.vercel.app/product/deleteProduct/${id}`, {
         method: 'DELETE',
       });
-  
+
       if (response.ok) {
-        const data = await response.json(); // Convert response to JSON
-  
-        // Update state to remove deleted product from the list
-        setProducts(products.filter(product => product.id_2 !== id));
-        setFilteredProducts(filteredProducts.filter(product => product.id_2 !== id));
+        setProducts(products.filter(product => product._id !== id));
+        setFilteredProducts(filteredProducts.filter(product => product._id !== id));
       } else {
         console.error('Failed to delete product. Status:', response.status);
-        const errorData = await response.json(); // Optional: Get more details about the error
-        console.error('Error details:', errorData);
         alert('Failed to delete product.');
       }
     } catch (error) {
@@ -63,7 +60,7 @@ const {user} = useAuthContext()
   useEffect(() => {
     const fetchProductData = async () => {
       const id = localStorage.getItem('userid');
-      
+
       if (!id) {
         console.error('User ID not found in localStorage.');
         return;
@@ -75,20 +72,10 @@ const {user} = useAuthContext()
         });
 
         if (response.ok) {
-          const data = await response.json(); // Convert response to JSON
-          console.log(data);
-          // Ensure data.products is an array
+          const data = await response.json();
           if (Array.isArray(data.products)) {
-            // Extract and set relevant data
-            const extractedData = data.products.map(product => ({
-              product_id: product.id,
-              id_2 : product._id,
-              title: product.title,
-              product_type: product.product_type,
-              asking_price: product.equipment?.asking_price ?? product.equipment.sale_price, // Use default value if asking_price is undefined
-            }));
-            setProducts(extractedData);
-            setFilteredProducts(extractedData); // Initialize filtered products
+            setProducts(data.products);
+            setFilteredProducts(data.products);
           } else {
             console.error('Expected products array, but got:', data.products);
           }
@@ -116,15 +103,16 @@ const {user} = useAuthContext()
 
   const clearSearch = () => {
     setSearchVal('');
-    setFilteredProducts(products); // Reset to all products
+    setFilteredProducts(products);
   };
 
   return user ? (
     <main className="w-full p-4 md:p-8">
+      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold mb-1">Products</h1>
-          <p className="text-gray-600">Here are your products.</p>
+          <h1 className="text-2xl font-semibold mb-1">Listings</h1>
+          <p className="text-gray-600">Here are your Listings.</p>
         </div>
 
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
@@ -135,12 +123,9 @@ const {user} = useAuthContext()
         </div>
       </div>
 
+      {/* Search Section */}
       <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
-        {/* Combined Filters and Search */}
         <div className="flex flex-col md:flex-row md:items-center w-full md:ml-auto md:space-x-4">
-          {/* Filter By Dropdown */}
-          
-          {/* Search Bar */}
           <div className="flex items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
             <input 
               type="text" 
@@ -168,17 +153,16 @@ const {user} = useAuthContext()
         </div>
       </div>
 
+      {/* Products Table */}
       <div className="p-4">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
-            <tr className=' items-center'>
-
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRODUCT NAME</th>
+            <tr className=' items-center '>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LISTING NAME</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRICE</th>
               <th className=" py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
               <th className=" py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 mb-4">
@@ -188,11 +172,11 @@ const {user} = useAuthContext()
               </tr>
             ) : (
               filteredProducts.map((product, index) => (
-                <tr key={product.product_id} >
+                <tr key={product._id}>
                   <td className="px-6 py-4 whitespace-nowrap">{product.title}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">${product.asking_price.toFixed(2)}</td>
-                  <td className=" py-4 whitespace-nowrap relative">
+                  <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "0"}</td>
+                  <td className="py-4 whitespace-nowrap relative">
                     <button 
                       onClick={() => toggleDropdown(index)}
                       className="text-gray-600 hover:text-gray-800 focus:outline-none"
@@ -200,28 +184,33 @@ const {user} = useAuthContext()
                       <HiDotsVertical className="w-5 h-5" />
                     </button>
                     {openDropdown === index && (
-                      <div className="absolute  w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+                      <div className="absolute w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
                         <ul className="py-1">
-                        <li>
+                          <li>
                             <button 
                               className="block px-4 w-1/4 py-2 text-center text-gray-700 hover:bg-gray-100"
-                                onClick={() => OnEdit(product)}
-                                >
-                             Edit
+                              onClick={() => OnEdit(product)}
+                            >
+                              Edit
                             </button>
                           </li>
                           <li>
                             <button 
-                              onClick={() => onDelete(product.id_2)} 
+                              onClick={() => onDelete(product._id)} 
                               className="block px-4 w-1/4 py-2 text-center text-gray-700 hover:bg-gray-100"
                             >
-                             Delete
+                              Delete
                             </button>
                           </li>
-                          
                         </ul>
                       </div>
                     )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap flex items-center">
+                    <div
+                      className={`w-3 h-3 rounded-full ${product.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}
+                      title={product.status}
+                    />
                   </td>
                 </tr>
               ))
@@ -230,7 +219,7 @@ const {user} = useAuthContext()
         </table>
       </div>
     </main>
-  ) : null
+  ) : null;
 };
 
 export default Dashboard;

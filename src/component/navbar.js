@@ -20,12 +20,7 @@ const Navbar = ()=>{
             const response =  fetch(`https://medspaa.vercel.app/auth/logout/${userid}`, {
               method: 'POST',
             });
-
-            
         dispatch({ type: "LOGOUT" })
-          
-              
-
           }
         } catch (error) {
           console.error('Error during logout:', error.error);
@@ -79,7 +74,7 @@ const Navbar = ()=>{
                     </Link>
                   </li>
                   <li>
-                  <Link to="/dashboard" className="text-white hover:text-gray-400" onClick={toggleMenu}>
+                  <Link to="/Subcription_Details" className="text-white hover:text-gray-400" onClick={toggleMenu}>
                       My Subscriptions
                     </Link>
                   </li>

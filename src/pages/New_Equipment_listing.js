@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
-import { convertToRaw, EditorState } from "draft-js";
+import { convertToRaw, EditorState , ContentState } from "draft-js";
+import { useLocation } from 'react-router-dom';
 
 const AddNewEquipmentForm = () => {
+  const Location = useLocation();
+  const { product } = Location.state || {};
+
   // State hooks for form fields
   const [location, setLocation] = useState('');
   const [name, setName] = useState('');
@@ -19,12 +23,44 @@ const AddNewEquipmentForm = () => {
   const [imageName, setImageName] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
-  const [Enabled , setEnabled] = useState(false);
-  const [loading, setLoading] = useState(false); // New state for loading
-  const [showRemoveOption, setShowRemoveOption] = useState(false); // State to show/hide remove option
-
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const [loading, setLoading] = useState(false);
+  const [showRemoveOption, setShowRemoveOption] = useState(false);
+  const [editorState, setEditorState] = useState();
   const [description, setText] = useState("");
+
+  // Use effect to set initial state from product
+
+
+  useEffect(() => {
+    if (product && product.equipment) {
+      setLocation(product.equipment.location || '');
+      setName(product.equipment.name || '');
+      setBrand(product.equipment.name || ''); // Assuming brand is same as name
+      setSalePrice(product.equipment.sale_price || '');
+      setEquipmentType(product.equipment.equipment_type || '');
+      setCertification(product.equipment.certification || '');
+      setYearManufactured(product.equipment.year_purchased || '');
+      setWarranty(product.equipment.warranty || '');
+      setShipping(product.equipment.shipping || '');
+      setTraining(product.equipment.training || '');
+      setYearManufactured(product.equipment.year_manufactured)
+      setText(product.equipment.description);
+      if (typeof description === 'string') {
+        // If it's a plain string, convert it to ContentState
+        const contentState = ContentState.createFromText(description);
+        setEditorState(EditorState.createWithContent(contentState));
+      } else if (description) {
+        // If it's already a ContentState or something similar, use it directly
+        setEditorState(EditorState.createWithContent(convertToRaw(description)));
+      } else {
+        // Handle case where description is undefined or null
+        setEditorState(EditorState.createEmpty());
+      }
+      setImage(product.image.src);
+        setImageName("image"); // Set image name from URL
+      setImage(product.image?.src || null); // Set image if available
+    }
+  });
 
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
@@ -32,23 +68,20 @@ const AddNewEquipmentForm = () => {
     setText(currentText);
   };
 
-  // Handler for form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e , status) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setLoading(true); // Set loading to true
+    if(status == "active"){
+      setLoading(true);
+    }
     const id = localStorage.getItem('userid');
-   
-    // Create a new FormData object
     const formData = new FormData();
-  
-    // Append the image file if it exists
+
     if (file) {
       formData.append('image', file);
     }
-  
-    // Append other fields
+
     formData.append('location', location);
     formData.append('name', name);
     formData.append('brand', brand);
@@ -59,19 +92,23 @@ const AddNewEquipmentForm = () => {
     formData.append('warranty', warranty);
     formData.append('shipping', shipping);
     formData.append('training', training);
-    formData.append('description', description); // Append description field
+    formData.append('description', description);
     formData.append('userId', id);
-
+    formData.append('status', status);
     try {
       const response = await fetch("https://medspaa.vercel.app/product/addNewEquipments", {
         method: "POST",
         body: formData
       });
-  
+
       const json = await response.json();
-  
+
       if (response.ok) {
-        setSuccess(json.message);
+        if(status == "active"){
+          setSuccess(json.message);
+        }else{
+          setSuccess("Your post drafted sucessfully")
+        }
         setError('');
         // Clear form fields
         setLocation('');
@@ -84,10 +121,9 @@ const AddNewEquipmentForm = () => {
         setYearManufactured('');
         setSalePrice('');
         setWarranty('');
-        setImage(null); // Clear the image file
-        setText(''); // Clear description
-        setImageName(''); // Clear image name
-
+        setImage(null);
+        setText('');
+        setImageName('');
       } else {
         setSuccess('');
         setError(json.error);
@@ -97,22 +133,20 @@ const AddNewEquipmentForm = () => {
       setError('An unexpected error occurred.');
       console.log(error);
     } finally {
-      setLoading(false); // Set loading to false after operation completes
+      setLoading(false);
     }
   };
-  
-  // Handler for image file change
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImage(file);
     setImageName(file.name);
   };
 
-  // Handler to remove image
   const handleRemoveImage = () => {
     setImage(null);
     setImageName('');
-    setShowRemoveOption(false); // Hide the remove option after removing the image
+    setShowRemoveOption(false);
   };
 
   return (
@@ -124,15 +158,10 @@ const AddNewEquipmentForm = () => {
         {success && <div className="text-green-500">{success}</div>}
       </div>
       <div className="flex flex-col lg:flex-row flex-1">
-        
         <div className="flex-1 bg-white px-8 py-4 shadow-md lg:mr-8 mb-8 lg:mb-0">
-          {/* Show error and success messages */}
-          
           <h1 className='text-2xl font-semibold mb-4'>Product Details</h1>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Product Details */}
             <div className="grid grid-cols-1 gap-6">
-              {/* Location */}
               <div className="flex flex-col">
                 <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location *</label>
                 <input
@@ -144,10 +173,8 @@ const AddNewEquipmentForm = () => {
                   required
                 />
               </div>
-
-              {/* Equipment Name */}
               <div className="flex flex-col">
-                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Title *</label>
+                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Equipment Name *</label>
                 <input
                   type="text"
                   id="name"
@@ -157,8 +184,6 @@ const AddNewEquipmentForm = () => {
                   required
                 />
               </div>
-
-              {/* Description */}
               <div className='mb-4'>
                 <RTC
                   name={"Description"}
@@ -166,8 +191,6 @@ const AddNewEquipmentForm = () => {
                   onEditorStateChange={onEditorStateChange}
                 />
               </div>
-
-              {/* Brand Name */}
               <div className="flex flex-col mt-4">
                 <label htmlFor="brand" className="text-gray-700 text-sm font-medium mb-1">Brand Name</label>
                 <input
@@ -178,8 +201,6 @@ const AddNewEquipmentForm = () => {
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 />
               </div>
-
-              {/* Sale Price */}
               <div className="flex flex-col">
                 <label htmlFor="sale_price" className="text-gray-700 text-sm font-medium mb-1">Sale Price $ *</label>
                 <input
@@ -192,8 +213,6 @@ const AddNewEquipmentForm = () => {
                   required
                 />
               </div>
-
-              {/* Equipment Type */}
               <div className="flex flex-col">
                 <label htmlFor="equipment_type" className="text-gray-700 text-sm font-medium mb-1">Equipment Type *</label>
                 <select
@@ -217,8 +236,6 @@ const AddNewEquipmentForm = () => {
                   <option value="Small tools">Small Tools</option>
                 </select>
               </div>
-
-              {/* Certification */}
               <div className="flex flex-col">
                 <label htmlFor="certification" className="text-gray-700 text-sm font-medium mb-1">Certification *</label>
                 <select
@@ -234,8 +251,6 @@ const AddNewEquipmentForm = () => {
                   <option value="FDA Certification">FDA Certification</option>
                 </select>
               </div>
-
-              {/* Year Manufactured */}
               <div className="flex flex-col">
                 <label htmlFor="year_manufactured" className="text-gray-700 text-sm font-medium mb-1">Year Manufactured *</label>
                 <input
@@ -248,13 +263,10 @@ const AddNewEquipmentForm = () => {
                   required
                 />
               </div>
-
-              {/* Warranty */}
               <div className="flex flex-col">
                 <label htmlFor="warranty" className="text-gray-700 text-sm font-medium mb-1">Warranty *</label>
                 <input
                   type="text"
-                  min={0}
                   id="warranty"
                   value={warranty}
                   onChange={(e) => setWarranty(e.target.value)}
@@ -262,8 +274,6 @@ const AddNewEquipmentForm = () => {
                   required
                 />
               </div>
-
-              {/* Shipping */}
               <div className="flex flex-col">
                 <label htmlFor="shipping" className="text-gray-700 text-sm font-medium mb-1">Shipping *</label>
                 <select
@@ -279,8 +289,6 @@ const AddNewEquipmentForm = () => {
                   <option value="Pick up available">Pick Up Available</option>
                 </select>
               </div>
-
-              {/* Training */}
               <div className="flex flex-col">
                 <label htmlFor="training" className="text-gray-700 text-sm font-medium mb-1">Training *</label>
                 <select
@@ -302,74 +310,71 @@ const AddNewEquipmentForm = () => {
 
         {/* Image Upload */}
         <div className="lg:w-1/3 lg:pl-8 flex-1">
-         
-        <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
-  <h2 className="text-2xl font-semibold mb-4">Equipment Image</h2>
-  <p className="text-gray-600 mb-4">
-    Upload an image of the equipment. Recommended size: 1024x1024 and less than 15MB.
-  </p>
-  <p className="text-sm text-gray-500 mb-2"></p>
+          <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
+            <h2 className="text-2xl font-semibold mb-4">Equipment Image</h2>
+            <p className="text-gray-600 mb-4">
+              Upload an image of the equipment. Recommended size: 1024x1024 and less than 15MB.
+            </p>
 
-  {/* Image Preview */}
-  {file ? (
-    <div className="flex items-center mb-4">
-      <img
-        src={URL.createObjectURL(file)}
-        alt="Preview"
-        className="border border-gray-300 w-24 h-24 object-cover"
-      />
-      <div className="ml-4 flex flex-1 items-center">
-        <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-        <button
-          type="button"
-          onClick={() => {
-            setShowRemoveOption(!showRemoveOption);
-          }}
-          className="text-gray-500 hover:text-gray-700 text-3xl"
-        >
-          &#8230;
-        </button>
-        {showRemoveOption && (
-          <button
-            type="button"
-            onClick={handleRemoveImage}
-            className="text-red-500 hover:text-red-700 text-sm ml-4"
-          >
-            <FaTrash />
-          </button>
-        )}
-      </div>
-    </div>
-  ) : (
-    <div className="flex items-center mb-4">
-      <img
-        src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
-        alt="Preview"
-        className="border border-gray-300 w-24 h-24 object-cover"
-      />
-      <div className="ml-4 flex flex-1 items-center">
-        <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-      </div>
-    </div>
-  )}
+            {/* Image Preview */}
+            {file ? (
+              <div className="flex items-center mb-4">
+                <img
+                  src={file}
+                  alt="Preview"
+                  className="border border-gray-300 w-24 h-24 object-cover"
+                />
+                <div className="ml-4 flex flex-1 items-center">
+                  <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowRemoveOption(!showRemoveOption);
+                    }}
+                    className="text-gray-500 hover:text-gray-700 text-3xl"
+                  >
+                    &#8230;
+                  </button>
+                  {showRemoveOption && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="text-red-500 hover:text-red-700 text-sm ml-4"
+                    >
+                      <FaTrash />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center mb-4">
+                <img
+                  src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
+                  alt="Preview"
+                  className="border border-gray-300 w-24 h-24 object-cover"
+                />
+                <div className="ml-4 flex flex-1 items-center">
+                  <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+                </div>
+              </div>
+            )}
 
-  <button
-    onClick={() => document.getElementById('imageUpload').click()}
-    className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
-  >
-    Upload Image
-  </button>
-  <input
-    type="file"
-    id="imageUpload"
-    onChange={handleImageChange}
-    className="hidden"
-  />
-</div>
-  <p className="text-sm text-gray-500">
+            <button
+              onClick={() => document.getElementById('imageUpload').click()}
+              className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
+            >
+              Upload Image
+            </button>
+            <input
+              type="file"
+              id="imageUpload"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+          </div>
+          <p className="text-sm text-gray-500">
             Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
           </p>
-        
         </div>
       </div>
 
@@ -378,7 +383,7 @@ const AddNewEquipmentForm = () => {
       <div className="mt-8 flex ">
         <button
           type="submit"
-          onClick={handleSubmit}
+          onClick={(e)=>{handleSubmit(e,"active")}}
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
@@ -408,35 +413,12 @@ const AddNewEquipmentForm = () => {
         </button>
 
         <button
-          type="submit"
-          onClick={handleSubmit}
+          type="button"
+          onClick={(e)=>{handleSubmit(e,"inactive")}}
           className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
-
-          disabled={loading}
         >
-          {loading && (
-            <svg
-              className="w-5 h-5 mr-3 text-white animate-spin"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4h-4z"
-              />
-            </svg>
-          )}
-          {loading ? 'Submitting...' : 'Draft'}
+          
+         Draft
         </button>
       </div>
     </main>

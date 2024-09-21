@@ -29,6 +29,7 @@ const AddBusinessListingForm = () => {
   const [showRemoveOption, setShowRemoveOption] = useState(false);
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [descriptionText, setText] = useState("");
+  const [name, setName] = useState('');
 
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
@@ -37,12 +38,14 @@ const AddBusinessListingForm = () => {
   };
 
   // Handler for form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e , status) => {
     const id = localStorage.getItem("userid")
     e.preventDefault();
     setError('');
     setSuccess('');
-    setLoading(true); // Set loading to true
+    if(status == "active"){
+      setLoading(true);
+    }
 
     // Create a new FormData object
     const formData = new FormData();
@@ -51,11 +54,12 @@ const AddBusinessListingForm = () => {
     if (image) {
       formData.append('image', image);
     }
-
+console.log(descriptionText)
     // Append other fields
+    formData.append('name', name )
     formData.append('location', location);
     formData.append('businessDescription', descriptionText);
-    formData.append('askingPrice', askingPrice);
+    formData.append(' asking_price', askingPrice);
     formData.append('establishedYear', establishedYear);
     formData.append('numberOfEmployees', numEmployees); // Consistent naming
     formData.append('locationMonthlyRent', monthlyRent); // Consistent naming
@@ -70,6 +74,8 @@ const AddBusinessListingForm = () => {
     formData.append('offeredServices', offeredServices);
     formData.append('supportAndTraining', supportAndTraining);
     formData.append('userId', id);
+    formData.append('status', status);
+
     try {
       const response = await fetch('https://medspaa.vercel.app/product/addBusiness', {
         method: 'POST',
@@ -115,7 +121,7 @@ const AddBusinessListingForm = () => {
   };
 
   // Handler for image file change
-  const handleImageChange = (e) => {
+  const handleImageChange = (e ) => {
     const file = e.target.files[0];
     setImage(file);
     setImageName(file.name);
@@ -150,6 +156,17 @@ const AddBusinessListingForm = () => {
                   id="location"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+              <div className="flex flex-col">
+                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Business Name *</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
@@ -207,7 +224,7 @@ const AddBusinessListingForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="monthlyRent" className="text-gray-700 text-sm font-medium mb-1">Monthly Rent $ *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="monthlyRent"
                   value={monthlyRent}
                   onChange={(e) => setMonthlyRent(e.target.value)}
@@ -220,7 +237,7 @@ const AddBusinessListingForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="leaseExpiration" className="text-gray-700 text-sm font-medium mb-1">Lease Expiration *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="leaseExpiration"
                   value={leaseExpiration}
                   onChange={(e) => setLeaseExpiration(e.target.value)}
@@ -233,7 +250,7 @@ const AddBusinessListingForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="locationSize" className="text-gray-700 text-sm font-medium mb-1">Location Size (sq ft) *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="locationSize"
                   value={locationSize}
                   onChange={(e) => setLocationSize(e.target.value)}
@@ -246,7 +263,7 @@ const AddBusinessListingForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="grossYearlyRevenue" className="text-gray-700 text-sm font-medium mb-1">Gross Yearly Revenue $ *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="grossYearlyRevenue"
                   value={grossYearlyRevenue}
                   onChange={(e) => setGrossYearlyRevenue(e.target.value)}
@@ -259,7 +276,7 @@ const AddBusinessListingForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="cashFlow" className="text-gray-700 text-sm font-medium mb-1">Cash Flow $$ >> (Net profit before Taxes and adding back depreciation and owner draws)*</label>
                 <input
-                  type="text"
+                  type="number"
                   id="cashFlow"
                   value={cashFlow}
                   onChange={(e) => setCashFlow(e.target.value)}
@@ -272,7 +289,7 @@ const AddBusinessListingForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="productsInventory" className="text-gray-700 text-sm font-medium mb-1">Products/Inventory *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="productsInventory"
                   value={productsInventory}
                   onChange={(e) => setProductsInventory(e.target.value)}
@@ -285,7 +302,7 @@ const AddBusinessListingForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="equipmentValue" className="text-gray-700 text-sm font-medium mb-1">Equipment Value $ *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="equipmentValue"
                   value={equipmentValue}
                   onChange={(e) => setEquipmentValue(e.target.value)}
@@ -298,7 +315,7 @@ const AddBusinessListingForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="reasonForSelling" className="text-gray-700 text-sm font-medium mb-1">Reason for Selling</label>
                 <input
-                  type="text"
+                  type="number"
                   id="reasonForSelling"
                   value={reasonForSelling}
                   onChange={(e) => setReasonForSelling(e.target.value)}
@@ -310,7 +327,7 @@ const AddBusinessListingForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="listOfDevices" className="text-gray-700 text-sm font-medium mb-1">List of Devices</label>
                 <input
-                  type="text"
+                  type="number"
                   id="listOfDevices"
                   value={listOfDevices}
                   onChange={(e) => setListOfDevices(e.target.value)}
@@ -424,7 +441,7 @@ const AddBusinessListingForm = () => {
       <div className="mt-8 flex ">
         <button
           type="submit"
-          onClick={handleSubmit}
+          onClick={(e)=>{handleSubmit(e,"active")}}
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
@@ -455,34 +472,13 @@ const AddBusinessListingForm = () => {
 
         <button
           type="submit"
-          onClick={handleSubmit}
+          onClick={(e)=>{handleSubmit(e,"active")}}
+
           className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
 
-          disabled={loading}
+        
         >
-          {loading && (
-            <svg
-              className="w-5 h-5 mr-3 text-white animate-spin"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4h-4z"
-              />
-            </svg>
-          )}
-          {loading ? 'Submitting...' : 'Draft'}
+          Draft
         </button>
       </div>
     </main>

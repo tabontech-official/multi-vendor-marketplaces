@@ -19,27 +19,30 @@ import AddRoomForRentForm from './pages/Rent_Room';
 import { useAuthContext } from './Hooks/useAuthContext';
 import { useEffect } from 'react';
 import { jwtDecode } from "jwt-decode";
+import SubscriptionHistory from './Subcription/Subpage';
 
 const App = () => {
+
+  const {dispatch} = useAuthContext()
+
   function isTokenExpired(token) { 
-    if (!token) return true; // No token means it's expired 
+    if (!token) return true; 
     const decoded = jwtDecode(token); 
-    return decoded.exp * 1000 < Date.now(); // exp is in seconds, convert to milliseconds 
+    console.log(decoded.exp* 1000 < Date.now() )
+    return  decoded.exp * 1000 < Date.now();
 } 
+
   useEffect(()=>{
     function checkTokenAndRemove() { 
       const token = localStorage.getItem('usertoken'); 
       if (isTokenExpired(token)) { 
-        localStorage.removeItem('usertoken'); 
-          localStorage.removeItem('userid'); 
-          console.log('Token expired and removed from local storage.'); 
-      } else { 
-          console.log('Token is valid.'); 
-      } 
+        dispatch({type:"LOGOUT"})
+
+      }
   } 
   checkTokenAndRemove()
    
-  })
+  },[])
 
   const { user } = useAuthContext();
   return (
@@ -51,6 +54,7 @@ const App = () => {
         <Route path="/Rent_Room_listing" element={<PrivateRoute element={<AddRoomForRentForm/>} />} />
           <Route path="/Job_Provider_listing" element={<PrivateRoute element={<AddProviderSearchForm/>} />} />
           <Route path="/Job_Search_listing" element={<PrivateRoute element={<AddJobSearchForm/>} />} />
+          <Route path="/Subcription_Details" element={<PrivateRoute element={<SubscriptionHistory />} />} />
           <Route path="/Business_Equipment_listing" element={<PrivateRoute element={<AddBusinessForm/>} />} />
           <Route path="/New_Equipment_listing" element={<PrivateRoute element={<AddNewEquipmentForm/>} />} />
           <Route path="/Categories" element={<PrivateRoute element={<CategorySelector />} />} />

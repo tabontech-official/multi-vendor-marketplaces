@@ -68,7 +68,7 @@ const SubscriptionHistory = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  return subscriptions.length > 0 ? (
+  return (
     <div className="flex flex-col bg-gray-50 px-3 py-6">
       <div className="flex">
         <div className="pt-4 min-w-full px-3 bg-white shadow-lg rounded-lg">
@@ -97,6 +97,7 @@ const SubscriptionHistory = () => {
           </div>
 
           <div className="w-full max-sm:flex items-center">
+            
             <table className="min-w-full max-sm:flex max-sm:flex-col overflow-auto max-sm:items-center">
               <thead className="bg-gray-200 border-b max-sm:flex max-sm:flex-col min-w-full">
                 <tr>
@@ -129,9 +130,7 @@ const SubscriptionHistory = () => {
         </div>
       </div>
     </div>
-  ) : (
-    <div className="text-center py-6">No subscriptions found.</div>
-  );
+  ) 
 };
 
 export default SubscriptionHistory;

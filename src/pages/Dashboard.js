@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { HiDotsVertical, HiPlus, HiX } from 'react-icons/hi';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../Hooks/useAuthContext';
@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [searchVal, setSearchVal] = useState('');
   const { user } = useAuthContext();
+  const dropdownRefs = useRef([]);
 
   const toggleDropdown = (index) => {
     setOpenDropdown(openDropdown === index ? null : index);
@@ -17,7 +18,6 @@ const Dashboard = () => {
 
   const OnEdit = (product) => {
     let formPage = '';
-
     switch (product.product_type) {
       case 'used Equipment':
         formPage = 'Used_Equipment_Listing';
@@ -25,89 +25,114 @@ const Dashboard = () => {
       case 'New Equipment':
         formPage = 'New_Equipment_listing';
         break;
-        case 'Job Listing':
+      case 'Job Listing':
         formPage = 'Job_Search_listing';
         break;
       case 'Provider Search Listing':
-          formPage = 'Job_Provider_listing';
-          break;
-          case 'Room Listing':
-            formPage = 'Rent_Room_listing';
-            break;
+        formPage = 'Job_Provider_listing';
+        break;
+      case 'Room Listing':
+        formPage = 'Rent_Room_listing';
+        break;
       default:
         console.error('Unknown product type:', product.product_type);
         return;
     }
-
     navigate(formPage, { state: { product } });
   };
 
   const onDelete = async (id) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this listing?");
-    if (!confirmDelete) {
-      return;
-    }
-
+    if (!confirmDelete) return;
     try {
       const response = await fetch(`https://medspaa.vercel.app/product/deleteProduct/${id}`, {
         method: 'DELETE',
       });
-
       if (response.ok) {
         setProducts(products.filter(product => product._id !== id));
         setFilteredProducts(filteredProducts.filter(product => product._id !== id));
-      } else {
-        console.error('Failed to delete product. Status:', response.status);
-        alert('Failed to delete product.');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('An error occurred while deleting the product.');
+    }
+  };
+
+  const handlePublish = async (product) => {
+    let apiEndpoint = '';
+    switch (product.product_type) {
+      case 'used Equipment':
+        apiEndpoint = '/product/addEquipment';
+        break;
+      case 'New Equipment':
+        apiEndpoint = '/product/addNewEquipments';
+        break;
+      case 'Job Listing':
+        apiEndpoint = '/product/addJob';
+        break;
+      case 'Provider Search Listing':
+        apiEndpoint = '/product/addProvider';
+        break;
+      case 'Room Listing':
+        apiEndpoint = '/product/addRoom';
+        break;
+      default:
+        console.error('Unknown product type:', product.product_type);
+        return;
+    }
+
+    try {
+      const response = await fetch(`https://medspaa.vercel.app${apiEndpoint}`, {
+        method: 'POST',
+        body:  product ,
+      });
+
+      if (response.ok) {
+        alert('Product published successfully!');
+      } else {
+        console.error('Failed to publish product. Status:', response.status);
+        alert('Failed to publish product.');
+      }
+    } catch (error) {
+      console.error('Error publishing product:', error);
     }
   };
 
   useEffect(() => {
     const fetchProductData = async () => {
       const id = localStorage.getItem('userid');
-
-      if (!id) {
-        console.error('User ID not found in localStorage.');
-        return;
-      }
-
+      if (!id) return;
       try {
-        const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${id}`, {
-          method: 'GET',
-        });
-
+        const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${id}`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
-          if (Array.isArray(data.products)) {
-            setProducts(data.products);
-            setFilteredProducts(data.products);
-          } else {
-            console.error('Expected products array, but got:', data.products);
-          }
-        } else {
-          console.error('Failed to fetch product data. Status:', response.status);
+          setProducts(data.products);
+          setFilteredProducts(data.products);
         }
       } catch (error) {
         console.error('Error fetching product data:', error);
       }
     };
-
     fetchProductData();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const dropdowns = dropdownRefs.current;
+      if (dropdowns.every(ref => ref && !ref.contains(event.target))) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const handleSearch = () => {
-    if (searchVal === '') {
-      setFilteredProducts(products);
-    } else {
-      const filtered = products.filter(product =>
-        product.title.toLowerCase().includes(searchVal.toLowerCase())
-      );
-      setFilteredProducts(filtered);
-    }
+    const filtered = searchVal === '' ? products : products.filter(product =>
+      product.title.toLowerCase().includes(searchVal.toLowerCase())
+    );
+    setFilteredProducts(filtered);
   };
 
   const clearSearch = () => {
@@ -123,7 +148,6 @@ const Dashboard = () => {
           <h1 className="text-2xl font-semibold mb-1">Listings</h1>
           <p className="text-gray-600">Here are your Listings.</p>
         </div>
-
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
           <Link to="/Categories" className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
             <HiPlus className="w-5 h-5" />
@@ -166,12 +190,12 @@ const Dashboard = () => {
       <div className="p-4">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
-            <tr className=' items-center '>
+            <tr className='items-center'>
+              <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
+              <th className="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LISTING NAME</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRICE</th>
-              <th className=" py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
-              <th className=" py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 mb-4">
@@ -182,37 +206,56 @@ const Dashboard = () => {
             ) : (
               filteredProducts.map((product, index) => (
                 <tr key={product._id}>
-                  <td className="px-6 py-4 whitespace-nowrap">{product.title !== "Job Listing" ? product.title : "Job Search Listing"  }</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "0"}</td>
-                  <td className="py-4 whitespace-nowrap relative">
+                  <td className="py-4 whitespace-nowrap relative px-4">
                     <button 
                       onClick={() => toggleDropdown(index)}
                       className="text-gray-600 hover:text-gray-800 focus:outline-none"
                     >
                       <HiDotsVertical className="w-5 h-5" />
                     </button>
-                    {openDropdown === index && (
-                      <div className="absolute w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
-                        <ul className="py-1">
-                          <li onClick={() => OnEdit(product)}>
-                            <button 
-                              className="block px-4 w-1/4 py-2 text-center text-gray-700 hover:bg-gray-100"
-                            >
-                              Edit
-                            </button>
-                          </li>
-                          <li>
-                            <button 
-                              onClick={() => onDelete(product._id)} 
-                              className="block px-4 w-1/4 py-2 text-center text-gray-700 hover:bg-gray-100"
-                            >
-                              Delete
-                            </button>
-                          </li>
-                        </ul>
-                      </div>
-                    )}
+                    <div ref={el => dropdownRefs.current[index] = el}>
+                      {openDropdown === index && (
+                        <div className="absolute w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+                          <ul className="py-1">
+                            {product.status === 'inactive' && (
+                              <li>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent click outside
+                                    handlePublish(product);
+                                  }}
+                                  className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
+                                >
+                                  Publish
+                                </button>
+                              </li>
+                            )}
+                            <li>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent click outside
+                                  OnEdit(product);
+                                }}
+                                className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
+                              >
+                                Edit
+                              </button>
+                            </li>
+                            <li>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent click outside
+                                  onDelete(product._id);
+                                }} 
+                                className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
+                              >
+                                Delete
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap flex items-center">
                     <div
@@ -220,6 +263,9 @@ const Dashboard = () => {
                       title={product.status}
                     />
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap">{product.title !== "Job Listing" ? product.title : "Job Search Listing"}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "0"}</td>
                 </tr>
               ))
             )}

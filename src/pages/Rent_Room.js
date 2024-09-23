@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
-import { EditorState } from "draft-js";
+import { EditorState , ContentState, convertToRaw } from "draft-js";
+import { useLocation } from 'react-router-dom';
+
 
 const PostRentalForm = () => {
   // State hooks for form fields
@@ -23,7 +25,12 @@ const PostRentalForm = () => {
 
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [description, setDescription] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const locationData = useLocation();
+  const { product } = locationData.state || {};
 
+
+  console.log(product)
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
     const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");

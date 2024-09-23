@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor'; // Assuming RTC is your custom rich text editor component
-import { EditorState } from "draft-js";
+import { EditorState , ContentState , convertToRaw } from "draft-js";
+import { useLocation } from 'react-router-dom';
 
 const AddNewJobForm = () => {
   // State hooks for form fields
@@ -19,6 +20,39 @@ const AddNewJobForm = () => {
   const [showRemoveOption, setShowRemoveOption] = useState(false);
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [Enabled , setEnabled] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const LocationData = useLocation();
+  const { product } = LocationData.state || {};
+ console.log(product)
+
+
+ useEffect(() => {
+  if (product) {
+    setIsEditing(true);
+    setLocation(product.providerListings[0].location || '');
+    setQualification(product.providerListings[0].qualificationRequested || '');
+    setJobType(product.providerListings[0].jobType || '');
+    setJobOfferType(product.providerListings[0].typeOfJobOffered || '');
+    setOfferedSalary(product.providerListings[0].offeredYearlySalary || '');
+    setPositionDescription(product.providerListings[0].offeredPositionDescription || '');
+    setImage(product.providerListings[0].image)
+    // Optionally set the image if product has an image URL
+    // setImage(product.image || null);
+    // setImageName(product.imageName || '');
+    if (typeof positionDescription === 'string') {
+      // If it's a plain string, convert it to ContentState
+      const contentState = ContentState.createFromText(positionDescription);
+      setEditorState(EditorState.createWithContent(contentState));
+    } else if (positionDescription) {
+      // If it's already a ContentState or something similar, use it directly
+      setEditorState(EditorState.createWithContent(convertToRaw(positionDescription)));
+    } else {
+      // Handle case where description is undefined or null
+      setEditorState(EditorState.createEmpty());
+      }
+      }
+}, []);
+
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
     const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
@@ -219,9 +253,9 @@ const AddNewJobForm = () => {
             </div>
             <hr className="border-t border-gray-500 my-4" />
             <div className="mt-8 flex ">
-        <button
+            <button
           type="submit"
-          onClick={(e)=>{handleSubmit(e,"active")}}
+          onClick={(e) => { handleSubmit(e, "active") }}
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
@@ -247,8 +281,8 @@ const AddNewJobForm = () => {
               />
             </svg>
           )}
-          {loading ? 'Publishing...' : 'Publish'}
-        </button>
+{loading ? (isEditing ? 'Updating...' : 'Publishing...') : (isEditing ? 'Update' : 'Publish')}
+</button>
 
        
         <button
@@ -277,7 +311,7 @@ const AddNewJobForm = () => {
   {file ? (
     <div className="flex items-center mb-4">
       <img
-        src={URL.createObjectURL(file)}
+        src={file}
         alt="Preview"
         className="border border-gray-300 w-24 h-24 object-cover"
       />

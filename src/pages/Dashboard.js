@@ -25,6 +25,15 @@ const Dashboard = () => {
       case 'New Equipment':
         formPage = 'New_Equipment_listing';
         break;
+        case 'Job Listing':
+        formPage = 'Job_Search_listing';
+        break;
+      case 'Provider Search Listing':
+          formPage = 'Job_Provider_listing';
+          break;
+          case 'Room Listing':
+            formPage = 'Rent_Room_listing';
+            break;
       default:
         console.error('Unknown product type:', product.product_type);
         return;
@@ -173,7 +182,7 @@ const Dashboard = () => {
             ) : (
               filteredProducts.map((product, index) => (
                 <tr key={product._id}>
-                  <td className="px-6 py-4 whitespace-nowrap">{product.title}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{product.title !== "Job Listing" ? product.title : "Job Search Listing"  }</td>
                   <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
                   <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "0"}</td>
                   <td className="py-4 whitespace-nowrap relative">
@@ -186,10 +195,9 @@ const Dashboard = () => {
                     {openDropdown === index && (
                       <div className="absolute w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
                         <ul className="py-1">
-                          <li>
+                          <li onClick={() => OnEdit(product)}>
                             <button 
                               className="block px-4 w-1/4 py-2 text-center text-gray-700 hover:bg-gray-100"
-                              onClick={() => OnEdit(product)}
                             >
                               Edit
                             </button>

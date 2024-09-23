@@ -29,7 +29,6 @@ const PostEquipmentForm = () => {
   const [isEditing, setIsEditing] = useState(false); // New state for editing mode
 
   const { product } = location.state || {};
- console.log(product)
 
   useEffect(() => {
     if (product) {
@@ -63,10 +62,9 @@ const PostEquipmentForm = () => {
     }
         setImageName("image"); // Set image name from URL
     }
-  });
+  },[]);
 
   const onEditorStateChange = (newEditorState) => {
-    console.log(newEditorState)
     setEditorState(newEditorState);
     const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
     setDescription(currentText);
@@ -106,7 +104,7 @@ const PostEquipmentForm = () => {
     formData.append('status', status);
 
     try {
-      const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateEquipment/${product.id}` : "https://medspaa.vercel.app/product/addEquipment", {
+      const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateListing/${product._id}` : "https://medspaa.vercel.app/product/addEquipment", {
         method: isEditing ? "PUT" : "POST",
         body: formData
       });

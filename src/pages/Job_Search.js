@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor'; // Assuming RTC is the rich text editor
-import { EditorState } from "draft-js";
+import { EditorState , ContentState, convertToRaw } from "draft-js";
+import { useLocation } from 'react-router-dom';
 
 const AddJobSearchForm = () => {
-  // State hooks for form fields
   const [location, setLocation] = useState('');
   const [name, setName] = useState('');
-  const [qualificationRequested, setQualificationRequested] = useState(''); // Changed state name
+  const [qualificationRequested, setQualificationRequested] = useState('');
   const [availability, setAvailability] = useState('');
   const [requestedYearlySalary, setRequestedYearlySalary] = useState('');
   const [positionRequestedDescription, setPositionRequestedDescription] = useState('');
@@ -16,12 +16,37 @@ const AddJobSearchForm = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showRemoveOption, setShowRemoveOption] = useState(false);
-  const [Enabled , setEnabled] = useState(false);
   const [file, setImage] = useState();
-
-  
-
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const [isEditing, setIsEditing] = useState(false);
+  const locationData = useLocation();
+  const { product } = locationData.state || {};
+
+  useEffect(() => {
+    console.log(product)
+    if (product) {
+      setIsEditing(true);
+      setLocation(product.jobListings[0].location || '');
+      setName(product.title || '');
+      setQualificationRequested(product.jobListings[0].qualification || '');
+      setAvailability(product.jobListings[0].availability || '');
+      setRequestedYearlySalary(product.jobListings[0].requestedYearlySalary || '');
+      setPositionRequestedDescription(product.jobListings[0].positionRequestedDescription || '');
+      setImage(product.image.src)
+      setImageName(product.imageName || '');
+      // Set the editor state if there's existing description
+      if (typeof positionRequestedDescription === 'string') {
+        // If it's a plain string, convert it to ContentState
+        const contentState = ContentState.createFromText(positionRequestedDescription);
+        setEditorState(EditorState.createWithContent(contentState));
+      } else if (positionRequestedDescription) {
+        // If it's already a ContentState or something similar, use it directly
+        setEditorState(EditorState.createWithContent(convertToRaw(positionRequestedDescription)));
+      } else {
+        // Handle case where description is undefined or null
+        setEditorState(EditorState.createEmpty());
+      }    }
+  }, []);
 
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
@@ -29,37 +54,31 @@ const AddJobSearchForm = () => {
     setPositionRequestedDescription(currentText);
   };
 
-  // Handler for form submission
-  const handleSubmit = async (e , status) => {
+  const handleSubmit = async (e, status) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if(status == "active"){
+    if (status === "active") {
       setLoading(true);
     }
 
     // Create FormData object
     const formData = new FormData();
-
-    // Append the image file if it exists
     if (file) {
       formData.append('image', file);
     }
-
-    // Append other fields
     formData.append('location', location);
     formData.append('name', name);
-    formData.append('qualification', qualificationRequested); // Updated field name
+    formData.append('qualification', qualificationRequested);
     formData.append('availability', availability);
     formData.append('requestedYearlySalary', requestedYearlySalary);
     formData.append('positionRequestedDescription', positionRequestedDescription);
-     formData.append("status", status)
-    // Append userId
+    formData.append('status', status);
     const id = localStorage.getItem('userid');
     formData.append('userId', id);
 
     try {
-      const response = await fetch("https://medspaa.vercel.app/product/addJob", {
+      const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateListing/${product._id}` : "https://medspaa.vercel.app/product/addJob", {
         method: "POST",
         body: formData
       });
@@ -67,21 +86,20 @@ const AddJobSearchForm = () => {
       const json = await response.json();
 
       if (response.ok) {
-        if(status == "active"){
-          setSuccess(json.message);
-        }else{
-          setSuccess("Your post drafted sucessfully")
-        }
+        setSuccess(isEditing ? "Job updated successfully!" : json.message);
         setError('');
-        // Clear form fields
-        setLocation('');
-        setName('');
-        setQualificationRequested(''); // Clear qualification requested
-        setAvailability('');
-        setRequestedYearlySalary('');
-        setPositionRequestedDescription('');
-        setImage(null);
-        setImageName('');
+        // Clear form fields after successful submission
+        if (!isEditing) {
+          setIsEditing(false)
+          setLocation('');
+          setName('');
+          setQualificationRequested('');
+          setAvailability('');
+          setRequestedYearlySalary('');
+          setPositionRequestedDescription('');
+          setImage(null);
+          setImageName('');
+        }
       } else {
         setSuccess('');
         setError(json.error);
@@ -95,14 +113,12 @@ const AddJobSearchForm = () => {
     }
   };
 
-  // Handler for image file change
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImage(file);
     setImageName(file.name);
   };
 
-  // Handler to remove image
   const handleRemoveImage = () => {
     setImage(null);
     setImageName('');
@@ -112,13 +128,12 @@ const AddJobSearchForm = () => {
   return (
     <main className="bg-gray-100 min-h-screen p-8 flex-row">
       <h1 className="text-4xl font-bold mb-4">Provider Job Search Listing</h1>
-      <p className="text-lg mb-8 text-gray-700">Here you can add job listings to your site.</p>
+      <p className="text-lg mb-8 text-gray-700">Here you can {isEditing ? "edit" : "add"} job listings to your site.</p>
       <div className="mb-4">
         {error && <div className="text-red-500">{error}</div>}
         {success && <div className="text-green-500">{success}</div>}
       </div>
       <div className="flex flex-col lg:flex-row flex-1">
-        
         <div className="flex-1 bg-white px-8 py-4 shadow-md lg:mr-8 mb-8 lg:mb-0">
           <h1 className='text-2xl font-semibold mb-4'>Job Details</h1>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -198,20 +213,18 @@ const AddJobSearchForm = () => {
                   required
                 />
               </div>
-             
 
               {/* Position Description */}
               <div className='mb-4'>
-              <RTC 
-                name={"Position Requested Description"}
-                editorState={editorState}
-                onEditorStateChange={onEditorStateChange}
-              />
-               </div>
+                <RTC 
+                  name={"Position Requested Description"}
+                  editorState={editorState}
+                  onEditorStateChange={onEditorStateChange}
+                />
+              </div>
 
-
-                  {/* Job Type */}
-                  <div className="flex flex-col mt-4">
+              {/* Job Type */}
+              <div className="flex flex-col mt-4">
                 <label htmlFor="jobType" className="text-gray-700 text-sm font-medium mb-1">Job Type *</label>
                 <select
                   id="jobType"
@@ -225,91 +238,86 @@ const AddJobSearchForm = () => {
                   <option value="Part-time">Part-time</option>
                 </select>
               </div>
-            
             </div>
           </form>
         </div>
 
         {/* Image Upload */}
         <div className="lg:w-1/3 lg:pl-8 flex-1">
-        
-        <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
-  <h2 className="text-2xl font-semibold mb-4">Resume</h2>
-  <p className="text-gray-600 mb-4">
-    Upload an image of the equipment. Recommended size: 1024x1024 and less than 15MB.
-  </p>
-  <p className="text-sm text-gray-500 mb-2"></p>
-  
-  {/* Image Preview */}
-  {file ? (
-    <div className="flex items-center mb-4">
-      <img
-        src={URL.createObjectURL(file)}
-        alt="Preview"
-        className="border border-gray-300 w-24 h-24 object-cover"
-      />
-      <div className="ml-4 flex flex-1 items-center">
-        <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-        <button
-          type="button"
-          onClick={() => {
-            setShowRemoveOption(!showRemoveOption);
-          }}
-          className="text-gray-500 hover:text-gray-700 text-3xl"
-        >
-          &#8230;
-        </button>
-        {showRemoveOption && (
-          <button
-            type="button"
-            onClick={handleRemoveImage}
-            className="text-red-500 hover:text-red-700 text-sm ml-4"
-          >
-            <FaTrash />
-          </button>
-        )}
-      </div>
-    </div>
-  ) : (
-    <div className="flex items-center mb-4">
-      <img
-        src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
-        alt="Preview"
-        className="border border-gray-300 w-24 h-24 object-cover"
-      />
-      <div className="ml-4 flex flex-1 items-center">
-        <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-      </div>
-    </div>
-  )}
+          <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
+            <h2 className="text-2xl font-semibold mb-4">Resume</h2>
+            <p className="text-gray-600 mb-4">
+              Upload an image of the equipment. Recommended size: 1024x1024 and less than 15MB.
+            </p>
 
-  <button
-    onClick={() => document.getElementById('imageUpload').click()}
-    className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
-  >
-    Upload Resume
-  </button>
-  <input
-    type="file"
-    id="imageUpload"
-    onChange={handleImageChange}
-    className="hidden"
-  />
-</div>
-<p className="text-sm text-gray-500">
+            {/* Image Preview */}
+            {file ? (
+              <div className="flex items-center mb-4">
+                <img
+                  src={file}
+                  alt="Preview"
+                  className="border border-gray-300 w-24 h-24 object-cover"
+                />
+                <div className="ml-4 flex flex-1 items-center">
+                  <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowRemoveOption(!showRemoveOption);
+                    }}
+                    className="text-gray-500 hover:text-gray-700 text-3xl"
+                  >
+                    &#8230;
+                  </button>
+                  {showRemoveOption && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="text-red-500 hover:text-red-700 text-sm ml-4"
+                    >
+                      <FaTrash />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center mb-4">
+                <img
+                  src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
+                  alt="Preview"
+                  className="border border-gray-300 w-24 h-24 object-cover"
+                />
+                <div className="ml-4 flex flex-1 items-center">
+                  <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => document.getElementById('imageUpload').click()}
+              className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
+            >
+              Upload Resume
+            </button>
+            <input
+              type="file"
+              id="imageUpload"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+          </div>
+          <p className="text-sm text-gray-500">
             Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
           </p>
-        
         </div>
       </div>
 
       {/* Submit Button */}
       <hr className="border-t border-gray-500 my-4" />
       <div className="mt-8 flex ">
-        <button
+      <button
           type="submit"
-          onClick={(e)=>{handleSubmit(e,"active")}}
-
+          onClick={(e) => { handleSubmit(e, "active") }}
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
@@ -335,18 +343,16 @@ const AddJobSearchForm = () => {
               />
             </svg>
           )}
-          {loading ? 'Publishing...' : 'Publish'}
-        </button>
+{loading ? (isEditing ? 'Updating...' : 'Publishing...') : (isEditing ? 'Update' : 'Publish')}
+</button>
+
 
         <button
           type="submit"
-          onClick={(e)=>{handleSubmit(e,"active")}}
-
+          onClick={(e) => { handleSubmit(e, "draft") }}
           className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
-
-          
         >
-         Draft
+          Draft
         </button>
       </div>
     </main>

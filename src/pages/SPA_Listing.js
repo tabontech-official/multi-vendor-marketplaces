@@ -315,7 +315,7 @@ console.log(descriptionText)
               <div className="flex flex-col">
                 <label htmlFor="reasonForSelling" className="text-gray-700 text-sm font-medium mb-1">Reason for Selling</label>
                 <input
-                  type="number"
+                  type="text"
                   id="reasonForSelling"
                   value={reasonForSelling}
                   onChange={(e) => setReasonForSelling(e.target.value)}
@@ -327,7 +327,7 @@ console.log(descriptionText)
               <div className="flex flex-col">
                 <label htmlFor="listOfDevices" className="text-gray-700 text-sm font-medium mb-1">List of Devices</label>
                 <input
-                  type="number"
+                  type="text"
                   id="listOfDevices"
                   value={listOfDevices}
                   onChange={(e) => setListOfDevices(e.target.value)}

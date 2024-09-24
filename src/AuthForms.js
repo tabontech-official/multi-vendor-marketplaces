@@ -94,10 +94,12 @@ const handleLogin = async (e) => {
     if (response.ok) {
       console.log(json)
       console.log(json)
+
       localStorage.setItem('usertoken', json.token);
       localStorage.setItem('userid', json.data._id);
       localStorage.setItem('email', json.data.email);
-      dispatch({ type: 'LOGIN', payload: json });
+    
+   dispatch({ type: 'LOGIN', payload: json });
       setSuccess('Login successful!');
       navigate(path);
       localStorage.removeItem('path');

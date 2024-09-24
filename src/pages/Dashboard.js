@@ -9,6 +9,9 @@ const Dashboard = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [searchVal, setSearchVal] = useState('');
+  const [loadingId, setLoadingId] = useState(null);
+  const [message, setMessage] = useState('');
+  const [credit, setCredit] = useState(0); // Credit state
   const { user } = useAuthContext();
   const dropdownRefs = useRef([]);
 
@@ -58,42 +61,50 @@ const Dashboard = () => {
   };
 
   const handlePublish = async (product) => {
-    let apiEndpoint = '';
-    switch (product.product_type) {
-      case 'used Equipment':
-        apiEndpoint = '/product/addEquipment';
-        break;
-      case 'New Equipment':
-        apiEndpoint = '/product/addNewEquipments';
-        break;
-      case 'Job Listing':
-        apiEndpoint = '/product/addJob';
-        break;
-      case 'Provider Search Listing':
-        apiEndpoint = '/product/addProvider';
-        break;
-      case 'Room Listing':
-        apiEndpoint = '/product/addRoom';
-        break;
-      default:
-        console.error('Unknown product type:', product.product_type);
-        return;
-    }
+    const userId = localStorage.getItem('userid');
+    setLoadingId(product.id);
+    setMessage('');
 
     try {
-      const response = await fetch(`https://medspaa.vercel.app${apiEndpoint}`, {
-        method: 'POST',
-        body:  product ,
+      const response = await fetch(`https://medspaa.vercel.app/product/publishedProduct/${product.id}`, {
+        method: 'PUT',
       });
 
       if (response.ok) {
-        alert('Product published successfully!');
+        setMessage('Product published successfully!');
       } else {
-        console.error('Failed to publish product. Status:', response.status);
-        alert('Failed to publish product.');
+        setMessage(`You don't have enough credits.`);
       }
     } catch (error) {
       console.error('Error publishing product:', error);
+      setMessage('An error occurred while publishing the product.');
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const handleUnpublish = async (product) => {
+    
+    setLoadingId(product.id);
+    setMessage('');
+
+    try {
+      const response = await fetch(`https://medspaa.vercel.app/product/unpublished/${product.id}`, {
+        method: 'PUT',
+      });
+
+      if (response.ok) {
+        setMessage('Product unpublished successfully!');
+        // Optionally, refresh the products list or update state as needed
+        // fetchProductData();
+      } else {
+        setMessage('Failed to unpublish product.');
+      }
+    } catch (error) {
+      console.error('Error unpublishing product:', error);
+      setMessage('An error occurred while unpublishing the product.');
+    } finally {
+      setLoadingId(null);
     }
   };
 
@@ -109,11 +120,21 @@ const Dashboard = () => {
           setFilteredProducts(data.products);
         }
       } catch (error) {
-        console.error('Error fetching product data:', error);
+        setMessage("You don't have enough credits");
+      }
+
+      try {
+        const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setCredit(data.quantity || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching quantity:', error);
       }
     };
     fetchProductData();
-  }, []);
+  }, [products, credit]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -142,6 +163,14 @@ const Dashboard = () => {
 
   return user ? (
     <main className="w-full p-4 md:p-8">
+      {/* Message Display */}
+      {message && <div className="mb-4 text-red-600">{message}</div>}
+
+      {/* Credit Display */}
+      <div className="mb-4 text-blue-600 font-semibold text-lg">
+        Available Credits: {credit}
+      </div>
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
         <div className="flex-1">
@@ -217,23 +246,37 @@ const Dashboard = () => {
                       {openDropdown === index && (
                         <div className="absolute w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
                           <ul className="py-1">
-                            {product.status === 'inactive' && (
+                            {product.status === 'draft' ? (
                               <li>
                                 <button 
                                   onClick={(e) => {
-                                    e.stopPropagation(); // Prevent click outside
+                                    e.stopPropagation();
                                     handlePublish(product);
                                   }}
                                   className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
                                 >
-                                  Publish
+                                  {loadingId === product._id ? 'Loading...' : 'Publish'}
                                 </button>
                               </li>
+                            ) : (
+                              product.status === 'active' && (
+                                <li>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleUnpublish(product);
+                                    }}
+                                    className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
+                                  >
+                                    {loadingId === product._id ? 'Loading...' : 'Unpublish'}
+                                  </button>
+                                </li>
+                              )
                             )}
                             <li>
                               <button 
                                 onClick={(e) => {
-                                  e.stopPropagation(); // Prevent click outside
+                                  e.stopPropagation();
                                   OnEdit(product);
                                 }}
                                 className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
@@ -244,7 +287,7 @@ const Dashboard = () => {
                             <li>
                               <button 
                                 onClick={(e) => {
-                                  e.stopPropagation(); // Prevent click outside
+                                  e.stopPropagation();
                                   onDelete(product._id);
                                 }} 
                                 className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"

@@ -84,7 +84,6 @@ const Dashboard = () => {
   };
 
   const handleUnpublish = async (product) => {
-    
     setLoadingId(product.id);
     setMessage('');
 
@@ -95,8 +94,6 @@ const Dashboard = () => {
 
       if (response.ok) {
         setMessage('Product unpublished successfully!');
-        // Optionally, refresh the products list or update state as needed
-        // fetchProductData();
       } else {
         setMessage('Failed to unpublish product.');
       }
@@ -116,6 +113,7 @@ const Dashboard = () => {
         const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${id}`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
+      
           setProducts(data.products);
           setFilteredProducts(data.products);
         }
@@ -134,7 +132,7 @@ const Dashboard = () => {
       }
     };
     fetchProductData();
-  }, [products, credit]);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -168,7 +166,7 @@ const Dashboard = () => {
 
       {/* Credit Display */}
       <div className="mb-4 text-blue-600 font-semibold text-lg">
-        Available Credits: {credit}
+        <span className={credit === 0 ? 'text-red-500' : ''}> Available Credits: {credit}</span>
       </div>
 
       {/* Header Section */}
@@ -217,10 +215,10 @@ const Dashboard = () => {
 
       {/* Products Table */}
       <div className="p-4">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
             <tr className='items-center'>
-              <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
+              <th className="py-3 pl-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
               <th className="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LISTING NAME</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
@@ -244,15 +242,15 @@ const Dashboard = () => {
                     </button>
                     <div ref={el => dropdownRefs.current[index] = el}>
                       {openDropdown === index && (
-                        <div className="absolute w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+                        <div className="absolute  bg-white border flex justify-start items-start border-gray-300 rounded-md shadow-lg z-10">
                           <ul className="py-1">
                             {product.status === 'draft' ? (
-                              <li>
+                              <li   onClick={(e) => {
+                                e.stopPropagation();
+                                handlePublish(product);
+                              }}>
                                 <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handlePublish(product);
-                                  }}
+                                
                                   className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
                                 >
                                   {loadingId === product._id ? 'Loading...' : 'Publish'}
@@ -260,12 +258,12 @@ const Dashboard = () => {
                               </li>
                             ) : (
                               product.status === 'active' && (
-                                <li>
+                                <li  onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUnpublish(product);
+                                }}>
                                   <button 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleUnpublish(product);
-                                    }}
+                                   
                                     className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
                                   >
                                     {loadingId === product._id ? 'Loading...' : 'Unpublish'}
@@ -273,12 +271,12 @@ const Dashboard = () => {
                                 </li>
                               )
                             )}
-                            <li>
-                              <button 
-                                onClick={(e) => {
+                            <li   onClick={(e) => {
                                   e.stopPropagation();
                                   OnEdit(product);
-                                }}
+                                }} >
+                              <button 
+                              
                                 className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
                               >
                                 Edit
@@ -306,7 +304,16 @@ const Dashboard = () => {
                       title={product.status}
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">{product.title !== "Job Listing" ? product.title : "Job Search Listing"}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+ 
+  {product.title !== "Job Listing" ? product.title : "Job Search Listing"}
+  {product.product_type === "used Equipment" && (
+    <span className="bg-blue-100 text-green-800 text-xs font-medium me-2 px-2.5 mx-3 py-0.5 rounded dark:bg-green-900 dark:text-blue-300">
+      Free Listing
+    </span>
+  )}
+</td>
+
                   <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
                   <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "0"}</td>
                 </tr>

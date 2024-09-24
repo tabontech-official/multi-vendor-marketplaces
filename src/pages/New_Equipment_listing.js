@@ -56,9 +56,12 @@ const AddNewEquipmentForm = () => {
         // Handle case where description is undefined or null
         setEditorState(EditorState.createEmpty());
       }
-      setImage(product.image.src);
+    
+      if(product.image){
+        setImage(product.image.src);
+      }
         setImageName("image"); // Set image name from URL
-      setImage(product.image?.src || null); // Set image if available
+      setImage(product.image?.src || ""); // Set image if available
     }
   });
 

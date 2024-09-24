@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
 import { EditorState , ContentState, convertToRaw } from "draft-js";
@@ -28,14 +28,31 @@ const PostRentalForm = () => {
   const [isEditing, setIsEditing] = useState(false);
   const locationData = useLocation();
   const { product } = locationData.state || {};
+console.log(product)
+  useEffect(() => {
+    if (product) {
+      const roomListing = product.roomListing[0];
+      setLocation(roomListing.location);
+      setRoomSize(roomListing.roomSize);
+      setMonthlyRent(roomListing.monthlyRent);
+      setDeposit(roomListing.deposit);
+      setMinimumInsuranceRequested(roomListing.minimumInsuranceRequested);
+      setTypeOfUseAllowed(roomListing.typeOfUseAllowed || []);
+      setRentalTerms(roomListing.rentalTerms);
+      setWifiAvailable(roomListing.wifiAvailable);
+      setOtherDetails(roomListing.otherDetails);
+      setImage(roomListing.image);
+      setImageName(roomListing.imageName || '');
+      setIsEditing(true);
+    }
+  }, []);
 
-
-  console.log(product)
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
     const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
     setDescription(currentText);
   };
+
 
   // Handler for form submission
   const handleSubmit = async (e , status) => {
@@ -265,7 +282,7 @@ const PostRentalForm = () => {
   {image ? (
     <div className="flex items-center mb-4">
       <img
-        src={URL.createObjectURL(image)}
+        src={image}
         alt="Preview"
         className="border border-gray-300 w-24 h-24 object-cover"
       />
@@ -327,7 +344,7 @@ const PostRentalForm = () => {
       <div className="mt-8 flex ">
         <button
           type="submit"
-          onClick={(e)=>{handleSubmit(e,"active")}}
+          onClick={(e) => { handleSubmit(e, isEditing ? "update" : "active"); }}
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
@@ -353,8 +370,9 @@ const PostRentalForm = () => {
               />
             </svg>
           )}
-          {loading ? 'Publishing...' : 'Publish'}
+          {loading ? 'Updating...' : (isEditing ? 'Update' : 'Publish')}
         </button>
+        {/* existing Draft button... */}
 
         
         <button

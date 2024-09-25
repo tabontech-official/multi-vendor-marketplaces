@@ -17,7 +17,7 @@ const PostEquipmentForm = () => {
   const [warranty, setWarranty] = useState('');
   const [reasonForSelling, setReasonForSelling] = useState('');
   const [shipping, setShipping] = useState('');
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]);
   const [imageName, setImageName] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -57,8 +57,8 @@ const PostEquipmentForm = () => {
         // Handle case where description is undefined or null
         setEditorState(EditorState.createEmpty());
       }
-    if(product.image){
-      setImage(product.image.src);
+    if(product.images){
+      setImages(product.images.map(img => img.src));
     }
         setImageName("image"); // Set image name from URL
     }
@@ -84,8 +84,8 @@ const PostEquipmentForm = () => {
 
     const formData = new FormData();
 
-    if (image) {
-      formData.append('image', image);
+    if (images) {
+      formData.append('images', images);
     }
 
     formData.append('location', Location);
@@ -133,20 +133,19 @@ const PostEquipmentForm = () => {
 
   // Handler for image file change
   const handleImageChange = (e) => {
-    const file = e.target.files[0]; // Get the first file
+    const files = Array.from(e.target.files); // Get all selected files
 
-    if (file) {
-      const src = URL.createObjectURL(file); // Create a URL for the selected file
-      setImage(src); // Set the image preview URL
-      setImageName(file.name); // Set the name of the image
+    if (files) {
+      const newImages = files.map(file => URL.createObjectURL(file)); // Create object URLs for preview
+      setImages(prevImages => [...prevImages, ...newImages]); // Append to the existing images
     }
   };
 
+
+
   // Handler to remove image
-  const handleRemoveImage = () => {
-    setImage(null);
-    setImageName('');
-    setShowRemoveOption(false);
+  const handleRemoveImage = (index) => {
+    setImages(prevImages => prevImages.filter((_, i) => i !== index)); // Remove image at the specified index
   };
 
   return (
@@ -348,36 +347,27 @@ const PostEquipmentForm = () => {
           </p>
 
           {/* Image Preview */}
-          {image ? (
-            <div className="flex items-center mb-4">
-              <img
-                src={image}
-                alt="Preview"
-                className="border border-gray-300 w-24 h-24 object-cover"
-              />
-              <div className="ml-4 flex flex-1 items-center">
-                <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowRemoveOption(!showRemoveOption);
-                  }}
-                  className="text-gray-500 hover:text-gray-700 text-3xl"
-                >
-                  &#8230;
-                </button>
-                {showRemoveOption && (
-                  <button
-                    type="button"
-                    onClick={handleRemoveImage}
-                    className="text-red-500 hover:text-red-700 text-sm ml-4"
-                  >
-                    <FaTrash />
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
+          {images.length > 0 ? (
+  images.map((image, index) => (
+    <div key={index} className="flex items-center mb-4">
+      <img
+        src={image}
+        alt={`Preview ${index}`}
+        className="border border-gray-300 w-14 h-14 object-cover"
+      />
+      <div className="ml-4 flex flex-1 items-center">
+        <p className="text-sm text-gray-700 flex-1">Image {index + 1}</p>
+        <button
+          type="button"
+          onClick={() => handleRemoveImage(index)} // Call remove handler with the index
+          className="text-red-500 hover:text-red-700 text-sm ml-4"
+        >
+          <FaTrash />
+        </button>
+      </div>
+    </div>
+  ))
+) : (
             <div className="flex items-center mb-4">
               <img
                 src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
@@ -391,15 +381,16 @@ const PostEquipmentForm = () => {
           )}
 
           <button
-            onClick={() => document.getElementById('imageUpload').click()}
+            onClick={() => document.getElementById('images').click()}
             className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
           >
             Upload Image
           </button>
           <input
             type="file"
-            id="imageUpload"
+                id="images"
             onChange={handleImageChange}
+            multiple
             className="hidden"
           />
         </div>

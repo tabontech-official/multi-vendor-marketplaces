@@ -92,14 +92,11 @@ const SubscriptionHistory = () => {
               <div className='bg-blue-100 p-2 mr-3 rounded-lg shadow-md max-sm:mb-2'>
                 <span className="font-bold text-green-600  ">Total Listings: {totalListings}</span>
               </div>
-              <div className='bg-blue-100 mr-3 p-2 rounded-lg shadow-md max-sm:mb-2'>
-                <span className="font-bold text-green-600">Active Listings: {activeListings}</span>
-              </div>
               <div className='bg-blue-100 p-2 mr-3 rounded-lg shadow-md max-sm:mb-2'>
-                <span className="font-bold text-green-600">Active Free Listings: {freeListing}</span>
+                <span className="font-bold text-green-600"> Free Listings: {freeListing}</span>
               </div>
               <div className='bg-blue-100 p-2 rounded-lg shadow-md max-sm:mb-2'>
-                <span className="font-bold text-green-600">Active Paid Listings: {paidListing}</span>
+                <span className="font-bold text-green-600">Paid Listings: {paidListing}</span>
               </div>
             </div>
             <div className='flex items-center'>

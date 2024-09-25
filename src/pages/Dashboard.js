@@ -22,7 +22,7 @@ const Dashboard = () => {
   const OnEdit = (product) => {
     let formPage = '';
     switch (product.product_type) {
-      case 'used Equipment':
+      case 'Used Equipment':
         formPage = 'Used_Equipment_Listing';
         break;
       case 'New Equipment':
@@ -307,7 +307,7 @@ const Dashboard = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
  
   {product.title !== "Job Listing" ? product.title : "Job Search Listing"}
-  {product.product_type === "used Equipment" && (
+  {product.product_type === "Used Equipment" && (
     <span className="bg-blue-100 text-green-800 text-xs font-medium me-2 px-2.5 mx-3 py-0.5 rounded dark:bg-green-900 dark:text-blue-300">
       Free Listing
     </span>

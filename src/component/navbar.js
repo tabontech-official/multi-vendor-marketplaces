@@ -1,34 +1,38 @@
 import React, { useState } from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa'; 
 import { useAuthContext } from '../Hooks/useAuthContext';
 
-const Navbar = ()=>{
+const Navbar = () => {
+  const { user, dispatch } = useAuthContext();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    const {user , dispatch} = useAuthContext()
-    const [isOpen, setIsOpen] = useState(false);
-     const navigate = useNavigate()
-    const toggleMenu = () => {
-      setIsOpen(!isOpen);
-    };
-  
-    const LogOut = ()=>{
-        try {
-          const userid = localStorage.getItem('userid');
-    
-          if (userid) {
-            const response =  fetch(`https://medspaa.vercel.app/auth/logout/${userid}`, {
-              method: 'POST',
-            });
-        dispatch({ type: "LOGOUT" })
-          }
-        } catch (error) {
-          console.error('Error during logout:', error.error);
-        }
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const LogOut = async () => {
+    try {
+      const userid = localStorage.getItem('userid');
+      if (userid) {
+        await fetch(`https://medspaa.vercel.app/auth/logout/${userid}`, {
+          method: 'POST',
+        });
+        dispatch({ type: "LOGOUT" });
       }
-    return user ? (
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
+  return (
     <>
-        <nav className="bg-[#18262f] h-[85px] flex items-center px-4 relative">
+      <nav className="bg-[#18262f] h-[85px] flex items-center px-4 relative">
         <div className="flex-shrink-0">
           <Link to="/">
             <img
@@ -39,7 +43,6 @@ const Navbar = ()=>{
           </Link>
         </div>
         <div className="flex-grow flex items-center justify-end">
-          {/* Hamburger Menu Icon */}
           <button
             className="block md:hidden p-2 text-white"
             onClick={toggleMenu}
@@ -47,10 +50,7 @@ const Navbar = ()=>{
           >
             {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
           </button>
-          {/* Navigation Links */}
-          <div
-            className={`fixed inset-0 bg-[#18262f] p-4 md:static md:flex md:flex-row md:space-x-8 md:bg-transparent md:items-center ${isOpen ? 'block' : 'hidden'} md:block z-10`}
-          >
+          <div className={`fixed inset-0 bg-[#18262f] p-4 md:static md:flex md:flex-row md:space-x-8 md:bg-transparent md:items-center ${isOpen ? 'block' : 'hidden'} md:block z-10`}>
             <button
               className="absolute top-4 right-4 text-white md:hidden"
               onClick={toggleMenu}
@@ -58,51 +58,54 @@ const Navbar = ()=>{
             >
               <FaTimes size={24} />
             </button>
-            <ul className="flex flex-col md:flex-row md:space-x-8 space-y-4 md:space-y-0">
+            <ul className="flex flex-col md:flex-row md:space-x-8 space-y-4 items-center md:space-y-0">
               {user ? (
-                // Links for authenticated users
                 <>
-                 
                   <li>
-                  <Link to="/dashboard" className="text-white hover:text-gray-400" onClick={toggleMenu}>
-                      Dashboard
+                    <Link to="/dashboard" className="text-white hover:text-gray-400" onClick={toggleMenu}>
+                      My Listings
                     </Link>
                   </li>
                   <li>
-                  <Link to="/edit-account" className="text-white hover:text-gray-400" onClick={toggleMenu}>
-                     My Account
-                    </Link>
-                  </li>
-                  <li>
-                  <Link to="/Subcription_Details" className="text-white hover:text-gray-400" onClick={toggleMenu}>
+                    <Link to="/Subcription_Details" className="text-white hover:text-gray-400" onClick={toggleMenu}>
                       My Subscriptions
                     </Link>
                   </li>
-                  <li onClick={LogOut}>
-                    <Link to="/Login" className="text-white hover:text-gray-400" onClick={toggleMenu}>
-                      LogOut
-                    </Link>
+                  <li className="relative">
+                    <button
+                      onClick={toggleDropdown}
+                      className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
+                    >
+                      My Account
+                      <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4"/>
+                      </svg>
+                    </button>
+                    {isDropdownOpen && (
+                      <div className="absolute  mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow w-40 z-10">
+                        <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownHoverButton">
+                          <li>
+                            <Link to="/edit-account" className="block px-4 py-2 hover:bg-gray-100" onClick={toggleMenu}>
+                              My Profile
+                            </Link>
+                          </li>
+                          <li>
+                            <button onClick={LogOut} className="block w-full text-left px-4 py-2 hover:bg-gray-100">
+                              Log Out
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    )}
                   </li>
                 </>
-              ) : null }
+              ) : null}
             </ul>
           </div>
         </div>
       </nav>
     </>
-    ): <nav className="bg-[#18262f] h-[85px] flex items-center px-4 relative">
-        <div className="flex-shrink-0">
-          <Link to="/">
-            <img
-              src="https://shopify-digital-delivery.s3.amazonaws.com/shop_logo/59235/vRlqYxKteX848.png"
-              className="h-9 logo"
-              alt="Logo"
-            />
-            </Link>
-            </div>
-          
-    </nav>
+  );
+};
 
-}
-
-export default Navbar
+export default Navbar;

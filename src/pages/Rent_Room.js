@@ -16,8 +16,7 @@ const PostRentalForm = () => {
   const [rentalTerms, setRentalTerms] = useState('');
   const [wifiAvailable, setWifiAvailable] = useState();
   const [otherDetails, setOtherDetails] = useState('');
-  const [image, setImage] = useState(null); // State for image upload
-  const [imageName, setImageName] = useState('');
+  const [images, setImages] = useState([]);  const [imageName, setImageName] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,7 +40,7 @@ console.log(product)
       setRentalTerms(roomListing.rentalTerms);
       setWifiAvailable(roomListing.wifiAvailable);
       setOtherDetails(roomListing.otherDetails);
-      setImage(roomListing.image);
+      setImages(roomListing.image);
       setImageName(roomListing.imageName || '');
       setIsEditing(true);
     }
@@ -65,9 +64,10 @@ console.log(product)
 
     const formData = new FormData();
     const id = localStorage.getItem('userid');
-    if (image) {
-      formData.append('image', image);
-    }
+   
+if (images) {
+  formData.append('images', images);
+}
 
     formData.append('location', location);
     formData.append('roomSize', roomSize);
@@ -109,19 +109,23 @@ console.log(product)
   };
 
   // Handler for image file change
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setImage(file);
-    setImageName(file.name);
-    setShowRemoveOption(true); // Show remove option when an image is selected
-  };
+  
+ const handleImageChange = (e) => {
+  const files = Array.from(e.target.files); // Get all selected files
 
-  // Handler to remove image
-  const handleRemoveImage = () => {
-    setImage(null);
-    setImageName('');
-    setShowRemoveOption(false);
-  };
+  if (files) {
+    const newImages = files.map(file => URL.createObjectURL(file)); // Create object URLs for preview
+    setImages(prevImages => [...prevImages, ...newImages]); // Append to the existing images
+  }
+};
+
+
+
+// Handler to remove image
+const handleRemoveImage = (index) => {
+  setImages(prevImages => prevImages.filter((_, i) => i !== index)); // Remove image at the specified index
+};
+
 
   // Handler for type of use allowed change
   const handleTypeOfUseAllowedChange = (e) => {
@@ -279,64 +283,57 @@ console.log(product)
   <p className="text-sm text-gray-500 mb-2"></p>
   
   {/* Image Preview */}
-  {image ? (
-    <div className="flex items-center mb-4">
+  {images.length > 0 ? (
+  images.map((image, index) => (
+    <div key={index} className="flex items-center mb-4">
       <img
         src={image}
-        alt="Preview"
-        className="border border-gray-300 w-24 h-24 object-cover"
+        alt={`Preview ${index}`}
+        className="border border-gray-300 w-14 h-14 object-cover"
       />
       <div className="ml-4 flex flex-1 items-center">
-        <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+        <p className="text-sm text-gray-700 flex-1">Image {index + 1}</p>
         <button
           type="button"
-          onClick={() => {
-            setShowRemoveOption(!showRemoveOption);
-          }}
-          className="text-gray-500 hover:text-gray-700 text-3xl"
+          onClick={() => handleRemoveImage(index)} // Call remove handler with the index
+          className="text-red-500 hover:text-red-700 text-sm ml-4"
         >
-          &#8230;
+          <FaTrash />
         </button>
-        {showRemoveOption && (
-          <button
-            type="button"
-            onClick={handleRemoveImage}
-            className="text-red-500 hover:text-red-700 text-sm ml-4"
-          >
-            <FaTrash />
-          </button>
-        )}
       </div>
     </div>
-  ) : (
-    <div className="flex items-center mb-4">
-      <img
-        src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
-        alt="Preview"
-        className="border border-gray-300 w-24 h-24 object-cover"
-      />
-      <div className="ml-4 flex flex-1 items-center">
-        <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-      </div>
-    </div>
-  )}
+  ))
+) : (
+            <div className="flex items-center mb-4">
+              <img
+                src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
+                alt="Preview"
+                className="border border-gray-300 w-24 h-24 object-cover"
+              />
+              <div className="ml-4 flex flex-1 items-center">
+                <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+              </div>
+            </div>
+          )}
 
-  <button
-    onClick={() => document.getElementById('imageUpload').click()}
-    className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
-  >
-    Upload Image
-  </button>
-  <input
-    type="file"
-    id="imageUpload"
-    onChange={handleImageChange}
-    className="hidden"
-  />
-</div>
-<p className="text-sm text-gray-500">
-            Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
-          </p>
+          <button
+            onClick={() => document.getElementById('images').click()}
+            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
+          >
+            Upload Image
+          </button>
+          <input
+            type="file"
+                id="images"
+            onChange={handleImageChange}
+            multiple
+            className="hidden"
+          />
+        </div>
+        <p className="text-sm text-gray-500">
+          Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
+        </p>
+
         </div>
       </div>
 

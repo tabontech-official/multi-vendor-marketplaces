@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa'; 
 import { useAuthContext } from '../Hooks/useAuthContext';
@@ -7,6 +7,7 @@ const Navbar = () => {
   const { user, dispatch } = useAuthContext();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);  // Reference for the dropdown container
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -29,6 +30,23 @@ const Navbar = () => {
       console.error('Error during logout:', error);
     }
   };
+
+  useEffect(() => {
+    // Function to close dropdown when clicking outside of it
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    // Add event listener to detect clicks outside the dropdown
+    window.addEventListener('click', handleClickOutside);
+
+    // Cleanup the event listener when the component unmounts
+    return () => {
+      window.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
 
   return (
     <>
@@ -71,7 +89,7 @@ const Navbar = () => {
                       My Subscriptions
                     </Link>
                   </li>
-                  <li className="relative">
+                  <li className="relative" ref={dropdownRef}>
                     <button
                       onClick={toggleDropdown}
                       className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
@@ -82,7 +100,7 @@ const Navbar = () => {
                       </svg>
                     </button>
                     {isDropdownOpen && (
-                      <div className="absolute  mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow w-40 z-10">
+                      <div className="absolute mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow w-40 z-10">
                         <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownHoverButton">
                           <li>
                             <Link to="/edit-account" className="block px-4 py-2 hover:bg-gray-100" onClick={toggleMenu}>
@@ -91,7 +109,7 @@ const Navbar = () => {
                           </li>
                           <li>
                             <button onClick={LogOut} className="block w-full text-left px-4 py-2 hover:bg-gray-100">
-                              Log Out
+                              Logout
                             </button>
                           </li>
                         </ul>

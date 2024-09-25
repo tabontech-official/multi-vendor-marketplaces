@@ -113,7 +113,6 @@ const Dashboard = () => {
         const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${id}`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
-          console.log(data)
           setProducts(data.products);
           setFilteredProducts(data.products);
         }
@@ -122,9 +121,10 @@ const Dashboard = () => {
       }
 
       try {
-        const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}`);
+        const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}` , { method: 'GET' } );
         if (response.ok) {
           const data = await response.json();
+
           setCredit(data.quantity || 0);
         }
       } catch (error) {
@@ -132,7 +132,7 @@ const Dashboard = () => {
       }
     };
     fetchProductData();
-  }, []);
+  }, [credit , products]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

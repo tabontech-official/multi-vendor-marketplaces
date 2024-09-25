@@ -92,12 +92,11 @@ const handleLogin = async (e) => {
     const path = localStorage.getItem('path') || '/'; // Default to '/' if path is not found
 
     if (response.ok) {
-      console.log(json)
-      console.log(json)
+
 
       localStorage.setItem('usertoken', json.token);
-      localStorage.setItem('userid', json.data._id);
-      localStorage.setItem('email', json.data.email);
+      localStorage.setItem('userid', json.data.user._id);
+      localStorage.setItem('email', json.data.user.email);
     
    dispatch({ type: 'LOGIN', payload: json });
       setSuccess('Login successful!');

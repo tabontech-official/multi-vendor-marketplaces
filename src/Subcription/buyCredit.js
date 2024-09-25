@@ -39,31 +39,31 @@ const BuyCreditDialog = ({ isOpen, closeModal }) => {
           <h2 className="text-2xl font-bold mb-1">Buy Credits</h2>
           <span className="text-base">10$/credit</span>
           <div className="flex items-center justify-between mb-4 mt-2">
-  <label htmlFor="quantity" className="font-medium">Quantity:</label>
-  <div className="flex items-center">
-    <button
-      onClick={decreaseQuantity}
-      className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-1 px-4 rounded-l transition duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
-    >
-      -
-    </button>
-    <input
-      id="quantity"
-      type="text"
-      value={quantity}
-      onChange={handleQuantityChange}
-      className="border border-gray-300 rounded text-center w-16 py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-      min="1"
-      style={{ MozAppearance: "textfield" }} // For Firefox
-    />
-    <button
-      onClick={increaseQuantity}
-      className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-1 px-4 rounded-r transition duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
-    >
-      +
-    </button>
-  </div>
-</div>
+            <label htmlFor="quantity" className="font-medium">Quantity:</label>
+            <div className="flex items-center">
+              <button
+                onClick={decreaseQuantity}
+                className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-1 px-4 rounded-l transition duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+              >
+                -
+              </button>
+              <input
+                id="quantity"
+                type="text"
+                value={quantity}
+                onChange={handleQuantityChange}
+                className="border border-gray-300 rounded text-center w-16 py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                min="1"
+                style={{ MozAppearance: "textfield" }} // For Firefox
+              />
+              <button
+                onClick={increaseQuantity}
+                className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-1 px-4 rounded-r transition duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+              >
+                +
+              </button>
+            </div>
+          </div>
 
           <div className="mb-6">
             <span className="text-lg font-bold">Price: {dynamicPrice}$</span>

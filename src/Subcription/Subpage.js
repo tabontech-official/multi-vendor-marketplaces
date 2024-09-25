@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { FaShoppingBasket } from 'react-icons/fa';
 import BuyCreditDialog from './buyCredit'; // Import the dialog component
 import { Link } from 'react-router-dom';
@@ -10,6 +10,7 @@ const SubscriptionHistory = () => {
   const [paidListing, setPaidListing] = useState(0);
   const [freeListing, setFreeListing] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false); // New state for dialog visibility
+  const dialogRef = useRef(null); // Reference to the dialog
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -35,7 +36,7 @@ const SubscriptionHistory = () => {
 
             const freeCount = data.products.filter(product => 
               product.product_type === "Used Equipment"  
-            ).length; // Free listings of type "used Equipment"
+            ).length; // Free listings of type "Used Equipment"
             setFreeListing(freeCount);
 
             const paidCount = data.products.filter(product => 
@@ -86,6 +87,23 @@ const SubscriptionHistory = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  const handleClickOutside = (event) => {
+    // Check if the click is outside the dialog
+    if (dialogRef.current && !dialogRef.current.contains(event.target)) {
+      setIsDialogOpen(false); // Close the dialog
+    }
+  };
+
+  useEffect(() => {
+    // Add event listener for clicks
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      // Cleanup event listener on unmount
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className={`flex flex-col bg-gray-50 px-3 py-6 ${isDialogOpen ? 'blur-background' : ''}`}> {/* Apply blur when dialog is open */}
       <div className="flex">
@@ -120,7 +138,7 @@ const SubscriptionHistory = () => {
             <table className="max-sm:flex max-sm:flex-col overflow-auto max-sm:items-center w-full max-sm:w-auto">
               <thead className="bg-gray-200 border-b max-sm:flex max-sm:flex-col w-full">
                 <tr>
-                  <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left ">#</th>
+                  <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">#</th>
                   <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Date Purchased</th>
                   <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Product Name</th>
                   <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Per Credit Price</th>
@@ -134,12 +152,12 @@ const SubscriptionHistory = () => {
                   subscription.lineItems.map((item, itemIndex) => (
                     <tr key={`${index}-${itemIndex}`} className={`border-b ${itemIndex % 2 === 0 ? 'bg-white' : 'bg-gray-100'} w-full`}>
                       <td scope="col" className="px-4 py-2 text-sm font-medium text-gray-900">{index + 1}</td>
-                      <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2 ">{formatDate(subscription.createdAt)}</td>
-                      <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2 ">{item.name}</td>
-                      <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2 ">${item.price}</td>
+                      <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{formatDate(subscription.createdAt)}</td>
+                      <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{item.name}</td>
+                      <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">${item.price}</td>
                       <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{item.quantity}</td>
                       <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2 ">${(item.quantity * item.price).toFixed(2)}</td>
-                      <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2 ">{formatDate(subscription.expiresAt)}</td>
+                      <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{formatDate(subscription.expiresAt)}</td>
                     </tr>
                   ))
                 )}
@@ -150,7 +168,9 @@ const SubscriptionHistory = () => {
       </div>
 
       {/* Render the dialog */}
-      <BuyCreditDialog isOpen={isDialogOpen} closeModal={() => setIsDialogOpen(false)} />
+      <div ref={dialogRef}>
+        <BuyCreditDialog isOpen={isDialogOpen} closeModal={() => setIsDialogOpen(false)}  />
+      </div>
     </div>
   );
 };

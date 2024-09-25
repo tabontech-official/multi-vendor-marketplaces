@@ -113,7 +113,7 @@ const Dashboard = () => {
         const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${id}`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
-      
+          console.log(data)
           setProducts(data.products);
           setFilteredProducts(data.products);
         }

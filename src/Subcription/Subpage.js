@@ -34,12 +34,12 @@ const SubscriptionHistory = () => {
             setActiveListings(activeCount); // Active listings
 
             const freeCount = data.products.filter(product => 
-              product.product_type === "used Equipment"  
+              product.product_type === "Used Equipment"  
             ).length; // Free listings of type "used Equipment"
             setFreeListing(freeCount);
 
             const paidCount = data.products.filter(product => 
-              product.product_type !== "used Equipment" 
+              product.product_type !== "Used Equipment" 
             ).length; // Paid listings
             setPaidListing(paidCount);
 

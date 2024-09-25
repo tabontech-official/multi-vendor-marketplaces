@@ -14,7 +14,7 @@ const BuyCreditDialog = ({ isOpen, closeModal }) => {
 
   const handleBuyNow = () => {
     // The original buy credit functionality
-    window.open("https://www.medspatrader.com/cart/45681550131453:1", "_blank");
+    window.open(`https://www.medspatrader.com/cart/45681550131453:${quantity}`, "_blank");
   };
 
   return (

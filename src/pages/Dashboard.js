@@ -509,7 +509,7 @@ const Dashboard = () => {
         </div>
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
   {/* Buy Credits Button */}
-  <a
+ <a
   href="https://www.medspatrader.com/cart/45681550131453:1"
   target="_blank" // Open in a new tab
   rel="noopener noreferrer" // Security measure

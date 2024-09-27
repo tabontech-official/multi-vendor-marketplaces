@@ -106,7 +106,9 @@ const CategorySelector = () => {
               <HiCube className="w-6 h-6" />
               <span className="text-lg font-medium">Post Used Equipments for Sale</span>
             </div>
-            <span className="text-green-800 font-medium">Free Listing</span>
+            <div className="border border-green-500 text-green-800 p-1 rounded-md flex items-center justify-center">
+              <span className="font-medium">Free Listing</span>
+            </div>
           </div>
         </Link>
 
@@ -123,7 +125,9 @@ const CategorySelector = () => {
                 {icon}
                 <span className="text-lg font-medium">{label}</span>
               </div>
-              <span className="text-yellow-800 font-medium">Paid Listing</span>
+              <div className="border border-yellow-500 text-yellow-800 p-1 rounded-md flex items-center justify-center">
+                <span className="font-medium">Paid Listing</span>
+              </div>
             </div>
           </Link>
         ))}

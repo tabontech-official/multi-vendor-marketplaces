@@ -83,7 +83,7 @@ const CategorySelector = () => {
 
         {/* Available Credits Box and Buy Credits Button */}
         <div className="flex mb-4">
-          <div className="bg-blue-100 text-blue-800 p-3 rounded-lg shadow-md text-center flex-1 transition-transform transform hover:scale-105">
+          <div className="bg-blue-100 text-blue-800 p-3 rounded-lg shadow-md text-center flex-1 transition-transform transform ">
             <span className="font-bold">Available Credits: {availableCredits}</span>
           </div>
           {availableCredits === 0 && (

@@ -569,6 +569,8 @@ const Dashboard = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LISTING NAME</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRICE</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PUBLISH AT</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EXPIRES AT</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 mb-4">
@@ -662,6 +664,8 @@ const Dashboard = () => {
 
                   <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
                   <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "0"}</td>
+                  <td className="px-4 py-2">{new Date(product.createdAt).toLocaleDateString()}</td>
+                  <td className="px-4 py-2">{new Date(product.expiresAt).toLocaleDateString()}</td>
                 </tr>
               ))
             )}

@@ -67,7 +67,7 @@ const CategorySelector = () => {
   };
 
   const handleCategoryClick = (e, path) => {
-    if (availableCredits === 0) {
+    if (availableCredits === 0 && path !== '/Used_Equipment_Listing') {
       e.preventDefault(); // Prevent the link from being followed
       alert("You need to buy credits to use this feature. Please purchase credits to proceed."); // Show alert message
     } else {
@@ -89,7 +89,7 @@ const CategorySelector = () => {
           {availableCredits === 0 && (
             <button
               onClick={handleBuyCredits}
-              className="bg-red-100 text-red-800 p-3 rounded-lg shadow-md text-center flex-1 ml-2 transition-transform transform hover:bg-red-200"
+              className="bg-green-100 text-green-800 p-3 rounded-lg shadow-md text-center flex-1 ml-2 transition-transform transform hover:bg-green-200"
             >
               Buy Credits
             </button>
@@ -104,10 +104,10 @@ const CategorySelector = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <HiCube className="w-6 h-6" />
-              <span className="text-lg font-medium">Post Used Equipments for Sale</span>
+              <span className="text-sm font-medium transform rotate-2">Post Used Equipments for Sale</span> {/* Added tilt */}
             </div>
             <div className="border border-green-500 text-green-800 p-1 rounded-md flex items-center justify-center">
-              <span className="font-medium">Free Listing</span>
+              <span className="font-medium text-sm transform rotate-2">Free</span> {/* Added tilt */}
             </div>
           </div>
         </Link>
@@ -117,16 +117,16 @@ const CategorySelector = () => {
           <Link
             to={path}
             key={path}
-            className="block w-full py-2 px-3 text-white bg-blue-500 border-b-4 border-blue-700 hover:bg-blue-400 hover:border-blue-500 shadow-lg transition-transform transform hover:scale-105 mb-4"
+            className={`block w-full py-2 px-3 ${availableCredits === 0 ? 'text-gray-500 bg-gray-200 border-gray-500' : 'text-white bg-blue-500 border-b-4 border-blue-700'} hover:${availableCredits > 0 ? 'bg-blue-400 border-blue-500' : 'bg-gray-300 border-gray-500'} shadow-lg transition-transform transform hover:scale-105 mb-4`}
             onClick={(e) => handleCategoryClick(e, path)} // Attach click handler for other categories
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 {icon}
-                <span className="text-lg font-medium">{label}</span>
+                <span className="text-sm font-medium transform rotate-2">{label}</span> {/* Added tilt */}
               </div>
               <div className="border border-yellow-500 text-yellow-800 p-1 rounded-md flex items-center justify-center">
-                <span className="font-medium">Paid Listing</span>
+                <span className="font-medium text-sm transform rotate-2">Paid</span> {/* Added tilt */}
               </div>
             </div>
           </Link>

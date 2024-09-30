@@ -21,6 +21,7 @@ const AddJobSearchForm = () => {
   const [isEditing, setIsEditing] = useState(false);
   const locationData = useLocation();
   const { product } = locationData.state || {};
+  const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
 
   useEffect(() => {
     console.log(product)
@@ -65,9 +66,12 @@ const AddJobSearchForm = () => {
     // Create FormData object
     const formData = new FormData();
     
-    if (images) {
-      formData.append('images', images);
+    if(images.length > 0 ){
+      images.map((image)=>{
+        formData.append('images', image); // Append each file
+      })
     }
+
 
     formData.append('location', location);
     formData.append('name', name);
@@ -115,21 +119,18 @@ const AddJobSearchForm = () => {
     }
   };
 
- // Handler for image file change
- const handleImageChange = (e) => {
+// Handler for image file change
+const handleImageChange = (e) => {
   const files = Array.from(e.target.files); // Get all selected files
-
-  if (files) {
-    const newImages = files.map(file => URL.createObjectURL(file)); // Create object URLs for preview
-    setImages(prevImages => [...prevImages, ...newImages]); // Append to the existing images
-  }
+  setImages(prevImages => [...prevImages, ...files]); // Store file objects
+  const newImagePreviews = files.map(file => URL.createObjectURL(file)); // Create object URLs for preview
+  setImagePreviews(prevPreviews => [...prevPreviews, ...newImagePreviews]); // Append to the existing previews
 };
-
-
 
 // Handler to remove image
 const handleRemoveImage = (index) => {
   setImages(prevImages => prevImages.filter((_, i) => i !== index)); // Remove image at the specified index
+  setImagePreviews(prevPreviews => prevPreviews.filter((_, i) => i !== index)); // Remove preview at the specified index
 };
 
   return (
@@ -258,8 +259,8 @@ const handleRemoveImage = (index) => {
             </p>
 
             {/* Image Preview */}
-            {images.length > 0 ? (
-  images.map((image, index) => (
+            {imagePreviews.length > 0 ? (
+  imagePreviews.map((image, index) => (
     <div key={index} className="flex items-center mb-4">
       <img
         src={image}

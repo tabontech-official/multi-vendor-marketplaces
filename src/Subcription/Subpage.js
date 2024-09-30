@@ -260,9 +260,9 @@ const SubscriptionHistory = () => {
             setTotalListings(data.products.length);
             const activeCount = data.products.filter(product => product.status === "active").length; 
             setActiveListings(activeCount);
-            const freeCount = data.products.filter(product => product.product_type === "Used Equipment").length;
+            const freeCount = data.products.filter(product => product.product_type === "Used Equipment" && product.status === "active").length;
             setFreeListing(freeCount);
-            const paidCount = data.products.filter(product => product.product_type !== "Used Equipment").length;
+            const paidCount = data.products.filter(product => product.product_type !== "Used Equipment" && product.status === "active").length;
             setPaidListing(paidCount);
           } else {
             console.error('Expected products array, but got:', data.products);

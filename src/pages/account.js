@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { HiCamera } from 'react-icons/hi';
-
+import { FaTimes } from 'react-icons/fa'; // Import the close icon
+import { useNavigate } from 'react-router-dom'; // Import useHistory for navigation
 const AccountPage = () => {
+  const navigate = useNavigate(); // Initialize useHistory hook
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -120,7 +122,17 @@ const AccountPage = () => {
 
   return (
     <main className="w-full p-8 flex justify-center items-center bg-gray-100 mt-10">
-      <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg p-6">
+      <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg p-6 relative">
+        
+        {/* Close Icon */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="absolute top-4 right-4 text-gray-700 hover:text-gray-900"
+          aria-label="Close"
+        >
+          <FaTimes className="w-6 h-6 text-red-600" />
+        </button>
+
         <div className="mb-4">
           {success && <div className="text-green-500 text-lg font-semibold">{success}</div>}
         </div>

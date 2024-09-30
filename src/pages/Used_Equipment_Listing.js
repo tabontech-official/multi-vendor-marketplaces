@@ -27,6 +27,7 @@ const PostEquipmentForm = () => {
   const [editorState, setEditorState] = useState();
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(false); // New state for editing mode
+  const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
 
   const { product } = location.state || {};
 
@@ -71,23 +72,25 @@ const PostEquipmentForm = () => {
   };
 
   // Handler for form submission
-  const handleSubmit = async (e, status) => { 
-    console.log(status)
+  const handleSubmit = async (e, status) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if(status == "active"){
-      setLoading(true);
-    }
+    setLoading(true);
 
     const id = localStorage.getItem('userid');
-
     const formData = new FormData();
 
-    if (images) {
-      formData.append('images', images);
-    }
 
+    if(images.length > 0 ){
+      images.map((image)=>{
+        formData.append('images', image); // Append each file
+      })
+    }
+   
+
+
+    // Append other form fields to FormData
     formData.append('location', Location);
     formData.append('name', equipmentName);
     formData.append('brand', brandName);
@@ -112,11 +115,7 @@ const PostEquipmentForm = () => {
       const json = await response.json();
 
       if (response.ok) {
-        if(status == "active"){
-          setSuccess(json.message);
-        }else{
-          setSuccess("Your post drafted sucessfully")
-        }
+        setSuccess(status === "active" ? json.message : "Your post drafted successfully");
         setError('');
       } else {
         setSuccess('');
@@ -134,20 +133,16 @@ const PostEquipmentForm = () => {
   // Handler for image file change
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files); // Get all selected files
-
-    if (files) {
-      const newImages = files.map(file => URL.createObjectURL(file)); // Create object URLs for preview
-      setImages(prevImages => [...prevImages, ...newImages]); // Append to the existing images
-    }
+    setImages(prevImages => [...prevImages, ...files]); // Store file objects
+    const newImagePreviews = files.map(file => URL.createObjectURL(file)); // Create object URLs for preview
+    setImagePreviews(prevPreviews => [...prevPreviews, ...newImagePreviews]); // Append to the existing previews
   };
-
-
 
   // Handler to remove image
   const handleRemoveImage = (index) => {
     setImages(prevImages => prevImages.filter((_, i) => i !== index)); // Remove image at the specified index
+    setImagePreviews(prevPreviews => prevPreviews.filter((_, i) => i !== index)); // Remove preview at the specified index
   };
-
   return (
     <main className="bg-gray-100 min-h-screen p-8 flex-row">
       <h1 className="text-4xl font-bold mb-4">Add Used Equipment Listing</h1>
@@ -347,8 +342,8 @@ const PostEquipmentForm = () => {
           </p>
 
           {/* Image Preview */}
-          {images.length > 0 ? (
-  images.map((image, index) => (
+          {imagePreviews.length > 0 ? (
+  imagePreviews.map((image, index) => (
     <div key={index} className="flex items-center mb-4">
       <img
         src={image}
@@ -386,11 +381,12 @@ const PostEquipmentForm = () => {
           >
             Upload Image
           </button>
-          <input
-            type="file"
+          <input 
                 id="images"
-            onChange={handleImageChange}
-            multiple
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                multiple
             className="hidden"
           />
         </div>

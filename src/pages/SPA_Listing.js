@@ -435,7 +435,7 @@ console.log(descriptionText)
       <div className="mt-8 flex ">
         <button
           type="submit"
-          onClick={(e)=>{handleSubmit(e,"active")}}
+          onClick={(e)=>{handleSubmit(e,"publish")}}
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >

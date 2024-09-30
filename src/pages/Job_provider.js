@@ -37,20 +37,23 @@ const AddNewJobForm = () => {
     setJobOfferType(product.providerListings[0].typeOfJobOffered || '');
     setOfferedSalary(product.providerListings[0].offeredYearlySalary || '');
     setPositionDescription(product.providerListings[0].offeredPositionDescription || '');
-    // Optionally set the image if product has an image URL
-    // setImage(product.image || null);
-    // setImageName(product.imageName || '');
-    if (typeof positionDescription === 'string') {
-      // If it's a plain string, convert it to ContentState
-      const contentState = ContentState.createFromText(positionDescription);
+
+
+
+    if (product.providerListings[0].offeredPositionDescription) {
+      const contentState = ContentState.createFromText(product.providerListings[0].offeredPositionDescription);
       setEditorState(EditorState.createWithContent(contentState));
-    } else if (positionDescription) {
-      // If it's already a ContentState or something similar, use it directly
-      setEditorState(EditorState.createWithContent(convertToRaw(positionDescription)));
     } else {
-      // Handle case where description is undefined or null
       setEditorState(EditorState.createEmpty());
+    }
+
+       // Preload product images if available
+       if (product.images && Array.isArray(product.images)) {
+        const existingImages = product.images.map((img) => img.src); // Extract image URLs
+        setImagePreviews(existingImages); // Set them as previews
       }
+    
+   
       }
 }, []);
 
@@ -76,26 +79,41 @@ const AddNewJobForm = () => {
     const formData = new FormData();
 
     // Append the image file if it exists
-    if (images) {
-      formData.append('images', images);
+   
+    if (images.length > 0) {
+      images.forEach((image) => {
+        formData.append('images', image);
+      });
     }
-
 
     // Append other fields
     formData.append('location', location);
-    formData.append('qualificationRequested', qualification);
-    formData.append('jobType', jobType);
+    if(isEditing){
+      formData.append('title', qualification);
+    }else{
+      formData.append('qualificationRequested', qualification);
+ 
+    }
+   formData.append('jobType', jobType);
     formData.append('typeOfJobOffered', jobOfferType);
     formData.append('offeredYearlySalary', offeredSalary); // Fixed key
-    formData.append('offeredPositionDescription', positionDescription);
+    if(isEditing){
+      formData.append('body_html', positionDescription);
+    }else{
+      formData.append('offeredPositionDescription', positionDescription);
+ 
+    }
+
     formData.append("userId", id);
     formData.append("status", status);
 
     try {
-      const response = await fetch("https://medspaa.vercel.app/product/addProvider", {
-        method: "POST",
-        body: formData
-      });
+        const response = await fetch(isEditing
+          ? `https://medspaa.vercel.app/product/updateListing/${product._id}`
+          : "https://medspaa.vercel.app/product/addProvider", {
+          method: isEditing ? "PUT" : "POST",
+          body: formData,
+        });;
 
       const json = await response.json();
 

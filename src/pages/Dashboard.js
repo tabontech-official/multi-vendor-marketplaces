@@ -356,7 +356,10 @@ const handleUnpublish = async (product) => {
                                 </li>
                               )
                             )}
-                            <li >
+                            <li   onClick={(e) => {
+                               
+                               OnEdit(product);
+                             }} >
                               <button 
                               onClick={(e) => {
                                

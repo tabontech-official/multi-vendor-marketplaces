@@ -50,6 +50,8 @@ const AddNewEquipmentForm = () => {
       setYearManufactured(product.equipment.year_manufactured);
       setText(product.equipment.description ||'');
 
+      
+
       if (product.equipment.description) {
         const contentState = ContentState.createFromText(product.equipment.description);
         setEditorState(EditorState.createWithContent(contentState));

@@ -7,7 +7,7 @@ import { useLocation } from 'react-router-dom';
 const AddNewEquipmentForm = () => {
   const Location = useLocation();
   const { product } = Location.state || {};
-
+  const [isEdit, setIsEdit] = useState(false);
   // State hooks for form fields
   const [location, setLocation] = useState('');
   const [name, setName] = useState('');
@@ -35,8 +35,10 @@ const AddNewEquipmentForm = () => {
 
   useEffect(() => {
     if (product && product.equipment) {
+      setIsEdit(true);  // We're editing, not creating
+
       setLocation(product.equipment.location || '');
-      setName(product.equipment.name || '');
+      setName(product.title || '');
       setBrand(product.equipment.name || ''); // Assuming brand is same as name
       setSalePrice(product.equipment.sale_price || '');
       setEquipmentType(product.equipment.equipment_type || '');
@@ -45,27 +47,24 @@ const AddNewEquipmentForm = () => {
       setWarranty(product.equipment.warranty || '');
       setShipping(product.equipment.shipping || '');
       setTraining(product.equipment.training || '');
-      setYearManufactured(product.equipment.year_manufactured)
-      setText(product.equipment.description);
-      if (typeof description === 'string') {
-        // If it's a plain string, convert it to ContentState
-        const contentState = ContentState.createFromText(description);
+      setYearManufactured(product.equipment.year_manufactured);
+      setText(product.equipment.description ||'');
+
+      if (product.equipment.description) {
+        const contentState = ContentState.createFromText(product.equipment.description);
         setEditorState(EditorState.createWithContent(contentState));
-      } else if (description) {
-        // If it's already a ContentState or something similar, use it directly
-        setEditorState(EditorState.createWithContent(convertToRaw(description)));
       } else {
-        // Handle case where description is undefined or null
         setEditorState(EditorState.createEmpty());
       }
-    
-      if(product.image){
-        setImage(product.image.src);
+  
+      // Preload product images if available
+      if (product.images && Array.isArray(product.images)) {
+        const existingImages = product.images.map((img) => img.src); // Extract image URLs
+        setImagePreviews(existingImages); // Set them as previews
       }
-        setImageName("image"); // Set image name from URL
-      setImage(product.image?.src || ""); // Set image if available
     }
-  });
+  }, []);
+  
 
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
@@ -73,23 +72,26 @@ const AddNewEquipmentForm = () => {
     setText(currentText);
   };
 
-  const handleSubmit = async (e , status) => {
+  const handleSubmit = async (e, status) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if(status == "active"){
+    
+    if (status === "active") {
       setLoading(true);
     }
+  
     const id = localStorage.getItem('userid');
     const formData = new FormData();
-
-    if(images.length > 0 ){
-      images.map((image)=>{
-        formData.append('images', image); // Append each file
-      })
+  
+    if (images.length > 0) {
+      images.forEach((image) => {
+        formData.append('images', image);
+      });
     }
+  
     formData.append('location', location);
-    formData.append('name', name);
+    formData.append('title', name);
     formData.append('brand', brand);
     formData.append('sale_price', sale_price);
     formData.append('equipment_type', equipment_type);
@@ -98,49 +100,66 @@ const AddNewEquipmentForm = () => {
     formData.append('warranty', warranty);
     formData.append('shipping', shipping);
     formData.append('training', training);
-    formData.append('description', description);
+   
+      formData.append('description', description);
+ 
     formData.append('userId', id);
     formData.append('status', status);
+  
     try {
-      const response = await fetch("https://medspaa.vercel.app/product/addNewEquipments", {
-        method: "POST",
-        body: formData
+      let url = "https://medspaa.vercel.app/product/addNewEquipments";
+      let method = "POST";
+  
+      // If editing, switch to update API
+      if (product && product._id) {
+        url = `https://medspaa.vercel.app/product/updateListing/${product._id}`;
+        method = "PUT";
+      }
+  
+      const response = await fetch(url, {
+        method,
+        body: formData,
       });
-
+  
       const json = await response.json();
-
+  
       if (response.ok) {
-        if(status == "active"){
+        if (status === "active") {
           setSuccess(json.message);
-        }else{
-          setSuccess("Your post drafted sucessfully")
+        } else {
+          setSuccess("Your post drafted successfully");
         }
         setError('');
-        // Clear form fields
-        setLocation('');
-        setBrand('');
-        setName('');
-        setEquipmentType('');
-        setCertification('');
-        setShipping('');
-        setTraining('');
-        setYearManufactured('');
-        setSalePrice('');
-        setWarranty('');
-        setImage(null);
-        setText('');
-        setImageName('');
+  
+        // Reset the form fields
+        resetFormFields();
       } else {
-        setSuccess('');
         setError(json.error);
+        setSuccess('');
       }
     } catch (error) {
-      setSuccess('');
       setError('An unexpected error occurred.');
-      console.log(error);
+      setSuccess('');
+      console.error(error);
     } finally {
       setLoading(false);
     }
+  };
+  
+  const resetFormFields = () => {
+    setLocation('');
+    setName('');
+    setBrand('');
+    setSalePrice('');
+    setEquipmentType('');
+    setCertification('');
+    setYearManufactured('');
+    setWarranty('');
+    setShipping('');
+    setTraining('');
+    setText('');
+    setImages([]);
+    setImagePreviews([]);
   };
   // Handler for image file change
   const handleImageChange = (e) => {
@@ -152,9 +171,10 @@ const AddNewEquipmentForm = () => {
 
   // Handler to remove image
   const handleRemoveImage = (index) => {
-    setImages(prevImages => prevImages.filter((_, i) => i !== index)); // Remove image at the specified index
-    setImagePreviews(prevPreviews => prevPreviews.filter((_, i) => i !== index)); // Remove preview at the specified index
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index)); // Remove from images
+    setImagePreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index)); // Remove preview
   };
+  
   return (
     <main className="bg-gray-100 min-h-screen p-8 flex-row">
       <h1 className="text-4xl font-bold mb-4">Add New Equipment Listing</h1>
@@ -323,7 +343,8 @@ const AddNewEquipmentForm = () => {
             </p>
 
             {/* Image Preview */}
-            {imagePreviews.length > 0 ? (
+     {/* Image Preview */}
+{imagePreviews.length > 0 ? (
   imagePreviews.map((image, index) => (
     <div key={index} className="flex items-center mb-4">
       <img
@@ -344,17 +365,18 @@ const AddNewEquipmentForm = () => {
     </div>
   ))
 ) : (
-            <div className="flex items-center mb-4">
-              <img
-                src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
-                alt="Preview"
-                className="border border-gray-300 w-24 h-24 object-cover"
-              />
-              <div className="ml-4 flex flex-1 items-center">
-                <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-              </div>
-            </div>
-          )}
+  <div className="flex items-center mb-4">
+    <img
+      src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
+      alt="Preview"
+      className="border border-gray-300 w-24 h-24 object-cover"
+    />
+    <div className="ml-4 flex flex-1 items-center">
+      <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+    </div>
+  </div>
+)}
+
 
           <button
             onClick={() => document.getElementById('images').click()}
@@ -378,45 +400,21 @@ const AddNewEquipmentForm = () => {
 
       {/* Submit Button */}
       <hr className="border-t border-gray-500 my-4" />
-      <div className="mt-8 flex ">
+      <div className="mt-8 flex">
         <button
           type="submit"
-          onClick={(e)=>{handleSubmit(e,"active")}}
+          onClick={(e) => handleSubmit(e, "active")}
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
-          {loading && (
-            <svg
-              className="w-5 h-5 mr-3 text-white animate-spin"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4h-4z"
-              />
-            </svg>
-          )}
-          {loading ? 'Publishing...' : 'Publish'}
+          {loading ? 'Loading...' : isEdit ? 'Update' : 'Publish'}
         </button>
-
         <button
           type="button"
-          onClick={(e)=>{handleSubmit(e,"draft")}}
+          onClick={(e) => handleSubmit(e, "draft")}
           className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
         >
-          
-         Draft
+          Draft
         </button>
       </div>
     </main>

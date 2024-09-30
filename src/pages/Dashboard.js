@@ -183,6 +183,7 @@ const handleUnpublish = async (product) => {
         const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${id}`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
+          console.log(data)
           setProducts(data.products);
           setFilteredProducts(data.products);
         }
@@ -355,12 +356,12 @@ const handleUnpublish = async (product) => {
                                 </li>
                               )
                             )}
-                            <li   onClick={(e) => {
-                                  e.stopPropagation();
-                                  OnEdit(product);
-                                }} >
+                            <li >
                               <button 
-                              
+                              onClick={(e) => {
+                               
+                                OnEdit(product);
+                              }}
                                 className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
                               >
                                 Edit

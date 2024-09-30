@@ -52,9 +52,9 @@ const Navbar = () => {
     <>
       <nav className="bg-[#18262f] h-[85px] flex items-center px-4 relative">
         <div className="flex-shrink-0">
-          <Link to="/">
+          <Link to="https://www.medspatrader.com/">
             <img
-              src="https://shopify-digital-delivery.s3.amazonaws.com/shop_logo/59235/vRlqYxKteX848.png"
+              src="https://cdn.shopify.com/s/files/1/0712/3337/2413/files/Layer_26.svg?v=1724230677"
               className="h-9 logo"
               alt="Logo"
             />

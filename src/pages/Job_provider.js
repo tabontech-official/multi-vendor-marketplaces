@@ -24,7 +24,6 @@ const AddNewJobForm = () => {
   const LocationData = useLocation();
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
 
-
   const { product } = LocationData.state || {};
  console.log(product)
 
@@ -38,7 +37,6 @@ const AddNewJobForm = () => {
     setJobOfferType(product.providerListings[0].typeOfJobOffered || '');
     setOfferedSalary(product.providerListings[0].offeredYearlySalary || '');
     setPositionDescription(product.providerListings[0].offeredPositionDescription || '');
-    setImages(product.providerListings[0].image)
     // Optionally set the image if product has an image URL
     // setImage(product.image || null);
     // setImageName(product.imageName || '');
@@ -78,12 +76,9 @@ const AddNewJobForm = () => {
     const formData = new FormData();
 
     // Append the image file if it exists
-    if(images.length > 0 ){
-      images.map((image)=>{
-        formData.append('images', image); // Append each file
-      })
+    if (images) {
+      formData.append('images', images);
     }
-
 
 
     // Append other fields
@@ -106,6 +101,8 @@ const AddNewJobForm = () => {
 
       if (response.ok) {
         if(status == "active"){
+          setImages([])
+          setImagePreviews([])
           setSuccess(json.message);
         }else{
           setSuccess("Your post drafted sucessfully")
@@ -134,7 +131,7 @@ const AddNewJobForm = () => {
     }
   };
 
-  // Handler for image file change
+  /// Handler for image file change
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files); // Get all selected files
     setImages(prevImages => [...prevImages, ...files]); // Store file objects
@@ -142,11 +139,14 @@ const AddNewJobForm = () => {
     setImagePreviews(prevPreviews => [...prevPreviews, ...newImagePreviews]); // Append to the existing previews
   };
 
-  // Handler to remove image
-  const handleRemoveImage = (index) => {
-    setImages(prevImages => prevImages.filter((_, i) => i !== index)); // Remove image at the specified index
-    setImagePreviews(prevPreviews => prevPreviews.filter((_, i) => i !== index)); // Remove preview at the specified index
-  };
+
+
+
+// Handler to remove image
+const handleRemoveImage = (index) => {
+  setImages((prevImages) => prevImages.filter((_, i) => i !== index)); // Remove from images
+  setImagePreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index)); // Remove preview
+};
 
   return (
     <main className="bg-gray-100 min-h-screen p-8 flex-row">
@@ -324,7 +324,7 @@ const AddNewJobForm = () => {
         className="border border-gray-300 w-14 h-14 object-cover"
       />
       <div className="ml-4 flex flex-1 items-center">
-        <p className="text-sm text-gray-700 flex-1">file {index + 1}</p>
+        <p className="text-sm text-gray-700 flex-1">Image {index + 1}</p>
         <button
           type="button"
           onClick={() => handleRemoveImage(index)} // Call remove handler with the index
@@ -336,17 +336,17 @@ const AddNewJobForm = () => {
     </div>
   ))
 ) : (
-            <div className="flex items-center mb-4">
-              <img
-                src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
-                alt="Preview"
-                className="border border-gray-300 w-24 h-24 object-cover"
-              />
-              <div className="ml-4 flex flex-1 items-center">
-                <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-              </div>
-            </div>
-          )}
+  <div className="flex items-center mb-4">
+    <img
+      src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
+      alt="Preview"
+      className="border border-gray-300 w-24 h-24 object-cover"
+    />
+    <div className="ml-4 flex flex-1 items-center">
+      <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+    </div>
+  </div>
+)}
 
           <button
             onClick={() => document.getElementById('images').click()}

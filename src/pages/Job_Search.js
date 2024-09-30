@@ -33,22 +33,32 @@ const AddJobSearchForm = () => {
       setAvailability(product.jobListings[0].availability || '');
       setRequestedYearlySalary(product.jobListings[0].requestedYearlySalary || '');
       setPositionRequestedDescription(product.jobListings[0].positionRequestedDescription || '');
-      setImages(product.image.src)
-      setImageName(product.imageName || '');
-      // Set the editor state if there's existing description
-      if (typeof positionRequestedDescription === 'string') {
-        // If it's a plain string, convert it to ContentState
-        const contentState = ContentState.createFromText(positionRequestedDescription);
+     
+      if (product.images && Array.isArray(product.images)) {
+        const existingImages = product.images.map((img) => img.src); // Extract image URLs
+        setImagePreviews(existingImages); // Set them as previews
+      } 
+      if (product.jobListings[0].positionRequestedDescription ) {
+        const contentState = ContentState.createFromText(product.jobListings[0].positionRequestedDescription );
         setEditorState(EditorState.createWithContent(contentState));
-      } else if (positionRequestedDescription) {
-        // If it's already a ContentState or something similar, use it directly
-        setEditorState(EditorState.createWithContent(convertToRaw(positionRequestedDescription)));
       } else {
-        // Handle case where description is undefined or null
         setEditorState(EditorState.createEmpty());
-      }    }
+      }
+  
+     
+    }
   }, []);
-
+  const resetForm = () => {
+    setLocation('');
+    setName('');
+    setQualificationRequested('');
+    setAvailability('');
+    setRequestedYearlySalary('');
+    setPositionRequestedDescription('');
+    setImages([]);
+    setImageName('');
+    setEditorState(EditorState.createEmpty());
+  };
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
     const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
@@ -59,66 +69,60 @@ const AddJobSearchForm = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if (status === "active") {
-      setLoading(true);
-    }
+    setLoading(true); // Start loading
 
-    // Create FormData object
     const formData = new FormData();
-    
-    if(images.length > 0 ){
-      images.map((image)=>{
-        formData.append('images', image); // Append each file
-      })
-    }
 
+    if (images.length > 0) {
+      images.forEach((image) => {
+        formData.append('images', image); // Append each file
+      });
+    }
 
     formData.append('location', location);
-    formData.append('name', name);
+    if(isEditing){
+      formData.append('title', name);
+    }
+    else{
+      formData.append('name', name);
+    }
     formData.append('qualification', qualificationRequested);
     formData.append('availability', availability);
     formData.append('requestedYearlySalary', requestedYearlySalary);
     formData.append('positionRequestedDescription', positionRequestedDescription);
     formData.append('status', status);
-    const id = localStorage.getItem('userid');
-    formData.append('userId', id);
+    formData.append('userId', localStorage.getItem('userid')); // Get userId from local storage
 
     try {
-      const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateListing/${product._id}` : "https://medspaa.vercel.app/product/addJob", {
-        method: "POST",
-        body: formData
+      const response = await fetch(isEditing
+        ? `https://medspaa.vercel.app/product/updateListing/${product._id}`
+        : "https://medspaa.vercel.app/product/addJob", {
+        method: isEditing ? "PUT" : "POST",
+        body: formData,
       });
 
       const json = await response.json();
-
       if (response.ok) {
         setSuccess(isEditing ? "Job updated successfully!" : json.message);
         setError('');
-        // Clear form fields after successful submission
+        setTimeout(() => setSuccess(''), 5000); // Clear success message after 5 seconds
+
         if (!isEditing) {
-          setIsEditing(false)
-          setLocation('');
-          setName('');
-          setQualificationRequested('');
-          setAvailability('');
-          setRequestedYearlySalary('');
-          setPositionRequestedDescription('');
-          setImages([]);
-          setImageName('');
+          resetForm();
         }
       } else {
         setSuccess('');
         setError(json.error);
+        setTimeout(() => setError(''), 5000); // Clear error message after 5 seconds
       }
     } catch (error) {
       setSuccess('');
       setError('An unexpected error occurred.');
-      console.log(error);
+      setTimeout(() => setError(''), 5000); // Clear error message after 5 seconds
     } finally {
-      setLoading(false);
+      setLoading(false); // End loading
     }
   };
-
 // Handler for image file change
 const handleImageChange = (e) => {
   const files = Array.from(e.target.files); // Get all selected files

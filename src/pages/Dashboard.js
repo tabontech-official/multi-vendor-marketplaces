@@ -26,7 +26,7 @@ const Dashboard = () => {
 
 
   const handleBuyNow = () => {
-    const buyCreditUrl = `https://www.medspatrader.com/cart/45681550131453:${quantity}`;
+    const buyCreditUrl = `https://www.medspatrader.com/cart/45706005643517:${quantity}`;
     window.open(buyCreditUrl, "_blank");
   }; 
 

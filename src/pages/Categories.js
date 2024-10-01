@@ -45,7 +45,7 @@ const CategorySelector = () => {
   }, []);
 
   const handleBuyNow = () => {
-    const buyCreditUrl = `https://www.medspatrader.com/cart/45706005643517:${quantity}`;
+    const buyCreditUrl = `${process.env.REACT_APP_URL_Product}${quantity}` ||`https://www.medspatrader.com/cart/45706005643517:${quantity}`;
     window.open(buyCreditUrl, "_blank");
   };
 

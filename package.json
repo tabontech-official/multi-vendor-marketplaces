@@ -67,13 +67,13 @@
   "scripts": {
    
      
-  "start": "set PORT=3006 && react-scripts start",
+  "start": "set PORT=3006 && react-app-rewired start",
    
      
-  "build": "react-scripts build",
+  "build": "react-app-rewired build",
    
      
-  "test": "react-scripts test",
+  "test": "react-app-rewired test",
    
      
   "eject": "react-scripts eject"
@@ -141,10 +141,46 @@
   "devDependencies": {
    
      
+  "assert": "^2.1.0",
+   
+     
+  "buffer": "^6.0.3",
+   
+     
+  "crypto-browserify": "^3.12.0",
+   
+     
+  "dotenv": "^16.4.5",
+   
+     
   "http-proxy-middleware": "^3.0.2",
    
      
-  "tailwindcss": "^3.4.10"
+  "https-browserify": "^1.0.0",
+   
+     
+  "os-browserify": "^0.3.0",
+   
+     
+  "process": "^0.11.10",
+   
+     
+  "react-app-rewired": "^2.2.1",
+   
+     
+  "stream-browserify": "^3.0.0",
+   
+     
+  "stream-http": "^3.2.0",
+   
+     
+  "tailwindcss": "^3.4.10",
+   
+     
+  "url": "^0.11.4",
+   
+     
+  "webpack": "^5.95.0"
    
   }
 }

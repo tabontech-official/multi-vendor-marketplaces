@@ -240,7 +240,7 @@ const SubscriptionHistory = () => {
 
   const handleBuyNow = () => {
     // The original buy credit functionality
-    window.open(`https://www.medspatrader.com/cart/45706005643517:${quantity}`, "_blank");
+    window.open( `${process.env.REACT_APP_URL_Product}${quantity}` ||`https://www.medspatrader.com/cart/45706005643517:${quantity}`, "_blank");
   };
 
 

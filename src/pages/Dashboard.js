@@ -7,6 +7,8 @@ import { Dialog } from '@headlessui/react';
 import { FaTimes, FaShoppingBasket } from 'react-icons/fa';
 
 const Dashboard = () => {
+
+
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -26,7 +28,7 @@ const Dashboard = () => {
 
 
   const handleBuyNow = () => {
-    const buyCreditUrl = `https://www.medspatrader.com/cart/45706005643517:${quantity}`;
+    const buyCreditUrl = `${process.env.REACT_APP_URL_Product}${quantity}` ||`https://www.medspatrader.com/cart/45706005643517:${quantity}`;
     window.open(buyCreditUrl, "_blank");
   }; 
 

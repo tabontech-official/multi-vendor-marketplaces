@@ -31,6 +31,8 @@ const AddBusinessListingForm = () => {
   const [descriptionText, setText] = useState("");
   const [name, setName] = useState('');
   const [Zip , setZip] = useState("")
+  const [isEditing, setIsEditing] = useState(false);
+
 
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const onEditorStateChange = (newEditorState) => {
@@ -162,7 +164,7 @@ console.log(descriptionText)
                 <input
                   type="text"
                   id="location"
-                  value={Location}
+                  value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
                   required
@@ -456,9 +458,9 @@ console.log(descriptionText)
       {/* Submit Button */}
       <hr className="border-t border-gray-500 my-4" />
       <div className="mt-8 flex ">
-        <button
+      <button
           type="submit"
-          onClick={(e)=>{handleSubmit(e,"publish")}}
+          onClick={(e) => { handleSubmit(e, "active") }}
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
@@ -484,16 +486,14 @@ console.log(descriptionText)
               />
             </svg>
           )}
-          {loading ? 'Publishing...' : 'Publish'}
-        </button>
+{loading ? (isEditing ? 'Updating...' : 'Publishing...') : (isEditing ? 'Update' : 'Publish')}
+</button>
+
 
         <button
           type="submit"
-          onClick={(e)=>{handleSubmit(e,"active")}}
-
+          onClick={(e) => { handleSubmit(e, "draft") }}
           className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
-
-        
         >
           Draft
         </button>

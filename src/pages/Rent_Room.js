@@ -157,7 +157,7 @@ const handleRemoveImage = (index) => {
                 <input
                   type="text"
                   id="location"
-                  value={Location}
+                  value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
                   required
@@ -382,7 +382,7 @@ const handleRemoveImage = (index) => {
               />
             </svg>
           )}
-          {loading ? 'Updating...' : (isEditing ? 'Update' : 'Publish')}
+          {loading && isEditing ? 'Updating...' : (isEditing ? 'Update' : 'Publish')}
         </button>
         {/* existing Draft button... */}
 

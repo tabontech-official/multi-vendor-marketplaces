@@ -20,7 +20,7 @@ import { useAuthContext } from './Hooks/useAuthContext';
 import { useEffect } from 'react';
 import { jwtDecode } from "jwt-decode";
 import SubscriptionHistory from './Subcription/Subpage';
-
+import PrivacyPolicy from './pages/Policy';
 const App = () => {
 
   const {dispatch} = useAuthContext()
@@ -53,6 +53,7 @@ const App = () => {
         <Route path="/Login" element={!user ? <Auth /> : <Dashboard />} />
         <Route path="/Rent_Room_listing" element={<PrivateRoute element={<AddRoomForRentForm/>} />} />
           <Route path="/Job_Provider_listing" element={<PrivateRoute element={<AddProviderSearchForm/>} />} />
+          <Route path="/Policy" element={<PrivateRoute element={<PrivacyPolicy/>} />} />
           <Route path="/Job_Search_listing" element={<PrivateRoute element={<AddJobSearchForm/>} />} />
           <Route path="/Subcription_Details" element={<PrivateRoute element={<SubscriptionHistory />} />} />
           <Route path="/Business_Equipment_listing" element={<PrivateRoute element={<AddBusinessForm/>} />} />

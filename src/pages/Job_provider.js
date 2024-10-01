@@ -23,6 +23,7 @@ const AddNewJobForm = () => {
   const [isEditing, setIsEditing] = useState(false);
   const LocationData = useLocation();
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
+  const [Zip , setZip] = useState("")
 
   const { product } = LocationData.state || {};
  console.log(product)
@@ -88,6 +89,7 @@ const AddNewJobForm = () => {
 
     // Append other fields
     formData.append('location', location);
+    formData.append('zip',Zip)
     if(isEditing){
       formData.append('title', qualification);
     }else{
@@ -168,7 +170,7 @@ const handleRemoveImage = (index) => {
 
   return (
     <main className="bg-gray-100 min-h-screen p-8 flex-row">
-      <h1 className="text-3xl font-bold mb-1">Add Job Offer Listing</h1>
+      <h1 className="text-3xl font-bold mb-1">PROVIDER JOB OFFER LISTING</h1>
       <p className="text-lg mb-3 text-gray-700">Here you can add job listings to your site.</p>
       <div className="mb-4">
         {error && <div className="text-red-500">{error}</div>}
@@ -181,8 +183,9 @@ const handleRemoveImage = (index) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
               {/* Location */}
-              <div className="flex flex-col">
-                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location *</label>
+              <div className='flex flex-row'>
+              <div className="flex flex-col flex-1 mr-4">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
                 <select
                   id="location"
                   value={location}
@@ -198,7 +201,20 @@ const handleRemoveImage = (index) => {
                   <option value="Other">Other</option>
                 </select>
               </div>
+              
+              <div className="flex flex-col flex-1 ">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>
+                <input
+                  type="number"
+                  id="location"
+                  value={Zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
+                  required
+                />
+              </div>
 
+              </div>
               {/* Qualification Requested */}
               <div className="flex flex-col">
                 <label htmlFor="qualification" className="text-gray-700 text-sm font-medium mb-1">Qualification Requested *</label>
@@ -224,7 +240,7 @@ const handleRemoveImage = (index) => {
               {/* Position Description */}
               <div className='mb-4'>
                 <RTC 
-                  name={"Position Description"}
+                  name={"Position offered Description"}
                   editorState={editorState}
                   onEditorStateChange={onEditorStateChange}
                 />
@@ -264,7 +280,7 @@ const handleRemoveImage = (index) => {
 
               {/* Offered Salary */}
               <div className="flex flex-col">
-                <label htmlFor="offeredSalary" className="text-gray-700 text-sm font-medium mb-1">Offered Salary $ *</label>
+                <label htmlFor="offeredSalary" className="text-gray-700 text-sm font-medium mb-1"> Offered Yearly Salary $  *</label>
                 <input
                   type="number"
                   id="offeredSalary"

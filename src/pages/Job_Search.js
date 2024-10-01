@@ -22,6 +22,7 @@ const AddJobSearchForm = () => {
   const locationData = useLocation();
   const { product } = locationData.state || {};
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
+  const [Zip , setZip] = useState("")
 
   useEffect(() => {
     console.log(product)
@@ -80,6 +81,8 @@ const AddJobSearchForm = () => {
     }
 
     formData.append('location', location);
+    formData.append('zip', Zip)
+
     if(isEditing){
       formData.append('title', name);
     }
@@ -87,7 +90,7 @@ const AddJobSearchForm = () => {
       formData.append('name', name);
     }
     formData.append('qualification', qualificationRequested);
-    formData.append('availability', availability);
+    formData.append('availability',parseInt( availability));
     formData.append('requestedYearlySalary', requestedYearlySalary);
     formData.append('positionRequestedDescription', positionRequestedDescription);
     formData.append('status', status);
@@ -152,17 +155,32 @@ const handleRemoveImage = (index) => {
             {/* Job Details */}
             <div className="grid grid-cols-1 gap-6">
               {/* Location */}
-              <div className="flex flex-col">
-                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location *</label>
+              <div className='flex flex-row '>
+              <div className="flex flex-col flex-1 mr-4">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
                 <input
                   type="text"
                   id="location"
-                  value={location}
+                  value={Location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
                   required
                 />
               </div>
+
+              <div className="flex flex-col flex-1 ">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>
+                <input
+                  type="number"
+                  id="location"
+                  value={Zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
+                  required
+                />
+              </div>
+              </div>
+
 
               {/* Name */}
               <div className="flex flex-col">
@@ -179,7 +197,7 @@ const handleRemoveImage = (index) => {
 
               {/* Qualification Requested */}
               <div className="flex flex-col">
-                <label htmlFor="qualificationRequested" className="text-gray-700 text-sm font-medium mb-1">Qualification Requested *</label>
+                <label htmlFor="qualificationRequested" className="text-gray-700 text-sm font-medium mb-1">Professional Qualifications *</label>
                 <select
                   id="qualificationRequested"
                   value={qualificationRequested}
@@ -201,9 +219,9 @@ const handleRemoveImage = (index) => {
 
               {/* Availability */}
               <div className="flex flex-col">
-                <label htmlFor="availability" className="text-gray-700 text-sm font-medium mb-1">Availability *</label>
+                <label htmlFor="availability" className="text-gray-700 text-sm font-medium mb-1">Available from date *</label>
                 <input
-                  type="text"
+                  type="date"
                   id="availability"
                   value={availability}
                   onChange={(e) => setAvailability(e.target.value)}
@@ -237,7 +255,7 @@ const handleRemoveImage = (index) => {
 
               {/* Job Type */}
               <div className="flex flex-col mt-4">
-                <label htmlFor="jobType" className="text-gray-700 text-sm font-medium mb-1">Job Type *</label>
+                <label htmlFor="jobType" className="text-gray-700 text-sm font-medium mb-1">Position Requested Description: *</label>
                 <select
                   id="jobType"
                   value={availability}

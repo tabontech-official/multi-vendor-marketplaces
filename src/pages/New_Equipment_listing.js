@@ -29,6 +29,7 @@ const AddNewEquipmentForm = () => {
   const [description, setText] = useState("");
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
+  const [Zip , setZip] = useState("")
 
   // Use effect to set initial state from product
 
@@ -93,6 +94,8 @@ const AddNewEquipmentForm = () => {
     }
   
     formData.append('location', location);
+    formData.append('zip', Zip);
+
     if(isEdit){
       formData.append('title', name);
     }else{
@@ -102,7 +105,7 @@ const AddNewEquipmentForm = () => {
     formData.append('sale_price', sale_price);
     formData.append('equipment_type', equipment_type);
     formData.append('certification', certification);
-    formData.append('year_manufactured', year_manufactured);
+    formData.append('year_manufactured', parseInt(year_manufactured));
     formData.append('warranty', warranty);
     formData.append('shipping', shipping);
     formData.append('training', training);
@@ -194,16 +197,31 @@ const AddNewEquipmentForm = () => {
           <h1 className='text-2xl font-semibold mb-4'>Product Details</h1>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
-              <div className="flex flex-col">
-                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location *</label>
+
+
+               <div className='flex flex-row '>
+              <div className="flex flex-col flex-1 mr-4">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
                 <input
                   type="text"
                   id="location"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
                   required
                 />
+              </div>
+
+              <div className="flex flex-col flex-1 ">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>
+                <input
+                  type="number"
+                  value={Zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
+                  required
+                />
+              </div>
               </div>
               <div className="flex flex-col">
                 <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Equipment Name *</label>
@@ -280,13 +298,15 @@ const AddNewEquipmentForm = () => {
                 >
                   <option value="">Select certification</option>
                   <option value="CE Certification">CE Certification</option>
-                  <option value="FDA Certification">FDA Certification</option>
+                  <option value="FDA Certification">FDA Approved</option>
+                  <option value="FDA Certification">FDA Registered</option>
+                  <option value="FDA Certification">Unknown</option>
                 </select>
               </div>
               <div className="flex flex-col">
                 <label htmlFor="year_manufactured" className="text-gray-700 text-sm font-medium mb-1">Year Manufactured *</label>
                 <input
-                  type="number"
+                  type="date"
                   id="year_manufactured"
                   min={0}
                   value={year_manufactured}
@@ -316,9 +336,8 @@ const AddNewEquipmentForm = () => {
                   required
                 >
                   <option value="">Select shipping option</option>
-                  <option value="Free">Free</option>
-                  <option value="At cost">At Cost</option>
-                  <option value="Pick up available">Pick Up Available</option>
+                  <option value="Pick up only">Pick up only</option>
+                  <option value="Free Shipping">Free Shipping</option>
                 </select>
               </div>
               <div className="flex flex-col">

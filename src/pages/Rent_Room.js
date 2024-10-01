@@ -26,6 +26,8 @@ const PostRentalForm = () => {
   const [description, setDescription] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const locationData = useLocation();
+  const [Zip , setZip] = useState("")
+
   const { product } = locationData.state || {};
 console.log(product)
   useEffect(() => {
@@ -72,6 +74,8 @@ console.log(product)
 
 
     formData.append('location', location);
+    formData.append('zip', Zip);
+
     formData.append('roomSize', roomSize);
     formData.append('monthlyRent', monthlyRent);
     formData.append('deposit', deposit);
@@ -134,7 +138,7 @@ const handleRemoveImage = (index) => {
 
   return (
     <main className="bg-gray-100 min-h-screen p-8 flex-row">
-      <h1 className="text-4xl font-bold mb-4">Add Rent Room Listing</h1>
+      <h1 className="text-4xl font-bold mb-4">Add for Rent Room Listing</h1>
       <p className="text-lg mb-8 text-gray-700">Use this form to list your rental property.</p>
       <div className="mb-4">
         {error && <div className="text-red-500">{error}</div>}
@@ -147,16 +151,30 @@ const handleRemoveImage = (index) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
               
-              <div className="flex flex-col">
-                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location *</label>
+            <div className='flex flex-row '>
+              <div className="flex flex-col flex-1 mr-4">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
                 <input
                   type="text"
                   id="location"
-                  value={location}
+                  value={Location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
                   required
                 />
+              </div>
+
+              <div className="flex flex-col flex-1 ">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>
+                <input
+                  type="number"
+                  id="location"
+                  value={Zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
+                  required
+                />
+              </div>
               </div>
 
               <div className="flex flex-col">
@@ -260,8 +278,8 @@ const handleRemoveImage = (index) => {
     required
   >
     <option value="">Select Wi-Fi Availability</option>
-    <option value="true">True</option>
-    <option value="false">False</option>
+    <option value="true">Yes</option>
+    <option value="false">No</option>
   </select>
 </div>
 

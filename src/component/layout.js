@@ -18,8 +18,8 @@ const Layout = () => {
             © Copyright 2020-2024 <span className="font-semibold">med-spa-trader</span>, All rights reserved.
           </p>
           <div className="mt-2 text-center text-xs">
-            <a href="#privacy-policy" className="text-gray-400 hover:text-gray-300 transition duration-300">Privacy Policy</a> |
-            <a href="#terms-of-service" className="text-gray-400 hover:text-gray-300 transition duration-300"> Terms of Service</a>
+            <a href="/policy" className="text-gray-400 hover:text-gray-300 transition duration-300">Privacy Policy</a> |
+            <a href="/policy" className="text-gray-400 hover:text-gray-300 transition duration-300"> Terms of Service</a>
           </div>
         </div>
       </footer>

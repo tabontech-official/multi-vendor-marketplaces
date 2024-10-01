@@ -94,6 +94,7 @@ const PostEquipmentForm = () => {
 
     // Append other form fields to FormData
     formData.append('location', Location);
+    formData.append('zip', Zip)
     formData.append('name', equipmentName);
     formData.append('brand', brandName);
     formData.append('asking_price', askingPrice);
@@ -177,7 +178,7 @@ const PostEquipmentForm = () => {
               <div className="flex flex-col flex-1 ">
                 <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>
                 <input
-                  type="text"
+                  type="number"
                   id="location"
                   value={Zip}
                   onChange={(e) => setZip(e.target.value)}

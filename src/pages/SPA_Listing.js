@@ -30,6 +30,8 @@ const AddBusinessListingForm = () => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [descriptionText, setText] = useState("");
   const [name, setName] = useState('');
+  const [Zip , setZip] = useState("")
+
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
@@ -61,6 +63,7 @@ console.log(descriptionText)
     // Append other fields
     formData.append('name', name )
     formData.append('location', location);
+    formData.append('zip' , Zip)
     formData.append('businessDescription', descriptionText);
     formData.append('asking_price', askingPrice);
     formData.append('establishedYear', establishedYear);
@@ -152,17 +155,33 @@ console.log(descriptionText)
             {/* Business Details */}
             <div className="grid grid-cols-1 gap-6">
               {/* Location */}
-              <div className="flex flex-col">
-                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location *</label>
+            
+              <div className='flex flex-row '>
+              <div className="flex flex-col flex-1 mr-4">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
                 <input
                   type="text"
                   id="location"
-                  value={location}
+                  value={Location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
                   required
                 />
               </div>
+
+              <div className="flex flex-col flex-1 ">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>
+                <input
+                  type="number"
+                  id="location"
+                  value={Zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
+                  required
+                />
+              </div>
+              </div>
+
               <div className="flex flex-col">
                 <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Business Name *</label>
                 <input
@@ -225,7 +244,7 @@ console.log(descriptionText)
 
               {/* Monthly Rent */}
               <div className="flex flex-col">
-                <label htmlFor="monthlyRent" className="text-gray-700 text-sm font-medium mb-1">Monthly Rent $ *</label>
+                <label htmlFor="monthlyRent" className="text-gray-700 text-sm font-medium mb-1">Monthly Rent $ *  (Including Sales Taxes) </label>
                 <input
                   type="number"
                   id="monthlyRent"
@@ -238,7 +257,7 @@ console.log(descriptionText)
 
               {/* Lease Expiration */}
               <div className="flex flex-col">
-                <label htmlFor="leaseExpiration" className="text-gray-700 text-sm font-medium mb-1">Lease Expiration *</label>
+                <label htmlFor="leaseExpiration" className="text-gray-700 text-sm font-medium mb-1"> Lease Expiration date *</label>
                 <input
                   type="number"
                   id="leaseExpiration"
@@ -290,7 +309,7 @@ console.log(descriptionText)
 
               {/* Products/Inventory */}
               <div className="flex flex-col">
-                <label htmlFor="productsInventory" className="text-gray-700 text-sm font-medium mb-1">Products/Inventory *</label>
+                <label htmlFor="productsInventory" className="text-gray-700 text-sm font-medium mb-1">Product Inventory Value $$ *</label>
                 <input
                   type="number"
                   id="productsInventory"
@@ -329,9 +348,11 @@ console.log(descriptionText)
               {/* List of Devices */}
               <div className="flex flex-col">
                 <label htmlFor="listOfDevices" className="text-gray-700 text-sm font-medium mb-1">List of Devices</label>
-                <input
+                <textarea
                   type="text"
                   id="listOfDevices"
+                    rows="5"
+                    cols="50"
                   value={listOfDevices}
                   onChange={(e) => setListOfDevices(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
@@ -341,9 +362,11 @@ console.log(descriptionText)
               {/* Offered Services */}
               <div className="flex flex-col">
                 <label htmlFor="offeredServices" className="text-gray-700 text-sm font-medium mb-1">Offered Services</label>
-                <input
+                <textarea
                   type="text"
                   id="offeredServices"
+                   rows="5"
+                    cols="50"
                   value={offeredServices}
                   onChange={(e) => setOfferedServices(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"

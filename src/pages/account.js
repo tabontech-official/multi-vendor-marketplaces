@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { HiCamera } from 'react-icons/hi';
 import { FaTimes } from 'react-icons/fa'; // Import the close icon
-import { useNavigate } from 'react-router-dom'; // Import useHistory for navigation
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+
 const AccountPage = () => {
-  const navigate = useNavigate(); // Initialize useHistory hook
+  const navigate = useNavigate(); // Initialize useNavigate hook
   const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     phone: '',
@@ -18,6 +21,7 @@ const AccountPage = () => {
   const [error, setError] = useState(null);
   const [info, setInfo] = useState('');
   const [success, setSuccess] = useState('');
+  const [agreedToPolicies, setAgreedToPolicies] = useState(false); // New state for policy agreement
 
   useEffect(() => {
     let isMounted = true;
@@ -38,10 +42,12 @@ const AccountPage = () => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log(data)
+          console.log(data);
           setInfo(data);
           if (isMounted) {
             setFormData({
+              firstName: data.firstName || '',
+              lastName: data.lastName || '',
               email: data.email || '',
               password: data.password || '',
               phone: data.phoneNumber || '',
@@ -80,6 +86,11 @@ const AccountPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!agreedToPolicies) {
+      alert("Please agree to the policies before proceeding.");
+      return;
+    }
+
     setLoading(true);
 
     const userId = localStorage.getItem('userid');
@@ -90,6 +101,8 @@ const AccountPage = () => {
     }
 
     const data = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       email: formData.email,
       password: formData.password,
       phoneNumber: formData.phone,
@@ -97,6 +110,7 @@ const AccountPage = () => {
       zip: formData.zip,
       country: formData.country,
       city: formData.city,
+      avatar: formData.profileImage,
     };
 
     try {
@@ -124,7 +138,6 @@ const AccountPage = () => {
   return (
     <main className="w-full p-8 flex justify-center items-center bg-gray-100 mt-10">
       <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg p-6 relative">
-        
         {/* Close Icon */}
         <button
           onClick={() => navigate("/dashboard")}
@@ -167,41 +180,164 @@ const AccountPage = () => {
 
           {/* Form Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {['email', 'password', 'phone', 'address', 'zip', 'country', 'city'].map((field) => (
-              <div key={field} className="flex flex-col">
-                <label htmlFor={field} className="block text-sm font-medium text-gray-700 capitalize">{field.replace(/^\w/, c => c.toUpperCase())}</label>
-                <input
-                  type={field === 'zip' ? 'number' : field === 'password' ? 'password' : 'text'}
-                  id={field}
-                  value={formData[field]}
-                  name={field}
-                  onChange={handleChange}
-                  className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            ))}
+            {/* First Name Field */}
+            <div className="flex flex-col">
+              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name *</label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Last Name Field */}
+            <div className="flex flex-col">
+              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Last Name *</label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Email Field */}
+            <div className="flex flex-col">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email *</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Password Field */}
+            <div className="flex flex-col">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password *</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Phone Field */}
+            <div className="flex flex-col">
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone *</label>
+              <input
+                type="text"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Address Field */}
+            <div className="flex flex-col">
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address *</label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Zip Code Field */}
+            <div className="flex flex-col">
+              <label htmlFor="zip" className="block text-sm font-medium text-gray-700">Zip *</label>
+              <input
+                type="number"
+                id="zip"
+                name="zip"
+                value={formData.zip}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Country Field */}
+            <div className="flex flex-col">
+              <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country *</label>
+              <input
+                type="text"
+                id="country"
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* City Field */}
+            <div className="flex flex-col">
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700">City *</label>
+              <input
+                type="text"
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Policy Agreement Checkbox */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="policyAgreement"
+              name="policyAgreement"
+              checked={agreedToPolicies}
+              onChange={(e) => setAgreedToPolicies(e.target.checked)}
+              className="h-5 w-5 text-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="policyAgreement" className="text-sm font-medium text-gray-700">
+              I agree with the{' '}
+              <span
+                className="text-blue-600 cursor-pointer hover:underline"
+                onClick={() => navigate('/policy')}
+              >
+                policies and terms
+              </span>
+            </label>
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  Loading...
-                </>
-              ) : (
-                'Save Changes'
-              )}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white font-bold py-2 rounded-md shadow hover:bg-blue-700 transition disabled:bg-blue-300"
+          >
+            {loading ? 'Loading...' : 'Save Changes'}
+          </button>
+
+          {error && <div className="text-red-500">{error}</div>}
         </form>
       </div>
     </main>

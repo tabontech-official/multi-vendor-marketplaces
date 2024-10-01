@@ -44,7 +44,7 @@ const AccountPage = () => {
             setFormData({
               email: data.email || '',
               password: data.password || '',
-              phone: data.phone || '',
+              phone: data.phoneNumber || '',
               address: data.address || '',
               zip: data.zip || '',
               country: data.country || '',
@@ -92,7 +92,7 @@ const AccountPage = () => {
     const data = {
       email: formData.email,
       password: formData.password,
-      phone: formData.phone,
+      phoneNumber: formData.phone,
       address: formData.address,
       zip: formData.zip,
       country: formData.country,

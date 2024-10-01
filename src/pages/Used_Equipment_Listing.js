@@ -28,9 +28,11 @@ const PostEquipmentForm = () => {
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(false); // New state for editing mode
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
-
+   const [Zip , setZip] = useState("")
   const { product } = location.state || {};
+  
 
+  console.log(yearPurchased)
   useEffect(() => {
     if (product) {
       setIsEditing(true);
@@ -98,7 +100,7 @@ const PostEquipmentForm = () => {
     formData.append('accept_offers', acceptOffers);
     formData.append('equipment_type', equipmentType);
     formData.append('certification', certification);
-    formData.append('year_purchased', yearPurchased);
+    formData.append('year_purchased', parseInt(yearPurchased));
     formData.append('warranty', warranty);
     formData.append('reason_for_selling', reasonForSelling);
     formData.append('shipping', shipping);
@@ -157,17 +159,32 @@ const PostEquipmentForm = () => {
           <h1 className='text-2xl font-semibold mb-4'>Equipment Details</h1>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
-              
-              <div className="flex flex-col">
-                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location *</label>
+            
+
+            <div className='flex flex-row '>
+              <div className="flex flex-col flex-1 mr-4">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
                 <input
                   type="text"
                   id="location"
                   value={Location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
                   required
                 />
+              </div>
+
+              <div className="flex flex-col flex-1 ">
+                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>
+                <input
+                  type="text"
+                  id="location"
+                  value={Zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
+                  required
+                />
+              </div>
               </div>
 
               <div className="flex flex-col">
@@ -224,8 +241,8 @@ const PostEquipmentForm = () => {
                   required
                 >
                   <option value="">Select an option</option>
-                  <option value="true">True</option>
-                  <option value="false">False</option>
+                  <option value="true">Yes</option>
+                  <option value="false">no</option>
                 </select>
               </div>
 
@@ -270,9 +287,8 @@ const PostEquipmentForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="yearPurchased" className="text-gray-700 text-sm font-medium mb-1">Year Purchased *</label>
                 <input
-                  type="number"
+                  type="date"
                   id="yearPurchased"
-                  min={0}
                   value={yearPurchased}
                   onChange={(e) => setYearPurchased(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
@@ -323,7 +339,6 @@ const PostEquipmentForm = () => {
                   required
                 >
                   <option value="">Select shipping option</option>
-                  <option value="available at cost">Available at cost</option>
                   <option value="free shipping">Free shipping</option>
                   <option value="pick up only">Pick up only</option>
                 </select>

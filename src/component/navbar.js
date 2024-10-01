@@ -26,6 +26,7 @@ const Navbar = () => {
         });
         dispatch({ type: "LOGOUT" });
         isDropdownOpen(false)
+
       }
     } catch (error) {
       console.error('Error during logout:', error);

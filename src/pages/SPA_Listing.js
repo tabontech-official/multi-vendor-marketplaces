@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor'; // Assuming RTC is the custom editor component
-import { EditorState } from 'draft-js';
+import { convertToRaw, EditorState , ContentState } from "draft-js";
+import { useLocation } from 'react-router-dom';
 
 const AddBusinessListingForm = () => {
   // State hooks for form fields
@@ -31,47 +32,93 @@ const AddBusinessListingForm = () => {
   const [descriptionText, setText] = useState("");
   const [name, setName] = useState('');
   const [Zip , setZip] = useState("")
-  const [isEditing, setIsEditing] = useState(false);
-
-
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
-  const onEditorStateChange = (newEditorState) => {
-    setEditorState(newEditorState);
-    const currentText = newEditorState.getCurrentContent().getPlainText('\u0001');
-    setText(currentText);
-  };
 
-  // Handler for form submission
-  const handleSubmit = async (e , status) => {
-    const id = localStorage.getItem("userid")
+  const [isEditing, setIsEditing] = useState(false);
+  const locationData = useLocation()
+  const { product } = locationData.state || {};
+
+  useEffect(() => {
+    if (product) {
+      setIsEditing(true);
+      const business = product.business || {};
+      setLocation(business.location || '');
+      setZip(business.zip || '');
+      setName(business.name || '');
+      setAskingPrice( product.variants[0].price || '');
+      setEstablishedYear(business.establishedYear || '');
+      setNumEmployees(business.numberOfEmployees || '');
+      setMonthlyRent(business.locationMonthlyRent || '');
+      setLeaseExpiration(parseInt(business.leaseExpirationDate )|| '');
+      setLocationSize(business.locationSize || '');
+      setGrossYearlyRevenue(business.grossYearlyRevenue || '');
+      setCashFlow(business.cashFlow || '');
+      setProductsInventory(business.productsInventory || '');
+      setEquipmentValue(business.equipmentValue || '');
+      setReasonForSelling(business.reasonForSelling || '');
+      setListOfDevices(business.listOfDevices || '');
+      setOfferedServices(business.offeredServices || '');
+      setSupportAndTraining(business.supportAndTraining || '');
+      setText(business.businessDescription || '' )
+      if(business.images){
+        setImages(business.images.map(img => img.src));
+      }
+      
+
+      if (typeof descriptionText === 'string') {
+        // If it's a plain string, convert it to ContentState
+        const contentState = ContentState.createFromText(descriptionText);
+        setEditorState(EditorState.createWithContent(contentState));
+      } else if (descriptionText) {
+        // If it's already a ContentState or something similar, use it directly
+        setEditorState(EditorState.createWithContent(convertToRaw(descriptionText)));
+      } else {
+        // Handle case where description is undefined or null
+        setEditorState(EditorState.createEmpty());
+      }
+
+    }
+  }, []);
+console.log(product)
+
+const onEditorStateChange = (newEditorState) => {
+  setEditorState(newEditorState);
+  const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
+  setText(currentText);
+};
+
+
+
+
+
+     // Handler for form submission
+  const handleSubmit = async (e, status) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if(status == "active"){
-      setLoading(true);
-    }
+    setLoading(true);
 
-    // Create a new FormData object
+    const id = localStorage.getItem("userid");
+
     const formData = new FormData();
 
     // Append the image file if it exists
-  
-    if(images.length > 0 ){
-      images.map((image)=>{
+    if (images.length > 0) {
+      images.forEach((image) => {
         formData.append('images', image); // Append each file
-      })
+      });
     }
-console.log(descriptionText)
+
     // Append other fields
-    formData.append('name', name )
+    formData.append('name', name);
     formData.append('location', location);
-    formData.append('zip' , Zip)
+    formData.append('zip', Zip);
     formData.append('businessDescription', descriptionText);
     formData.append('asking_price', askingPrice);
     formData.append('establishedYear', establishedYear);
-    formData.append('numberOfEmployees', numEmployees); // Consistent naming
-    formData.append('locationMonthlyRent', monthlyRent); // Consistent naming
-    formData.append('leaseExpirationDate', leaseExpiration); // Consistent naming
+    formData.append('numberOfEmployees', numEmployees);
+    formData.append('locationMonthlyRent', monthlyRent);
+    formData.append('leaseExpirationDate', leaseExpiration);
     formData.append('locationSize', locationSize);
     formData.append('grossYearlyRevenue', grossYearlyRevenue);
     formData.append('cashFlow', cashFlow);
@@ -85,10 +132,12 @@ console.log(descriptionText)
     formData.append('status', status);
 
     try {
-      const response = await fetch('https://medspaa.vercel.app/product/addBusiness', {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await fetch(isEditing
+        ? `https://medspaa.vercel.app/product/updateListing/${product._id}`
+        : 'https://medspaa.vercel.app/product/addBusiness', {
+          method: isEditing ? 'PUT' : 'POST', 
+          body: formData,
+        });
 
       const json = await response.json();
 
@@ -112,9 +161,9 @@ console.log(descriptionText)
         setListOfDevices('');
         setOfferedServices('');
         setSupportAndTraining('');
-        setImages([]); // Clear the image file
-        setText(''); // Clear description
-        setImageName(''); // Clear image name
+        setImages([]);
+        setText('');
+        setImageName('');
       } else {
         setSuccess('');
         setError(json.error);
@@ -124,9 +173,10 @@ console.log(descriptionText)
       setError('An unexpected error occurred.');
       console.log(error);
     } finally {
-      setLoading(false); // Set loading to false after operation completes
+      setLoading(false);
     }
   };
+
 
   // Handler for image file change
   const handleImageChange = (e) => {
@@ -135,6 +185,7 @@ console.log(descriptionText)
     const newImagePreviews = files.map(file => URL.createObjectURL(file)); // Create object URLs for preview
     setImagePreviews(prevPreviews => [...prevPreviews, ...newImagePreviews]); // Append to the existing previews
   };
+
 
   // Handler to remove image
   const handleRemoveImage = (index) => {

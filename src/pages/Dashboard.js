@@ -89,6 +89,9 @@ const Dashboard = () => {
       case 'Room Listing':
         formPage = 'Rent_Room_listing';
         break;
+        case 'Business Listing':
+          formPage = 'Business_Equipment_listing';
+          break;
       default:
         console.error('Unknown product type:', product.product_type);
         return;

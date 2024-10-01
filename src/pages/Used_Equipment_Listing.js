@@ -32,7 +32,6 @@ const PostEquipmentForm = () => {
   const { product } = location.state || {};
   
 
-  console.log(yearPurchased)
   useEffect(() => {
     if (product) {
       setIsEditing(true);

@@ -75,22 +75,22 @@ const Dashboard = () => {
     let formPage = '';
     switch (product.product_type) {
       case 'Used Equipment':
-        formPage = 'Used_Equipment_Listing';
+        formPage = '/Used_Equipment_Listing';
         break;
       case 'New Equipment':
-        formPage = 'New_Equipment_listing';
+        formPage = '/New_Equipment_listing';
         break;
       case 'Job Listing':
-        formPage = 'Job_Search_listing';
+        formPage = '/Job_Search_listing';
         break;
       case 'Provider Search Listing':
-        formPage = 'Job_Provider_listing';
+        formPage = '/Job_Provider_listing';
         break;
       case 'Room Listing':
-        formPage = 'Rent_Room_listing';
+        formPage = '/Rent_Room_listing';
         break;
         case 'Business Listing':
-          formPage = 'Business_Equipment_listing';
+          formPage = '/Business_Equipment_listing';
           break;
       default:
         console.error('Unknown product type:', product.product_type);
@@ -359,13 +359,11 @@ const handleUnpublish = async (product) => {
                                 </li>
                               )
                             )}
-                            <li   onClick={(e) => {
-                               
+                            <li onClick={(e) => {
                                OnEdit(product);
                              }} >
                               <button 
                               onClick={(e) => {
-                               
                                 OnEdit(product);
                               }}
                                 className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"

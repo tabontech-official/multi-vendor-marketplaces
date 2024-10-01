@@ -112,7 +112,7 @@ const CategorySelector = () => {
                 }}
                 className={`block w-full py-3 px-4 text-white border-b-4 shadow-lg transition-transform transform hover:scale-105 ${
                   isDisabled 
-                    ? 'bg-gray-950 border-gray-950' 
+                    ? 'bg-gray-300 border-gray-400 text-black ' 
                     : 'bg-blue-500 border-blue-500 hover:bg-blue-400'
                 }`}
               >

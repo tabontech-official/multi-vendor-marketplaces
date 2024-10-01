@@ -25,6 +25,7 @@ const Navbar = () => {
           method: 'POST',
         });
         dispatch({ type: "LOGOUT" });
+        isDropdownOpen(false)
       }
     } catch (error) {
       console.error('Error during logout:', error);

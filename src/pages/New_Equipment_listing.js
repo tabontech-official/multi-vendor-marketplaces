@@ -93,7 +93,11 @@ const AddNewEquipmentForm = () => {
     }
   
     formData.append('location', location);
-    formData.append('title', name);
+    if(isEdit){
+      formData.append('title', name);
+    }else{
+      formData.append('name', name);
+    }
     formData.append('brand', brand);
     formData.append('sale_price', sale_price);
     formData.append('equipment_type', equipment_type);

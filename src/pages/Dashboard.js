@@ -301,122 +301,113 @@ const handleUnpublish = async (product) => {
         </div>
       </div>
 
-      {/* Products Table */}
-      <div className="p-4">
-        <table className="w-full divide-y divide-gray-200">
-          <thead className="bg-gray-100">
-            <tr className='items-center'>
-              <th className="py-3 pl-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
-              <th className="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LISTING NAME</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRICE</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PUBLISH AT</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EXPIRES AT</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200 mb-4">
-            {filteredProducts.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="px-6 py-4 text-center text-gray-500">No products available</td>
+           {/* Products Table */}
+           <div className="p-4">
+        <div className="overflow-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-100">
+              <tr className='items-center'>
+                <th className="py-3 pl-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
+                <th className="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LISTING NAME</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRICE</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PUBLISH AT</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EXPIRES AT</th>
               </tr>
-            ) : (
-              filteredProducts.map((product, index) => (
-                <tr key={product._id}>
-                  <td className="py-4 whitespace-nowrap relative px-4">
-                    <button 
-                      onClick={() => toggleDropdown(index)}
-                      className="text-gray-600 hover:text-gray-800 focus:outline-none"
-                    >
-                      <HiDotsVertical className="w-5 h-5" />
-                    </button>
-                    <div ref={el => dropdownRefs.current[index] = el}>
-                      {openDropdown === index && (
-                        <div className="absolute  bg-white border flex justify-start items-start border-gray-300 rounded-md shadow-lg z-10">
-                          <ul className="py-1">
-                            {product.status === 'draft' ? (
-                              <li   onClick={(e) => {
-                                e.stopPropagation();
-                                handlePublish(product);
-                              }}>
-                                <button 
-                                
-                                  className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
-                                >
-                                  {loadingId === product._id ? 'Loading...' : 'Publish'}
-                                </button>
-                              </li>
-                            ) : (
-                              product.status === 'active' && (
-                                <li  onClick={(e) => {
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200 mb-4">
+              {filteredProducts.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500">No products available</td>
+                </tr>
+              ) : (
+                filteredProducts.map((product, index) => (
+                  <tr key={product._id}>
+                    <td className="py-4 whitespace-nowrap relative px-4">
+                      <button 
+                        onClick={() => toggleDropdown(index)}
+                        className="text-gray-600 hover:text-gray-800 focus:outline-none"
+                      >
+                        <HiDotsVertical className="w-5 h-5" />
+                      </button>
+                      <div ref={el => dropdownRefs.current[index] = el}>
+                        {openDropdown === index && (
+                          <div className="absolute bg-white border flex justify-start items-start border-gray-300 rounded-md shadow-lg z-10">
+                            <ul className="py-1">
+                              {product.status === 'draft' ? (
+                                <li onClick={(e) => {
                                   e.stopPropagation();
-                                  handleUnpublish(product);
+                                  handlePublish(product);
                                 }}>
-                                  <button 
-                                   
-                                    className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
-                                  >
-                                    {loadingId === product._id ? 'Loading...' : 'Unpublish'}
+                                  <button className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100">
+                                    {loadingId === product._id ? 'Loading...' : 'Publish'}
                                   </button>
                                 </li>
-                              )
-                            )}
-                            <li onClick={(e) => {
-                               OnEdit(product);
-                             }} >
-                              <button 
-                              onClick={(e) => {
+                              ) : (
+                                product.status === 'active' && (
+                                  <li onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleUnpublish(product);
+                                  }}>
+                                    <button className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100">
+                                      {loadingId === product._id ? 'Loading...' : 'Unpublish'}
+                                    </button>
+                                  </li>
+                                )
+                              )}
+                              <li onClick={(e) => {
                                 OnEdit(product);
-                              }}
-                                className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
-                              >
-                                Edit
-                              </button>
-                            </li>
-                            <li>
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onDelete(product._id);
-                                }} 
-                                className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
-                              >
-                                Delete
-                              </button>
-                            </li>
-                          </ul>
-                        </div>
+                              }}>
+                                <button className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100">Edit</button>
+                              </li>
+                              <li>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(product._id);
+                                  }} 
+                                  className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
+                                >
+                                  Delete
+                                </button>
+                              </li>
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap flex items-center">
+                      <div
+                        className={`w-3 h-3 rounded-full ${product.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}
+                        title={product.status}
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {product.title !== "Job Listing" ? product.title : "Job Search Listing"}
+                      {product.product_type === "Used Equipment" && (
+                        <span className="bg-blue-100 text-green-800 text-xs font-medium me-2 px-2.5 mx-3 py-0.5 rounded dark:bg-green-900 dark:text-blue-300">
+                          Free Listing
+                        </span>
                       )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap flex items-center">
-                  <div
-  className={`w-3 h-3 rounded-full ${product.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}
-  title={product.status}
-/>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
- 
-  {product.title !== "Job Listing" ? product.title : "Job Search Listing"}
-  {product.product_type === "Used Equipment" && (
-    <span className="bg-blue-100 text-green-800 text-xs font-medium me-2 px-2.5 mx-3 py-0.5 rounded dark:bg-green-900 dark:text-blue-300">
-      Free Listing
-    </span>
-  )}
-</td>
-
-                  <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "0"}</td>
-                  <td className="px-4 py-2">{new Date(product.createdAt).toLocaleDateString()}</td>
-                  <td className="px-4 py-2">  {product.expiresAt && !isNaN(new Date(product.expiresAt)) 
-    ? new Date(product.expiresAt).toLocaleDateString() 
-    : " 00/00/00 "} </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "0"}</td>
+                    <td className="px-4 py-2">{new Date(product.createdAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-2">
+                      {product.expiresAt && !isNaN(new Date(product.expiresAt)) 
+                        ? new Date(product.expiresAt).toLocaleDateString() 
+                        : "00/00/00"} 
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} className="fixed inset-0 z-10 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4">
           <div ref={dialogRef} className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg border border-black relative">
@@ -428,7 +419,7 @@ const handleUnpublish = async (product) => {
             </button>
 
             <h2 className="text-2xl font-bold mb-1">Buy Credits</h2>
-            <span className="text-base">10$/credit</span>
+            <span className="text-base">$10.00/credit</span>
 
             <div className="flex items-center justify-between mb-4 mt-2">
               <label htmlFor="quantity" className="font-medium">Quantity:</label>
@@ -444,7 +435,8 @@ const handleUnpublish = async (product) => {
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="border border-gray-300 rounded text-center w-16 py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                  className="border border-gray-300 rounded text-center w-16 py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm
+                  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="1"
                 />
                 <button
@@ -457,7 +449,7 @@ const handleUnpublish = async (product) => {
             </div>
 
             <div className="mb-6">
-              <span className="text-lg font-bold">Price: {quantity * pricePerCredit}$</span>
+              <span className="text-lg font-bold">Price:${quantity * pricePerCredit}.00</span>
             </div>
 
             <button

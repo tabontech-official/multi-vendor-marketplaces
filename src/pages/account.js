@@ -55,7 +55,7 @@ const AccountPage = () => {
               zip: data.zip || '',
               country: data.country || '',
               city: data.city || '',
-              profileImage: data.profileImage || 'https://sp-seller.webkul.com/img/store_logo/icon-user.png',
+              profileImage: data.avatar[0] || 'https://sp-seller.webkul.com/img/store_logo/icon-user.png',
             });
           }
         } else {
@@ -110,7 +110,7 @@ const AccountPage = () => {
       zip: formData.zip,
       country: formData.country,
       city: formData.city,
-      avatar: formData.profileImage,
+      images: formData.profileImage,
     };
 
     try {
@@ -222,19 +222,7 @@ const AccountPage = () => {
               />
             </div>
 
-            {/* Password Field */}
-            <div className="flex flex-col">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password *</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+         
 
             {/* Phone Field */}
             <div className="flex flex-col">

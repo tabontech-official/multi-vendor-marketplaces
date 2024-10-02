@@ -52,9 +52,9 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-[#18262f] h-[85px] flex items-center px-4 relative">
+      <nav className="bg-rgb(0 101 174) flex items-center px-4 relative" style={{ backgroundColor: 'rgb(31 130 201)' }}>
         <div className="flex-shrink-0">
-          <Link to="https://www.medspatrader.com/">
+          <Link to="/dashboard">
             <img
               src="https://cdn.shopify.com/s/files/1/0712/3337/2413/files/Layer_26.svg?v=1724230677"
               className="h-9 logo"
@@ -81,6 +81,11 @@ const Navbar = () => {
             <ul className="flex flex-col md:flex-row md:space-x-8 space-y-4 items-center md:space-y-0">
               {user ? (
                 <>
+                 <li>
+                    <Link to="https://www.medspatrader.com/" className="text-white hover:text-gray-400" onClick={toggleMenu}>
+                     Main Store
+                    </Link>
+                  </li>
                   <li>
                     <Link to="/dashboard" className="text-white hover:text-gray-400" onClick={toggleMenu}>
                       My Listings

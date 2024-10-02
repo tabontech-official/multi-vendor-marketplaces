@@ -12,7 +12,7 @@ const Layout = () => {
         <Outlet />
       </main>
 
-      <footer className="bg-gray-800 text-white py-4">
+      <footer className= "text-white py-4"  style={{ backgroundColor: 'rgb(31 130 201)' }}>
         <div className="container mx-auto flex flex-col items-center justify-center">
           <p className="text-center text-sm">
             © Copyright 2020-2024 <span className="font-semibold">med-spa-trader</span>, All rights reserved.

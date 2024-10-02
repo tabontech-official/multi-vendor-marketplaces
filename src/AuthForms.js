@@ -12,6 +12,7 @@ const Auth = () => {
   const [activeTab, setActiveTab] = useState('login');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [name , setName ] = useState('')
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -47,7 +48,7 @@ const Auth = () => {
       const response = await fetch('https://medspaa.vercel.app/auth/signUp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, email, password}),
+        body: JSON.stringify({ firstName, lastName, userName : name ,email, password}),
       });
 
       const json = await response.json();
@@ -115,7 +116,7 @@ const handleLogin = async (e) => {
   }
 
   return (
-    <section className="bg-white dark:bg-gray-900 border-blue-500 mt-20">
+    <section className="bg-white dark:bg-gray-900 border-blue-500 mt-10">
       <div className="container flex items-center justify-center px-6 mx-auto">
         <div className="w-full max-w-md">
           <div className="flex justify-center mx-auto">
@@ -231,6 +232,21 @@ const handleLogin = async (e) => {
                       placeholder="Last Name"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
+                      aria-required="true"
+                    />
+                  </div>
+                  <div className="relative flex items-center mb-4">
+                    <span className="absolute">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 mx-3 text-gray-300 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </span>
+                    <input
+                      type="text"
+                      className="block w-full px-10 py-3 text-gray-700 bg-white border border-blue-500  dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                      placeholder="Last Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                       aria-required="true"
                     />
                   </div>

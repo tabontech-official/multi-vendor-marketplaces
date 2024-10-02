@@ -143,7 +143,7 @@ const CategorySelector = () => {
             </button>
 
             <h2 className="text-2xl font-bold mb-1">Buy Credits</h2>
-            <span className="text-base">10$/credit</span>
+            <span className="text-base">$10.00/credit</span>
 
             <div className="flex items-center justify-between mb-4 mt-2">
               <label htmlFor="quantity" className="font-medium">Quantity:</label>
@@ -159,7 +159,8 @@ const CategorySelector = () => {
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="border border-gray-300 rounded text-center w-16 py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                  className="border border-gray-300 rounded text-center w-16 py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm 
+                  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="1"
                 />
                 <button
@@ -172,7 +173,7 @@ const CategorySelector = () => {
             </div>
 
             <div className="mb-6">
-              <span className="text-lg font-bold">Price: {quantity * pricePerCredit}$</span>
+              <span className="text-lg font-bold">Price:${quantity * pricePerCredit}.00</span>
             </div>
 
             <button

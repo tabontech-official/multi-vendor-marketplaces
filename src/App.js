@@ -2,9 +2,11 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import ForgotPassword from "./pages/ForgotPassword"
 import Dashboard from './pages/Dashboard';
 import EditProfile from './pages/EditProfile';
 import Layout from './component/layout';
+import ResetPassword from './pages/resetPassword';
 import Used_EquipmentForm from './pages/Used_Equipment_Listing';
 import PrivateRoute from './context api/protectedRoutes';
 import AccountPage from './pages/account';
@@ -51,6 +53,8 @@ const App = () => {
         <Route path="/" element={ <Layout />} >
         <Route index element={<PrivateRoute element={<Dashboard />} />} />
         <Route path="/Login" element={!user ? <Auth /> : <Dashboard />} />
+        <Route path="/ForgotPassword" element={<ForgotPassword/>} />
+        <Route path="/Reset" element={<ResetPassword/>} />
         <Route path="/Rent_Room_listing" element={<PrivateRoute element={<AddRoomForRentForm/>} />} />
           <Route path="/Job_Provider_listing" element={<PrivateRoute element={<AddProviderSearchForm/>} />} />
           <Route path="/Policy" element={<PrivateRoute element={<PrivacyPolicy/>} />} />

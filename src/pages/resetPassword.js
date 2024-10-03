@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const ResetPassword = () => {
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const token = queryParams.get('token')
+
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -13,7 +18,7 @@ const ResetPassword = () => {
     setError('');
     setSuccess('');
 
-    const token = localStorage.getItem('reset')
+
 
     if (!newPassword || !confirmPassword) {
       setError('Both password fields are required.');

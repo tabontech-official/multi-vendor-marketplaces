@@ -31,8 +31,6 @@ const ForgotPassword = () => {
       const json = await response.json();
 
       if (response.ok) {
-        console.log(json)
-        localStorage.setItem('reset' , json.token)
         setSuccess('Password reset link sent successfully!');
       } else {
         setError(json.error || 'An error occurred.');

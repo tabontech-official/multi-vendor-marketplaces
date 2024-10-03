@@ -13,7 +13,7 @@ const ResetPassword = () => {
     setError('');
     setSuccess('');
 
-    const token = localStorage.get('reset')
+    const token = localStorage.getItem('reset')
 
     if (!newPassword || !confirmPassword) {
       setError('Both password fields are required.');

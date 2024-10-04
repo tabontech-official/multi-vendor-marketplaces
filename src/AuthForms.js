@@ -228,136 +228,133 @@ if (user) {
               </div>
             ) : (
               <div className="bg-white dark:bg-gray-900 p-6 shadow-lg border border-blue-500 dark:border-gray-600">
-                <form onSubmit={handleSignup}>
-
-
-                <div className="flex space-x-4 mb-4">
-                  
+              <form onSubmit={handleSignup}>
+                <div className="relative flex items-center  mb-2">
                   <input
                     type="text"
-                    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                    placeholder="Email"
+                    className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 px-11 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    placeholder="Username"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    aria-required="true"
+                  />
+                </div>
+                <div className="relative flex items-center mb-2">
+                  <input
+                    type="text"
+                    className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 px-11 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    placeholder="First Name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    aria-required="true"
+                  />
+                </div>
+                <div className="relative flex items-center  mb-2">
+                  <input
+                    type="text"
+                    className="block w-full  pl-3 py-3 text-gray-700 bg-white border border-blue-500 px-11 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    placeholder="Last Name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    aria-required="true"
+                  />
+                </div>
+                <div className="relative flex items-center  mb-2">
+                  <input
+                    type="email"
+                    className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 px-11 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    placeholder="Email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    required
+                    aria-required="true"
                   />
+                </div>
+                <div className="relative flex items-center  mb-2">
                   <input
                     type="password"
-                    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required
+                    aria-required="true"
                   />
                 </div>
 
- <div className="flex space-x-4 mb-4">
+                <div className="relative flex items-center  mb-2">
                   
-  <input
-    type="text"
-    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-    placeholder="First Name"
-    value={firstName}
-    onChange={(e) => setFirstName(e.target.value)}
-    required
-  />
-  <input
-    type="text"
-    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-    placeholder="Last Name"
-    value={lastName}
-    onChange={(e) => setLastName(e.target.value)}
-    required
-  />
-</div>
+                  <input
+                    type="number"
+                    className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40 
+                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="Zip"
+                    value={zip}
+                    onChange={(e) => setZip(e.target.value)}
+                    aria-required="true"
+                  />
+                </div>
 
-<div className="flex space-x-4 mb-4">
-  <input
-    type="text"
-    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-    placeholder="City"
-    value={city}
-    onChange={(e) => setCity(e.target.value)}
-    required
-  />
-  <input
-    type="text"
-    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-    placeholder="State"
-    value={state}
-    onChange={(e) => setState(e.target.value)}
-    required
-  />
-</div>
+                <div className="relative flex items-center  mb-2">
+                  <input
+                    type="text"
+                    className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    placeholder="Country"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    aria-required="true"
+                  />
+                </div>
 
-<div className="flex space-x-4 mb-4">
-  <input
-    type="text"
-    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-    placeholder="ZIP Code"
-    value={zip}
-    onChange={(e) => setZip(e.target.value)}
-    required
-  />
-  <input
-    type="text"
-    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-    placeholder="Country"
-    value={country}
-    onChange={(e) => setCountry(e.target.value)}
-    required
-  />
-</div>
+                <div className="relative flex items-center  mb-2">
+                  <input
+                    type="text"
+                    className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    placeholder="State"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    aria-required="true"
+                  />
+                </div>
 
-<div className="flex space-x-4 mb-4">
-  <input
-    type="text"
-    className="w-1/2  px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-    placeholder="Phone Number"
-    value={phoneNumber}
-    onChange={(e) => setNumber(e.target.value)}
-    required
-  />
+                
+                <div className="relative flex items-center  mb-2">
+                  <input
+                    type="text"
+                    className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    placeholder="City"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    aria-required="true"
+                  />
+                </div>
 
-<input
-    type="text"
-    className="w-1/2  px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-    placeholder="UserName"
-    value={userName}
-    onChange={(e) => setUserName(e.target.value)}
-    required
-  />
-</div>
-
-                  {error && (
-                    <div className="mb-4 text-red-500 dark:text-red-400">
-                      {error}
-                    </div>
-                  )}
-                  {success && (
-                    <div className="mb-4 text-green-500 dark:text-green-400">
-                      {success}
-                    </div>
-                  )}
-                    <button
+                <div className="relative flex items-center  mb-2">
+                  <input
+                    type="number"
+                    className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40
+                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="Phone Number"
+                    value={phoneNumber}
+                    onChange={(e) => setNumber(e.target.value)}
+                    aria-required="true"
+                  />
+                </div>
+      
+                <div className="flex justify-center">
+                  <button
                     type="submit"
-                    className={`w-full py-3 text-white bg-blue-500 rounded focus:outline-none hover:bg-blue-600 ${
+                    disabled={loading}
+                    className={`w-full px-3 py-3 font-semibold text-center text-white transition-colors duration-200 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:bg-blue-600 ${
                       loading ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
-                    disabled={loading} // Disable button while loading
                   >
-                    {loading ? (
-                      <span className="flex justify-center">
-                        <svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24" />
-                        Loading...
-                      </span>
-                    ) : (
-                      'Sign Up'
-                    )}
+                    {loading ? 'Signing up...' : 'Sign Up'}
                   </button>
-                </form>
-              </div>
-            )}
+                </div>
+                {error && <p className="text-red-500 mt-2">{error}</p>}
+                {success && <p className="text-green-500 mt-2">{success}</p>}
+              </form>
+            </div>
+          )}
           </div>
         </div>
       </div>

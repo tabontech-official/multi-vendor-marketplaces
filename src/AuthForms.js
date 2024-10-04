@@ -18,102 +18,114 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [city, setCity] = useState('');
+const [state, setState] = useState('');
+const [zip, setZip] = useState('');
+const [phoneNumber , setNumber ] = useState('')
+const [country, setCountry] = useState('');
+const [loading, setLoading] = useState(false); // Loading state
+ 
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+const handleSignup = async (e) => {
+  e.preventDefault();
+  setError(''); // Clear previous messages
+  setSuccess('');
+  setLoading(true); // Set loading state to true
 
-    if (!firstName || !lastName || !userName || !email || !password || !confirmPassword) {
-      setError('All fields are required.');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      setError('Please enter a valid email address.');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
-      return;
-    }
-
-    try {
-      const response = await fetch('https://medspaa.vercel.app/auth/signUp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, userName, email, password }),
-      });
-
-      const json = await response.json();
-
-      if (response.ok) {
-        setSuccess('Registration successful! Please log in.');
-        setActiveTab('login');
-      } else {
-        setError(json.error || 'An error occurred during registration.');
-      }
-    } catch (error) {
-      setError('An error occurred. Please try again.');
-    }
-  };
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (!email || !password) {
-      setError('All fields are required.');
-      return;
-    }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      setError('Please enter a valid email address.');
-      return;
-    }
-
-    try {
-      const response = await fetch('https://medspaa.vercel.app/auth/signIn', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const json = await response.json();
-      const path = localStorage.getItem('path') || '/';
-
-      if (response.ok) {
-        localStorage.setItem('usertoken', json.token);
-        localStorage.setItem('userid', json.data.user._id);
-        localStorage.setItem('email', json.data.user.email);
-
-        dispatch({ type: 'LOGIN', payload: json });
-        setSuccess('Login successful!');
-        navigate(path);
-        localStorage.removeItem('path');
-      } else {
-        setError(json.error || 'An error occurred during login.');
-      }
-    } catch (error) {
-      setError('An error occurred. Please try again.');
-    }
-  };
-
-  if (user) {
-    return <Dashboard />; // Redirect to dashboard if the user is already logged in
+  if (!firstName || !lastName || !userName || !email || !password) {
+    setError('All fields are required.');
+    setLoading(false); // Reset loading state
+    return;
   }
 
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    setError('Please enter a valid email address.');
+    setLoading(false); // Reset loading state
+    return;
+  }
+
+  if (password.length < 6) {
+    setError('Password must be at least 6 characters long.');
+    setLoading(false); // Reset loading state
+    return;
+  }
+
+  try {
+    const response = await fetch('https://medspaa.vercel.app/auth/signUp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName, lastName, userName, email, password, zip, country, state, phoneNumber, city }),
+    });
+
+    const json = await response.json();
+
+    if (response.ok) {
+      setSuccess('Registration successful! Please log in.');
+      setActiveTab('login');
+    } else {
+      setError(json.error || 'An error occurred during registration.');
+    }
+  } catch (error) {
+    setError('An error occurred. Please try again.');
+  } finally {
+    setLoading(false); // Reset loading state after request
+  }
+};
+
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setError(''); // Clear previous messages
+  setSuccess('');
+  setLoading(true); // Set loading state to true
+
+  if (!email || !password) {
+    setError('All fields are required.');
+    setLoading(false); // Reset loading state
+    return;
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    setError('Please enter a valid email address.');
+    setLoading(false); // Reset loading state
+    return;
+  }
+
+  try {
+    const response = await fetch('https://medspaa.vercel.app/auth/signIn', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const json = await response.json();
+    const path = localStorage.getItem('path') || '/';
+
+    if (response.ok) {
+      localStorage.setItem('usertoken', json.token);
+      localStorage.setItem('userid', json.data.user._id);
+      localStorage.setItem('email', json.data.user.email);
+
+      dispatch({ type: 'LOGIN', payload: json });
+      setSuccess('Login successful!');
+      navigate(path);
+      localStorage.removeItem('path');
+    } else {
+      setError(json.error || 'An error occurred during login.');
+    }
+  } catch (error) {
+    setError('An error occurred. Please try again.');
+  } finally {
+    setLoading(false); // Reset loading state after request
+  }
+};
+
+if (user) {
+  return <Dashboard />; // Redirect to dashboard if the user is already logged in
+}
   return (
-    <section className="bg-white dark:bg-gray-900 border-blue-500 mt-20">
+    <section className="bg-white dark:bg-gray-900 border-blue-500 mt-5 mb-10">
       <div className="container flex items-center justify-center px-6 mx-auto">
         <div className="w-full max-w-md">
           <div className="flex justify-center mx-auto">
@@ -123,7 +135,7 @@ const Auth = () => {
               alt="Logo"
             />
           </div>
-          <div className="flex items-center justify-center mt-6">
+          <div className="flex items-center justify-center mt-2">
             <button
               type="button"
               onClick={() => setActiveTab('login')}
@@ -198,75 +210,125 @@ const Auth = () => {
                   </div>
                   <button
                     type="submit"
-                    className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50"
+                    className={`w-full py-3 text-white bg-blue-500 rounded focus:outline-none hover:bg-blue-600 ${
+                      loading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    disabled={loading} // Disable button while loading
                   >
-                    Login
+                    {loading ? (
+                      <span className="flex justify-center">
+                        <svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24" />
+                        Loading...
+                      </span>
+                    ) : (
+                      'Login'
+                    )}
                   </button>
                 </form>
               </div>
             ) : (
               <div className="bg-white dark:bg-gray-900 p-6 shadow-lg border border-blue-500 dark:border-gray-600">
                 <form onSubmit={handleSignup}>
-                  <div className="mb-4">
-                    <input
-                      type="text"
-                      className="block w-full px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                      placeholder="First Name"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <input
-                      type="text"
-                      className="block w-full px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                      placeholder="Last Name"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <input
-                      type="text"
-                      className="block w-full px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                      placeholder="Username"
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <input
-                      type="email"
-                      className="block w-full px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                      placeholder="Email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <input
-                      type="password"
-                      className="block w-full px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <input
-                      type="password"
-                      className="block w-full px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                      placeholder="Confirm Password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                    />
-                  </div>
+
+
+                <div className="flex space-x-4 mb-4">
+                  
+                  <input
+                    type="text"
+                    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                  <input
+                    type="password"
+                    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+ <div className="flex space-x-4 mb-4">
+                  
+  <input
+    type="text"
+    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+    placeholder="First Name"
+    value={firstName}
+    onChange={(e) => setFirstName(e.target.value)}
+    required
+  />
+  <input
+    type="text"
+    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+    placeholder="Last Name"
+    value={lastName}
+    onChange={(e) => setLastName(e.target.value)}
+    required
+  />
+</div>
+
+<div className="flex space-x-4 mb-4">
+  <input
+    type="text"
+    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+    placeholder="City"
+    value={city}
+    onChange={(e) => setCity(e.target.value)}
+    required
+  />
+  <input
+    type="text"
+    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+    placeholder="State"
+    value={state}
+    onChange={(e) => setState(e.target.value)}
+    required
+  />
+</div>
+
+<div className="flex space-x-4 mb-4">
+  <input
+    type="text"
+    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+    placeholder="ZIP Code"
+    value={zip}
+    onChange={(e) => setZip(e.target.value)}
+    required
+  />
+  <input
+    type="text"
+    className="w-1/2 px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+    placeholder="Country"
+    value={country}
+    onChange={(e) => setCountry(e.target.value)}
+    required
+  />
+</div>
+
+<div className="flex space-x-4 mb-4">
+  <input
+    type="text"
+    className="w-1/2  px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+    placeholder="Phone Number"
+    value={phoneNumber}
+    onChange={(e) => setNumber(e.target.value)}
+    required
+  />
+
+<input
+    type="text"
+    className="w-1/2  px-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+    placeholder="UserName"
+    value={userName}
+    onChange={(e) => setUserName(e.target.value)}
+    required
+  />
+</div>
+
                   {error && (
                     <div className="mb-4 text-red-500 dark:text-red-400">
                       {error}
@@ -277,11 +339,21 @@ const Auth = () => {
                       {success}
                     </div>
                   )}
-                  <button
+                    <button
                     type="submit"
-                    className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50"
+                    className={`w-full py-3 text-white bg-blue-500 rounded focus:outline-none hover:bg-blue-600 ${
+                      loading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    disabled={loading} // Disable button while loading
                   >
-                    Sign Up
+                    {loading ? (
+                      <span className="flex justify-center">
+                        <svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24" />
+                        Loading...
+                      </span>
+                    ) : (
+                      'Sign Up'
+                    )}
                   </button>
                 </form>
               </div>

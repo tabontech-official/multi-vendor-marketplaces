@@ -25,7 +25,9 @@ const Navbar = () => {
           method: 'POST',
         });
         dispatch({ type: "LOGOUT" });
-        isDropdownOpen(false)
+        localStorage.clear()
+         setIsDropdownOpen(false)
+        setIsOpen(false)
 
       }
     } catch (error) {

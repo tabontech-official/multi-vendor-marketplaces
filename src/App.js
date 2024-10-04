@@ -1,7 +1,7 @@
 // src/App.js
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
 import ForgotPassword from "./pages/ForgotPassword"
 import Dashboard from './pages/Dashboard';
 import EditProfile from './pages/EditProfile';
@@ -22,15 +22,15 @@ import { useAuthContext } from './Hooks/useAuthContext';
 import { useEffect } from 'react';
 import { jwtDecode } from "jwt-decode";
 import SubscriptionHistory from './Subcription/Subpage';
-import PrivacyPolicy from './pages/Policy';
-const App = () => {
 
+import PrivacyPolicy from './pages/Policy';
+
+const App = () => {
   const {dispatch} = useAuthContext()
 
   function isTokenExpired(token) { 
     if (!token) return true; 
     const decoded = jwtDecode(token); 
-    console.log(decoded.exp* 1000 < Date.now() )
     return  decoded.exp * 1000 < Date.now();
 } 
 
@@ -39,7 +39,8 @@ const App = () => {
       const token = localStorage.getItem('usertoken'); 
       if (isTokenExpired(token)) { 
         dispatch({type:"LOGOUT"})
-
+        localStorage.removeItem('usertoken'); 
+        return <Navigate to="/Login" replace />
       }
   } 
   checkTokenAndRemove()
@@ -52,7 +53,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={ <Layout />} >
         <Route index element={<PrivateRoute element={<Dashboard />} />} />
-        <Route path="/Login" element={!user ? <Auth /> : <Dashboard />} />
+        <Route path="/Login" element={!user ? <Auth /> : <Navigate to="/dashboard" /> } />
         <Route path="/ForgotPassword" element={<ForgotPassword/>} />
         <Route path="/Reset" element={<ResetPassword/>} />
         <Route path="/Rent_Room_listing" element={<PrivateRoute element={<AddRoomForRentForm/>} />} />
@@ -65,7 +66,6 @@ const App = () => {
           <Route path="/Categories" element={<PrivateRoute element={<CategorySelector />} />} />
           <Route path="/Used_Equipment_Listing" element={<PrivateRoute element={<Used_EquipmentForm />} />} />
           <Route path="/edit-account" element={<PrivateRoute element={<AccountPage />} />} />
-          <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
           <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Route>

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-
 const ResetPassword = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -11,7 +10,23 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const [tokenValid, setTokenValid] = useState(true); // State to track if token exists
+
   const navigate = useNavigate();
+
+
+
+  useEffect(() => {
+    // If no token is found, mark it as invalid and redirect or show an error
+    if (!token) {
+      setTokenValid(false);
+      setTimeout(() => {
+        navigate('/Login'); // Redirect to login or forgot password page after 2 seconds
+      }, 1000);
+    }
+  }, [token, navigate]);
+
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
@@ -55,6 +70,10 @@ const ResetPassword = () => {
       setError('An error occurred. Please try again.');
     }
   };
+
+  if (!tokenValid) {
+    return <div>Invalid or missing token. Redirecting to login...</div>;
+  }
 
   return (
     <section className="bg-white dark:bg-gray-900 border-blue-500 mt-20">

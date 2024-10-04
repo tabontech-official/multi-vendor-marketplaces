@@ -35,7 +35,6 @@ const CategorySelector = () => {
           const data = await response.json();
           const fetchedCredits = data.quantity || 0; // Set available credits from server
           setCredits(fetchedCredits);
-          localStorage.setItem('availableCredits', fetchedCredits); // Store in local storage
         }
       } catch (error) {
         console.error('Error fetching quantity:', error);

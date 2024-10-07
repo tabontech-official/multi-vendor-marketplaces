@@ -2,14 +2,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { HiDotsVertical, HiPlus, HiX } from 'react-icons/hi';
 import { Link, useNavigate } from 'react-router-dom';
+import UseFetchUserData from '../component/fetchUser';
 import { useAuthContext } from '../Hooks/useAuthContext';
 import { Dialog } from '@headlessui/react';
 import { FaTimes, FaShoppingBasket } from 'react-icons/fa';
-
+import { createCheckoutUrl } from '../component/Checkout';
 const Dashboard = () => {
 
 
   const navigate = useNavigate();
+  const {userData , loading , error} = UseFetchUserData()
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -27,8 +29,10 @@ const Dashboard = () => {
 
 
 
-  const handleBuyNow = () => {
-    const buyCreditUrl = `${process.env.REACT_APP_URL_Product}${quantity}` ||`https://www.medspatrader.com/cart/45706005643517:${quantity}`;
+  const handleBuyNow =  () => {
+    console.log(userData)
+    const buyCreditUrl =  createCheckoutUrl(userData,quantity,loading,error);
+    console.log(buyCreditUrl)
     window.open(buyCreditUrl, "_blank");
   }; 
 

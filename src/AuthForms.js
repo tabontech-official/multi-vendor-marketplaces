@@ -106,7 +106,7 @@ const handleLogin = async (e) => {
       localStorage.setItem('usertoken', json.token);
       localStorage.setItem('userid', json.data.user._id);
       localStorage.setItem('email', json.data.user.email);
-
+      console.log(json)
       dispatch({ type: 'LOGIN', payload: json });
       setSuccess('Login successful!');
       navigate(path);
@@ -233,7 +233,7 @@ if (user) {
                   <input
                     type="text"
                     className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 px-11 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                    placeholder="Username"
+                    placeholder="Username*"
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
                     aria-required="true"
@@ -243,7 +243,7 @@ if (user) {
                   <input
                     type="text"
                     className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 px-11 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                    placeholder="First Name"
+                    placeholder="First Name*"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     aria-required="true"
@@ -253,7 +253,7 @@ if (user) {
                   <input
                     type="text"
                     className="block w-full  pl-3 py-3 text-gray-700 bg-white border border-blue-500 px-11 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                    placeholder="Last Name"
+                    placeholder="Last Name*"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     aria-required="true"
@@ -273,7 +273,7 @@ if (user) {
                   <input
                     type="password"
                     className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                    placeholder="Password"
+                    placeholder="Password*"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     aria-required="true"
@@ -286,7 +286,7 @@ if (user) {
                     type="number"
                     className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40 
                     [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    placeholder="Zip"
+                    placeholder="Zip*"
                     value={zip}
                     onChange={(e) => setZip(e.target.value)}
                     aria-required="true"
@@ -297,7 +297,7 @@ if (user) {
                   <input
                     type="text"
                     className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                    placeholder="Country"
+                    placeholder="Country*"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     aria-required="true"
@@ -308,7 +308,7 @@ if (user) {
                   <input
                     type="text"
                     className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                    placeholder="State"
+                    placeholder="State*"
                     value={state}
                     onChange={(e) => setState(e.target.value)}
                     aria-required="true"
@@ -320,7 +320,7 @@ if (user) {
                   <input
                     type="text"
                     className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                    placeholder="City"
+                    placeholder="City*"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     aria-required="true"
@@ -332,7 +332,7 @@ if (user) {
                     type="number"
                     className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40
                     [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    placeholder="Phone Number"
+                    placeholder="Phone Number*"
                     value={phoneNumber}
                     onChange={(e) => setNumber(e.target.value)}
                     aria-required="true"

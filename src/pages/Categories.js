@@ -20,7 +20,7 @@ const CategorySelector = () => {
   const {userData , loading , error} = UseFetchUserData()
   const [credits, setCredits] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(0);
   const pricePerCredit = 10; // Example price per credit
   const dialogRef = useRef(null);
   const [errorMessage, setErrorMessage] = useState('');

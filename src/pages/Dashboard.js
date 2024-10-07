@@ -65,7 +65,7 @@ const Dashboard = () => {
       const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}` , { method: 'GET' } );
       if (response.ok) {
         const data = await response.json();
-
+         console.log(data)
         setCredit(data.quantity || 0);
       }
     } catch (error) {

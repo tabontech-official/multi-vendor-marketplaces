@@ -30,7 +30,7 @@ const ProtectedForms = ({ element, ...rest }) => {
     };
 
     fetchCredits();
-  }, [navigate]);
+  }, []);
 
   // If user is authenticated and has credits, render the element
   if (credits > 0 && user) {

@@ -17,6 +17,7 @@ const AccountPage = () => {
     city: '',
     profileImage: 'https://sp-seller.webkul.com/img/store_logo/icon-user.png',
   });
+  const [imageFile, setImageFile] = useState(null); // State for storing selected image file
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [info, setInfo] = useState('');
@@ -81,7 +82,11 @@ const AccountPage = () => {
   };
 
   const handleImageChange = (e) => {
-    setFormData({ ...formData, profileImage: URL.createObjectURL(e.target.files[0]) });
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file); // Store the selected file
+      setFormData({ ...formData, profileImage: URL.createObjectURL(file) }); // Update the profile image preview
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -90,6 +95,8 @@ const AccountPage = () => {
       alert("Please agree to the policies before proceeding.");
       return;
     }
+
+    const form = new FormData(); // Create a new FormData instance
 
     setLoading(true);
 
@@ -100,26 +107,25 @@ const AccountPage = () => {
       return;
     }
 
-    const data = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      password: formData.password,
-      phoneNumber: formData.phone,
-      address: formData.address,
-      zip: formData.zip,
-      country: formData.country,
-      city: formData.city,
-      images: formData.profileImage,
-    };
+    form.append('firstName', formData.firstName);
+    form.append('lastName', formData.lastName);
+    form.append('email', formData.email);
+    form.append('password', formData.password);
+    form.append('phoneNumber', formData.phone);
+    form.append('address', formData.address);
+    form.append('zip', formData.zip);
+    form.append('country', formData.country);
+    form.append('city', formData.city);
+
+    // Append image file if it exists
+    if (imageFile) {
+      form.append('images', imageFile); // Ensure the correct file is sent
+    }
 
     try {
       const response = await fetch(`https://medspaa.vercel.app/auth/editProfile/${userId}`, {
         method: 'PUT',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        body: form,
       });
 
       if (response.ok) {
@@ -177,6 +183,7 @@ const AccountPage = () => {
               <p className="text-gray-600">Click the icon to upload or change your profile image.</p>
             </div>
           </div>
+
 
           {/* Form Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

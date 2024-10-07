@@ -12,7 +12,6 @@ const Auth = () => {
   const [activeTab, setActiveTab] = useState('login');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [userName, setUserName] = useState(''); // New state for username
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,7 +31,7 @@ const handleSignup = async (e) => {
   setSuccess('');
   setLoading(true); // Set loading state to true
 
-  if (!firstName || !lastName || !userName || !email || !password) {
+  if (!firstName || !lastName  || !email || !password) {
     setError('All fields are required.');
     setLoading(false); // Reset loading state
     return;
@@ -55,7 +54,7 @@ const handleSignup = async (e) => {
     const response = await fetch('https://medspaa.vercel.app/auth/signUp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ firstName, lastName, userName, email, password, zip, country, state, phoneNumber, city }),
+      body: JSON.stringify({ firstName, lastName,  email, password, zip, country, state, phoneNumber, city }),
     });
 
     const json = await response.json();
@@ -229,16 +228,7 @@ if (user) {
             ) : (
               <div className="bg-white dark:bg-gray-900 p-6 shadow-lg border border-blue-500 dark:border-gray-600">
               <form onSubmit={handleSignup}>
-                <div className="relative flex items-center  mb-2">
-                  <input
-                    type="text"
-                    className="block w-full pl-3 py-3 text-gray-700 bg-white border border-blue-500 px-11 dark:bg-gray-900 dark:text-gray-300 dark:border-blue-500 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                    placeholder="Username*"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    aria-required="true"
-                  />
-                </div>
+           
                 <div className="relative flex items-center mb-2">
                   <input
                     type="text"

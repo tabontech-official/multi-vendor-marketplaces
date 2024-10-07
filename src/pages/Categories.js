@@ -5,7 +5,8 @@ import { HiNewspaper, HiCube, HiOfficeBuilding, HiSearch, HiBriefcase, HiHome } 
 import { Dialog } from '@headlessui/react';
 import { FaTimes, FaShoppingBasket } from 'react-icons/fa';
 import { useAuthContext } from '../Hooks/useAuthContext';
-
+import { createCheckoutUrl } from '../component/Checkout';
+import UseFetchUserData from '../component/fetchUser';
 const categories = [
   { path: '/Used_Equipment_Listing', label: 'Post Used Equipments for Sale', icon: <HiCube className="w-6 h-6" />, isFree: true },
   { path: '/New_Equipment_listing', label: 'Post New Equipments for Sale', icon: <HiNewspaper className="w-6 h-6" />, isFree: false },
@@ -16,6 +17,7 @@ const categories = [
 ];
 
 const CategorySelector = () => {
+  const {userData , loading , error} = UseFetchUserData()
   const [credits, setCredits] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -44,7 +46,8 @@ const CategorySelector = () => {
   }, []);
 
   const handleBuyNow = () => {
-    const buyCreditUrl = `${process.env.REACT_APP_URL_Product}${quantity}` ||`https://www.medspatrader.com/cart/45706005643517:${quantity}`;
+    const buyCreditUrl =  createCheckoutUrl(userData,quantity,loading,error);
+    console.log(buyCreditUrl)
     window.open(buyCreditUrl, "_blank");
   };
 

@@ -30,7 +30,7 @@ const Dashboard = () => {
 
 
   const handleBuyNow =  () => {
-    console.log(userData)
+
     const buyCreditUrl =  createCheckoutUrl(userData,quantity,loading,error);
     console.log(buyCreditUrl)
     window.open(buyCreditUrl, "_blank");

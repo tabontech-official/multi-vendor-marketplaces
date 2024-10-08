@@ -4,40 +4,51 @@ import { useAuthContext } from '../Hooks/useAuthContext';
 
 const ProtectedForms = ({ element, ...rest }) => {
   const [credits, setCredits] = useState(0);
-  const navigate = useNavigate(); // Use navigate for redirection
-  const { user } = useAuthContext(); // Access user context
+  const [loading, setLoading] = useState(true); // New loading state
+  const navigate = useNavigate();
+  const { user } = useAuthContext();
 
   useEffect(() => {
     const id = localStorage.getItem('userid');
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
 
     const fetchCredits = async () => {
       try {
         const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
-          const fetchedCredits = data.quantity || 0; // Get available credits
+          const fetchedCredits = data.quantity || 0; 
           setCredits(fetchedCredits);
 
-          // If credits are 0, redirect to the categories page
+          // Redirect if credits are 0
           if (fetchedCredits === 0) {
-            navigate("/categories"); // Replace with the desired route when credits are 0
+            navigate("/categories");
           }
         }
       } catch (error) {
         console.error('Error fetching quantity:', error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
 
     fetchCredits();
   }, []);
 
-  // If user is authenticated and has credits, render the element
+  // Handle loading state
+  if (loading) {
+    return <div>Loading...</div>; // or any loading indicator you prefer
+  }
+
+  // Check credits and user
   if (credits > 0 && user) {
     return element;
   }
 
-  // If not, redirect to the login page
+  // Redirect if not authorized
   return <Navigate to="/Categories" replace />;
 };
 

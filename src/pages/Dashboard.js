@@ -29,13 +29,6 @@ const Dashboard = () => {
 
 
 
-  const handleBuyNow =  () => {
-
-    const buyCreditUrl =  createCheckoutUrl(userData,quantity,loading,error);
-    console.log(buyCreditUrl)
-    window.open(buyCreditUrl, "_blank");
-  }; 
-
   const handleClickOutside = (event) => {
     if (dialogRef.current && !dialogRef.current.contains(event.target)) {
       setIsDialogOpen(false);
@@ -47,6 +40,7 @@ const Dashboard = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
   const fetchProductData = async () => {
     const id = localStorage.getItem('userid');
     if (!id) return;
@@ -192,19 +186,19 @@ const handleUnpublish = async (product) => {
         const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${id}`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
-          console.log(data)
-          setProducts(data.products);
-          setFilteredProducts(data.products);
+          // Sort products by createdAt in descending order (latest first)
+          const sortedProducts = data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          setProducts(sortedProducts);
+          setFilteredProducts(sortedProducts);
         }
       } catch (error) {
         setMessage("You don't have enough credits");
       }
-
+    
       try {
-        const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}` , { method: 'GET' } );
+        const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
-
           setCredit(data.quantity || 0);
         }
       } catch (error) {
@@ -238,6 +232,20 @@ const handleUnpublish = async (product) => {
     setSearchVal('');
     setFilteredProducts(products);
   };
+
+  
+  const handleBuyNow =  () => {
+
+    const buyCreditUrl =  createCheckoutUrl(userData,quantity,loading,error);
+    console.log(buyCreditUrl)
+    window.open(buyCreditUrl, "_blank");
+    setIsDialogOpen(false)
+   setTimeout(() => {
+    fetchCredits()
+   },20000); 
+
+  }; 
+
 
   return user ? (
     <main className="w-full p-4 md:p-8">

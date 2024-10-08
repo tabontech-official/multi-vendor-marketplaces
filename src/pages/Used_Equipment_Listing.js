@@ -31,7 +31,7 @@ const PostEquipmentForm = () => {
    const [Zip , setZip] = useState("")
   const { product } = location.state || {};
   
-
+console.log(product)
   useEffect(() => {
     if (product) {
       setIsEditing(true);
@@ -46,8 +46,10 @@ const PostEquipmentForm = () => {
       setWarranty(product.equipment.warranty);
       setReasonForSelling(product.equipment.reason_for_selling);
       setShipping(product.equipment.shipping);
-     
+      setDescription(product.equipment.description)
+     setZip(product.equipment.zip)
       setDescription(product.equipment.description);
+
       if (typeof description === 'string') {
         // If it's a plain string, convert it to ContentState
         const contentState = ContentState.createFromText(description);
@@ -59,10 +61,11 @@ const PostEquipmentForm = () => {
         // Handle case where description is undefined or null
         setEditorState(EditorState.createEmpty());
       }
-    if(product.images){
-      setImages(product.images.map(img => img.src));
-    }
-        setImageName("image"); // Set image name from URL
+      
+      if (product.images && Array.isArray(product.images)) {
+        const existingImages = product.images.map((img) => img.src); // Extract image URLs
+        setImagePreviews(existingImages); // Set them as previews
+      }
     }
   },[]);
 

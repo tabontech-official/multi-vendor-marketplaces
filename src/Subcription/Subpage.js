@@ -21,12 +21,35 @@ const SubscriptionHistory = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false); // State for dialog visibility
   const dialogRef = useRef(null); // Reference to the dialog
 
+  const fetchSubscriptions = async () => {
+    const email = localStorage.getItem('email');
+    if (!email) {
+      console.error('Email not found in localStorage.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`https://medspaa.vercel.app/order/order/${email}`, { method: "GET" });
+      if (res.ok) {
+        const json = await res.json();
+        const sortedSubscriptions = json.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          setSubscriptions(sortedSubscriptions); // Set sorted subscriptions
+      } else {
+        console.error('Failed to fetch subscriptions:', res.status);
+      }
+    } catch (error) {
+      console.error('Error fetching subscriptions:', error);
+    }
+  };
+
   const handleBuyNow = () => {
     const buyCreditUrl =  createCheckoutUrl(userData,quantity,loading,error);
     console.log(buyCreditUrl)
     window.open(buyCreditUrl, "_blank");
+    setIsDialogOpen(false)
   };
 
+  
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -40,7 +63,9 @@ const SubscriptionHistory = () => {
         const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${id}`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
+           console.log(data)
           if (Array.isArray(data.products)) {
+            
             setTotalListings(data.products.length);
             const activeCount = data.products.filter(product => product.status === "active").length; 
             setActiveListings(activeCount);
@@ -59,25 +84,7 @@ const SubscriptionHistory = () => {
       }
     };
 
-    const fetchSubscriptions = async () => {
-      const email = localStorage.getItem('email');
-      if (!email) {
-        console.error('Email not found in localStorage.');
-        return;
-      }
-
-      try {
-        const res = await fetch(`https://medspaa.vercel.app/order/order/${email}`, { method: "GET" });
-        if (res.ok) {
-          const json = await res.json();
-          setSubscriptions(json.data);
-        } else {
-          console.error('Failed to fetch subscriptions:', res.status);
-        }
-      } catch (error) {
-        console.error('Error fetching subscriptions:', error);
-      }
-    };
+   
 
     fetchProductData();
     fetchSubscriptions();

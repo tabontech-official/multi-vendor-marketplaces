@@ -33,6 +33,7 @@ console.log(product)
   useEffect(() => {
     if (product) {
       const roomListing = product.roomListing[0];
+      setZip(roomListing.zip)
       setLocation(roomListing.location);
       setRoomSize(roomListing.roomSize);
       setMonthlyRent(roomListing.monthlyRent);
@@ -45,6 +46,17 @@ console.log(product)
       setImages(roomListing.image);
       setImageName(roomListing.imageName || '');
       setIsEditing(true);
+      setDescription(roomListing.otherDetails)
+      if (roomListing.otherDetails) {
+        const contentState = ContentState.createFromText(roomListing.otherDetails);
+        setEditorState(EditorState.createWithContent(contentState));
+      } else {
+        setEditorState(EditorState.createEmpty());
+      }
+      if (product.images && Array.isArray(product.images)) {
+        const existingImages = product.images.map((img) => img.src); // Extract image URLs
+        setImagePreviews(existingImages); // Set them as previews
+      }
     }
   }, []);
 

@@ -34,6 +34,7 @@ const AddJobSearchForm = () => {
       setAvailability(product.jobListings[0].availability || '');
       setRequestedYearlySalary(product.jobListings[0].requestedYearlySalary || '');
       setPositionRequestedDescription(product.jobListings[0].positionRequestedDescription || '');
+      setZip(product.jobListings[0].zip)
      
       if (product.images && Array.isArray(product.images)) {
         const existingImages = product.images.map((img) => img.src); // Extract image URLs

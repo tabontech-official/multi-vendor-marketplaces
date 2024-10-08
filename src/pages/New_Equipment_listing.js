@@ -50,7 +50,7 @@ const AddNewEquipmentForm = () => {
       setTraining(product.equipment.training || '');
       setYearManufactured(product.equipment.year_manufactured);
       setText(product.equipment.description ||'');
-
+     setZip(product.equipment.zip)
       
 
       if (product.equipment.description) {

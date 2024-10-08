@@ -27,21 +27,22 @@ const CategorySelector = () => {
   const { user } = useAuthContext();
 
   // Fetching credits from localStorage and server
-  useEffect(() => {
-    const fetchQuantity = async () => {
-      const id = localStorage.getItem('userid');
-      if (!id) return;
-      try {
-        const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}`, { method: 'GET' });
-        if (response.ok) {
-          const data = await response.json();
-          const fetchedCredits = data.quantity || 0; // Set available credits from server
-          setCredits(fetchedCredits);
-        }
-      } catch (error) {
-        console.error('Error fetching quantity:', error);
+  const fetchQuantity = async () => {
+    const id = localStorage.getItem('userid');
+    if (!id) return;
+    try {
+      const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}`, { method: 'GET' });
+      if (response.ok) {
+        const data = await response.json();
+        const fetchedCredits = data.quantity || 0; // Set available credits from server
+        setCredits(fetchedCredits);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching quantity:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchQuantity();
   }, []);
 
@@ -49,6 +50,11 @@ const CategorySelector = () => {
     const buyCreditUrl =  createCheckoutUrl(userData,quantity,loading,error);
     console.log(buyCreditUrl)
     window.open(buyCreditUrl, "_blank");
+    setIsDialogOpen(false)
+  setTimeout(() => {
+  fetchQuantity();
+}, 20000);  // 30,000 milliseconds = 30 seconds
+
   };
 
   const handleClickOutside = (event) => {

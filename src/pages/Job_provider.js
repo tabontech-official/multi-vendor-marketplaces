@@ -38,7 +38,7 @@ const AddNewJobForm = () => {
     setJobOfferType(product.providerListings[0].typeOfJobOffered || '');
     setOfferedSalary(product.providerListings[0].offeredYearlySalary || '');
     setPositionDescription(product.providerListings[0].offeredPositionDescription || '');
-
+   setZip(product.providerListings[0].zip)
 
 
     if (product.providerListings[0].offeredPositionDescription) {

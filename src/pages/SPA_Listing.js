@@ -65,16 +65,16 @@ const AddBusinessListingForm = () => {
       }
       
 
-      if (typeof descriptionText === 'string') {
-        // If it's a plain string, convert it to ContentState
-        const contentState = ContentState.createFromText(descriptionText);
+      if (product.business.businessDescription) {
+        const contentState = ContentState.createFromText(product.business.businessDescription);
         setEditorState(EditorState.createWithContent(contentState));
-      } else if (descriptionText) {
-        // If it's already a ContentState or something similar, use it directly
-        setEditorState(EditorState.createWithContent(convertToRaw(descriptionText)));
       } else {
-        // Handle case where description is undefined or null
         setEditorState(EditorState.createEmpty());
+      }
+
+      if (product.images && Array.isArray(product.images)) {
+        const existingImages = product.images.map((img) => img.src); // Extract image URLs
+        setImagePreviews(existingImages); // Set them as previews
       }
 
     }

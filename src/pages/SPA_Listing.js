@@ -145,25 +145,25 @@ const onEditorStateChange = (newEditorState) => {
         setSuccess(json.message);
         setError('');
         // Clear form fields
-        setLocation('');
-        setBusinessDescription('');
-        setAskingPrice('');
-        setEstablishedYear('');
-        setNumEmployees('');
-        setMonthlyRent('');
-        setLeaseExpiration('');
-        setLocationSize('');
-        setGrossYearlyRevenue('');
-        setCashFlow('');
-        setProductsInventory('');
-        setEquipmentValue('');
-        setReasonForSelling('');
-        setListOfDevices('');
-        setOfferedServices('');
-        setSupportAndTraining('');
-        setImages([]);
-        setText('');
-        setImageName('');
+        // setLocation('');
+        // setBusinessDescription('');
+        // setAskingPrice('');
+        // setEstablishedYear('');
+        // setNumEmployees('');
+        // setMonthlyRent('');
+        // setLeaseExpiration('');
+        // setLocationSize('');
+        // setGrossYearlyRevenue('');
+        // setCashFlow('');
+        // setProductsInventory('');
+        // setEquipmentValue('');
+        // setReasonForSelling('');
+        // setListOfDevices('');
+        // setOfferedServices('');
+        // setSupportAndTraining('');
+        // setImages([]);
+        // setText('');
+        // setImageName('');
       } else {
         setSuccess('');
         setError(json.error);
@@ -511,7 +511,7 @@ const onEditorStateChange = (newEditorState) => {
       <div className="mt-8 flex ">
       <button
           type="submit"
-          onClick={(e) => { handleSubmit(e, "active") }}
+          onClick={(e) => handleSubmit(e, 'active')}
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
@@ -533,21 +533,23 @@ const onEditorStateChange = (newEditorState) => {
               <path
                 className="opacity-75"
                 fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4h-4z"
+                d="M4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0z"
               />
             </svg>
           )}
-{loading ? (isEditing ? 'Updating...' : 'Publishing...') : (isEditing ? 'Update' : 'Publish')}
-</button>
-
-
-        <button
-          type="submit"
-          onClick={(e) => { handleSubmit(e, "draft") }}
-          className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
-        >
-          Draft
+          {isEditing ? "Update" : "Publish"}
         </button>
+      {!isEditing ?(
+  <button
+  type="submit"
+  onClick={(e) => handleSubmit(e, 'draft')}
+  className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
+>
+  Draft
+</button>
+      ):null
+      }
+      
       </div>
     </main>
   );

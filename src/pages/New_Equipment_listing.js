@@ -140,8 +140,8 @@ const AddNewEquipmentForm = () => {
         }
         setError('');
   
-        // Reset the form fields
-        resetFormFields();
+        // // Reset the form fields
+        // resetFormFields();
       } else {
         setError(json.error);
         setSuccess('');
@@ -155,21 +155,21 @@ const AddNewEquipmentForm = () => {
     }
   };
   
-  const resetFormFields = () => {
-    setLocation('');
-    setName('');
-    setBrand('');
-    setSalePrice('');
-    setEquipmentType('');
-    setCertification('');
-    setYearManufactured('');
-    setWarranty('');
-    setShipping('');
-    setTraining('');
-    setText('');
-    setImages([]);
-    setImagePreviews([]);
-  };
+  // const resetFormFields = () => {
+  //   setLocation('');
+  //   setName('');
+  //   setBrand('');
+  //   setSalePrice('');
+  //   setEquipmentType('');
+  //   setCertification('');
+  //   setYearManufactured('');
+  //   setWarranty('');
+  //   setShipping('');
+  //   setTraining('');
+  //   setText('');
+  //   setImages([]);
+  //   setImagePreviews([]);
+  // };
   // Handler for image file change
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files); // Get all selected files
@@ -425,22 +425,48 @@ const AddNewEquipmentForm = () => {
 
       {/* Submit Button */}
       <hr className="border-t border-gray-500 my-4" />
-      <div className="mt-8 flex">
-        <button
+      <div className="mt-8 flex ">
+      <button
           type="submit"
-          onClick={(e) => handleSubmit(e, "active")}
+          onClick={(e) => handleSubmit(e, 'active')}
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
-          {loading ? 'Loading...' : isEdit ? 'Update' : 'Publish'}
+          {loading && (
+            <svg
+              className="w-5 h-5 mr-3 text-white animate-spin"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0z"
+              />
+            </svg>
+          )}
+          {isEdit? "Update" : "Publish"}
         </button>
-        <button
-          type="button"
-          onClick={(e) => handleSubmit(e, "draft")}
-          className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
-        >
-          Draft
-        </button>
+      {!isEdit ?(
+  <button
+  type="submit"
+  onClick={(e) => handleSubmit(e, 'draft')}
+  className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
+>
+  Draft
+</button>
+      ):null
+      }
+      
       </div>
     </main>
   );

@@ -1,12 +1,13 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { HiDotsVertical, HiPlus, HiX } from 'react-icons/hi';
+import { HiDotsVertical, HiPlus, HiX , Hiload } from 'react-icons/hi';
 import { Link, useNavigate } from 'react-router-dom';
 import UseFetchUserData from '../component/fetchUser';
 import { useAuthContext } from '../Hooks/useAuthContext';
 import { Dialog } from '@headlessui/react';
 import { FaTimes, FaShoppingBasket } from 'react-icons/fa';
 import { createCheckoutUrl } from '../component/Checkout';
+import { HiOutlineRefresh } from 'react-icons/hi';
 const Dashboard = () => {
 
 
@@ -29,11 +30,7 @@ const Dashboard = () => {
 
 
 
-  const handleClickOutside = (event) => {
-    if (dialogRef.current && !dialogRef.current.contains(event.target)) {
-      setIsDialogOpen(false);
-    }
-  };
+ 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -66,6 +63,7 @@ const Dashboard = () => {
       console.error('Error fetching quantity:', error);
     }
   };
+
 
   const toggleDropdown = (index) => {
     setOpenDropdown(openDropdown === index ? null : index);
@@ -153,6 +151,20 @@ const Dashboard = () => {
       setLoadingId(null);
     }
   };
+
+  
+  const handleClickOutside = (event) => {
+    if (dialogRef.current && !dialogRef.current.contains(event.target)) {
+      fetchCredits()
+      setIsDialogOpen(false);
+    }
+  };
+
+  const handleCancel=()=>{
+    fetchCredits();
+    setIsDialogOpen(false);
+ 
+  }
   
   
 const handleUnpublish = async (product) => {
@@ -330,9 +342,11 @@ const handleUnpublish = async (product) => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200 mb-4">
               {filteredProducts.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500">No products available</td>
-                </tr>
+             <tr>
+             <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
+               <HiOutlineRefresh className="animate-spin inline-block mr-2" /> Loading...
+             </td>
+           </tr>
               ) : (
                 filteredProducts.map((product, index) => (
                   <tr key={product._id}>
@@ -424,7 +438,7 @@ const handleUnpublish = async (product) => {
         <div className="flex items-center justify-center min-h-screen px-4">
           <div ref={dialogRef} className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg border border-black relative">
             <button
-              onClick={() => setIsDialogOpen(false)}
+              onClick={handleCancel}
               className="absolute top-2 right-2 text-red-500 hover:text-red-700"
             >
               <FaTimes size={20} />

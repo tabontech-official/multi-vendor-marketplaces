@@ -19,11 +19,11 @@ export const createCheckoutUrl = (userData, quantity, loading, error) => {
       'checkout[email]': userData.email || '',
       'checkout[billing_address][first_name]': userData.firstName || '',
       'checkout[billing_address][last_name]': userData.lastName || '',
-      'checkout[billing_address][Address]': userData.address || '',
+      'checkout[billing_address][address1]': userData.address || '',
       'checkout[billing_address][city]': userData.city || '',
       'checkout[billing_address][province]': userData.province || '',
       'checkout[billing_address][zip]': userData.zip || '',
-      'checkout[billing_address][Phone]': userData.phoneNumber || '',
+      'checkout[billing_address][phone]': userData.phoneNumber || '',
       'checkout[billing_address][country]': userData.country || ''
     }).toString();
   

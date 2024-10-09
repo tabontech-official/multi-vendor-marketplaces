@@ -50,18 +50,26 @@ const CategorySelector = () => {
     const buyCreditUrl =  createCheckoutUrl(userData,quantity,loading,error);
     console.log(buyCreditUrl)
     window.open(buyCreditUrl, "_blank");
-    setIsDialogOpen(false)
-  setTimeout(() => {
+
   fetchQuantity();
-}, 20000);  // 30,000 milliseconds = 30 seconds
+
 
   };
 
   const handleClickOutside = (event) => {
     if (dialogRef.current && !dialogRef.current.contains(event.target)) {
+    
+        console.log("Fecthc click outside")
+        fetchQuantity();
+   
       setIsDialogOpen(false);
     }
   };
+  const handleCancel=()=>{
+    console.log("Fecthc click cancel")
+    fetchQuantity();
+    setIsDialogOpen(false);
+  }
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -144,7 +152,7 @@ const CategorySelector = () => {
         <div className="flex items-center justify-center min-h-screen px-4">
           <div ref={dialogRef} className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg border border-black relative">
             <button
-              onClick={() => setIsDialogOpen(false)}
+              onClick={handleCancel}
               className="absolute top-2 right-2 text-red-500 hover:text-red-700"
             >
               <FaTimes size={20} />

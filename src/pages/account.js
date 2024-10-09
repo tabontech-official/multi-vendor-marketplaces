@@ -130,7 +130,7 @@ const AccountPage = () => {
 
       if (response.ok) {
         const responseData = await response.json();
-        setSuccess(responseData.message);
+        setSuccess("Profile Updated");
       } else {
         console.error('Failed to update profile. Status:', response.status);
       }

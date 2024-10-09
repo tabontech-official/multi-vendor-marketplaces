@@ -5,7 +5,7 @@ import { Dialog } from '@headlessui/react';
 import { FaTimes } from 'react-icons/fa';
 import { createCheckoutUrl } from '../component/Checkout';
 import UseFetchUserData from '../component/fetchUser';
-
+import { HiOutlineRefresh } from 'react-icons/hi';
 const SubscriptionHistory = () => {
   const {userData , loading , error} = UseFetchUserData()
 
@@ -46,7 +46,6 @@ const SubscriptionHistory = () => {
     const buyCreditUrl =  createCheckoutUrl(userData,quantity,loading,error);
     console.log(buyCreditUrl)
     window.open(buyCreditUrl, "_blank");
-    setIsDialogOpen(false)
   };
 
   
@@ -139,33 +138,39 @@ const SubscriptionHistory = () => {
           </div>
 
           <div className="w-full max-sm:flex items-center">
-          <table className="max-sm:flex max-sm:flex-col overflow-auto max-sm:items-center w-full max-sm:w-auto">
-  <thead className="bg-gray-200 border-b max-sm:flex max-sm:flex-col w-full">
-    <tr>
-      <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">#</th>
-      <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Date Purchased</th>
-      <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Product Name</th>
-      <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Per Credit Price</th>
-      <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Total Credit</th>
-      <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Total Price</th>
-    </tr>
-  </thead>
-  <tbody className='max-sm:flex max-sm:flex-col w-full'>
-    {subscriptions.map((subscription, index) =>
-      subscription.lineItems.map((item, itemIndex) => (
-        <tr key={`${index}-${itemIndex}`} className={`border-b ${itemIndex % 2 === 0 ? 'bg-white' : 'bg-gray-100'} w-full`}>
-          <td scope="col" className="px-4 py-2 text-sm font-medium text-gray-900">{index + 1}</td>
-          <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{formatDate(subscription.createdAt)}</td>
-          <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{item.name}</td>
-          <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">${item.price}</td>
-          <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{item.quantity}</td>
-          <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2 ">${(item.quantity * item.price).toFixed(2)}</td>
-        </tr>
-      ))
-    )}
-  </tbody>
-</table>
-
+            {/* Render loading icon or table based on loading state */}
+            {loading ? (
+              <div className="flex justify-center items-center py-10">
+                <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />loading...
+              </div>
+            ) : (
+              <table className="max-sm:flex max-sm:flex-col overflow-auto max-sm:items-center w-full max-sm:w-auto">
+                <thead className="bg-gray-200 border-b max-sm:flex max-sm:flex-col w-full">
+                  <tr>
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">#</th>
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Date Purchased</th>
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Product Name</th>
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Per Credit Price</th>
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Total Credit</th>
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Total Price</th>
+                  </tr>
+                </thead>
+                <tbody className="max-sm:flex max-sm:flex-col w-full">
+                  {subscriptions.map((subscription, index) =>
+                    subscription.lineItems.map((item, itemIndex) => (
+                      <tr key={`${index}-${itemIndex}`} className={`border-b ${itemIndex % 2 === 0 ? 'bg-white' : 'bg-gray-100'} w-full`}>
+                        <td scope="col" className="px-4 py-2 text-sm font-medium text-gray-900">{index + 1}</td>
+                        <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{formatDate(subscription.createdAt)}</td>
+                        <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{item.name}</td>
+                        <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">${item.price}</td>
+                        <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{item.quantity}</td>
+                        <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">${(item.quantity * item.price).toFixed(2)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>

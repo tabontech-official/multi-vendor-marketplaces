@@ -27,7 +27,7 @@ const Dashboard = () => {
   const pricePerCredit = 10; // Example price per credit
   const [errorMessage, setErrorMessage] = useState('');
   const [quantity, setQuantity] = useState(1);
-
+const [Loading , setLoading] = useState(false)
 
 
  
@@ -192,6 +192,7 @@ const handleUnpublish = async (product) => {
 };
   useEffect(() => {
     const fetchProductData = async () => {
+      setLoading(true)
       const id = localStorage.getItem('userid');
       if (!id) return;
       try {
@@ -203,7 +204,11 @@ const handleUnpublish = async (product) => {
           setProducts(sortedProducts);
           setFilteredProducts(sortedProducts);
         }
+        else{
+          setLoading(false)
+        }
       } catch (error) {
+       
         setMessage("You don't have enough credits");
       }
     
@@ -212,8 +217,13 @@ const handleUnpublish = async (product) => {
         if (response.ok) {
           const data = await response.json();
           setCredit(data.quantity || 0);
+          setLoading(false)
+        }
+        else{
+          setLoading(false)
         }
       } catch (error) {
+        setLoading(false)
         console.error('Error fetching quantity:', error);
       }
     };
@@ -326,112 +336,123 @@ const handleUnpublish = async (product) => {
       </div>
 
            {/* Products Table */}
-           <div className="p-4">
-        <div className="overflow-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-100">
-              <tr className='items-center'>
-                <th className="py-3 pl-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
-                <th className="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LISTING NAME</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRICE</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PUBLISH AT</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EXPIRES AT</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200 mb-4">
-              {filteredProducts.length === 0 ? (
-             <tr>
-             <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-               <HiOutlineRefresh className="animate-spin inline-block mr-2" /> Loading...
-             </td>
-           </tr>
-              ) : (
-                filteredProducts.map((product, index) => (
-                  <tr key={product._id}>
-                    <td className="py-4 whitespace-nowrap relative px-4">
-                      <button 
-                        onClick={() => toggleDropdown(index)}
-                        className="text-gray-600 hover:text-gray-800 focus:outline-none"
-                      >
-                        <HiDotsVertical className="w-5 h-5" />
-                      </button>
-                      <div ref={el => dropdownRefs.current[index] = el}>
-                        {openDropdown === index && (
-                          <div className="absolute bg-white border flex justify-start items-start border-gray-300 rounded-md shadow-lg z-10">
-                            <ul className="py-1">
-                              {product.status === 'draft' ? (
-                                <li onClick={(e) => {
-                                  e.stopPropagation();
-                                  handlePublish(product);
-                                }}>
-                                  <button className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100">
-                                    {loadingId === product._id ? 'Loading...' : 'Publish'}
-                                  </button>
-                                </li>
-                              ) : (
-                                product.status === 'active' && (
-                                  <li onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleUnpublish(product);
-                                  }}>
-                                    <button className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100">
-                                      {loadingId === product._id ? 'Loading...' : 'Unpublish'}
-                                    </button>
-                                  </li>
-                                )
-                              )}
+          {/* Products Table */}
+{/* Products Table */}
+{Loading ? (
+  <div className="flex justify-center items-center py-10">
+    <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />loading...
+  </div>
+) : (
+  <div className="p-4">
+    {filteredProducts.length === 0 ? (
+      <div className="text-center py-10 text-gray-500">
+        {/* Only show this message if there are no products available */}
+        <h2>No products available.</h2>
+      </div>
+    ) : (
+      <div className="overflow-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-100">
+            <tr className='items-center'>
+              <th className="py-3 pl-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
+              <th className="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LISTING NAME</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRICE</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PUBLISH AT</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EXPIRES AT</th>
+            </tr>
+          </thead>
+
+          <tbody className="bg-white divide-y divide-gray-200 mb-4">
+            {filteredProducts.map((product, index) => (
+              <tr key={product._id}>
+                <td className="py-4 whitespace-nowrap relative px-4">
+                  <button
+                    onClick={() => toggleDropdown(index)}
+                    className="text-gray-600 hover:text-gray-800 focus:outline-none"
+                  >
+                    <HiDotsVertical className="w-5 h-5" />
+                  </button>
+                  <div ref={el => dropdownRefs.current[index] = el}>
+                    {openDropdown === index && (
+                      <div className="absolute bg-white border flex justify-start items-start border-gray-300 rounded-md shadow-lg z-10">
+                        <ul className="py-1">
+                          {product.status === 'draft' ? (
+                            <li onClick={(e) => {
+                              e.stopPropagation();
+                              handlePublish(product);
+                            }}>
+                              <button className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100">
+                                {loadingId === product._id ? 'Loading...' : 'Publish'}
+                              </button>
+                            </li>
+                          ) : (
+                            product.status === 'active' && (
                               <li onClick={(e) => {
-                                OnEdit(product);
+                                e.stopPropagation();
+                                handleUnpublish(product);
                               }}>
-                                <button className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100">Edit</button>
-                              </li>
-                              <li>
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onDelete(product._id);
-                                  }} 
-                                  className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
-                                >
-                                  Delete
+                                <button className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100">
+                                  {loadingId === product._id ? 'Loading...' : 'Unpublish'}
                                 </button>
                               </li>
-                            </ul>
-                          </div>
-                        )}
+                            )
+                          )}
+                          <li onClick={(e) => {
+                            OnEdit(product);
+                          }}>
+                            <button className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100">Edit</button>
+                          </li>
+                          <li>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(product._id);
+                              }}
+                              className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
+                            >
+                              Delete
+                            </button>
+                          </li>
+                        </ul>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap flex items-center">
-                      <div
-                        className={`w-3 h-3 rounded-full ${product.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}
-                        title={product.status}
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {product.title !== "Job Listing" ? product.title : "Job Search Listing"}
-                      {product.product_type === "Used Equipment" && (
-                        <span className="bg-blue-100 text-green-800 text-xs font-medium me-2 px-2.5 mx-3 py-0.5 rounded dark:bg-green-900 dark:text-blue-300">
-                          Free Listing
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "0"}</td>
-                    <td className="px-4 py-2">{new Date(product.createdAt).toLocaleDateString()}</td>
-                    <td className="px-4 py-2">
-                      {product.expiresAt && !isNaN(new Date(product.expiresAt)) 
-                        ? new Date(product.expiresAt).toLocaleDateString() 
-                        : "00/00/00"} 
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                    )}
+                  </div>
+                </td>
+
+                <td className="px-6 py-4 whitespace-nowrap flex items-center">
+                  <div
+                    className={`w-3 h-3 rounded-full ${product.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}
+                    title={product.status}
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {product.title !== "Job Listing" ? product.title : "Job Search Listing"}
+                  {product.product_type === "Used Equipment" && (
+                    <span className="bg-blue-100 text-green-800 text-xs font-medium me-2 px-2.5 mx-3 py-0.5 rounded dark:bg-green-900 dark:text-blue-300">
+                      Free Listing
+                    </span>
+                  )}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
+                <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "0"}</td>
+                <td className="px-4 py-2">{new Date(product.createdAt).toLocaleDateString()}</td>
+                <td className="px-4 py-2">
+                  {product.expiresAt && !isNaN(new Date(product.expiresAt))
+                    ? new Date(product.expiresAt).toLocaleDateString()
+                    : "00/00/00"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+    )}
+  </div>
+)}
+
+
 
       
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} className="fixed inset-0 z-10 overflow-y-auto">

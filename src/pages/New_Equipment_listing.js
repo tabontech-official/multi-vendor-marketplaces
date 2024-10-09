@@ -185,22 +185,22 @@ const AddNewEquipmentForm = () => {
   };
   
   return (
-    <main className="bg-gray-100 min-h-screen p-8 flex-row">
-      <h1 className="text-4xl font-bold mb-4">Add New Equipment Listing</h1>
-      <p className="text-lg mb-8 text-gray-700">Here you can add products to your store.</p>
+    <main className="bg-gray-100 min-h-screen p-5 flex-row">
+      <h1 className="text-4xl max-sm:text-xl font-bold mb-4">Add New Equipment Listing</h1>
+      <p className="text-lg mb-8 text-gray-700 max-sm:text-base">Here you can add products to your store.</p>
       <div className="mb-4">
         {error && <div className="text-red-500">{error}</div>}
         {success && <div className="text-green-500">{success}</div>}
       </div>
       <div className="flex flex-col lg:flex-row flex-1">
-        <div className="flex-1 bg-white px-8 py-4 shadow-md lg:mr-8 mb-8 lg:mb-0">
-          <h1 className='text-2xl font-semibold mb-4'>Product Details</h1>
+        <div className="flex-1 bg-white px-4 py-4 shadow-md lg:mr-8 mb-8 lg:mb-0">
+          <h1 className='text-2xl font-semibold mb-4 max-sm:text-xl '>Product Details</h1>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
 
 
-               <div className='flex flex-row '>
-              <div className="flex flex-col flex-1 mr-4">
+               <div className='flex flex-row max-sm:flex-col '>
+              <div className="flex flex-col flex-1  max-sm:mb-4  mr-4 max-sm:mr-0">
                 <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
                 <input
                   type="text"

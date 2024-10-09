@@ -59,7 +59,7 @@ const Navbar = () => {
           <Link to="/dashboard">
             <img
               src="https://cdn.shopify.com/s/files/1/0712/3337/2413/files/Layer_26.svg?v=1724230677"
-              className="h-9 logo"
+              className="h-12"
               alt="Logo"
             />
           </Link>

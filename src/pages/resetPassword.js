@@ -1,6 +1,7 @@
 import React, { useState , useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode";
 const ResetPassword = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -15,11 +16,17 @@ const ResetPassword = () => {
 
   const navigate = useNavigate();
 
+  
+  function isTokenExpired(token) { 
+    if (!token) return true; 
+    const decoded = jwtDecode(token); 
+    return  decoded.exp * 1000 < Date.now();
+} 
 
 
   useEffect(() => {
     // If no token is found, mark it as invalid and redirect or show an error
-    if (!token) {
+    if (!token || isTokenExpired(token)) {
       setTokenValid(false);
       setTimeout(() => {
         navigate('/Login'); // Redirect to login or forgot password page after 2 seconds

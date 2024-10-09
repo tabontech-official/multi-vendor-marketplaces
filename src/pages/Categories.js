@@ -89,15 +89,15 @@ const CategorySelector = () => {
 
   return (
     <main className="flex justify-center items-center bg-gray-100 p-20 max-sm:p-5">
-      <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg p-8">
-        <h1 className="text-3xl font-semibold mb-8 text-center text-gray-800">Choose a Category</h1>
+      <div className="w-full max-w-lg bg-white  shadow-lg p-8">
+        <h1 className="text-3xl font-semibold mb-8 text-center text-gray-800 max-sm:text-xs ">Choose a Category</h1>
 
         {/* Available Credits Section */}
         <div className="mb-6 flex justify-between items-center">
-          <span className="text-lg font-medium text-gray-800">Available Credits: {credits}</span>
+          <span className="text-lg font-medium text-gray-800 max-sm:text-xs ">Available Credits: {credits}</span>
           <button
             onClick={() => setIsDialogOpen(true)}
-            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded flex items-center max-sm:text-xs"
           >
             Buy Credits <FaShoppingBasket className="ml-1" />
           </button>
@@ -135,7 +135,7 @@ const CategorySelector = () => {
                 <div className="flex items-center justify-between space-x-4">
                   <div className="flex items-center space-x-4">
                     {icon}
-                    <span className="text-lg font-medium">{label}</span>
+                    <span className="text-lg max-sm:text-xs font-medium">{label}</span>
                   </div>
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isFree ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
                     {isFree ? 'Free' : 'Paid'}

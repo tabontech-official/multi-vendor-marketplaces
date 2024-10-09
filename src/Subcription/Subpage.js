@@ -126,18 +126,16 @@ const SubscriptionHistory = () => {
               </div>
             </div>
             <div className='flex items-center'>
-              <button
-                onClick={() => setIsDialogOpen(true)}
-                type="button"
-                className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
-              >
-                Buy Credits
-                <FaShoppingBasket className='ml-1' />
-              </button>
+            <button
+            onClick={() => setIsDialogOpen(true)}
+            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded flex items-center max-sm:text-xs"
+          >
+            Buy Credits <FaShoppingBasket className="ml-1" />
+          </button>
             </div>
           </div>
 
-          <div className="w-full max-sm:flex items-center">
+          <div className="w-full  max-sm:w-auto  max-sm:flex items-center">
             {/* Render loading icon or table based on loading state */}
             {loading ? (
               <div className="flex justify-center items-center py-10">
@@ -145,7 +143,7 @@ const SubscriptionHistory = () => {
               </div>
             ) : (
               <table className="max-sm:flex max-sm:flex-col overflow-auto max-sm:items-center w-full max-sm:w-auto">
-                <thead className="bg-gray-200 border-b max-sm:flex max-sm:flex-col w-full">
+                <thead className="bg-gray-200 border-b max-sm:flex max-sm:flex-col w-full max-sm:w-auto">
                   <tr>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">#</th>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Date Purchased</th>

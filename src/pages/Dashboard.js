@@ -70,24 +70,26 @@ const [Loading , setLoading] = useState(false)
   };
 
   const OnEdit = (product) => {
+    console.log(product)
+    console.log("clicking")
     let formPage = '';
     switch (product.product_type) {
-      case 'Used Equipment':
+      case 'Used Equipments':
         formPage = '/Used_Equipment_Listing';
         break;
-      case 'New Equipment':
+      case 'New Equipments':
         formPage = '/New_Equipment_listing';
         break;
-      case 'Job Listing':
+      case 'Providers Available':
         formPage = '/Job_Search_listing';
         break;
-      case 'Provider Search Listing':
+      case 'Provider Needed':
         formPage = '/Job_Provider_listing';
         break;
-      case 'Room Listing':
+      case 'Spa Room For Rent':
         formPage = '/Rent_Room_listing';
         break;
-        case 'Business Listing':
+        case 'Businesses To Purchase':
           formPage = '/Business_Equipment_listing';
           break;
       default:

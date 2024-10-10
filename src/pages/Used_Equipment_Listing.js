@@ -48,7 +48,7 @@ console.log(product)
       setShipping(product.equipment.shipping);
       setDescription(product.equipment.description)
      setZip(product.equipment.zip)
-      setDescription(product.equipment.description);
+
 
       if (typeof description === 'string') {
         // If it's a plain string, convert it to ContentState
@@ -112,7 +112,7 @@ console.log(product)
     formData.append('status', status);
 
     try {
-      const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateListing/${product._id}` : "https://medspaa.vercel.app/product/addEquipment", {
+      const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateListing/${product.id}` : "https://medspaa.vercel.app/product/addEquipment", {
         method: isEditing ? "PUT" : "POST",
         body: formData
       });

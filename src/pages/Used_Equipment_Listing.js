@@ -82,7 +82,8 @@ console.log(product)
     setSuccess('');
     setLoading(true);
 
-    const id = localStorage.getItem('userid');
+    const  Id = localStorage.getItem('userid');
+  
     const formData = new FormData();
 
 
@@ -92,7 +93,7 @@ console.log(product)
       })
     }
    
-
+   
 
     // Append other form fields to FormData
     formData.append('location', Location);
@@ -108,8 +109,9 @@ console.log(product)
     formData.append('reason_for_selling', reasonForSelling);
     formData.append('shipping', shipping);
     formData.append('description', description);
-    formData.append('userId', id);
+    formData.append('userId',  Id);
     formData.append('status', status);
+     
 
     try {
       const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateListing/${product.id}` : "https://medspaa.vercel.app/product/addEquipment", {
@@ -121,6 +123,7 @@ console.log(product)
 
       if (response.ok) {
         setSuccess(status === "active" ? json.message : "Your post drafted successfully");
+        console.log(json)
         setError('');
       } else {
         setSuccess('');

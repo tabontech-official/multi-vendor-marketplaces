@@ -37,6 +37,7 @@ const [Loading , setLoading] = useState(false)
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+  
 
   const fetchProductData = async () => {
     const id = localStorage.getItem('userid');
@@ -45,6 +46,7 @@ const [Loading , setLoading] = useState(false)
       const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${id}`, { method: 'GET' });
       if (response.ok) {
         const data = await response.json();
+        console.log("Product Fetch " , data)
         setProducts(data.products);
         setFilteredProducts(data.products);
       }
@@ -63,6 +65,10 @@ const [Loading , setLoading] = useState(false)
       console.error('Error fetching quantity:', error);
     }
   };
+
+  useEffect(()=>{
+    fetchProductData()
+  },[])
 
 
   const toggleDropdown = (index) => {

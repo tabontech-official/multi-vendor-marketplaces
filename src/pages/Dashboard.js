@@ -6,13 +6,13 @@ import UseFetchUserData from '../component/fetchUser';
 import { useAuthContext } from '../Hooks/useAuthContext';
 import { Dialog } from '@headlessui/react';
 import { FaTimes, FaShoppingBasket } from 'react-icons/fa';
-import { createCheckoutUrl } from '../component/Checkout';
+import { CreateCheckoutUrl } from '../component/Checkout';
 import { HiOutlineRefresh } from 'react-icons/hi';
 const Dashboard = () => {
 
 
   const navigate = useNavigate();
-  const {userData , loading , error} = UseFetchUserData()
+  const {userData , loading , error , variantId} = UseFetchUserData()
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -208,6 +208,7 @@ const handleUnpublish = async (product) => {
         if (response.ok) {
           const data = await response.json();
           // Sort products by createdAt in descending order (latest first)
+          console.log(data)
           const sortedProducts = data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
           setProducts(sortedProducts);
           setFilteredProducts(sortedProducts);
@@ -279,7 +280,7 @@ const handleUnpublish = async (product) => {
   
   const handleBuyNow =  () => {
 
-    const buyCreditUrl =  createCheckoutUrl(userData,quantity,loading,error);
+    const buyCreditUrl =  CreateCheckoutUrl(userData,quantity,loading,error,variantId);
     console.log(buyCreditUrl)
     window.open(buyCreditUrl, "_blank");
     setIsDialogOpen(false)
@@ -371,7 +372,7 @@ const handleUnpublish = async (product) => {
         <h2>No products available.</h2>
       </div>
     ) : (
-      <div className="overflow-auto">
+      <div className=" max-sm:overflow-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
             <tr className='items-center'>

@@ -5,7 +5,7 @@ import { HiNewspaper, HiCube, HiOfficeBuilding, HiSearch, HiBriefcase, HiHome } 
 import { Dialog } from '@headlessui/react';
 import { FaTimes, FaShoppingBasket } from 'react-icons/fa';
 import { useAuthContext } from '../Hooks/useAuthContext';
-import { createCheckoutUrl } from '../component/Checkout';
+import { CreateCheckoutUrl } from '../component/Checkout';
 import UseFetchUserData from '../component/fetchUser';
 const categories = [
   { path: '/Used_Equipment_Listing', label: 'Post Used Equipments for Sale', icon: <HiCube className="w-6 h-6" />, isFree: true },
@@ -17,7 +17,7 @@ const categories = [
 ];
 
 const CategorySelector = () => {
-  const {userData , loading , error} = UseFetchUserData()
+  const {userData , loading , error ,variantId} = UseFetchUserData()
   const [credits, setCredits] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -62,7 +62,7 @@ const CategorySelector = () => {
   }, []);
 
   const handleBuyNow = () => {
-    const buyCreditUrl =  createCheckoutUrl(userData,quantity,loading,error);
+    const buyCreditUrl =  CreateCheckoutUrl(userData,quantity,loading,error,variantId);
     console.log(buyCreditUrl)
     window.open(buyCreditUrl, "_blank");
 

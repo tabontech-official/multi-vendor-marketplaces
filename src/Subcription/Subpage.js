@@ -3,11 +3,11 @@ import React, { useEffect, useState, useRef } from 'react';
 import { FaShoppingBasket } from 'react-icons/fa';
 import { Dialog } from '@headlessui/react';
 import { FaTimes } from 'react-icons/fa';
-import { createCheckoutUrl } from '../component/Checkout';
+import { CreateCheckoutUrl } from '../component/Checkout';
 import UseFetchUserData from '../component/fetchUser';
 import { HiOutlineRefresh } from 'react-icons/hi';
 const SubscriptionHistory = () => {
-  const {userData , loading , error} = UseFetchUserData()
+  const {userData , loading , error ,variantId} = UseFetchUserData()
 
   const [subscriptions, setSubscriptions] = useState([]);
   const [totalListings, setTotalListings] = useState(0);
@@ -58,7 +58,7 @@ const SubscriptionHistory = () => {
   };
 
   const handleBuyNow = () => {
-    const buyCreditUrl =  createCheckoutUrl(userData,quantity,loading,error);
+    const buyCreditUrl =  CreateCheckoutUrl(userData,quantity,loading,error,variantId);
     console.log(buyCreditUrl)
     window.open(buyCreditUrl, "_blank");
   };

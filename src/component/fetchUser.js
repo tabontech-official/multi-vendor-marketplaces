@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import axios from "axios";  // assuming you're using axios for API requests
 
 const UseFetchUserData = () => {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [variantId, setVariantId] = useState('');
 
   const fetchUserData = async () => {
     const id = localStorage.getItem('userid');
@@ -31,13 +33,23 @@ const UseFetchUserData = () => {
       setError('Error fetching user data.');
       setLoading(false);
     }
+
+    const fetchVariantId = async () => {
+      try {
+        const response = await axios.get("https://medspaa.vercel.app/product/getPrice");
+        setVariantId(response.data[0].variantId); // assuming response structure
+      } catch (error) {
+        console.error("Error fetching variant ID", error);
+      }
+    };
+    fetchVariantId();
   };
 
   useEffect(() => {
     fetchUserData();
   }, []);
 
-  return { userData, error, loading };
+  return { userData, error, loading , variantId};
 };
 
 export default UseFetchUserData;

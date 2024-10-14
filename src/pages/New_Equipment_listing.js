@@ -25,7 +25,7 @@ const AddNewEquipmentForm = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showRemoveOption, setShowRemoveOption] = useState(false);
-  const [editorState, setEditorState] = useState();
+  const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
   const [description, setText] = useState("");
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
@@ -35,12 +35,13 @@ const AddNewEquipmentForm = () => {
 
 
   useEffect(() => {
+    console.log(product)
     if (product && product.equipment) {
       setIsEdit(true);  // We're editing, not creating
 
       setLocation(product.equipment.location || '');
       setName(product.title || '');
-      setBrand(product.equipment.name || ''); // Assuming brand is same as name
+      setBrand(product.equipment.brand || ''); // Assuming brand is same as name
       setSalePrice(product.equipment.sale_price || '');
       setEquipmentType(product.equipment.equipment_type || '');
       setCertification(product.equipment.certification || '');
@@ -96,11 +97,8 @@ const AddNewEquipmentForm = () => {
     formData.append('location', location);
     formData.append('zip', Zip);
 
-    if(isEdit){
-      formData.append('title', name);
-    }else{
+  
       formData.append('name', name);
-    }
     formData.append('brand', brand);
     formData.append('sale_price', sale_price);
     formData.append('equipment_type', equipment_type);
@@ -120,8 +118,8 @@ const AddNewEquipmentForm = () => {
       let method = "POST";
   
       // If editing, switch to update API
-      if (product && product._id) {
-        url = `https://medspaa.vercel.app/product/updateListing/${product._id}`;
+      if (product && product.id) {
+        url = `https://medspaa.vercel.app/product/updateListing/${product.id}`;
         method = "PUT";
       }
   
@@ -140,8 +138,7 @@ const AddNewEquipmentForm = () => {
         }
         setError('');
   
-        // // Reset the form fields
-        // resetFormFields();
+   
       } else {
         setError(json.error);
         setSuccess('');
@@ -155,22 +152,7 @@ const AddNewEquipmentForm = () => {
     }
   };
   
-  // const resetFormFields = () => {
-  //   setLocation('');
-  //   setName('');
-  //   setBrand('');
-  //   setSalePrice('');
-  //   setEquipmentType('');
-  //   setCertification('');
-  //   setYearManufactured('');
-  //   setWarranty('');
-  //   setShipping('');
-  //   setTraining('');
-  //   setText('');
-  //   setImages([]);
-  //   setImagePreviews([]);
-  // };
-  // Handler for image file change
+
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files); // Get all selected files
     setImages(prevImages => [...prevImages, ...files]); // Store file objects

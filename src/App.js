@@ -24,7 +24,7 @@ import { jwtDecode } from "jwt-decode";
 import SubscriptionHistory from './Subcription/Subpage';
 import ProtectedForms from './context api/FormProtect';
 import PrivacyPolicy from './pages/Policy';
-
+import AdminDashboard from "./admin/adminpanel"
 const App = () => {
   const {dispatch} = useAuthContext()
 
@@ -59,6 +59,7 @@ const App = () => {
         <Route path="/Rent_Room_listing" element={<ProtectedForms element={<AddRoomForRentForm/>} />} />
           <Route path="/Job_Provider_listing" element={<ProtectedForms element={<AddProviderSearchForm/>} />} />
           <Route path="/Policy" element={ <PrivacyPolicy/>} />
+          <Route path="/admin" element={ <AdminDashboard/>} />
           <Route path="/Job_Search_listing" element={<ProtectedForms element={<AddJobSearchForm/>} />} />
           <Route path="/Subcription_Details" element={<PrivateRoute element={<SubscriptionHistory />} />} />
           <Route path="/Business_Equipment_listing" element={<ProtectedForms element={<AddBusinessForm/>} />} />

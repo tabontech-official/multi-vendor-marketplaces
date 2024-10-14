@@ -25,6 +25,7 @@ const CategorySelector = () => {
   const dialogRef = useRef(null);
   const [errorMessage, setErrorMessage] = useState('');
   const { user } = useAuthContext();
+  const [Price , setPrice] = useState(10)
 
   // Fetching credits from localStorage and server
   const fetchQuantity = async () => {
@@ -40,7 +41,21 @@ const CategorySelector = () => {
     } catch (error) {
       console.error('Error fetching quantity:', error);
     }
+
+    try {
+      const response =  await fetch("https://medspaa.vercel.app/product/getPrice/", {method:'GET'})
+      const json = await response.json()
+      if(response.ok){
+        console.log("Price",json)
+        setPrice(json[0].price)
+      }   
+    } catch (error) {
+      console.error('Error fetching quantity:', error);
+    }
+
   };
+
+  
 
   useEffect(() => {
     fetchQuantity();
@@ -159,7 +174,7 @@ const CategorySelector = () => {
             </button>
 
             <h2 className="text-2xl font-bold mb-1">Buy Credits</h2>
-            <span className="text-base">$10.00/credit</span>
+            <span className="text-base">${Price}/credit</span>
 
             <div className="flex items-center justify-between mb-4 mt-2">
               <label htmlFor="quantity" className="font-medium">Quantity:</label>
@@ -189,7 +204,7 @@ const CategorySelector = () => {
             </div>
 
             <div className="mb-6">
-              <span className="text-lg font-bold">Price:${quantity * pricePerCredit}.00</span>
+              <span className="text-lg font-bold">Price:${quantity * Price}.00</span>
             </div>
 
             <button

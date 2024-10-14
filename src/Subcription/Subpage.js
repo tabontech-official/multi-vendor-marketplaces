@@ -14,9 +14,11 @@ const SubscriptionHistory = () => {
   const [activeListings, setActiveListings] = useState(0);
   const [paidListing, setPaidListing] = useState(0);
   const [freeListing, setFreeListing] = useState(0);
+  const [Price , setPrice] = useState(10)
   const [quantity, setQuantity] = useState(1);
   const pricePerCredit = 10; // Example price per credit
-  const dynamicPrice = quantity * pricePerCredit;
+  const dynamicPrice = quantity * Price;
+ 
 
   const [isDialogOpen, setIsDialogOpen] = useState(false); // State for dialog visibility
   const dialogRef = useRef(null); // Reference to the dialog
@@ -40,6 +42,19 @@ const SubscriptionHistory = () => {
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
     }
+   
+    try {
+      const response =  await fetch("https://medspaa.vercel.app/product/getPrice/", {method:'GET'})
+      const json = await response.json()
+      if(response.ok){
+        console.log("Price",json)
+        setPrice(json[0].price)
+      }   
+    } catch (error) {
+      console.error('Error fetching quantity:', error);
+    }
+
+
   };
 
   const handleBuyNow = () => {
@@ -185,7 +200,7 @@ const SubscriptionHistory = () => {
             </button>
 
             <h2 className="text-2xl font-bold mb-1">Buy Credits</h2>
-            <span className="text-base">$10.00/credit</span>
+            <span className="text-base">${Price}.00/credit</span>
 
             <div className="flex items-center justify-between mb-4 mt-2">
               <label htmlFor="quantity" className="font-medium">Quantity:</label>

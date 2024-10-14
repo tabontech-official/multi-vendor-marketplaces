@@ -12,7 +12,7 @@ export const createCheckoutUrl = (userData, quantity, loading, error) => {
     }
   
     // Base URL for the cart, including the product ID and quantity
-    const baseUrl = `https://www.medspatrader.com/cart/45706005643517:${quantity}`;
+    const baseUrl = `${process.env.REACT_APP_URL_Product}${quantity}`
   
     // Constructing the query parameters for checkout
     const queryParams = new URLSearchParams({

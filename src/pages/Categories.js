@@ -47,7 +47,7 @@ const CategorySelector = () => {
       const response =  await fetch("https://medspaa.vercel.app/product/getPrice/", {method:'GET'})
       const json = await response.json()
       if(response.ok){
-  
+        console.log("Price",json)
         setPrice(json[0].price)
       }   
     } catch (error) {

@@ -102,14 +102,18 @@ const handleLogin = async (e) => {
     const path = localStorage.getItem('path') || '/';
 
     if (response.ok) {
-      localStorage.setItem('usertoken', json.token);
-      localStorage.setItem('userid', json.data.user._id);
-      localStorage.setItem('email', json.data.user.email);
       console.log(json)
-      dispatch({ type: 'LOGIN', payload: json });
-      setSuccess('Login successful!');
-      navigate(path);
-      localStorage.removeItem('path');
+      if(json.token && json.user._id && json.user.email ){
+        localStorage.setItem('usertoken', json.token);
+      localStorage.setItem('userid', json.user._id);
+      localStorage.setItem('email', json.user.email);
+      console.log(json)
+        dispatch({ type: 'LOGIN', payload: json });
+        setSuccess('Login successful!');
+        navigate(path);
+        localStorage.removeItem('path');
+      }
+
     } else {
       setError(json.error || 'An error occurred during login.');
     }

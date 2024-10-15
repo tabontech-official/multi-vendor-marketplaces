@@ -29,7 +29,7 @@ const Dashboard = () => {
   const [quantity, setQuantity] = useState(1);
 const [Loading , setLoading] = useState(false)
 const [Price , setPrice] = useState()
-
+let buyCreditUrl = ''
  
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -280,7 +280,7 @@ const handleUnpublish = async (product) => {
   
   const handleBuyNow =  () => {
 
-    const buyCreditUrl =  CreateCheckoutUrl(userData,quantity,loading,error,variantId);
+ buyCreditUrl =  CreateCheckoutUrl(userData,quantity,loading,error,variantId);
     console.log(buyCreditUrl)
     window.open(buyCreditUrl, "_blank");
     setIsDialogOpen(false)
@@ -288,6 +288,7 @@ const handleUnpublish = async (product) => {
     fetchCredits()
    },20000); 
 
+   buyCreditUrl = ''
   }; 
 
 

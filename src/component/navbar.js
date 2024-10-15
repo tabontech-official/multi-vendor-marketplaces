@@ -21,6 +21,9 @@ const Navbar = () => {
     return false;
   };
 
+useEffect(()=>{
+isAdmin()
+},[])
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };

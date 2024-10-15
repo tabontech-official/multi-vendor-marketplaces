@@ -463,7 +463,7 @@ const handleUnpublish = async (product) => {
                 <td className="px-4 py-2">
                   {product.expiresAt && !isNaN(new Date(product.expiresAt))
                     ? new Date(product.expiresAt).toLocaleDateString()
-                    : "00/00/00"}
+                    : " "}
                 </td>
               </tr>
             ))}

@@ -38,12 +38,12 @@ const AddNewJobForm = () => {
     setJobType(product.providerListings[0].jobType || '');
     setJobOfferType(product.providerListings[0].typeOfJobOffered || '');
     setOfferedSalary(product.providerListings[0].offeredYearlySalary || '');
-    setPositionDescription(product.providerListings[0].offeredPositionDescription || '');
+    setPositionDescription(product.body_html );
    setZip(product.providerListings[0].zip)
 
 
-    if (product.providerListings[0].offeredPositionDescription) {
-      const contentState = ContentState.createFromText(product.providerListings[0].offeredPositionDescription);
+    if (product.body_html) {
+      const contentState = ContentState.createFromText(product.body_html);
       setEditorState(EditorState.createWithContent(contentState));
     } else {
       setEditorState(EditorState.createEmpty());
@@ -98,6 +98,7 @@ const AddNewJobForm = () => {
     formData.append('offeredYearlySalary', offeredSalary); 
     if(isEditing){
       formData.append('body_html', positionDescription);
+      formData.append('offeredPositionDescription', positionDescription);
     }else{
       formData.append('offeredPositionDescription', positionDescription);
  

@@ -10,7 +10,7 @@ const PostEquipmentForm = () => {
   const [equipmentName, setEquipmentName] = useState('');
   const [brandName, setBrandName] = useState('');
   const [askingPrice, setAskingPrice] = useState('');
-  const [acceptOffers, setAcceptOffers] = useState("");
+  const [acceptOffers, setAcceptOffers] = useState();
   const [equipmentType, setEquipmentType] = useState('');
   const [certification, setCertification] = useState('');
   const [yearPurchased, setYearPurchased] = useState('');

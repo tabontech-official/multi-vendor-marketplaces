@@ -281,9 +281,9 @@ const AddNewEquipmentForm = () => {
                 >
                   <option value="">Select certification</option>
                   <option value="CE Certification">CE Certification</option>
-                  <option value="FDA Certification">FDA Approved</option>
-                  <option value="FDA Certification">FDA Registered</option>
-                  <option value="FDA Certification">Unknown</option>
+                  <option value="FDA Approved">FDA Approved</option>
+                  <option value="FDA Registered">FDA Registered</option>
+                  <option value="Unknown">Unknown</option>
                 </select>
               </div>
               <div className="flex flex-col">

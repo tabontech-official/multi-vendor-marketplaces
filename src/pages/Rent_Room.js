@@ -8,13 +8,13 @@ import { useLocation } from 'react-router-dom';
 const PostRentalForm = () => {
   // State hooks for form fields
   const [location, setLocation] = useState('');
-  const [roomSize, setRoomSize] = useState('');
-  const [monthlyRent, setMonthlyRent] = useState('');
-  const [deposit, setDeposit] = useState('');
-  const [minimumInsuranceRequested, setMinimumInsuranceRequested] = useState('');
-  const [typeOfUseAllowed, setTypeOfUseAllowed] = useState([]);
+  const [roomSize, setRoomSize] = useState(null);
+  const [monthlyRent, setMonthlyRent] = useState(null);
+  const [deposit, setDeposit] = useState(null);
+  const [minimumInsuranceRequested, setMinimumInsuranceRequested] = useState(null);
+  const [typeOfUseAllowed, setTypeOfUseAllowed] = useState('');
   const [rentalTerms, setRentalTerms] = useState('');
-  const [wifiAvailable, setWifiAvailable] = useState();
+  const [wifiAvailable, setWifiAvailable] = useState(null);
   const [otherDetails, setOtherDetails] = useState('');
   const [images, setImages] = useState([]);  const [imageName, setImageName] = useState('');
   const [success, setSuccess] = useState('');
@@ -72,12 +72,14 @@ console.log(product)
     e.preventDefault();
     setError('');
     setSuccess('');
+    
     if(status == "active"){
       setLoading(true);
     }
 
     const formData = new FormData();
     const id = localStorage.getItem('userid');
+
     if(images.length > 0 ){
       images.map((image)=>{
         formData.append('images', image); // Append each file
@@ -92,15 +94,15 @@ console.log(product)
     formData.append('monthlyRent', monthlyRent);
     formData.append('deposit', deposit);
     formData.append('minimumInsuranceRequested', minimumInsuranceRequested);
-    formData.append('typeOfUseAllowed', JSON.stringify(typeOfUseAllowed)); // Updated field
+    formData.append('typeOfUseAllowed', typeOfUseAllowed); // Updated field
     formData.append('rentalTerms', rentalTerms);
     formData.append('wifiAvailable', wifiAvailable);
-    formData.append('otherDetails', description);
+    formData.append('otherDetails', otherDetails);
     formData.append('userId', id);
     formData.append('status', status);
     try {
-      const response = await fetch("https://medspaa.vercel.app/product/addRoom", {
-        method: "POST",
+      const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateListing/${product.id}`:"https://medspaa.vercel.app/product/addRoom", {
+        method: isEditing?"PUT": "POST",
         body: formData
       });
 

@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef  } from 'react';
 import { HiOutlineCheckCircle, HiOutlineXCircle, HiOutlinePencil } from 'react-icons/hi'; // Success and error icons
 import { FiLoader } from 'react-icons/fi'; // Import loader icon
 import { Dialog } from '@headlessui/react';
-import { HiOutlineRefresh } from 'react-icons/hi';
 import { FaTimes } from 'react-icons/fa';
 
 
@@ -23,7 +22,7 @@ const AdminDashboard = () => {
   const [toast2, setToast2] = useState({ show: false, type: '', message: '' });
   const [toast3, setToast3] = useState({ show: false, type: '', message: '' });
 
-  const [Price, setPrice] = useState(10);
+  const [Price, setPrice] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isChangePriceDialogOpen, setIsChangePriceDialogOpen] = useState(false);
   const dialogRef = useRef(null);
@@ -32,6 +31,19 @@ const AdminDashboard = () => {
   const [productId, setProductId] = useState('');
   const [variantId, setVariantId] = useState('');
   const [changePrice, setChangePrice] = useState('');
+
+  const fetchPrice = async () => {
+    try {
+      const response = await fetch("https://medspaa.vercel.app/product/getPrice/", { method: 'GET' });
+      const json = await response.json();
+      if (response.ok) {
+        console.log("Price", json);
+        setPrice(json[0].price);
+      }
+    } catch (error) {
+      console.error('Error fetching quantity:', error);
+    }
+  };
 
   // Show toast message
   const showToast = (type, message) => {
@@ -70,6 +82,7 @@ const AdminDashboard = () => {
   
       if (response.ok) {
         const json = await response.json();
+        fetchPrice()
         console.log(json);
         showToast2('success', json.message);
         setChangePrice('');
@@ -89,18 +102,7 @@ const AdminDashboard = () => {
   
 
   useEffect(() => {
-    const fetchPrice = async () => {
-      try {
-        const response = await fetch("https://medspaa.vercel.app/product/getPrice/", { method: 'GET' });
-        const json = await response.json();
-        if (response.ok) {
-          console.log("Price", json);
-          setPrice(json[0].price);
-        }
-      } catch (error) {
-        console.error('Error fetching quantity:', error);
-      }
-    };
+   
     fetchPrice();
   }, []);
 

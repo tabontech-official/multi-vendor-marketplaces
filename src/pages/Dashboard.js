@@ -281,7 +281,7 @@ const handleUnpublish = async (product) => {
   const handleBuyNow =  () => {
 
  buyCreditUrl =  CreateCheckoutUrl(userData,quantity,loading,error,variantId);
-    console.log(buyCreditUrl)
+    console.log(variantId)
     window.open(buyCreditUrl, "_blank");
     setIsDialogOpen(false)
    setTimeout(() => {

@@ -7,6 +7,7 @@ import { FaTimes, FaShoppingBasket } from 'react-icons/fa';
 import { useAuthContext } from '../Hooks/useAuthContext';
 import { CreateCheckoutUrl } from '../component/Checkout';
 import UseFetchUserData from '../component/fetchUser';
+
 const categories = [
   { path: '/Used_Equipment_Listing', label: 'Post Used Equipments for Sale', icon: <HiCube className="w-6 h-6" />, isFree: true },
   { path: '/New_Equipment_listing', label: 'Post New Equipments for Sale', icon: <HiNewspaper className="w-6 h-6" />, isFree: false },
@@ -46,13 +47,24 @@ const CategorySelector = () => {
       const response =  await fetch("https://medspaa.vercel.app/product/getPrice/", {method:'GET'})
       const json = await response.json()
       if(response.ok){
-        console.log("Price",json)
+  
         setPrice(json[0].price)
       }   
     } catch (error) {
       console.error('Error fetching quantity:', error);
     }
+    
+    
+    try {
+      const response =  await fetch("https://medspaa.vercel.app/product/getPrice/", {method:'GET'})
+      const json = await response.json()
+      if(response.ok){
 
+        setPrice(json[0].price)
+      }   
+    } catch (error) {
+      console.error('Error fetching quantity:', error);
+    }
   };
 
   

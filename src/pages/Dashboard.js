@@ -289,6 +289,7 @@ const handleUnpublish = async (product) => {
    },20000); 
 
    buyCreditUrl = ''
+   console.log("url",buyCreditUrl)
   }; 
 
 

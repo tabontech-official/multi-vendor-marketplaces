@@ -5,7 +5,7 @@ const UseFetchUserData = () => {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [variantId, setVariantId] = useState('');
+  const [variantId, setVariantId] = useState(null);
 
   const fetchUserData = async () => {
     const id = localStorage.getItem('userid');

@@ -114,6 +114,7 @@ const onEditorStateChange = (newEditorState) => {
     formData.append('location', location);
     formData.append('zip', Zip);
     formData.append('businessDescription', descriptionText);
+    formData.append('description', descriptionText);
     formData.append('asking_price', askingPrice);
     formData.append('establishedYear', establishedYear);
     formData.append('numberOfEmployees', numEmployees);
@@ -133,7 +134,7 @@ const onEditorStateChange = (newEditorState) => {
 
     try {
       const response = await fetch(isEditing
-        ? `https://medspaa.vercel.app/product/updateListing/${product._id}`
+        ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
         : 'https://medspaa.vercel.app/product/addBusiness', {
           method: isEditing ? 'PUT' : 'POST', 
           body: formData,

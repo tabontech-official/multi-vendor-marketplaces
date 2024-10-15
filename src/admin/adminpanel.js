@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { HiOutlineCheckCircle, HiOutlineXCircle, HiOutlinePencil } from 'react-icons/hi'; // Success and error icons
 import { FiLoader } from 'react-icons/fi'; // Import loader icon
 import { Dialog } from '@headlessui/react';
-import { FaTimes } from 'react-icons/fa';
 import { HiOutlineRefresh } from 'react-icons/hi';
+import { FaTimes } from 'react-icons/fa';
+
 
 const AdminDashboard = () => {
   const [filteredProducts, setFilteredProducts] = useState([
@@ -290,7 +291,7 @@ const AdminDashboard = () => {
         onClick={() => setEditingPrice(null)} // Cancel the editing
         className="ml-2 bg-red-500 text-white rounded-md px-2 py-1 flex items-center"
       >
-        Cancel
+    <FaTimes />
       </button>
     </div>
   ) : (

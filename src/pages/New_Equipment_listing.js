@@ -43,7 +43,7 @@ const AddNewEquipmentForm = () => {
       setName(product.title || '');
       setBrand(product.equipment.brand || ''); // Assuming brand is same as name
       setSalePrice(product.equipment.sale_price || '');
-      setEquipmentType(product.equipment.equipment_type || '');
+      setEquipmentType(product.equipment.equipment_type || ''); 
       setCertification(product.equipment.certification || '');
       setYearManufactured(product.equipment.year_purchased || '');
       setWarranty(product.equipment.warranty || '');
@@ -103,7 +103,7 @@ const AddNewEquipmentForm = () => {
     formData.append('sale_price', sale_price);
     formData.append('equipment_type', equipment_type);
     formData.append('certification', certification);
-    formData.append('year_manufactured', parseInt(year_manufactured));
+    formData.append('year_manufactured', year_manufactured);
     formData.append('warranty', warranty);
     formData.append('shipping', shipping);
     formData.append('training', training);
@@ -149,6 +149,7 @@ const AddNewEquipmentForm = () => {
       console.error(error);
     } finally {
       setLoading(false);
+   
     }
   };
   
@@ -290,7 +291,6 @@ const AddNewEquipmentForm = () => {
                 <input
                   type="date"
                   id="year_manufactured"
-                  min={0}
                   value={year_manufactured}
                   onChange={(e) => setYearManufactured(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"

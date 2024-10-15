@@ -48,26 +48,24 @@ console.log(product)
       setShipping(product.equipment.shipping);
       setDescription(product.equipment.description)
      setZip(product.equipment.zip)
+     
 
 
-      if (typeof description === 'string') {
-        // If it's a plain string, convert it to ContentState
-        const contentState = ContentState.createFromText(description);
-        setEditorState(EditorState.createWithContent(contentState));
-      } else if (description) {
-        // If it's already a ContentState or something similar, use it directly
-        setEditorState(EditorState.createWithContent(convertToRaw(description)));
-      } else {
-        // Handle case where description is undefined or null
-        setEditorState(EditorState.createEmpty());
-      }
-      
+     if (product.equipment.description) {
+      const contentState = ContentState.createFromText(product.equipment.description);
+      setEditorState(EditorState.createWithContent(contentState));
+    } else {
+      setEditorState(EditorState.createEmpty());
+    }
+
       if (product.images && Array.isArray(product.images)) {
         const existingImages = product.images.map((img) => img.src); // Extract image URLs
         setImagePreviews(existingImages); // Set them as previews
       }
     }
   },[]);
+
+  
 
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
@@ -77,6 +75,7 @@ console.log(product)
 
   // Handler for form submission
   const handleSubmit = async (e, status) => {
+    console.log( typeof yearPurchased , yearPurchased)
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -104,11 +103,11 @@ console.log(product)
     formData.append('accept_offers', acceptOffers);
     formData.append('equipment_type', equipmentType);
     formData.append('certification', certification);
-    formData.append('year_purchased', parseInt(yearPurchased));
+    formData.append('year_purchased',yearPurchased);
     formData.append('warranty', warranty);
     formData.append('reason_for_selling', reasonForSelling);
     formData.append('shipping', shipping);
-    formData.append('description', description);
+    formData.append('description', description); 
     formData.append('userId',  Id);
     formData.append('status', status);
      

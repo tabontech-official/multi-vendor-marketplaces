@@ -18,7 +18,8 @@ const AddNewJobForm = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showRemoveOption, setShowRemoveOption] = useState(false);
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
+
   const [Enabled , setEnabled] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const LocationData = useLocation();
@@ -90,15 +91,11 @@ const AddNewJobForm = () => {
     // Append other fields
     formData.append('location', location);
     formData.append('zip',Zip)
-    if(isEditing){
-      formData.append('title', qualification);
-    }else{
       formData.append('qualificationRequested', qualification);
- 
-    }
+      formData.append('name', qualification);
    formData.append('jobType', jobType);
     formData.append('typeOfJobOffered', jobOfferType);
-    formData.append('offeredYearlySalary', offeredSalary); // Fixed key
+    formData.append('offeredYearlySalary', offeredSalary); 
     if(isEditing){
       formData.append('body_html', positionDescription);
     }else{
@@ -111,7 +108,7 @@ const AddNewJobForm = () => {
 
     try {
         const response = await fetch(isEditing
-          ? `https://medspaa.vercel.app/product/updateListing/${product._id}`
+          ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
           : "https://medspaa.vercel.app/product/addProvider", {
           method: isEditing ? "PUT" : "POST",
           body: formData,
@@ -121,8 +118,6 @@ const AddNewJobForm = () => {
 
       if (response.ok) {
         if(status == "active"){
-          setImages([])
-          setImagePreviews([])
           setSuccess(json.message);
         }else{
           setSuccess("Your post drafted sucessfully")

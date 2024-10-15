@@ -23,7 +23,6 @@ const AddJobSearchForm = () => {
   const { product } = locationData.state || {};
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const [Zip , setZip] = useState("")
-
   useEffect(() => {
     console.log(product)
     if (product) {
@@ -68,6 +67,7 @@ const AddJobSearchForm = () => {
   };
 
   const handleSubmit = async (e, status) => {
+    console.log(typeof availabilitydate)
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -91,7 +91,7 @@ const AddJobSearchForm = () => {
       formData.append('name', name);
     }
     formData.append('qualification', qualificationRequested);
-    formData.append('availability',parseInt( availability));
+    formData.append('availability',availability);
     formData.append('requestedYearlySalary', requestedYearlySalary);
     formData.append('positionRequestedDescription', positionRequestedDescription);
     formData.append('status', status);
@@ -99,7 +99,7 @@ const AddJobSearchForm = () => {
 
     try {
       const response = await fetch(isEditing
-        ? `https://medspaa.vercel.app/product/updateListing/${product._id}`
+        ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
         : "https://medspaa.vercel.app/product/addJob", {
         method: isEditing ? "PUT" : "POST",
         body: formData,
@@ -220,7 +220,7 @@ const handleRemoveImage = (index) => {
 
               {/* Availability */}
               <div className="flex flex-col">
-                <label htmlFor="availability" className="text-gray-700 text-sm font-medium mb-1">Available from date *</label>
+                <label htmlFor="availability" className="text-gray-700 text-sm font-medium mb-1">Available date*</label>
                 <input
                   type="date"
                   id="availability"
@@ -254,21 +254,7 @@ const handleRemoveImage = (index) => {
                 />
               </div>
 
-              {/* Job Type */}
-              <div className="flex flex-col mt-4">
-                <label htmlFor="jobType" className="text-gray-700 text-sm font-medium mb-1">Position Requested Description: *</label>
-                <select
-                  id="jobType"
-                  value={availability}
-                  onChange={(e) => setAvailability(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  required
-                >
-                  <option value="">Select Job Type</option>
-                  <option value="Full-Time">Full-Time</option>
-                  <option value="Part-time">Part-time</option>
-                </select>
-              </div>
+            
             </div>
           </form>
         </div>

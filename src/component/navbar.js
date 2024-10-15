@@ -2,12 +2,24 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa'; 
 import { useAuthContext } from '../Hooks/useAuthContext';
-
+import { jwtDecode } from "jwt-decode";
 const Navbar = () => {
   const { user, dispatch } = useAuthContext();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);  // Reference for the dropdown container
+
+  const isAdmin = () => {
+    const token = localStorage.getItem('usertoken'); 
+    if (token) {
+      const decoded = jwtDecode(token);
+      // Check if the user is an admin and if the token is not expired
+      if (decoded.payLoad.isAdmin && decoded.exp * 1000 > Date.now()) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -83,6 +95,14 @@ const Navbar = () => {
             <ul className="flex flex-col md:flex-row md:space-x-8 space-y-4 items-center md:space-y-0">
               {user ? (
                 <>
+                 {isAdmin() && (
+                    <li>
+                      <Link to="/admin" className="text-white hover:text-gray-400" onClick={toggleMenu}>
+                        Admin Panel
+                      </Link>
+                    </li>
+                  )}
+                 
                  <li>
                     <Link to="https://www.medspatrader.com/" className="text-white hover:text-gray-400" onClick={toggleMenu}>
                      Main Store

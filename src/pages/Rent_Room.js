@@ -43,7 +43,7 @@ console.log(product)
       setRentalTerms(roomListing.rentalTerms);
       setWifiAvailable(roomListing.wifiAvailable);
       setOtherDetails(roomListing.otherDetails);
-      setImages(roomListing.image);
+      setImages(roomListing.image || []); // Fallback to an empty array if undefined
       setImageName(roomListing.imageName || '');
       setIsEditing(true);
       setDescription(roomListing.otherDetails)
@@ -80,11 +80,12 @@ console.log(product)
     const formData = new FormData();
     const id = localStorage.getItem('userid');
 
-    if(images.length > 0 ){
-      images.map((image)=>{
+    if (images && images.length > 0) {
+      images.map((image) => {
         formData.append('images', image); // Append each file
-      })
+      });
     }
+    
 
 
     formData.append('location', location);
@@ -128,13 +129,13 @@ console.log(product)
     }
   };
 
- // Handler for image file change
- const handleImageChange = (e) => {
-  const files = Array.from(e.target.files); // Get all selected files
-  setImages(prevImages => [...prevImages, ...files]); // Store file objects
-  const newImagePreviews = files.map(file => URL.createObjectURL(file)); // Create object URLs for preview
-  setImagePreviews(prevPreviews => [...prevPreviews, ...newImagePreviews]); // Append to the existing previews
-};
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files || []); // Ensure files is an array
+    setImages((prevImages) => [...prevImages, ...files]);
+    const newImagePreviews = files.map((file) => URL.createObjectURL(file));
+    setImagePreviews((prevPreviews) => [...prevPreviews, ...newImagePreviews]);
+  };
+  
 
 // Handler to remove image
 const handleRemoveImage = (index) => {

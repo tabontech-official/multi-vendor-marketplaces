@@ -32,6 +32,8 @@ const AdminDashboard = () => {
   const [variantId, setVariantId] = useState('');
   const [changePrice, setChangePrice] = useState('');
 
+
+
   const fetchPrice = async () => {
     try {
       const response = await fetch("https://medspaa.vercel.app/product/getPrice/", { method: 'GET' });
@@ -285,7 +287,7 @@ const AdminDashboard = () => {
         {loading ? (
           <FiLoader className="animate-spin mr-2" />
         ) : (
-          'Set Price'
+          'Set Credit'
         )}
       </button>
       {/* Cancel Button */}

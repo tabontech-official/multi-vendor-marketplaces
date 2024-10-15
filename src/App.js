@@ -34,6 +34,17 @@ const App = () => {
     return  decoded.exp * 1000 < Date.now();
 } 
 
+const isAdmin = ()=>{
+  const token = localStorage.getItem('usertoken'); 
+  if (!isTokenExpired(token)) { 
+     const decode = jwtDecode(token);
+    if(decode.payLoad.isAdmin ){
+      return true;
+    }
+    return false;
+  }
+}
+
   useEffect(()=>{
     function checkTokenAndRemove() { 
       const token = localStorage.getItem('usertoken'); 
@@ -59,7 +70,7 @@ const App = () => {
         <Route path="/Rent_Room_listing" element={<ProtectedForms element={<AddRoomForRentForm/>} />} />
           <Route path="/Job_Provider_listing" element={<ProtectedForms element={<AddProviderSearchForm/>} />} />
           <Route path="/Policy" element={ <PrivacyPolicy/>} />
-          <Route path="/admin" element={ <AdminDashboard/>} />
+          <Route path="/admin" element={ isAdmin() ? <AdminDashboard/>  : <Navigate to="/" /> } />
           <Route path="/Job_Search_listing" element={<ProtectedForms element={<AddJobSearchForm/>} />} />
           <Route path="/Subcription_Details" element={<PrivateRoute element={<SubscriptionHistory />} />} />
           <Route path="/Business_Equipment_listing" element={<ProtectedForms element={<AddBusinessForm/>} />} />

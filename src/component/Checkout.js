@@ -30,5 +30,5 @@ export const CreateCheckoutUrl = (userData, quantity, loading, error , variantId
   }).toString();
 
   // Constructing the full URL for checkout
-  return `${baseUrl}?${queryParams}`;
+  return `${baseUrl}?${queryParams}`
 };

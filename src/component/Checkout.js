@@ -15,18 +15,13 @@ export const CreateCheckoutUrl = (userData, quantity, loading, error, variantId)
   return `https://www.medspatrader.com/cart/${variantId}:${quantity}?${new URLSearchParams({
     'checkout[email]': userData.email || '',
     'checkout[billing_address][first_name]': userData.firstName || '',
-    'checkout[shipping_address][first_name]': userData.firstName || '',
     'checkout[billing_address][last_name]': userData.lastName || '',
-    'checkout[shipping_address][last_name]': userData.lastName || '',
     'checkout[billing_address][address1]':  userData.address,
-    'checkout[shipping_address][address1]':  userData.address,
     'checkout[billing_address][city]': userData.city || '',
-    'checkout[shipping_address][city]': userData.city || '',
     'checkout[billing_address][zip]': userData.zip || '',
-    'checkout[shipping_address][zip]': userData.zip || '',
     'checkout[billing_address][phone]': userData.phoneNumber || '',
-    'checkout[shipping_address][phone]': userData.phoneNumber || '',
-    'checkout[billing_address][country]': userData.country,
-    'checkout[shipping_address][country]': userData.country,
+    'checkout[billing_address][country]': userData.country || "Pakistan",
+
+  
   }).toString()}`;
 };

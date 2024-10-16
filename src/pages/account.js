@@ -46,6 +46,8 @@ const AccountPage = () => {
           console.log(data);
           setInfo(data);
           if (isMounted) {
+            localStorage.setItem('img',data.avatar[0] || 'https://sp-seller.webkul.com/img/store_logo/icon-user.png')
+            localStorage.setItem('name', data.lastName )
             setFormData({
               firstName: data.firstName || '',
               lastName: data.lastName || '',

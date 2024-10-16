@@ -7,14 +7,14 @@ import { FaTimes } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const [filteredProducts, setFilteredProducts] = useState([
-    { _id: '1', title: 'New Equipment Per Listing Credit' },
-    { _id: '2', title: 'Used Equipment Per Listing Credit' },
-    { _id: '3', title: 'SPA Business Equipment Per Listing Credit' },
-    { _id: '4', title: 'Job Provider Per Listing Credit' },
-    { _id: '5', title: 'Job Offer Per Listing Credit' },
-    { _id: '6', title: 'Room for Rent Per Listing Credit' },
+    { _id: '1', title: 'New Equipments ' },
+    { _id: '2', title: 'Used Equipments ' },
+    { _id: '3', title: 'SPA Business Equipment ' },
+    { _id: '4', title: 'Job Provider ' },
+    { _id: '5', title: 'Job Offer ' },
+    { _id: '6', title: 'Room for Rent ' },
   ]);
-
+  const [requiredCredits, setRequiredCredits] = useState({});
   const [editingPrice, setEditingPrice] = useState(null);
   const [newPrice, setNewPrice] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,7 +31,7 @@ const AdminDashboard = () => {
   const [productId, setProductId] = useState('');
   const [variantId, setVariantId] = useState('');
   const [changePrice, setChangePrice] = useState('');
-
+ const [EditCredit , setEditCredit] = useState(true)
 
 
   const fetchPrice = async () => {
@@ -40,7 +40,9 @@ const AdminDashboard = () => {
       const json = await response.json();
       if (response.ok) {
         console.log("Price", json);
+        setProductId(json[0].creditId )
         setPrice(json[0].price);
+        setChangePrice(json[0].price)
       }
     } catch (error) {
       console.error('Error fetching quantity:', error);
@@ -65,10 +67,10 @@ const AdminDashboard = () => {
   };
 
 
-  // Function to handle price change
+
   const handleChangePerCreditPrice = () => {
-    setEditingPrice(null); // Reset editing price state
-    setIsChangePriceDialogOpen(true); // Open the dialog to change per credit price
+    setEditingPrice(null); 
+    setIsChangePriceDialogOpen(true); 
   };
 
   const handleConfirmChangePrice = async () => {
@@ -79,32 +81,85 @@ const AdminDashboard = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ creditId: productId, price: Number(changePrice) }), // Correctly formatted body
+        body: JSON.stringify({ creditId: productId, price: Number(changePrice) }), 
       });
   
       if (response.ok) {
         const json = await response.json();
         fetchPrice()
-        console.log(json);
         showToast2('success', json.message);
+        setEditCredit(!EditCredit)
         setChangePrice('');
         setProductId('');
       } else {
-        const errorData = await response.json(); // Get more details on the error
-        console.error('Error response:', errorData); // Log error for debugging
+        const errorData = await response.json();
+        console.error('Error response:', errorData); 
         showToast2('error', errorData.message || 'Failed to update price.');
       }
     } catch (error) {
-      console.error('Error during API call:', error); // Log the error for debugging
+      console.error('Error during API call:', error);
       showToast2('error', 'Error during the API call.');
     }finally{
       setLoading(false)
     }
   };
-  
+
+  const fetchRequiredCredits = async () => {
+    try {
+      const response = await fetch('https://medspaa.vercel.app/product/fetchRequireCredits', { method: 'GET' });
+      const data = await response.json();
+
+      const creditsMap = data.data.reduce((map, item) => {
+        map[item.product_type] = item.credit_required;
+        return map;
+      }, {});
+      
+     
+
+      const updatedProducts = filteredProducts.map(product => {
+        const cleanedTitle = product.title.trim();
+        let matchedType = '';
+
+        switch (cleanedTitle) {
+          case 'New Equipments':
+            matchedType = 'New Equipments';
+            break;
+          case 'Used Equipments':
+            matchedType = 'Used Equipments';
+            break;
+          case 'SPA Business Equipment':
+            matchedType = 'Businesses To Purchase';
+            break;
+          case 'Job Provider':
+            matchedType = 'Provider Needed';
+            break;
+          case 'Job Offer':
+            matchedType = 'Providers Available';
+            break;
+          case 'Room for Rent':
+            matchedType = 'Spa Room For Rent';
+            break;
+          default:
+            matchedType = '';
+        }
+
+        return {
+          ...product,
+          requiredCredits: creditsMap[matchedType] ||"0",
+        };
+      });
+
+      setFilteredProducts(updatedProducts);
+    } catch (error) {
+      console.error('Error fetching required credits:', error);
+    }
+  };
+
+   
+
 
   useEffect(() => {
-   
+    fetchRequiredCredits();
     fetchPrice();
   }, []);
 
@@ -134,22 +189,22 @@ const AdminDashboard = () => {
   
     let product_type = '';
     switch (productname) {
-      case 'New Equipment Per Listing Credit':
+      case 'New Equipments ':
         product_type = 'New Equipments';
         break;
-      case 'Used Equipment Per Listing Credit':
+      case 'Used Equipments ':
         product_type = 'Used Equipments';
         break;
-      case 'SPA Business Equipment Per Listing Credit':
+      case 'SPA Business Equipment ':
         product_type = 'Businesses To Purchase';
         break;
-      case 'Job Provider Per Listing Credit':
+      case 'Job Provider ':
         product_type = 'Provider Needed';
         break;
-      case 'Job Offer Per Listing Credit':
+      case 'Job Offer ':
         product_type = 'Providers Available';
         break;
-      case 'Room for Rent Per Listing Credit':
+      case 'Room for Rent ':
         product_type = 'Spa Room For Rent';
         break;
       default:
@@ -172,6 +227,7 @@ const AdminDashboard = () => {
       });
   
       if (response.ok) {
+        fetchRequiredCredits()
         const json = await response.json();
         showToast('success', json.message);
   
@@ -207,7 +263,6 @@ const AdminDashboard = () => {
         });
 
         if (response.ok) {
-          console.log("success")
             const json = await response.json();
             showToast3('success', json.message || 'Credits sent successfully!');
             setGiftQuantity(null)
@@ -260,61 +315,56 @@ const AdminDashboard = () => {
 
         {/* Product Table */}
         <div className="flex flex-1 overflow-hidden py-10">
-          <div className="w-full overflow-auto flex justify-center items-center">
-            <table className="w-2/4 divide-y divide-gray-200">
-              <thead className="bg-gray-100">
-                <tr className="items-center">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Listings Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change Credit Price</th>
+        <div className="w-full overflow-auto flex justify-center items-center">
+          <table className="w-2/4 divide-y divide-gray-200">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Per Credit Listing</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required Credits</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change Credit Price</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredProducts.map(product => (
+                <tr key={product._id}>
+                  <td className="px-6 py-4 whitespace-nowrap">{product.title}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{product.requiredCredits || 'Loading...'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {editingPrice === product._id ? (
+                      <div className="flex items-center">
+                        <input
+                          type="number"
+                          onChange={(e) => setNewPrice(e.target.value)}
+                          className="border rounded-md px-2 text-center py-1 w-1/5  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <button
+                          onClick={() => handleSetPrice(product.title, newPrice)}
+                          className="ml-2 bg-blue-500 text-white rounded-md px-2 py-1"
+                        >
+                          {loading ? <FiLoader className="animate-spin mr-2" /> : 'Set Credit'}
+                        </button>
+                        <button
+                          onClick={() => setEditingPrice(null)}
+                          className="ml-2 bg-red-500 text-white rounded-md px-2 py-1"
+                        >
+                          <FaTimes />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleEditPrice(product._id)}
+                        className="ml-2 text-gray-500 hover:text-gray-700"
+                      >
+                        <HiOutlinePencil className="w-5 h-5" />
+                      </button>
+                    )}
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200 mb-4">
-                {filteredProducts.map((product) => (
-                  <tr key={product._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">{product.title}</td>
-                    <td className="px-6 py-4 whitespace-nowrap w-2/5">
-  {editingPrice === product._id ? (
-    <div className="flex items-center">
-      <input
-        type="number"
-        onChange={(e) => setNewPrice(e.target.value)}
-        className="border rounded-md px-2 text-center py-1 w-1/5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-      />
-      <button
-        onClick={() => handleSetPrice(product.title, newPrice)}
-        className="ml-2 bg-blue-500 text-white rounded-md px-2 py-1 flex items-center"
-      >
-        {loading ? (
-          <FiLoader className="animate-spin mr-2" />
-        ) : (
-          'Set Credit'
-        )}
-      </button>
-      {/* Cancel Button */}
-      <button
-        onClick={() => setEditingPrice(null)} // Cancel the editing
-        className="ml-2 bg-red-500 text-white rounded-md px-2 py-1 flex items-center"
-      >
-    <FaTimes />
-      </button>
-    </div>
-  ) : (
-    <div className="flex items-center">
-      <button
-        onClick={() => handleEditPrice(product._id)}
-        className="ml-2 text-gray-500 hover:text-gray-700"
-      >
-        <HiOutlinePencil className="w-5 h-5" />
-      </button>
-    </div>
-  )}
-</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
+      </div>
 
         {/* Dialog for buying credits */}
         <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} className="fixed inset-0 z-10 overflow-y-auto">
@@ -324,6 +374,7 @@ const AdminDashboard = () => {
                 <FaTimes />
               </button>
               <h2 className="text-xl font-bold mb-4">Gift Credits</h2>
+             
               <input
                 type="email"
                 value={email}
@@ -331,6 +382,8 @@ const AdminDashboard = () => {
                 placeholder="Recipient's email"
                 className="border border-gray-300 rounded-md px-4 py-2 w-full mb-4"
               />
+         
+
               <input
                 type="number"
                 value={GiftQuantity}
@@ -370,21 +423,27 @@ const AdminDashboard = () => {
                 <FaTimes />
               </button>
               <h2 className="text-xl font-bold mb-4">Change Credit Price</h2>
+              <div className='flex '>
               <input
                 type="text"
                 value={productId}
+                disabled={EditCredit}
                 onChange={(e) => setProductId(e.target.value)}
                 placeholder="Product ID"
                 className="border border-gray-300 rounded-md px-4 py-2 w-full mb-4       [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
+                    <button onClick={(e)=> setEditCredit(!EditCredit)} className='absolute right-10 ' style={{top:"79px"}}>  <HiOutlinePencil className="w-5 h-5" /></button>
+                    </div>
               <input
                 type="number"
                 value={changePrice}
+                disabled={EditCredit}
                 onChange={(e) => setChangePrice(e.target.value)}
                 placeholder="New Price"
                 className="border border-gray-300 rounded-md px-4 py-2 w-full mb-4       [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <button
+              disabled={EditCredit}
                 onClick={handleConfirmChangePrice}
                 className="w-full flex justify-center  bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 rounded-md"
               >

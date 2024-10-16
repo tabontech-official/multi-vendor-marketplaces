@@ -12,14 +12,14 @@ const Layout = () => {
         <Outlet />
       </main>
 
-      <footer className= "text-white py-4"  style={{ backgroundColor: 'rgb(31 130 201)' }}>
+      <footer className= "text-white py-4 bg-gradient-to-r from-blue-600  to-[#18262f]"  >
         <div className="container mx-auto flex flex-col items-center justify-center">
           <p className="text-center text-sm">
             © Copyright 2020-2024 <span className="font-semibold">med-spa-trader</span>, All rights reserved.
           </p>
           <div className="mt-2 text-center text-xs">
-            <a href="/policy" className="text-gray-400 hover:text-gray-300 transition duration-300">Privacy Policy</a> |
-            <a href="/policy" className="text-gray-400 hover:text-gray-300 transition duration-300"> Terms of Service</a>
+            <a href="/policy" className=" hover:text-gray-300 transition duration-300">Privacy Policy</a> |
+            <a href="/policy" className=" hover:text-gray-300 transition duration-300"> Terms of Service</a>
           </div>
         </div>
       </footer>

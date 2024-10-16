@@ -67,16 +67,16 @@ const isAdmin = ()=>{
         <Route path="/Login" element={!user ? <Auth /> : <Navigate to="/dashboard" /> } />
         <Route path="/ForgotPassword" element={<ForgotPassword/>} />
         <Route path="/Reset" element={<ResetPassword/>} />
-        <Route path="/Rent_Room_listing" element={<PrivateRoute element={<AddRoomForRentForm/>} />} />
-          <Route path="/Job_Provider_listing" element={<PrivateRoute element={<AddProviderSearchForm/>} />} />
+        <Route path="/Rent_Room_listing" element={<ProtectedForms element={<AddRoomForRentForm/>} />} />
+          <Route path="/Job_Provider_listing" element={<ProtectedForms element={<AddProviderSearchForm/>} />} />
           <Route path="/Policy" element={ <PrivacyPolicy/>} />
           <Route path="/admin" element={ isAdmin() ? <AdminDashboard/>  : <Navigate to="/" /> } />
-          <Route path="/Job_Search_listing" element={<PrivateRoute element={<AddJobSearchForm/>} />} />
+          <Route path="/Job_Search_listing" element={<ProtectedForms element={<AddJobSearchForm/>} />} />
           <Route path="/Subcription_Details" element={<PrivateRoute element={<SubscriptionHistory />} />} />
-          <Route path="/Business_Equipment_listing" element={<PrivateRoute element={<AddBusinessForm/>} />} />
-          <Route path="/New_Equipment_listing" element={<PrivateRoute element={<AddNewEquipmentForm/>} />} />
+          <Route path="/Business_Equipment_listing" element={<ProtectedForms element={<AddBusinessForm/>} />} />
+          <Route path="/New_Equipment_listing" element={<ProtectedForms element={<AddNewEquipmentForm/>} />} />
           <Route path="/Categories" element={<PrivateRoute element={<CategorySelector />} />} />
-          <Route path="/Used_Equipment_Listing" element={<PrivateRoute element={<Used_EquipmentForm />} />} />
+          <Route path="/Used_Equipment_Listing" element={<ProtectedForms element={<Used_EquipmentForm />} />} />
           <Route path="/edit-account" element={<PrivateRoute element={<AccountPage />} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Route>

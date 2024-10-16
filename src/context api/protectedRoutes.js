@@ -7,6 +7,8 @@ const ProtectedRoute = ({ element, ...rest }) => {
   const location = useLocation();
   const { pathname } = location;
 
+
+  console.log(pathname)
   useEffect(() => {
     // Set the path in local storage only if the user is not logged in
     if (!user) {

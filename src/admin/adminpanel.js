@@ -423,25 +423,31 @@ const AdminDashboard = () => {
                 <FaTimes />
               </button>
               <h2 className="text-xl font-bold mb-4">Change Credit Price</h2>
-              <div className='flex '>
+              <div className=' '>
+                <label htmlFor='#id'>Product ID</label>
               <input
+              id='id'
                 type="text"
                 value={productId}
                 disabled={EditCredit}
                 onChange={(e) => setProductId(e.target.value)}
                 placeholder="Product ID"
-                className="border border-gray-300 rounded-md px-4 py-2 w-full mb-4       [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className={`border border-gray-300 rounded-md px-4 py-2 w-full mb-4     ${EditCredit ? "bg-gray-300" :"bg-white"}  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
               />
-                    <button onClick={(e)=> setEditCredit(!EditCredit)} className='absolute right-10 ' style={{top:"79px"}}>  <HiOutlinePencil className="w-5 h-5" /></button>
+                    <button onClick={(e)=> setEditCredit(!EditCredit)} className='absolute right-10 my-3 ' >  <HiOutlinePencil className="w-5 h-5" /></button>
                     </div>
-              <input
-                type="number"
-                value={changePrice}
-                disabled={EditCredit}
-                onChange={(e) => setChangePrice(e.target.value)}
-                placeholder="New Price"
-                className="border border-gray-300 rounded-md px-4 py-2 w-full mb-4       [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
+
+           <div className="relative">
+            <label>Per Cerdit Price $$</label>
+  <span className="absolute left-4 top-2/4 transform -translate-y-1/2 text-gray-500 my-1">$</span>
+  <input
+    type="number"
+    value={changePrice}
+    onChange={(e) => setChangePrice(e.target.value)}
+    placeholder="New Price"
+    className="border border-gray-300 rounded-md px-8 py-2 w-full mb-4 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  />
+</div>
               <button
               disabled={EditCredit}
                 onClick={handleConfirmChangePrice}

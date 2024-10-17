@@ -15,7 +15,7 @@ const PostRentalForm = () => {
   const [typeOfUseAllowed, setTypeOfUseAllowed] = useState('');
   const [rentalTerms, setRentalTerms] = useState('');
   const [wifiAvailable, setWifiAvailable] = useState(null);
-  const [otherDetails, setOtherDetails] = useState('');
+
   const [images, setImages] = useState([]);  const [imageName, setImageName] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -42,7 +42,6 @@ console.log(product)
       setTypeOfUseAllowed(roomListing.typeOfUseAllowed || []);
       setRentalTerms(roomListing.rentalTerms);
       setWifiAvailable(roomListing.wifiAvailable);
-      setOtherDetails(roomListing.otherDetails);
       setImages(roomListing.image || []); // Fallback to an empty array if undefined
       setImageName(roomListing.imageName || '');
       setIsEditing(true);
@@ -98,7 +97,8 @@ console.log(product)
     formData.append('typeOfUseAllowed', typeOfUseAllowed); // Updated field
     formData.append('rentalTerms', rentalTerms);
     formData.append('wifiAvailable', wifiAvailable);
-    formData.append('otherDetails', otherDetails);
+    formData.append('otherDetails', description);
+    console.log("other detais", description)
     formData.append('userId', id);
     if(!isEditing){
       formData.append('status', status);

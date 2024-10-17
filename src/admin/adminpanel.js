@@ -10,8 +10,8 @@ const AdminDashboard = () => {
     { _id: '1', title: 'New Equipments ' },
     { _id: '2', title: 'Used Equipments ' },
     { _id: '3', title: 'SPA Business Equipment ' },
-    { _id: '4', title: 'Job Provider ' },
-    { _id: '5', title: 'Job Offer ' },
+    { _id: '4', title: 'Job Offer ' },
+    { _id: '5', title: 'Job Provider ' },
     { _id: '6', title: 'Room for Rent ' },
   ]);
 

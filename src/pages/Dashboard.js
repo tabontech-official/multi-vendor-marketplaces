@@ -143,18 +143,19 @@ let buyCreditUrl = ''
       const response = await fetch(`https://medspaa.vercel.app/product/publishedProduct/${product.id}`, {
         method: 'PUT',
       });
-  
+  const json = await response.json()
       if (response.ok) {
-        setMessage('Product published successfully!');
-        await fetchCredits(); // Fetch updated credits after publishing
-        // Refresh product data
+        setMessage( json.message||'Product published successfully!');
+        await fetchCredits();
         fetchProductData();
-      } else {
-        setMessage(`You don't have enough credits.`);
+      }
+      else{
+        setErrorMessage(json.error ||'An error occurred while publishing the product.');
+   
       }
     } catch (error) {
-      console.error('Error publishing product:', error);
-      setMessage('An error occurred while publishing the product.');
+     
+      setErrorMessage(error.message ||'An error occurred while publishing the product.');
     } finally {
       setLoadingId(null);
     }
@@ -189,11 +190,11 @@ const handleUnpublish = async (product) => {
       // Refresh product data
       fetchProductData();
     } else {
-      setMessage('Failed to unpublish product.');
+      setErrorMessage('Failed to unpublish product.');
     }
   } catch (error) {
     console.error('Error unpublishing product:', error);
-    setMessage('An error occurred while unpublishing the product.');
+    setErrorMessage('An error occurred while unpublishing the product.');
   } finally {
     setLoadingId(null);
   }
@@ -218,7 +219,7 @@ const handleUnpublish = async (product) => {
         }
       } catch (error) {
        
-        setMessage("You don't have enough credits");
+        setErrorMessage("You don't have enough credits");
       }
     
       try {
@@ -296,7 +297,7 @@ const handleUnpublish = async (product) => {
   return user ? (
     <main className="w-full p-4 md:p-8">
       {/* Message Display */}
-      {message && <div className="mb-4 text-red-600">{message}</div>}
+      {message ? <div className="mb-4 text-green-600">{message}</div> : <div className="mb-4 text-red-600">{errorMessage}</div>  }
 
       {/* Credit Display */}
       <div className="mb-4 text-blue-600 font-semibold text-lg">
@@ -383,7 +384,7 @@ const handleUnpublish = async (product) => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LISTING NAME</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRICE</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PUBLISH AT</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CREATED AT</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EXPIRES AT</th>
             </tr>
           </thead>
@@ -490,7 +491,7 @@ const handleUnpublish = async (product) => {
             </button>
 
             <h2 className="text-2xl font-bold mb-1">Buy Credits</h2>
-            <span className="text-base">${Price}/credit</span>
+            <span className="text-base">${Price || "...Loading"}/credit</span>
 
             <div className="flex items-center justify-between mb-4 mt-2">
               <label htmlFor="quantity" className="font-medium">Quantity:</label>
@@ -520,7 +521,7 @@ const handleUnpublish = async (product) => {
             </div>
 
             <div className="mb-6">
-              <span className="text-lg font-bold">Price:${quantity * Price}.00</span>
+              <span className="text-lg font-bold">Price:${quantity * Price || "...Loading"}.00</span>
             </div>
 
             <button

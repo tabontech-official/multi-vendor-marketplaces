@@ -130,8 +130,9 @@ const onEditorStateChange = (newEditorState) => {
     formData.append('offeredServices', offeredServices);
     formData.append('supportAndTraining', supportAndTraining);
     formData.append('userId', id);
-    formData.append('status', status);
-
+    if(!isEditing){
+      formData.append('status', status);
+      }
     try {
       const response = await fetch(isEditing
         ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
@@ -195,8 +196,8 @@ const onEditorStateChange = (newEditorState) => {
   };
 
   return (
-    <main className="bg-gray-100 min-h-screen p-8 flex-row">
-      <h1 className="text-4xl font-bold mb-4">Add New Business Listing</h1>
+    <main className="bg-gray-100 min-h-screen p-5 flex-row">
+      <h1 className="text-4xl max-sm:text-xl font-bold mb-4">Add New Business Listing</h1>
       <p className="text-lg mb-8 text-gray-700">Here you can add a business to your platform.</p>
       <div className="mb-4">
         {error && <div className="text-red-500">{error}</div>}
@@ -210,8 +211,8 @@ const onEditorStateChange = (newEditorState) => {
             <div className="grid grid-cols-1 gap-6">
               {/* Location */}
             
-              <div className='flex flex-row '>
-              <div className="flex flex-col flex-1 mr-4">
+              <div className='flex flex-row max-sm:flex-col  '>
+              <div className="flex flex-col flex-1  max-sm:mb-4  mr-4 max-sm:mr-0">
                 <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
                 <input
                   type="text"

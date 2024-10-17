@@ -94,7 +94,9 @@ const AddJobSearchForm = () => {
     formData.append('availability',availability);
     formData.append('requestedYearlySalary', requestedYearlySalary);
     formData.append('positionRequestedDescription', positionRequestedDescription);
-    formData.append('status', status);
+    if(!isEditing){
+      formData.append('status', status);
+      }
     formData.append('userId', localStorage.getItem('userid')); // Get userId from local storage
 
     try {
@@ -142,8 +144,8 @@ const handleRemoveImage = (index) => {
 };
 
   return (
-    <main className="bg-gray-100 min-h-screen p-8 flex-row">
-      <h1 className="text-4xl font-bold mb-4">Provider Job Search Listing</h1>
+    <main className="bg-gray-100 min-h-screen p-5 flex-row">
+      <h1 className="text-2xl font-semibold mb-4 max-sm:text-xl">Provider Job Search Listing</h1>
       <p className="text-lg mb-8 text-gray-700">Here you can {isEditing ? "edit" : "add"} job listings to your site.</p>
       <div className="mb-4">
         {error && <div className="text-red-500">{error}</div>}
@@ -156,8 +158,8 @@ const handleRemoveImage = (index) => {
             {/* Job Details */}
             <div className="grid grid-cols-1 gap-6">
               {/* Location */}
-              <div className='flex flex-row '>
-              <div className="flex flex-col flex-1 mr-4">
+              <div className='flex flex-row max-sm:flex-col '>
+              <div className="flex flex-col flex-1  max-sm:mb-4  mr-4 max-sm:mr-0">
                 <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
                 <input
                   type="text"

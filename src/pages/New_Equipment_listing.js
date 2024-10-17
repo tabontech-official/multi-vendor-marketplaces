@@ -111,8 +111,9 @@ const AddNewEquipmentForm = () => {
       formData.append('description', description);
  
     formData.append('userId', id);
+    if(!isEdit){
     formData.append('status', status);
-  
+    }
     try {
       let url = "https://medspaa.vercel.app/product/addNewEquipments";
       let method = "POST";

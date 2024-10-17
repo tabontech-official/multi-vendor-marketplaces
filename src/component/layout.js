@@ -8,11 +8,11 @@ const Layout = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      <main className="flex-1 justify-center items-center">
+      <div className='flex-1  '>
         <Outlet />
-      </main>
+        </div> 
 
-      <footer className= "text-white py-4 bg-gradient-to-r from-blue-600  to-[#18262f]"  >
+      <footer className= "text-white py-4 bg-gradient-to-r from-blue-600  to-[#18262f] left-0 bottom-0 w-full"  >
         <div className="container mx-auto flex flex-col items-center justify-center">
           <p className="text-center text-sm">
             © Copyright 2020-2024 <span className="font-semibold">med-spa-trader</span>, All rights reserved.

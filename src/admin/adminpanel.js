@@ -14,9 +14,9 @@ const AdminDashboard = () => {
     { _id: '5', title: 'Job Offer ' },
     { _id: '6', title: 'Room for Rent ' },
   ]);
-  const [requiredCredits, setRequiredCredits] = useState({});
+
   const [editingPrice, setEditingPrice] = useState(null);
-  const [newPrice, setNewPrice] = useState('');
+  const [newPrice, setNewPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, type: '', message: '' });
   const [toast2, setToast2] = useState({ show: false, type: '', message: '' });
@@ -29,11 +29,11 @@ const AdminDashboard = () => {
   const [email, setEmail] = useState('');
   const [GiftQuantity, setGiftQuantity] = useState(null);
   const [productId, setProductId] = useState('');
-  const [variantId, setVariantId] = useState('');
+  
   const [changePrice, setChangePrice] = useState('');
  const [EditCredit , setEditCredit] = useState(true)
 
-
+ const [editingProductId, setEditingProductId] = useState(null); // Track the ID of the product being edited
   const fetchPrice = async () => {
     try {
       const response = await fetch("https://medspaa.vercel.app/product/getPrice/", { method: 'GET' });
@@ -69,7 +69,7 @@ const AdminDashboard = () => {
 
 
   const handleChangePerCreditPrice = () => {
-    setEditingPrice(null); 
+    setEditingPrice(!editingPrice); 
     setIsChangePriceDialogOpen(true); 
   };
 
@@ -88,9 +88,9 @@ const AdminDashboard = () => {
         const json = await response.json();
         fetchPrice()
         showToast2('success', json.message);
-        setEditCredit(!EditCredit)
         setChangePrice('');
         setProductId('');
+        return setEditingProductId(null)
       } else {
         const errorData = await response.json();
         console.error('Error response:', errorData); 
@@ -148,7 +148,7 @@ const AdminDashboard = () => {
           requiredCredits: creditsMap[matchedType] ||"0",
         };
       });
-
+    
       setFilteredProducts(updatedProducts);
     } catch (error) {
       console.error('Error fetching required credits:', error);
@@ -163,8 +163,13 @@ const AdminDashboard = () => {
     fetchPrice();
   }, []);
 
-  const handleEditPrice = (productId) => {
-    setEditingPrice(productId);
+  const handleEditPrice = (productId , price) => {
+    if (editingProductId === productId) {
+      setEditingProductId(null); // Disable editing if already in edit mode for this product
+    } else {
+      setEditingProductId(productId); // Enable editing for the selected product
+      setNewPrice(price)
+    }
   };
 
   
@@ -183,7 +188,7 @@ const AdminDashboard = () => {
     };
   }, []);
 
-  const handleSetPrice = async (productname , price) => {
+  const handleSetPrice = async (productname , price ) => {
     setLoading(true);
     setToast({ show: false, type: '', message: '' }); // Reset toast
   
@@ -230,7 +235,7 @@ const AdminDashboard = () => {
         fetchRequiredCredits()
         const json = await response.json();
         showToast('success', json.message);
-  
+      setEditingProductId(null)
       
       } else {
         showToast('error', 'Failed to update price.');
@@ -315,56 +320,59 @@ const AdminDashboard = () => {
 
         {/* Product Table */}
         <div className="flex flex-1 overflow-hidden py-10">
-        <div className="w-full overflow-auto flex justify-center items-center">
-          <table className="w-2/4 divide-y divide-gray-200">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Per Credit Listing</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required Credits</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change Credit Price</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts.map(product => (
-                <tr key={product._id}>
-                  <td className="px-6 py-4 whitespace-nowrap">{product.title}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{product.requiredCredits || 'Loading...'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {editingPrice === product._id ? (
-                      <div className="flex items-center">
-                        <input
-                          type="number"
-                          onChange={(e) => setNewPrice(e.target.value)}
-                          className="border rounded-md px-2 text-center py-1 w-1/5  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                        <button
-                          onClick={() => handleSetPrice(product.title, newPrice)}
-                          className="ml-2 bg-blue-500 text-white rounded-md px-2 py-1"
-                        >
-                          {loading ? <FiLoader className="animate-spin mr-2" /> : 'Set Credit'}
-                        </button>
-                        <button
-                          onClick={() => setEditingPrice(null)}
-                          className="ml-2 bg-red-500 text-white rounded-md px-2 py-1"
-                        >
-                          <FaTimes />
-                        </button>
-                      </div>
-                    ) : (
+      <div className="w-full overflow-auto flex justify-center items-center">
+        <table className="w-2/4 divide-y divide-gray-200">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Per Credit Listing</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required Credits</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change Credit Price</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {filteredProducts.map(product => (
+              <tr key={product._id}>
+                <td className="px-6 py-4 whitespace-nowrap">{product.title}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    disabled={editingProductId !== product._id} // Disable input if this product is not being edited
+                    value={editingProductId === product._id ? newPrice : product.requiredCredits}
+                    type="number"
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    className={`border rounded-md px-2 text-center max-sm:w-12  py-1 w-36 ${editingProductId === product._id ? "bg-white" : "bg-gray-200"}  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none `}
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {editingProductId === product._id ? (
+                    <div className="flex items-center">
                       <button
-                        onClick={() => handleEditPrice(product._id)}
-                        className="ml-2 text-gray-500 hover:text-gray-700"
+                        onClick={() => handleSetPrice(product.title, newPrice ,product._id)}
+                        className="ml-2 bg-blue-500 text-white rounded-md px-2 py-1"
                       >
-                        <HiOutlinePencil className="w-5 h-5" />
+                        {loading ? <FiLoader className="animate-spin mr-2" /> : 'Set Credit'}
                       </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      <button
+                        onClick={() => handleEditPrice(product._id)} // Close edit mode
+                        className="ml-2 bg-red-500 text-white rounded-md px-2 py-1"
+                      >
+                        <FaTimes/>
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleEditPrice(product._id , product.requiredCredits)} // Open edit mode for this product
+                      className="ml-10 max-sm:ml-2 text-gray-500 hover:text-gray-700"
+                    >
+                      <HiOutlinePencil className="w-5 h-5" />
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+    </div>
 
         {/* Dialog for buying credits */}
         <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} className="fixed inset-0 z-10 overflow-y-auto">
@@ -449,7 +457,7 @@ const AdminDashboard = () => {
   />
 </div>
               <button
-              disabled={EditCredit}
+           
                 onClick={handleConfirmChangePrice}
                 className="w-full flex justify-center  bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 rounded-md"
               >

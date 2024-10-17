@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from '../Hooks/useAuthContext';
-
+import { FiLoader } from 'react-icons/fi'; // Import loader icon
+import { height } from "@fortawesome/free-solid-svg-icons/fa0";
 const ProtectedForms = ({ element, ...rest }) => {
   const [credits, setCredits] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -57,7 +58,8 @@ const ProtectedForms = ({ element, ...rest }) => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return  <div className="m-auto flex justify-center items-center " style={{height:"70vh"}} > <FiLoader className="animate-spin text-2xl"/> </div>;
+    
   }
 
   // Match pathname with product_type
@@ -76,7 +78,9 @@ const ProtectedForms = ({ element, ...rest }) => {
         },2000)
         return(
           <>
+          <h1 className="text-xl">
           This is Paid Listing . First Buy Credits from dash board.
+          </h1>
           </>
         )
       }

@@ -86,6 +86,7 @@ const AdminDashboard = () => {
   
       if (response.ok) {
         const json = await response.json();
+        setEditCredit(!EditCredit)
         fetchPrice()
         showToast2('success', json.message);
         setChangePrice('');

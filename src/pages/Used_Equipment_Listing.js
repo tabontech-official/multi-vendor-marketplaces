@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
 import { convertToRaw, EditorState , ContentState } from "draft-js";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const PostEquipmentForm = () => {
   // State hooks for form fields
@@ -30,6 +30,7 @@ const PostEquipmentForm = () => {
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
    const [Zip , setZip] = useState("")
   const { product } = location.state || {};
+  const navigate = useNavigate()
   
 console.log(product)
   useEffect(() => {
@@ -122,7 +123,7 @@ console.log(product)
 
       if (response.ok) {
         setSuccess(status === "active" ? json.message : "Your post drafted successfully");
-        console.log(json)
+        navigate("/")
         setError('');
       } else {
         setSuccess('');
@@ -130,7 +131,7 @@ console.log(product)
       }
     } catch (error) {
       setSuccess('');
-      setError('An unexpected error occurred.');
+      setError('An unexpected error occurred.', error);
       console.log(error);
     } finally {
       setLoading(false);
@@ -286,6 +287,8 @@ console.log(product)
                   <option value="">Select certification</option>
                   <option value="CE Certification">CE Certification</option>
                   <option value="FDA Certification">FDA Certification</option>
+                  <option value="CE certified">CE certified</option>
+                  <option value="unknown">unknown</option>
                 </select>
               </div>
 
@@ -346,6 +349,7 @@ console.log(product)
                   <option value="">Select shipping option</option>
                   <option value="free shipping">Free shipping</option>
                   <option value="pick up only">Pick up only</option>
+                  <option value="Available at cost">Available at cost</option>
                 </select>
               </div>
 

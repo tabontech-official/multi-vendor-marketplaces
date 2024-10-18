@@ -3,7 +3,7 @@ import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
 import { convertToRaw, EditorState , ContentState } from "draft-js";
 import { useLocation } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 const AddNewEquipmentForm = () => {
   const Location = useLocation();
   const { product } = Location.state || {};
@@ -31,6 +31,7 @@ const AddNewEquipmentForm = () => {
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const [Zip , setZip] = useState("")
 
+  const navigate = useNavigate()
   // Use effect to set initial state from product
 
 
@@ -134,6 +135,7 @@ const AddNewEquipmentForm = () => {
       if (response.ok) {
         if (status === "active") {
           setSuccess(json.message);
+          navigate("/")
         } else {
           setSuccess("Your post drafted successfully");
         }
@@ -321,6 +323,7 @@ const AddNewEquipmentForm = () => {
                   <option value="">Select shipping option</option>
                   <option value="Pick up only">Pick up only</option>
                   <option value="Free Shipping">Free Shipping</option>
+                  <option value="Available at cost">Available at cost</option>
                 </select>
               </div>
               <div className="flex flex-col">

@@ -4,6 +4,7 @@ import RTC from '../component/editor';
 import { EditorState , ContentState, convertToRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
 
+import { useNavigate } from 'react-router-dom';
 
 const PostRentalForm = () => {
   // State hooks for form fields
@@ -27,7 +28,7 @@ const PostRentalForm = () => {
   const [isEditing, setIsEditing] = useState(false);
   const locationData = useLocation();
   const [Zip , setZip] = useState("")
-
+  const navigate = useNavigate()
   const { product } = locationData.state || {};
 console.log(product)
   useEffect(() => {
@@ -117,6 +118,7 @@ console.log(product)
         }else{
           setSuccess("Your post drafted sucessfully")
         }
+        navigate("/")
         setError('');
       } else {
         setSuccess('');
@@ -195,7 +197,7 @@ const handleRemoveImage = (index) => {
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="roomSize" className="text-gray-700 text-sm font-medium mb-1">Room Size *</label>
+                <label htmlFor="roomSize" className="text-gray-700 text-sm font-medium mb-1">Room size (sq ft)*</label>
                 <input
                   type="number"
                   id="roomSize"

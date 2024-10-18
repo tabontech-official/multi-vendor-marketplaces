@@ -3,7 +3,7 @@ import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor'; // Assuming RTC is your custom rich text editor component
 import { EditorState , ContentState , convertToRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 const AddNewJobForm = () => {
   // State hooks for form fields
   const [location, setLocation] = useState('');
@@ -12,8 +12,7 @@ const AddNewJobForm = () => {
   const [jobOfferType, setJobOfferType] = useState('');
   const [offeredSalary, setOfferedSalary] = useState('');
   const [positionDescription, setPositionDescription] = useState('');
-  const [images, setImages] = useState([]);
-  const [imageName, setImageName] = useState('');
+
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +24,8 @@ const AddNewJobForm = () => {
   const LocationData = useLocation();
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const [Zip , setZip] = useState("")
-
+  const navigate = useNavigate()
+  
   const { product } = LocationData.state || {};
  console.log(product)
 
@@ -49,12 +49,7 @@ const AddNewJobForm = () => {
       setEditorState(EditorState.createEmpty());
     }
 
-       // Preload product images if available
-       if (product.images && Array.isArray(product.images)) {
-        const existingImages = product.images.map((img) => img.src); // Extract image URLs
-        setImagePreviews(existingImages); // Set them as previews
-      }
-    
+   
    
       }
 }, []);
@@ -82,11 +77,6 @@ const AddNewJobForm = () => {
 
     // Append the image file if it exists
    
-    if (images.length > 0) {
-      images.forEach((image) => {
-        formData.append('images', image);
-      });
-    }
 
     // Append other fields
     formData.append('location', location);
@@ -125,6 +115,7 @@ const AddNewJobForm = () => {
         }else{
           setSuccess("Your post drafted sucessfully")
         }
+        navigate("/")
         setError('');
         // Clear form fields
         // setLocation('');
@@ -149,22 +140,11 @@ const AddNewJobForm = () => {
     }
   };
 
-  /// Handler for image file change
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files); // Get all selected files
-    setImages(prevImages => [...prevImages, ...files]); // Store file objects
-    const newImagePreviews = files.map(file => URL.createObjectURL(file)); // Create object URLs for preview
-    setImagePreviews(prevPreviews => [...prevPreviews, ...newImagePreviews]); // Append to the existing previews
-  };
 
 
 
 
-// Handler to remove image
-const handleRemoveImage = (index) => {
-  setImages((prevImages) => prevImages.filter((_, i) => i !== index)); // Remove from images
-  setImagePreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index)); // Remove preview
-};
+
 
   return (
     <main className="bg-gray-100 min-h-screen p-5 flex-row">
@@ -340,65 +320,7 @@ const handleRemoveImage = (index) => {
      {/* Image Upload */}
      <div className="lg:w-1/3 lg:pl-8 flex-1">
           
-            
-     <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
-  <h2 className="text-2xl font-semibold mb-4">Resume</h2>
-  <p className="text-gray-600 mb-4">
-    Upload an image of the equipment. Recommended size: 1024x1024 and less than 15MB.
-  </p>
-  <p className="text-sm text-gray-500 mb-2"></p>
-  
-  {/* Image Preview */}
-  {imagePreviews.length > 0 ? (
-  imagePreviews.map((image, index) => (
-    <div key={index} className="flex items-center mb-4">
-      <img
-        src={image}
-        alt={`Preview ${index}`}
-        className="border border-gray-300 w-14 h-14 object-cover"
-      />
-      <div className="ml-4 flex flex-1 items-center">
-        <p className="text-sm text-gray-700 flex-1">Image {index + 1}</p>
-        <button
-          type="button"
-          onClick={() => handleRemoveImage(index)} // Call remove handler with the index
-          className="text-red-500 hover:text-red-700 text-sm ml-4"
-        >
-          <FaTrash />
-        </button>
-      </div>
-    </div>
-  ))
-) : (
-  <div className="flex items-center mb-4">
-    <img
-      src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
-      alt="Preview"
-      className="border border-gray-300 w-24 h-24 object-cover"
-    />
-    <div className="ml-4 flex flex-1 items-center">
-      <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-    </div>
-  </div>
-)}
 
-          <button
-            onClick={() => document.getElementById('images').click()}
-            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
-          >
-            Upload Image
-          </button>
-          <input
-            type="file"
-                id="images"
-            onChange={handleImageChange}
-            multiple
-            className="hidden"
-          />
-        </div>
-        <p className="text-sm text-gray-500">
-          Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
-        </p>
 
         
         </div>

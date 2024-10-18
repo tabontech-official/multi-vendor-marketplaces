@@ -3,7 +3,7 @@ import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor'; // Assuming RTC is the rich text editor
 import { EditorState , ContentState, convertToRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 const AddJobSearchForm = () => {
   const [location, setLocation] = useState('');
   const [name, setName] = useState('');
@@ -23,6 +23,7 @@ const AddJobSearchForm = () => {
   const { product } = locationData.state || {};
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const [Zip , setZip] = useState("")
+  const navigate = useNavigate()
   useEffect(() => {
     console.log(product)
     if (product) {
@@ -112,6 +113,7 @@ const AddJobSearchForm = () => {
         setSuccess(isEditing ? "Job updated successfully!" : json.message);
         setError('');
         setTimeout(() => setSuccess(''), 5000); // Clear success message after 5 seconds
+        navigate("/")
 
         // if (!isEditing) {
         //   resetForm();
@@ -266,7 +268,7 @@ const handleRemoveImage = (index) => {
           <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
             <h2 className="text-2xl font-semibold mb-4">Resume</h2>
             <p className="text-gray-600 mb-4">
-              Upload an image of the equipment. Recommended size: 1024x1024 and less than 15MB.
+              Upload  Resume and Your Photo
             </p>
 
             {/* Image Preview */}
@@ -318,7 +320,8 @@ const handleRemoveImage = (index) => {
           />
         </div>
         <p className="text-sm text-gray-500">
-          Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
+          Note: Upload your resume and your photo. Recommended size: 1024x1024 and less than 15MB.
+
         </p>
 
         </div>

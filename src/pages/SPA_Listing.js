@@ -3,7 +3,7 @@ import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor'; // Assuming RTC is the custom editor component
 import { convertToRaw, EditorState , ContentState } from "draft-js";
 import { useLocation } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 const AddBusinessListingForm = () => {
   // State hooks for form fields
   const [location, setLocation] = useState('');
@@ -33,7 +33,7 @@ const AddBusinessListingForm = () => {
   const [name, setName] = useState('');
   const [Zip , setZip] = useState("")
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
-
+  const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false);
   const locationData = useLocation()
   const { product } = locationData.state || {};
@@ -145,6 +145,7 @@ const onEditorStateChange = (newEditorState) => {
 
       if (response.ok) {
         setSuccess(json.message);
+        navigate("/")
         setError('');
         // Clear form fields
         // setLocation('');
@@ -319,7 +320,7 @@ const onEditorStateChange = (newEditorState) => {
               <div className="flex flex-col">
                 <label htmlFor="leaseExpiration" className="text-gray-700 text-sm font-medium mb-1"> Lease Expiration date *</label>
                 <input
-                  type="number"
+                  type="date"
                   id="leaseExpiration"
                   value={leaseExpiration}
                   onChange={(e) => setLeaseExpiration(e.target.value)}

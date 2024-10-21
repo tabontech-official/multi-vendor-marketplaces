@@ -24,6 +24,7 @@ import { jwtDecode } from "jwt-decode";
 import SubscriptionHistory from './Subcription/Subpage';
 import ProtectedForms from './context api/FormProtect';
 import PrivacyPolicy from './pages/Policy';
+import PeopleLooking from './pages/PeopleLooking';
 import AdminDashboard from "./admin/adminpanel"
 const App = () => {
   const {dispatch} = useAuthContext()
@@ -77,6 +78,7 @@ const isAdmin = ()=>{
           <Route path="/New_Equipment_listing" element={<ProtectedForms element={<AddNewEquipmentForm/>} />} />
           <Route path="/Categories" element={<PrivateRoute element={<CategorySelector />} />} />
           <Route path="/Used_Equipment_Listing" element={<ProtectedForms element={<Used_EquipmentForm />} />} />
+          <Route path="/I_AM_LOOKING_FOR" element={<ProtectedForms element={<PeopleLooking />} />} />
           <Route path="/edit-account" element={<PrivateRoute element={<AccountPage />} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Route>

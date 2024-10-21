@@ -8,7 +8,7 @@ import { Fragment } from "react";
 export default function RTC({ editorState, onEditorStateChange, name }) {
   return (
     <>
-      <p>{name}:</p>
+      <p>{name}</p>
       <div className='border border-gray-300  rounded w-auto'>
         <div>
           <Editor

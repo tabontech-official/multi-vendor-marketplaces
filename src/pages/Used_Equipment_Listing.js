@@ -285,10 +285,10 @@ console.log(product)
                   required
                 >
                   <option value="">Select certification</option>
-                  <option value="CE Certification">CE Certification</option>
-                  <option value="FDA Certification">FDA Certification</option>
+                  <option value="FDA approved">FDA approved</option>
+                  <option value="FDA Registerd">FDA Registerd</option>
                   <option value="CE certified">CE certified</option>
-                  <option value="unknown">unknown</option>
+                  <option value="Unknown">Unknown</option>
                 </select>
               </div>
 

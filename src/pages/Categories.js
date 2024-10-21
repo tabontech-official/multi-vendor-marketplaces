@@ -16,6 +16,7 @@ const CategorySelector = () => {
     { path: '/Job_Provider_listing', label: 'Post Provider Job Offer', icon: <HiBriefcase className="w-6 h-6" /> },
     { path: '/Business_Equipment_listing', label: 'Post SPA Business for Sale', icon: <HiOfficeBuilding className="w-6 h-6" /> },
     { path: '/Rent_Room_listing', label: 'Post a Spa Room for Rent', icon: <HiHome className="w-6 h-6" /> },
+    { path: '/I_AM_LOOKING_FOR', label: 'I AM LOOKING FOR', icon: <HiSearch className="w-6 h-6" /> },
   ];
   
   const { userData, loading, error, variantId } = UseFetchUserData();
@@ -85,6 +86,7 @@ const navigate = useNavigate()
             if (category.path.includes('Job_Search') && product.product_type === "Providers Available") return true;
             if (category.path.includes('Job_Provider') && product.product_type === "Provider Needed") return true;
             if (category.path.includes('Rent_Room') && product.product_type === "Spa Room For Rent") return true;
+            if (category.path.includes('I_AM_LOOKING_FOR') && product.product_type === "Looking For") return true
           }
         );
 

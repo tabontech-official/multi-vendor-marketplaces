@@ -95,6 +95,9 @@ let buyCreditUrl = ''
       case 'Spa Room For Rent':
         formPage = '/Rent_Room_listing';
         break;
+        case 'Looking For':
+        formPage = '/I_AM_LOOKING_FOR';
+        break;
         case 'Businesses To Purchase':
           formPage = '/Business_Equipment_listing';
           break;

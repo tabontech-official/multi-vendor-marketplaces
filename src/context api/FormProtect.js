@@ -19,6 +19,7 @@ const ProtectedForms = ({ element, ...rest }) => {
     '/Job_Provider_listing': 'Provider Needed',
     '/Rent_Room_listing': 'Spa Room For Rent',
     '/Business_Equipment_listing': 'Businesses To Purchase',
+    '/I_AM_LOOKING_FOR': 'Looking For',
   };
 
   useEffect(() => {
@@ -67,11 +68,11 @@ const ProtectedForms = ({ element, ...rest }) => {
   console.log("Matched product type:", matchedProductType); // Debugging log
   
   if (matchedProductType) {
-    if (requiredCredits.length > 0) {
+    if (requiredCredits !== 0  && requiredCredits.length > 0) {
     const product = requiredCredits.find((item) => item.product_type === matchedProductType);
     console.log("Found product:", product); // Debugging log
-    if (product) {
-      if (product.credit_required > 0 && credits === 0) {
+    if (product && user) {
+      if (product.credit_required > 0 && credits === 0  ) {
         // Redirect if product requires credits but user has none
         setTimeout(()=>{
          navigate('/')
@@ -88,6 +89,8 @@ const ProtectedForms = ({ element, ...rest }) => {
       console.log("No matching product found for:", matchedProductType); // Handle no match case
     } 
   
+  }else{
+    navigate('/')
   }
 
   }

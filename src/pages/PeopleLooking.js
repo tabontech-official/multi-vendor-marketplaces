@@ -3,6 +3,7 @@ import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
 import { EditorState , ContentState, convertToRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
+import CurrencyInput from 'react-currency-input-field';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -209,15 +210,22 @@ const handleRemoveImage = (index) => {
 
               <div className="flex flex-col">
                 <label htmlFor="deposit" className="text-gray-700 text-sm font-medium mb-1">My Budget for the Unit $ *</label>
-                <input
-                  type="number"
-                  id="deposit"
-                  min={0}
-                  value={budget}
-                  onChange={(e) => setBudget(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+
+
+                
+              <CurrencyInput
+  id="validation-example-2-field"
+  placeholder="$1,234,567"
+  onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setBudget(formattedValue);
+  }}
+  value={budget}
+  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/>
+
               </div>
 
               

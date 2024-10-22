@@ -3,7 +3,7 @@ import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
 import { EditorState , ContentState, convertToRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
-
+import CurrencyInput from 'react-currency-input-field';
 import { useNavigate } from 'react-router-dom';
 
 const PostRentalForm = () => {
@@ -218,15 +218,19 @@ const handleRemoveImage = (index) => {
 
               <div className="flex flex-col">
                 <label htmlFor="monthlyRent" className="text-gray-700 text-sm font-medium mb-1">Monthly Rent $ *</label>
-                <input
-                  type="number"
-                  id="monthlyRent"
-                  min={0}
-                  value={monthlyRent}
-                  onChange={(e) => setMonthlyRent(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+                <CurrencyInput
+  id="validation-example-2-field"
+  placeholder="$1,234,567"
+  onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setMonthlyRent(formattedValue);
+  }}
+  value={monthlyRent}
+  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/>
+      
               </div>
 
               <div className="flex flex-col">

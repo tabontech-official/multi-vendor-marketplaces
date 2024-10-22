@@ -4,6 +4,7 @@ import RTC from '../component/editor';
 import { convertToRaw, EditorState , ContentState } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import CurrencyInput from 'react-currency-input-field';
 const AddNewEquipmentForm = () => {
   const Location = useLocation();
   const { product } = Location.state || {};
@@ -239,15 +240,20 @@ const AddNewEquipmentForm = () => {
               </div>
               <div className="flex flex-col">
                 <label htmlFor="sale_price" className="text-gray-700 text-sm font-medium mb-1">Sale Price $ *</label>
-                <input
-                  type="number"
-                  id="sale_price"
-                  min={0}
-                  value={sale_price}
-                  onChange={(e) => setSalePrice(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+                
+              <CurrencyInput
+  id="validation-example-2-field"
+  placeholder="$1,234,567"
+  onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setSalePrice(formattedValue);
+  }}
+  value={sale_price}
+  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/>
+                
               </div>
               <div className="flex flex-col">
                 <label htmlFor="equipment_type" className="text-gray-700 text-sm font-medium mb-1">Equipment Type *</label>

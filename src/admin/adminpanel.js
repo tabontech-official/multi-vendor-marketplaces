@@ -13,6 +13,7 @@ const AdminDashboard = () => {
     { _id: '4', title: 'Job Offer ' },
     { _id: '5', title: 'Job Provider ' },
     { _id: '6', title: 'Room for Rent ' },
+    { _id: '7', title: 'Looking For' },
   ]);
 
   const [editingPrice, setEditingPrice] = useState(null);
@@ -109,7 +110,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch('https://medspaa.vercel.app/product/fetchRequireCredits', { method: 'GET' });
       const data = await response.json();
-
+    
       const creditsMap = data.data.reduce((map, item) => {
         map[item.product_type] = item.credit_required;
         return map;
@@ -140,6 +141,9 @@ const AdminDashboard = () => {
           case 'Room for Rent':
             matchedType = 'Spa Room For Rent';
             break;
+            case 'Looking For':
+              matchedType = 'Looking For';
+              break;
           default:
             matchedType = '';
         }
@@ -213,6 +217,9 @@ const AdminDashboard = () => {
       case 'Room for Rent ':
         product_type = 'Spa Room For Rent';
         break;
+        case 'Looking For':
+          product_type = 'Looking For';
+          break;
       default:
         console.error('Unknown product type');
         setLoading(false);

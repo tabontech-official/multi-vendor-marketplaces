@@ -4,6 +4,7 @@ import RTC from '../component/editor'; // Assuming RTC is your custom rich text 
 import { EditorState , ContentState , convertToRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import CurrencyInput from 'react-currency-input-field';
 const AddNewJobForm = () => {
   // State hooks for form fields
   const [location, setLocation] = useState('');
@@ -259,15 +260,19 @@ const AddNewJobForm = () => {
               {/* Offered Salary */}
               <div className="flex flex-col">
                 <label htmlFor="offeredSalary" className="text-gray-700 text-sm font-medium mb-1"> Offered Yearly Salary $  *</label>
-                <input
-                  type="number"
-                  id="offeredSalary"
-                  min={0}
-                  value={offeredSalary}
-                  onChange={(e) => setOfferedSalary(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+                <CurrencyInput
+  id="validation-example-2-field"
+  placeholder="$1,234,567"
+  onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setOfferedSalary(formattedValue);
+  }}
+  value={offeredSalary}
+  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/>
+          
               </div>
             </div>
             <hr className="border-t border-gray-500 my-4" />

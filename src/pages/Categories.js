@@ -167,38 +167,39 @@ const navigate = useNavigate()
 
         {/* Categories List */}
         <div className="space-y-4">
-          {categories.map(({ path, label, icon, isFree }) => {
-            const isDisabled = !isFree && credits <= 0;
-            return (
-              <Link
-                to={isDisabled ? "#" : path}
-                key={path}
-                onClick={(e) => {
-                  if (!handleCategoryClick(isFree)) {
-                    e.preventDefault();
-                  }
-                  else{
-                    navigate(path)
-                  }
-                }}
-                className={`block w-full py-3 px-4 border-b-4 shadow-lg transition-transform transform hover:scale-105 ${
-                  isDisabled
-                    ? 'bg-gray-300 border-gray-400 text-black '
-                    : 'bg-blue-500 border-blue-500 hover:bg-blue-400 text-white'
-                }`}
-              >
-                <div className="flex items-center justify-between space-x-4">
-                  <div className="flex items-center space-x-4">
-                    {icon}
-                    <span className="text-lg max-sm:text-xs font-medium">{label}</span>
-                  </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isFree ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-                    {isFree ? 'Free' : 'Paid'}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
+        {categories.map(({ path, label, icon, isFree, requiredCredit }) => {
+  const isDisabled = !isFree && credits <= 0;
+  return (
+    <Link
+      to={isDisabled ? "#" : path}
+      key={path}
+      onClick={(e) => {
+        if (!handleCategoryClick(isFree)) {
+          e.preventDefault();
+        } else {
+          navigate(path);
+        }
+      }}
+      className={`block w-full py-3 px-4 border-b-4 shadow-lg transition-transform transform hover:scale-105 ${
+        isDisabled
+          ? 'bg-gray-300 border-gray-400 text-black '
+          : 'bg-blue-500 border-blue-500 hover:bg-blue-400 text-white'
+      }`}
+    >
+      <div className="flex items-center justify-between space-x-4">
+        <div className="flex items-center space-x-4">
+          {icon}
+          <span className="text-lg max-sm:text-xs font-medium">
+            {label} ({requiredCredit} Credits)
+          </span>
+        </div>
+        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isFree ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+          {isFree ? 'Free' : 'Paid'}
+        </span>
+      </div>
+    </Link>
+  );
+})}
         </div>
 
       </div>

@@ -4,6 +4,7 @@ import RTC from '../component/editor'; // Assuming RTC is the rich text editor
 import { EditorState , ContentState, convertToRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import CurrencyInput from 'react-currency-input-field';
 const AddJobSearchForm = () => {
   const [location, setLocation] = useState('');
   const [name, setName] = useState('');
@@ -23,6 +24,7 @@ const AddJobSearchForm = () => {
   const { product } = locationData.state || {};
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const [Zip , setZip] = useState("")
+
   const navigate = useNavigate()
   useEffect(() => {
     console.log(product)
@@ -238,15 +240,19 @@ const handleRemoveImage = (index) => {
               {/* Requested Yearly Salary */}
               <div className="flex flex-col">
                 <label htmlFor="requestedYearlySalary" className="text-gray-700 text-sm font-medium mb-1">Requested Yearly Salary *</label>
-                <input
-                  type="number"
-                  id="requestedYearlySalary"
-                  min={0}
-                  value={requestedYearlySalary}
-                  onChange={(e) => setRequestedYearlySalary(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+
+                <CurrencyInput
+  id="validation-example-2-field"
+  placeholder="$1,234,567"
+  onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setRequestedYearlySalary(formattedValue);
+  }}
+  value={requestedYearlySalary}
+  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/>
               </div>
 
               {/* Position Description */}

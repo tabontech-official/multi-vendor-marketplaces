@@ -4,6 +4,7 @@ import RTC from '../component/editor'; // Assuming RTC is the custom editor comp
 import { convertToRaw, EditorState , ContentState } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import CurrencyInput from 'react-currency-input-field';
 const AddBusinessListingForm = () => {
   // State hooks for form fields
   const [location, setLocation] = useState('');
@@ -262,16 +263,21 @@ const onEditorStateChange = (newEditorState) => {
               {/* Asking Price */}
               <div className="flex flex-col">
                 <label htmlFor="askingPrice" className="text-gray-700 text-sm font-medium mb-1">Asking Price $ *</label>
-                <input
-                  type="number"
-                  id="askingPrice"
-                  min={0}
-                  value={askingPrice}
-                  onChange={(e) => setAskingPrice(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm 
-                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+               
+              <CurrencyInput
+  id="validation-example-2-field"
+  placeholder="$1,234,567"
+  onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setAskingPrice(formattedValue);
+  }}
+  value={askingPrice}
+  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/>
+               
+               
               </div>
 
               {/* Established Year */}
@@ -305,15 +311,20 @@ const onEditorStateChange = (newEditorState) => {
               {/* Monthly Rent */}
               <div className="flex flex-col">
                 <label htmlFor="monthlyRent" className="text-gray-700 text-sm font-medium mb-1">Monthly Rent $ *  (Including Sales Taxes) </label>
-                <input
-                  type="number"
-                  id="monthlyRent"
-                  value={monthlyRent}
-                  onChange={(e) => setMonthlyRent(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm 
-                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+                
+              <CurrencyInput
+   id="validation-example-2-field"
+  placeholder="$1,234,567"
+   onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setMonthlyRent(formattedValue);
+  }}
+   value={monthlyRent}
+    className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/ >
+            
               </div>
 
               {/* Lease Expiration */}
@@ -347,29 +358,42 @@ const onEditorStateChange = (newEditorState) => {
               {/* Gross Yearly Revenue */}
               <div className="flex flex-col">
                 <label htmlFor="grossYearlyRevenue" className="text-gray-700 text-sm font-medium mb-1">Gross Yearly Revenue $ *</label>
-                <input
-                  type="number"
-                  id="grossYearlyRevenue"
-                  value={grossYearlyRevenue}
-                  onChange={(e) => setGrossYearlyRevenue(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm  
-                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+              
+              
+                <CurrencyInput
+  id="validation-example-2-field"
+  placeholder="$1,234,567"
+  onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setGrossYearlyRevenue(formattedValue);
+  }}
+  value={grossYearlyRevenue}
+  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/>
+              
+    
               </div>
 
               {/* Cash Flow */}
               <div className="flex flex-col">
                 <label htmlFor="cashFlow" className="text-gray-700 text-sm font-medium mb-1">Cash Flow $$ >> (Net profit before Taxes and adding back depreciation and owner draws)*</label>
-                <input
-                  type="number"
-                  id="cashFlow"
-                  value={cashFlow}
-                  onChange={(e) => setCashFlow(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm 
-                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+              
+                <CurrencyInput
+  id="validation-example-2-field"
+  placeholder="$1,234,567"
+  onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setCashFlow(formattedValue);
+  }}
+  value={cashFlow}
+  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/>
+              
+              
               </div>
 
               {/* Products/Inventory */}
@@ -389,15 +413,20 @@ const onEditorStateChange = (newEditorState) => {
               {/* Equipment Value */}
               <div className="flex flex-col">
                 <label htmlFor="equipmentValue" className="text-gray-700 text-sm font-medium mb-1">Equipment Value $ *</label>
-                <input
-                  type="number"
-                  id="equipmentValue"
-                  value={equipmentValue}
-                  onChange={(e) => setEquipmentValue(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm 
-                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+             
+                <CurrencyInput
+  id="validation-example-2-field"
+  placeholder="$1,234,567"
+  onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setEquipmentValue(formattedValue);
+  }}
+  value={equipmentValue}
+  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/>
+           
               </div>
 
               {/* Reason for Selling */}

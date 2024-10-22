@@ -235,27 +235,38 @@ const handleRemoveImage = (index) => {
 
               <div className="flex flex-col">
                 <label htmlFor="deposit" className="text-gray-700 text-sm font-medium mb-1">Deposit $ *</label>
-                <input
-                  type="number"
-                  id="deposit"
-                  min={0}
-                  value={deposit}
-                  onChange={(e) => setDeposit(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+                <CurrencyInput
+  id="validation-example-2-field"
+  placeholder="$1,234,567"
+  onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setDeposit(formattedValue);
+  }}
+  value={deposit}
+  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/>
+              
+            
               </div>
 
               <div className="flex flex-col">
                 <label htmlFor="minimumInsuranceRequested" className="text-gray-700 text-sm font-medium mb-1">Minimum Insurance Requested $ *</label>
-                <input
-                  type="number"
-                  id="minimumInsuranceRequested"
-                  value={minimumInsuranceRequested}
-                  onChange={(e) => setMinimumInsuranceRequested(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+                <CurrencyInput
+  id="validation-example-2-field"
+  placeholder="$1,234,567"
+  onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setMinimumInsuranceRequested(formattedValue);
+  }}
+  value={minimumInsuranceRequested}
+  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/>
+               
+             
               </div>
 
               <div className="flex flex-col">

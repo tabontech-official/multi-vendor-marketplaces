@@ -399,15 +399,20 @@ const onEditorStateChange = (newEditorState) => {
               {/* Products/Inventory */}
               <div className="flex flex-col">
                 <label htmlFor="productsInventory" className="text-gray-700 text-sm font-medium mb-1">Product Inventory Value $$ *</label>
-                <input
-                  type="number"
-                  id="productsInventory"
-                  value={productsInventory}
-                  onChange={(e) => setProductsInventory(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm 
-                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
+               
+              <CurrencyInput
+  id="validation-example-2-field"
+  placeholder="$1,234,567"
+  onValueChange={(value, name, values) => {
+    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
+    setProductsInventory(formattedValue);
+  }}
+  value={productsInventory}
+  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+  prefix={'$'}
+  step={10}
+/>
+               
               </div>
 
               {/* Equipment Value */}

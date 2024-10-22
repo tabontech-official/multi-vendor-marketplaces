@@ -10,13 +10,14 @@ import UseFetchUserData from '../component/fetchUser';
 
 const CategorySelector = () => {
   const initialCategories = [
+    { path: '/I_AM_LOOKING_FOR', label: 'I AM LOOKING FOR', icon: <HiSearch className="w-6 h-6" /> },
     { path: '/Used_Equipment_Listing', label: 'Post Used Equipments for Sale', icon: <HiCube className="w-6 h-6" /> },
     { path: '/New_Equipment_listing', label: 'Post New Equipments for Sale', icon: <HiNewspaper className="w-6 h-6" /> },
     { path: '/Job_Search_listing', label: 'Post Provider Job Search', icon: <HiSearch className="w-6 h-6" /> },
     { path: '/Job_Provider_listing', label: 'Post Provider Job Offer', icon: <HiBriefcase className="w-6 h-6" /> },
     { path: '/Business_Equipment_listing', label: 'Post SPA Business for Sale', icon: <HiOfficeBuilding className="w-6 h-6" /> },
     { path: '/Rent_Room_listing', label: 'Post a Spa Room for Rent', icon: <HiHome className="w-6 h-6" /> },
-    { path: '/I_AM_LOOKING_FOR', label: 'I AM LOOKING FOR', icon: <HiSearch className="w-6 h-6" /> },
+   
   ];
   
   const { userData, loading, error, variantId } = UseFetchUserData();

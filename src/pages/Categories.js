@@ -190,7 +190,7 @@ const navigate = useNavigate()
       <div className="flex items-center justify-between space-x-4">
         <div className="flex items-center space-x-4">
           {icon}
-          <span className="text-lg max-sm:text-xs font-medium">
+          <span className="text-base max-sm:text-xs font-medium">
             {label} ({requiredCredit} Credits)
           </span>
         </div>

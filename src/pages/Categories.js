@@ -10,7 +10,7 @@ import UseFetchUserData from '../component/fetchUser';
 
 const CategorySelector = () => {
   const initialCategories = [
-    { path: '/I_AM_LOOKING_FOR', label: 'I AM LOOKING FOR', icon: <HiSearch className="w-6 h-6" /> },
+    { path: '/I_AM_LOOKING_FOR', label: 'I Am Looking For', icon: <HiSearch className="w-6 h-6" /> },
     { path: '/Used_Equipment_Listing', label: 'Post Used Equipments for Sale', icon: <HiCube className="w-6 h-6" /> },
     { path: '/New_Equipment_listing', label: 'Post New Equipments for Sale', icon: <HiNewspaper className="w-6 h-6" /> },
     { path: '/Job_Search_listing', label: 'Post Provider Job Search', icon: <HiSearch className="w-6 h-6" /> },
@@ -190,9 +190,13 @@ const navigate = useNavigate()
       <div className="flex items-center justify-between space-x-4">
         <div className="flex items-center space-x-4">
           {icon}
-          <span className="text-base max-sm:text-xs font-medium">
-            {label} ({requiredCredit} Credits)
+          <span className="text-base max-sm:text-xs font-medium mb-1">
+            {label} 
           </span>
+          <span className="text-sm max-sm:text-xs font-medium absolute bottom-0 left-10 text-black">
+          { requiredCredit && requiredCredit > 0 ?`${requiredCredit} Credits ` : null}
+          </span>
+
         </div>
         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isFree ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
           {isFree ? 'Free' : 'Paid'}

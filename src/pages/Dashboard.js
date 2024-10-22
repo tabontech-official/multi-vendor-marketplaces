@@ -8,11 +8,15 @@ import { Dialog } from '@headlessui/react';
 import { FaTimes, FaShoppingBasket } from 'react-icons/fa';
 import { CreateCheckoutUrl } from '../component/Checkout';
 import { HiOutlineRefresh } from 'react-icons/hi';
+
+
 const Dashboard = () => {
 
-
+  const productsPerPage = 10;
   const navigate = useNavigate();
   const {userData , loading , error , variantId} = UseFetchUserData()
+  const [starting , setStarting ]= useState(0)
+  const [ending , setEnding] = useState(10)
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -27,10 +31,14 @@ const Dashboard = () => {
   const pricePerCredit = 10; // Example price per credit
   const [errorMessage, setErrorMessage] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [ListingPerPage , setListingPerPage] = useState(10)
+  const [next , setNext] = useState(1)
 const [Loading , setLoading] = useState(false)
+
 const [Price , setPrice] = useState()
 let buyCreditUrl = ''
- 
+const [currentPage, setCurrentPage] = useState(1); // Track the current page
+const [totalPages, setTotalPages] = useState(null); // Track total pages
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -39,36 +47,24 @@ let buyCreditUrl = ''
   }, []);
   
 
-  const fetchProductData = async () => {
-    const id = localStorage.getItem('userid');
-    if (!id) return;
+  
+  const fetchProductData = async (userId) => {
+    setLoading(true);
     try {
-      const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${id}`, { method: 'GET' });
+      const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${userId}`, { method: 'GET' });
       if (response.ok) {
         const data = await response.json();
-        console.log("Product Fetch " , data)
-        setProducts(data.products);
-        setFilteredProducts(data.products);
+        const sortedProducts = data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setProducts(sortedProducts);
+        setFilteredProducts(sortedProducts);
+        setTotalPages(Math.ceil(sortedProducts.length / productsPerPage)); // Calculate total pages
       }
+      setLoading(false);
     } catch (error) {
-      setMessage("You don't have enough credits");
-    }
-
-    try {
-      const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}` , { method: 'GET' } );
-      if (response.ok) {
-        const data = await response.json();
-         console.log(data)
-        setCredit(data.quantity || 0);
-      }
-    } catch (error) {
-      console.error('Error fetching quantity:', error);
+      setLoading(false);
+      setMessage("Error fetching products");
     }
   };
-
-  useEffect(()=>{
-    fetchProductData()
-  },[])
 
 
   const toggleDropdown = (index) => {
@@ -297,6 +293,24 @@ const handleUnpublish = async (product) => {
   }; 
 
 
+  const handleNext = () => {
+    if (ending < filteredProducts.length) {
+      setStarting(starting + productsPerPage);
+      setEnding(ending + productsPerPage);
+    }
+  };
+
+  // Handle "Previous" button click
+  const handlePrevious = () => {
+    if (starting > 0) {
+      setStarting(starting - productsPerPage);
+      setEnding(ending - productsPerPage);
+    }
+  };
+
+  
+
+
   return user ? (
     <main className="w-full p-4 md:p-8">
       {/* Message Display */}
@@ -393,7 +407,7 @@ const handleUnpublish = async (product) => {
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200 mb-4">
-            {filteredProducts.map((product, index) => (
+          {filteredProducts.slice(starting, ending).map((product, index) => (
               <tr key={product._id}>
                 <td className="py-4 whitespace-nowrap relative px-4">
                   <button
@@ -475,14 +489,32 @@ const handleUnpublish = async (product) => {
             ))}
           </tbody>
         </table>
+        
+
       </div>
     )}
   </div>
 )}
+   {/* Pagination Controls */}
+   { !Loading &&
+   <div className="flex justify-between mt-4">
+          <button
+            onClick={handlePrevious}
+            disabled={starting === 0}
+            className="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded"
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={ending >= filteredProducts.length || ending >= 80} // Disable if max products are reached
+            className="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded"
+          >
+            Next
+          </button>
+        </div>
 
-
-
-      
+   }
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} className="fixed inset-0 z-10 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4">
           <div ref={dialogRef} className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg border border-black relative">

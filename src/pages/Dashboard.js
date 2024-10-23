@@ -495,7 +495,7 @@ handleSearch()
                   {product.title !== "Job Listing" ? product.title : "Job Search Listing"}
               
                 </td>
-                {admin && product.tags.split(",")[1].split("_")[0]}
+                {admin && product.tags.split(",")[1].split("_")[1]}
                 <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
                 <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "..loading"}</td>
                 <td className="px-4 py-2">{new Date(product.createdAt).toLocaleDateString()}</td>

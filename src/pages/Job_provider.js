@@ -26,7 +26,8 @@ const AddNewJobForm = () => {
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const [Zip , setZip] = useState("")
   const navigate = useNavigate()
-  
+  const [customLocation, setCustomLocation] = useState('');
+
   const { product } = LocationData.state || {};
  console.log(product)
 
@@ -80,7 +81,12 @@ const AddNewJobForm = () => {
    
 
     // Append other fields
-    formData.append('location', location);
+    if(location === "Other"){
+      formData.append('location', customLocation);
+    }else{
+      formData.append('location', location);
+    }
+  
     formData.append('zip',Zip)
       formData.append('qualificationRequested', qualification);
       formData.append('name', qualification);
@@ -179,7 +185,21 @@ const AddNewJobForm = () => {
                   <option value="Houston">Houston</option>
                   <option value="Other">Other</option>
                 </select>
+                {location === 'Other' && (
+    <div className="flex flex-col flex-1 mt-4 max-sm:mb-4   max-sm:mr-0">
+      <label htmlFor="customLocation" className="text-gray-700 text-sm font-medium mb-1">Specify Other Location *</label>
+      <input
+        type="text"
+        id="customLocation"
+        value={customLocation}
+        onChange={(e) => setCustomLocation(e.target.value)}
+        className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+        required
+      />
+    </div>
+  )}
               </div>
+    
               
               <div className="flex flex-col flex-1 ">
                 <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>
@@ -193,7 +213,10 @@ const AddNewJobForm = () => {
                 />
               </div>
 
+
+
               </div>
+              
               {/* Qualification Requested */}
               <div className="flex flex-col">
                 <label htmlFor="qualification" className="text-gray-700 text-sm font-medium mb-1">Qualification Requested *</label>

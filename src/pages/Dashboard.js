@@ -233,7 +233,7 @@ const handleUnpublish = async (product) => {
         if (response.ok) {
           const data = await response.json();
           // Sort products by createdAt in descending order (latest first)
-          console.log(data)
+      
           const sortedProducts = data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
           setProducts(sortedProducts);
           setFilteredProducts(sortedProducts);
@@ -420,7 +420,7 @@ handleSearch()
               <th className="py-3 pl-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
               <th className="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LISTING NAME</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Publisher</th>
+              {admin && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Publisher</th>}
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRICE</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CREATED AT</th>
@@ -493,12 +493,9 @@ handleSearch()
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {product.title !== "Job Listing" ? product.title : "Job Search Listing"}
-                  {product.product_type === "Used Equipment" && (
-                    <span className="bg-blue-100 text-green-800 text-xs font-medium me-2 px-2.5 mx-3 py-0.5 rounded dark:bg-green-900 dark:text-blue-300">
-                      Free Listing
-                    </span>
-                  )}
+              
                 </td>
+                {admin && product.tags.split(",")[1].split("_")[0]}
                 <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
                 <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "..loading"}</td>
                 <td className="px-4 py-2">{new Date(product.createdAt).toLocaleDateString()}</td>

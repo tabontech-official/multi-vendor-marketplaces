@@ -16,7 +16,6 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [city, setCity] = useState('');
 const [state, setState] = useState('');
 const [zip, setZip] = useState('');
@@ -24,8 +23,9 @@ const [phoneNumber , setNumber ] = useState('')
 const [country, setCountry] = useState('');
 const [loading, setLoading] = useState(false); // Loading state
  
-
-const handleSignup = async (e) => {
+const [success, setSuccess] = useState('');
+const [agreedToPolicies, setAgreedToPolicies] = useState(false); // New state for policy agreement
+const handleSignup = async (e) => {  
   e.preventDefault();
   setError(''); // Clear previous messages
   setSuccess('');
@@ -33,6 +33,12 @@ const handleSignup = async (e) => {
 
   if (!firstName || !lastName  || !email || !password) {
     setError('All fields are required.');
+    setLoading(false); // Reset loading state
+    return;
+  }
+
+  if (!agreedToPolicies) {
+    setError('You must agree to the policies and terms to sign up.');
     setLoading(false); // Reset loading state
     return;
   }
@@ -71,6 +77,7 @@ const handleSignup = async (e) => {
     setLoading(false); // Reset loading state after request
   }
 };
+
 
 const handleLogin = async (e) => {
   e.preventDefault();
@@ -332,6 +339,26 @@ if (user) {
                     aria-required="true"
                   />
                 </div>
+                <div className="flex items-center space-x-2 my-3">
+            <input
+              type="checkbox"
+              id="policyAgreement"
+              name="policyAgreement"
+              checked={agreedToPolicies}
+              onChange={(e) => setAgreedToPolicies(e.target.checked)}
+              className="h-5 w-5 text-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="policyAgreement" className="text-sm font-medium text-gray-700">
+              I agree with the{' '}
+              <span
+                className="text-blue-600 cursor-pointer hover:underline"
+                onClick={() => navigate('/policy')}
+              >
+                policies and terms
+              </span>
+            </label>
+          </div>
+
       
                 <div className="flex justify-center">
                   <button

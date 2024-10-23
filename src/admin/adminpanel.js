@@ -9,11 +9,11 @@ const AdminDashboard = () => {
   const [filteredProducts, setFilteredProducts] = useState([
     { _id: '1', title: 'New Equipments ' },
     { _id: '2', title: 'Used Equipments ' },
-    { _id: '3', title: 'SPA Business Equipment ' },
-    { _id: '4', title: 'Job Offer ' },
-    { _id: '5', title: 'Job Provider ' },
+    { _id: '3', title: 'SPA Business For Sale' },
+    { _id: '4', title: 'Provider Job Offer ' },
+    { _id: '5', title: 'Provider Job Search' },
     { _id: '6', title: 'Room for Rent ' },
-    { _id: '7', title: 'Looking For' },
+    { _id: '7', title: 'I am Looking For' },
   ]);
 
   const [editingPrice, setEditingPrice] = useState(null);
@@ -129,19 +129,19 @@ const AdminDashboard = () => {
           case 'Used Equipments':
             matchedType = 'Used Equipments';
             break;
-          case 'SPA Business Equipment':
+          case 'SPA Business For Sale':
             matchedType = 'Businesses To Purchase';
             break;
-          case 'Job Provider':
+          case 'Provider Job Search':
             matchedType = 'Provider Needed';
             break;
-          case 'Job Offer':
+          case 'Provider Job Offer ':
             matchedType = 'Providers Available';
             break;
           case 'Room for Rent':
             matchedType = 'Spa Room For Rent';
             break;
-            case 'Looking For':
+            case 'I am Looking For':
               matchedType = 'Looking For';
               break;
           default:

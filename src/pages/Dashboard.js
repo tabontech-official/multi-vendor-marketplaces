@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { HiDotsVertical, HiPlus, HiX , Hiload } from 'react-icons/hi';
+import { HiDotsVertical, HiOutlineCheckCircle, HiOutlineXCircle, HiPlus, HiX , Hiload } from 'react-icons/hi';
 import { Link, useNavigate } from 'react-router-dom';
 import UseFetchUserData from '../component/fetchUser';
 import { useAuthContext } from '../Hooks/useAuthContext';
@@ -8,9 +8,29 @@ import { Dialog } from '@headlessui/react';
 import { FaTimes, FaShoppingBasket } from 'react-icons/fa';
 import { CreateCheckoutUrl } from '../component/Checkout';
 import { HiOutlineRefresh } from 'react-icons/hi';
+import { jwtDecode } from 'jwt-decode';
 
 
 const Dashboard = () => {
+  const [admin , setAdmin]=useState(null)
+
+  const isAdmin = () => {
+    const token = localStorage.getItem('usertoken');
+    if (token) {
+      const decoded = jwtDecode(token);
+      if (decoded.payLoad.isAdmin && decoded.exp * 1000 > Date.now()) {
+        return setAdmin(true);
+      }
+    }
+    return setAdmin(false);
+  };
+
+  useEffect(()=>{
+   isAdmin()
+  },[])
+
+
+
 
   const productsPerPage = 10;
   const navigate = useNavigate();
@@ -31,10 +51,8 @@ const Dashboard = () => {
   const pricePerCredit = 10; // Example price per credit
   const [errorMessage, setErrorMessage] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [ListingPerPage , setListingPerPage] = useState(10)
-  const [next , setNext] = useState(1)
 const [Loading , setLoading] = useState(false)
-
+const [toast, setToast] = useState({ show: false, type: '', message: '' });
 const [Price , setPrice] = useState()
 let buyCreditUrl = ''
 const [currentPage, setCurrentPage] = useState(1); // Track the current page
@@ -46,12 +64,18 @@ const [totalPages, setTotalPages] = useState(null); // Track total pages
     };
   }, []);
   
-
+ 
+  // Show toast message
+  const showToast = (type, message) => {
+    
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: '', message: '' }), 3000);
+  };
   
   const fetchProductData = async (userId) => {
     setLoading(true);
     try {
-      const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${userId}`, { method: 'GET' });
+      const response = await fetch(admin ? `https://medspaa.vercel.app/product/getAllData/` :`https://medspaa.vercel.app/product/getProduct/${userId}`, { method: 'GET' });
       if (response.ok) {
         const data = await response.json();
         const sortedProducts = data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -144,16 +168,18 @@ const [totalPages, setTotalPages] = useState(null); // Track total pages
       });
   const json = await response.json()
       if (response.ok) {
+        showToast("success",json.message ||'Product published successfully!')
         setMessage( json.message||'Product published successfully!');
         await fetchCredits();
         fetchProductData();
       }
       else{
+        showToast("Failed",json.error ||'An error occurred while publishing the product.')
         setErrorMessage(json.error ||'An error occurred while publishing the product.');
    
       }
     } catch (error) {
-     
+      showToast("Failed",error.message||'An error occurred while publishing the product.')
       setErrorMessage(error.message ||'An error occurred while publishing the product.');
     } finally {
       setLoadingId(null);
@@ -185,15 +211,14 @@ const handleUnpublish = async (product) => {
     });
 
     if (response.ok) {
-      setMessage('Product unpublished successfully!');
-      // Refresh product data
+      showToast('success','Product unpublished successfully!' )
       fetchProductData();
     } else {
-      setErrorMessage('Failed to unpublish product.');
+      showToast('Failed','Failed to unpublish product.' )
+
     }
   } catch (error) {
-    console.error('Error unpublishing product:', error);
-    setErrorMessage('An error occurred while unpublishing the product.');
+    showToast('Failed','An error occurred while unpublishing the product.' )
   } finally {
     setLoadingId(null);
   }
@@ -204,12 +229,12 @@ const handleUnpublish = async (product) => {
       const id = localStorage.getItem('userid');
       if (!id) return;
       try {
-        const response = await fetch(`https://medspaa.vercel.app/product/getProduct/${id}`, { method: 'GET' });
+        const response = await fetch(admin ? "https://medspaa.vercel.app/product/getAllData/" :`https://medspaa.vercel.app/product/getAllData/`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
           // Sort products by createdAt in descending order (latest first)
           console.log(data)
-          const sortedProducts = data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          const sortedProducts = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
           setProducts(sortedProducts);
           setFilteredProducts(sortedProducts);
         }
@@ -245,6 +270,7 @@ const handleUnpublish = async (product) => {
       } catch (error) {
         console.error('Error fetching quantity:', error);
       }
+  
 
       
     };
@@ -312,9 +338,9 @@ const handleUnpublish = async (product) => {
 
 
   return user ? (
+    
     <main className="w-full p-4 md:p-8">
-      {/* Message Display */}
-      {message ? <div className="mb-4 text-green-600">{message}</div> : <div className="mb-4 text-red-600">{errorMessage}</div>  }
+    
 
       {/* Credit Display */}
       <div className="mb-4 text-blue-600 font-semibold text-lg">
@@ -342,7 +368,16 @@ const handleUnpublish = async (product) => {
     <span>Add Listings</span>
   </Link>
 </div>
-
+{toast.show && (
+          <div className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`}>
+            {toast.type === 'success' ? (
+              <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+            ) : (
+              <HiOutlineXCircle className="w-6 h-6 mr-2" />
+            )}
+            <span>{toast.message}</span>
+          </div>
+        )}
        
       </div>
       
@@ -399,6 +434,7 @@ const handleUnpublish = async (product) => {
               <th className="py-3 pl-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
               <th className="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LISTING NAME</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Publisher</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PRICE</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CREATED AT</th>
@@ -497,13 +533,13 @@ const handleUnpublish = async (product) => {
 )}
    {/* Pagination Controls */}
    { !Loading &&
-   <div className="flex justify-between mt-4">
+   <div className="flex justify-center mt-4">
           <button
             onClick={handlePrevious}
             disabled={starting === 0}
-            className="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded"
+            className="bg-gray-300 mr-2 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded"
           >
-            Previous
+            Prev
           </button>
           <button
             onClick={handleNext}

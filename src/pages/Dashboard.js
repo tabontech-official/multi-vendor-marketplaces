@@ -229,12 +229,12 @@ const handleUnpublish = async (product) => {
       const id = localStorage.getItem('userid');
       if (!id) return;
       try {
-        const response = await fetch(admin ? "https://medspaa.vercel.app/product/getAllData/" :`https://medspaa.vercel.app/product/getAllData/`, { method: 'GET' });
+        const response = await fetch(admin ? "https://medspaa.vercel.app/product/getAllData/" :`https://medspaa.vercel.app/product/getProduct/${id}`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
           // Sort products by createdAt in descending order (latest first)
           console.log(data)
-          const sortedProducts = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          const sortedProducts = data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
           setProducts(sortedProducts);
           setFilteredProducts(sortedProducts);
         }
@@ -293,16 +293,16 @@ const handleUnpublish = async (product) => {
 
   const handleSearch = () => {
     const filtered = searchVal === '' ? products : products.filter(product =>
-      product.title.toLowerCase().includes(searchVal.toLowerCase())
+      product.title.toLowerCase().includes(searchVal.toLowerCase()) ||  product.product_type.toLowerCase().includes(searchVal.toLowerCase())
     );
     setFilteredProducts(filtered);
   };
 
-  const clearSearch = () => {
-    setSearchVal('');
-    setFilteredProducts(products);
-  };
+  
 
+  useEffect(()=>{
+handleSearch()
+  },[searchVal])      
   
   const handleBuyNow =  () => {
 
@@ -393,21 +393,7 @@ const handleUnpublish = async (product) => {
               onChange={e => setSearchVal(e.target.value)}
               className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <button 
-              onClick={handleSearch}
-              className="ml-2 bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out"
-            >
-              Search
-            </button>
-            {searchVal && (
-              <button 
-                onClick={clearSearch}
-                className="ml-2 text-gray-600 hover:text-gray-800 focus:outline-none"
-                aria-label="Clear Search"
-              >
-                <HiX className="w-5 h-5" />
-              </button>
-            )}
+     
           </div>
         </div>
       </div>
@@ -532,7 +518,7 @@ const handleUnpublish = async (product) => {
   </div>
 )}
    {/* Pagination Controls */}
-   { !Loading &&
+   { !Loading && filteredProducts.length > 10  &&
    <div className="flex justify-center mt-4">
           <button
             onClick={handlePrevious}

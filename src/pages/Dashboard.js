@@ -179,8 +179,8 @@ const [totalPages, setTotalPages] = useState(null); // Track total pages
    
       }
     } catch (error) {
-      showToast("Failed",error.message||'An error occurred while publishing the product.')
-      setErrorMessage(error.message ||'An error occurred while publishing the product.');
+      showToast("Failed",error.message||'An error occurred while publishing the product')
+      setErrorMessage(error.message ||'An error occurred while publishing the product');
     } finally {
       setLoadingId(null);
     }

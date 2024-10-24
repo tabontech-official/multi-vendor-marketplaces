@@ -42,7 +42,25 @@ const AddNewJobForm = () => {
     setOfferedSalary(product.providerListings[0].offeredYearlySalary || '');
     setPositionDescription(product.body_html );
    setZip(product.providerListings[0].zip)
+  switch (product.providerListings[0].location){
+    case 'Los Angeles':
+      setLocation(product.providerListings[0].location || '');
+      break;
+      case 'Chicago':
+        setLocation(product.providerListings[0].location || '');
+      break;
+      case 'Houston':
+        setLocation(product.providerListings[0].location || '');
+      break;
+      case 'New York':
+        setLocation(product.providerListings[0].location || '');
+      break;
+       default:
+        setCustomLocation(product.providerListings[0].location)
+        setLocation("Other")
+        break;
 
+      }
 
     if (product.body_html) {
       const contentState = ContentState.createFromText(product.body_html);

@@ -12,27 +12,27 @@ import { jwtDecode } from 'jwt-decode';
 
 
 const Dashboard = () => {
-  const [admin , setAdmin]=useState(null)
+let admin;
 
   const isAdmin = () => {
     const token = localStorage.getItem('usertoken');
     if (token) {
       const decoded = jwtDecode(token);
       if (decoded.payLoad.isAdmin && decoded.exp * 1000 > Date.now()) {
-        return setAdmin(true);
+        return true;
       }
     }
-    return setAdmin(false);
+    return false;
   };
 
-  useEffect(()=>{
-   isAdmin()
-  },[])
+  admin = isAdmin()
+ const [totalPages , setTotalPages]=useState(null)
 
+const [page , SetPage]= useState(1)
 
-
-
-  const productsPerPage = 10;
+ 
+  const  limit  = 20
+ 
   const navigate = useNavigate();
   const {userData , loading , error , variantId} = UseFetchUserData()
   const [starting , setStarting ]= useState(0)
@@ -56,7 +56,7 @@ const [toast, setToast] = useState({ show: false, type: '', message: '' });
 const [Price , setPrice] = useState()
 let buyCreditUrl = ''
 const [currentPage, setCurrentPage] = useState(1); // Track the current page
-const [totalPages, setTotalPages] = useState(null); // Track total pages
+
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -64,6 +64,7 @@ const [totalPages, setTotalPages] = useState(null); // Track total pages
     };
   }, []);
   
+
  
   // Show toast message
   const showToast = (type, message) => {
@@ -75,13 +76,13 @@ const [totalPages, setTotalPages] = useState(null); // Track total pages
   const fetchProductData = async (userId) => {
     setLoading(true);
     try {
-      const response = await fetch(admin ? `https://medspaa.vercel.app/product/getAllData/` :`https://medspaa.vercel.app/product/getProduct/${userId}`, { method: 'GET' });
+      const response = await fetch(admin ? `https://medspaa.vercel.app/product/getAllData/?page=${page}&limit=${limit}` :`https://medspaa.vercel.app/product/getProduct/${userId}/?page=${page}&limit=${limit}`, { method: 'GET' });
       if (response.ok) {
         const data = await response.json();
         const sortedProducts = data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setProducts(sortedProducts);
         setFilteredProducts(sortedProducts);
-        setTotalPages(Math.ceil(sortedProducts.length / productsPerPage)); // Calculate total pages
+        setTotalPages(data.totalPages)
       }
       setLoading(false);
     } catch (error) {
@@ -165,6 +166,7 @@ const [totalPages, setTotalPages] = useState(null); // Track total pages
     try {
       const response = await fetch(`https://medspaa.vercel.app/product/publishedProduct/${product.id}`, {
         method: 'PUT',
+       body: JSON.stringify(userId) 
       });
   const json = await response.json()
       if (response.ok) {
@@ -223,21 +225,30 @@ const handleUnpublish = async (product) => {
     setLoadingId(null);
   }
 };
+
+
+
   useEffect(() => {
+    
     const fetchProductData = async () => {
+     
       setLoading(true)
       const id = localStorage.getItem('userid');
+      console.log(admin)
       if (!id) return;
       try {
-        const response = await fetch(admin ? "https://medspaa.vercel.app/product/getAllData/" :`https://medspaa.vercel.app/product/getProduct/${id}`, { method: 'GET' });
+        const response = await fetch(admin ? `https://medspaa.vercel.app/product/getAllData/?page=${page}&limit=${limit}` :`https://medspaa.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
+          console.log(data)
           // Sort products by createdAt in descending order (latest first)
       
           const sortedProducts = data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
           setProducts(sortedProducts);
           setFilteredProducts(sortedProducts);
-        }
+          setTotalPages(data.totalPages)
+
+        } 
         else{
           setLoading(false)
         }
@@ -277,6 +288,8 @@ const handleUnpublish = async (product) => {
     fetchProductData();
 
   }, []);
+
+ 
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -319,19 +332,25 @@ handleSearch()
   }; 
 
 
-  const handleNext = () => {
-    if (ending < filteredProducts.length) {
-      setStarting(starting + productsPerPage);
-      setEnding(ending + productsPerPage);
-    }
+ 
+
+  useEffect(()=>{
+    fetchProductData()
+  },[page])
+
+  const handleNext =  () => {
+    if(totalPages >= page){
+      SetPage((prev)=>prev+=1)
+
+    }  
   };
 
   // Handle "Previous" button click
   const handlePrevious = () => {
-    if (starting > 0) {
-      setStarting(starting - productsPerPage);
-      setEnding(ending - productsPerPage);
-    }
+    if(page <= totalPages){ 
+      SetPage((prev)=>prev-=1)
+     
+    }  
   };
 
   
@@ -429,7 +448,7 @@ handleSearch()
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200 mb-4">
-          {filteredProducts.slice(starting, ending).map((product, index) => (
+          {filteredProducts.map((product, index) => (
               <tr key={product._id}>
                 <td className="py-4 whitespace-nowrap relative px-4">
                   <button
@@ -515,18 +534,19 @@ handleSearch()
   </div>
 )}
    {/* Pagination Controls */}
-   { !Loading && filteredProducts.length > 10  &&
+   { !Loading && totalPages > 1    &&
    <div className="flex justify-center mt-4">
           <button
-            onClick={handlePrevious}
-            disabled={starting === 0}
+         onClick={()=>{handlePrevious()}}
+         disabled={page === 1} 
             className="bg-gray-300 mr-2 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded"
           >
             Prev
           </button>
           <button
-            onClick={handleNext}
-            disabled={ending >= filteredProducts.length || ending >= 80} // Disable if max products are reached
+            onClick={()=>{handleNext()}}
+            disabled={page === totalPages}
+            // Disable if max products are reached
             className="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded"
           >
             Next

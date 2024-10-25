@@ -10,7 +10,7 @@ const AdminDashboard = () => {
     { _id: '1', title: 'New Equipments ' },
     { _id: '2', title: 'Used Equipments ' },
     { _id: '3', title: 'SPA Business For Sale' },
-    { _id: '4', title: 'Provider Job Offer ' },
+    { _id: '4', title: 'Provider Job Offer' },
     { _id: '5', title: 'Provider Job Search' },
     { _id: '6', title: 'Room for Rent ' },
     { _id: '7', title: 'I am Looking For' },
@@ -132,10 +132,10 @@ const AdminDashboard = () => {
           case 'SPA Business For Sale':
             matchedType = 'Businesses To Purchase';
             break;
-          case 'Provider Job Search':
+            case 'Provider Job Offer':
             matchedType = 'Provider Needed';
             break;
-          case 'Provider Job Offer ':
+            case 'Provider Job Search':
             matchedType = 'Providers Available';
             break;
           case 'Room for Rent':
@@ -164,7 +164,7 @@ const AdminDashboard = () => {
 
 
   useEffect(() => {
-    fetchRequiredCredits();
+  fetchRequiredCredits();
     fetchPrice();
   }, []);
 
@@ -205,19 +205,19 @@ const AdminDashboard = () => {
       case 'Used Equipments ':
         product_type = 'Used Equipments';
         break;
-      case 'SPA Business Equipment ':
+      case 'SPA Business For Sale':
         product_type = 'Businesses To Purchase';
         break;
-      case 'Job Provider ':
-        product_type = 'Provider Needed';
-        break;
-      case 'Job Offer ':
-        product_type = 'Providers Available';
-        break;
+        case 'Provider Job Offer':
+          product_type = 'Provider Needed';
+          break;
+        case 'Provider Job Search':
+          product_type = 'Providers Available';
+          break;
       case 'Room for Rent ':
         product_type = 'Spa Room For Rent';
         break;
-        case 'Looking For':
+        case 'I am Looking For':
           product_type = 'Looking For';
           break;
       default:

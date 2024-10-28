@@ -66,6 +66,21 @@ const [hasMore, setHasMore] = useState(true);
   }, []);
   
 
+
+  const fetchPrice = async()=>{
+    try {
+      const response =  await fetch("https://medspaa.vercel.app/product/getPrice/", {method:'GET'})
+      const json = await response.json()
+      if(response.ok){
+        console.log("Price",json)
+        setPrice(json[0].price)
+      }   
+    } catch (error) {
+      console.error('Error fetching quantity:', error);
+    }
+
+  }
+
  
   // Show toast message
   const showToast = (type, message) => {
@@ -91,6 +106,7 @@ const [hasMore, setHasMore] = useState(true);
         const sortedProducts = data.products.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
+        setProducts((prevProducts) => [...prevProducts, ...sortedProducts]);
         setFilteredProducts((prevProducts) => [...prevProducts, ...sortedProducts]);
         setTotalPages(data.totalPages);
         setHasMore(page < data.totalPages); // Check if more pages are available
@@ -252,18 +268,21 @@ const handleUnpublish = async (product) => {
     };
   }, []);
 
-  const handleSearch = () => {
-    const filtered = searchVal === '' ? products : products.filter(product =>
-      product.title.toLowerCase().includes(searchVal.toLowerCase()) ||  product.product_type.toLowerCase().includes(searchVal.toLowerCase())
-    );
-    setFilteredProducts(filtered);
-  };
+
+  // const handleSearch = (event) => {
+  //   const value = event.target.value;
+  //   setSearchVal(value);
+  //   const filtered = value === '' ? products : products.filter(product =>
+  //     product.title.toLowerCase().includes(value.toLowerCase()) || product.product_type.toLowerCase().includes(value.toLowerCase())
+  //   );
+  //   setProducts(filtered);
+  // };
 
   
 
-  useEffect(()=>{
-handleSearch()
-  },[searchVal])      
+//   useEffect(()=>{
+// handleSearch()
+//   },[searchVal])      
   
   const handleBuyNow =  () => {
 
@@ -283,6 +302,7 @@ handleSearch()
  
   useEffect(() => {
     fetchProductData();
+    fetchPrice()
   }, []);
 
   useEffect(() => {
@@ -387,7 +407,7 @@ handleSearch()
               type="text" 
               placeholder="Search..." 
               value={searchVal}
-              onChange={e => setSearchVal(e.target.value)}
+           
               className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
      

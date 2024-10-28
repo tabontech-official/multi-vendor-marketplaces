@@ -24,7 +24,7 @@ const AddJobSearchForm = () => {
   const { product } = locationData.state || {};
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const [Zip , setZip] = useState("")
-
+const [workas , setWorkAs] = useState("")
   const navigate = useNavigate()
   useEffect(() => {
     console.log(product)
@@ -37,7 +37,7 @@ const AddJobSearchForm = () => {
       setRequestedYearlySalary(product.jobListings[0].requestedYearlySalary || '');
       setPositionRequestedDescription(product.jobListings[0].positionRequestedDescription || '');
       setZip(product.jobListings[0].zip)
-     
+     setWorkAs(product.jobListings[0].availableToWorkAs || '')
       if (product.images && Array.isArray(product.images)) {
         const existingImages = product.images.map((img) => img.src); // Extract image URLs
         setImagePreviews(existingImages); // Set them as previews
@@ -97,6 +97,7 @@ const AddJobSearchForm = () => {
     formData.append('availability',availability);
     formData.append('requestedYearlySalary', requestedYearlySalary);
     formData.append('positionRequestedDescription', positionRequestedDescription);
+    formData.append('availableToWorkAs' , workas)
     if(!isEditing){
       formData.append('status', status);
       }
@@ -221,6 +222,24 @@ const handleRemoveImage = (index) => {
                   <option value="Laser Technician">Laser Technician</option>
                   <option value="Massage therapist">Massage therapist</option>
                   <option value="Front desk clerk">Front desk clerk</option>
+                </select>
+              </div>
+
+
+                 {/* Work As */}
+                 <div className="flex flex-col">
+                <label htmlFor="qualificationRequested" className="text-gray-700 text-sm font-medium mb-1">Available to work as  *</label>
+                <select
+                  id="Workas"
+                  value={workas}
+                  onChange={(e) => setWorkAs(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                >
+                  <option value="">Select Option</option>
+                  <option value="Employee W2">Employee W2</option>
+                  <option value="Independant freelancer 1099 on commissions">Independant freelancer 1099 on commissions</option>
+                  <option value="Both">Both</option>
                 </select>
               </div>
 

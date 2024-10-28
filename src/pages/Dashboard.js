@@ -28,7 +28,7 @@ let admin;
   admin = isAdmin()
  const [totalPages , setTotalPages]=useState(null)
 
-const [page , SetPage]= useState(1)
+
 
  
   const  limit  = 20
@@ -55,7 +55,8 @@ const [Loading , setLoading] = useState(false)
 const [toast, setToast] = useState({ show: false, type: '', message: '' });
 const [Price , setPrice] = useState()
 let buyCreditUrl = ''
-const [currentPage, setCurrentPage] = useState(1); // Track the current page
+const [page, setPage] = useState(1);
+const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -73,24 +74,33 @@ const [currentPage, setCurrentPage] = useState(1); // Track the current page
     setTimeout(() => setToast({ show: false, type: '', message: '' }), 3000);
   };
   
-  const fetchProductData = async (userId) => {
+  const fetchProductData = async () => {
     setLoading(true);
+    const id = localStorage.getItem('userid');
     try {
-      const response = await fetch(admin ? `https://medspaa.vercel.app/product/getAllData/?page=${page}&limit=${limit}` :`https://medspaa.vercel.app/product/getProduct/${userId}/?page=${page}&limit=${limit}`, { method: 'GET' });
+      const response = await fetch(
+        admin
+          ? `https://medspaa.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
+          : `https://medspaa.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+        { method: 'GET' }
+      );
+
       if (response.ok) {
         const data = await response.json();
-        const sortedProducts = data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setProducts(sortedProducts);
-        setFilteredProducts(sortedProducts);
-        setTotalPages(data.totalPages)
+        console.log(data)
+        const sortedProducts = data.products.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setFilteredProducts((prevProducts) => [...prevProducts, ...sortedProducts]);
+        setTotalPages(data.totalPages);
+        setHasMore(page < data.totalPages); // Check if more pages are available
       }
-      setLoading(false);
     } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
       setLoading(false);
-      setMessage("Error fetching products");
     }
   };
-
 
   const toggleDropdown = (index) => {
     setOpenDropdown(openDropdown === index ? null : index);
@@ -228,69 +238,7 @@ const handleUnpublish = async (product) => {
 
 
 
-  useEffect(() => {
-    
-    const fetchProductData = async () => {
-     
-      setLoading(true)
-      const id = localStorage.getItem('userid');
-      console.log(admin)
-      if (!id) return;
-      try {
-        const response = await fetch(admin ? `https://medspaa.vercel.app/product/getAllData/?page=${page}&limit=${limit}` :`https://medspaa.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`, { method: 'GET' });
-        if (response.ok) {
-          const data = await response.json();
-          console.log(data)
-          // Sort products by createdAt in descending order (latest first)
-      
-          const sortedProducts = data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          setProducts(sortedProducts);
-          setFilteredProducts(sortedProducts);
-          setTotalPages(data.totalPages)
-
-        } 
-        else{
-          setLoading(false)
-        }
-      } catch (error) {
-       
-        setErrorMessage("You don't have enough credits");
-      }
-    
-      try {
-        const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}`, { method: 'GET' });
-        if (response.ok) {
-          const data = await response.json();
-          setCredit(data.quantity || 0);
-          setLoading(false)
-        }
-        else{
-          setLoading(false)
-        }
-      } catch (error) {
-        setLoading(false)
-        console.error('Error fetching quantity:', error);
-      }
-      try {
-        const response =  await fetch("https://medspaa.vercel.app/product/getPrice/", {method:'GET'})
-        const json = await response.json()
-        if(response.ok){
-       
-          setPrice(json[0].price)
-        }   
-      } catch (error) {
-        console.error('Error fetching quantity:', error);
-      }
-  
-
-      
-    };
-    fetchProductData();
-
-  }, []);
-
  
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       const dropdowns = dropdownRefs.current;
@@ -333,26 +281,56 @@ handleSearch()
 
 
  
+  useEffect(() => {
+    fetchProductData();
+  }, []);
 
-  useEffect(()=>{
-    fetchProductData()
-  },[page])
-
-  const handleNext =  () => {
-    if(totalPages >= page){
-      SetPage((prev)=>prev+=1)
-
-    }  
-  };
-
-  // Handle "Previous" button click
-  const handlePrevious = () => {
-    if(page <= totalPages){ 
-      SetPage((prev)=>prev-=1)
+  useEffect(() => {
+    const fetchProductData2 = async () => {
      
-    }  
-  };
+      const id = localStorage.getItem('userid');
+      try {
+        const response = await fetch(
+          admin
+            ? `https://medspaa.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
+            : `https://medspaa.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+          { method: 'GET' }
+        );
+  
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data)
+          const sortedProducts = data.products.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
+          setFilteredProducts((prevProducts) => [...prevProducts, ...sortedProducts]);
+          setTotalPages(data.totalPages);
+          setHasMore(page < data.totalPages); // Check if more pages are available
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } 
+    }; 
 
+    fetchProductData2();
+  }, [page]);
+
+  const handleScroll = () => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop + 200 >=
+      document.documentElement.scrollHeight
+    ) {
+      if (hasMore && !loading) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    }
+  };
+  
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasMore, loading]);
+  
   
 
 
@@ -533,27 +511,7 @@ handleSearch()
     )}
   </div>
 )}
-   {/* Pagination Controls */}
-   { !Loading && totalPages > 1    &&
-   <div className="flex justify-center mt-4">
-          <button
-         onClick={()=>{handlePrevious()}}
-         disabled={page === 1} 
-            className="bg-gray-300 mr-2 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded"
-          >
-            Prev
-          </button>
-          <button
-            onClick={()=>{handleNext()}}
-            disabled={page === totalPages}
-            // Disable if max products are reached
-            className="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded"
-          >
-            Next
-          </button>
-        </div>
-
-   }
+  
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} className="fixed inset-0 z-10 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4">
           <div ref={dialogRef} className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg border border-black relative">

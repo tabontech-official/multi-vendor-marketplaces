@@ -352,7 +352,7 @@ if (user) {
               I agree with the{' '}
               <span
                 className="text-blue-600 cursor-pointer hover:underline"
-                onClick={() => navigate('/policy')}
+                onClick={() => window.open('/policy', '_blank')}
               >
                 policies and terms
               </span>

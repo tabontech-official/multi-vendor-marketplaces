@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import { useAuthContext } from '../Hooks/useAuthContext';
 import { jwtDecode } from 'jwt-decode';
@@ -9,7 +9,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-
+ const navigate = useNavigate()
   const isAdmin = () => {
     const token = localStorage.getItem('usertoken');
     if (token) {
@@ -42,6 +42,7 @@ const Navbar = () => {
         });
         dispatch({ type: 'LOGOUT' });
         localStorage.clear();
+        navigate('/')
         setIsDropdownOpen(false);
         setIsOpen(false);
       }
@@ -136,7 +137,7 @@ const Navbar = () => {
                     className="text-white border border-transparent hover:border-blue-300 hover:bg-blue-700 transition duration-200 rounded-md px-4 py-2 shadow-md"
                     onClick={toggleMenu}
                   >
-                    My Subscriptions
+                  My Purchases
                   </Link>
                 </li>
                 <li className="relative" ref={dropdownRef}>

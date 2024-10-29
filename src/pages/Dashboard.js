@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { HiDotsVertical, HiOutlineCheckCircle, HiOutlineXCircle, HiPlus, HiX , Hiload } from 'react-icons/hi';
 import { Link, useNavigate } from 'react-router-dom';
 import UseFetchUserData from '../component/fetchUser';
@@ -9,6 +9,7 @@ import { FaTimes, FaShoppingBasket } from 'react-icons/fa';
 import { CreateCheckoutUrl } from '../component/Checkout';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import { jwtDecode } from 'jwt-decode';
+import { debounce } from 'lodash';
 
 
 const Dashboard = () => {
@@ -26,7 +27,7 @@ let admin;
   };
 
   admin = isAdmin()
- const [totalPages , setTotalPages]=useState(null)
+
 
 
 
@@ -102,13 +103,13 @@ const [hasMore, setHasMore] = useState(true);
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data)
+        console.log("Products",data)
         const sortedProducts = data.products.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
         setProducts((prevProducts) => [...prevProducts, ...sortedProducts]);
         setFilteredProducts((prevProducts) => [...prevProducts, ...sortedProducts]);
-        setTotalPages(data.totalPages);
+   
         setHasMore(page < data.totalPages); // Check if more pages are available
       }
     } catch (error) {
@@ -177,7 +178,7 @@ const [hasMore, setHasMore] = useState(true);
       const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}`, { method: 'GET' });
       if (response.ok) {
         const data = await response.json();
-        setCredit(data.quantity || 0);
+        setCredit(data.quantity)
       }
     } catch (error) {
       console.error('Error fetching quantity:', error);
@@ -269,19 +270,18 @@ const handleUnpublish = async (product) => {
   }, []);
 
 
-  // const handleSearch = (event) => {
-  //   const value = event.target.value;
-  //   setSearchVal(value);
-  //   const filtered = value === '' ? products : products.filter(product =>
-  //     product.title.toLowerCase().includes(value.toLowerCase()) || product.product_type.toLowerCase().includes(value.toLowerCase())
-  //   );
-  //   setProducts(filtered);
-  // };
+//   const handleSearch = () => {
+
+//     const filtered = searchVal === '' ? products : products.filter(product =>
+//       product.title.includes(searchVal) || product.product_type.includes(searchVal)
+//     );
+//     setProducts(filtered);
+//   };
 
   
 
 //   useEffect(()=>{
-// handleSearch()
+// handleSearch() 
 //   },[searchVal])      
   
   const handleBuyNow =  () => {
@@ -301,6 +301,7 @@ const handleUnpublish = async (product) => {
 
  
   useEffect(() => {
+    fetchCredits()
     fetchProductData();
     fetchPrice()
   }, []);
@@ -319,12 +320,13 @@ const handleUnpublish = async (product) => {
   
         if (response.ok) {
           const data = await response.json();
-          console.log(data)
+          console.log("Secind Product render",data)
           const sortedProducts = data.products.sort(
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           );
+          setProducts((prevProducts) => [...prevProducts, ...sortedProducts])
           setFilteredProducts((prevProducts) => [...prevProducts, ...sortedProducts]);
-          setTotalPages(data.totalPages);
+     
           setHasMore(page < data.totalPages); // Check if more pages are available
         }
       } catch (error) {
@@ -335,7 +337,7 @@ const handleUnpublish = async (product) => {
     fetchProductData2();
   }, [page]);
 
-  const handleScroll = () => {
+  const handleScroll = useCallback( () => {
     if (
       window.innerHeight + document.documentElement.scrollTop + 200 >=
       document.documentElement.scrollHeight
@@ -344,7 +346,7 @@ const handleUnpublish = async (product) => {
         setPage((prevPage) => prevPage + 1);
       }
     }
-  };
+  })
   
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
@@ -400,20 +402,20 @@ const handleUnpublish = async (product) => {
       
 
       {/* Search Section */}
-      <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
+      {/* <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
         <div className="flex flex-col md:flex-row md:items-center w-full md:ml-auto md:space-x-4">
           <div className="flex items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
             <input 
               type="text" 
               placeholder="Search..." 
               value={searchVal}
-           
+           onChange={(e)=>setSearchVal(e.target.value)}
               className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
      
           </div>
         </div>
-      </div>
+      </div> */}
 
            {/* Products Table */}
           {/* Products Table */}

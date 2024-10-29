@@ -30,7 +30,17 @@ const AddNewJobForm = () => {
 
   const { product } = LocationData.state || {};
  console.log(product)
-
+ const usStates = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+  "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+  "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", 
+  "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi",
+  "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+  "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
+  "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", 
+  "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia",
+  "Washington", "West Virginia", "Wisconsin", "Wyoming"
+]; 
 
  useEffect(() => {
   if (product) {
@@ -42,25 +52,8 @@ const AddNewJobForm = () => {
     setOfferedSalary(product.providerListings[0].offeredYearlySalary || '');
     setPositionDescription(product.body_html );
    setZip(product.providerListings[0].zip)
-  switch (product.providerListings[0].location){
-    case 'Los Angeles':
-      setLocation(product.providerListings[0].location || '');
-      break;
-      case 'Chicago':
-        setLocation(product.providerListings[0].location || '');
-      break;
-      case 'Houston':
-        setLocation(product.providerListings[0].location || '');
-      break;
-      case 'New York':
-        setLocation(product.providerListings[0].location || '');
-      break;
-       default:
-        setCustomLocation(product.providerListings[0].location)
-        setLocation("Other")
-        break;
+  setLocation (product.providerListings[0].location)
 
-      }
 
     if (product.body_html) {
       const contentState = ContentState.createFromText(product.body_html);
@@ -99,12 +92,8 @@ const AddNewJobForm = () => {
    
 
     // Append other fields
-    if(location === "Other"){
-      formData.append('location', customLocation);
-    }else{
+
       formData.append('location', location);
-    }
-  
     formData.append('zip',Zip)
       formData.append('qualificationRequested', qualification);
       formData.append('name', qualification);
@@ -187,37 +176,24 @@ const AddNewJobForm = () => {
             <div className="grid grid-cols-1 gap-6">
               {/* Location */}
               <div className='flex flex-row max-sm:flex-col'>
-              <div className="flex flex-col flex-1  max-sm:mb-4  mr-4 max-sm:mr-0">
-                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
-                <select
-                  id="location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  required
-                >
-                  <option value="">Select a location</option>
-                  <option value="New York">New York</option>
-                  <option value="Los Angeles">Los Angeles</option>
-                  <option value="Chicago">Chicago</option>
-                  <option value="Houston">Houston</option>
-                  <option value="Other">Other</option>
-                </select>
-                {location === 'Other' && (
-    <div className="flex flex-col flex-1 mt-4 max-sm:mb-4   max-sm:mr-0">
-      <label htmlFor="customLocation" className="text-gray-700 text-sm font-medium mb-1">Specify Other Location *</label>
-      <input
-        type="text"
-        id="customLocation"
-        value={customLocation}
-        onChange={(e) => setCustomLocation(e.target.value)}
-        className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-        required
-      />
-    </div>
-  )}
-              </div>
-    
+              <div className="flex flex-col flex-1 mr-4 max-sm:mr-0">
+  <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
+  <select
+    id="location"
+    value={location}
+    onChange={(e) => setLocation(e.target.value)}
+    className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+    required
+  >
+    <option value="">Select a state</option>
+    {usStates.map((state) => (
+      <option key={state} value={state}>
+        {state}
+      </option>
+    ))}
+  </select>
+</div>
+
               
               <div className="flex flex-col flex-1 ">
                 <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>

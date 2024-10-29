@@ -26,6 +26,19 @@ const AddJobSearchForm = () => {
   const [Zip , setZip] = useState("")
 const [workas , setWorkAs] = useState("")
   const navigate = useNavigate()
+
+  const usStates = [
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+    "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+    "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", 
+    "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi",
+    "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+    "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
+    "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", 
+    "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia",
+    "Washington", "West Virginia", "Wisconsin", "Wyoming"
+  ]; 
+
   useEffect(() => {
     console.log(product)
     if (product) {
@@ -164,17 +177,25 @@ const handleRemoveImage = (index) => {
             <div className="grid grid-cols-1 gap-6">
               {/* Location */}
               <div className='flex flex-row max-sm:flex-col '>
-              <div className="flex flex-col flex-1  max-sm:mb-4  mr-4 max-sm:mr-0">
-                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
-                <input
-                  type="text"
-                  id="location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm "
-                  required
-                />
-              </div>
+   
+<div className="flex flex-col flex-1 mr-4 max-sm:mr-0">
+  <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
+  <select
+    id="location"
+    value={location}
+    onChange={(e) => setLocation(e.target.value)}
+    className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+    required
+  >
+    <option value="">Select a state</option>
+    {usStates.map((state) => (
+      <option key={state} value={state}>
+        {state}
+      </option>
+    ))}
+  </select>
+</div>
+
 
               <div className="flex flex-col flex-1 ">
                 <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>

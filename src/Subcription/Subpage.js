@@ -126,7 +126,7 @@ const SubscriptionHistory = () => {
     <div className={`flex flex-col bg-gray-50 px-3 py-6 ${isDialogOpen ? 'blur-background' : ''}`}>
       <div className="flex">
         <div className="pt-4 min-w-full px-3 bg-white shadow-lg rounded-lg">
-          <h2 className="text-center text-2xl font-bold mb-8">Subscription History</h2>
+          <h2 className="text-center text-2xl font-bold mb-8">Purchase History</h2>
 
           <div className="flex justify-between mb-6">
             <div className="flex flex-row flex-wrap items-center">

@@ -57,7 +57,7 @@ const [toast, setToast] = useState({ show: false, type: '', message: '' });
 const [Price , setPrice] = useState()
 let buyCreditUrl = ''
 const [page, setPage] = useState(1);
-const [hasMore, setHasMore] = useState(true);
+const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -103,15 +103,22 @@ const [hasMore, setHasMore] = useState(true);
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Products",data)
+    
         const sortedProducts = data.products.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-        setProducts((prevProducts) => [...prevProducts, ...sortedProducts]);
-        setFilteredProducts((prevProducts) => [...prevProducts, ...sortedProducts]);
-   
+       
+        setProducts(sortedProducts);
+        setFilteredProducts((prev) => [
+          ...prev,
+          ...sortedProducts.filter(
+            (newProduct) => !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+          )
+        ]);
+
         setHasMore(page < data.totalPages); // Check if more pages are available
-      }
+       
+      } 
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {
@@ -270,19 +277,19 @@ const handleUnpublish = async (product) => {
   }, []);
 
 
-//   const handleSearch = () => {
+  const handleSearch = () => {
 
-//     const filtered = searchVal === '' ? products : products.filter(product =>
-//       product.title.includes(searchVal) || product.product_type.includes(searchVal)
-//     );
-//     setProducts(filtered);
-//   };
+    const filtered = searchVal === '' ? products : products.filter(product =>
+      product.title.includes(searchVal) || product.product_type.includes(searchVal)
+    );
+    setFilteredProducts(filtered);    
+  };
 
   
 
-//   useEffect(()=>{
-// handleSearch() 
-//   },[searchVal])      
+  useEffect(()=>{
+handleSearch() 
+  },[searchVal])      
   
   const handleBuyNow =  () => {
 
@@ -306,10 +313,11 @@ const handleUnpublish = async (product) => {
     fetchPrice()
   }, []);
 
-  useEffect(() => {
+
+  useEffect(()=>{
     const fetchProductData2 = async () => {
-     
       const id = localStorage.getItem('userid');
+      
       try {
         const response = await fetch(
           admin
@@ -317,42 +325,56 @@ const handleUnpublish = async (product) => {
             : `https://medspaa.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
           { method: 'GET' }
         );
-  
+    
         if (response.ok) {
           const data = await response.json();
-          console.log("Secind Product render",data)
+          console.log("Second Product render", data);
+          
+          // Sort products by creation date
           const sortedProducts = data.products.sort(
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           );
-          setProducts((prevProducts) => [...prevProducts, ...sortedProducts])
-          setFilteredProducts((prevProducts) => [...prevProducts, ...sortedProducts]);
-     
+          
+          setProducts(sortedProducts);
+          
+          // Append only new products
+          setFilteredProducts((prev) => [
+            ...prev,
+            ...sortedProducts.filter(
+              (newProduct) => !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+            )
+          ]);
+          
           setHasMore(page < data.totalPages); // Check if more pages are available
+          console.log(hasMore);
         }
       } catch (error) {
         console.error('Error fetching products:', error);
-      } 
-    }; 
+      }
+    };
+    fetchProductData2()
+  },[page]) 
+  
+  
+     
 
-    fetchProductData2();
-  }, [page]);
-
-  const handleScroll = useCallback( () => {
-    if (
-      window.innerHeight + document.documentElement.scrollTop + 200 >=
-      document.documentElement.scrollHeight
-    ) {
-      if (hasMore && !loading) {
-        setPage((prevPage) => prevPage + 1);
+    const handleScroll =async ()=>{
+      if (
+        window.innerHeight + document.documentElement.scrollTop + 200 >=
+        document.documentElement.scrollHeight
+      ) {
+        if (hasMore && !loading) {
+          setPage(prevPage => prevPage + 1);
+          console.log("scroll")
+          console.log(page)
+        }
       }
     }
-  })
-  
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [hasMore, loading]);
-  
+    
+    useEffect(() => {
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }, [handleScroll]);
   
 
 
@@ -401,8 +423,8 @@ const handleUnpublish = async (product) => {
       </div>
       
 
-      {/* Search Section */}
-      {/* <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
+      {/* Search Section
+      <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
         <div className="flex flex-col md:flex-row md:items-center w-full md:ml-auto md:space-x-4">
           <div className="flex items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
             <input 
@@ -514,7 +536,7 @@ const handleUnpublish = async (product) => {
                   {product.title !== "Job Listing" ? product.title : "Job Search Listing"}
               
                 </td>
-                {admin && product.tags.split(",")[1].split("_")[1]}
+                {admin && product.tags?.split(",")[1]?.split("_")[1]}
                 <td className="px-6 py-4 whitespace-nowrap">{product.product_type}</td>
                 <td className="px-6 py-4 whitespace-nowrap">${product.variants[0].price || "..loading"}</td>
                 <td className="px-4 py-2">{new Date(product.createdAt).toLocaleDateString()}</td>

@@ -260,7 +260,7 @@ const handleRemoveImage = (index) => {
                   <option value="">Select Option</option>
                   <option value="Employee W2">Employee W2</option>
                   <option value="Independant freelancer 1099 on commissions">Independant freelancer 1099 on commissions</option>
-                  <option value="Both">Both</option>
+                    <option value="Both W2 and 1099">Both W2 and 1099</option>
                 </select>
               </div>
 

@@ -227,7 +227,7 @@ const handleRemoveImage = (index) => {
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="deposit" className="text-gray-700 text-sm font-medium mb-1">My Budget for the Unit $ *</label>
+                <label htmlFor="deposit" className="text-gray-700 text-sm font-medium mb-1">My Budget for the Unit $ </label>
 
 
                 

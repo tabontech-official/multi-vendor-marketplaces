@@ -87,8 +87,15 @@ const AddBusinessListingForm = () => {
       }
 
       if (product.images && Array.isArray(product.images)) {
-        const existingImages = product.images.map((img) => img.src); // Extract image URLs
-        setImagePreviews(existingImages); // Set them as previews
+        const imageFiles = product.images.map(async(img) => {
+          const blob = await fetch(img.src).then((r) => r.blob());
+          return new File([blob], img.alt || 'product-image.jpg', { type: 'image/jpeg' });
+        });
+  
+        Promise.all(imageFiles).then((files) => {
+          setImages(files);
+          setImagePreviews(product.images.map((img) => img.src));
+        });
       }
 
     }

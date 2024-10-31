@@ -367,7 +367,7 @@ handleSearch()
 
     const handleScroll = async ()=>{
       if (
-        window.innerHeight + document.documentElement.scrollTop + 500 >=
+        window.innerHeight + document.documentElement.scrollTop + 400 >=
         document.documentElement.scrollHeight
       ) {
         if (hasMore && !loading) {

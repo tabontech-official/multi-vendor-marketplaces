@@ -51,10 +51,17 @@ const [workas , setWorkAs] = useState("")
       setPositionRequestedDescription(product.jobListings[0].positionRequestedDescription || '');
       setZip(product.jobListings[0].zip)
      setWorkAs(product.jobListings[0].availableToWorkAs || '')
-      if (product.images && Array.isArray(product.images)) {
-        const existingImages = product.images.map((img) => img.src); // Extract image URLs
-        setImagePreviews(existingImages); // Set them as previews
-      } 
+     if (product.images && Array.isArray(product.images)) {
+      const imageFiles = product.images.map(async(img) => {
+        const blob = await fetch(img.src).then((r) => r.blob());
+        return new File([blob], img.alt || 'product-image.jpg', { type: 'image/jpeg' });
+      });
+
+      Promise.all(imageFiles).then((files) => {
+        setImages(files);
+        setImagePreviews(product.images.map((img) => img.src));
+      });
+    }
       if (product.jobListings[0].positionRequestedDescription ) {
         const contentState = ContentState.createFromText(product.jobListings[0].positionRequestedDescription );
         setEditorState(EditorState.createWithContent(contentState));

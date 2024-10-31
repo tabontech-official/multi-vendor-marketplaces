@@ -147,14 +147,18 @@ console.log(product)
         setSuccess(status === "active" ? json.message : "Your post drafted successfully");
         navigate("/")
         setError('');
-      } 
-      console.log(json)
+      } else{
+        setSuccess('');
+      setError( json.error ||'An unexpected error occurred.' || json.error.errors.value);    
+      console.log(json.error)
+      }
+ 
     } catch (error) {
       setSuccess('');
-      setError('An unexpected error occurred.', error.error);
-      console.log(error);
+      setError( error.error ||'An unexpected error occurred.' || error.error.errors.value);
+      console.log(error.error.errors)
     } finally {
-      setLoading(false);
+      setLoading(false); 
     }
   };
 

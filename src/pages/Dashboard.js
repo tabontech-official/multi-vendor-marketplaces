@@ -279,10 +279,12 @@ const handleUnpublish = async (product) => {
 
   const handleSearch = () => {
 
-    const filtered = searchVal === '' ? products : products.filter(product =>
+    let filtered = searchVal === '' ? products : products.filter(product =>
       product.title.includes(searchVal) || product.product_type.includes(searchVal)
     );
     setFilteredProducts(filtered);    
+
+  
   };
 
   
@@ -335,7 +337,12 @@ handleSearch()
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           );
           
-          setProducts(sortedProducts);
+          setProducts((prev) => [
+            ...prev,
+            ...sortedProducts.filter(
+              (newProduct) => !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+            )
+          ]);
           
           // Append only new products
           setFilteredProducts((prev) => [
@@ -365,8 +372,7 @@ handleSearch()
       ) {
         if (hasMore && !loading) {
           setPage(prevPage => prevPage + 1);
-          console.log("scroll")
-          console.log(page)
+        
         }
       }
     }
@@ -423,7 +429,6 @@ handleSearch()
       </div>
       
 
-      {/* Search Section
       <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
         <div className="flex flex-col md:flex-row md:items-center w-full md:ml-auto md:space-x-4">
           <div className="flex items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
@@ -437,7 +442,7 @@ handleSearch()
      
           </div>
         </div>
-      </div> */}
+      </div>
 
            {/* Products Table */}
           {/* Products Table */}

@@ -12,7 +12,7 @@ const PeopleLooking = () => {
   const [location, setLocation] = useState('');
   const[lookingfor , setLookingFor]=useState('')
   const [name , setName] = useState('')
-  const[budget , setBudget]= useState(null)
+  const[budget , setBudget]= useState(0)
   
   const [images, setImages] = useState([]);  const [imageName, setImageName] = useState('');
   const [success, setSuccess] = useState('');
@@ -97,7 +97,9 @@ const PeopleLooking = () => {
     formData.append('zip', Zip);
     formData.append('name', lookingfor);
     formData.append('brand', name );
-    formData.append('sale_price', budget);
+  formData.append('sale_price', budget);
+  
+   
     formData.append('description', description);
 
     formData.append('userId', id);

@@ -176,7 +176,7 @@ const handleRemoveImage = (index) => {
 
   return (
     <main className="bg-gray-100 min-h-screen p-5 flex-row">
-      <h1 className="text-2xl font-semibold mb-4 max-sm:text-xl">Add for Rent Room Listing</h1>
+      <h1 className="text-2xl font-semibold mb-4 max-sm:text-xl">Add Room Rental Listing</h1>
       <p className="text-lg mb-8 text-gray-700">Use this form to list your rental property.</p>
       <div className="mb-4">
         {error && <div className="text-red-500">{error}</div>}

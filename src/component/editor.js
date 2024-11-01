@@ -13,7 +13,7 @@ export default function RTC({ editorState, onEditorStateChange, name }) {
         <div>
           <Editor
             editorState={editorState}
-            toolbarClassName="toolbarClassName custom-toolbar " // Toolbar border
+            toolbarHidden
             wrapperClassName="wrapperClassName"
             editorClassName="editorClassName custom-editor border border-gray-300 rounded-b" // Custom editor class
             onEditorStateChange={onEditorStateChange}

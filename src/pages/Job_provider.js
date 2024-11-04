@@ -53,13 +53,14 @@ const AddNewJobForm = () => {
     setJobType(product.providerListings[0].jobType || '');
     setJobOfferType(product.providerListings[0].typeOfJobOffered || '');
     setOfferedSalary(product.providerListings[0].offeredYearlySalary || '');
-    setPositionDescription(product.body_html );
+    const textDescrip = product.body_html.replace(/<br\s*\/?>|&nbsp;/gi, '');
+    setPositionDescription(textDescrip );
    setZip(product.providerListings[0].zip)
   setLocation (product.providerListings[0].location)
 
 
     if (product.body_html) {
-      const contentState = ContentState.createFromText(product.body_html);
+      const contentState = ContentState.createFromText(textDescrip);
       setEditorState(EditorState.createWithContent(contentState));
     } else {
       setEditorState(EditorState.createEmpty());
@@ -82,7 +83,8 @@ const AddNewJobForm = () => {
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+   
 
     e.preventDefault();
     setError('');

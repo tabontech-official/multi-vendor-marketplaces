@@ -67,12 +67,14 @@ const AddNewEquipmentForm = () => {
       setShipping(product.equipment.shipping || '');
       setTraining(product.equipment.training || '');
       setYearManufactured(product.equipment.year_manufactured);
-      setText(product.equipment.description ||'');
+      const textDescrip = product.equipment.description.replace(/<br\s*\/?>|&nbsp;/gi, '');
+
+      setText(textDescrip ||'');
      setZip(product.equipment.zip)
       
 
       if (product.equipment.description) {
-        const contentState = ContentState.createFromText(product.equipment.description);
+        const contentState = ContentState.createFromText(textDescrip);
         setEditorState(EditorState.createWithContent(contentState));
       } else {
         setEditorState(EditorState.createEmpty());
@@ -107,7 +109,8 @@ console.log(description)
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+
 
     e.preventDefault();
     setError('');

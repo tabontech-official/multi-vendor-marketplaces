@@ -56,6 +56,7 @@ const PeopleLooking = () => {
       setImageName(roomListing.imageName || '');
       setName(roomListing.name)
       setIsEditing(true);
+      const textDescrip = product.body_html.replace(/<br\s*\/?>|&nbsp;/gi, '');
       setDescription(roomListing.description)
       if (roomListing.description) {
         const contentState = ContentState.createFromText(roomListing.description);
@@ -90,7 +91,8 @@ const PeopleLooking = () => {
     const htmlContent = draftToHtml(rawContentState)
 
 
-    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+   
 
     e.preventDefault();
     setError('');

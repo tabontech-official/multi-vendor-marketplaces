@@ -64,13 +64,15 @@ console.log(product)
       setWarranty(product.equipment.warranty);
       setReasonForSelling(product.equipment.reason_for_selling);
       setShipping(product.equipment.shipping);
-      setDescription(product.equipment.description)
+      const textDescrip = product.equipment.description.replace(/<br\s*\/?>|&nbsp;/gi, '');
+
+      setDescription(textDescrip)
      setZip(product.equipment.zip)
      
 
 
      if (product.equipment.description) {
-      const contentState = ContentState.createFromText(product.equipment.description);
+      const contentState = ContentState.createFromText(textDescrip);
       setEditorState(EditorState.createWithContent(contentState));
     } else {
       setEditorState(EditorState.createEmpty());
@@ -106,7 +108,8 @@ console.log(product)
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+   
 
   
     e.preventDefault();

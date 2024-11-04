@@ -62,9 +62,10 @@ console.log(product)
       setImages(roomListing.image || []); // Fallback to an empty array if undefined
       setImageName(roomListing.imageName || '');
       setIsEditing(true);
-      setDescription(roomListing.otherDetails)
+      const textDescrip = roomListing.otherDetails.replace(/<br\s*\/?>|&nbsp;/gi, '');
+      setDescription(textDescrip)
       if (roomListing.otherDetails) {
-        const contentState = ContentState.createFromText(roomListing.otherDetails);
+        const contentState = ContentState.createFromText(textDescrip);
         setEditorState(EditorState.createWithContent(contentState));
       } else {
         setEditorState(EditorState.createEmpty());
@@ -95,8 +96,8 @@ console.log(product)
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
-
+    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+   
     e.preventDefault();
     setError('');
     setSuccess('');

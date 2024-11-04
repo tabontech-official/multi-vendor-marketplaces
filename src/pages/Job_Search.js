@@ -51,9 +51,11 @@ const [workas , setWorkAs] = useState("")
       setQualificationRequested(product.jobListings[0].qualification || '');
       setAvailability(product.jobListings[0].availability || '');
       setRequestedYearlySalary(product.jobListings[0].requestedYearlySalary || '');
-      setPositionRequestedDescription(product.jobListings[0].positionRequestedDescription || '');
+      const textDescrip = product.jobListings[0].positionRequestedDescription.replace(/<br\s*\/?>|&nbsp;/gi, '');
+      setPositionRequestedDescription(textDescrip || '');
       setZip(product.jobListings[0].zip)
      setWorkAs(product.jobListings[0].availableToWorkAs || '')
+     
      if (product.images && Array.isArray(product.images)) {
       const imageFiles = product.images.map(async(img) => {
         const blob = await fetch(img.src).then((r) => r.blob());
@@ -66,7 +68,7 @@ const [workas , setWorkAs] = useState("")
       });
     }
       if (product.jobListings[0].positionRequestedDescription ) {
-        const contentState = ContentState.createFromText(product.jobListings[0].positionRequestedDescription );
+        const contentState = ContentState.createFromText(textDescrip);
         setEditorState(EditorState.createWithContent(contentState));
       } else {
         setEditorState(EditorState.createEmpty());
@@ -96,7 +98,8 @@ const [workas , setWorkAs] = useState("")
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+   
 
     console.log(typeof availabilitydate)
     e.preventDefault();

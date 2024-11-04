@@ -75,14 +75,15 @@ const AddBusinessListingForm = () => {
       setListOfDevices(business.listOfDevices || '');
       setOfferedServices(business.offeredServices || '');
       setSupportAndTraining(business.supportAndTraining || '');
-      setText(business.businessDescription || '' )
+      const textDescrip = business.businessDescription.replace(/<br\s*\/?>|&nbsp;/gi, '');
+      setText(textDescrip || '' )
       if(business.images){
         setImages(business.images.map(img => img.src));
       }
       
 
       if (product.business.businessDescription) {
-        const contentState = ContentState.createFromText(product.business.businessDescription);
+        const contentState = ContentState.createFromText(textDescrip);
         setEditorState(EditorState.createWithContent(contentState));
       } else {
         setEditorState(EditorState.createEmpty());
@@ -119,7 +120,8 @@ const onEditorStateChange = (newEditorState) => {
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+   
 
     e.preventDefault();
     setError('');

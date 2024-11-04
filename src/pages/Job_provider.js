@@ -47,8 +47,8 @@ const AddNewJobForm = () => {
  useEffect(() => {
   if (product) {
     setIsEditing(true);
-    setLocation(product.providerListings[0].location.spli("_")[0] || '');
-    setCity(product.providerListings[0].location.spli("_")[1] || '')
+    setLocation(product.providerListings[0].location.split("_")[0] || '');
+    setCity(product.providerListings[0].location.split("_")[1] || '')
     setQualification(product.providerListings[0].qualificationRequested || '');
     setJobType(product.providerListings[0].jobType || '');
     setJobOfferType(product.providerListings[0].typeOfJobOffered || '');
@@ -221,6 +221,11 @@ const AddNewJobForm = () => {
               </div>
 
 
+
+
+              </div>
+
+
               <div className="flex flex-col">
                 <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">City *</label>
                 <input
@@ -231,10 +236,6 @@ const AddNewJobForm = () => {
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
-              </div>
-
-
-
               </div>
               
               {/* Qualification Requested */}

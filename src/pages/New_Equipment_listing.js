@@ -172,7 +172,7 @@ console.log(description)
       if (response.ok) {
         if (status === "active") {
           setSuccess(json.message);
-          // navigate("/")
+          navigate("/")
         } else {
           setSuccess("Your post drafted successfully");
         }

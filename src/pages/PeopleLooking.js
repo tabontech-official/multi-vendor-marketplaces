@@ -41,10 +41,14 @@ const PeopleLooking = () => {
     "Washington", "West Virginia", "Wisconsin", "Wyoming"
   ]; 
 
-  console.log(product)
 
+
+
+
+  
   useEffect(() => {
     if (product) {
+      console.log(product)
       const roomListing = product.looking;
       setZip(roomListing.zip)
       setLookingFor(roomListing.brand)
@@ -57,9 +61,9 @@ const PeopleLooking = () => {
       setName(roomListing.name)
       setIsEditing(true);
       const textDescrip = product.body_html.replace(/<br\s*\/?>|&nbsp;/gi, '');
-      setDescription(roomListing.description)
+      setDescription(textDescrip)
       if (roomListing.description) {
-        const contentState = ContentState.createFromText(roomListing.description);
+        const contentState = ContentState.createFromText(textDescrip);
         setEditorState(EditorState.createWithContent(contentState));
       } else {
         setEditorState(EditorState.createEmpty());

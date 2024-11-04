@@ -5,6 +5,7 @@ import { EditorState , ContentState, convertToRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
+import draftToHtml from 'draftjs-to-html';
 const AddJobSearchForm = () => {
   const [location, setLocation] = useState('');
   const [name, setName] = useState('');
@@ -92,6 +93,11 @@ const [workas , setWorkAs] = useState("")
   };
 
   const handleSubmit = async (e, status) => {
+    const rawContentState = convertToRaw(editorState.getCurrentContent());
+    const htmlContent = draftToHtml(rawContentState);
+
+    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+
     console.log(typeof availabilitydate)
     e.preventDefault();
     setError('');
@@ -118,7 +124,7 @@ const [workas , setWorkAs] = useState("")
     formData.append('qualification', qualificationRequested);
     formData.append('availability',availability);
     formData.append('requestedYearlySalary', requestedYearlySalary);
-    formData.append('positionRequestedDescription', positionRequestedDescription);
+    formData.append('positionRequestedDescription', modifiedContent);
     formData.append('availableToWorkAs' , workas)
     if(!isEditing){
       formData.append('status', status);

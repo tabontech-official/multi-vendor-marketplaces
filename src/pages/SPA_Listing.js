@@ -5,6 +5,7 @@ import { convertToRaw, EditorState , ContentState } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
+import draftToHtml from 'draftjs-to-html';
 const AddBusinessListingForm = () => {
   // State hooks for form fields
   const [location, setLocation] = useState('');
@@ -115,6 +116,11 @@ const onEditorStateChange = (newEditorState) => {
 
      // Handler for form submission
   const handleSubmit = async (e, status) => {
+    const rawContentState = convertToRaw(editorState.getCurrentContent());
+    const htmlContent = draftToHtml(rawContentState);
+
+    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -138,7 +144,7 @@ const onEditorStateChange = (newEditorState) => {
     formData.append('name', name);
     formData.append('location', fullLocation);
     formData.append('zip', Zip);
-    formData.append('businessDescription', descriptionText);
+    formData.append('businessDescription', modifiedContent);
     formData.append('description', descriptionText);
     formData.append('asking_price', askingPrice);
     formData.append('establishedYear', establishedYear);

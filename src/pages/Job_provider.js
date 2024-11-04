@@ -5,6 +5,7 @@ import { EditorState , ContentState , convertToRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
+import draftToHtml from 'draftjs-to-html';
 const AddNewJobForm = () => {
   // State hooks for form fields
   const [location, setLocation] = useState('');
@@ -77,6 +78,12 @@ const AddNewJobForm = () => {
 
   // Handler for form submission
   const handleSubmit = async (e , status) => {
+
+    const rawContentState = convertToRaw(editorState.getCurrentContent());
+    const htmlContent = draftToHtml(rawContentState);
+
+    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -105,10 +112,10 @@ const AddNewJobForm = () => {
     formData.append('typeOfJobOffered', jobOfferType);
     formData.append('offeredYearlySalary', offeredSalary); 
     if(isEditing){
-      formData.append('body_html', positionDescription);
-      formData.append('offeredPositionDescription', positionDescription);
+      formData.append('body_html', modifiedContent);
+      formData.append('offeredPositionDescription', modifiedContent);
     }else{
-      formData.append('offeredPositionDescription', positionDescription);
+      formData.append('offeredPositionDescription', modifiedContent);
  
     }
 

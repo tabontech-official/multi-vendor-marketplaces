@@ -6,10 +6,29 @@ import draftToHtml from "draftjs-to-html";
 import { Fragment } from "react";
 
 export default function RTC({ editorState, onEditorStateChange, name }) {
+  const [content, setContent] = useState("");
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent the default action if needed
+
+      // Capture the editor content
+      const rawContentState = convertToRaw(editorState.getCurrentContent());
+      const htmlContent = draftToHtml(rawContentState);
+      
+      // Replace line breaks with <br /> tags
+      const modifiedContent = htmlContent.replace(/<p><br><\/p>/g, '<br />');
+
+      // Store or send the modified content
+      setContent(modifiedContent);
+      console.log(modifiedContent); // Use this modified content as needed
+    }
+  };
+
   return (
     <>
       <p>{name}</p>
-      <div className='border border-gray-300  rounded w-auto'>
+      <div className='border border-gray-300 rounded w-auto'>
         <div>
           <Editor
             editorState={editorState}
@@ -17,6 +36,7 @@ export default function RTC({ editorState, onEditorStateChange, name }) {
             wrapperClassName="wrapperClassName"
             editorClassName="editorClassName custom-editor border border-gray-300 rounded-b" // Custom editor class
             onEditorStateChange={onEditorStateChange}
+            onKeyDown={handleKeyDown} // Attach the handleKeyDown function here
             mention={{
               separator: " ",
               trigger: "@",

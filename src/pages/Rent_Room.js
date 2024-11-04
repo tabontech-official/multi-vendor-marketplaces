@@ -5,6 +5,7 @@ import { EditorState , ContentState, convertToRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
 import { useNavigate } from 'react-router-dom';
+import draftToHtml from 'draftjs-to-html';
 
 const PostRentalForm = () => {
   // State hooks for form fields
@@ -91,6 +92,11 @@ console.log(product)
 
   // Handler for form submission
   const handleSubmit = async (e , status) => {
+    const rawContentState = convertToRaw(editorState.getCurrentContent());
+    const htmlContent = draftToHtml(rawContentState);
+
+    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -120,7 +126,7 @@ console.log(product)
     formData.append('typeOfUseAllowed', typeOfUseAllowed); // Updated field
     formData.append('rentalTerms', rentalTerms);
     formData.append('wifiAvailable', wifiAvailable);
-    formData.append('otherDetails', description);
+    formData.append('otherDetails', modifiedContent);
     console.log("other detais", description)
     formData.append('userId', id);
     if(!isEditing){

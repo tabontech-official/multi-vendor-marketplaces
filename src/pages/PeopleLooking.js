@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
 
 import { useNavigate } from 'react-router-dom';
+import draftToHtml from 'draftjs-to-html';
 
 const PeopleLooking = () => {
   // State hooks for form fields
@@ -85,6 +86,12 @@ const PeopleLooking = () => {
 
   // Handler for form submission
   const handleSubmit = async (e , status) => {
+    const rawContentState = convertToRaw(editorState.getCurrentContent());
+    const htmlContent = draftToHtml(rawContentState)
+
+
+    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -117,7 +124,7 @@ let fullLocation = location.concat("_", city)
   
     }
 
-    formData.append('description', description);
+    formData.append('description', modifiedContent);
 
     formData.append('userId', id);
     if(!isEditing){

@@ -4,6 +4,7 @@ import RTC from '../component/editor';
 import { convertToRaw, EditorState , ContentState } from "draft-js";
 import { useLocation, useNavigate } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
+import draftToHtml from 'draftjs-to-html';
 
 const PostEquipmentForm = () => {
   // State hooks for form fields
@@ -97,9 +98,17 @@ console.log(product)
     setDescription(currentText);
   };
 
+  console.log(description)
+
   // Handler for form submission
   const handleSubmit = async (e, status) => {
-    console.log( typeof yearPurchased , yearPurchased)
+
+    const rawContentState = convertToRaw(editorState.getCurrentContent());
+    const htmlContent = draftToHtml(rawContentState);
+
+    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+
+  
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -132,7 +141,7 @@ console.log(product)
     formData.append('warranty', warranty);
     formData.append('reason_for_selling', reasonForSelling);
     formData.append('shipping', shipping);
-    formData.append('description', description); 
+    formData.append('description', modifiedContent); 
     formData.append('userId',  Id);
     if(!isEditing){
       formData.append('status', status);
@@ -233,6 +242,19 @@ console.log(product)
                   id="City"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+
+
+              <div className="flex flex-col">
+                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Equipment Name *</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={equipmentName}
+                  onChange={(e) => setEquipmentName(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />

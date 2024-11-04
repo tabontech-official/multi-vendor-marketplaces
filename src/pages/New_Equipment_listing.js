@@ -5,6 +5,8 @@ import { convertToRaw, EditorState , ContentState } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
+import draftToHtml from 'draftjs-to-html';
+ 
 const AddNewEquipmentForm = () => {
   const Location = useLocation();
   const { product } = Location.state || {};
@@ -98,7 +100,15 @@ const AddNewEquipmentForm = () => {
     setText(currentText);  // Store as JSON with formatting
 
   }
+console.log(description)
+
   const handleSubmit = async (e, status) => {
+
+    const rawContentState = convertToRaw(editorState.getCurrentContent());
+    const htmlContent = draftToHtml(rawContentState);
+
+    const modifiedContent = htmlContent.replace(/<p>(.*?)<\/p>/g, '$1<br />');
+
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -133,7 +143,7 @@ const AddNewEquipmentForm = () => {
     formData.append('shipping', shipping);
     formData.append('training', training);
    
-      formData.append('description', description);
+      formData.append('description', modifiedContent);
  
     formData.append('userId', id);
     if(!isEdit){
@@ -159,7 +169,7 @@ const AddNewEquipmentForm = () => {
       if (response.ok) {
         if (status === "active") {
           setSuccess(json.message);
-          navigate("/")
+          // navigate("/")
         } else {
           setSuccess("Your post drafted successfully");
         }

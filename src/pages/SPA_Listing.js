@@ -38,7 +38,7 @@ const AddBusinessListingForm = () => {
   const [isEditing, setIsEditing] = useState(false);
   const locationData = useLocation()
   const { product } = locationData.state || {};
-
+  const [city , setCity] = useState("")
   const usStates = [
     "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
     "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
@@ -56,7 +56,8 @@ const AddBusinessListingForm = () => {
     if (product) {
       setIsEditing(true);
       const business = product.business || {};
-      setLocation(business.location || '');
+      setLocation(business.location.split("_")[0] || '');
+      setCity(business.location.split("_")[1] || '')
       setZip(business.zip || '');
       setName(business.name || '');
       setAskingPrice( product.variants[0].price || '');
@@ -131,8 +132,11 @@ const onEditorStateChange = (newEditorState) => {
     }
 
     // Append other fields
+    
+  let fullLocation = location.concat("_", city)
+  
     formData.append('name', name);
-    formData.append('location', location);
+    formData.append('location', fullLocation);
     formData.append('zip', Zip);
     formData.append('businessDescription', descriptionText);
     formData.append('description', descriptionText);
@@ -266,6 +270,20 @@ const onEditorStateChange = (newEditorState) => {
                 />
               </div>
               </div>
+
+              
+    <div className="flex flex-col">
+                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">City *</label>
+                <input
+                  type="text"
+                  id="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+
 
               <div className="flex flex-col">
                 <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Business Name *</label>

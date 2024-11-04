@@ -31,6 +31,7 @@ const AddNewEquipmentForm = () => {
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const [Zip , setZip] = useState("")
+  const [city , setCity] = useState("")
 
   const navigate = useNavigate()
   // Use effect to set initial state from product
@@ -52,7 +53,8 @@ const AddNewEquipmentForm = () => {
     if (product && product.equipment) {
       setIsEdit(true);  // We're editing, not creating
 
-      setLocation(product.equipment.location || '');
+      setLocation(product.equipment.location.split("_")[0] || '');
+      setCity(product.equipment.location.split("_")[1] || '')
       setName(product.title || '');
       setBrand(product.equipment.brand || ''); // Assuming brand is same as name
       setSalePrice(product.equipment.sale_price || '');
@@ -93,9 +95,9 @@ const AddNewEquipmentForm = () => {
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
     const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
-    setText(currentText);
-  };
+    setText(currentText);  // Store as JSON with formatting
 
+  }
   const handleSubmit = async (e, status) => {
     e.preventDefault();
     setError('');
@@ -114,8 +116,10 @@ const AddNewEquipmentForm = () => {
         console.log('Image Update',image)
       });
     }
+
+    let fullLocation = location.concat("_", city)
   
-    formData.append('location', location);
+    formData.append('location', fullLocation);
     formData.append('zip', Zip);
 
   
@@ -175,7 +179,7 @@ const AddNewEquipmentForm = () => {
    
     }
   };
-  
+  console.log(description)
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files); // Get all selected files
@@ -234,7 +238,22 @@ const AddNewEquipmentForm = () => {
                   required
                 />
               </div>
+
+            
               </div>
+
+              <div className="flex flex-col">
+                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">City *</label>
+                <input
+                  type="text"
+                  id="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+
               <div className="flex flex-col">
                 <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Equipment Name *</label>
                 <input

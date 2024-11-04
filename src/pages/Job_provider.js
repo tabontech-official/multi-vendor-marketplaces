@@ -19,6 +19,7 @@ const AddNewJobForm = () => {
   const [loading, setLoading] = useState(false);
   const [showRemoveOption, setShowRemoveOption] = useState(false);
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
+  const [city , setCity] = useState("")
 
   const [Enabled , setEnabled] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -45,7 +46,8 @@ const AddNewJobForm = () => {
  useEffect(() => {
   if (product) {
     setIsEditing(true);
-    setLocation(product.providerListings[0].location || '');
+    setLocation(product.providerListings[0].location.spli("_")[0] || '');
+    setCity(product.providerListings[0].location.spli("_")[1] || '')
     setQualification(product.providerListings[0].qualificationRequested || '');
     setJobType(product.providerListings[0].jobType || '');
     setJobOfferType(product.providerListings[0].typeOfJobOffered || '');
@@ -93,7 +95,9 @@ const AddNewJobForm = () => {
 
     // Append other fields
 
-      formData.append('location', location);
+    let fullLocation = location.concat("_", city)
+  
+      formData.append('location', fullLocation);
     formData.append('zip',Zip)
       formData.append('qualificationRequested', qualification);
       formData.append('name', qualification);
@@ -203,6 +207,19 @@ const AddNewJobForm = () => {
                   value={Zip}
                   onChange={(e) => setZip(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  required
+                />
+              </div>
+
+
+              <div className="flex flex-col">
+                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">City *</label>
+                <input
+                  type="text"
+                  id="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
               </div>

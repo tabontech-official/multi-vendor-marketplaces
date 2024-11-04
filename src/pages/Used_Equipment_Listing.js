@@ -32,7 +32,7 @@ const PostEquipmentForm = () => {
    const [Zip , setZip] = useState("")
   const { product } = location.state || {};
   const navigate = useNavigate()
-
+  const [city , setCity] = useState("")
   const usStates = [
     "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
     "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
@@ -51,7 +51,8 @@ console.log(product)
   useEffect(() => {
     if (product) {
       setIsEditing(true);
-      setLocation(product.equipment.location);
+      setLocation(product.equipment.location.split("_")[0]);
+      setCity(product.equipment.location.split("_")[1])
       setEquipmentName(product.equipment.name);
       setBrandName(product.equipment.brand); // Assuming `brand` is part of the product object
       setAskingPrice(product.equipment.asking_price);
@@ -118,7 +119,8 @@ console.log(product)
    
 
     // Append other form fields to FormData
-    formData.append('location', Location);
+    let fullLocation = Location.concat("_", city)
+    formData.append('location', fullLocation);
     formData.append('zip', Zip)
     formData.append('name', equipmentName);
     formData.append('brand', brandName);
@@ -225,16 +227,17 @@ console.log(product)
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="equipmentName" className="text-gray-700 text-sm font-medium mb-1">Equipment Name *</label>
+                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">City *</label>
                 <input
                   type="text"
-                  id="equipmentName"
-                  value={equipmentName}
-                  onChange={(e) => setEquipmentName(e.target.value)}
+                  id="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
               </div>
+
               
               <div className='mb-4'>
                 <RTC name={"Description"}

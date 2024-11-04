@@ -18,7 +18,7 @@ const PeopleLooking = () => {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const [city , setCity] = useState("")
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [description, setDescription] = useState("");
@@ -40,12 +40,16 @@ const PeopleLooking = () => {
     "Washington", "West Virginia", "Wisconsin", "Wyoming"
   ]; 
 
+  console.log(product)
+
   useEffect(() => {
     if (product) {
-      const roomListing = product.equipment;
+      const roomListing = product.looking;
       setZip(roomListing.zip)
       setLookingFor(roomListing.brand)
-      setLocation(roomListing.location);
+      setLocation(roomListing.location.split("_")[0]);
+      setCity(roomListing.location.split("_")[1])
+
       setBudget(roomListing.sale_price)
       setImages(roomListing.image || []); // Fallback to an empty array if undefined
       setImageName(roomListing.imageName || '');
@@ -98,13 +102,13 @@ const PeopleLooking = () => {
       });
     }
     
-
-
-    formData.append('location', location);
+console.log("budeget",budget)
+let fullLocation = location.concat("_", city)
+    formData.append('location', fullLocation);
     formData.append('zip', Zip);
     formData.append('name', lookingfor);
-    formData.append('brand', name );
-    if(budget === null){
+    formData.append('brand', name ); 
+    if(budget === null || !budget){
       formData.append('sale_price', 0);
   
     }
@@ -209,6 +213,20 @@ const handleRemoveImage = (index) => {
                 />
               </div>
               </div>
+
+              
+    <div className="flex flex-col">
+                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">City *</label>
+                <input
+                  type="text"
+                  id="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+
 
               <div className="flex flex-col">
                 <label htmlFor="roomSize" className="text-gray-700 text-sm font-medium mb-1">Name of what I am looking *</label>

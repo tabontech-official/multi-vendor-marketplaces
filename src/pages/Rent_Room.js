@@ -28,6 +28,7 @@ const PostRentalForm = () => {
   const [isEditing, setIsEditing] = useState(false);
   const locationData = useLocation();
   const [Zip , setZip] = useState("")
+  const [city , setCity] = useState("")
   const navigate = useNavigate()
 
   const usStates = [
@@ -47,7 +48,9 @@ console.log(product)
     if (product) {
       const roomListing = product.roomListing[0];
       setZip(roomListing.zip)
-      setLocation(roomListing.location);
+      setLocation(roomListing.location.split("_")[0]);
+      setCity(roomListing.location.split("_")[1])
+
       setRoomSize(roomListing.roomSize);
       setMonthlyRent(roomListing.monthlyRent);
       setDeposit(roomListing.deposit);
@@ -106,8 +109,8 @@ console.log(product)
     }
     
 
-
-    formData.append('location', location);
+    let fullLocation = location.concat("_", city)
+    formData.append('location', fullLocation);
     formData.append('zip', Zip);
 
     formData.append('roomSize', roomSize);
@@ -221,6 +224,21 @@ const handleRemoveImage = (index) => {
                 />
               </div>
               </div>
+
+
+              
+    <div className="flex flex-col">
+                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">City *</label>
+                <input
+                  type="text"
+                  id="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+              </div>
+
 
               <div className="flex flex-col">
                 <label htmlFor="roomSize" className="text-gray-700 text-sm font-medium mb-1">Room size (sq ft)*</label>

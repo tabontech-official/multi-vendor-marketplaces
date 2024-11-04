@@ -24,6 +24,7 @@ const AddJobSearchForm = () => {
   const { product } = locationData.state || {};
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const [Zip , setZip] = useState("")
+  const [city , setCity] = useState("")
 const [workas , setWorkAs] = useState("")
   const navigate = useNavigate()
 
@@ -43,7 +44,8 @@ const [workas , setWorkAs] = useState("")
     console.log(product)
     if (product) {
       setIsEditing(true);
-      setLocation(product.jobListings[0].location || '');
+      setLocation(product.jobListings[0].location.spli("_")[0] || '');
+      setCity(product.jobListings[0].location.spli("_")[1] || '')
       setName(product.title || '');
       setQualificationRequested(product.jobListings[0].qualification || '');
       setAvailability(product.jobListings[0].availability || '');
@@ -103,8 +105,8 @@ const [workas , setWorkAs] = useState("")
         formData.append('images', image); // Append each file
       });
     }
-
-    formData.append('location', location);
+    let fullLocation = location.concat("_", city)
+    formData.append('location', fullLocation);
     formData.append('zip', Zip)
 
     if(isEditing){
@@ -215,6 +217,21 @@ const handleRemoveImage = (index) => {
                   required
                 />
               </div>
+              </div>
+
+
+              
+
+    <div className="flex flex-col">
+                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">City *</label>
+                <input
+                  type="text"
+                  id="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
               </div>
 
 

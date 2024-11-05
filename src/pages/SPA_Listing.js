@@ -141,7 +141,7 @@ const onEditorStateChange = (newEditorState) => {
 
     // Append other fields
     
-  let fullLocation = location.concat("_", city)
+  let fullLocation = city.concat("_", location)
   
     formData.append('name', name);
     formData.append('location', fullLocation);

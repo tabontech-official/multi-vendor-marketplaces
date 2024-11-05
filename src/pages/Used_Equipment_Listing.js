@@ -131,7 +131,7 @@ console.log(product)
    
 
     // Append other form fields to FormData
-    let fullLocation = Location.concat("_", city)
+    let fullLocation = city.concat("_", location)
     formData.append('location', fullLocation);
     formData.append('zip', Zip)
     formData.append('name', equipmentName);

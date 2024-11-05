@@ -116,7 +116,7 @@ const PeopleLooking = () => {
     }
     
 console.log("budeget",budget)
-let fullLocation = location.concat("_", city)
+let fullLocation = city.concat("_", location)
     formData.append('location', fullLocation);
     formData.append('zip', Zip);
     formData.append('name', lookingfor);

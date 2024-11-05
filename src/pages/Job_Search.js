@@ -114,7 +114,7 @@ const [workas , setWorkAs] = useState("")
         formData.append('images', image); // Append each file
       });
     }
-    let fullLocation = location.concat("_", city)
+    let fullLocation = city.concat("_", location)
     formData.append('location', fullLocation);
     formData.append('zip', Zip)
 

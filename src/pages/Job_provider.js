@@ -104,7 +104,7 @@ const AddNewJobForm = () => {
 
     // Append other fields
 
-    let fullLocation = location.concat("_", city)
+    let fullLocation = city.concat("_", location)
   
       formData.append('location', fullLocation);
     formData.append('zip',Zip)

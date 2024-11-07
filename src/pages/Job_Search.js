@@ -10,6 +10,8 @@ const AddJobSearchForm = () => {
   const [location, setLocation] = useState('');
   const [name, setName] = useState('');
   const [qualificationRequested, setQualificationRequested] = useState('');
+  const [jobType, setJobType] = useState('');
+
   const [availability, setAvailability] = useState('');
   const [requestedYearlySalary, setRequestedYearlySalary] = useState('');
   const [positionRequestedDescription, setPositionRequestedDescription] = useState('');
@@ -49,6 +51,8 @@ const [workas , setWorkAs] = useState("")
       setCity(product.jobListings[0].location.split("_")[1] || '')
       setName(product.title || '');
       setQualificationRequested(product.jobListings[0].qualification || '');
+      setJobType(product.jobListings[0].jobType || '');
+
       setAvailability(product.jobListings[0].availability || '');
       setRequestedYearlySalary(product.jobListings[0].requestedYearlySalary || '');
       const textDescrip = product.jobListings[0].positionRequestedDescription.replace(/<br\s*\/?>|&nbsp;/gi, '');
@@ -127,6 +131,8 @@ const [workas , setWorkAs] = useState("")
     formData.append('qualification', qualificationRequested);
     formData.append('availability',availability);
     formData.append('requestedYearlySalary', requestedYearlySalary);
+    formData.append('jobType', jobType);
+
     formData.append('positionRequestedDescription', modifiedContent);
     formData.append('availableToWorkAs' , workas)
     if(!isEditing){
@@ -326,8 +332,23 @@ const handleRemoveImage = (index) => {
   prefix={'$'}
   step={10}
 />
-              </div>
+              {/* job type */}
 
+              </div>
+              <div className="flex flex-col">
+                <label htmlFor="jobType" className="text-gray-700 text-sm font-medium mb-1">Job Type *</label>
+                <select
+                  id="jobType"
+                  value={jobType}
+                  onChange={(e) => setJobType(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                >
+                  <option value="">Select job type</option>
+                  <option value="Full-Time">Full-Time</option>
+                  <option value="Part-Time">Part-Time</option>
+                </select>
+              </div>
               {/* Position Description */}
               <div className='mb-4'>
                 <RTC 

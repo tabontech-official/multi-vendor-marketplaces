@@ -33,7 +33,7 @@ const PostEquipmentForm = () => {
    const [Zip , setZip] = useState("")
   const { product } = location.state || {};
   const navigate = useNavigate()
-  const [city , setCity] = useState("")
+  const [city, setCity] = useState('');
   const usStates = [
     "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
     "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
@@ -52,8 +52,9 @@ console.log(product)
   useEffect(() => {
     if (product) {
       setIsEditing(true);
-      setLocation(product.equipment.location.split("_")[0]);
-      setCity(product.equipment.location.split("_")[1])
+      setLocation(product.equipment.location);
+      // setCity(product.equipment.location.split("_")[1] || '')
+      setCity(product.equipment.city)
       setEquipmentName(product.equipment.name);
       setBrandName(product.equipment.brand); // Assuming `brand` is part of the product object
       setAskingPrice(product.equipment.asking_price);
@@ -131,8 +132,9 @@ console.log(product)
    
 
     // Append other form fields to FormData
-    let fullLocation = city.concat("_", location)
-    formData.append('location', fullLocation);
+   
+    formData.append('location', Location);
+    formData.append('city', city);
     formData.append('zip', Zip)
     formData.append('name', equipmentName);
     formData.append('brand', brandName);
@@ -536,3 +538,4 @@ console.log(product)
 };
 
 export default PostEquipmentForm;
+

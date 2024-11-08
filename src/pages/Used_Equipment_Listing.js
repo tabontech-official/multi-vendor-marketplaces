@@ -53,7 +53,6 @@ console.log(product)
     if (product) {
       setIsEditing(true);
       setLocation(product.equipment.location);
-      // setCity(product.equipment.location.split("_")[1] || '')
       setCity(product.equipment.city)
       setEquipmentName(product.equipment.name);
       setBrandName(product.equipment.brand); // Assuming `brand` is part of the product object
@@ -212,9 +211,12 @@ console.log(product)
 <div className="flex flex-col flex-1 mr-4 max-sm:mr-0">
   <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
   <select
-    id="location"
-    value={Location}
-    onChange={(e) => setLocation(e.target.value)}
+  type='text'
+    // id="location"
+    value={Location.split('_')[1] || ''}
+    onChange={(e) => {
+      setLocation(`${city}_${e.target.value}`); // Update Location dynamically
+    }}
     className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
     required
   >
@@ -246,7 +248,10 @@ console.log(product)
                   type="text"
                   id="City"
                   value={city}
-                  onChange={(e) => setCity(e.target.value)}
+                  onChange={(e) => {
+                    setCity(e.target.value);
+                    setLocation(`${e.target.value}_${Location.split('_')[1]}`); // Update Location dynamically
+                  }}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />

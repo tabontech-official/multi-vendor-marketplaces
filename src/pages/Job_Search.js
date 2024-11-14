@@ -55,7 +55,11 @@ const [workas , setWorkAs] = useState("")
 
       setAvailability(product.jobListings[0].availability || '');
       setRequestedYearlySalary(product.jobListings[0].requestedYearlySalary || '');
-      const textDescrip = product.jobListings[0].positionRequestedDescription.replace(/<br\s*\/?>|&nbsp;/gi, '');
+      // const textDescrip = product.jobListings[0].positionRequestedDescription.replace(/<br\s*\/?>|&nbsp;/gi, '');
+      const textDescrip = product.jobListings[0].positionRequestedDescription.replace(
+        /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
+        ""
+      );
       setPositionRequestedDescription(textDescrip || '');
       setZip(product.jobListings[0].zip)
      setWorkAs(product.jobListings[0].availableToWorkAs || '')
@@ -92,17 +96,26 @@ const [workas , setWorkAs] = useState("")
   //   setImageName('');
   //   setEditorState(EditorState.createEmpty());
   // };
+  // const onEditorStateChange = (newEditorState) => {
+  //   setEditorState(newEditorState);
+  //   const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
+  //   setPositionRequestedDescription(currentText);
+  // };
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
-    const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
-    setPositionRequestedDescription(currentText);
+    const currentText = newEditorState
+      .getCurrentContent()
+      .getPlainText("\u0001"); // Get plain text from the editor, no HTML
+      setPositionRequestedDescription(currentText);
   };
-
   const handleSubmit = async (e, status) => {
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+    const modifiedContent = htmlContent
+    .replace(/<p>/g, "")
+    .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
+    .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
    
 
     console.log(typeof availabilitydate)

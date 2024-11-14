@@ -1,28 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { FaTrash } from 'react-icons/fa';
-import RTC from '../component/editor';
-import { convertToRaw, EditorState , ContentState } from "draft-js";
-import { useLocation, useNavigate } from 'react-router-dom';
-import CurrencyInput from 'react-currency-input-field';
-import draftToHtml from 'draftjs-to-html';
+import React, { useEffect, useState } from "react";
+import { FaTrash } from "react-icons/fa";
+import RTC from "../component/editor";
+import { convertToRaw, EditorState, ContentState } from "draft-js";
+import { useLocation, useNavigate } from "react-router-dom";
+import CurrencyInput from "react-currency-input-field";
+import draftToHtml from "draftjs-to-html";
 
 const PostEquipmentForm = () => {
   // State hooks for form fields
-  const [Location, setLocation] = useState('');
-  const [equipmentName, setEquipmentName] = useState('');
-  const [brandName, setBrandName] = useState('');
-  const [askingPrice, setAskingPrice] = useState('');
+  const [Location, setLocation] = useState("");
+  const [equipmentName, setEquipmentName] = useState("");
+  const [brandName, setBrandName] = useState("");
+  const [askingPrice, setAskingPrice] = useState("");
   const [acceptOffers, setAcceptOffers] = useState();
-  const [equipmentType, setEquipmentType] = useState('');
-  const [certification, setCertification] = useState('');
-  const [yearPurchased, setYearPurchased] = useState('');
-  const [warranty, setWarranty] = useState('');
-  const [reasonForSelling, setReasonForSelling] = useState('');
-  const [shipping, setShipping] = useState('');
+  const [equipmentType, setEquipmentType] = useState("");
+  const [certification, setCertification] = useState("");
+  const [yearPurchased, setYearPurchased] = useState("");
+  const [warranty, setWarranty] = useState("");
+  const [reasonForSelling, setReasonForSelling] = useState("");
+  const [shipping, setShipping] = useState("");
   const [images, setImages] = useState([]);
-  const [imageName, setImageName] = useState('');
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
+  const [imageName, setImageName] = useState("");
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showRemoveOption, setShowRemoveOption] = useState(false);
   const [description, setDescription] = useState("");
@@ -30,30 +30,71 @@ const PostEquipmentForm = () => {
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(false); // New state for editing mode
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
-   const [Zip , setZip] = useState("")
+  const [Zip, setZip] = useState("");
   const { product } = location.state || {};
-  const navigate = useNavigate()
-  const [city, setCity] = useState('');
+  const navigate = useNavigate();
+  const [city, setCity] = useState("");
   const usStates = [
-    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
-    "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
-    "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", 
-    "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi",
-    "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
-    "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
-    "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", 
-    "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia",
-    "Washington", "West Virginia", "Wisconsin", "Wyoming"
-  ]; 
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
+  ];
 
-
-  
-console.log(product)
+  console.log(product);
   useEffect(() => {
     if (product) {
       setIsEditing(true);
-      setLocation(product.equipment.location);
-      setCity(product.equipment.city)
+      const [cityFromLocation, stateFromLocation] =
+        product.equipment.location.split("_");
+      setCity(cityFromLocation);
+      setLocation(stateFromLocation);
       setEquipmentName(product.equipment.name);
       setBrandName(product.equipment.brand); // Assuming `brand` is part of the product object
       setAskingPrice(product.equipment.asking_price);
@@ -64,202 +105,243 @@ console.log(product)
       setWarranty(product.equipment.warranty);
       setReasonForSelling(product.equipment.reason_for_selling);
       setShipping(product.equipment.shipping);
-      const textDescrip = product.equipment.description.replace(/<br\s*\/?>|&nbsp;/gi, '');
+      const textDescrip = product.equipment.description.replace(
+        /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
+        ""
+      );
 
-      setDescription(textDescrip)
-     setZip(product.equipment.zip)
-     
+      setDescription(textDescrip);
+      setZip(product.equipment.zip);
 
+      if (product.equipment.description) {
+        const contentState = ContentState.createFromText(textDescrip);
+        setEditorState(EditorState.createWithContent(contentState));
+      } else {
+        setEditorState(EditorState.createEmpty());
+      }
 
-     if (product.equipment.description) {
-      const contentState = ContentState.createFromText(textDescrip);
-      setEditorState(EditorState.createWithContent(contentState));
-    } else {
-      setEditorState(EditorState.createEmpty());
+      if (product.images && Array.isArray(product.images)) {
+        const imageFiles = product.images.map(async (img) => {
+          const blob = await fetch(img.src).then((r) => r.blob());
+          return new File([blob], img.alt || "product-image.jpg", {
+            type: "image/jpeg",
+          });
+        });
+
+        Promise.all(imageFiles).then((files) => {
+          setImages(files);
+          setImagePreviews(product.images.map((img) => img.src));
+        });
+      }
     }
+  }, []);
 
-    if (product.images && Array.isArray(product.images)) {
-      const imageFiles = product.images.map(async(img) => {
-        const blob = await fetch(img.src).then((r) => r.blob());
-        return new File([blob], img.alt || 'product-image.jpg', { type: 'image/jpeg' });
-      });
-
-      Promise.all(imageFiles).then((files) => {
-        setImages(files);
-        setImagePreviews(product.images.map((img) => img.src));
-      });
-    }
-    }
-  },[]);
-
-  
-
+  const handleStateChange = (e) => {
+    const state = e.target.value;
+    setLocation(`${city}_${state}`); // Update location with both city and state
+    setLocation(state); // update state value only
+  };
+  const handleCityChange = (e) => {
+    const cityValue = e.target.value;
+    setCity(cityValue); // update city value only
+    setLocation(`${cityValue}_${Location}`); // Update location with both city and state
+  };
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
-    const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
+    const currentText = newEditorState
+      .getCurrentContent()
+      .getPlainText("\u0001"); // Get plain text from the editor, no HTML
     setDescription(currentText);
   };
+  
 
-  console.log(description)
+  console.log(description);
 
   // Handler for form submission
   const handleSubmit = async (e, status) => {
-
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
-   
+    const modifiedContent = htmlContent
+    .replace(/<p>/g, "")
+    .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
+    .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
 
-  
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
     setLoading(true);
 
-    const  Id = localStorage.getItem('userid');
-  
+    const Id = localStorage.getItem("userid");
+
     const formData = new FormData();
 
-
-    if(images.length > 0 ){
-      images.map((image)=>{
-        formData.append('images', image); // Append each file
-      })
+    if (images.length > 0) {
+      images.map((image) => {
+        formData.append("images", image); // Append each file
+      });
     }
-   
-   
 
     // Append other form fields to FormData
-   
-    formData.append('location', Location);
-    formData.append('city', city);
-    formData.append('zip', Zip)
-    formData.append('name', equipmentName);
-    formData.append('brand', brandName);
-    formData.append('asking_price', askingPrice);
-    formData.append('accept_offers', acceptOffers);
-    formData.append('equipment_type', equipmentType);
-    formData.append('certification', certification);
-    formData.append('year_purchased',yearPurchased);
-    formData.append('warranty', warranty);
-    formData.append('reason_for_selling', reasonForSelling);
-    formData.append('shipping', shipping);
-    formData.append('description', modifiedContent); 
-    formData.append('userId',  Id);
-    if(!isEditing){
-      formData.append('status', status);
-      }
+
+    formData.append("location", Location);
+    formData.append("city", city);
+    formData.append("zip", Zip);
+    formData.append("name", equipmentName);
+    formData.append("brand", brandName);
+    formData.append("asking_price", askingPrice);
+    formData.append("accept_offers", acceptOffers);
+    formData.append("equipment_type", equipmentType);
+    formData.append("certification", certification);
+    formData.append("year_purchased", yearPurchased);
+    formData.append("warranty", warranty);
+    formData.append("reason_for_selling", reasonForSelling);
+    formData.append("shipping", shipping);
+    formData.append("description", modifiedContent);
+    formData.append("userId", Id);
+    if (!isEditing) {
+      formData.append("status", status);
+    }
     try {
-      const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateListing/${product.id}` : "https://medspaa.vercel.app/product/addEquipment", {
-        method: isEditing ? "PUT" : "POST",
-        body: formData
-      });
+      const response = await fetch(
+        isEditing
+          ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
+          : "https://medspaa.vercel.app/product/addEquipment",
+        {
+          method: isEditing ? "PUT" : "POST",
+          body: formData,
+        }
+      );
 
       const json = await response.json();
 
       if (response.ok) {
-        setSuccess(status === "active" ? json.message : "Your post drafted successfully");
-        navigate("/")
-        setError('');
-      } else{
-        setSuccess('');
-      setError( json.error ||'An unexpected error occurred.' || json.error.errors.value);    
-      console.log(json.error)
+        setSuccess(
+          status === "active" ? json.message : "Your post drafted successfully"
+        );
+        navigate("/");
+        setError("");
+      } else {
+        setSuccess("");
+        setError(
+          json.error ||
+            "An unexpected error occurred." ||
+            json.error.errors.value
+        );
+        console.log(json.error);
       }
- 
     } catch (error) {
-      setSuccess('');
-      setError( error.error ||'An unexpected error occurred.' || error.error.errors.value);
-      console.log(error.error.errors)
+      setSuccess("");
+      setError(
+        error.error ||
+          "An unexpected error occurred." ||
+          error.error.errors.value
+      );
+      console.log(error.error.errors);
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
   // Handler for image file change
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files); // Get all selected files
-    setImages(prevImages => [...prevImages, ...files]); // Store file objects
-    const newImagePreviews = files.map(file => URL.createObjectURL(file)); // Create object URLs for preview
-    setImagePreviews(prevPreviews => [...prevPreviews, ...newImagePreviews]); // Append to the existing previews
+    setImages((prevImages) => [...prevImages, ...files]); // Store file objects
+    const newImagePreviews = files.map((file) => URL.createObjectURL(file)); // Create object URLs for preview
+    setImagePreviews((prevPreviews) => [...prevPreviews, ...newImagePreviews]); // Append to the existing previews
   };
 
   // Handler to remove image
   const handleRemoveImage = (index) => {
-    setImages(prevImages => prevImages.filter((_, i) => i !== index)); // Remove image at the specified index
-    setImagePreviews(prevPreviews => prevPreviews.filter((_, i) => i !== index)); // Remove preview at the specified index
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index)); // Remove image at the specified index
+    setImagePreviews((prevPreviews) =>
+      prevPreviews.filter((_, i) => i !== index)
+    ); // Remove preview at the specified index
   };
   return (
     <main className="bg-gray-100 min-h-screen p-5 flex-row">
-      <h1 className="text-2xl font-semibold mb-4 max-sm:text-xl">Add Used Equipment Listing</h1>
-      <p className="text-lg mb-8 text-gray-700">Use this form to list your Used equipment.</p>
+      <h1 className="text-2xl font-semibold mb-4 max-sm:text-xl">
+        Add Used Equipment Listing
+      </h1>
+      <p className="text-lg mb-8 text-gray-700">
+        Use this form to list your Used equipment.
+      </p>
       <div className="mb-4">
         {error && <div className="text-red-500">{error}</div>}
         {success && <div className="text-green-500">{success}</div>}
       </div>
       <div className="flex flex-col lg:flex-row flex-1">
-        
         <div className="flex-1 bg-white px-8 py-4 shadow-md lg:mr-8 mb-8 lg:mb-0">
-          <h1 className='text-2xl font-semibold mb-4 max-sm:text-xl '>Equipment Details</h1>
+          <h1 className="text-2xl font-semibold mb-4 max-sm:text-xl ">
+            Equipment Details
+          </h1>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
-            
+              <div className="flex flex-row max-sm:flex-col ">
+                <div className="flex flex-col flex-1 mr-4 max-sm:mr-0">
+                  <label
+                    htmlFor="location"
+                    className="text-gray-700 text-sm font-medium mb-1"
+                  >
+                    Location STATE *
+                  </label>
+                  <select
+                    value={Location.split("_")[1] || ""}
+                    onChange={handleStateChange}
+                    className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    required
+                  >
+                    <option value="">Select a state</option>
+                    {usStates.map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div className='flex flex-row max-sm:flex-col '>
-             
-<div className="flex flex-col flex-1 mr-4 max-sm:mr-0">
-  <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
-  <select
-  type='text'
-    // id="location"
-    value={Location.split('_')[1] || ''}
-    onChange={(e) => {
-      setLocation(`${city}_${e.target.value}`); // Update Location dynamically
-    }}
-    className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-    required
-  >
-    <option value="">Select a state</option>
-    {usStates.map((state) => (
-      <option key={state} value={state}>
-        {state}
-      </option>
-    ))}
-  </select>
-</div>
-
-              <div className="flex flex-col flex-1 ">
-                <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>
-                <input
-                  type="number"
-                  id="location"
-                  value={Zip}
-                  onChange={(e) => setZip(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  required
-                />
-              </div>
+                <div className="flex flex-col flex-1 ">
+                  <label
+                    htmlFor="location"
+                    className="text-gray-700 text-sm font-medium mb-1"
+                  >
+                    Location ZIP CODE *
+                  </label>
+                  <input
+                    type="number"
+                    id="location"
+                    value={Zip}
+                    onChange={(e) => setZip(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    required
+                  />
+                </div>
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">City *</label>
+                <label
+                  htmlFor="name"
+                  className="text-gray-700 text-sm font-medium mb-1"
+                >
+                  City *
+                </label>
                 <input
                   type="text"
-                  id="City"
+                  id="city"
                   value={city}
-                  onChange={(e) => {
-                    setCity(e.target.value);
-                    setLocation(`${e.target.value}_${Location.split('_')[1]}`); // Update Location dynamically
-                  }}
+                  onChange={handleCityChange}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
               </div>
 
-
               <div className="flex flex-col">
-                <label htmlFor="name" className="text-gray-700 text-sm font-medium mb-1">Equipment Name *</label>
+                <label
+                  htmlFor="name"
+                  className="text-gray-700 text-sm font-medium mb-1"
+                >
+                  Equipment Name *
+                </label>
                 <input
                   type="text"
                   id="name"
@@ -270,16 +352,21 @@ console.log(product)
                 />
               </div>
 
-              
-              <div className='mb-4'>
-                <RTC name={"Description"}
+              <div className="mb-4">
+                <RTC
+                  name={"Description"}
                   editorState={editorState}
                   onEditorStateChange={onEditorStateChange}
                 />
               </div>
 
               <div className="flex flex-col mt-4">
-                <label htmlFor="brandName" className="text-gray-700 text-sm font-medium mb-1">Brand Name *</label>
+                <label
+                  htmlFor="brandName"
+                  className="text-gray-700 text-sm font-medium mb-1"
+                >
+                  Brand Name *
+                </label>
                 <input
                   type="text"
                   id="brandName"
@@ -291,31 +378,40 @@ console.log(product)
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="askingPrice" className="text-gray-700 text-sm font-medium mb-1">Asking Price $ *</label>
-               
-               
-              <CurrencyInput 
-  id="validation-example-2-field"
-  placeholder="$1,234,567"
-  onValueChange={(value, name, values) => {
-    const formattedValue = value ? `${parseFloat(value).toFixed(2)}` : '';
-    setAskingPrice(formattedValue);
-  }}
-  value={askingPrice}
-  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-  prefix={'$'}
-  step={10}
-/>
-               
-  
+                <label
+                  htmlFor="askingPrice"
+                  className="text-gray-700 text-sm font-medium mb-1"
+                >
+                  Asking Price $ *
+                </label>
+
+                <CurrencyInput
+                  id="validation-example-2-field"
+                  placeholder="$1,234,567"
+                  onValueChange={(value, name, values) => {
+                    const formattedValue = value
+                      ? `${parseFloat(value).toFixed(2)}`
+                      : "";
+                    setAskingPrice(formattedValue);
+                  }}
+                  value={askingPrice}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  prefix={"$"}
+                  step={10}
+                />
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="acceptOffers" className="text-gray-700 text-sm font-medium mb-1">Accept Offers *</label>
+                <label
+                  htmlFor="acceptOffers"
+                  className="text-gray-700 text-sm font-medium mb-1"
+                >
+                  Accept Offers *
+                </label>
                 <select
                   id="acceptOffers"
                   value={acceptOffers}
-                  onChange={(e) => setAcceptOffers(e.target.value === 'true')}
+                  onChange={(e) => setAcceptOffers(e.target.value === "true")}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 >
@@ -326,7 +422,12 @@ console.log(product)
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="equipmentType" className="text-gray-700 text-sm font-medium mb-1">Equipment Type *</label>
+                <label
+                  htmlFor="equipmentType"
+                  className="text-gray-700 text-sm font-medium mb-1"
+                >
+                  Equipment Type *
+                </label>
                 <select
                   id="equipmentType"
                   value={equipmentType}
@@ -339,17 +440,28 @@ console.log(product)
                   <option value="Body shaping">Body Shaping</option>
                   <option value="Laser Hair removal">Laser Hair Removal</option>
                   <option value="Laser skin care">Laser Skin Care</option>
-                  <option value="Laser tattoo removal">Laser Tattoo Removal</option>
+                  <option value="Laser tattoo removal">
+                    Laser Tattoo Removal
+                  </option>
                   <option value="Lab equipment">Lab Equipment</option>
-                  <option value="Other aesthetic device">Other Aesthetic Device</option>
-                  <option value="Other Medical device">Other Medical Device</option>
+                  <option value="Other aesthetic device">
+                    Other Aesthetic Device
+                  </option>
+                  <option value="Other Medical device">
+                    Other Medical Device
+                  </option>
                   <option value="Furniture">Furniture</option>
                   <option value="Small tools">Small Tools</option>
                 </select>
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="certification" className="text-gray-700 text-sm font-medium mb-1">Certification *</label>
+                <label
+                  htmlFor="certification"
+                  className="text-gray-700 text-sm font-medium mb-1"
+                >
+                  Certification *
+                </label>
                 <select
                   id="certification"
                   value={certification}
@@ -366,7 +478,12 @@ console.log(product)
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="yearPurchased" className="text-gray-700 text-sm font-medium mb-1">Year Purchased *</label>
+                <label
+                  htmlFor="yearPurchased"
+                  className="text-gray-700 text-sm font-medium mb-1"
+                >
+                  Year Purchased *
+                </label>
                 <input
                   type="date"
                   id="yearPurchased"
@@ -378,7 +495,12 @@ console.log(product)
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="warranty" className="text-gray-700 text-sm font-medium mb-1">Warranty *</label>
+                <label
+                  htmlFor="warranty"
+                  className="text-gray-700 text-sm font-medium mb-1"
+                >
+                  Warranty *
+                </label>
                 <select
                   id="warranty"
                   value={warranty}
@@ -387,14 +509,23 @@ console.log(product)
                   required
                 >
                   <option value="">Select a warranty</option>
-                  <option value="No warranty, as it is">No warranty, as it is</option>
-                  <option value="Still under manufacturer warranty">Still under manufacturer warranty</option>
+                  <option value="No warranty, as it is">
+                    No warranty, as it is
+                  </option>
+                  <option value="Still under manufacturer warranty">
+                    Still under manufacturer warranty
+                  </option>
                   <option value="6 month warranty">6 month warranty</option>
                 </select>
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="reasonForSelling" className="text-gray-700 text-sm font-medium mb-1">Reason for Selling *</label>
+                <label
+                  htmlFor="reasonForSelling"
+                  className="text-gray-700 text-sm font-medium mb-1"
+                >
+                  Reason for Selling *
+                </label>
                 <select
                   id="reasonForSelling"
                   value={reasonForSelling}
@@ -411,7 +542,12 @@ console.log(product)
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="shipping" className="text-gray-700 text-sm font-medium mb-1">Shipping *</label>
+                <label
+                  htmlFor="shipping"
+                  className="text-gray-700 text-sm font-medium mb-1"
+                >
+                  Shipping *
+                </label>
                 <select
                   id="shipping"
                   value={shipping}
@@ -425,80 +561,84 @@ console.log(product)
                   <option value="Available at cost">Available at cost</option>
                 </select>
               </div>
-
             </div>
           </form>
         </div>
 
         <div className="lg:w-1/3 lg:pl-8 flex-1">
-         
-        <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
-          <h2 className="text-2xl font-semibold mb-4">Equipment Image</h2>
-          <p className="text-gray-600 mb-4">
-            Upload an image of the equipment. Recommended size: 1024x1024 and less than 15MB.
-          </p>
+          <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
+            <h2 className="text-2xl font-semibold mb-4">Equipment Image</h2>
+            <p className="text-gray-600 mb-4">
+              Upload an image of the equipment. Recommended size: 1024x1024 and
+              less than 15MB.
+            </p>
 
-          {/* Image Preview */}
-          {imagePreviews.length > 0 ? (
-  imagePreviews.map((image, index) => (
-    <div key={index} className="flex items-center mb-4">
-      <img
-        src={image}
-        alt={`Preview ${index}`}
-        className="border border-gray-300 w-14 h-14 object-cover"
-      />
-      <div className="ml-4 flex flex-1 items-center">
-        <p className="text-sm text-gray-700 flex-1">Image {index + 1}</p>
-        <button
-          type="button"
-          onClick={() => handleRemoveImage(index)} // Call remove handler with the index
-          className="text-red-500 hover:text-red-700 text-sm ml-4"
-        >
-          <FaTrash />
-        </button>
-      </div>
-    </div>
-  ))
-) : (
-            <div className="flex items-center mb-4">
-              <img
-                src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
-                alt="Preview"
-                className="border border-gray-300 w-24 h-24 object-cover"
-              />
-              <div className="ml-4 flex flex-1 items-center">
-                <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+            {/* Image Preview */}
+            {imagePreviews.length > 0 ? (
+              imagePreviews.map((image, index) => (
+                <div key={index} className="flex items-center mb-4">
+                  <img
+                    src={image}
+                    alt={`Preview ${index}`}
+                    className="border border-gray-300 w-14 h-14 object-cover"
+                  />
+                  <div className="ml-4 flex flex-1 items-center">
+                    <p className="text-sm text-gray-700 flex-1">
+                      Image {index + 1}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)} // Call remove handler with the index
+                      className="text-red-500 hover:text-red-700 text-sm ml-4"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="flex items-center mb-4">
+                <img
+                  src={
+                    "https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"
+                  }
+                  alt="Preview"
+                  className="border border-gray-300 w-24 h-24 object-cover"
+                />
+                <div className="ml-4 flex flex-1 items-center">
+                  <p className="text-sm text-gray-700 flex-1">{imageName}</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <button
-            onClick={() => document.getElementById('images').click()}
-            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
-          >
-            Upload Image
-          </button>
-          <input 
-                id="images"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                multiple
-            className="hidden"
-          />
-        </div>
-        <p className="text-sm text-gray-500">
-          Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
-        </p>
-
+            <button
+              onClick={() => document.getElementById("images").click()}
+              className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
+            >
+              Upload Image
+            </button>
+            <input
+              id="images"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              multiple
+              className="hidden"
+            />
+          </div>
+          <p className="text-sm text-gray-500">
+            Note: Image can be uploaded of any dimension but we recommend you
+            upload an image with dimensions of 1024x1024 & its size must be less
+            than 15MB.
+          </p>
         </div>
       </div>
 
       <hr className="border-t border-gray-500 my-4" />
       <div className="mt-8 flex ">
-      <button
+        <button
           type="submit"
-          onClick={(e) => handleSubmit(e, 'active')}
+          onClick={(e) => handleSubmit(e, "active")}
           className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 mr-4 border-blue-700 hover:border-blue-500 rounded flex items-center"
           disabled={loading}
         >
@@ -526,21 +666,18 @@ console.log(product)
           )}
           {isEditing ? "Update" : "Publish"}
         </button>
-      {!isEditing ?(
-  <button
-  type="submit"
-  onClick={(e) => handleSubmit(e, 'draft')}
-  className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
->
-  Draft
-</button>
-      ):null
-      }
-      
+        {!isEditing ? (
+          <button
+            type="submit"
+            onClick={(e) => handleSubmit(e, "draft")}
+            className="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded flex items-center"
+          >
+            Draft
+          </button>
+        ) : null}
       </div>
     </main>
   );
 };
 
 export default PostEquipmentForm;
-

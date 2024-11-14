@@ -67,8 +67,11 @@ const AddNewEquipmentForm = () => {
       setShipping(product.equipment.shipping || '');
       setTraining(product.equipment.training || '');
       setYearManufactured(product.equipment.year_manufactured);
-      const textDescrip = product.equipment.description.replace(/<br\s*\/?>|&nbsp;/gi, '');
-
+      // const textDescrip = product.equipment.description.replace(/<br\s*\/?>|&nbsp;/gi, '');
+      const textDescrip = product.equipment.description.replace(
+        /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
+        ""
+      );
       setText(textDescrip ||'');
      setZip(product.equipment.zip)
       
@@ -96,12 +99,20 @@ const AddNewEquipmentForm = () => {
   }, []);
   
 
+  // const onEditorStateChange = (newEditorState) => {
+  //   setEditorState(newEditorState);
+  //   const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
+  //   setText(currentText);  // Store as JSON with formatting
+
+  // }
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
-    const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
-    setText(currentText);  // Store as JSON with formatting
-
-  }
+    const currentText = newEditorState
+      .getCurrentContent()
+      .getPlainText("\u0001"); // Get plain text from the editor, no HTML
+    setText(currentText);
+  };
+  
 console.log(description)
 
   const handleSubmit = async (e, status) => {
@@ -109,7 +120,11 @@ console.log(description)
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+    // const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+    const modifiedContent = htmlContent
+    .replace(/<p>/g, "")
+    .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
+    .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
 
 
     e.preventDefault();

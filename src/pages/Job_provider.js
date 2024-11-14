@@ -53,7 +53,11 @@ const AddNewJobForm = () => {
     setJobType(product.providerListings[0].jobType || '');
     setJobOfferType(product.providerListings[0].typeOfJobOffered || '');
     setOfferedSalary(product.providerListings[0].offeredYearlySalary || '');
-    const textDescrip = product.body_html.replace(/<br\s*\/?>|&nbsp;/gi, '');
+    // const textDescrip = product.body_html.replace(/<br\s*\/?>|&nbsp;/gi, '');
+    const textDescrip = product.body_html.replace(
+      /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
+      ""
+    );
     setPositionDescription(textDescrip );
    setZip(product.providerListings[0].zip)
   setLocation (product.providerListings[0].location)
@@ -71,20 +75,31 @@ const AddNewJobForm = () => {
       }
 }, []);
 
+  // const onEditorStateChange = (newEditorState) => {
+  //   setEditorState(newEditorState);
+  //   const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
+  //   setPositionDescription(currentText);
+  // };
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
-    const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
-    setPositionDescription(currentText);
+    const currentText = newEditorState
+      .getCurrentContent()
+      .getPlainText("\u0001"); // Get plain text from the editor, no HTML
+      setPositionDescription(currentText);
   };
-
+  
   // Handler for form submission
   const handleSubmit = async (e , status) => {
 
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+    // const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
    
+    const modifiedContent = htmlContent
+    .replace(/<p>/g, "")
+    .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
+    .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
 
     e.preventDefault();
     setError('');

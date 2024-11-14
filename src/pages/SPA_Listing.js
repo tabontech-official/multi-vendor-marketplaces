@@ -75,7 +75,10 @@ const AddBusinessListingForm = () => {
       setListOfDevices(business.listOfDevices || '');
       setOfferedServices(business.offeredServices || '');
       setSupportAndTraining(business.supportAndTraining || '');
-      const textDescrip = business.businessDescription.replace(/<br\s*\/?>|&nbsp;/gi, '');
+      const textDescrip = product.business.businessDescription.replace(
+        /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
+        ""
+      );
       setText(textDescrip || '' )
       if(business.images){
         setImages(business.images.map(img => img.src));
@@ -107,7 +110,9 @@ console.log(product)
 
 const onEditorStateChange = (newEditorState) => {
   setEditorState(newEditorState);
-  const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
+  const currentText = newEditorState
+    .getCurrentContent()
+    .getPlainText("\u0001"); // Get plain text from the editor, no HTML
   setText(currentText);
 };
 
@@ -120,7 +125,11 @@ const onEditorStateChange = (newEditorState) => {
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+    const modifiedContent = htmlContent
+    .replace(/<p>/g, "")
+    .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
+    .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
+
    
 
     e.preventDefault();

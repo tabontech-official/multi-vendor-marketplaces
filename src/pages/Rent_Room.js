@@ -62,7 +62,11 @@ console.log(product)
       setImages(roomListing.image || []); // Fallback to an empty array if undefined
       setImageName(roomListing.imageName || '');
       setIsEditing(true);
-      const textDescrip = roomListing.otherDetails.replace(/<br\s*\/?>|&nbsp;/gi, '');
+      // const textDescrip = roomListing.otherDetails.replace(/<br\s*\/?>|&nbsp;/gi, '');
+      const textDescrip = roomListing.otherDetails.replace(
+        /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
+        ""
+      );
       setDescription(textDescrip)
       if (roomListing.otherDetails) {
         const contentState = ContentState.createFromText(textDescrip);
@@ -84,19 +88,29 @@ console.log(product)
     }
   }, []);
 
+  // const onEditorStateChange = (newEditorState) => {
+  //   setEditorState(newEditorState);
+  //   const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
+  //   setDescription(currentText);
+  // };
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
-    const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
+    const currentText = newEditorState
+      .getCurrentContent()
+      .getPlainText("\u0001"); // Get plain text from the editor, no HTML
     setDescription(currentText);
   };
-
 
   // Handler for form submission
   const handleSubmit = async (e , status) => {
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+    // const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+    const modifiedContent = htmlContent
+    .replace(/<p>/g, "")
+    .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
+    .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
    
     e.preventDefault();
     setError('');

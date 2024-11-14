@@ -53,7 +53,7 @@ console.log(product)
     if (product) {
       setIsEditing(true);
       setLocation(product.equipment.location);
-      setCity(product.equipment.city)
+      setCity(product.equipment.location.split('_')[0])
       setEquipmentName(product.equipment.name);
       setBrandName(product.equipment.brand); // Assuming `brand` is part of the product object
       setAskingPrice(product.equipment.asking_price);
@@ -250,7 +250,7 @@ console.log(product)
                   value={city}
                   onChange={(e) => {
                     setCity(e.target.value);
-                    setLocation(`${e.target.value}_${Location.split('_')[1]}`); // Update Location dynamically
+                    // setLocation(`${e.target.value}_${Location.split('_')[1]}`); // Update Location dynamically
                   }}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required

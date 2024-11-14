@@ -55,8 +55,8 @@ const AddNewEquipmentForm = () => {
     if (product && product.equipment) {
       setIsEdit(true);  // We're editing, not creating
 
-      setLocation(product.equipment.location.split("_")[0] || '');
-      setCity(product.equipment.location.split("_")[1] || '')
+      setLocation(product.equipment.location.split("_")[1] || '');
+      setCity(product.equipment.location.split("_")[0] || '')
       setName(product.title || '');
       setBrand(product.equipment.brand || ''); // Assuming brand is same as name
       setSalePrice(product.equipment.sale_price || '');

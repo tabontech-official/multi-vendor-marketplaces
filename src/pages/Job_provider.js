@@ -47,8 +47,8 @@ const AddNewJobForm = () => {
  useEffect(() => {
   if (product) {
     setIsEditing(true);
-    setLocation(product.providerListings[0].location.split("_")[0] || '');
-    setCity(product.providerListings[0].location.split("_")[1] || '')
+    setLocation(product.providerListings[0].location.split("_")[1] || '');
+    setCity(product.providerListings[0].location.split("_")[0] || '')
     setQualification(product.providerListings[0].qualificationRequested || '');
     setJobType(product.providerListings[0].jobType || '');
     setJobOfferType(product.providerListings[0].typeOfJobOffered || '');

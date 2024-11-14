@@ -52,8 +52,8 @@ const PeopleLooking = () => {
       const roomListing = product.looking;
       setZip(roomListing.zip)
       setLookingFor(roomListing.brand)
-      setLocation(roomListing.location.split("_")[0]);
-      setCity(roomListing.location.split("_")[1])
+      setLocation(roomListing.location.split("_")[1]);
+      setCity(roomListing.location.split("_")[0])
 
       setBudget(roomListing.sale_price)
       setImages(roomListing.image || []); // Fallback to an empty array if undefined

@@ -47,8 +47,8 @@ const [workas , setWorkAs] = useState("")
     console.log(product)
     if (product) {
       setIsEditing(true);
-      setLocation(product.jobListings[0].location.split("_")[0] || '');
-      setCity(product.jobListings[0].location.split("_")[1] || '')
+      setLocation(product.jobListings[0].location.split("_")[1] || '');
+      setCity(product.jobListings[0].location.split("_")[0] || '')
       setName(product.title || '');
       setQualificationRequested(product.jobListings[0].qualification || '');
       setJobType(product.jobListings[0].jobType || '');

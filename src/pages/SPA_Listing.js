@@ -57,8 +57,8 @@ const AddBusinessListingForm = () => {
     if (product) {
       setIsEditing(true);
       const business = product.business || {};
-      setLocation(business.location.split("_")[0] || '');
-      setCity(business.location.split("_")[1] || '')
+      setLocation(business.location.split("_")[1] || '');
+      setCity(business.location.split("_")[0] || '')
       setZip(business.zip || '');
       setName(business.name || '');
       setAskingPrice( product.variants[0].price || '');

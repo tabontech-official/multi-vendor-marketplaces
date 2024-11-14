@@ -49,8 +49,8 @@ console.log(product)
     if (product) {
       const roomListing = product.roomListing[0];
       setZip(roomListing.zip)
-      setLocation(roomListing.location.split("_")[0]);
-      setCity(roomListing.location.split("_")[1])
+      setLocation(roomListing.location.split("_")[1]);
+      setCity(roomListing.location.split("_")[0])
 
       setRoomSize(roomListing.roomSize);
       setMonthlyRent(roomListing.monthlyRent);

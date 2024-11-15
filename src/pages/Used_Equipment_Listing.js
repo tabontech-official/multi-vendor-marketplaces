@@ -52,8 +52,12 @@ console.log(product)
   useEffect(() => {
     if (product) {
       setIsEditing(true);
-      setLocation(product.equipment.location);
-      setCity(product.equipment.location.split('_')[0])
+      const locationParts = product.equipment.location.split('_');
+      const cityFromLocation = locationParts[0] || '';
+      const stateFromLocation = locationParts[1] || '';
+      
+      setLocation(product.equipment.location); // Ensure Location is in the correct city_state format
+      setCity(cityFromLocation); // City is the first
       setEquipmentName(product.equipment.name);
       setBrandName(product.equipment.brand); // Assuming `brand` is part of the product object
       setAskingPrice(product.equipment.asking_price);
@@ -64,8 +68,11 @@ console.log(product)
       setWarranty(product.equipment.warranty);
       setReasonForSelling(product.equipment.reason_for_selling);
       setShipping(product.equipment.shipping);
-      const textDescrip = product.equipment.description.replace(/<br\s*\/?>|&nbsp;/gi, '');
-
+      // const textDescrip = product.equipment.description.replace(/<br\s*\/?>|&nbsp;/gi, '');
+      const textDescrip = product.equipment.description.replace(
+        /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
+        ""
+      );
       setDescription(textDescrip)
      setZip(product.equipment.zip)
      
@@ -96,7 +103,9 @@ console.log(product)
 
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
-    const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
+    const currentText = newEditorState
+      .getCurrentContent()
+      .getPlainText("\u0001"); // Get plain text from the editor, no HTML
     setDescription(currentText);
   };
 
@@ -108,7 +117,12 @@ console.log(product)
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
 
-    const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+    // const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
+    const modifiedContent = htmlContent
+    .replace(/<p>/g, "")
+    .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
+    .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
+
    
 
   
@@ -131,8 +145,9 @@ console.log(product)
    
 
     // Append other form fields to FormData
-   
-    formData.append('location', Location);
+    const locationValue = `${city}_${Location.split('_')[1] || ''}`;
+
+    formData.append('location', locationValue);
     formData.append('city', city);
     formData.append('zip', Zip)
     formData.append('name', equipmentName);
@@ -210,23 +225,21 @@ console.log(product)
              
 <div className="flex flex-col flex-1 mr-4 max-sm:mr-0">
   <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
-  <select
-  type='text'
-    // id="location"
-    value={Location.split('_')[1] || ''}
-    onChange={(e) => {
-      setLocation(`${city}_${e.target.value}`); // Update Location dynamically
-    }}
-    className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-    required
-  >
-    <option value="">Select a state</option>
-    {usStates.map((state) => (
-      <option key={state} value={state}>
-        {state}
-      </option>
-    ))}
-  </select>
+<select
+      value={Location.split('_')[2] || Location.split('_')[1]} // Set state from Location
+      onChange={(e) => {
+        setLocation(`${city}_${e.target.value}`); // Dynamically update Location when state is selected
+      }}
+      className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+      required
+    >
+      <option value="">Select a state</option>
+      {usStates.map((state) => (
+        <option key={state} value={state}>
+          {state}
+        </option>
+      ))}
+    </select> 
 </div>
 
               <div className="flex flex-col flex-1 ">

@@ -115,7 +115,7 @@ const Navbar = () => {
                 )}
                 <li>
                   <Link
-                    to="https://www.medspatrader.com/"
+                    to="https://www.medspatrader.com/?loggedin"
                     className="text-white border border-transparent hover:border-blue-300 hover:bg-blue-700 transition duration-200 rounded-md px-4 py-2 shadow-md"
                     onClick={toggleMenu}
                   >

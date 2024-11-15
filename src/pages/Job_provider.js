@@ -89,57 +89,62 @@ const AddNewJobForm = () => {
   };
   
   // Handler for form submission
-  const handleSubmit = async (e , status) => {
+ const handleSubmit = async (e, status) => {
+    e.preventDefault();
 
+    // Step 1: Process content from rich text editor
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
-
-    // const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
-   
     const modifiedContent = htmlContent
-    .replace(/<p>/g, "")
-    .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
-    .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
+      .replace(/<p>/g, "")
+      .replace(/<\/p>/g, "<br />")
+      .replace(/&nbsp;/g, " "); // Clean up content
 
-    e.preventDefault();
+    // Step 2: Validation checks for required fields
+    if (!city || !location || !qualification || !Zip || !jobType || !jobOfferType || !offeredSalary) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
     setError('');
     setSuccess('');
-    if(status == "active"){
-      setLoading(true);
+    if (status === "active") {
+      setLoading(true);  // Set loading state if status is active
     }
 
     // Get user ID from local storage
     const id = localStorage.getItem('userid');
-    
-    // Create a new FormData object
-    const formData = new FormData();
-
-    // Append the image file if it exists
-   
-
-    // Append other fields
-
-    let fullLocation = city.concat("_", location)
-  
-      formData.append('location', fullLocation);
-    formData.append('zip',Zip)
-      formData.append('qualificationRequested', qualification);
-      formData.append('name', qualification);
-   formData.append('jobType', jobType);
-    formData.append('typeOfJobOffered', jobOfferType);
-    formData.append('offeredYearlySalary', offeredSalary); 
-    if(isEditing){
-      formData.append('body_html', modifiedContent);
-      formData.append('offeredPositionDescription', modifiedContent);
-    }else{
-      formData.append('offeredPositionDescription', modifiedContent);
- 
+    if (!id) {
+      setError('User not logged in.');
+      return;
     }
 
-    formData.append("userId", id);
-    if(!isEditing){
-      formData.append('status', status);
-      }
+    // Step 3: Create FormData object
+    const formData = new FormData();
+
+    // Prepare formData fields
+    let fullLocation = city.concat("_", location)
+    formData.append('location', fullLocation);
+    formData.append('zip', Zip);
+    formData.append('qualificationRequested', qualification);
+    formData.append('name', qualification);  // It seems 'qualification' is being used for 'name' too
+    formData.append('jobType', jobType);
+    formData.append('typeOfJobOffered', jobOfferType);
+    formData.append('offeredYearlySalary', offeredSalary);
+
+    // Add content for editing
+    if (isEditing) {
+      formData.append('body_html', modifiedContent);
+      formData.append('offeredPositionDescription', modifiedContent);
+    } else {
+      formData.append('offeredPositionDescription', modifiedContent);
+    }
+
+    formData.append('userId', id); // Append the user ID
+
+    if (!isEditing) {
+      formData.append('status', status); // Add status when not editing
+    }
 
     try {
         const response = await fetch(isEditing

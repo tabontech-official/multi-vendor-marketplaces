@@ -213,7 +213,7 @@ const AddNewJobForm = () => {
     className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
     required
   >
-    <option value="">Select a state</option>
+   <option value="">Select a state</option>
     {usStates.map((state) => (
       <option key={state} value={state}>
         {state}

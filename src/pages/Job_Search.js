@@ -117,7 +117,10 @@ const [workas , setWorkAs] = useState("")
     .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
     .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
    
-
+if(!jobType){
+  setError("Job Type Required");
+  return;
+}
     console.log(typeof availabilitydate)
     e.preventDefault();
     setError('');

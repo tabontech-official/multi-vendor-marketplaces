@@ -239,14 +239,11 @@ const AddNewJobForm = () => {
               <div className="flex flex-col flex-1 ">
                 <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>
                 <input
-                  type="text"
-                  id="City"
-                  value={city}
-                  onChange={(e) => {
-                    setCity(e.target.value);
-                    // setLocation(`${e.target.value}_${Location.split('_')[1]}`); // Update Location dynamically
-                  }}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  type="number"
+                  id="location"
+                  value={Zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   required
                 />
               </div>
@@ -263,7 +260,10 @@ const AddNewJobForm = () => {
                   type="text"
                   id="City"
                   value={city}
-                  onChange={(e) => setCity(e.target.value)}
+                  onChange={(e) => {
+                    setCity(e.target.value);
+                    // setLocation(`${e.target.value}_${Location.split('_')[1]}`); // Update Location dynamically
+                  }}
                   className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />

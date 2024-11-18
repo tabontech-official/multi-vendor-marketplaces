@@ -47,8 +47,12 @@ const AddNewJobForm = () => {
  useEffect(() => {
   if (product) {
     setIsEditing(true);
-    setLocation(product.providerListings[0].location.split("_")[1] || '');
-    setCity(product.providerListings[0].location.split("_")[0] || '')
+    // setLocation(product.providerListings[0].location.split("_")[1] || '');
+    // setCity(product.providerListings[0].location.split("_")[0] || '')
+    const locationParts = product.providerListings[0].location.split('_');
+      const cityFromLocation = locationParts[0] || '';
+      setLocation(product.providerListings[0].location); // Ensure Location is in the correct city_state format
+      setCity(cityFromLocation); // City is the first
     setQualification(product.providerListings[0].qualificationRequested || '');
     setJobType(product.providerListings[0].jobType || '');
     setJobOfferType(product.providerListings[0].typeOfJobOffered || '');
@@ -123,8 +127,11 @@ const AddNewJobForm = () => {
     const formData = new FormData();
 
     // Prepare formData fields
-    let fullLocation = city.concat("_", location)
-    formData.append('location', fullLocation);
+    // let fullLocation = city.concat("_", location)
+    // formData.append('location', fullLocation);
+    const locationValue = `${city}_${location.split('_')[1] || ''}`;
+
+    formData.append('location', locationValue);
     formData.append('zip', Zip);
     formData.append('qualificationRequested', qualification);
     formData.append('name', qualification);  // It seems 'qualification' is being used for 'name' too
@@ -212,30 +219,34 @@ const AddNewJobForm = () => {
               <div className="flex flex-col flex-1 mr-4 max-sm:mr-0">
   <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location STATE *</label>
   <select
-    id="location"
-    value={location}
-    onChange={(e) => setLocation(e.target.value)}
-    className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-    required
-  >
-   <option value="">Select a state</option>
-    {usStates.map((state) => (
-      <option key={state} value={state}>
-        {state}
-      </option>
-    ))}
-  </select>
+      value={location.split('_')[2] || location.split('_')[1]} // Set state from Location
+      onChange={(e) => {
+        setLocation(`${city}_${e.target.value}`); // Dynamically update Location when state is selected
+      }}
+      className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+      required
+    >
+      <option value="">Select a state</option>
+      {usStates.map((state) => (
+        <option key={state} value={state}>
+          {state}
+        </option>
+      ))}
+    </select> 
 </div>
 
               
               <div className="flex flex-col flex-1 ">
                 <label htmlFor="location" className="text-gray-700 text-sm font-medium mb-1">Location ZIP CODE *</label>
                 <input
-                  type="number"
-                  id="location"
-                  value={Zip}
-                  onChange={(e) => setZip(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  type="text"
+                  id="City"
+                  value={city}
+                  onChange={(e) => {
+                    setCity(e.target.value);
+                    // setLocation(`${e.target.value}_${Location.split('_')[1]}`); // Update Location dynamically
+                  }}
+                  className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
               </div>

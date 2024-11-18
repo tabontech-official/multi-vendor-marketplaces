@@ -105,10 +105,10 @@ const AddNewJobForm = () => {
       .replace(/&nbsp;/g, " "); // Clean up content
 
     // Step 2: Validation checks for required fields
-    if (!city || !location || !qualification || !Zip || !jobType || !jobOfferType || !offeredSalary) {
-      setError("Please fill in all required fields.");
-      return;
-    }
+    // if (!city || !location || !qualification || !Zip || !jobType || !jobOfferType || !offeredSalary) {
+    //   setError("Please fill in all required fields.");
+    //   return;
+    // }
 
     setError('');
     setSuccess('');

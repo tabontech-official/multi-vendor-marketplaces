@@ -65,12 +65,7 @@ const AddBusinessListingForm = () => {
       setEstablishedYear(business.establishedYear || '');
       setNumEmployees(business.numberOfEmployees || '');
       setMonthlyRent(business.locationMonthlyRent || '');
-      // setLeaseExpiration(parseInt(business.leaseExpirationDate )|| '');
-      if (business.leaseExpirationDate) {
-        // Convert ISO string to YYYY-MM-DD format
-        const formattedDate = new Date(business.leaseExpirationDate).toISOString().split('T')[0];
-        setLeaseExpiration(formattedDate);
-      }
+      setLeaseExpiration(parseInt(business.leaseExpirationDate )|| '');
       setLocationSize(business.locationSize || '');
       setGrossYearlyRevenue(business.grossYearlyRevenue || '');
       setCashFlow(business.cashFlow || '');

@@ -6,6 +6,8 @@ import { useLocation } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
 import { useNavigate } from 'react-router-dom';
 import draftToHtml from 'draftjs-to-html';
+import { Editor } from 'react-draft-wysiwyg'
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'; 
 
 const PostRentalForm = () => {
   // State hooks for form fields
@@ -93,13 +95,17 @@ console.log(product)
   //   const currentText = newEditorState.getCurrentContent().getPlainText("\u0001");
   //   setDescription(currentText);
   // };
+  // const onEditorStateChange = (newEditorState) => {
+  //   setEditorState(newEditorState);
+  //   const currentText = newEditorState
+  //     .getCurrentContent()
+  //     .getPlainText("\u0001"); // Get plain text from the editor, no HTML
+  //   setDescription(currentText);
+  // };
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
-    const currentText = newEditorState
-      .getCurrentContent()
-      .getPlainText("\u0001"); // Get plain text from the editor, no HTML
-    setDescription(currentText);
   };
+
 
   // Handler for form submission
   const handleSubmit = async (e , status) => {
@@ -273,13 +279,21 @@ const handleRemoveImage = (index) => {
                 />
               </div>
 
-              <div className='mb-4'>
-                <RTC 
-                  name={"Other Details"}
-                  editorState={editorState}
-                  onEditorStateChange={onEditorStateChange}
-                />
-              </div>
+              <div className="mb-4">
+      {/* Label for the description field */}
+      <label className="block text-lg font-medium text-gray-700">{'Description* '}</label>
+      
+      {/* Editor container with Tailwind styles */}
+      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-hidden">
+        <Editor
+          editorState={editorState}
+          onEditorStateChange={onEditorStateChange}
+          wrapperClassName="border-none"
+          editorClassName="min-h-[200px] bg-white p-2"
+        />
+      </div>
+    </div>
+
 
               <div className="flex flex-col">
                 <label htmlFor="monthlyRent" className="text-gray-700 text-sm font-medium mb-1">Monthly Rent $ *</label>

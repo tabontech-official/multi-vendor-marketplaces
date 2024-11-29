@@ -5,6 +5,9 @@ import { convertToRaw, EditorState , ContentState } from "draft-js";
 import { useLocation, useNavigate } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
 import draftToHtml from 'draftjs-to-html';
+import { Editor } from 'react-draft-wysiwyg'
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'; 
+
 
 const PostEquipmentForm = () => {
   // State hooks for form fields
@@ -103,10 +106,6 @@ console.log(product)
 
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
-    const currentText = newEditorState
-      .getCurrentContent()
-      .getPlainText("\u0001"); // Get plain text from the editor, no HTML
-    setDescription(currentText);
   };
 
   console.log(description)
@@ -284,12 +283,20 @@ console.log(product)
               </div>
 
               
-              <div className='mb-4'>
-                <RTC name={"Description"}
-                  editorState={editorState}
-                  onEditorStateChange={onEditorStateChange}
-                />
-              </div>
+              <div className="mb-4">
+      {/* Label for the description field */}
+      <label className="block text-lg font-medium text-gray-700">{'Description* '}</label>
+      
+      {/* Editor container with Tailwind styles */}
+      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-hidden">
+        <Editor
+          editorState={editorState}
+          onEditorStateChange={onEditorStateChange}
+          wrapperClassName="border-none"
+          editorClassName="min-h-[200px] bg-white p-2"
+        />
+      </div>
+    </div>
 
               <div className="flex flex-col mt-4">
                 <label htmlFor="brandName" className="text-gray-700 text-sm font-medium mb-1">Brand Name *</label>

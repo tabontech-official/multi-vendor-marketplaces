@@ -719,8 +719,8 @@ const handleSubmit = async (e, status) => {
     }
   } catch (error) {
     setSuccess('');
-    setError('An unexpected error occurred.');
-    console.log(error);
+    // setError('An unexpected error occurred.');
+    // console.log(error);
   } finally {
     setLoading(false);
   }

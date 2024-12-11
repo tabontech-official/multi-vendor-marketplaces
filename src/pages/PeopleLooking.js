@@ -537,86 +537,112 @@ const PeopleLooking = () => {
   
 
   // Handler for form submission
-//   const handleSubmit = async (e , status) => {
-//     const rawContentState = convertToRaw(editorState.getCurrentContent());
-//     const htmlContent = draftToHtml(rawContentState)
 
 
-//     // const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
-//     const modifiedContent = htmlContent
+// const handleSubmit = async (e, status) => {
+//   const rawContentState = convertToRaw(editorState.getCurrentContent());
+//   const htmlContent = draftToHtml(rawContentState);
+
+//   const modifiedContent = htmlContent
 //     .replace(/<p>/g, "")
-//     .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
-//     .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
-   
+//     .replace(/<\/p>/g, "<br />")  // Replaces <p> and </p> with <br />
+//     .replace(/&nbsp;/g, " ");      // Replaces &nbsp; with normal spaces.
 
-//     e.preventDefault();
-//     setError('');
-//     setSuccess('');
-    
-//     if(status == "active"){
-//       setLoading(true);
-//     }
+//   e.preventDefault();
+//   setError('');
+//   setSuccess('');
 
-//     const formData = new FormData();
-//     const id = localStorage.getItem('userid');
-
-//     if (images && images.length > 0) {
-//       images.map((image) => {
-//         formData.append('images', image); // Append each file
-//       });
-//     }
-    
-// console.log("budeget",budget)
-// let fullLocation = city.concat("_", location)
-//     formData.append('location', fullLocation);
-//     formData.append('zip', Zip);
-//     formData.append('name', lookingfor);
-//     formData.append('brand', name ); 
-//     if(budget === null || !budget){
-//       formData.append('sale_price', 0);
-  
-//     }
-//     else{
-//       formData.append('sale_price', budget);
-  
-//     }
-
-//     formData.append('description', modifiedContent);
-
-//     formData.append('userId', id);
-//     if(!isEditing){
-//       formData.append('status', status);
-//       }
-//     try {
-//       const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateListing/${product.id}`:"https://medspaa.vercel.app/product/lookingFor", {
-//         method: isEditing?"PUT": "POST",
-//         body: formData
-//       });
-
-//       const json = await response.json();
-
-//       if (response.ok) {
-//         if(status == "active"){
-//           setSuccess(json.message);
-//         }else{
-//           setSuccess("Your post drafted sucessfully")
-//         }
-//         navigate("/")
-//         setError('');
-//       } else {
-//         setSuccess('');
-//         setError(json.error);
-//       }
-//     } catch (error) {
-//       setSuccess('');
-//       setError('An unexpected error occurred.');
-//       console.log(error);
-//     } finally {
-//       setLoading(false);
-//     }
+//   if (status === "active") {
+//     setLoading(true);
 //   }
 
+//   const formData = new FormData();
+//   const id = localStorage.getItem('userid');
 
+//   let fullLocation = city.concat("_", location);
+//   formData.append('location', fullLocation);
+//   formData.append('zip', Zip);
+//   formData.append('name', lookingfor);
+//   formData.append('brand', name);
+
+//   if (budget === null || !budget) {
+//     formData.append('sale_price', 0);
+//   } else {
+//     formData.append('sale_price', budget);
+//   }
+
+//   formData.append('description', modifiedContent);
+//   formData.append('userId', id);
+
+//   if (!isEditing) {
+//     formData.append('status', status);  // For Publish: active status
+//   }
+
+//   try {
+//     // Submit the main form data (excluding images)
+//     const response = await fetch(
+//       isEditing
+//         ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
+//         : "https://medspaa.vercel.app/product/lookingFor",
+//       {
+//         method: isEditing ? "PUT" : "POST",
+//         body: formData
+//       }
+//     );
+
+//     const json = await response.json();
+
+//     if (response.ok) {
+//       const createdProductId = json.product?.id || product.id; // Use the returned product ID or the existing one for updating
+      
+//       if (status === "active") {
+//         setSuccess(json.message); // Success message for publishing
+//       } else {
+//         setSuccess("Your post was drafted successfully");
+//       }
+
+//       // Proceed with image upload only after the main form submission is successful
+//       if (images && images.length > 0) {
+//         // Loop through images and upload one by one
+//         for (let i = 0; i < images.length; i++) {
+//           const formDataImages = new FormData();
+//           formDataImages.append('images', images[i]); // Add the image to FormData
+
+//           // Send the request for each image and wait for it to complete before continuing
+//           const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${createdProductId}`, {
+//             method: "PUT", // Assuming a PUT request to update the image
+//             body: formDataImages
+//           });
+
+//           const imageJson = await imageResponse.json();
+//           if (imageResponse.ok) {
+//             console.log(`Image ${i + 1} uploaded successfully:`, imageJson);
+//           } else {
+//             setError(imageJson.error || `Error uploading image ${i + 1}.`);
+//             return; // If any image fails, stop the process and do not navigate
+//           }
+//         }
+//       }
+
+//       // Once the images are successfully uploaded, navigate to the homepage
+//       navigate("/");
+
+//     } else {
+//       setSuccess('');
+//       setError(json.error);
+//     }
+//   }  catch (error) {
+//     setSuccess('');
+//     setError('The following images exceed the 50MB size limit');
+//     setTimeout(() => {
+//       setError('');  // Clear the error after 5 seconds
+//     }, 5000);
+//     console.log(error);
+//   } finally {
+//     setLoading(false);
+//   }
+  
+// };
 const handleSubmit = async (e, status) => {
   const rawContentState = convertToRaw(editorState.getCurrentContent());
   const htmlContent = draftToHtml(rawContentState);
@@ -627,11 +653,44 @@ const handleSubmit = async (e, status) => {
     .replace(/&nbsp;/g, " ");      // Replaces &nbsp; with normal spaces.
 
   e.preventDefault();
-  setError('');
-  setSuccess('');
+  setError(''); // Clear previous errors
+  setSuccess(''); // Clear previous success messages
+
+  // Form validation: Ensure all required fields are filled out
+  // Uncomment the validation checks when needed
+  if (!lookingfor || !name || !Zip || !city || !location) {
+    setError('Please fill in all required fields');
+    setLoading(false);  // Stop the loader in case of validation error
+    return;  // Return early and prevent further processing
+  }
 
   if (status === "active") {
-    setLoading(true);
+    setLoading(true);  // Only set loading if validation passes and status is active
+  }
+
+  // Image validation: Check image size and type first
+  if (images && images.length > 0) {
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i];
+
+      // Validate image size (max size limit: 50MB)
+      if (image.size > 4.5 * 1024 * 1024) {
+        setError('One or more images exceed the 50MB size limit');
+        setLoading(false);  // Stop the loader if image validation fails
+        setTimeout(() => setError(''), 5000);
+        return; // Stop the process if any image exceeds size limit
+      }
+
+      // Validate image type (allowed types: jpeg, png, gif)
+      if (!['image/jpeg', 'image/png', 'image/gif'].includes(image.type)) {
+        setError('One or more images have an unsupported file type');
+        setLoading(false);  // Stop the loader if image validation fails
+
+        setTimeout(() => setError(''), 5000);
+        return; // Stop the process if any image has an unsupported file type
+      }
+      
+    }
   }
 
   const formData = new FormData();
@@ -672,7 +731,7 @@ const handleSubmit = async (e, status) => {
 
     if (response.ok) {
       const createdProductId = json.product?.id || product.id; // Use the returned product ID or the existing one for updating
-      
+
       if (status === "active") {
         setSuccess(json.message); // Success message for publishing
       } else {
@@ -687,16 +746,17 @@ const handleSubmit = async (e, status) => {
           formDataImages.append('images', images[i]); // Add the image to FormData
 
           // Send the request for each image and wait for it to complete before continuing
-          const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${createdProductId}`, {
+          const imageResponse = await fetch(`http://localhost:5000/product/updateImages/${createdProductId}`, {
             method: "PUT", // Assuming a PUT request to update the image
             body: formDataImages
           });
-
+          console.log(imageResponse);
           const imageJson = await imageResponse.json();
           if (imageResponse.ok) {
             console.log(`Image ${i + 1} uploaded successfully:`, imageJson);
           } else {
             setError(imageJson.error || `Error uploading image ${i + 1}.`);
+            setLoading(false);  // Stop the loader if image upload fails
             return; // If any image fails, stop the process and do not navigate
           }
         }
@@ -708,18 +768,20 @@ const handleSubmit = async (e, status) => {
     } else {
       setSuccess('');
       setError(json.error);
+      setLoading(false); // Stop the loader if the main form submission fails
     }
-  }  catch (error) {
+  } catch (error) {
     setSuccess('');
-    setError('The following images exceed the 50MB size limit');
+    setError('One or more images exceed the 50MB size limit');
     setTimeout(() => {
       setError('');  // Clear the error after 5 seconds
     }, 5000);
     console.log(error);
+    setLoading(false); // Stop the loader in case of network errors
   } finally {
+    // This will stop the loader if the process reaches here
     setLoading(false);
   }
-  
 };
 
 
@@ -964,6 +1026,17 @@ const handleRemoveImage = (index) => {
 
       <hr className="border-t border-gray-500 my-4" />
       <div className="mt-8 flex ">
+      {loading && (
+  <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex flex-col justify-center items-center z-50">
+    <img
+      src="https://i.gifer.com/4V0b.gif" // Replace this with your spinning GIF URL
+      alt="Loading..."
+      className="w-16 h-16" // You can adjust the size of the GIF here
+    />
+    <p className="mt-4 text-white font-semibold">Please do not close</p> {/* Text below the spinner */}
+  </div>
+)}
+
       <button
           type="submit"
           onClick={(e) => handleSubmit(e, 'active')}

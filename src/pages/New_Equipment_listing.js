@@ -121,131 +121,43 @@ const AddNewEquipmentForm = () => {
 
 console.log(description)
 
-  // const handleSubmit = async (e, status) => {
-
-  //   const rawContentState = convertToRaw(editorState.getCurrentContent());
-  //   const htmlContent = draftToHtml(rawContentState);
-
-  //   // const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
-  //   const modifiedContent = htmlContent
-  //   .replace(/<p>/g, "")
-  //   .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
-  //   .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
-
-
-  //   e.preventDefault();
-  //   setError('');
-  //   setSuccess('');
-    
-  //   if (status === "active") {
-  //     setLoading(true);
-  //   }
-  
-  //   const id = localStorage.getItem('userid');
-  //   const formData = new FormData();
-  
-  //   if (images.length > 0) {
-  //     images.forEach((image) => {
-  //       formData.append('images', image);
-  //       console.log('Image Update',image)
-  //     });
-  //   }
-
-  //   let fullLocation = city.concat("_", location)
-  
-  //   formData.append('location', fullLocation);
-  //   formData.append('zip', Zip);
-
-  
-  //     formData.append('name', name);
-  //   formData.append('brand', brand);
-  //   formData.append('sale_price', sale_price);
-  //   formData.append('equipment_type', equipment_type);
-  //   formData.append('certification', certification);
-  //   formData.append('year_manufactured', year_manufactured);
-  //   formData.append('warranty', warranty);
-  //   formData.append('shipping', shipping);
-  //   formData.append('training', training);
-   
-  //     formData.append('description', modifiedContent);
- 
-  //   formData.append('userId', id);
-  //   if(!isEdit){
-  //   formData.append('status', status);
-  //   }
-  //   try {
-  //     let url = "https://medspaa.vercel.app/product/addNewEquipments";
-  //     let method = "POST";
-  
-  //     // If editing, switch to update API
-  //     if (product && product.id) {
-  //       url = `https://medspaa.vercel.app/product/updateListing/${product.id}`;
-  //       method = "PUT";
-  //     }
-  
-  //     const response = await fetch(url, {
-  //       method,
-  //       body: formData,
-  //     });
-  
-  //     const json = await response.json();
-  
-  //     if (response.ok) {
-  //       if (status === "active") {
-  //         setSuccess(json.message);
-  //         navigate("/")
-  //       } else {
-  //         setSuccess("Your post drafted successfully");
-  //       }
-  //       setError('');
-  
-   
-  //     } else {
-  //       setError(json.error);
-  //       setSuccess('');
-  //     }
-  //   } catch (error) {
-  //     setError('An unexpected error occurred.');
-  //     setSuccess('');
-  //     console.error(error);
-  //   } finally {
-  //     setLoading(false);
-   
-  //   }
-  // };
-  
-
-
   const handleSubmit = async (e, status) => {
-    // Convert editor content to raw content and then to HTML
+
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
-  
-    // Modify the content to replace <p> tags with <br /> and non-breaking spaces with normal spaces
+
+    // const modifiedContent = htmlContent.replace(/<p>/g, '').replace(/<\/p>/g, '<br />');
     const modifiedContent = htmlContent
-      .replace(/<p>/g, "")
-      .replace(/<\/p>/g, "<br />")  // Replace <p> and </p> with <br />
-      .replace(/&nbsp;/g, " ");     // Replace &nbsp; (non-breaking spaces) with normal spaces.
-  
-    e.preventDefault(); // Prevent the default form submission behavior
-    setError(''); // Clear any previous error messages
-    setSuccess(''); // Clear any previous success messages
-  
-    // If the status is "active", show the loading spinner
+    .replace(/<p>/g, "")
+    .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
+    .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
+
+
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    
     if (status === "active") {
       setLoading(true);
     }
   
-    const formData = new FormData(); // Initialize FormData to store the form fields
-    const id = localStorage.getItem('userid'); // Get user ID from local storage
+    const id = localStorage.getItem('userid');
+    const formData = new FormData();
   
-    // Concatenate city and location to form the full location
-    let fullLocation = city.concat("_", location);
+    if (images.length > 0) {
+      images.forEach((image) => {
+        formData.append('images', image);
+        console.log('Image Update',image)
+      });
+    }
+
+    let fullLocation = city.concat("_", location)
+  
     formData.append('location', fullLocation);
     formData.append('zip', Zip);
+
   
-    // Append other fields to the FormData
-    formData.append('name', name);
+      formData.append('name', name);
     formData.append('brand', brand);
     formData.append('sale_price', sale_price);
     formData.append('equipment_type', equipment_type);
@@ -254,28 +166,23 @@ console.log(description)
     formData.append('warranty', warranty);
     formData.append('shipping', shipping);
     formData.append('training', training);
-  
-    // Append the description (modified content) to the form
-    formData.append('description', modifiedContent);
+   
+      formData.append('description', modifiedContent);
+ 
     formData.append('userId', id);
-  
-    // If not editing, set the post status (active or draft)
-    if (!isEdit) {
-      formData.append('status', status);
+    if(!isEdit){
+    formData.append('status', status);
     }
-  
     try {
-      // Set the API URL and method (POST for creating new, PUT for updating)
       let url = "https://medspaa.vercel.app/product/addNewEquipments";
       let method = "POST";
   
-      // If editing, use the update API endpoint
+      // If editing, switch to update API
       if (product && product.id) {
         url = `https://medspaa.vercel.app/product/updateListing/${product.id}`;
         method = "PUT";
       }
   
-      // Submit the form data (main product data)
       const response = await fetch(url, {
         method,
         body: formData,
@@ -284,50 +191,143 @@ console.log(description)
       const json = await response.json();
   
       if (response.ok) {
-        // Handle successful response
         if (status === "active") {
-          setSuccess(json.message); // Success message for publishing
-        
+          setSuccess(json.message);
+          navigate("/")
         } else {
-          setSuccess("Your post drafted successfully"); // Success message for draft
+          setSuccess("Your post drafted successfully");
         }
-        setError(''); // Clear any error messages
+        setError('');
   
-        // Handle image upload (if images exist)
-        if (images && images.length > 0) {
-          // Loop through the images and upload each one
-          for (let i = 0; i < images.length; i++) {
-            const formDataImages = new FormData();
-            formDataImages.append('images', images[i]); // Add image to FormData
-  
-            // Upload each image using the update images API
-            const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${json.product.id}`, {
-              method: "PUT",
-              body: formDataImages
-            });
-  
-            const imageJson = await imageResponse.json();
-            if (!imageResponse.ok) {
-              setError(imageJson.error || `Error uploading image ${i + 1}.`);
-              return; // If any image fails, stop the process
-            }
-          }
-        }
-        navigate("/"); // Navigate to the homepage after success
-
+   
       } else {
-        setError(json.error || "An unexpected error occurred."); // Handle failure
-        setSuccess(''); // Clear any success messages
-       
+        setError(json.error);
+        setSuccess('');
       }
     } catch (error) {
-      setError('An unexpected error occurred.'); // Handle general error
-      setSuccess(''); // Clear any success messages
+      setError('An unexpected error occurred.');
+      setSuccess('');
       console.error(error);
     } finally {
-      setLoading(false); // Hide the loading spinner after the process is complete
+      setLoading(false);
+   
     }
   };
+  
+
+
+  // const handleSubmit = async (e, status) => {
+  //   // Convert editor content to raw content and then to HTML
+  //   const rawContentState = convertToRaw(editorState.getCurrentContent());
+  //   const htmlContent = draftToHtml(rawContentState);
+  
+  //   // Modify the content to replace <p> tags with <br /> and non-breaking spaces with normal spaces
+  //   const modifiedContent = htmlContent
+  //     .replace(/<p>/g, "")
+  //     .replace(/<\/p>/g, "<br />")  // Replace <p> and </p> with <br />
+  //     .replace(/&nbsp;/g, " ");     // Replace &nbsp; (non-breaking spaces) with normal spaces.
+  
+  //   e.preventDefault(); // Prevent the default form submission behavior
+  //   setError(''); // Clear any previous error messages
+  //   setSuccess(''); // Clear any previous success messages
+  
+  //   // If the status is "active", show the loading spinner
+  //   if (status === "active") {
+  //     setLoading(true);
+  //   }
+  
+  //   const formData = new FormData(); // Initialize FormData to store the form fields
+  //   const id = localStorage.getItem('userid'); // Get user ID from local storage
+  
+  //   // Concatenate city and location to form the full location
+  //   let fullLocation = city.concat("_", location);
+  //   formData.append('location', fullLocation);
+  //   formData.append('zip', Zip);
+  
+  //   // Append other fields to the FormData
+  //   formData.append('name', name);
+  //   formData.append('brand', brand);
+  //   formData.append('sale_price', sale_price);
+  //   formData.append('equipment_type', equipment_type);
+  //   formData.append('certification', certification);
+  //   formData.append('year_manufactured', year_manufactured);
+  //   formData.append('warranty', warranty);
+  //   formData.append('shipping', shipping);
+  //   formData.append('training', training);
+  
+  //   // Append the description (modified content) to the form
+  //   formData.append('description', modifiedContent);
+  //   formData.append('userId', id);
+  
+  //   // If not editing, set the post status (active or draft)
+  //   if (!isEdit) {
+  //     formData.append('status', status);
+  //   }
+  
+  //   try {
+  //     // Set the API URL and method (POST for creating new, PUT for updating)
+  //     let url = "https://medspaa.vercel.app/product/addNewEquipments";
+  //     let method = "POST";
+  
+  //     // If editing, use the update API endpoint
+  //     if (product && product.id) {
+  //       url = `https://medspaa.vercel.app/product/updateListing/${product.id}`;
+  //       method = "PUT";
+  //     }
+  
+  //     // Submit the form data (main product data)
+  //     const response = await fetch(url, {
+  //       method,
+  //       body: formData,
+  //     });
+  
+  //     const json = await response.json();
+  
+  //     if (response.ok) {
+  //       // Handle successful response
+  //       if (status === "active") {
+  //         setSuccess(json.message); // Success message for publishing
+        
+  //       } else {
+  //         setSuccess("Your post drafted successfully"); // Success message for draft
+  //       }
+  //       setError(''); // Clear any error messages
+  
+  //       // Handle image upload (if images exist)
+  //       if (images && images.length > 0) {
+  //         // Loop through the images and upload each one
+  //         for (let i = 0; i < images.length; i++) {
+  //           const formDataImages = new FormData();
+  //           formDataImages.append('images', images[i]); // Add image to FormData
+  
+  //           // Upload each image using the update images API
+  //           const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${json.product.id}`, {
+  //             method: "PUT",
+  //             body: formDataImages
+  //           });
+  
+  //           const imageJson = await imageResponse.json();
+  //           if (!imageResponse.ok) {
+  //             setError(imageJson.error || `Error uploading image ${i + 1}.`);
+  //             return; // If any image fails, stop the process
+  //           }
+  //         }
+  //       }
+  //       navigate("/"); // Navigate to the homepage after success
+
+  //     } else {
+  //       setError(json.error || "An unexpected error occurred."); // Handle failure
+  //       setSuccess(''); // Clear any success messages
+       
+  //     }
+  //   } catch (error) {
+  //     setError('An unexpected error occurred.'); // Handle general error
+  //     setSuccess(''); // Clear any success messages
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false); // Hide the loading spinner after the process is complete
+  //   }
+  // };
   
 
   const handleImageChange = (e) => {

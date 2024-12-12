@@ -217,34 +217,35 @@ console.log(description)
 
 
   const handleSubmit = async (e, status) => {
-    // Convert editor content to raw content and then to HTML
-    const rawContentState = convertToRaw(editorState.getCurrentContent());
-    const htmlContent = draftToHtml(rawContentState);
-  
-    // Modify the content to replace <p> tags with <br /> and non-breaking spaces with normal spaces
-    const modifiedContent = htmlContent
-      .replace(/<p>/g, "")
-      .replace(/<\/p>/g, "<br />")  // Replace <p> and </p> with <br />
-      .replace(/&nbsp;/g, " ");     // Replace &nbsp; (non-breaking spaces) with normal spaces.
-  
-    e.preventDefault(); // Prevent the default form submission behavior
-    setError(''); // Clear any previous error messages
-    setSuccess(''); // Clear any previous success messages
+    // Prevent the default form submission behavior
+    e.preventDefault(); 
+    setError('');  // Clear previous errors
+    setSuccess('');  // Clear previous success messages
   
     // If the status is "active", show the loading spinner
     if (status === "active") {
       setLoading(true);
     }
   
-    const formData = new FormData(); // Initialize FormData to store the form fields
-    const id = localStorage.getItem('userid'); // Get user ID from local storage
+    // Convert editor content to raw content and then to HTML
+    const rawContentState = convertToRaw(editorState.getCurrentContent());
+    const htmlContent = draftToHtml(rawContentState);
+  
+    // Modify content to replace <p> tags with <br /> and non-breaking spaces with normal spaces
+    const modifiedContent = htmlContent
+      .replace(/<p>/g, "")
+      .replace(/<\/p>/g, "<br />")
+      .replace(/&nbsp;/g, " "); // Replace &nbsp; with normal spaces
+  
+    const formData = new FormData(); // Initialize FormData to store form fields
+    const id = localStorage.getItem('userid');  // Get user ID from local storage
   
     // Concatenate city and location to form the full location
-    let fullLocation = city.concat("_", location);
+    const fullLocation = `${city}_${location}`;
+  
+    // Append fields to FormData
     formData.append('location', fullLocation);
     formData.append('zip', Zip);
-  
-    // Append other fields to the FormData
     formData.append('name', name);
     formData.append('brand', brand);
     formData.append('sale_price', sale_price);
@@ -254,8 +255,6 @@ console.log(description)
     formData.append('warranty', warranty);
     formData.append('shipping', shipping);
     formData.append('training', training);
-  
-    // Append the description (modified content) to the form
     formData.append('description', modifiedContent);
     formData.append('userId', id);
   
@@ -269,7 +268,6 @@ console.log(description)
       let url = "https://medspaa.vercel.app/product/addNewEquipments";
       let method = "POST";
   
-      // If editing, use the update API endpoint
       if (product && product.id) {
         url = `https://medspaa.vercel.app/product/updateListing/${product.id}`;
         method = "PUT";
@@ -284,48 +282,76 @@ console.log(description)
       const json = await response.json();
   
       if (response.ok) {
-        // Handle successful response
+        // Success handling based on status
         if (status === "active") {
           setSuccess(json.message); // Success message for publishing
-        
         } else {
           setSuccess("Your post drafted successfully"); // Success message for draft
         }
-        setError(''); // Clear any error messages
   
-        // Handle image upload (if images exist)
+        // Handle image upload if there are images
         if (images && images.length > 0) {
-          // Loop through the images and upload each one
+          const cloudinaryURLs = [];
+          
+          // Loop through images and upload each one
           for (let i = 0; i < images.length; i++) {
             const formDataImages = new FormData();
-            formDataImages.append('images', images[i]); // Add image to FormData
+            formDataImages.append('file', images[i]);
+            formDataImages.append('upload_preset', 'images'); // Cloudinary preset
   
-            // Upload each image using the update images API
-            const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${json.product.id}`, {
-              method: "PUT",
-              body: formDataImages
+            // Upload image to Cloudinary
+            const cloudinaryResponse = await fetch('https://api.cloudinary.com/v1_1/djocrwprs/image/upload', {
+              method: "POST",
+              body: formDataImages,
             });
   
-            const imageJson = await imageResponse.json();
-            if (!imageResponse.ok) {
-              setError(imageJson.error || `Error uploading image ${i + 1}.`);
-              return; // If any image fails, stop the process
+            const cloudinaryJson = await cloudinaryResponse.json();
+  
+            if (cloudinaryResponse.ok) {
+              cloudinaryURLs.push(cloudinaryJson.secure_url);
+              console.log(`Image ${i + 1} uploaded successfully:`, cloudinaryJson.secure_url);
+            } else {
+              setError(`Error uploading image ${i + 1} to Cloudinary.`);
+              setLoading(false);
+              return;  // Stop the process if any image upload fails
             }
           }
+  
+          // Once all images are uploaded, save the URLs in the database
+          const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${json.product.id}`, {
+            method: "PUT",
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ images: cloudinaryURLs }),  // Send Cloudinary URLs
+          });
+  
+          const imageJson = await imageResponse.json();
+  
+          if (imageResponse.ok) {
+            console.log("Images URLs saved successfully:", imageJson);
+          } else {
+            setError('Error saving image URLs in the database.');
+            setLoading(false);
+            return;
+          }
         }
-        navigate("/"); // Navigate to the homepage after success
-
+  
+        // Navigate to homepage after success
+        navigate("/");
+  
       } else {
-        setError(json.error || "An unexpected error occurred."); // Handle failure
-        setSuccess(''); // Clear any success messages
-       
+        setSuccess('');
+        setError(json.error || "An unexpected error occurred.");
+        console.log(json.error);
       }
+  
     } catch (error) {
-      setError('An unexpected error occurred.'); // Handle general error
-      setSuccess(''); // Clear any success messages
+      setSuccess('');
+      setError(error.error || "An unexpected error occurred.");
       console.error(error);
     } finally {
-      setLoading(false); // Hide the loading spinner after the process is complete
+      setLoading(false);  // Hide the loading spinner when done
     }
   };
   
@@ -619,6 +645,17 @@ console.log(description)
       {/* Submit Button */}
       <hr className="border-t border-gray-500 my-4" />
       <div className="mt-8 flex ">
+      {loading && (
+  <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex flex-col justify-center items-center z-50">
+    <img
+      src="https://i.gifer.com/4V0b.gif" // Replace this with your spinning GIF URL
+      alt="Loading..."
+      className="w-16 h-16" // You can adjust the size of the GIF here
+    />
+    <p className="mt-4 text-white font-semibold">Please do not close window</p> {/* Text below the spinner */}
+  </div>
+)}
+
       <button
           type="submit"
           onClick={(e) => handleSubmit(e, 'active')}

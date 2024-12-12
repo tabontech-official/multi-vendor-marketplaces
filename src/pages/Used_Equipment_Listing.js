@@ -764,8 +764,8 @@ console.log(product)
     // Modify content (replace <p> with <br /> and handle &nbsp;)
     const modifiedContent = htmlContent
       .replace(/<p>/g, "")
-      .replace(/<\/p>/g, "<br />") // Replaces <p> and </p> with <br />
-      .replace(/&nbsp;/g, " ");     // Replaces &nbsp; with normal spaces.
+      .replace(/<\/p>/g, "<br />")  // Replaces <p> and </p> with <br />
+      .replace(/&nbsp;/g, " ");      // Replaces &nbsp; with normal spaces.
   
     e.preventDefault();
     setError('');
@@ -801,9 +801,9 @@ console.log(product)
     try {
       // Submit the form data (images + other details)
       const response = await fetch(
-        isEditing 
-          ? `https://medspaa.vercel.app/product/updateListing/${product.id}` 
-          : "https://medspaa.vercel.app/product/addEquipment", 
+        isEditing
+          ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
+          : "https://medspaa.vercel.app/product/addEquipment",
         {
           method: isEditing ? "PUT" : "POST", // PUT for update, POST for new post
           body: formData
@@ -817,24 +817,49 @@ console.log(product)
   
         // After successful form submission, handle image upload if needed
         if (images && images.length > 0) {
+          const cloudinaryURLs = [];
+          
           // Loop through images and upload each one
           for (let i = 0; i < images.length; i++) {
             const formDataImages = new FormData();
-            formDataImages.append('images', images[i]);  // Add the image to FormData
+            formDataImages.append('file', images[i]);
+            formDataImages.append('upload_preset', 'images'); // Replace with your Cloudinary preset
   
-            const imageResponse = await fetch(
-              `https://medspaa.vercel.app/product/updateImages/${json.product.id}`, 
-              {
-                method: "PUT",  // Assuming a PUT request to update the image
-                body: formDataImages
-              }
-            );
+            // Upload image to Cloudinary
+            const cloudinaryResponse = await fetch('https://api.cloudinary.com/v1_1/djocrwprs/image/upload', {
+              method: "POST",
+              body: formDataImages,
+            });
   
-            const imageJson = await imageResponse.json();
-            if (!imageResponse.ok) {
-              setError(imageJson.error || `Error uploading image ${i + 1}.`);
-              return;  // Stop the process if image upload fails
+            const cloudinaryJson = await cloudinaryResponse.json();
+  
+            if (cloudinaryResponse.ok) {
+              cloudinaryURLs.push(cloudinaryJson.secure_url);
+              console.log(`Image ${i + 1} uploaded successfully to Cloudinary:`, cloudinaryJson.secure_url);
+            } else {
+              setError(`Error uploading image ${i + 1} to Cloudinary.`);
+              setLoading(false);
+              return;  // Stop the process if any image fails
             }
+          }
+  
+          // Once all images are uploaded, save the URLs in the database
+          const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${json.product.id}`, {
+            method: "PUT",
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ images: cloudinaryURLs }),  // Send Cloudinary URLs
+          });
+  
+          const imageJson = await imageResponse.json();
+  
+          if (imageResponse.ok) {
+            console.log("Images URLs saved successfully:", imageJson);
+          } else {
+            setError('Error saving image URLs in the database.');
+            setLoading(false);
+            return;
           }
         }
   
@@ -855,6 +880,7 @@ console.log(product)
       setLoading(false);  // Stop the loading spinner when done
     }
   };
+  
   
   
 
@@ -1183,6 +1209,17 @@ console.log(product)
 
       <hr className="border-t border-gray-500 my-4" />
       <div className="mt-8 flex ">
+      {loading && (
+  <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex flex-col justify-center items-center z-50">
+    <img
+      src="https://i.gifer.com/4V0b.gif" // Replace this with your spinning GIF URL
+      alt="Loading..."
+      className="w-16 h-16" // You can adjust the size of the GIF here
+    />
+    <p className="mt-4 text-white font-semibold">Please do not close window</p> {/* Text below the spinner */}
+  </div>
+)}
+
       <button
           type="submit"
           onClick={(e) => handleSubmit(e, 'active')}

@@ -111,84 +111,143 @@ const [workas , setWorkAs] = useState("")
     setEditorState(newEditorState);
   };
   const handleSubmit = async (e, status) => {
+    // Convert the editor content to raw content and then to HTML
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
-
+  
+    // Modify the content (remove <p> and replace with <br />, and fix non-breaking spaces)
     const modifiedContent = htmlContent
-    .replace(/<p>/g, "")
-    .replace(/<\/p>/g, "<br />") // You can replace paragraph tags with <br /> or leave empty if you don't want any formatting
-    .replace(/&nbsp;/g, " "); // Remove &nbsp; (non-breaking spaces) and replace with normal spaces.
-   
-if(!jobType){
-  setError("Job Type Required");
-  return;
-}
-    console.log(typeof availabilitydate)
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true); // Start loading
-
-    const formData = new FormData();
-
-    if (images.length > 0) {
-      images.forEach((image) => {
-        formData.append('images', image); // Append each file
-      });
+      .replace(/<p>/g, "")
+      .replace(/<\/p>/g, "<br />")  // Replace <p> with <br />
+      .replace(/&nbsp;/g, " ");     // Replace &nbsp; with regular space
+  
+    // Ensure jobType is selected before proceeding
+    if (!jobType) {
+      setError("Job Type Required");
+      return; // Stop further execution if jobType is missing
     }
-    let fullLocation = city.concat("_", location)
+  
+    e.preventDefault(); // Prevent form submission
+    setError(''); // Clear any previous error messages
+    setSuccess(''); // Clear any previous success messages
+    setLoading(true); // Show loading spinner
+  
+    const formData = new FormData(); // Initialize formData to store form fields
+  
+    // Combine city and location to create full location
+    const fullLocation = `${city}_${location}`;
     formData.append('location', fullLocation);
-    formData.append('zip', Zip)
-
-    if(isEditing){
+    formData.append('zip', Zip);
+  
+    // Add either title or name depending on if it's an edit or a new job
+    if (isEditing) {
       formData.append('title', name);
-    }
-    else{
+    } else {
       formData.append('name', name);
     }
+  
+    // Add other fields to the formData
     formData.append('qualification', qualificationRequested);
-    formData.append('availability',availability);
+    formData.append('availability', availability);
     formData.append('requestedYearlySalary', requestedYearlySalary);
     formData.append('jobType', jobType);
-
     formData.append('positionRequestedDescription', modifiedContent);
-    formData.append('availableToWorkAs' , workas)
-    if(!isEditing){
+    formData.append('availableToWorkAs', workas);
+    
+    // Add status if it's a new job (not editing)
+    if (!isEditing) {
       formData.append('status', status);
-      }
+    }
+  
     formData.append('userId', localStorage.getItem('userid')); // Get userId from local storage
-
+  
     try {
-      const response = await fetch(isEditing
+      // API URL and method based on whether it's editing or adding a new job
+      const url = isEditing
         ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
-        : "https://medspaa.vercel.app/product/addJob", {
-        method: isEditing ? "PUT" : "POST",
+        : "https://medspaa.vercel.app/product/addJob";
+  
+      const method = isEditing ? "PUT" : "POST";
+  
+      // Submit the form data
+      const response = await fetch(url, {
+        method: method,
         body: formData,
       });
-
+  
       const json = await response.json();
+  
       if (response.ok) {
         setSuccess(isEditing ? "Job updated successfully!" : json.message);
-        setError('');
+        setError(''); // Clear error message on success
         setTimeout(() => setSuccess(''), 5000); // Clear success message after 5 seconds
-        navigate("/")
-
-        // if (!isEditing) {
-        //   resetForm();
-        // }
+  
+        // Handle image upload to Cloudinary
+        if (images && images.length > 0) {
+          const cloudinaryURLs = [];
+  
+          for (let i = 0; i < images.length; i++) {
+            const formDataImages = new FormData();
+            formDataImages.append('file', images[i]);
+            formDataImages.append('upload_preset', 'images'); // Cloudinary preset
+  
+            // Upload the image to Cloudinary
+            const cloudinaryResponse = await fetch('https://api.cloudinary.com/v1_1/djocrwprs/image/upload', {
+              method: "POST",
+              body: formDataImages,
+            });
+  
+            const cloudinaryJson = await cloudinaryResponse.json();
+  
+            if (cloudinaryResponse.ok) {
+              cloudinaryURLs.push(cloudinaryJson.secure_url); // Save the uploaded image URL
+              console.log(`Image ${i + 1} uploaded successfully:`, cloudinaryJson.secure_url);
+            } else {
+              setError(`Error uploading image ${i + 1} to Cloudinary.`);
+              setLoading(false);
+              return; // Stop further execution if any image upload fails
+            }
+          }
+  
+          // Save the Cloudinary URLs to the database
+          const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${json.product.id}`, {
+            method: "PUT",
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ images: cloudinaryURLs }), // Send Cloudinary URLs
+          });
+  
+          const imageJson = await imageResponse.json();
+  
+          if (imageResponse.ok) {
+            console.log("Images URLs saved successfully:", imageJson);
+          } else {
+            setError('Error saving image URLs in the database.');
+            setLoading(false);
+            return;
+          }
+        }
+  
+        // Navigate to the homepage after success
+        navigate("/");
+  
       } else {
         setSuccess('');
-        setError(json.error);
+        setError(json.error || "An unexpected error occurred.");
         setTimeout(() => setError(''), 5000); // Clear error message after 5 seconds
       }
+  
     } catch (error) {
       setSuccess('');
       setError('An unexpected error occurred.');
       setTimeout(() => setError(''), 5000); // Clear error message after 5 seconds
+      console.error(error);
     } finally {
-      setLoading(false); // End loading
+      setLoading(false); // Hide the loading spinner when done
     }
   };
+  
 // Handler for image file change
 const handleImageChange = (e) => {
   const files = Array.from(e.target.files); // Get all selected files
@@ -456,6 +515,16 @@ const handleRemoveImage = (index) => {
       {/* Submit Button */}
       <hr className="border-t border-gray-500 my-4" />
       <div className="mt-8 flex ">
+      {loading && (
+  <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex flex-col justify-center items-center z-50">
+    <img
+      src="https://i.gifer.com/4V0b.gif" // Replace this with your spinning GIF URL
+      alt="Loading..."
+      className="w-16 h-16" // You can adjust the size of the GIF here
+    />
+    <p className="mt-4 text-white font-semibold">Please do not close window</p> {/* Text below the spinner */}
+  </div>
+)}
       <button
           type="submit"
           onClick={(e) => handleSubmit(e, 'active')}

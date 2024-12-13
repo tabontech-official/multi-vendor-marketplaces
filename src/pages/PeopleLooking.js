@@ -439,12 +439,14 @@
 import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
-import { EditorState , ContentState, convertToRaw } from "draft-js";
+import { EditorState , ContentState, convertToRaw , convertFromRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
 import { Editor } from 'react-draft-wysiwyg'
 import { useNavigate } from 'react-router-dom';
 import draftToHtml from 'draftjs-to-html';
+import htmlToDraft from 'html-to-draftjs';
+
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'; 
 
 const PeopleLooking = () => {
@@ -505,24 +507,39 @@ const PeopleLooking = () => {
         ""
       );
       
-      setDescription(textDescrip)
-      if (roomListing.description) {
-        const contentState = ContentState.createFromText(textDescrip);
-        setEditorState(EditorState.createWithContent(contentState));
-      } else {
-        setEditorState(EditorState.createEmpty());
-      }
-      if (product.images && Array.isArray(product.images)) {
-        const imageFiles = product.images.map(async(img) => {
-          const blob = await fetch(img.src).then((r) => r.blob());
-          return new File([blob], img.alt || 'product-image.jpg', { type: 'image/jpeg' });
-        });
-  
-        Promise.all(imageFiles).then((files) => {
-          setImages(files);
-          setImagePreviews(product.images.map((img) => img.src));
-        });
-      }
+      setDescription(textDescrip);
+
+  try {
+    // Try parsing as JSON first
+    const parsedContent = JSON.parse(textDescrip);
+    const contentState = convertFromRaw(parsedContent);
+    setEditorState(EditorState.createWithContent(contentState));
+  } catch (error) {
+    // If not JSON, assume it's raw HTML or plain text
+    const contentBlock = htmlToDraft(textDescrip);
+    if (contentBlock) {
+      const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks);
+      setEditorState(EditorState.createWithContent(contentState));
+    } else {
+      setEditorState(EditorState.createEmpty());
+    }
+  }
+
+    // Handle product images
+
+  if (product.images && Array.isArray(product.images)) {
+    const imageFiles = product.images.map(async(img) => {
+      const blob = await fetch(img.src).then((r) => r.blob());
+      return new File([blob], img.alt || 'product-image.jpg', { type: 'image/jpeg' });
+    });
+
+    Promise.all(imageFiles).then((files) => {
+      setImages(files);
+      setImagePreviews(product.images.map((img) => img.src));
+    });
+  }
+
+
     }
   }, []);
 
@@ -533,7 +550,12 @@ const PeopleLooking = () => {
   // };
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
-  };
+  // Convert current editor state to raw JSON string
+  const rawContent = convertToRaw(newEditorState.getCurrentContent());
+  setDescription(JSON.stringify(rawContent));
+};
+
+console.log(description);
   
 
   // Handler for form submission

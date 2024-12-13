@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor'; // Assuming RTC is your custom rich text editor component
-import { EditorState , ContentState , convertToRaw } from "draft-js";
+import { EditorState , ContentState , convertToRaw , convertFromRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
 import draftToHtml from 'draftjs-to-html';
+import htmlToDraft from 'html-to-draftjs';
+
 import { Editor } from 'react-draft-wysiwyg'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'; 
 
@@ -61,24 +63,35 @@ const AddNewJobForm = () => {
     setJobType(product.providerListings[0].jobType || '');
     setJobOfferType(product.providerListings[0].typeOfJobOffered || '');
     setOfferedSalary(product.providerListings[0].offeredYearlySalary || '');
+   
     // const textDescrip = product.body_html.replace(/<br\s*\/?>|&nbsp;/gi, '');
-    const textDescrip = product.body_html.replace(
-      /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
-      ""
-    );
+    const rawDescription = product.body_html || "";
+  const textDescrip = rawDescription.replace(/<br\s*\/?>|&nbsp;/gi, ""); // Remove unwanted tags
+  setPositionDescription(textDescrip);
     setPositionDescription(textDescrip );
-   setZip(product.providerListings[0].zip)
-  setLocation (product.providerListings[0].location)
 
 
-    if (product.body_html) {
-      const contentState = ContentState.createFromText(textDescrip);
+  // Set additional properties from providerListings
+  setZip(product.providerListings?.[0]?.zip || "");
+  setLocation(product.providerListings?.[0]?.location || "");
+
+
+  try {
+    // Try parsing description as JSON first
+    const parsedContent = JSON.parse(textDescrip);
+    const contentState = convertFromRaw(parsedContent);
+    setEditorState(EditorState.createWithContent(contentState));
+  } catch (error) {
+    // If not JSON, assume it's raw HTML or plain text
+    const contentBlock = htmlToDraft(textDescrip);
+    if (contentBlock) {
+      const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks);
       setEditorState(EditorState.createWithContent(contentState));
     } else {
       setEditorState(EditorState.createEmpty());
     }
 
-   
+  }
    
       }
 }, []);

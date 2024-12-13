@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
-import { convertToRaw, EditorState , ContentState } from "draft-js";
+import { convertToRaw, EditorState , ContentState ,convertFromRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
 import draftToHtml from 'draftjs-to-html';
+import htmlToDraft from 'html-to-draftjs';
 import { Editor } from 'react-draft-wysiwyg'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'; 
 
@@ -33,6 +34,7 @@ const AddNewEquipmentForm = () => {
   const [showRemoveOption, setShowRemoveOption] = useState(false);
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
   const [description, setText] = useState("");
+  const [descriptions, setDescriptions] = useState("")
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]); // Keep previews here
   const [Zip , setZip] = useState("")
@@ -71,20 +73,30 @@ const AddNewEquipmentForm = () => {
       setTraining(product.equipment.training || '');
       setYearManufactured(product.equipment.year_manufactured);
       // const textDescrip = product.equipment.description.replace(/<br\s*\/?>|&nbsp;/gi, '');
-      const textDescrip = product.equipment.description.replace(
-        /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
-        ""
-      );
-      setText(textDescrip ||'');
+      const rawDescription = product.equipment.description || ""; // Your fetched description
+      setDescriptions(rawDescription);
+
+
+      // setText(textDescrip ||'');
      setZip(product.equipment.zip)
       
 
-      if (product.equipment.description) {
-        const contentState = ContentState.createFromText(textDescrip);
+     try {
+      // Try parsing as JSON first
+      const parsedContent = JSON.parse(rawDescription);
+      const contentState = convertFromRaw(parsedContent);
+      setEditorState(EditorState.createWithContent(contentState));
+    } catch (error) {
+      // If not JSON, assume it's raw HTML or plain text
+      const contentBlock = htmlToDraft(rawDescription);
+      if (contentBlock) {
+        const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks);
         setEditorState(EditorState.createWithContent(contentState));
       } else {
         setEditorState(EditorState.createEmpty());
       }
+    }
+  
   
     
       if (product.images && Array.isArray(product.images)) {
@@ -117,9 +129,13 @@ const AddNewEquipmentForm = () => {
   // };
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
+
+    // Convert current editor state to HTML
+    const rawContent = convertToRaw(newEditorState.getCurrentContent());
+    setDescriptions(JSON.stringify(rawContent)); // Save the raw content as a string
   };
 
-console.log(description)
+console.log(descriptions)
 
   // const handleSubmit = async (e, status) => {
 

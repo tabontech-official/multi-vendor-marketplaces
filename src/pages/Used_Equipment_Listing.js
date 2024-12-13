@@ -567,10 +567,11 @@
 import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
-import { convertToRaw, EditorState , ContentState } from "draft-js";
+import { convertToRaw, EditorState , ContentState , convertFromRaw } from "draft-js";
 import { useLocation, useNavigate } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
 import draftToHtml from 'draftjs-to-html';
+import htmlToDraft from 'html-to-draftjs';
 import { Editor } from 'react-draft-wysiwyg'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'; 
 
@@ -638,21 +639,46 @@ console.log(product)
       setReasonForSelling(product.equipment.reason_for_selling);
       setShipping(product.equipment.shipping);
       // const textDescrip = product.equipment.description.replace(/<br\s*\/?>|&nbsp;/gi, '');
-      const textDescrip = product.equipment.description.replace(
-        /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
-        ""
-      );
-      setDescription(textDescrip)
-     setZip(product.equipment.zip)
+    //   const textDescrip = product.equipment.description.replace(
+    //     /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
+    //     ""
+    //   );
+    //   setDescription(textDescrip)
+    //  setZip(product.equipment.zip)
      
 
 
-     if (product.equipment.description) {
-      const contentState = ContentState.createFromText(textDescrip);
+    //  if (product.equipment.description) {
+    //   const contentState = ContentState.createFromText(textDescrip);
+    //   setEditorState(EditorState.createWithContent(contentState));
+    // } else {
+    //   setEditorState(EditorState.createEmpty());
+    // }
+
+    const rawDescription = product.equipment.description || ""; // Your fetched description
+
+  // Remove unwanted tags
+  const textDescrip = rawDescription.replace(/<br\s*\/?>|&nbsp;/gi, "");
+  setDescription(textDescrip);
+
+  // Set zip code if available
+  setZip(product.equipment.zip);
+
+  try {
+    // Try parsing description as JSON first
+    const parsedContent = JSON.parse(textDescrip);
+    const contentState = convertFromRaw(parsedContent);
+    setEditorState(EditorState.createWithContent(contentState));
+  } catch (error) {
+    // If not JSON, assume it's raw HTML or plain text
+    const contentBlock = htmlToDraft(textDescrip);
+    if (contentBlock) {
+      const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks);
       setEditorState(EditorState.createWithContent(contentState));
     } else {
       setEditorState(EditorState.createEmpty());
     }
+  }
 
     if (product.images && Array.isArray(product.images)) {
       const imageFiles = product.images.map(async(img) => {

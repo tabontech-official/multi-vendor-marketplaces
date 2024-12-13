@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor'; // Assuming RTC is the rich text editor
-import { EditorState , ContentState, convertToRaw } from "draft-js";
+import { EditorState , ContentState, convertToRaw , convertFromRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
 import draftToHtml from 'draftjs-to-html';
+import htmlToDraft from 'html-to-draftjs';
+
 import { Editor } from 'react-draft-wysiwyg'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'; 
 
@@ -16,6 +18,7 @@ const AddJobSearchForm = () => {
   const [name, setName] = useState('');
   const [qualificationRequested, setQualificationRequested] = useState('');
   const [jobType, setJobType] = useState('');
+  const [description, setDescription] = useState("");
 
   const [availability, setAvailability] = useState('');
   const [requestedYearlySalary, setRequestedYearlySalary] = useState('');
@@ -61,15 +64,56 @@ const [workas , setWorkAs] = useState("")
       setAvailability(product.jobListings[0].availability || '');
       setRequestedYearlySalary(product.jobListings[0].requestedYearlySalary || '');
       // const textDescrip = product.jobListings[0].positionRequestedDescription.replace(/<br\s*\/?>|&nbsp;/gi, '');
-      const textDescrip = product.jobListings[0].positionRequestedDescription.replace(
-        /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
-        ""
-      );
-      setPositionRequestedDescription(textDescrip || '');
-      setZip(product.jobListings[0].zip)
-     setWorkAs(product.jobListings[0].availableToWorkAs || '')
+    //   const textDescrip = product.jobListings[0].positionRequestedDescription.replace(
+    //     /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
+    //     ""
+    //   );
+    //   setPositionRequestedDescription(textDescrip || '');
+    //   setZip(product.jobListings[0].zip)
+    //  setWorkAs(product.jobListings[0].availableToWorkAs || '')
      
-     if (product.images && Array.isArray(product.images)) {
+    //  if (product.images && Array.isArray(product.images)) {
+    //   const imageFiles = product.images.map(async(img) => {
+    //     const blob = await fetch(img.src).then((r) => r.blob());
+    //     return new File([blob], img.alt || 'product-image.jpg', { type: 'image/jpeg' });
+    //   });
+
+    //   Promise.all(imageFiles).then((files) => {
+    //     setImages(files);
+    //     setImagePreviews(product.images.map((img) => img.src));
+    //   });
+    // }
+    //   if (product.jobListings[0].positionRequestedDescription ) {
+    //     const contentState = ContentState.createFromText(textDescrip);
+    //     setEditorState(EditorState.createWithContent(contentState));
+    //   } else {
+    //     setEditorState(EditorState.createEmpty());
+    //   }
+    const rawDescription = product.jobListings[0]?.positionRequestedDescription || "";
+    const textDescrip = rawDescription.replace(/<br\s*\/?>|&nbsp;/gi, ""); // Remove unwanted tags
+    setPositionRequestedDescription(textDescrip || "");
+  
+    // Set other properties from jobListings
+    setZip(product.jobListings[0]?.zip || "");
+    setWorkAs(product.jobListings[0]?.availableToWorkAs || "");
+  
+    try {
+      // Try parsing description as JSON first
+      const parsedContent = JSON.parse(textDescrip);
+      const contentState = convertFromRaw(parsedContent);
+      setEditorState(EditorState.createWithContent(contentState));
+    } catch (error) {
+      // If not JSON, assume it's raw HTML or plain text
+      const contentBlock = htmlToDraft(textDescrip);
+      if (contentBlock) {
+        const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks);
+        setEditorState(EditorState.createWithContent(contentState));
+      } else {
+        setEditorState(EditorState.createEmpty());
+      }
+    }
+
+    if (product.images && Array.isArray(product.images)) {
       const imageFiles = product.images.map(async(img) => {
         const blob = await fetch(img.src).then((r) => r.blob());
         return new File([blob], img.alt || 'product-image.jpg', { type: 'image/jpeg' });
@@ -80,13 +124,8 @@ const [workas , setWorkAs] = useState("")
         setImagePreviews(product.images.map((img) => img.src));
       });
     }
-      if (product.jobListings[0].positionRequestedDescription ) {
-        const contentState = ContentState.createFromText(textDescrip);
-        setEditorState(EditorState.createWithContent(contentState));
-      } else {
-        setEditorState(EditorState.createEmpty());
-      }
-  
+
+
      
     }
   }, []);
@@ -109,7 +148,13 @@ const [workas , setWorkAs] = useState("")
  
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
+   // Convert current editor state to HTML
+    const rawContent = convertToRaw(newEditorState.getCurrentContent());
+    setDescription(JSON.stringify(rawContent)); // Save the raw content as a string
   };
+
+console.log(description)
+
   const handleSubmit = async (e, status) => {
     // Convert the editor content to raw content and then to HTML
     const rawContentState = convertToRaw(editorState.getCurrentContent());

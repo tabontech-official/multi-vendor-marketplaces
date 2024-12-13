@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor'; // Assuming RTC is the custom editor component
-import { convertToRaw, EditorState , ContentState } from "draft-js";
+import { convertToRaw, EditorState , ContentState ,convertFromRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
 import draftToHtml from 'draftjs-to-html';
+import htmlToDraft from 'html-to-draftjs';
 import { Editor } from 'react-draft-wysiwyg'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'; 
 
@@ -86,22 +87,33 @@ if (business.leaseExpirationDate) {
       setListOfDevices(business.listOfDevices || '');
       setOfferedServices(business.offeredServices || '');
       setSupportAndTraining(business.supportAndTraining || '');
-      const textDescrip = product.business.businessDescription.replace(
-        /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
-        ""
-      );
-      setText(textDescrip || '' )
-      if(business.images){
-        setImages(business.images.map(img => img.src));
-      }
-      
 
-      if (product.business.businessDescription) {
-        const contentState = ContentState.createFromText(textDescrip);
+         // Clean and set business description
+    const rawDescription = product.business.businessDescription || "";
+    const textDescrip = rawDescription.replace(/<br\s*\/?>|&nbsp;/gi, ""); // Remove unwanted tags
+    setText(textDescrip || "");
+
+    // Set images for business
+    if (business.images) {
+      setImages(business.images.map(img => img.src));
+    }
+
+   
+    try {
+      // Try parsing description as JSON first
+      const parsedContent = JSON.parse(textDescrip);
+      const contentState = convertFromRaw(parsedContent);
+      setEditorState(EditorState.createWithContent(contentState));
+    } catch (error) {
+      // If not JSON, assume it's raw HTML or plain text
+      const contentBlock = htmlToDraft(textDescrip);
+      if (contentBlock) {
+        const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks);
         setEditorState(EditorState.createWithContent(contentState));
       } else {
         setEditorState(EditorState.createEmpty());
       }
+    }
 
       if (product.images && Array.isArray(product.images)) {
         const imageFiles = product.images.map(async(img) => {

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import RTC from '../component/editor';
-import { EditorState , ContentState, convertToRaw } from "draft-js";
+import { EditorState , ContentState, convertToRaw , convertFromRaw} from "draft-js";
 import { useLocation } from 'react-router-dom';
 import CurrencyInput from 'react-currency-input-field';
 import { useNavigate } from 'react-router-dom';
 import draftToHtml from 'draftjs-to-html';
+import htmlToDraft from 'html-to-draftjs';
 import { Editor } from 'react-draft-wysiwyg'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'; 
 
@@ -64,18 +65,30 @@ console.log(product)
       setImages(roomListing.image || []); // Fallback to an empty array if undefined
       setImageName(roomListing.imageName || '');
       setIsEditing(true);
-      // const textDescrip = roomListing.otherDetails.replace(/<br\s*\/?>|&nbsp;/gi, '');
-      const textDescrip = roomListing.otherDetails.replace(
-        /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
-        ""
-      );
-      setDescription(textDescrip)
-      if (roomListing.otherDetails) {
-        const contentState = ContentState.createFromText(textDescrip);
+
+        // Clean the description and set it
+    const rawDescription = roomListing.otherDetails || "";
+    const textDescrip = rawDescription.replace(/<br\s*\/?>|&nbsp;/gi, ""); // Remove unwanted tags
+    setDescription(textDescrip || ""); // Set the cleaned description
+
+
+    
+    try {
+      // Try parsing description as JSON first
+      const parsedContent = JSON.parse(textDescrip);
+      const contentState = convertFromRaw(parsedContent);
+      setEditorState(EditorState.createWithContent(contentState));
+    } catch (error) {
+      // If not JSON, assume it's raw HTML or plain text
+      const contentBlock = htmlToDraft(textDescrip);
+      if (contentBlock) {
+        const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks);
         setEditorState(EditorState.createWithContent(contentState));
       } else {
         setEditorState(EditorState.createEmpty());
       }
+    }
+
       if (product.images && Array.isArray(product.images)) {
         const imageFiles = product.images.map(async(img) => {
           const blob = await fetch(img.src).then((r) => r.blob());
@@ -104,7 +117,12 @@ console.log(product)
   // };
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
+    // Convert current editor state to HTML
+    const rawContent = convertToRaw(newEditorState.getCurrentContent());
+    setDescription(JSON.stringify(rawContent)); // Save the raw content as a string
   };
+
+console.log(description)
 
 
   // Handler for form submission

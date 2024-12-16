@@ -68,7 +68,7 @@ console.log(product)
 
         // Clean the description and set it
     const rawDescription = roomListing.otherDetails || "";
-    const textDescrip = rawDescription.replace(/<br\s*\/?>|&nbsp;/gi, ""); // Remove unwanted tags
+    const textDescrip = rawDescription; // Remove unwanted tags
     setDescription(textDescrip || ""); // Set the cleaned description
 
 
@@ -144,10 +144,15 @@ console.log(description)
   
     // Modify content: remove <p> tags and replace with <br /> and convert non-breaking spaces to regular spaces
     const modifiedContent = htmlContent
-      .replace(/<p>/g, "")
-      .replace(/<\/p>/g, "<br />") 
-      .replace(/&nbsp;/g, " "); 
-  
+      // .replace(/<p>/g, "")
+      // .replace(/<\/p>/g, "<br />") 
+      // .replace(/&nbsp;/g, " "); 
+    //   .replace(/<p>/g, "") // Remove <p> tags
+    // .replace(/<\/p>/g, "<br />") // Replace closing </p> tags with <br />
+    // .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />") // Avoid double <br /> tags
+    .replace(/&nbsp;/g, " "); // Replace &nbsp; with normal spaces
+
+
     // Prepare form data for submission
     const formData = new FormData();
     const userId = localStorage.getItem('userid');
@@ -364,7 +369,7 @@ const handleRemoveImage = (index) => {
       <label className="block text-lg font-medium text-gray-700">{'Description* '}</label>
       
       {/* Editor container with Tailwind styles */}
-      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-hidden">
+      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-auto">
         <Editor
           editorState={editorState}
           onEditorStateChange={onEditorStateChange}

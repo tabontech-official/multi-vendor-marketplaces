@@ -90,7 +90,7 @@ const [workas , setWorkAs] = useState("")
     //     setEditorState(EditorState.createEmpty());
     //   }
     const rawDescription = product.jobListings[0]?.positionRequestedDescription || "";
-    const textDescrip = rawDescription.replace(/<br\s*\/?>|&nbsp;/gi, ""); // Remove unwanted tags
+    const textDescrip = rawDescription; // Remove unwanted tags
     setPositionRequestedDescription(textDescrip || "");
   
     // Set other properties from jobListings
@@ -162,10 +162,16 @@ console.log(description)
   
     // Modify the content (remove <p> and replace with <br />, and fix non-breaking spaces)
     const modifiedContent = htmlContent
-      .replace(/<p>/g, "")
-      .replace(/<\/p>/g, "<br />")  // Replace <p> with <br />
-      .replace(/&nbsp;/g, " ");     // Replace &nbsp; with regular space
+      // .replace(/<p>/g, "")
+      // .replace(/<\/p>/g, "<br />")  // Replace <p> with <br />
+      // .replace(/&nbsp;/g, " ");     // Replace &nbsp; with regular space
   
+      // .replace(/<p>/g, "") // Remove <p> tags
+      // .replace(/<\/p>/g, "<br />") // Replace closing </p> tags with <br />
+      // .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />") // Avoid double <br /> tags
+      // .replace(/&nbsp;/g, " "); // Replace &nbsp; with normal spaces
+  
+
     // Ensure jobType is selected before proceeding
     if (!jobType) {
       setError("Job Type Required");
@@ -206,37 +212,131 @@ console.log(description)
   
     formData.append('userId', localStorage.getItem('userid')); // Get userId from local storage
   
+    // try {
+    //   // API URL and method based on whether it's editing or adding a new job
+    //   const url = isEditing
+    //     ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
+    //     : "https://medspaa.vercel.app/product/addJob";
+  
+    //   const method = isEditing ? "PUT" : "POST";
+  
+    //   // Submit the form data
+    //   const response = await fetch(url, {
+    //     method: method,
+    //     body: formData,
+    //   });
+  
+    //   const json = await response.json();
+  
+    //   if (response.ok) {
+    //     setSuccess(isEditing ? "Job updated successfully!" : json.message);
+    //     setError(''); // Clear error message on success
+    //     setTimeout(() => setSuccess(''), 5000); // Clear success message after 5 seconds
+  
+    //     // Handle image upload to Cloudinary
+    //     if (images && images.length > 0) {
+    //       const cloudinaryURLs = [];
+  
+    //       for (let i = 0; i < images.length; i++) {
+    //         const formDataImages = new FormData();
+    //         formDataImages.append('file', images[i]);
+    //         formDataImages.append('upload_preset', 'images'); // Cloudinary preset
+  
+    //         // Upload the image to Cloudinary
+    //         const cloudinaryResponse = await fetch('https://api.cloudinary.com/v1_1/djocrwprs/image/upload', {
+    //           method: "POST",
+    //           body: formDataImages,
+    //         });
+  
+    //         const cloudinaryJson = await cloudinaryResponse.json();
+  
+    //         if (cloudinaryResponse.ok) {
+    //           cloudinaryURLs.push(cloudinaryJson.secure_url); // Save the uploaded image URL
+    //           console.log(`Image ${i + 1} uploaded successfully:`, cloudinaryJson.secure_url);
+    //         } else {
+    //           setError(`Error uploading image ${i + 1} to Cloudinary.`);
+    //           setLoading(false);
+    //           return; // Stop further execution if any image upload fails
+    //         }
+    //       }
+  
+    //       // Save the Cloudinary URLs to the database
+    //       const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${json.product.id}`, {
+    //         method: "PUT",
+    //         headers: {
+    //           'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({ images: cloudinaryURLs }), // Send Cloudinary URLs
+    //       });
+  
+    //       const imageJson = await imageResponse.json();
+  
+    //       if (imageResponse.ok) {
+    //         console.log("Images URLs saved successfully:", imageJson);
+    //       } else {
+    //         setError('Error saving image URLs in the database.');
+    //         setLoading(false);
+    //         return;
+    //       }
+    //     }
+  
+    //     // Navigate to the homepage after success
+    //     navigate("/");
+  
+    //   } else {
+    //     setSuccess('');
+    //     setError(json.error || "An unexpected error occurred.");
+    //     setTimeout(() => setError(''), 5000); // Clear error message after 5 seconds
+    //   }
+  
+    // } catch (error) {
+    //   setSuccess('');
+    //   setError('An unexpected error occurred.');
+    //   setTimeout(() => setError(''), 5000); // Clear error message after 5 seconds
+    //   console.error(error);
+    // } finally {
+    //   setLoading(false); // Hide the loading spinner when done
+    // }
+
     try {
-      // API URL and method based on whether it's editing or adding a new job
-      const url = isEditing
-        ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
-        : "https://medspaa.vercel.app/product/addJob";
+      // Set the API URL and method (POST for creating new, PUT for updating)
+      let url = "https://medspaa.vercel.app/product/addJob";
+      let method = "POST";
   
-      const method = isEditing ? "PUT" : "POST";
+      if (product && product.id) {
+        url = `https://medspaa.vercel.app/product/updateListing/${product.id}`;
+        method = "PUT";
+      }
   
-      // Submit the form data
+      // Submit the form data (main product data)
       const response = await fetch(url, {
-        method: method,
+        method,
         body: formData,
       });
   
       const json = await response.json();
   
       if (response.ok) {
-        setSuccess(isEditing ? "Job updated successfully!" : json.message);
-        setError(''); // Clear error message on success
-        setTimeout(() => setSuccess(''), 5000); // Clear success message after 5 seconds
   
-        // Handle image upload to Cloudinary
+    const createdProductId = json.product?.id || product.id;
+        // Success handling based on status
+        if (status === "active") {
+          setSuccess(json.message); // Success message for publishing
+        } else {
+          setSuccess("Your post drafted successfully"); // Success message for draft
+        }
+  
+        // Handle image upload if there are images
         if (images && images.length > 0) {
           const cloudinaryURLs = [];
-  
+          
+          // Loop through images and upload each one
           for (let i = 0; i < images.length; i++) {
             const formDataImages = new FormData();
             formDataImages.append('file', images[i]);
             formDataImages.append('upload_preset', 'images'); // Cloudinary preset
   
-            // Upload the image to Cloudinary
+            // Upload image to Cloudinary
             const cloudinaryResponse = await fetch('https://api.cloudinary.com/v1_1/djocrwprs/image/upload', {
               method: "POST",
               body: formDataImages,
@@ -245,22 +345,22 @@ console.log(description)
             const cloudinaryJson = await cloudinaryResponse.json();
   
             if (cloudinaryResponse.ok) {
-              cloudinaryURLs.push(cloudinaryJson.secure_url); // Save the uploaded image URL
+              cloudinaryURLs.push(cloudinaryJson.secure_url);
               console.log(`Image ${i + 1} uploaded successfully:`, cloudinaryJson.secure_url);
             } else {
               setError(`Error uploading image ${i + 1} to Cloudinary.`);
               setLoading(false);
-              return; // Stop further execution if any image upload fails
+              return;  // Stop the process if any image upload fails
             }
           }
   
-          // Save the Cloudinary URLs to the database
-          const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${json.product.id}`, {
+          // Once all images are uploaded, save the URLs in the database
+          const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${createdProductId}`, {
             method: "PUT",
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ images: cloudinaryURLs }), // Send Cloudinary URLs
+            body: JSON.stringify({ images: cloudinaryURLs }),  // Send Cloudinary URLs
           });
   
           const imageJson = await imageResponse.json();
@@ -274,23 +374,23 @@ console.log(description)
           }
         }
   
-        // Navigate to the homepage after success
+        // Navigate to homepage after success
         navigate("/");
   
       } else {
         setSuccess('');
         setError(json.error || "An unexpected error occurred.");
-        setTimeout(() => setError(''), 5000); // Clear error message after 5 seconds
+        console.log(json.error);
       }
   
     } catch (error) {
       setSuccess('');
-      setError('An unexpected error occurred.');
-      setTimeout(() => setError(''), 5000); // Clear error message after 5 seconds
+      setError(error.error || "An unexpected error occurred.");
       console.error(error);
     } finally {
-      setLoading(false); // Hide the loading spinner when done
+      setLoading(false);  // Hide the loading spinner when done
     }
+
   };
   
 // Handler for image file change
@@ -477,7 +577,7 @@ const handleRemoveImage = (index) => {
       <label className="block text-lg font-medium text-gray-700">{'Description* '}</label>
       
       {/* Editor container with Tailwind styles */}
-      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-hidden">
+      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-auto">
         <Editor
           editorState={editorState}
           onEditorStateChange={onEditorStateChange}

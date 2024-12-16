@@ -90,7 +90,7 @@ if (business.leaseExpirationDate) {
 
          // Clean and set business description
     const rawDescription = product.business.businessDescription || "";
-    const textDescrip = rawDescription.replace(/<br\s*\/?>|&nbsp;/gi, ""); // Remove unwanted tags
+    const textDescrip = rawDescription; // Remove unwanted tags
     setText(textDescrip || "");
 
     // Set images for business
@@ -154,10 +154,17 @@ const onEditorStateChange = (newEditorState) => {
       const htmlContent = draftToHtml(rawContentState);
       
       const modifiedContent = htmlContent
-        .replace(/<p>/g, "")
-        .replace(/<\/p>/g, "<br />") // Replace paragraph tags with <br /> or leave empty if you don't want any formatting
-        .replace(/&nbsp;/g, " "); // Remove non-breaking spaces and replace with normal spaces
+        // .replace(/<p>/g, "")
+        // .replace(/<\/p>/g, "<br />") // Replace paragraph tags with <br /> or leave empty if you don't want any formatting
+        // .replace(/&nbsp;/g, " "); // Remove non-breaking spaces and replace with normal spaces
     
+        // .replace(/<p>/g, "") // Remove <p> tags
+        // .replace(/<\/p>/g, "<br />") // Replace closing </p> tags with <br />
+        // .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />") // Avoid double <br /> tags
+        .replace(/&nbsp;/g, " "); // Replace &nbsp; with normal spaces
+    
+
+
       // Get user ID from local storage
       const id = localStorage.getItem("userid");
     
@@ -375,7 +382,7 @@ const onEditorStateChange = (newEditorState) => {
       <label className="block text-lg font-medium text-gray-700">{'Description* '}</label>
       
       {/* Editor container with Tailwind styles */}
-      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-hidden">
+      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-auto">
         <Editor
           editorState={editorState}
           onEditorStateChange={onEditorStateChange}

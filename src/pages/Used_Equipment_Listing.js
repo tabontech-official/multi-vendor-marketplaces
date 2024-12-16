@@ -789,9 +789,16 @@ console.log(product)
   
     // Modify content (replace <p> with <br /> and handle &nbsp;)
     const modifiedContent = htmlContent
-      .replace(/<p>/g, "")
-      .replace(/<\/p>/g, "<br />")  // Replaces <p> and </p> with <br />
-      .replace(/&nbsp;/g, " ");      // Replaces &nbsp; with normal spaces.
+      // .replace(/<p>/g, "")
+      // .replace(/<\/p>/g, "<br />")  // Replaces <p> and </p> with <br />
+      .replace(/&nbsp;/g, " ");  
+          // Replaces &nbsp; with normal spaces.
+  
+      // .replace(/<p>/g, "") // Remove <p> tags
+      // .replace(/<\/p>/g, "<br />") // Replace closing </p> tags with <br />
+      // .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />") // Avoid double <br /> tags
+      // .replace(/&nbsp;/g, " "); // Replace &nbsp; with normal spaces
+   
   
     e.preventDefault();
     setError('');
@@ -824,24 +831,117 @@ console.log(product)
       formData.append('status', status);  // Set the post status (active, draft)
     }
   
+    // try {
+    //   // Submit the form data (images + other details)
+    //   const response = await fetch(
+    //     isEditing
+    //       ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
+    //       : "https://medspaa.vercel.app/product/addEquipment",
+    //     {
+    //       method: isEditing ? "PUT" : "POST", // PUT for update, POST for new post
+    //       body: formData
+    //     }
+    //   );
+  
+    //   const json = await response.json();
+  
+    //   if (response.ok) {
+    //     setSuccess(status === "active" ? json.message : "Your post drafted successfully");
+  
+    //     // After successful form submission, handle image upload if needed
+    //     if (images && images.length > 0) {
+    //       const cloudinaryURLs = [];
+          
+    //       // Loop through images and upload each one
+    //       for (let i = 0; i < images.length; i++) {
+    //         const formDataImages = new FormData();
+    //         formDataImages.append('file', images[i]);
+    //         formDataImages.append('upload_preset', 'images'); // Replace with your Cloudinary preset
+  
+    //         // Upload image to Cloudinary
+    //         const cloudinaryResponse = await fetch('https://api.cloudinary.com/v1_1/djocrwprs/image/upload', {
+    //           method: "POST",
+    //           body: formDataImages,
+    //         });
+  
+    //         const cloudinaryJson = await cloudinaryResponse.json();
+  
+    //         if (cloudinaryResponse.ok) {
+    //           cloudinaryURLs.push(cloudinaryJson.secure_url);
+    //           console.log(`Image ${i + 1} uploaded successfully to Cloudinary:`, cloudinaryJson.secure_url);
+    //         } else {
+    //           setError(`Error uploading image ${i + 1} to Cloudinary.`);
+    //           setLoading(false);
+    //           return;  // Stop the process if any image fails
+    //         }
+    //       }
+  
+    //       // Once all images are uploaded, save the URLs in the database
+    //       const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${json.product.id}`, {
+    //         method: "PUT",
+    //         headers: {
+    //           'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({ images: cloudinaryURLs }),  // Send Cloudinary URLs
+    //       });
+  
+    //       const imageJson = await imageResponse.json();
+  
+    //       if (imageResponse.ok) {
+    //         console.log("Images URLs saved successfully:", imageJson);
+    //       } else {
+    //         setError('Error saving image URLs in the database.');
+    //         setLoading(false);
+    //         return;
+    //       }
+    //     }
+  
+    //     // Navigate to the homepage after success
+    //     navigate("/");
+  
+    //   } else {
+    //     setSuccess('');
+    //     setError(json.error || "An unexpected error occurred.");
+    //     console.log(json.error);
+    //   }
+  
+    // } catch (error) {
+    //   setSuccess('');
+    //   setError(error.error || "An unexpected error occurred.");
+    //   console.log(error);
+    // } finally {
+    //   setLoading(false);  // Stop the loading spinner when done
+    // }
+
     try {
-      // Submit the form data (images + other details)
-      const response = await fetch(
-        isEditing
-          ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
-          : "https://medspaa.vercel.app/product/addEquipment",
-        {
-          method: isEditing ? "PUT" : "POST", // PUT for update, POST for new post
-          body: formData
-        }
-      );
+      // Set the API URL and method (POST for creating new, PUT for updating)
+      let url = "https://medspaa.vercel.app/product/addEquipment";
+      let method = "POST";
+  
+      if (product && product.id) {
+        url = `https://medspaa.vercel.app/product/updateListing/${product.id}`;
+        method = "PUT";
+      }
+  
+      // Submit the form data (main product data)
+      const response = await fetch(url, {
+        method,
+        body: formData,
+      });
   
       const json = await response.json();
   
       if (response.ok) {
-        setSuccess(status === "active" ? json.message : "Your post drafted successfully");
   
-        // After successful form submission, handle image upload if needed
+    const createdProductId = json.product?.id || product.id;
+        // Success handling based on status
+        if (status === "active") {
+          setSuccess(json.message); // Success message for publishing
+        } else {
+          setSuccess("Your post drafted successfully"); // Success message for draft
+        }
+  
+        // Handle image upload if there are images
         if (images && images.length > 0) {
           const cloudinaryURLs = [];
           
@@ -849,9 +949,9 @@ console.log(product)
           for (let i = 0; i < images.length; i++) {
             const formDataImages = new FormData();
             formDataImages.append('file', images[i]);
-            formDataImages.append('upload_preset', 'images'); // Replace with your Cloudinary preset
+            formDataImages.append('upload_preset', 'images'); // Cloudinary preset
   
-            // Upload image to Cloudinary
+            // Upload image to Cloudinary 
             const cloudinaryResponse = await fetch('https://api.cloudinary.com/v1_1/djocrwprs/image/upload', {
               method: "POST",
               body: formDataImages,
@@ -861,16 +961,16 @@ console.log(product)
   
             if (cloudinaryResponse.ok) {
               cloudinaryURLs.push(cloudinaryJson.secure_url);
-              console.log(`Image ${i + 1} uploaded successfully to Cloudinary:`, cloudinaryJson.secure_url);
+              console.log(`Image ${i + 1} uploaded successfully:`, cloudinaryJson.secure_url);
             } else {
               setError(`Error uploading image ${i + 1} to Cloudinary.`);
               setLoading(false);
-              return;  // Stop the process if any image fails
+              return;  // Stop the process if any image upload fails
             }
           }
   
-          // Once all images are uploaded, save the URLs in the database
-          const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${json.product.id}`, {
+          // Once all images are uploaded, save the URLs in the database https://medspaa.vercel.app/product/updateImages/${json.product.id}
+          const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${createdProductId}`, {
             method: "PUT",
             headers: {
               'Content-Type': 'application/json',
@@ -889,7 +989,7 @@ console.log(product)
           }
         }
   
-        // Navigate to the homepage after success
+        // Navigate to homepage after success
         navigate("/");
   
       } else {
@@ -901,9 +1001,9 @@ console.log(product)
     } catch (error) {
       setSuccess('');
       setError(error.error || "An unexpected error occurred.");
-      console.log(error);
+      console.error(error);
     } finally {
-      setLoading(false);  // Stop the loading spinner when done
+      setLoading(false);  // Hide the loading spinner when done
     }
   };
   
@@ -1007,7 +1107,7 @@ console.log(product)
       <label className="block text-lg font-medium text-gray-700">{'Description* '}</label>
       
       {/* Editor container with Tailwind styles */}
-      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-hidden">
+      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-auto">
         <Editor
           editorState={editorState}
           onEditorStateChange={onEditorStateChange}

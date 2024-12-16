@@ -66,7 +66,7 @@ const AddNewJobForm = () => {
    
     // const textDescrip = product.body_html.replace(/<br\s*\/?>|&nbsp;/gi, '');
     const rawDescription = product.body_html || "";
-  const textDescrip = rawDescription.replace(/<br\s*\/?>|&nbsp;/gi, ""); // Remove unwanted tags
+  const textDescrip = rawDescription; // Remove unwanted tags
   setPositionDescription(textDescrip);
     setPositionDescription(textDescrip );
 
@@ -114,9 +114,16 @@ const AddNewJobForm = () => {
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
     const modifiedContent = htmlContent
-      .replace(/<p>/g, "")
-      .replace(/<\/p>/g, "<br />")
-      .replace(/&nbsp;/g, " "); // Clean up content
+      // .replace(/<p>/g, "")
+      // .replace(/<\/p>/g, "<br />")
+      // .replace(/&nbsp;/g, " "); // Clean up content
+
+      // .replace(/<p>/g, "") // Remove <p> tags
+      // .replace(/<\/p>/g, "<br />") // Replace closing </p> tags with <br />
+      // .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />") // Avoid double <br /> tags
+      // .replace(/&nbsp;/g, " "); // Replace &nbsp; with normal spaces
+  
+
 
     // Step 2: Validation checks for required fields
     // if (!city || !location || !qualification || !Zip || !jobType || !jobOfferType || !offeredSalary) {
@@ -167,44 +174,137 @@ const AddNewJobForm = () => {
       formData.append('status', status); // Add status when not editing
     }
 
+    // try {
+    //     const response = await fetch(isEditing
+    //       ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
+    //       : "https://medspaa.vercel.app/product/addProvider", {
+    //       method: isEditing ? "PUT" : "POST",
+    //       body: formData,
+    //     });;
+
+    //   const json = await response.json();
+
+    //   if (response.ok) {
+    //     if(status == "active"){
+    //       setSuccess(json.message);
+    //     }else{
+    //       setSuccess("Your post drafted sucessfully")
+    //     }
+    //     navigate("/")
+    //     setError('');
+    //     // Clear form fields
+    //     // setLocation('');
+    //     // setQualification('');
+    //     // setJobType('');
+    //     // setJobOfferType('');
+    //     // setOfferedSalary('');
+    //     // setPositionDescription('');
+    //     // setImages([]);
+    //     // setImageName('');
+    //     // setEditorState(EditorState.createEmpty());
+    //   } else {
+    //     setSuccess('');
+    //     setError(json.error);
+    //   }
+    // } catch (error) {
+    //   setSuccess('');
+    //   setError('An unexpected error occurred.');
+    //   console.error(error);
+    // } finally {
+    //   setLoading(false);
+    // }
+
     try {
-        const response = await fetch(isEditing
-          ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
-          : "https://medspaa.vercel.app/product/addProvider", {
-          method: isEditing ? "PUT" : "POST",
-          body: formData,
-        });;
-
+      // Set the API URL and method (POST for creating new, PUT for updating)
+      let url = "https://medspaa.vercel.app/product/addProvider";
+      let method = "POST";
+  
+      if (product && product.id) {
+        url = `https://medspaa.vercel.app/product/updateListing/${product.id}`;
+        method = "PUT";
+      }
+  
+      // Submit the form data (main product data)
+      const response = await fetch(url, {
+        method,
+        body: formData,
+      });
+  
       const json = await response.json();
-
+  
       if (response.ok) {
-        if(status == "active"){
-          setSuccess(json.message);
-        }else{
-          setSuccess("Your post drafted sucessfully")
+  
+    // const createdProductId = json.product?.id || product.id;
+        // Success handling based on status
+        if (status === "active") {
+          setSuccess(json.message); // Success message for publishing
+        } else {
+          setSuccess("Your post drafted successfully"); // Success message for draft
         }
-        navigate("/")
-        setError('');
-        // Clear form fields
-        // setLocation('');
-        // setQualification('');
-        // setJobType('');
-        // setJobOfferType('');
-        // setOfferedSalary('');
-        // setPositionDescription('');
-        // setImages([]);
-        // setImageName('');
-        // setEditorState(EditorState.createEmpty());
+  
+        // Handle image upload if there are images
+        // if (images && images.length > 0) {
+        //   const cloudinaryURLs = [];
+          
+        //   // Loop through images and upload each one
+        //   for (let i = 0; i < images.length; i++) {
+        //     const formDataImages = new FormData();
+        //     formDataImages.append('file', images[i]);
+        //     formDataImages.append('upload_preset', 'images'); // Cloudinary preset
+  
+        //     // Upload image to Cloudinary
+        //     const cloudinaryResponse = await fetch('https://api.cloudinary.com/v1_1/djocrwprs/image/upload', {
+        //       method: "POST",
+        //       body: formDataImages,
+        //     });
+  
+        //     const cloudinaryJson = await cloudinaryResponse.json();
+  
+        //     if (cloudinaryResponse.ok) {
+        //       cloudinaryURLs.push(cloudinaryJson.secure_url);
+        //       console.log(`Image ${i + 1} uploaded successfully:`, cloudinaryJson.secure_url);
+        //     } else {
+        //       setError(`Error uploading image ${i + 1} to Cloudinary.`);
+        //       setLoading(false);
+        //       return;  // Stop the process if any image upload fails
+        //     }
+        //   }
+  
+        //   // Once all images are uploaded, save the URLs in the database
+        //   const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${createdProductId}`, {
+        //     method: "PUT",
+        //     headers: {
+        //       'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({ images: cloudinaryURLs }),  // Send Cloudinary URLs
+        //   });
+  
+        //   const imageJson = await imageResponse.json();
+  
+        //   if (imageResponse.ok) {
+        //     console.log("Images URLs saved successfully:", imageJson);
+        //   } else {
+        //     setError('Error saving image URLs in the database.');
+        //     setLoading(false);
+        //     return;
+        //   }
+        // }
+  
+        // // Navigate to homepage after success
+         navigate("/");
+  
       } else {
         setSuccess('');
-        setError(json.error);
+        setError(json.error || "An unexpected error occurred.");
+        console.log(json.error);
       }
+  
     } catch (error) {
       setSuccess('');
-      setError('An unexpected error occurred.');
+      setError(error.error || "An unexpected error occurred.");
       console.error(error);
     } finally {
-      setLoading(false);
+      setLoading(false);  // Hide the loading spinner when done
     }
   };
 
@@ -311,7 +411,7 @@ const AddNewJobForm = () => {
       <label className="block text-lg font-medium text-gray-700">{'Description* '}</label>
       
       {/* Editor container with Tailwind styles */}
-      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-hidden">
+      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-auto">
         <Editor
           editorState={editorState}
           onEditorStateChange={onEditorStateChange}

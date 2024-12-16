@@ -111,7 +111,7 @@ const AddNewEquipmentForm = () => {
         });
       }
     }
-  }, []);
+  }, [product]);
   
 
   // const onEditorStateChange = (newEditorState) => {
@@ -249,9 +249,15 @@ console.log(descriptions)
   
     // Modify content to replace <p> tags with <br /> and non-breaking spaces with normal spaces
     const modifiedContent = htmlContent
-      .replace(/<p>/g, "")
-      .replace(/<\/p>/g, "<br />")
-      .replace(/&nbsp;/g, " "); // Replace &nbsp; with normal spaces
+      // .replace(/<p>/g, "")
+      // .replace(/<\/p>/g, "<br />")
+      // .replace(/&nbsp;/g, " "); // Replace &nbsp; with normal spaces
+
+      .replace(/<p>/g, "") // Remove <p> tags
+    .replace(/<\/p>/g, "<br />") // Replace closing </p> tags with <br />
+    .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />") // Avoid double <br /> tags
+    .replace(/&nbsp;/g, " "); // Replace &nbsp; with normal spaces
+
   
     const formData = new FormData(); // Initialize FormData to store form fields
     const id = localStorage.getItem('userid');  // Get user ID from local storage
@@ -462,11 +468,11 @@ console.log(descriptions)
       <label className="block text-lg font-medium text-gray-700">{'Description* '}</label>
       
       {/* Editor container with Tailwind styles */}
-      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-hidden">
+      <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-auto">
         <Editor
           editorState={editorState}
           onEditorStateChange={onEditorStateChange}
-          wrapperClassName="border-none"
+          wrapperClassName="border-none" 
           editorClassName="min-h-[200px] bg-white p-2"
         />
       </div>

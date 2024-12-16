@@ -473,6 +473,16 @@ const AddNewJobForm = () => {
             </div>
             <hr className="border-t border-gray-500 my-4" />
             <div className="mt-8 flex ">
+            {loading && (
+  <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex flex-col justify-center items-center z-50">
+    <img
+      src="https://i.gifer.com/4V0b.gif" // Replace this with your spinning GIF URL
+      alt="Loading..."
+      className="w-16 h-16" // You can adjust the size of the GIF here
+    />
+    <p className="mt-4 text-white font-semibold">Please do not close window</p> {/* Text below the spinner */}
+  </div>
+)}
       <button
           type="submit"
           onClick={(e) => handleSubmit(e, 'active')}

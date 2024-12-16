@@ -199,6 +199,11 @@ const onEditorStateChange = (newEditorState) => {
     
       try {
         // API URL and method depending on whether editing or creating
+        if (images.length === 0) {
+          setError('please upload atleast one image ')
+          return;
+        }
+        
         const response = await fetch(isEditing
           ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
           : 'https://medspaa.vercel.app/product/addBusiness', {
@@ -210,7 +215,7 @@ const onEditorStateChange = (newEditorState) => {
     
         if (response.ok) {
           // Show success message
-          setSuccess(isEditing ? "Business updated successfully!" : json.message);
+          // setSuccess(isEditing ? "Business updated successfully!" : json.message);
           setError(''); // Clear error message
     
           // Handle image uploads to Cloudinary if images exist

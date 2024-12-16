@@ -183,7 +183,10 @@ console.log(description)
         : "https://medspaa.vercel.app/product/addRoom";
   
       const method = isEditing ? "PUT" : "POST";
-  
+      if (images.length === 0) {
+        setError('please upload atleast one image ')
+        return;
+      }
       // Send the form data to the server
       const response = await fetch(url, {
         method,
@@ -194,7 +197,7 @@ console.log(description)
   
       if (response.ok) {
         // Show success message
-        setSuccess(isEditing ? "Room updated successfully!" : json.message);
+        // setSuccess(isEditing ? "Room updated successfully!" : json.message);
         setError(''); // Clear error message
   
         // Handle image uploads to Cloudinary if images exist

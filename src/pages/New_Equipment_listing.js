@@ -285,7 +285,10 @@ console.log(descriptions)
       formData.append('status', status);
     }
   
+
     try {
+
+
       // Set the API URL and method (POST for creating new, PUT for updating)
       let url = "https://medspaa.vercel.app/product/addNewEquipments";
       let method = "POST";
@@ -294,23 +297,31 @@ console.log(descriptions)
         url = `https://medspaa.vercel.app/product/updateListing/${product.id}`;
         method = "PUT";
       }
-  
+
+      if (images.length === 0) {
+        setError('please upload atleast one image ')
+        return;
+      }
+      
       // Submit the form data (main product data)
       const response = await fetch(url, {
         method,
         body: formData,
       });
+
+     
   
       const json = await response.json();
   
       if (response.ok) {
         // Success handling based on status
         if (status === "active") {
-          setSuccess(json.message); // Success message for publishing
+          // setSuccess(json.message); // Success message for publishing
         } else {
-          setSuccess("Your post drafted successfully"); // Success message for draft
+          // setSuccess("Your post drafted successfully"); // Success message for draft
         }
-  
+
+ 
         // Handle image upload if there are images
         if (images && images.length > 0) {
           const cloudinaryURLs = [];
@@ -668,7 +679,7 @@ console.log(descriptions)
       <hr className="border-t border-gray-500 my-4" />
       <div className="mt-8 flex ">
       {loading && (
-  <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex flex-col justify-center items-center z-50">
+  <div className="fixed inset-0 bg-gray-600 bg-opacity-80 flex flex-col justify-center items-center z-50">
     <img
       src="https://i.gifer.com/4V0b.gif" // Replace this with your spinning GIF URL
       alt="Loading..."

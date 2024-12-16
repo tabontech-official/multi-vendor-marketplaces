@@ -307,12 +307,19 @@ console.log(description)
         url = `https://medspaa.vercel.app/product/updateListing/${product.id}`;
         method = "PUT";
       }
-  
+
+      if (images.length === 0) {
+        setError('please upload atleast one image ')
+        return;
+      }
+
       // Submit the form data (main product data)
       const response = await fetch(url, {
         method,
         body: formData,
       });
+
+   
   
       const json = await response.json();
   
@@ -321,7 +328,7 @@ console.log(description)
     const createdProductId = json.product?.id || product.id;
         // Success handling based on status
         if (status === "active") {
-          setSuccess(json.message); // Success message for publishing
+          // setSuccess(json.message); // Success message for publishing
         } else {
           setSuccess("Your post drafted successfully"); // Success message for draft
         }

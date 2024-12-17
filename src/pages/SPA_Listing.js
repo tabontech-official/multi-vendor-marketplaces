@@ -200,7 +200,8 @@ const onEditorStateChange = (newEditorState) => {
       try {
         // API URL and method depending on whether editing or creating
         if (images.length === 0) {
-          setError('please upload atleast one image ')
+          setError('Please Upload Atleast 1 image ');
+          setTimeout(() => setError(''), 8000);
           return;
         }
         
@@ -749,5 +750,6 @@ const onEditorStateChange = (newEditorState) => {
     </main>
   );
 };
+
 
 export default AddBusinessListingForm;

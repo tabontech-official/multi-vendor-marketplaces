@@ -184,7 +184,8 @@ console.log(description)
   
       const method = isEditing ? "PUT" : "POST";
       if (images.length === 0) {
-        setError('please upload atleast one image ')
+        setError('Please Upload Atleast 1 image ');
+        setTimeout(() => setError(''), 8000);
         return;
       }
       // Send the form data to the server

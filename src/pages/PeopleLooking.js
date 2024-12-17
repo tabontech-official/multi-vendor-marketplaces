@@ -64,10 +64,7 @@ const PeopleLooking = () => {
       setName(roomListing.name)
       setIsEditing(true);
       // const textDescrip = product.body_html.replace(/<br\s*\/?>|&nbsp;/gi, '');
-      const textDescrip = product.body_html.replace(
-        /<br\s*\/?>|&nbsp;/gi, // Remove unwanted tags
-        ""
-      );
+      const textDescrip = product.body_html;
       
       setDescription(textDescrip);
 
@@ -389,8 +386,11 @@ const handleSubmit = async (e, status) => {
     }
 
     if (images.length === 0) {
-      setError('please upload atleast one image ')
-      return;
+    setError('Please Upload Atleast 1 image ');
+    setTimeout(() => {
+      setError("");
+    }, 8000);
+    return;
     }
     // Submit the form data (main product data)
     const response = await fetch(url, {
@@ -457,6 +457,15 @@ const handleSubmit = async (e, status) => {
           return;
         }
       }
+      // else{
+
+      //   // setError('please upload atleast one image ');
+      //   // setTimeout(() => {
+      //   //   setError("");
+      //   // }, 8000);
+      //   // return;
+
+      // }
 
       // Navigate to homepage after success
       navigate("/");

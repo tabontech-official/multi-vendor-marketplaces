@@ -160,6 +160,7 @@ const [hasMore, setHasMore] = useState(false);
         console.error('Unknown product type:', product.product_type);
         return;
     }
+    // setOpenDropdown(null);
     navigate(formPage, { state: { product } });
   };
 
@@ -177,6 +178,7 @@ const [hasMore, setHasMore] = useState(false);
     } catch (error) {
       console.error('Error deleting product:', error);
     }
+    // setOpenDropdown(null);
   };
 
   const fetchCredits = async () => {
@@ -258,6 +260,8 @@ const handleUnpublish = async (product) => {
   } finally {
     setLoadingId(null);
   }
+
+  // setOpenDropdown(null);
 };
 
 
@@ -480,11 +484,14 @@ handleSearch()
                 <td className="py-4 whitespace-nowrap relative px-4">
                   <button
                     onClick={() => toggleDropdown(index)}
+                   
                     className="text-gray-600 hover:text-gray-800 focus:outline-none"
                   >
                     <HiDotsVertical className="w-5 h-5" />
                   </button>
-                  <div ref={el => dropdownRefs.current[index] = el}>
+                  <div ref={el => dropdownRefs.current[index] = el}
+                   onMouseLeave={() => setOpenDropdown(null)} // Close dropdown on mouse leave
+                    >
                     {openDropdown === index && (
                       <div className="absolute bg-white border flex justify-start items-start border-gray-300 rounded-md shadow-lg z-10">
                         <ul className="py-1">

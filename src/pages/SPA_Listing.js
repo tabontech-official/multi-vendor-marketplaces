@@ -9,6 +9,49 @@ import draftToHtml from 'draftjs-to-html';
 import htmlToDraft from 'html-to-draftjs';
 import { Editor } from 'react-draft-wysiwyg'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'; 
+import { DndProvider } from "react-dnd"; // Import DndProvider
+import { useDrag, useDrop } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend"; // Import HTML5 backend
+
+const ImageItem = ({ image, index, moveImage, handleRemoveImage }) => {
+  const [, drag] = useDrag({
+    type: "IMAGE",
+    item: { index },
+  });
+
+  const [, drop] = useDrop({
+    accept: "IMAGE",
+    hover: (item) => {
+      if (item.index !== index) {
+        moveImage(item.index, index);
+        item.index = index;
+      }
+    },
+  });
+
+  return (
+    <div
+      ref={(node) => drag(drop(node))}
+      className="flex items-center mb-4 cursor-move"
+    >
+      <img
+        src={image}
+        alt={`Preview ${index}`}
+        className="border border-gray-300 w-14 h-14 object-cover"
+      />
+      <div className="ml-4 flex flex-1 items-center">
+        <p className="text-sm text-gray-700 flex-1">Image {index + 1}</p>
+        <button
+          type="button"
+          onClick={() => handleRemoveImage(index)}
+          className="text-red-500 hover:text-red-700 text-sm ml-4"
+        >
+          <FaTrash />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 
 
@@ -292,20 +335,75 @@ const onEditorStateChange = (newEditorState) => {
 
 
   // Handler for image file change
+  // const handleImageChange = (e) => {
+  //   const files = Array.from(e.target.files); // Get all selected files
+  //   setImages(prevImages => [...prevImages, ...files]); // Store file objects
+  //   const newImagePreviews = files.map(file => URL.createObjectURL(file)); // Create object URLs for preview
+  //   setImagePreviews(prevPreviews => [...prevPreviews, ...newImagePreviews]); // Append to the existing previews
+  // };
+
+
+  // // Handler to remove image
+  // const handleRemoveImage = (index) => {
+  //   setImages(prevImages => prevImages.filter((_, i) => i !== index)); // Remove image at the specified index
+  //   setImagePreviews(prevPreviews => prevPreviews.filter((_, i) => i !== index)); // Remove preview at the specified index
+  // };
+
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files); // Get all selected files
-    setImages(prevImages => [...prevImages, ...files]); // Store file objects
-    const newImagePreviews = files.map(file => URL.createObjectURL(file)); // Create object URLs for preview
-    setImagePreviews(prevPreviews => [...prevPreviews, ...newImagePreviews]); // Append to the existing previews
+    const files = Array.from(e.target.files || []); // Ensure files is an array
+    const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+    let validImages = [];
+    let invalidImages = [];
+
+    files.forEach((file) => {
+      if (file.size > maxSize) {
+        // If file size exceeds 50MB, add it to the invalidImages array
+        invalidImages.push(file);
+      } else {
+        // Otherwise, add to the validImages array
+        validImages.push(file);
+      }
+    });
+
+    // If there are any invalid images, show an error message
+    if (invalidImages.length > 0) {
+      setError(
+        `The following images exceed the 50MB size limit: ${invalidImages
+          .map((file) => file.name)
+          .join(", ")}`
+      );
+    }
+
+    // Add only the valid images to the state
+    setImages((prevImages) => [...prevImages, ...validImages]);
+
+    // Preview the valid images
+    const newImagePreviews = validImages.map((file) =>
+      URL.createObjectURL(file)
+    );
+    setImagePreviews((prevPreviews) => [...prevPreviews, ...newImagePreviews]);
   };
 
-
-  // Handler to remove image
   const handleRemoveImage = (index) => {
-    setImages(prevImages => prevImages.filter((_, i) => i !== index)); // Remove image at the specified index
-    setImagePreviews(prevPreviews => prevPreviews.filter((_, i) => i !== index)); // Remove preview at the specified index
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index)); // Remove image at the specified index
+    setImagePreviews((prevPreviews) =>
+      prevPreviews.filter((_, i) => i !== index)
+    ); // Remove preview at the specified index
   };
 
+  const moveImage = (fromIndex, toIndex) => {
+    const updatedImages = [...images];
+    const [movedImage] = updatedImages.splice(fromIndex, 1);
+    updatedImages.splice(toIndex, 0, movedImage);
+    setImages(updatedImages);
+
+    const updatedPreviews = [...imagePreviews];
+    const [movedPreview] = updatedPreviews.splice(fromIndex, 1);
+    updatedPreviews.splice(toIndex, 0, movedPreview);
+    setImagePreviews(updatedPreviews);
+  };
+
+  
   return (
     <main className="bg-gray-100 min-h-screen p-5 flex-row">
       <h1 className="text-4xl max-sm:text-xl font-bold mb-4">Add New Business Listing</h1>
@@ -627,71 +725,69 @@ const onEditorStateChange = (newEditorState) => {
           </form>
         </div>
 
-        {/* Image Upload */}
-        <div className="lg:w-1/3 lg:pl-8 flex-1">
-         
-        <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
-  <h2 className="text-2xl font-semibold mb-4">Business Image</h2>
-  <p className="text-gray-600 mb-4">
-    Upload an image of the equipment. Recommended size: 1024x1024 and less than 50MB.
-  </p>
-  <p className="text-sm text-gray-500 mb-2"></p>
-
-  {/* Image Preview */}
-  {imagePreviews.length > 0 ? (
-  imagePreviews.map((image, index) => (
-    <div key={index} className="flex items-center mb-4">
-      <img
-        src={image}
-        alt={`Preview ${index}`}
-        className="border border-gray-300 w-14 h-14 object-cover"
-      />
-      <div className="ml-4 flex flex-1 items-center">
-        <p className="text-sm text-gray-700 flex-1">Image {index + 1}</p>
-        <button
-          type="button"
-          onClick={() => handleRemoveImage(index)} // Call remove handler with the index
-          className="text-red-500 hover:text-red-700 text-sm ml-4"
-        >
-          <FaTrash />
-        </button>
-      </div>
-    </div>
-  ))
-) : (
-            <div className="flex items-center mb-4">
-              <img
-                src={"https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"}
-                alt="Preview"
-                className="border border-gray-300 w-24 h-24 object-cover"
-              />
-              <div className="ml-4 flex flex-1 items-center">
-                <p className="text-sm text-gray-700 flex-1">{imageName}</p>
-              </div>
-            </div>
-          )}
-
-          <button
-            onClick={() => document.getElementById('images').click()}
-            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
-          >
-            Browse Image
-          </button>
-          <input
-            type="file"
-                id="images"
-            onChange={handleImageChange}
-            multiple
-            className="hidden"
-          />
+     <DndProvider backend={HTML5Backend}>
+             {" "}
+             {/* Wrap your app with DndProvider */}
+             <div className="lg:w-1/3 lg:pl-8 flex-1">
+               <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
+                 <h2 className="text-2xl font-semibold mb-4">Upload pictures</h2>
+                 <p className="text-gray-600 mb-4">
+                   Upload an image. Recommended size: 2048x1024 and less than 50MB.
+                 </p>
+                 <p className="text-sm text-gray-500 mb-2"></p>
+   
+                 {/* Image Preview */}
+                 {error && <div className="text-red-500">{error}</div>}
+                 {imagePreviews.length > 0 ? (
+                   imagePreviews.map((image, index) => (
+                     <ImageItem
+                       key={index}
+                       index={index}
+                       image={image}
+                       moveImage={moveImage}
+                       handleRemoveImage={handleRemoveImage}
+                     />
+                   ))
+                 ) : (
+                   <div className="flex items-center mb-4">
+                     <img
+                       src={
+                         "https://sp-seller.webkul.com/img/No-Image/No-Image-140x140.png"
+                       }
+                       alt="Preview"
+                       className="border border-gray-300 w-24 h-24 object-cover"
+                     />
+                     <div className="ml-4 flex flex-1 items-center">
+                       <p className="text-sm text-gray-700 flex-1">
+                         No images uploaded
+                       </p>
+                     </div>
+                   </div>
+                 )}
+   
+                 <button
+                   onClick={() => document.getElementById("images").click()}
+                   className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
+                 >
+                   Browse Image
+                 </button>
+                 <input
+                   type="file"
+                   id="images"
+                   onChange={handleImageChange}
+                   multiple
+                   className="hidden"
+                 />
+               </div>
+               <p className="text-sm text-gray-500">
+                 Note: Image can be uploaded of any dimension but we recommend you
+                 upload an image with dimensions of 2048x1024 & its size must be
+                 less than 50MB.
+               </p>
+             </div>
+           </DndProvider>
         </div>
-        <p className="text-sm text-gray-500">
-          Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 50MB.
-        </p>
-
-        </div>
-      </div>
-
+      
       {/* Submit Button */}
       <hr className="border-t border-gray-500 my-4" />
       <div className="mt-8 flex ">

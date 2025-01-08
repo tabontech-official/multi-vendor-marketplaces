@@ -633,7 +633,7 @@ const onEditorStateChange = (newEditorState) => {
         <div className="bg-gray-50 p-4 border border-gray-300 mb-4">
   <h2 className="text-2xl font-semibold mb-4">Business Image</h2>
   <p className="text-gray-600 mb-4">
-    Upload an image of the equipment. Recommended size: 1024x1024 and less than 15MB.
+    Upload an image of the equipment. Recommended size: 1024x1024 and less than 50MB.
   </p>
   <p className="text-sm text-gray-500 mb-2"></p>
 
@@ -675,7 +675,7 @@ const onEditorStateChange = (newEditorState) => {
             onClick={() => document.getElementById('images').click()}
             className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded"
           >
-            Upload Image
+            Browse Image
           </button>
           <input
             type="file"
@@ -686,7 +686,7 @@ const onEditorStateChange = (newEditorState) => {
           />
         </div>
         <p className="text-sm text-gray-500">
-          Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 15MB.
+          Note: Image can be uploaded of any dimension but we recommend you upload an image with dimensions of 1024x1024 & its size must be less than 50MB.
         </p>
 
         </div>

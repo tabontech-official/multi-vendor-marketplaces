@@ -658,7 +658,7 @@ const handleRemoveImage = (index) => {
           />
         </div>
         <p className="text-sm text-gray-500">
-          Note: Upload your resume and your photo. Recommended size: 1024x1024 and less than 15MB.
+          Note: Upload your resume and your photo. Recommended size: 1024x1024 and less than 50MB.
 
         </p>
 

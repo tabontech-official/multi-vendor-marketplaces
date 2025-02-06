@@ -37,7 +37,7 @@ const navigate = useNavigate()
     const id = localStorage.getItem('userid');
     if (!id) return;
     try {
-      const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}`, { method: 'GET' });
+      const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/quantity/${id}`, { method: 'GET' });
       if (response.ok) {
         const data = await response.json();
         const fetchedCredits = data.quantity || 0;
@@ -48,7 +48,7 @@ const navigate = useNavigate()
     }
     
     try {
-      const response = await fetch("https://medspaa.vercel.app/product/getPrice/", { method: 'GET' });
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/product/getPrice/", { method: 'GET' });
       const json = await response.json();
       if (response.ok) {
         setPrice(json[0].price);
@@ -61,7 +61,7 @@ const navigate = useNavigate()
   // Fetch required credits for each category
   const fetchRequiredCredits = async () => {
     try {
-      const response = await fetch("https://medspaa.vercel.app/product/fetchRequireCredits", { method: 'GET' });
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/product/fetchRequireCredits", { method: 'GET' });
       if (response.ok) {
         const data = await response.json();
         setRequiredCredits(data.data);

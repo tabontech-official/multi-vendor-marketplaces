@@ -70,7 +70,7 @@ const [hasMore, setHasMore] = useState(false);
 
   const fetchPrice = async()=>{
     try {
-      const response =  await fetch("https://medspaa.vercel.app/product/getPrice/", {method:'GET'})
+      const response =  await fetch("https://multi-vendor-marketplace.vercel.app/product/getPrice/", {method:'GET'})
       const json = await response.json()
       if(response.ok){
         console.log("Price",json)
@@ -96,8 +96,8 @@ const [hasMore, setHasMore] = useState(false);
     try {
       const response = await fetch(
         admin
-          ? `https://medspaa.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-          : `https://medspaa.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+          ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
+          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
         { method: 'GET' }
       );
 
@@ -168,7 +168,7 @@ const [hasMore, setHasMore] = useState(false);
     const confirmDelete = window.confirm("Are you sure you want to delete this listing?");
     if (!confirmDelete) return;
     try {
-      const response = await fetch(`https://medspaa.vercel.app/product/deleteProduct/${id}`, {
+      const response = await fetch(`https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`, {
         method: 'DELETE',
       });
       if (response.ok) {
@@ -184,7 +184,7 @@ const [hasMore, setHasMore] = useState(false);
   const fetchCredits = async () => {
     const id = localStorage.getItem('userid');
     try {
-      const response = await fetch(`https://medspaa.vercel.app/auth/quantity/${id}`, { method: 'GET' });
+      const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/quantity/${id}`, { method: 'GET' });
       if (response.ok) {
         const data = await response.json();
         setCredit(data.quantity)
@@ -200,7 +200,7 @@ const [hasMore, setHasMore] = useState(false);
     setMessage('');
   
     try {
-      const response = await fetch(`https://medspaa.vercel.app/product/publishedProduct/${product.id}`, {
+      const response = await fetch(`https://multi-vendor-marketplace.vercel.app/product/publishedProduct/${product.id}`, {
         method: 'PUT',
        body: JSON.stringify(userId) 
       });
@@ -244,7 +244,7 @@ const handleUnpublish = async (product) => {
   setMessage('');
 
   try {
-    const response = await fetch(`https://medspaa.vercel.app/product/unpublished/${product.id}`, {
+    const response = await fetch(`https://multi-vendor-marketplace.vercel.app/product/unpublished/${product.id}`, {
       method: 'PUT',
     });
 
@@ -327,8 +327,8 @@ handleSearch()
       try {
         const response = await fetch(
           admin
-            ? `https://medspaa.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-            : `https://medspaa.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+            ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
+            : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
           { method: 'GET' }
         );
     

@@ -249,8 +249,8 @@ const onEditorStateChange = (newEditorState) => {
         }
         
         const response = await fetch(isEditing
-          ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
-          : 'https://medspaa.vercel.app/product/addBusiness', {
+          ? `https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}`
+          : 'https://multi-vendor-marketplace.vercel.app/product/addBusiness', {
           method: isEditing ? 'PUT' : 'POST', 
           body: formData,
         });
@@ -291,7 +291,7 @@ const onEditorStateChange = (newEditorState) => {
             }
     
             // Save the Cloudinary URLs to the database
-            const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${json.product.id}`, {
+            const imageResponse = await fetch(`https://multi-vendor-marketplace.vercel.app/product/updateImages/${json.product.id}`, {
               method: "PUT",
               headers: {
                 'Content-Type': 'application/json',

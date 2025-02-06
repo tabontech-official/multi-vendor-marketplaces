@@ -37,7 +37,7 @@ const AdminDashboard = () => {
  const [editingProductId, setEditingProductId] = useState(null); // Track the ID of the product being edited
   const fetchPrice = async () => {
     try {
-      const response = await fetch("https://medspaa.vercel.app/product/getPrice/", { method: 'GET' });
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/product/getPrice/", { method: 'GET' });
       const json = await response.json();
       if (response.ok) {
         console.log("Price", json);
@@ -77,7 +77,7 @@ const AdminDashboard = () => {
   const handleConfirmChangePrice = async () => {
     setLoading(true)
     try {
-      const response = await fetch('https://medspaa.vercel.app/product/updateId/', {
+      const response = await fetch('https://multi-vendor-marketplace.vercel.app/product/updateId/', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ const AdminDashboard = () => {
 
   const fetchRequiredCredits = async () => {
     try {
-      const response = await fetch('https://medspaa.vercel.app/product/fetchRequireCredits', { method: 'GET' });
+      const response = await fetch('https://multi-vendor-marketplace.vercel.app/product/fetchRequireCredits', { method: 'GET' });
       const data = await response.json();
     
       const creditsMap = data.data.reduce((map, item) => {
@@ -228,7 +228,7 @@ const AdminDashboard = () => {
     }
   
     try {
-      const response = await fetch('https://medspaa.vercel.app/product/credits/', {
+      const response = await fetch('https://multi-vendor-marketplace.vercel.app/product/credits/', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -264,7 +264,7 @@ const AdminDashboard = () => {
     setLoading(true);
     setToast({ show: false, type: '', message: '' }); // Reset toast
     try {
-        const response = await fetch('https://medspaa.vercel.app/auth/updatequantity', {
+        const response = await fetch('https://multi-vendor-marketplace.vercel.app/auth/updatequantity', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json', // Include content-type

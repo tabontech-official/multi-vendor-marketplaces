@@ -37,7 +37,7 @@ const AccountPage = () => {
       }
 
       try {
-        const response = await fetch(`https://medspaa.vercel.app/auth/user/${id}`, {
+        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
           method: 'GET',
         });
 
@@ -124,7 +124,7 @@ const AccountPage = () => {
     }
 
     try {
-      const response = await fetch(`https://medspaa.vercel.app/auth/editProfile/${userId}`, {
+      const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`, {
         method: 'PUT',
         body: form,
       });

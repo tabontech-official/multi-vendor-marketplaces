@@ -165,7 +165,7 @@
 //       formData.append('status', status);
 //       }
 //     try {
-//       const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateListing/${product.id}` : "https://medspaa.vercel.app/product/addEquipment", {
+//       const response = await fetch(isEditing ? `https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}` : "https://multi-vendor-marketplace.vercel.app/product/addEquipment", {
 //         method: isEditing ? "PUT" : "POST",
 //         body: formData
 //       });
@@ -799,7 +799,7 @@ console.log(product)
   //     formData.append('status', status);
   //     }
   //   try {
-  //     const response = await fetch(isEditing ? `https://medspaa.vercel.app/product/updateListing/${product.id}` : "https://medspaa.vercel.app/product/addEquipment", {
+  //     const response = await fetch(isEditing ? `https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}` : "https://multi-vendor-marketplace.vercel.app/product/addEquipment", {
   //       method: isEditing ? "PUT" : "POST",
   //       body: formData
   //     });
@@ -877,8 +877,8 @@ console.log(product)
     //   // Submit the form data (images + other details)
     //   const response = await fetch(
     //     isEditing
-    //       ? `https://medspaa.vercel.app/product/updateListing/${product.id}`
-    //       : "https://medspaa.vercel.app/product/addEquipment",
+    //       ? `https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}`
+    //       : "https://multi-vendor-marketplace.vercel.app/product/addEquipment",
     //     {
     //       method: isEditing ? "PUT" : "POST", // PUT for update, POST for new post
     //       body: formData
@@ -919,7 +919,7 @@ console.log(product)
     //       }
   
     //       // Once all images are uploaded, save the URLs in the database
-    //       const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${json.product.id}`, {
+    //       const imageResponse = await fetch(`https://multi-vendor-marketplace.vercel.app/product/updateImages/${json.product.id}`, {
     //         method: "PUT",
     //         headers: {
     //           'Content-Type': 'application/json',
@@ -957,11 +957,11 @@ console.log(product)
 
     try {
       // Set the API URL and method (POST for creating new, PUT for updating)
-      let url = "https://medspaa.vercel.app/product/addEquipment";
+      let url = "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
       let method = "POST";
   
       if (product && product.id) {
-        url = `https://medspaa.vercel.app/product/updateListing/${product.id}`;
+        url = `https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}`;
         method = "PUT";
       }
       if (images.length === 0) {
@@ -1016,8 +1016,8 @@ console.log(product)
             }
           }
   
-          // Once all images are uploaded, save the URLs in the database https://medspaa.vercel.app/product/updateImages/${json.product.id}
-          const imageResponse = await fetch(`https://medspaa.vercel.app/product/updateImages/${createdProductId}`, {
+          // Once all images are uploaded, save the URLs in the database https://multi-vendor-marketplace.vercel.app/product/updateImages/${json.product.id}
+          const imageResponse = await fetch(`https://multi-vendor-marketplace.vercel.app/product/updateImages/${createdProductId}`, {
             method: "PUT",
             headers: {
               'Content-Type': 'application/json',

@@ -37,7 +37,7 @@ const Navbar = () => {
     try {
       const userid = localStorage.getItem('userid');
       if (userid) {
-        await fetch(`https://medspaa.vercel.app/auth/logout/${userid}`, {
+        await fetch(`https://multi-vendor-marketplace.vercel.app/auth/logout/${userid}`, {
           method: 'POST',
         });
         dispatch({ type: 'LOGOUT' });

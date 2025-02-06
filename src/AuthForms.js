@@ -57,7 +57,7 @@ const handleSignup = async (e) => {
   }
 
   try {
-    const response = await fetch('https://medspaa.vercel.app/auth/signUp', {
+    const response = await fetch('https://multi-vendor-marketplace.vercel.app/auth/signUp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ firstName, lastName,  email, password, zip, country, state, phoneNumber, city }),
@@ -99,7 +99,7 @@ const handleLogin = async (e) => {
   }
 
   try {
-    const response = await fetch('https://medspaa.vercel.app/auth/signIn', {
+    const response = await fetch('https://multi-vendor-marketplace.vercel.app/auth/signIn', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),

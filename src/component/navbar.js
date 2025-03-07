@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FaBars, FaTimes } from 'react-icons/fa';
-import { useAuthContext } from '../Hooks/useAuthContext';
-import { jwtDecode } from 'jwt-decode';
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FaBars, FaTimes } from "react-icons/fa";
+import { useAuthContext } from "../Hooks/useAuthContext";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar = () => {
   const { user, dispatch } = useAuthContext();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
- const navigate = useNavigate()
+  const navigate = useNavigate();
   const isAdmin = () => {
-    const token = localStorage.getItem('usertoken');
+    const token = localStorage.getItem("usertoken");
     if (token) {
       const decoded = jwtDecode(token);
       if (decoded.payLoad.isAdmin && decoded.exp * 1000 > Date.now()) {
@@ -35,19 +35,22 @@ const Navbar = () => {
 
   const LogOut = async () => {
     try {
-      const userid = localStorage.getItem('userid');
+      const userid = localStorage.getItem("userid");
       if (userid) {
-        await fetch(`https://multi-vendor-marketplace.vercel.app/auth/logout/${userid}`, {
-          method: 'POST',
-        });
-        dispatch({ type: 'LOGOUT' });
+        await fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/logout/${userid}`,
+          {
+            method: "POST",
+          }
+        );
+        dispatch({ type: "LOGOUT" });
         localStorage.clear();
-        navigate('/')
+        navigate("/");
         setIsDropdownOpen(false);
         setIsOpen(false);
       }
     } catch (error) {
-      console.error('Error during logout:', error);
+      console.error("Error during logout:", error);
     }
   };
 
@@ -58,10 +61,10 @@ const Navbar = () => {
       }
     };
 
-    window.addEventListener('click', handleClickOutside);
+    window.addEventListener("click", handleClickOutside);
 
     return () => {
-      window.removeEventListener('click', handleClickOutside);
+      window.removeEventListener("click", handleClickOutside);
     };
   }, []);
 
@@ -69,7 +72,7 @@ const Navbar = () => {
     <nav className=" bg-gradient-to-r from-blue-600  to-[#18262f] flex items-center px-4 py-3 relative shadow-lg">
       <div className="flex-shrink-0">
         <Link to="/dashboard">
-          <img
+          {/* <img
             src="https://cdn.shopify.com/s/files/1/0712/3337/2413/files/Layer_26.svg?v=1724230677"
             className="max-sm:h-12 shadow-md h-16"
             alt="Logo"
@@ -78,7 +81,8 @@ const Navbar = () => {
               padding: '5px', // Padding around logo
               borderRadius: '8px', // Rounded corners for better aesthetic
             }}
-          />
+          /> */}
+          <h1 className="text-white">AYDI Marketplace</h1>
         </Link>
       </div>
       <div className="flex-grow flex items-center justify-end">
@@ -90,7 +94,9 @@ const Navbar = () => {
           {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
         </button>
         <div
-          className={`fixed inset-0 bg-[#18262f] p-4 md:static md:flex md:flex-row md:space-x-8 md:bg-transparent md:items-center ${isOpen ? 'block' : 'hidden'} md:block z-10 transition-transform duration-500 ease-in-out`}
+          className={`fixed inset-0 bg-[#18262f] p-4 md:static md:flex md:flex-row md:space-x-8 md:bg-transparent md:items-center ${
+            isOpen ? "block" : "hidden"
+          } md:block z-10 transition-transform duration-500 ease-in-out`}
         >
           <button
             className="absolute top-4 right-4 text-white md:hidden"
@@ -113,39 +119,13 @@ const Navbar = () => {
                     </Link>
                   </li>
                 )}
-                <li>
-                  <Link
-                    to="https://www.medspatrader.com/?loggedin"
-                    className="text-white border border-transparent hover:border-blue-300 hover:bg-blue-700 transition duration-200 rounded-md px-4 py-2 shadow-md"
-                    onClick={toggleMenu}
-                  >
-                    Main Store
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/dashboard"
-                    className="text-white border border-transparent hover:border-blue-300 hover:bg-blue-700 transition duration-200 rounded-md px-4 py-2 shadow-md"
-                    onClick={toggleMenu}
-                  >
-                    My Listings
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/Subcription_Details"
-                    className="text-white border border-transparent hover:border-blue-300 hover:bg-blue-700 transition duration-200 rounded-md px-4 py-2 shadow-md"
-                    onClick={toggleMenu}
-                  >
-                  My Purchases
-                  </Link>
-                </li>
+
                 <li className="relative" ref={dropdownRef}>
                   <button
                     onClick={toggleDropdown}
                     className="text-white border-transparent hover:bg-blue-800 transition-transform duration-200 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center shadow-md"
                   >
-                    My Account
+                    Settings 
                     <svg
                       className="w-2.5 h-2.5 ms-3 transition-transform duration-300 transform"
                       aria-hidden="true"
@@ -164,8 +144,12 @@ const Navbar = () => {
                   </button>
                   {isDropdownOpen && (
                     <div
-                      className="absolute mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow w-40 z-10 transform transition-transform duration-300 origin-top ease-out"
-                      style={{ animation: isDropdownOpen ? 'slide-down 0.3s ease-out' : '' }}
+                      className="absolute mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow w-32 z-10 transform transition-transform duration-300 origin-top ease-out"
+                      style={{
+                        animation: isDropdownOpen
+                          ? "slide-down 0.3s ease-out"
+                          : "",
+                      }}
                     >
                       <ul className="py-2 text-sm text-gray-700">
                         <li>

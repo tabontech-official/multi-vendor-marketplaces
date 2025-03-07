@@ -15,7 +15,13 @@ const AccountPage = () => {
     zip: '',
     country: '',
     city: '',
+    dispatchAddress : " ",
+    dispatchCity : " ",
+    dispatchCountry : " ",
+    dispatchzip :" ",
     profileImage: 'https://sp-seller.webkul.com/img/store_logo/icon-user.png',
+    sellerGst:"",
+    gstRegistered:""
   });
   const [imageFile, setImageFile] = useState(null); // State for storing selected image file
   const [loading, setLoading] = useState(false);
@@ -58,6 +64,12 @@ const AccountPage = () => {
               country: data.country || '',
               city: data.city || '',
               profileImage: data.avatar[0] || 'https://sp-seller.webkul.com/img/store_logo/icon-user.png',
+              gstRegistered:data.gstRegistered,
+              sellerGst:data.sellerGst,
+              dispatchCountry:data.dispatchCountry,
+              dispatchCity:data.dispatchCity,
+              dispatchAddress:data.dispatchAddress,
+              dispatchzip:data.dispatchzip
             });
           }
         } else {
@@ -117,6 +129,14 @@ const AccountPage = () => {
     form.append('zip', formData.zip);
     form.append('country', formData.country);
     form.append('city', formData.city);
+    form.append('gstRegistered', formData.gstRegistered);
+    form.append('sellerGst', formData.sellerGst);
+    form.append('dispatchzip', formData.dispatchzip);
+    form.append('dispatchCountry', formData.dispatchCountry);
+    form.append('dispatchCity', formData.dispatchCity);
+    form.append('dispatchAddress', formData.dispatchAddress);
+
+
 
     // Append image file if it exists
     if (imageFile) {
@@ -301,7 +321,90 @@ const AccountPage = () => {
                 className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+            {/* Seller GST */}
+
+            <div className="flex flex-col">
+              <label htmlFor="Seller GST" className="block text-sm font-medium text-gray-700">Seller GST *</label>
+              <input
+                type="text"
+                id="Seller GST"
+                name="Seller GST"
+                value={formData.sellerGst}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+               {/* Seller GST */}
+
+               <div className="flex flex-col">
+              <label htmlFor="GST Registered" className="block text-sm font-medium text-gray-700">GST Registered *</label>
+              <input
+                type="text"
+                id="GST Registered"
+                name="GST Registered"
+                value={formData.gstRegistered}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label htmlFor="GST Registered" className="block text-sm font-medium text-gray-700">Dispatch Address *</label>
+              <input
+                type="text"
+                id="Dispatch Address"
+                name="Dispatch Address"
+                value={formData.dispatchAddress}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label htmlFor="Dispatch City" className="block text-sm font-medium text-gray-700">Dispatch City *</label>
+              <input
+                type="text"
+                id="Dispatch City"
+                name="Dispatch City"
+                value={formData.dispatchCity}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label htmlFor="dipatch Country" className="block text-sm font-medium text-gray-700">Dispatch Country *</label>
+              <input
+                type="text"
+                id="dipatch Country"
+                name="dipatch Country"
+                value={formData.dispatchCountry}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label htmlFor="dispatch Zip" className="block text-sm font-medium text-gray-700">Dispatch Zip *</label>
+              <input
+                type="text"
+                id="dispatch Zip"
+                name="dispatch Zip"
+                value={formData.dispatchzip}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
+
+          
 
           {/* Policy Agreement Checkbox */}
           <div className="flex items-center space-x-2">

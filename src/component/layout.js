@@ -1,7 +1,7 @@
 // src/Layout.js
 import React from "react";
 import { Outlet,useLocation } from "react-router-dom";
-import Navbar from "./navbar"; // Import Navbar component
+import Navbar from "./navbar"
 import SubNavbar from "./subNavbar";
 
 const Layout = () => {

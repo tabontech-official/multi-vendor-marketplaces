@@ -394,9 +394,9 @@ handleSearch()
     
 
       {/* Credit Display */}
-      <div className="mb-4 text-blue-600 font-semibold text-lg">
+      {/* <div className="mb-4 text-blue-600 font-semibold text-lg">
         <span className={credit === 0 ? 'text-red-500' : ''}> Available Credits: {credit}</span>
-      </div>
+      </div> */}
 
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
@@ -406,18 +406,18 @@ handleSearch()
         </div>
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
   {/* Buy Credits Button */}
-  <button
+  {/* <button
             onClick={() => setIsDialogOpen(true)}
             className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded flex items-center"
           >
             Buy Credits <FaShoppingBasket className="ml-1" />
-          </button>
+          </button> */}
 
   {/* Add Listings Button */}
-  <Link to="/Categories" className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
+  {/* <Link to="/Categories" className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
     <HiPlus className="w-5 h-5" />
     <span>Add Listings</span>
-  </Link>
+  </Link> */}
 </div>
 {toast.show && (
           <div className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`}>

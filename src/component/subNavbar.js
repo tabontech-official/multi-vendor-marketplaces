@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { FaTh, FaTags, FaBullhorn } from "react-icons/fa";
 import { BsGraphUp } from "react-icons/bs";
 import { IoSettingsOutline } from "react-icons/io5";
+import { MdDashboard } from "react-icons/md";
 
 const SubNavbar = () => {
   // State for tracking dropdown visibility
@@ -20,6 +21,17 @@ const SubNavbar = () => {
   return (
     <div className="flex items-center bg-white border border-gray-300 px-4 py-2 shadow-sm relative">
       <ul className="flex space-x-6 text-sm text-gray-700">
+         {/* Dashboard */}
+         <li
+          className="relative flex items-center space-x-1 cursor-pointer hover:text-gray-900"
+          onMouseEnter={() => handleMouseEnter("Dashboard")}
+          onMouseLeave={handleMouseLeave}
+        >
+          <MdDashboard  className="text-green-600" />
+          <Link to="/">Dasboard </Link>
+          
+        </li>
+
         {/* Products */}
         <li
           className="relative flex items-center space-x-1 cursor-pointer hover:text-gray-900"
@@ -30,10 +42,10 @@ const SubNavbar = () => {
           <Link to="#">Products </Link>
           {openDropdown === "products" && (
             <div className="absolute top-full left-0 bg-green-600 text-white py-2 px-4 w-48 shadow-lg">
-              <Link to="#" className="block hover:bg-green-700 px-2 py-1">
+              <Link to="/dashboard" className="block hover:bg-green-700 px-2 py-1">
                 Manage Products
               </Link>
-              <Link to="#" className="block hover:bg-green-700 px-2 py-1">
+              <Link to="/Categories" className="block hover:bg-green-700 px-2 py-1">
                 Add a Product
               </Link>
               <Link to="#" className="block hover:bg-green-700 px-2 py-1">

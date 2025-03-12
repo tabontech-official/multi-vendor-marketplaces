@@ -46,10 +46,9 @@ const ForgotPassword = () => {
   return (
     <section className="flex h-screen bg-gradient-to-r from-purple-600 to-indigo-500 items-center justify-center px-6">
       <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden">
-        {/* Left Side - Image & Text */}
         <div className="hidden md:flex flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white">
           <img
-            src="/png-logo.png" // Correct way to access public assets in React
+            src="/png-logo.png" 
             alt="Login"
             className="w-64 h-64 object-cover"
           />
@@ -60,7 +59,6 @@ const ForgotPassword = () => {
           </p>
         </div>
 
-        {/* Right Side - Login Form */}
         <div className="w-full md:w-1/2 p-8">
         
         <div className="mt-8">

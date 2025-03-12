@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { HiCamera } from "react-icons/hi";
 import { FaTimes } from "react-icons/fa"; // Import the close icon
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import { FaUser, FaBars, FaArrowLeft } from "react-icons/fa";
+import { IoSettings } from "react-icons/io5";
+import { MdIntegrationInstructions } from "react-icons/md";
+import { IoDocuments } from "react-icons/io5";
+import { TiUserAdd } from "react-icons/ti";
+import { TiContacts } from "react-icons/ti";
+import { RiStarSFill } from "react-icons/ri";
+import { MdOutlineHolidayVillage } from "react-icons/md";
 
 const AccountPage = () => {
   const navigate = useNavigate(); // Initialize useNavigate hook
@@ -30,6 +37,7 @@ const AccountPage = () => {
   const [info, setInfo] = useState("");
   const [success, setSuccess] = useState("");
   const [agreedToPolicies, setAgreedToPolicies] = useState(false); // New state for policy agreement
+  const [activeTab, setActiveTab] = useState("contactDetails");
 
   useEffect(() => {
     let isMounted = true;
@@ -169,52 +177,72 @@ const AccountPage = () => {
   };
 
   return (
-    <div className="flex bg-gray-100 min-h-screen text-gray-200">
+    <div className="flex bg-blue-50 min-h-screen text-blue-900">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-300 p-6 mt-2 mb-2 ml-2 rounded-r-xl flex flex-col justify-between">
+      <aside className="w-64 mt-2 mb-2 ml-4 rounded-r-2xl bg-blue-900 p-6 flex flex-col justify-between min-h-screen">
         <div>
           {/* User Info */}
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
-              <FaUser className="text-yellow-400 w-6 h-6" />
+          <div className="flex flex-col items-center border-b-2">
+            <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">
+              <FaUser className="text-yellow-400 w-10 h-10" />
             </div>
-            <div>
-              <h2 className="text-lg font-semibold">Business Account</h2>
-              <p className="text-sm text-gray-400">Profile is 75% complete</p>
+            <h2 className="text-lg font-semibold text-white mt-2">
+              Business Account
+            </h2>
+
+            {/* Rating & Profile Completion */}
+            <div className="flex items-center space-x-1 mt-1">
+              <span className="text-yellow-400 text-sm font-semibold">6.0</span>
+              <div className="flex space-x-1">
+                {[...Array(5)].map((_, index) => (
+                  <span key={index} className="text-yellow-400 text-sm">
+                    ★
+                  </span>
+                ))}
+              </div>
+            </div>
+            <p className="text-green-400 text-sm mt-1">
+              Profile is 75% complete
+            </p>
+            <div className="">
+              {/* Add Info Button */}
+              <button className="mt-2 mb-2 text-yellow-500 px-4 py-1 text-sm font-sans border-2 border-yellow-500 rounded-2xl ">
+                Add Info
+              </button>
             </div>
           </div>
 
           {/* Sidebar Navigation */}
           <nav className="mt-6 space-y-4">
-            <button className="w-full text-left flex items-center space-x-3 text-gray-300 hover:text-yellow-400">
-              <span className="w-6 h-6 bg-gray-800 flex items-center justify-center rounded-md">
-                <FaBars />
+            <button className="w-full text-left flex items-center space-x-3 text-blue-300 hover:text-yellow-400">
+              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                <TiUserAdd />
               </span>
-              <span>Home</span>
+              <span className="text-sm">Manage User</span>
             </button>
-            <button className="w-full text-left flex items-center space-x-3 text-gray-300 hover:text-yellow-400">
-              <span className="w-6 h-6 bg-gray-800 flex items-center justify-center rounded-md">
-                <FaBars />
+            <button className="w-full text-left flex items-center space-x-3 text-blue-300 hover:text-yellow-400">
+              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                <IoDocuments />
               </span>
-              <span>Partner Program</span>
+              <span className="text-sm">Document Template</span>
             </button>
-            <button className="w-full text-left flex items-center space-x-3 text-gray-300 hover:text-yellow-400">
-              <span className="w-6 h-6 bg-gray-800 flex items-center justify-center rounded-md">
-                <FaBars />
+            <button className="w-full text-left flex items-center space-x-3 text-blue-300 hover:text-yellow-400">
+              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                <MdIntegrationInstructions />
               </span>
-              <span>Wishlist</span>
+              <span className="text-sm">Integration Management</span>
             </button>
             <button className="w-full text-left flex items-center space-x-3 text-yellow-400">
-              <span className="w-6 h-6 bg-gray-800 flex items-center justify-center rounded-md">
-                <FaBars />
+              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                <IoSettings />
               </span>
-              <span>Settings</span>
+              <span className="text-sm">Settings</span>
             </button>
           </nav>
         </div>
 
         {/* Promote Button */}
-        <button className="w-full py-2 bg-yellow-500 text-black font-semibold rounded-md">
+        <button className="w-full py-2 bg-yellow-500 text-black font-semibold rounded-md hover:bg-yellow-600">
           Promote
         </button>
       </aside>
@@ -222,262 +250,589 @@ const AccountPage = () => {
       {/* Main Content */}
       <main className="flex-1 p-6">
         {/* Back Button */}
-        <button className="flex items-center text-black hover:text-gray-200 mb-4">
-          <FaArrowLeft className="mr-2" /> Back
-        </button>
-
-        {/* Account Settings Header */}
-        <h1 className="text-2xl font-semibold text-gray-600">Account Settings</h1>
-
-        {/* Tabs */}
-        <div className="flex justify-between border-b border-gray-700 mt-4 text-gray-400">
-          <button className="pb-2 text-blue-600 w-60 border-b-2 border-blue-600">
-            Contact details
+        <Link to={"/"}>
+          <button className="flex items-center text-blue-700 hover:text-blue-500 mb-4">
+            <FaArrowLeft className="mr-2" /> Back
           </button>
-          <button className="pb-2 text-gray-600 hover:text-gray-800">Profile details</button>
-          <button className="pb-2 text-gray-600 hover:text-gray-800">Profile Reviews</button>
-          <button className="pb-2 text-gray-600 hover:text-gray-800">Opening hours</button>
+        </Link>
+        <h1 className="text-2xl font-semibold text-blue-800">
+          Account Settings
+        </h1>
+        <div className="flex justify-between border-b border-blue-700 mt-4 text-blue-600">
+          <button
+            className={`pb-2 flex items-center space-x-2 ${
+              activeTab === "contactDetails"
+                ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
+                : "text-blue-500 hover:text-blue-700"
+            }`}
+            onClick={() => setActiveTab("contactDetails")}
+          >
+            <TiContacts className="text-xl" />
+            <span>Contact Details</span>
+          </button>
+
+          <button
+            className={`pb-2 flex items-center space-x-2 ${
+              activeTab === "profileDetails"
+                ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
+                : "text-blue-500 hover:text-blue-700"
+            }`}
+            onClick={() => setActiveTab("profileDetails")}
+          >
+            <FaUser className="text-xl" />
+            <span>Profile Details</span>
+          </button>
+
+          <button
+            className={`pb-2 flex items-center space-x-2 ${
+              activeTab === "profileReviews"
+                ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
+                : "text-blue-500 hover:text-blue-700"
+            }`}
+            onClick={() => setActiveTab("profileReviews")}
+          >
+            <RiStarSFill className="text-xl" />
+            <span>Profile Reviews</span>
+          </button>
+
+          <button
+            className={`pb-2 flex items-center space-x-2 ${
+              activeTab === "holiday"
+                ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
+                : "text-blue-500 hover:text-blue-700"
+            }`}
+            onClick={() => setActiveTab("holiday")}
+          >
+            <MdOutlineHolidayVillage className="text-xl" />
+            <span>Holiday</span>
+          </button>
         </div>
 
-        {/* Form Section */}
-        <div className="bg-gray-300 p-6 rounded-lg mt-6">
-          <h2 className="text-lg font-semibold text-gray-600">Edit Profile</h2>
+        {/* Tab Content */}
+        <div className="mt-6 p-6 bg-blue-200 rounded-lg">
+          {activeTab === "contactDetails" && (
+            <div>
+              {/* Form Section */}
+              <div className="bg-blue-200 p-6 rounded-lg mt-6">
+                <h2 className="text-lg font-semibold text-blue-800">
+                  Edit Profile
+                </h2>
 
-          {/* Account Status Toggle */}
-          <div className="flex items-center space-x-4 mt-4">
-            <p className="text-sm text-gray-600">Account Status</p>
-            <div className="flex space-x-4">
-              <button
-                className={`px-4 py-2 rounded-lg ${
-                  formData.accountStatus === "Private"
-                    ? "bg-red-700 text-white"
-                    : "bg-gray-800 text-gray-400"
-                }`}
-                onClick={() =>
-                  setFormData({ ...formData, accountStatus: "Private" })
-                }
-              >
-                Private
-              </button>
-              <button
-                className={`px-4 py-2 rounded-lg ${
-                  formData.accountStatus === "Business"
-                    ? "bg-yellow-500 text-black"
-                    : "bg-gray-800 text-gray-400"
-                }`}
-                onClick={() =>
-                  setFormData({ ...formData, accountStatus: "Business" })
-                }
-              >
-                Business
-              </button>
+                {/* Account Status Toggle */}
+                <div className="flex items-center space-x-4 mt-4">
+                  <p className="text-sm text-blue-700">Account Status</p>
+                  <div className="flex space-x-4">
+                    <button
+                      className={`px-4 py-2 rounded-lg ${
+                        formData.accountStatus === "Private"
+                          ? "bg-blue-700 text-white"
+                          : "bg-blue-500 text-blue-100"
+                      }`}
+                      onClick={() =>
+                        setFormData({ ...formData, accountStatus: "Private" })
+                      }
+                    >
+                      Private
+                    </button>
+                    <button
+                      className={`px-4 py-2 rounded-lg ${
+                        formData.accountStatus === "Business"
+                          ? "bg-yellow-500 text-black"
+                          : "bg-blue-500 text-blue-100"
+                      }`}
+                      onClick={() =>
+                        setFormData({ ...formData, accountStatus: "Business" })
+                      }
+                    >
+                      Business
+                    </button>
+                  </div>
+                </div>
+
+                {/* Form Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* First Name */}
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="firstName"
+                      className="text-sm font-medium text-blue-800"
+                    >
+                      First Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="firstName"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+
+                  {/* Last Name */}
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="lastName"
+                      className="text-sm font-medium text-blue-800"
+                    >
+                      Last Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="lastName"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="email"
+                      className="text-sm font-medium text-blue-800"
+                    >
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+
+                  {/* Phone */}
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="phone"
+                      className="text-sm font-medium text-blue-800"
+                    >
+                      Phone *
+                    </label>
+                    <input
+                      type="text"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="address"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Address *
+                    </label>
+                    <input
+                      type="text"
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+
+                  {/* Zip Code Field */}
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="zip"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Zip *
+                    </label>
+                    <input
+                      type="number"
+                      id="zip"
+                      name="zip"
+                      value={formData.zip}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+
+                  {/* Country Field */}
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="country"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Country *
+                    </label>
+                    <input
+                      type="text"
+                      id="country"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+
+                  {/* City Field */}
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="city"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      City *
+                    </label>
+                    <input
+                      type="text"
+                      id="city"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+                  {/* Seller GST */}
+
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="Seller GST"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Seller GST *
+                    </label>
+                    <input
+                      type="text"
+                      id="Seller GST"
+                      name="Seller GST"
+                      value={formData.sellerGst}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+
+                  {/* Seller GST */}
+
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="GST Registered"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      GST Registered *
+                    </label>
+                    <input
+                      type="text"
+                      id="GST Registered"
+                      name="GST Registered"
+                      value={formData.gstRegistered}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="GST Registered"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Dispatch Address *
+                    </label>
+                    <input
+                      type="text"
+                      id="Dispatch Address"
+                      name="Dispatch Address"
+                      value={formData.dispatchAddress}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="Dispatch City"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Dispatch City *
+                    </label>
+                    <input
+                      type="text"
+                      id="Dispatch City"
+                      name="Dispatch City"
+                      value={formData.dispatchCity}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="dipatch Country"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Dispatch Country *
+                    </label>
+                    <input
+                      type="text"
+                      id="dipatch Country"
+                      name="dipatch Country"
+                      value={formData.dispatchCountry}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="dispatch Zip"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Dispatch Zip *
+                    </label>
+                    <input
+                      type="text"
+                      id="dispatch Zip"
+                      name="dispatch Zip"
+                      value={formData.dispatchzip}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                    />
+                  </div>
+                </div>
+
+                {/* Save Button */}
+                <div className="flex justify-end mt-6">
+                  <button className="px-6 py-2 bg-yellow-500 text-black font-semibold rounded-md hover:bg-yellow-600">
+                    Save
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Form Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* First Name Field */}
-            <div className="flex flex-col">
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name *</label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
+          {activeTab === "profileDetails" && (
+            <div className=" p-6 rounded-lg text-blue-900">
+              {/* Header */}
+              <div className="flex justify-between">
+                <h2 className="text-xl font-semibold text-blue-900">
+                  About Profile
+                </h2>
+                <p className="text-green-600 text-sm mt-1">
+                  Profile is 75% complete
+                </p>
+              </div>
+
+              {/* Profile Photo Section */}
+              <div className="flex items-center mt-4 space-x-4">
+                {/* Profile Picture */}
+                <div className="w-16 h-16 rounded-full bg-blue-400 flex items-center justify-center">
+                  <FaUser className="text-yellow-400 w-8 h-8" />
+                </div>
+
+                {/* Upload & Delete Buttons */}
+                <div className="flex space-x-2">
+                  <button className="bg-yellow-500 px-4 py-1 text-black font-semibold rounded-md">
+                    Upload New
+                  </button>
+                  <button className="bg-blue-300 px-4 py-1 text-blue-900 font-semibold rounded-md">
+                    Delete Photo
+                  </button>
+                </div>
+              </div>
+
+              {/* Cover Photo Upload */}
+              <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300 text-center">
+                <p className="text-blue-500">
+                  Maximum size for a file is 5MB, format: .jpg, .jpeg
+                </p>
+                <p className="text-blue-600">
+                  Recommended image size: 1180×290px
+                </p>
+                <div className="mt-4 h-32 border-2 border-dashed border-blue-500 flex justify-center items-center">
+                  <span className="text-blue-500">Upload Cover Photo</span>
+                </div>
+              </div>
+
+              {/* Description Field */}
+              <div className="mt-6">
+                <label className="block text-blue-700 mb-1">Description</label>
+                <textarea
+                  className="w-full p-2 bg-blue-200 text-blue-900 border border-blue-400 rounded-md"
+                  placeholder="Minimum 160 and maximum 900 characters"
+                  rows="4"
+                ></textarea>
+              </div>
+
+              {/* Promo Video Upload */}
+              <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300 text-center">
+                <p className="text-blue-500">Upload a promo video</p>
+                <div className="mt-4 h-20 border-2 border-dashed border-blue-500 flex justify-center items-center">
+                  <span className="text-blue-500">Upload Video</span>
+                </div>
+              </div>
+
+              {/* Photo Info Section */}
+              <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300">
+                <h3 className="text-lg font-semibold text-blue-900">Photo</h3>
+                <ul className="text-blue-600 text-sm mt-2 space-y-1">
+                  <li>✔ Your photo will be posted:</li>
+                  <li>- On the business page</li>
+                  <li>- On the ad page (if you have an ad package)</li>
+                  <li>- In job search results (if using premium ads)</li>
+                </ul>
+              </div>
             </div>
+          )}
 
-            {/* Last Name Field */}
-            <div className="flex flex-col">
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Last Name *</label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
+          {activeTab === "profileReviews" && (
+            <div className="p-6 rounded-lg text-blue-900">
+              <div className="flex justify-between">
+                <h2 className="text-xl font-semibold text-blue-900">
+                  Profile Reviews
+                </h2>
+                <p className="text-green-600 text-sm mt-1">
+                  Profile is 75% complete
+                </p>
+              </div>
+
+              {/* Overall Rating */}
+              <div className="mt-4 bg-blue-200 p-4 rounded-lg border border-blue-300">
+                <div className="flex items-center space-x-4">
+                  <div className="bg-blue-600 text-white px-4 py-2 text-2xl font-bold rounded-md">
+                    4.7
+                  </div>
+                  <div className="flex space-x-1">
+                    {[...Array(5)].map((_, index) => (
+                      <span key={index} className="text-yellow-400 text-xl">
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-blue-700 text-sm">(50 Reviews)</p>
+                </div>
+
+                {/* Star Rating Distribution */}
+                <div className="mt-4 space-y-2">
+                  {[5, 4, 3, 2, 1].map((stars, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <span className="text-blue-700">{stars} ★</span>
+                      <div className="w-48 h-2 bg-blue-300 rounded-full">
+                        <div
+                          className={`h-2 bg-yellow-400 rounded-full`}
+                          style={{ width: `${stars * 20}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-blue-700">
+                        {[24, 5, 1, 0, 0][index]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Featured Reviews */}
+              <h3 className="text-lg font-semibold text-blue-900 mt-6">
+                Featured Reviews
+              </h3>
+
+              {[1, 2].map((review, index) => (
+                <div
+                  key={index}
+                  className="mt-4 bg-blue-200 p-4 rounded-lg border border-blue-300"
+                >
+                  <div className="flex justify-between">
+                    <p className="text-sm text-blue-700">Jan 20, 2024</p>
+                    <button className="text-blue-600 text-sm hover:text-blue-800">
+                      Report this review
+                    </button>
+                  </div>
+
+                  <div className="flex items-center space-x-2 mt-2">
+                    <div className="w-10 h-10 bg-blue-400 text-white flex items-center justify-center rounded-full">
+                      AK
+                    </div>
+                    <p className="text-blue-900 font-semibold">Alex K.</p>
+                  </div>
+
+                  <div className="flex space-x-1 mt-2">
+                    {[...Array(4)].map((_, index) => (
+                      <span key={index} className="text-yellow-400 text-lg">
+                        ★
+                      </span>
+                    ))}
+                    <span className="text-gray-400 text-lg">★</span>
+                  </div>
+
+                  <p className="text-blue-700 mt-2">
+                    {index === 0
+                      ? "Working at Sam AI has been an incredible journey. The technology we're building is truly cutting-edge."
+                      : "The Galaxy M315 is the latest in Samsung's phone lineup. It has minor upgrades but remains consistent."}
+                  </p>
+                </div>
+              ))}
             </div>
+          )}
 
-            {/* Email Field */}
-            <div className="flex flex-col">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email *</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
+          {activeTab === "holiday" && (
+            <div className=" p-6 rounded-lg text-blue-900">
+              {/* Header */}
+              <h2 className="text-xl font-semibold text-blue-900">
+                Holiday Settings
+              </h2>
+              <p className="text-blue-700 mt-2">
+                During the holiday period, your products will be offline, but
+                you can still process outstanding orders or view your account
+                statement.
+                <br />
+                The holiday period includes the Start and End dates.
+              </p>
+
+              {/* Holiday Date Selection */}
+              <div className="mt-4 bg-blue-200 p-4 rounded-lg border border-blue-300">
+                {/* Start Date */}
+                <div className="flex items-center space-x-4">
+                  <label className="text-blue-900 font-medium w-24">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full p-2 bg-blue-50 text-blue-900 border border-blue-400 rounded-md"
+                  />
+                </div>
+
+                {/* End Date */}
+                <div className="flex items-center space-x-4 mt-4">
+                  <label className="text-blue-900 font-medium w-24">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full p-2 bg-blue-50 text-blue-900 border border-blue-400 rounded-md"
+                  />
+                </div>
+              </div>
+
+              {/* Save Button */}
+              <div className="flex justify-end mt-6">
+                <button className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">
+                  Save
+                </button>
+              </div>
             </div>
-
-         
-
-            {/* Phone Field */}
-            <div className="flex flex-col">
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone *</label>
-              <input
-                type="text"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
-            </div>
-
-            {/* Address Field */}
-            <div className="flex flex-col">
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address *</label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
-            </div>
-
-            {/* Zip Code Field */}
-            <div className="flex flex-col">
-              <label htmlFor="zip" className="block text-sm font-medium text-gray-700">Zip *</label>
-              <input
-                type="number"
-                id="zip"
-                name="zip"
-                value={formData.zip}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
-            </div>
-
-            {/* Country Field */}
-            <div className="flex flex-col">
-              <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country *</label>
-              <input
-                type="text"
-                id="country"
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
-            </div>
-
-            {/* City Field */}
-            <div className="flex flex-col">
-              <label htmlFor="city" className="block text-sm font-medium text-gray-700">City *</label>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
-            </div>
-            {/* Seller GST */}
-
-            <div className="flex flex-col">
-              <label htmlFor="Seller GST" className="block text-sm font-medium text-gray-700">Seller GST *</label>
-              <input
-                type="text"
-                id="Seller GST"
-                name="Seller GST"
-                value={formData.sellerGst}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
-            </div>
-
-               {/* Seller GST */}
-
-               <div className="flex flex-col">
-              <label htmlFor="GST Registered" className="block text-sm font-medium text-gray-700">GST Registered *</label>
-              <input
-                type="text"
-                id="GST Registered"
-                name="GST Registered"
-                value={formData.gstRegistered}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <label htmlFor="GST Registered" className="block text-sm font-medium text-gray-700">Dispatch Address *</label>
-              <input
-                type="text"
-                id="Dispatch Address"
-                name="Dispatch Address"
-                value={formData.dispatchAddress}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <label htmlFor="Dispatch City" className="block text-sm font-medium text-gray-700">Dispatch City *</label>
-              <input
-                type="text"
-                id="Dispatch City"
-                name="Dispatch City"
-                value={formData.dispatchCity}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <label htmlFor="dipatch Country" className="block text-sm font-medium text-gray-700">Dispatch Country *</label>
-              <input
-                type="text"
-                id="dipatch Country"
-                name="dipatch Country"
-                value={formData.dispatchCountry}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <label htmlFor="dispatch Zip" className="block text-sm font-medium text-gray-700">Dispatch Zip *</label>
-              <input
-                type="text"
-                id="dispatch Zip"
-                name="dispatch Zip"
-                value={formData.dispatchzip}
-                onChange={handleChange}
-                required
-                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
-              />
-            </div>
-          </div>
-
-          {/* Save Button */}
-          <div className="flex justify-end mt-6">
-            <button className="px-6 py-2 bg-yellow-500 text-black font-semibold rounded-md hover:bg-yellow-600">
-              Save
-            </button>
-          </div>
+          )}
         </div>
       </main>
     </div>

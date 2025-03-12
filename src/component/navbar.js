@@ -71,7 +71,7 @@ const Navbar = () => {
   return (
     <nav className=" bg-gradient-to-r from-blue-600  to-[#18262f] flex items-center px-4 h-16 relative shadow-lg">
       <div className="flex-shrink-0">
-        <Link to="/dashboard">
+        <Link to="/">
           <img
             src="https://www.aydiactive.com/cdn/shop/files/AYDI_ACTIVE_White-01_6d6bf132-6b36-49f6-86cb-d15be7d25245.png?v=1736855456&width=350"
             className="max-sm:h-12 shadow-md h-13"

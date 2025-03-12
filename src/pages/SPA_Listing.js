@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
-import RTC from '../component/editor'; // Assuming RTC is the custom editor component
+import RTC from '../component/editor';
 import { convertToRaw, EditorState , ContentState ,convertFromRaw } from "draft-js";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -9,9 +9,9 @@ import draftToHtml from 'draftjs-to-html';
 import htmlToDraft from 'html-to-draftjs';
 import { Editor } from 'react-draft-wysiwyg'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'; 
-import { DndProvider } from "react-dnd"; // Import DndProvider
+import { DndProvider } from "react-dnd"; 
 import { useDrag, useDrop } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend"; // Import HTML5 backend
+import { HTML5Backend } from "react-dnd-html5-backend"; 
 
 const ImageItem = ({ image, index, moveImage, handleRemoveImage }) => {
   const [, drag] = useDrag({

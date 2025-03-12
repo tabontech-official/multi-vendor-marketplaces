@@ -69,7 +69,7 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className=" bg-gradient-to-r from-blue-600  to-[#18262f] flex items-center px-4 h-16 relative shadow-lg">
+    <nav className=" bg-gradient-to-r from-blue-600  to-[#18262f] flex items-center px-4 h-[8vh] relative shadow-lg">
       <div className="flex-shrink-0">
         <Link to="/">
           <img

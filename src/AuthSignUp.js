@@ -93,8 +93,8 @@ const AuthSignUp = () => {
     return <Dashboard />;
   }
   return (
-    <section className=" flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
-      <div className="flex w-full mt-2 mb-3 max-w-4xl bg-white rounded-lg shadow-lg">
+    <section className="h-[82vh] flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
+      <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg">
         <div className=" md:flex  flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white ">
           <img
             src="/png-logo.png"
@@ -107,7 +107,7 @@ const AuthSignUp = () => {
           </p>
         </div>
 
-        <div className="w-full md:w-1/2 p-8 h-[481px] max-h-screen overflow-y-auto">
+        <div className="w-full md:w-1/2 p-8  max-h-screen overflow-y-auto">
           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
             Welcome Back
           </h2>
@@ -162,7 +162,7 @@ const AuthSignUp = () => {
             </div>
 
             {/* Zip */}
-            <div>
+            {/* <div>
               <input
                 type="number"
                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
@@ -171,10 +171,10 @@ const AuthSignUp = () => {
                 onChange={(e) => setZip(e.target.value)}
                 required
               />
-            </div>
+            </div> */}
 
             {/* Country */}
-            <div>
+            {/* <div>
               <input
                 type="text"
                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
@@ -183,10 +183,10 @@ const AuthSignUp = () => {
                 onChange={(e) => setCountry(e.target.value)}
                 required
               />
-            </div>
+            </div> */}
 
             {/* State */}
-            <div>
+            {/* <div>
               <input
                 type="text"
                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
@@ -195,10 +195,10 @@ const AuthSignUp = () => {
                 onChange={(e) => setState(e.target.value)}
                 required
               />
-            </div>
+            </div> */}
 
             {/* City */}
-            <div>
+            {/* <div>
               <input
                 type="text"
                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
@@ -207,10 +207,10 @@ const AuthSignUp = () => {
                 onChange={(e) => setCity(e.target.value)}
                 required
               />
-            </div>
+            </div> */}
 
             {/* Phone Number */}
-            <div>
+            {/* <div>
               <input
                 type="number"
                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
@@ -219,7 +219,7 @@ const AuthSignUp = () => {
                 onChange={(e) => setNumber(e.target.value)}
                 required
               />
-            </div>
+            </div> */}
 
             {/* Policy Agreement */}
             <div className="flex items-center space-x-2 my-3">
@@ -257,7 +257,7 @@ const AuthSignUp = () => {
             </button>
           </form>
 
-          <div className="mt-4 text-center text-sm">
+          {/* <div className="mt-4 text-center text-sm">
             <a
               href="/ForgotPassword"
               className="text-indigo-500 hover:underline"
@@ -270,7 +270,7 @@ const AuthSignUp = () => {
             <a href="/signup" className="text-indigo-500 hover:underline">
               Create Account
             </a>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

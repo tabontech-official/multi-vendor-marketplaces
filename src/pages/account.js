@@ -1,84 +1,89 @@
-import React, { useEffect, useState } from 'react';
-import { HiCamera } from 'react-icons/hi';
-import { FaTimes } from 'react-icons/fa'; // Import the close icon
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import React, { useEffect, useState } from "react";
+import { HiCamera } from "react-icons/hi";
+import { FaTimes } from "react-icons/fa"; // Import the close icon
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import { FaUser, FaBars, FaArrowLeft } from "react-icons/fa";
 
 const AccountPage = () => {
   const navigate = useNavigate(); // Initialize useNavigate hook
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    phone: '',
-    address: '',
-    zip: '',
-    country: '',
-    city: '',
-    dispatchAddress : " ",
-    dispatchCity : " ",
-    dispatchCountry : " ",
-    dispatchzip :" ",
-    profileImage: 'https://sp-seller.webkul.com/img/store_logo/icon-user.png',
-    sellerGst:"",
-    gstRegistered:""
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    phone: "",
+    address: "",
+    zip: "",
+    country: "",
+    city: "",
+    dispatchAddress: " ",
+    dispatchCity: " ",
+    dispatchCountry: " ",
+    dispatchzip: " ",
+    profileImage: "https://sp-seller.webkul.com/img/store_logo/icon-user.png",
+    sellerGst: "",
+    gstRegistered: "",
   });
   const [imageFile, setImageFile] = useState(null); // State for storing selected image file
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [info, setInfo] = useState('');
-  const [success, setSuccess] = useState('');
+  const [info, setInfo] = useState("");
+  const [success, setSuccess] = useState("");
   const [agreedToPolicies, setAgreedToPolicies] = useState(false); // New state for policy agreement
 
   useEffect(() => {
     let isMounted = true;
 
     const fetchUserData = async () => {
-      const id = localStorage.getItem('userid');
+      const id = localStorage.getItem("userid");
 
       if (!id) {
-        console.error('User ID not found in localStorage.');
-        setError('User ID not found.');
+        console.error("User ID not found in localStorage.");
+        setError("User ID not found.");
         return;
       }
 
       try {
-        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
-          method: 'GET',
-        });
+        const response = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
+          {
+            method: "GET",
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
           console.log(data);
           setInfo(data);
           if (isMounted) {
-
             setFormData({
-              firstName: data.firstName || '',
-              lastName: data.lastName || '',
-              email: data.email || '',
-              password: data.password || '',
-              phone: data.phoneNumber || '',
-              address: data.address || '',
-              zip: data.zip || '',
-              country: data.country || '',
-              city: data.city || '',
-              profileImage: data.avatar[0] || 'https://sp-seller.webkul.com/img/store_logo/icon-user.png',
-              gstRegistered:data.gstRegistered,
-              sellerGst:data.sellerGst,
-              dispatchCountry:data.dispatchCountry,
-              dispatchCity:data.dispatchCity,
-              dispatchAddress:data.dispatchAddress,
-              dispatchzip:data.dispatchzip
+              firstName: data.firstName || "",
+              lastName: data.lastName || "",
+              email: data.email || "",
+              password: data.password || "",
+              phone: data.phoneNumber || "",
+              address: data.address || "",
+              zip: data.zip || "",
+              country: data.country || "",
+              city: data.city || "",
+              profileImage:
+                data.avatar[0] ||
+                "https://sp-seller.webkul.com/img/store_logo/icon-user.png",
+              gstRegistered: data.gstRegistered,
+              sellerGst: data.sellerGst,
+              dispatchCountry: data.dispatchCountry,
+              dispatchCity: data.dispatchCity,
+              dispatchAddress: data.dispatchAddress,
+              dispatchzip: data.dispatchzip,
             });
           }
         } else {
-          console.error('Failed to fetch user data. Status:', response.status);
+          console.error("Failed to fetch user data. Status:", response.status);
           setError(`Failed to fetch user data. Status: ${response.status}`);
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        setError('Error fetching user data.');
+        console.error("Error fetching user data:", error);
+        setError("Error fetching user data.");
       }
     };
 
@@ -113,98 +118,161 @@ const AccountPage = () => {
 
     setLoading(true);
 
-    const userId = localStorage.getItem('userid');
+    const userId = localStorage.getItem("userid");
     if (!userId) {
-      console.error('User ID not found in localStorage.');
+      console.error("User ID not found in localStorage.");
       setLoading(false);
       return;
     }
 
-    form.append('firstName', formData.firstName);
-    form.append('lastName', formData.lastName);
-    form.append('email', formData.email);
-    form.append('password', formData.password);
-    form.append('phoneNumber', formData.phone);
-    form.append('address', formData.address);
-    form.append('zip', formData.zip);
-    form.append('country', formData.country);
-    form.append('city', formData.city);
-    form.append('gstRegistered', formData.gstRegistered);
-    form.append('sellerGst', formData.sellerGst);
-    form.append('dispatchzip', formData.dispatchzip);
-    form.append('dispatchCountry', formData.dispatchCountry);
-    form.append('dispatchCity', formData.dispatchCity);
-    form.append('dispatchAddress', formData.dispatchAddress);
-
-
+    form.append("firstName", formData.firstName);
+    form.append("lastName", formData.lastName);
+    form.append("email", formData.email);
+    form.append("password", formData.password);
+    form.append("phoneNumber", formData.phone);
+    form.append("address", formData.address);
+    form.append("zip", formData.zip);
+    form.append("country", formData.country);
+    form.append("city", formData.city);
+    form.append("gstRegistered", formData.gstRegistered);
+    form.append("sellerGst", formData.sellerGst);
+    form.append("dispatchzip", formData.dispatchzip);
+    form.append("dispatchCountry", formData.dispatchCountry);
+    form.append("dispatchCity", formData.dispatchCity);
+    form.append("dispatchAddress", formData.dispatchAddress);
 
     // Append image file if it exists
     if (imageFile) {
-      form.append('images', imageFile); // Ensure the correct file is sent
+      form.append("images", imageFile); // Ensure the correct file is sent
     }
 
     try {
-      const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`, {
-        method: 'PUT',
-        body: form,
-      });
+      const response = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`,
+        {
+          method: "PUT",
+          body: form,
+        }
+      );
 
       if (response.ok) {
         const responseData = await response.json();
         setSuccess("Profile Updated");
       } else {
-        console.error('Failed to update profile. Status:', response.status);
+        console.error("Failed to update profile. Status:", response.status);
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error("Error updating profile:", error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="w-full p-8 flex justify-center items-center bg-gray-100 mt-10">
-      <div className="w-full max-w-lg bg-white border border-blue-500 shadow-lg p-6 relative">
-        {/* Close Icon */}
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="absolute top-4 right-4 text-gray-700 hover:text-gray-900"
-          aria-label="Close"
-        >
-          <FaTimes className="w-6 h-6 text-red-600" />
-        </button>
-
-        <div className="mb-4">
-          {success && <div className="text-green-500 text-lg font-semibold">{success}</div>}
-        </div>
-        <h1 className="text-2xl font-semibold mb-4 text-center text-gray-800">Account Settings</h1>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Profile Image Section */}
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <img
-                src={formData.profileImage}
-                alt="Profile"
-                className="w-40 h-32 rounded-full object-cover border-2 border-blue-500"
-              />
-              <label htmlFor="profileImage" className="absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full cursor-pointer hover:bg-blue-600 transition">
-                <HiCamera className="w-6 h-6" />
-                <input
-                  type="file"
-                  id="profileImage"
-                  name="profileImage"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
-              </label>
+    <div className="flex bg-gray-100 min-h-screen text-gray-200">
+      {/* Sidebar */}
+      <aside className="w-64 bg-gray-300 p-6 mt-2 mb-2 ml-2 rounded-r-xl flex flex-col justify-between">
+        <div>
+          {/* User Info */}
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
+              <FaUser className="text-yellow-400 w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-700">Profile Image</h2>
-              <p className="text-gray-600">Click the icon to upload or change your profile image.</p>
+              <h2 className="text-lg font-semibold">Business Account</h2>
+              <p className="text-sm text-gray-400">Profile is 75% complete</p>
             </div>
           </div>
 
+          {/* Sidebar Navigation */}
+          <nav className="mt-6 space-y-4">
+            <button className="w-full text-left flex items-center space-x-3 text-gray-300 hover:text-yellow-400">
+              <span className="w-6 h-6 bg-gray-800 flex items-center justify-center rounded-md">
+                <FaBars />
+              </span>
+              <span>Home</span>
+            </button>
+            <button className="w-full text-left flex items-center space-x-3 text-gray-300 hover:text-yellow-400">
+              <span className="w-6 h-6 bg-gray-800 flex items-center justify-center rounded-md">
+                <FaBars />
+              </span>
+              <span>Partner Program</span>
+            </button>
+            <button className="w-full text-left flex items-center space-x-3 text-gray-300 hover:text-yellow-400">
+              <span className="w-6 h-6 bg-gray-800 flex items-center justify-center rounded-md">
+                <FaBars />
+              </span>
+              <span>Wishlist</span>
+            </button>
+            <button className="w-full text-left flex items-center space-x-3 text-yellow-400">
+              <span className="w-6 h-6 bg-gray-800 flex items-center justify-center rounded-md">
+                <FaBars />
+              </span>
+              <span>Settings</span>
+            </button>
+          </nav>
+        </div>
+
+        {/* Promote Button */}
+        <button className="w-full py-2 bg-yellow-500 text-black font-semibold rounded-md">
+          Promote
+        </button>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 p-6">
+        {/* Back Button */}
+        <button className="flex items-center text-black hover:text-gray-200 mb-4">
+          <FaArrowLeft className="mr-2" /> Back
+        </button>
+
+        {/* Account Settings Header */}
+        <h1 className="text-2xl font-semibold text-gray-600">Account Settings</h1>
+
+        {/* Tabs */}
+        <div className="flex justify-between border-b border-gray-700 mt-4 text-gray-400">
+          <button className="pb-2 text-blue-600 w-60 border-b-2 border-blue-600">
+            Contact details
+          </button>
+          <button className="pb-2 text-gray-600 hover:text-gray-800">Profile details</button>
+          <button className="pb-2 text-gray-600 hover:text-gray-800">Profile Reviews</button>
+          <button className="pb-2 text-gray-600 hover:text-gray-800">Opening hours</button>
+        </div>
+
+        {/* Form Section */}
+        <div className="bg-gray-300 p-6 rounded-lg mt-6">
+          <h2 className="text-lg font-semibold text-gray-600">Edit Profile</h2>
+
+          {/* Account Status Toggle */}
+          <div className="flex items-center space-x-4 mt-4">
+            <p className="text-sm text-gray-600">Account Status</p>
+            <div className="flex space-x-4">
+              <button
+                className={`px-4 py-2 rounded-lg ${
+                  formData.accountStatus === "Private"
+                    ? "bg-red-700 text-white"
+                    : "bg-gray-800 text-gray-400"
+                }`}
+                onClick={() =>
+                  setFormData({ ...formData, accountStatus: "Private" })
+                }
+              >
+                Private
+              </button>
+              <button
+                className={`px-4 py-2 rounded-lg ${
+                  formData.accountStatus === "Business"
+                    ? "bg-yellow-500 text-black"
+                    : "bg-gray-800 text-gray-400"
+                }`}
+                onClick={() =>
+                  setFormData({ ...formData, accountStatus: "Business" })
+                }
+              >
+                Business
+              </button>
+            </div>
+          </div>
 
           {/* Form Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,7 +286,7 @@ const AccountPage = () => {
                 value={formData.firstName}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
 
@@ -232,7 +300,7 @@ const AccountPage = () => {
                 value={formData.lastName}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
 
@@ -246,7 +314,7 @@ const AccountPage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
 
@@ -262,7 +330,7 @@ const AccountPage = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
 
@@ -276,7 +344,7 @@ const AccountPage = () => {
                 value={formData.address}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
 
@@ -290,7 +358,7 @@ const AccountPage = () => {
                 value={formData.zip}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
 
@@ -304,7 +372,7 @@ const AccountPage = () => {
                 value={formData.country}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
 
@@ -318,7 +386,7 @@ const AccountPage = () => {
                 value={formData.city}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
             {/* Seller GST */}
@@ -332,7 +400,7 @@ const AccountPage = () => {
                 value={formData.sellerGst}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
 
@@ -347,7 +415,7 @@ const AccountPage = () => {
                 value={formData.gstRegistered}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
 
@@ -360,7 +428,7 @@ const AccountPage = () => {
                 value={formData.dispatchAddress}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
 
@@ -373,7 +441,7 @@ const AccountPage = () => {
                 value={formData.dispatchCity}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
 
@@ -386,7 +454,7 @@ const AccountPage = () => {
                 value={formData.dispatchCountry}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
 
@@ -399,47 +467,20 @@ const AccountPage = () => {
                 value={formData.dispatchzip}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 bg-gray-800 text-gray-200 border border-gray-700 rounded-md"
               />
             </div>
           </div>
 
-          
-
-          {/* Policy Agreement Checkbox */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="policyAgreement"
-              name="policyAgreement"
-              checked={agreedToPolicies}
-              onChange={(e) => setAgreedToPolicies(e.target.checked)}
-              className="h-5 w-5 text-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="policyAgreement" className="text-sm font-medium text-gray-700">
-              I agree with the{' '}
-              <span
-                className="text-blue-600 cursor-pointer hover:underline"
-                onClick={() => navigate('/policy')}
-              >
-                policies and terms
-              </span>
-            </label>
+          {/* Save Button */}
+          <div className="flex justify-end mt-6">
+            <button className="px-6 py-2 bg-yellow-500 text-black font-semibold rounded-md hover:bg-yellow-600">
+              Save
+            </button>
           </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white font-bold py-2 rounded-md shadow hover:bg-blue-700 transition disabled:bg-blue-300"
-          >
-            {loading ? 'Loading...' : 'Save Changes'}
-          </button>
-
-          {error && <div className="text-red-500">{error}</div>}
-        </form>
-      </div>
-    </main>
+        </div>
+      </main>
+    </div>
   );
 };
 

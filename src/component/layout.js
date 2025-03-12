@@ -15,7 +15,7 @@ const Layout = () => {
         <Outlet />
       </div>
 
-      <footer className="text-white py-4 bg-gradient-to-r from-blue-600  to-[#18262f] left-0 bottom-0 w-full">
+      <footer className="text-white py-4 bg-gradient-to-r h-[10vh] from-blue-600  to-[#18262f] left-0 bottom-0 w-full">
         <div className="container mx-auto flex flex-col items-center justify-center">
           <p className="text-center text-sm">
             © Copyright 2020-2024{" "}

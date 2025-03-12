@@ -69,8 +69,8 @@ const Auth = () => {
   }
 
   return (
-    <section className=" flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
-      <div className="flex w-full mt-10 mb-[0.80rem] max-w-4xl bg-white rounded-lg shadow-lg mx-auto">
+    <section className="h-[82vh] flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
+      <div className="flex w-full  max-w-4xl bg-white rounded-lg shadow-lg mx-auto">
         <div className=" md:flex  flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white">
           <img
             src="/png-logo.png"

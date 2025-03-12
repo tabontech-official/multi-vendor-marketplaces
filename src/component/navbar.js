@@ -69,20 +69,20 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className=" bg-gradient-to-r from-blue-600  to-[#18262f] flex items-center px-4 py-3 relative shadow-lg">
+    <nav className=" bg-gradient-to-r from-blue-600  to-[#18262f] flex items-center px-4 h-16 relative shadow-lg">
       <div className="flex-shrink-0">
         <Link to="/dashboard">
-          {/* <img
-            src="https://cdn.shopify.com/s/files/1/0712/3337/2413/files/Layer_26.svg?v=1724230677"
-            className="max-sm:h-12 shadow-md h-16"
+          <img
+            src="https://www.aydiactive.com/cdn/shop/files/AYDI_ACTIVE_White-01_6d6bf132-6b36-49f6-86cb-d15be7d25245.png?v=1736855456&width=350"
+            className="max-sm:h-12 shadow-md h-13"
             alt="Logo"
             style={{
-              backgroundColor: 'white', // Add white background
-              padding: '5px', // Padding around logo
-              borderRadius: '8px', // Rounded corners for better aesthetic
+              backgroundColor: 'black',
+              padding: '5px',
+              borderRadius: '8px', 
             }}
-          /> */}
-          <h1 className="text-white">AYDI Marketplace</h1>
+          />
+          {/* <h1 className="text-white">AYDI Marketplace</h1> */}
         </Link>
       </div>
       <div className="flex-grow flex items-center justify-end">

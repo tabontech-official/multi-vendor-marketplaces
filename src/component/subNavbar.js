@@ -30,10 +30,18 @@ const SubNavbar = () => {
           <Link to="#">Products </Link>
           {openDropdown === "products" && (
             <div className="absolute top-full left-0 bg-green-600 text-white py-2 px-4 w-48 shadow-lg">
-              <Link to="#" className="block hover:bg-green-700 px-2 py-1">Manage Products</Link>
-              <Link to="#" className="block hover:bg-green-700 px-2 py-1">Add a Product</Link>
-              <Link to="#" className="block hover:bg-green-700 px-2 py-1">Import Products</Link>
-              <Link to="#" className="block hover:bg-green-700 px-2 py-1">Manage Images</Link>
+              <Link to="#" className="block hover:bg-green-700 px-2 py-1">
+                Manage Products
+              </Link>
+              <Link to="#" className="block hover:bg-green-700 px-2 py-1">
+                Add a Product
+              </Link>
+              <Link to="#" className="block hover:bg-green-700 px-2 py-1">
+                Import Products
+              </Link>
+              <Link to="#" className="block hover:bg-green-700 px-2 py-1">
+                Manage Images
+              </Link>
             </div>
           )}
         </li>
@@ -47,7 +55,9 @@ const SubNavbar = () => {
           <Link to="#">Orders</Link>
           {openDropdown === "orders" && (
             <div className="absolute top-full left-0 bg-blue-600 text-white py-2 px-4 w-48 shadow-lg">
-              <Link to="#" className="block hover:bg-blue-700 px-2 py-1">Manage Orders</Link>
+              <Link to="#" className="block hover:bg-blue-700 px-2 py-1">
+                Manage Orders
+              </Link>
             </div>
           )}
         </li>
@@ -61,8 +71,12 @@ const SubNavbar = () => {
           <Link to="#">Promotions </Link>
           {openDropdown === "promotions" && (
             <div className="absolute top-full left-0 bg-orange-500 text-white py-2 px-4 w-48 shadow-lg">
-              <Link to="#" className="block hover:bg-orange-600 px-2 py-1">My Promotions</Link>
-              <Link to="#" className="block hover:bg-orange-600 px-2 py-1">All Promotions</Link>
+              <Link to="#" className="block hover:bg-orange-600 px-2 py-1">
+                My Promotions
+              </Link>
+              <Link to="#" className="block hover:bg-orange-600 px-2 py-1">
+                All Promotions
+              </Link>
             </div>
           )}
         </li>
@@ -77,14 +91,18 @@ const SubNavbar = () => {
           <Link to="#">Reports </Link>
           {openDropdown === "reports" && (
             <div className="absolute top-full left-0 bg-purple-500 text-white py-2 px-4 w-56 shadow-lg">
-              <Link to="#" className="block hover:bg-purple-600 px-2 py-1">Catalog Performance</Link>
-              <Link to="#" className="block hover:bg-purple-600 px-2 py-1">eCommerce Consultation</Link>
-              <Link to="#" className="block hover:bg-purple-600 px-2 py-1">Seller Rating</Link>
+              <Link to="#" className="block hover:bg-purple-600 px-2 py-1">
+                Catalog Performance
+              </Link>
+              <Link to="#" className="block hover:bg-purple-600 px-2 py-1">
+                eCommerce Consultation
+              </Link>
+              <Link to="#" className="block hover:bg-purple-600 px-2 py-1">
+                Seller Rating
+              </Link>
             </div>
           )}
         </li>
-
-       
       </ul>
     </div>
   );

@@ -1,58 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     if (!email) {
-      setError('Email is required.');
+      setError("Email is required.");
       return;
     }
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
-      setError('Please enter a valid email address.');
+      setError("Please enter a valid email address.");
       return;
     }
 
     try {
-      const response = await fetch('https://multi-vendor-marketplace.vercel.app/auth/forgot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/auth/forgot",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       const json = await response.json();
 
       if (response.ok) {
-        setSuccess('Password reset link sent successfully!');
+        setSuccess("Password reset link sent successfully!");
       } else {
-        setError(json.error || 'An error occurred.');
+        setError(json.error || "An error occurred.");
       }
     } catch (error) {
-      setError('An error occurred. Please try again.');
+      setError("An error occurred. Please try again.");
     }
   };
 
   return (
-    <section className="bg-white dark:bg-gray-900 border-blue-500 mt-20">
-      <div className="container flex items-center justify-center px-6 mx-auto">
-        <div className="w-full max-w-md">
-          <div className="flex justify-center mx-auto">
-            <img
-              className="w-auto h-7 sm:h-8"
-              src="https://shopify-digital-delivery.s3.amazonaws.com/shop_logo/59235/vRlqYxKteX848.png"
-              alt="Logo"
-            />
-          </div>
-          <div className="mt-8">
-            <div className="bg-white dark:bg-gray-900 p-6 shadow-lg border border-blue-500 dark:border-gray-600">
+    <section className="flex h-screen bg-gradient-to-r from-purple-600 to-indigo-500 items-center justify-center px-6">
+      <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden">
+        {/* Left Side - Image & Text */}
+        <div className="hidden md:flex flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white">
+          <img
+            src="/png-logo.png" // Correct way to access public assets in React
+            alt="Login"
+            className="w-64 h-64 object-cover"
+          />
+
+          <p className="mt-4 text-center text-sm opacity-90">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis at
+            velit maximus, molestie est a, tempor magna.
+          </p>
+        </div>
+
+        {/* Right Side - Login Form */}
+        <div className="w-full md:w-1/2 p-8">
+        
+        <div className="mt-8">
+            <div className=" p-6  ">
               <form onSubmit={handleForgotPassword}>
                 <div className="relative flex items-center mb-4">
                   <span className="absolute">
@@ -88,6 +100,8 @@ const ForgotPassword = () => {
               </form>
             </div>
           </div>
+
+
         </div>
       </div>
     </section>

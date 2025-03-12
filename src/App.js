@@ -26,6 +26,7 @@ import ProtectedForms from './context api/FormProtect';
 import PrivacyPolicy from './pages/Policy';
 import PeopleLooking from './pages/PeopleLooking';
 import AdminDashboard from "./admin/adminpanel"
+import AuthSignUp from './AuthSignUp';
 const App = () => {
   const {dispatch} = useAuthContext()
 
@@ -66,6 +67,7 @@ const isAdmin = ()=>{
         <Route path="/" element={ <Layout />} >
         <Route index element={<PrivateRoute element={<Dashboard />} />} />
         <Route path="/Login" element={!user ? <Auth /> : <Navigate to="/dashboard" /> } />
+        <Route path="/signup" element={!user ? <AuthSignUp /> : <Navigate to="/dashboard" /> } />
         <Route path="/ForgotPassword" element={<ForgotPassword/>} />
         <Route path="/Reset" element={<ResetPassword/>} />
         <Route path="/Rent_Room_listing" element={<ProtectedForms element={<AddRoomForRentForm/>} />} />

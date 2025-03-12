@@ -93,12 +93,12 @@ const AuthSignUp = () => {
     return <Dashboard />;
   }
   return (
-    <section className="flex h-screen bg-gradient-to-r from-purple-600 to-indigo-500 items-center justify-center px-6">
-      <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="hidden md:flex flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white">
+    <section className=" flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
+      <div className="flex w-full mt-2 mb-3 max-w-4xl bg-white rounded-lg shadow-lg">
+        <div className=" md:flex  flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white ">
           <img
             src="/png-logo.png"
-            alt="SignUp"
+            alt="Login"
             className="w-64 h-64 object-cover"
           />
           <p className="mt-4 text-center text-sm opacity-90">
@@ -107,15 +107,15 @@ const AuthSignUp = () => {
           </p>
         </div>
 
-        <div className="w-full md:w-1/2 p-8 h-[330px] max-h-screen overflow-y-auto">
+        <div className="w-full md:w-1/2 p-8 h-[481px] max-h-screen overflow-y-auto">
           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
-            Welcome
+            Welcome Back
           </h2>
           <p className="text-sm text-gray-600 text-center mb-6">
-            Sign Up to your account
+            Login to your account
           </p>
 
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-4 ">
             <div>
               <input
                 type="text"
@@ -256,6 +256,21 @@ const AuthSignUp = () => {
               {loading ? "Signing up..." : "Sign Up"}
             </button>
           </form>
+
+          <div className="mt-4 text-center text-sm">
+            <a
+              href="/ForgotPassword"
+              className="text-indigo-500 hover:underline"
+            >
+              Forgot Password?
+            </a>
+          </div>
+          <div className="mt-2 text-center text-sm">
+            <span className="text-gray-600">Don't have an account? </span>
+            <a href="/signup" className="text-indigo-500 hover:underline">
+              Create Account
+            </a>
+          </div>
         </div>
       </div>
     </section>

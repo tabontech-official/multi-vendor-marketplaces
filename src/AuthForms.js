@@ -1,8 +1,6 @@
-// src/pages/Auth.js
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "./Hooks/useAuthContext";
-import Dashboard from "./pages/Dashboard";
 import MainDashboard from "./pages/MainDashboard";
 
 const Auth = () => {
@@ -47,12 +45,10 @@ const Auth = () => {
       const path = localStorage.getItem("path") || "/";
 
       if (response.ok) {
-        console.log(json);
         if (json.token && json.user._id && json.user.email) {
           localStorage.setItem("usertoken", json.token);
           localStorage.setItem("userid", json.user._id);
           localStorage.setItem("email", json.user.email);
-          console.log(json);
           dispatch({ type: "LOGIN", payload: json });
           setSuccess("Login successful!");
           navigate(path);
@@ -71,16 +67,16 @@ const Auth = () => {
   if (user) {
     return <MainDashboard />; 
   }
+
   return (
-    <section className="flex h-screen bg-gradient-to-r from-purple-600 to-indigo-500 items-center justify-center px-6">
-      <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="hidden md:flex flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white">
+    <section className=" flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
+      <div className="flex w-full mt-10 mb-[0.80rem] max-w-4xl bg-white rounded-lg shadow-lg mx-auto">
+        <div className=" md:flex  flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white">
           <img
             src="/png-logo.png"
             alt="Login"
             className="w-64 h-64 object-cover"
           />
-
           <p className="mt-4 text-center text-sm opacity-90">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis at
             velit maximus, molestie est a, tempor magna.
@@ -98,7 +94,7 @@ const Auth = () => {
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Username
+                Email
               </label>
               <input
                 type="email"

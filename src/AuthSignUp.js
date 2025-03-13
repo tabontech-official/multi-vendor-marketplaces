@@ -162,7 +162,7 @@ const AuthSignUp = () => {
             </div>
 
             {/* Zip */}
-            {/* <div>
+            <div>
               <input
                 type="number"
                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
@@ -171,10 +171,10 @@ const AuthSignUp = () => {
                 onChange={(e) => setZip(e.target.value)}
                 required
               />
-            </div> */}
+            </div>
 
             {/* Country */}
-            {/* <div>
+            <div>
               <input
                 type="text"
                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
@@ -183,10 +183,10 @@ const AuthSignUp = () => {
                 onChange={(e) => setCountry(e.target.value)}
                 required
               />
-            </div> */}
+            </div>
 
             {/* State */}
-            {/* <div>
+            <div>
               <input
                 type="text"
                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
@@ -195,10 +195,10 @@ const AuthSignUp = () => {
                 onChange={(e) => setState(e.target.value)}
                 required
               />
-            </div> */}
+            </div>
 
             {/* City */}
-            {/* <div>
+            <div>
               <input
                 type="text"
                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
@@ -207,10 +207,10 @@ const AuthSignUp = () => {
                 onChange={(e) => setCity(e.target.value)}
                 required
               />
-            </div> */}
+            </div>
 
             {/* Phone Number */}
-            {/* <div>
+            <div>
               <input
                 type="number"
                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
@@ -219,7 +219,7 @@ const AuthSignUp = () => {
                 onChange={(e) => setNumber(e.target.value)}
                 required
               />
-            </div> */}
+            </div>
 
             {/* Policy Agreement */}
             <div className="flex items-center space-x-2 my-3">

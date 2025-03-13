@@ -11,7 +11,7 @@ import { TiContacts } from "react-icons/ti";
 import { RiStarSFill } from "react-icons/ri";
 import { MdOutlineHolidayVillage } from "react-icons/md";
 import { FaArrowRight } from "react-icons/fa";
-
+import { jwtDecode } from "jwt-decode";
 const AccountPage = () => {
   const navigate = useNavigate(); // Initialize useNavigate hook
   const [formData, setFormData] = useState({
@@ -177,12 +177,106 @@ const AccountPage = () => {
       setLoading(false);
     }
   };
+
+  const getRoleOptions = () => {
+    if (userRole === "Dev Admin") {
+      return ["DevAdmin", "Master Admin", "Client", "Staff"];
+    } else if (userRole === "MasterAdmin") {
+      return ["Client", "Staff"];
+    } else if (userRole === "Client") {
+      return ["Staff"];
+    }
+    return []; // Default empty array if role is unknown
+  };
+
   const [role, setRole] = useState("");
   const [activeButton, setActiveButton] = useState("active"); // Default "Active"
+  const [userRole, setUserRole] = useState(null);
+  useEffect(() => {
+    const token = localStorage.getItem("usertoken");
+    if (!token) return;
 
+    try {
+      const decoded = jwtDecode(token);
+      if (decoded?.payLoad?.role) {
+        setUserRole(decoded.payLoad.role);
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  }, []);
   const [isOpen, setIsOpen] = useState(false);
   const togglePopup = () => {
     setIsOpen(!isOpen);
+  };
+  const [selectedModules, setSelectedModules] = useState([]);
+  const [inputValue, setInputValue] = useState("");
+  const handleModuleSelection = (module) => {
+    if (!selectedModules.includes(module)) {
+      setSelectedModules([...selectedModules, module]);
+    }
+  };
+
+  // Function to remove selected module
+  const removeModule = (module) => {
+    setSelectedModules(selectedModules.filter((item) => item !== module));
+  };
+  const modules = [
+    "Dashboard",
+    "Manage Product",
+    "Add Product",
+    "Products",
+    "Orders",
+    "ManageOrders",
+    "my promitions",
+    "All Promotions",
+    "Promotions",
+    "Reports",
+    "Inventory",
+    "Catalog Performance",
+    "eCommerence Consultion",
+    "Seller Rating"
+  ];
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const handleUpdateTags = async () => {
+    if (!email) {
+      alert("Email is required!");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/auth/updateUserTagsModule",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            role,
+            modules: selectedModules,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update user");
+      }
+
+      alert("User updated successfully!");
+      setIsOpen(false);
+      setName("");
+      setEmail("");
+      setSelectedModules([]);
+      setIsDropdownOpen(false);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      alert("Error updating user: " + error.message);
+    }
   };
 
   return (
@@ -260,81 +354,128 @@ const AccountPage = () => {
       </aside>
       {/* Popup */}
       {isOpen && (
-  <div
-    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-    onClick={() => setIsOpen(false)} // Click outside to close
-  >
-    <div
-      className="bg-white p-2 rounded-lg shadow-lg w-96"
-      onClick={(e) => e.stopPropagation()} // Stop click inside modal from closing
-    >
-      {/* Header with Left Text & Close Button */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm">Manage User</h2>
-          <FaArrowRight className="text-sm" />
-          <h2 className="text-black text-sm">Add User</h2>
-        </div>
-
-        {/* Close (X) Button */}
-        <button
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
           onClick={() => setIsOpen(false)}
-          className="text-gray-500 hover:text-red-500"
         >
-          <FaTimes size={16} />
-        </button>
-      </div>
-
-      {/* Form Content */}
-      <h2 className="text-black text-sm font-semibold mt-3">Add User</h2>
-      <div className="">
-        {/* Role Dropdown */}
-        <div className="mt-3 flex items-center space-x-3">
-          <label className="text-sm text-gray-700">Role *</label>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="flex-1 px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <div
+            className="bg-white p-4 rounded-lg shadow-lg w-2/4"
+            onClick={(e) => e.stopPropagation()}
           >
-            <option value="">Select Role</option>
-            <option value="Admin">Admin</option>
-            <option value="Editor">Editor</option>
-            <option value="Viewer">Viewer</option>
-          </select>
-        </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm">Manage User</h2>
+                <FaArrowRight className="text-sm" />
+                <h2 className="text-black text-sm">Add User</h2>
+              </div>
 
-        {/* Email Input */}
-        <div className="mt-3 flex items-center space-x-3">
-          <label className="text-sm text-gray-700">Email *</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="flex-1 px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter email..."
-          />
-        </div>
+              {/* Close (X) Button */}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-500 hover:text-red-500"
+              >
+                <FaTimes size={16} />
+              </button>
+            </div>
 
-        {/* Name Input */}
-        <div className="mt-3 flex items-center space-x-3">
-          <label className="text-sm text-gray-700">Name *</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="flex-1 px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter name..."
-          />
-        </div>
+            {/* Form Content */}
+            <h2 className="text-black text-sm font-semibold mt-3">Add User</h2>
+            <div className="space-y-4">
+              {" "}
+              {/* Added spacing between inputs */}
+              {/* Role Dropdown */}
+              <div className="flex flex-col w-full">
+                <label className="text-sm text-gray-700 mb-1">Role *</label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Role</option>
+                  {getRoleOptions().map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* Multi-Select Dropdown with Badges */}
+              <div className="flex flex-col w-full relative">
+                <label className="text-sm text-gray-700 mb-1">Modules *</label>
+                <div
+                  className="w-full border px-3 py-2 rounded-md cursor-pointer focus-within:ring-2 focus-within:ring-blue-500"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                >
+                  {/* Display Selected Modules as Badges */}
+                  <div className="flex flex-wrap gap-2">
+                    {selectedModules.map((module, index) => (
+                      <span
+                        key={index}
+                        className="bg-blue-500 text-white text-sm px-2 py-1 rounded-full flex items-center"
+                      >
+                        {module}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeModule(module);
+                          }}
+                          className="ml-2 text-white hover:text-gray-300"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
 
-        {/* Save Button */}
-        <button className="mt-3 w-full px-4 py-1 bg-blue-500 text-white rounded-xl hover:bg-blue-600">
-          Save
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute top-full left-0 w-full bg-white border rounded-md shadow-lg mt-1 max-h-40 overflow-y-auto">
+                    {modules.map((module, index) => (
+                      <div
+                        key={index}
+                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleModuleSelection(module)}
+                      >
+                        {module}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* Email Input */}
+              <div className="flex flex-col w-full">
+                <label className="text-sm text-gray-700 mb-1">Email *</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter email..."
+                />
+              </div>
+              {/* Name Input */}
+              {/* <div className="flex flex-col w-full">
+                <label className="text-sm text-gray-700 mb-1">Name *</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter name..."
+                />
+              </div> */}
+              {/* Save Button */}
+              <button
+                onClick={handleUpdateTags}
+                className="w-full px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="flex-1 p-6">
@@ -387,7 +528,7 @@ const AccountPage = () => {
           <button
             className={`pb-2 flex items-center space-x-2 ${
               activeTab === "holiday"
-               ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
+                ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
                 : "text-blue-500 hover:text-blue-700"
             }`}
             onClick={() => setActiveTab("holiday")}
@@ -889,26 +1030,30 @@ const AccountPage = () => {
                 The holiday period includes the Start and End dates.
               </p>
               <div className="flex gap-3">
-      {/* Active Button */}
-      <button
-        onClick={() => setActiveButton("active")}
-        className={`py-1 px-3 rounded-xl ${
-          activeButton === "active" ? "bg-green-500 text-white" : "bg-indigo-600 text-black"
-        }`}
-      >
-        Active
-      </button>
+                {/* Active Button */}
+                <button
+                  onClick={() => setActiveButton("active")}
+                  className={`py-1 px-3 rounded-xl ${
+                    activeButton === "active"
+                      ? "bg-green-500 text-white"
+                      : "bg-indigo-600 text-black"
+                  }`}
+                >
+                  Active
+                </button>
 
-      {/* Inactive Button */}
-      <button
-        onClick={() => setActiveButton("inactive")}
-        className={`py-1 px-3 rounded-xl ${
-          activeButton === "inactive" ? "bg-red-500 text-white" : "bg-indigo-600 text-black"
-        }`}
-      >
-        Inactive
-      </button>
-    </div>
+                {/* Inactive Button */}
+                <button
+                  onClick={() => setActiveButton("inactive")}
+                  className={`py-1 px-3 rounded-xl ${
+                    activeButton === "inactive"
+                      ? "bg-red-500 text-white"
+                      : "bg-indigo-600 text-black"
+                  }`}
+                >
+                  Inactive
+                </button>
+              </div>
               {/* Holiday Date Selection */}
               <div className="mt-4 bg-blue-200 p-4 rounded-lg border border-blue-300">
                 {/* Start Date */}

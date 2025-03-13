@@ -39,120 +39,122 @@ const SubNavbar = () => {
       console.error("Error decoding token:", error);
     }
   }, []);
+  const [allowedModules, setAllowedModules] = useState([]);
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userid");
+    console.log("Fetched User ID from localStorage:", userId); // Debugging
+  
+    if (!userId) {
+      console.error("No userId found in localStorage");
+      return;
+    }
+  
+    const fetchUserModules = async () => {
+      try {
+        console.log("Fetching user modules..."); // Debugging API call
+        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules/${userId}`);
+  
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+  
+        const data = await response.json();
+        console.log("User Modules:", data); // Debugging response
+  
+        setAllowedModules(data.modules || []);
+      } catch (error) {
+        console.error("Error fetching user modules:", error);
+      }
+    };
+  
+    fetchUserModules();
+  }, []);
+  
+  
+
+  const modulesList = [
+    {
+      name: "Dashboard",
+      icon: <MdDashboard className="text-green-600" />,
+      path: "/",
+    },
+    {
+      name: "Products",
+      icon: <FaTh className="text-green-600" />,
+      path: "#",
+      subModules: [
+        { name: "Manage Product", path: "/manageProducts" },
+        { name: "Add Product", path: "/addproducts" },
+        { name: "Inventory", path: "/inventory" },
+      ],
+    },
+    {
+      name: "Orders",
+      icon: <FaTags className="text-blue-600" />,
+      path: "#",
+      subModules: [{ name: "ManageOrders", path: "/Order_Details" }],
+    },
+    {
+      name: "Promotions",
+      icon: <FaBullhorn className="text-yellow-500" />,
+      path: "#",
+      subModules: [
+        { name: "my Promitions", path: "#" },
+        { name: "All Promotions", path: "#" },
+      ],
+    },
+    {
+      name: "Reports",
+      icon: <BsGraphUp className="text-purple-500" />,
+      path: "#",
+      subModules: [
+        { name: "Catalog Performance", path: "#" },
+        { name: "eCommenrce Consulttion", path: "#" },
+        { name: "Seller Rating", path: "#" },
+      ],
+    },
+  ];
+
+
+
   return (
     <div className="flex items-center bg-white border border-gray-300 px-4 py-2 shadow-sm relative">
-      <ul className="flex space-x-6 text-sm text-gray-700">
-        {/* Dashboard */}
-        <li
-          className="relative flex items-center space-x-1 cursor-pointer hover:text-gray-900"
-          onMouseEnter={() => handleMouseEnter("Dashboard")}
-          onMouseLeave={handleMouseLeave}
-        >
-          <MdDashboard className="text-green-600" />
-          <Link to="/">Dasboard </Link>
-        </li>
+       <ul className="flex space-x-6 text-sm text-gray-700">
+      {modulesList.map((module) => {
+        // Agar module user ke allowed list me nahi hai to hide karein
+        if (!allowedModules.includes(module.name)) return null;
 
-        {/* Products */}
-        <li
-          className="relative flex items-center space-x-1 cursor-pointer hover:text-gray-900"
-          onMouseEnter={() => handleMouseEnter("products")}
-          onMouseLeave={handleMouseLeave}
-        >
-          <FaTh className="text-green-600" />
-          <Link to="#">Products </Link>
-          {openDropdown === "products" && (
-            <div className="absolute top-full left-0 bg-green-600 text-white py-2 px-4 w-48 shadow-lg">
-              <Link
-                to="/manageProducts"
-                className="block hover:bg-green-700 px-2 py-1"
-              >
-                Manage Products
-              </Link>
-              <Link
-                to="/addproducts"
-                className="block hover:bg-green-700 px-2 py-1"
-              >
-                Add a Product
-              </Link>
-              {role && ["Master Admin", "Dev Admin"].includes(role) && (
-                <li>
-                  <Link
-                    to="/inventory"
-                    className="block hover:bg-green-700 px-2 py-1"
-                  >
-                    Inventory
-                  </Link>
-                </li>
-              )}
-            </div>
-          )}
-        </li>
-
-        {role && ["Master Admin", "Dev Admin"].includes(role) && (
+        return (
           <li
+            key={module.name}
             className="relative flex items-center space-x-1 cursor-pointer hover:text-gray-900"
-            onMouseEnter={() => handleMouseEnter("orders")}
+            onMouseEnter={() => handleMouseEnter(module.name)}
             onMouseLeave={handleMouseLeave}
           >
-            <FaTags className="text-blue-600" />
-            <Link to="#">Orders</Link>
-            {openDropdown === "orders" && (
-              <div className="absolute top-full left-0 bg-blue-600 text-white py-2 px-4 w-48 shadow-lg">
-                <li>
-                  <Link
-                    to="/Order_Details"
-                    className="block hover:bg-blue-700 px-2 py-1"
-                  >
-                    Manage Orders
-                  </Link>
-                </li>
+            {module.icon}
+            <Link to={module.path}>{module.name}</Link>
+
+            {/* Submodules dropdown */}
+            {module.subModules && openDropdown === module.name && (
+              <div className="absolute top-full left-0 bg-gray-600 text-white py-2 px-4 w-48 shadow-lg">
+                {module.subModules
+                  .filter((subModule) => allowedModules.includes(subModule.name)) // Filter allowed submodules
+                  .map((subModule) => (
+                    <Link
+                      key={subModule.name}
+                      to={subModule.path}
+                      className="block hover:bg-gray-700 px-2 py-1"
+                    >
+                      {subModule.name}
+                    </Link>
+                  ))}
               </div>
             )}
           </li>
-        )}
-
-        <li
-          className="relative flex items-center space-x-1 cursor-pointer hover:text-gray-900"
-          onMouseEnter={() => handleMouseEnter("promotions")}
-          onMouseLeave={handleMouseLeave}
-        >
-          <FaBullhorn className="text-yellow-500" />
-          <Link to="#">Promotions </Link>
-          {openDropdown === "promotions" && (
-            <div className="absolute top-full left-0 bg-orange-500 text-white py-2 px-4 w-48 shadow-lg">
-              <Link to="#" className="block hover:bg-orange-600 px-2 py-1">
-                My Promotions
-              </Link>
-              <Link to="#" className="block hover:bg-orange-600 px-2 py-1">
-                All Promotions
-              </Link>
-            </div>
-          )}
-        </li>
-
-        {/* Reports */}
-        <li
-          className="relative flex items-center space-x-1 cursor-pointer hover:text-gray-900"
-          onMouseEnter={() => handleMouseEnter("reports")}
-          onMouseLeave={handleMouseLeave}
-        >
-          <BsGraphUp className="text-purple-500" />
-          <Link to="#">Reports </Link>
-          {openDropdown === "reports" && (
-            <div className="absolute top-full left-0 bg-purple-500 text-white py-2 px-4 w-56 shadow-lg">
-              <Link to="#" className="block hover:bg-purple-600 px-2 py-1">
-                Catalog Performance
-              </Link>
-              <Link to="#" className="block hover:bg-purple-600 px-2 py-1">
-                eCommerce Consultation
-              </Link>
-              <Link to="#" className="block hover:bg-purple-600 px-2 py-1">
-                Seller Rating
-              </Link>
-            </div>
-          )}
-        </li>
-      </ul>
+        );
+      })}
+    </ul>
     </div>
   );
 };

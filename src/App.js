@@ -19,7 +19,7 @@ import AddJobSearchForm from './pages/Job_Search';
 import AddProviderSearchForm from './pages/Job_provider';
 import AddRoomForRentForm from './pages/Rent_Room';
 import { useAuthContext } from './Hooks/useAuthContext';
-import { useEffect } from 'react';
+import { useEffect,useState } from 'react';
 import { jwtDecode } from "jwt-decode";
 import SubscriptionHistory from './Subcription/Subpage';
 import ProtectedForms from './context api/FormProtect';
@@ -30,24 +30,40 @@ import AuthSignUp from './AuthSignUp';
 import MainDashboard from './pages/MainDashboard';
 import Inventory from './pages/Inventory';
 const App = () => {
+  const [role, setRole] = useState(""); // Default empty string
   const {dispatch} = useAuthContext()
+  const [loading, setLoading] = useState(true); // Ensure role is fetched before route evaluation
 
   function isTokenExpired(token) { 
     if (!token) return true; 
     const decoded = jwtDecode(token); 
     return  decoded.exp * 1000 < Date.now();
 } 
-
-const isAdmin = ()=>{
-  const token = localStorage.getItem('usertoken'); 
-  if (!isTokenExpired(token)) { 
-     const decode = jwtDecode(token);
-    if(decode.payLoad.isAdmin ){
-      return true;
-    }
-    return false;
+useEffect(() => {
+  const token = localStorage.getItem("usertoken");
+  if (!token) {
+    console.log("No token found in localStorage");
+    setLoading(false);
+    return;
   }
-}
+
+  try {
+    const decoded = jwtDecode(token);
+    console.log("Decoded Token:", decoded); // Debugging
+
+    if (decoded?.payLoad?.role) {
+      setRole(decoded.payLoad.role);
+      console.log("Role Set in State:", decoded.payLoad.role); // Debugging
+    } else {
+      console.log("Role is missing in decoded token! Setting default value.");
+      setRole(""); // Default value to avoid null
+    }
+  } catch (error) {
+    console.error("Error decoding token:", error);
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   useEffect(()=>{
     function checkTokenAndRemove() { 
@@ -61,7 +77,9 @@ const isAdmin = ()=>{
   checkTokenAndRemove()
    
   },[])
-
+  const isAdmin = () => {
+    return role === "Dev Admin";
+  };
   const { user } = useAuthContext();
   return (
     <Router>
@@ -77,7 +95,7 @@ const isAdmin = ()=>{
         <Route path="/Rent_Room_listing" element={<ProtectedForms element={<AddRoomForRentForm/>} />} />
           <Route path="/Job_Provider_listing" element={<ProtectedForms element={<AddProviderSearchForm/>} />} />
           <Route path="/Policy" element={ <PrivacyPolicy/>} />
-          <Route path="/admin" element={ isAdmin() ? <AdminDashboard/>  : <Navigate to="/" /> } />
+          <Route path="/admin" element={loading ? <p>Loading...</p> : isAdmin() ? <AdminDashboard/> : <Navigate to="/" />} />
           <Route path="/Job_Search_listing" element={<ProtectedForms element={<AddJobSearchForm/>} />} />
           <Route path="/Order_Details" element={<PrivateRoute element={<SubscriptionHistory />} />} />
           <Route path="/Business_Equipment_listing" element={<ProtectedForms element={<AddBusinessForm/>} />} />

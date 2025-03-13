@@ -28,6 +28,7 @@ import PeopleLooking from './pages/PeopleLooking';
 import AdminDashboard from "./admin/adminpanel"
 import AuthSignUp from './AuthSignUp';
 import MainDashboard from './pages/MainDashboard';
+import Inventory from './pages/Inventory';
 const App = () => {
   const {dispatch} = useAuthContext()
 
@@ -67,7 +68,8 @@ const isAdmin = ()=>{
       <Routes>
         <Route path="/" element={ <Layout />} >
         <Route index element={<PrivateRoute element={<MainDashboard />} />} />
-        <Route path='/dashboard' element={<PrivateRoute element={<Dashboard />} />} />
+        <Route path='/manageProducts' element={<PrivateRoute element={<Dashboard />} />} />
+        <Route path='/inventory' element={<PrivateRoute element={<Inventory />} />} />
         <Route path="/Login" element={!user ? <Auth /> : <Navigate to="/dashboard" /> } />
         <Route path="/signup" element={!user ? <AuthSignUp /> : <Navigate to="/dashboard" /> } />
         <Route path="/ForgotPassword" element={<ForgotPassword/>} />
@@ -77,10 +79,10 @@ const isAdmin = ()=>{
           <Route path="/Policy" element={ <PrivacyPolicy/>} />
           <Route path="/admin" element={ isAdmin() ? <AdminDashboard/>  : <Navigate to="/" /> } />
           <Route path="/Job_Search_listing" element={<ProtectedForms element={<AddJobSearchForm/>} />} />
-          <Route path="/Subcription_Details" element={<PrivateRoute element={<SubscriptionHistory />} />} />
+          <Route path="/Order_Details" element={<PrivateRoute element={<SubscriptionHistory />} />} />
           <Route path="/Business_Equipment_listing" element={<ProtectedForms element={<AddBusinessForm/>} />} />
           <Route path="/New_Equipment_listing" element={<ProtectedForms element={<AddNewEquipmentForm/>} />} />
-          <Route path="/Categories" element={<PrivateRoute element={<CategorySelector />} />} />
+          <Route path="/addproducts" element={<PrivateRoute element={<CategorySelector />} />} />
           <Route path="/Used_Equipment_Listing" element={<ProtectedForms element={<Used_EquipmentForm />} />} />
           <Route path="/I_AM_LOOKING_FOR" element={<ProtectedForms element={<PeopleLooking />} />} />
           <Route path="/edit-account" element={<PrivateRoute element={<AccountPage />} />} />

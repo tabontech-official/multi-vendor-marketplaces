@@ -10,6 +10,7 @@ import { TiUserAdd } from "react-icons/ti";
 import { TiContacts } from "react-icons/ti";
 import { RiStarSFill } from "react-icons/ri";
 import { MdOutlineHolidayVillage } from "react-icons/md";
+import { FaArrowRight } from "react-icons/fa";
 
 const AccountPage = () => {
   const navigate = useNavigate(); // Initialize useNavigate hook
@@ -38,7 +39,8 @@ const AccountPage = () => {
   const [success, setSuccess] = useState("");
   const [agreedToPolicies, setAgreedToPolicies] = useState(false); // New state for policy agreement
   const [activeTab, setActiveTab] = useState("contactDetails");
-
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   useEffect(() => {
     let isMounted = true;
 
@@ -175,6 +177,13 @@ const AccountPage = () => {
       setLoading(false);
     }
   };
+  const [role, setRole] = useState("");
+  const [activeButton, setActiveButton] = useState("active"); // Default "Active"
+
+  const [isOpen, setIsOpen] = useState(false);
+  const togglePopup = () => {
+    setIsOpen(!isOpen);
+  };
 
   return (
     <div className="flex bg-blue-50 min-h-screen text-blue-900">
@@ -201,26 +210,29 @@ const AccountPage = () => {
                 ))}
               </div>
             </div>
-            <p className="text-green-400 text-sm mt-1">
+            <p className="text-green-400 text-sm mt-1 mb-2">
               Profile is 75% complete
             </p>
             <div className="">
               {/* Add Info Button */}
-              <button className="mt-2 mb-2 text-yellow-500 px-4 py-1 text-sm font-sans border-2 border-yellow-500 rounded-2xl ">
+              {/* <button className="mt-2 mb-2 text-yellow-500 px-4 py-1 text-sm font-sans border-2 border-yellow-500 rounded-2xl ">
                 Add Info
-              </button>
+              </button> */}
             </div>
           </div>
 
           {/* Sidebar Navigation */}
           <nav className="mt-6 space-y-4">
-            <button className="w-full text-left flex items-center space-x-3 text-blue-300 hover:text-yellow-400">
+            <button
+              onClick={togglePopup}
+              className="w-full text-left flex items-center space-x-3 text-blue-300 hover:text-yellow-400"
+            >
               <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
                 <TiUserAdd />
               </span>
               <span className="text-sm">Manage User</span>
             </button>
-            <button className="w-full text-left flex items-center space-x-3 text-blue-300 hover:text-yellow-400">
+            {/* <button className="w-full text-left flex items-center space-x-3 text-blue-300 hover:text-yellow-400">
               <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
                 <IoDocuments />
               </span>
@@ -231,7 +243,7 @@ const AccountPage = () => {
                 <MdIntegrationInstructions />
               </span>
               <span className="text-sm">Integration Management</span>
-            </button>
+            </button> */}
             <button className="w-full text-left flex items-center space-x-3 text-yellow-400">
               <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
                 <IoSettings />
@@ -246,6 +258,83 @@ const AccountPage = () => {
           Promote
         </button>
       </aside>
+      {/* Popup */}
+      {isOpen && (
+  <div
+    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+    onClick={() => setIsOpen(false)} // Click outside to close
+  >
+    <div
+      className="bg-white p-2 rounded-lg shadow-lg w-96"
+      onClick={(e) => e.stopPropagation()} // Stop click inside modal from closing
+    >
+      {/* Header with Left Text & Close Button */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm">Manage User</h2>
+          <FaArrowRight className="text-sm" />
+          <h2 className="text-black text-sm">Add User</h2>
+        </div>
+
+        {/* Close (X) Button */}
+        <button
+          onClick={() => setIsOpen(false)}
+          className="text-gray-500 hover:text-red-500"
+        >
+          <FaTimes size={16} />
+        </button>
+      </div>
+
+      {/* Form Content */}
+      <h2 className="text-black text-sm font-semibold mt-3">Add User</h2>
+      <div className="">
+        {/* Role Dropdown */}
+        <div className="mt-3 flex items-center space-x-3">
+          <label className="text-sm text-gray-700">Role *</label>
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="flex-1 px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select Role</option>
+            <option value="Admin">Admin</option>
+            <option value="Editor">Editor</option>
+            <option value="Viewer">Viewer</option>
+          </select>
+        </div>
+
+        {/* Email Input */}
+        <div className="mt-3 flex items-center space-x-3">
+          <label className="text-sm text-gray-700">Email *</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="flex-1 px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter email..."
+          />
+        </div>
+
+        {/* Name Input */}
+        <div className="mt-3 flex items-center space-x-3">
+          <label className="text-sm text-gray-700">Name *</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="flex-1 px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter name..."
+          />
+        </div>
+
+        {/* Save Button */}
+        <button className="mt-3 w-full px-4 py-1 bg-blue-500 text-white rounded-xl hover:bg-blue-600">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Main Content */}
       <main className="flex-1 p-6">
@@ -273,17 +362,17 @@ const AccountPage = () => {
 
           <button
             className={`pb-2 flex items-center space-x-2 ${
-              activeTab === "profileDetails"
+              activeTab === "brandassets"
                 ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
                 : "text-blue-500 hover:text-blue-700"
             }`}
-            onClick={() => setActiveTab("profileDetails")}
+            onClick={() => setActiveTab("brandassets")}
           >
             <FaUser className="text-xl" />
-            <span>Profile Details</span>
+            <span>Brand Assets</span>
           </button>
 
-          <button
+          {/* <button
             className={`pb-2 flex items-center space-x-2 ${
               activeTab === "profileReviews"
                 ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
@@ -293,12 +382,12 @@ const AccountPage = () => {
           >
             <RiStarSFill className="text-xl" />
             <span>Profile Reviews</span>
-          </button>
+          </button> */}
 
           <button
             className={`pb-2 flex items-center space-x-2 ${
               activeTab === "holiday"
-                ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
+               ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
                 : "text-blue-500 hover:text-blue-700"
             }`}
             onClick={() => setActiveTab("holiday")}
@@ -623,7 +712,7 @@ const AccountPage = () => {
             </div>
           )}
 
-          {activeTab === "profileDetails" && (
+          {activeTab === "brandassets" && (
             <div className=" p-6 rounded-lg text-blue-900">
               {/* Header */}
               <div className="flex justify-between">
@@ -697,7 +786,7 @@ const AccountPage = () => {
             </div>
           )}
 
-          {activeTab === "profileReviews" && (
+          {/* {activeTab === "profileReviews" && (
             <div className="p-6 rounded-lg text-blue-900">
               <div className="flex justify-between">
                 <h2 className="text-xl font-semibold text-blue-900">
@@ -706,10 +795,10 @@ const AccountPage = () => {
                 <p className="text-green-600 text-sm mt-1">
                   Profile is 75% complete
                 </p>
-              </div>
+              </div> */}
 
-              {/* Overall Rating */}
-              <div className="mt-4 bg-blue-200 p-4 rounded-lg border border-blue-300">
+          {/* Overall Rating */}
+          {/* <div className="mt-4 bg-blue-200 p-4 rounded-lg border border-blue-300">
                 <div className="flex items-center space-x-4">
                   <div className="bg-blue-600 text-white px-4 py-2 text-2xl font-bold rounded-md">
                     4.7
@@ -722,10 +811,10 @@ const AccountPage = () => {
                     ))}
                   </div>
                   <p className="text-blue-700 text-sm">(50 Reviews)</p>
-                </div>
+                </div> */}
 
-                {/* Star Rating Distribution */}
-                <div className="mt-4 space-y-2">
+          {/* Star Rating Distribution */}
+          {/* <div className="mt-4 space-y-2">
                   {[5, 4, 3, 2, 1].map((stars, index) => (
                     <div key={index} className="flex items-center space-x-2">
                       <span className="text-blue-700">{stars} ★</span>
@@ -741,14 +830,14 @@ const AccountPage = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
-              {/* Featured Reviews */}
-              <h3 className="text-lg font-semibold text-blue-900 mt-6">
+          {/* Featured Reviews */}
+          {/* <h3 className="text-lg font-semibold text-blue-900 mt-6">
                 Featured Reviews
-              </h3>
+              </h3> */}
 
-              {[1, 2].map((review, index) => (
+          {/* {[1, 2].map((review, index) => (
                 <div
                   key={index}
                   className="mt-4 bg-blue-200 p-4 rounded-lg border border-blue-300"
@@ -784,7 +873,7 @@ const AccountPage = () => {
                 </div>
               ))}
             </div>
-          )}
+          )} */}
 
           {activeTab === "holiday" && (
             <div className=" p-6 rounded-lg text-blue-900">
@@ -799,7 +888,27 @@ const AccountPage = () => {
                 <br />
                 The holiday period includes the Start and End dates.
               </p>
+              <div className="flex gap-3">
+      {/* Active Button */}
+      <button
+        onClick={() => setActiveButton("active")}
+        className={`py-1 px-3 rounded-xl ${
+          activeButton === "active" ? "bg-green-500 text-white" : "bg-indigo-600 text-black"
+        }`}
+      >
+        Active
+      </button>
 
+      {/* Inactive Button */}
+      <button
+        onClick={() => setActiveButton("inactive")}
+        className={`py-1 px-3 rounded-xl ${
+          activeButton === "inactive" ? "bg-red-500 text-white" : "bg-indigo-600 text-black"
+        }`}
+      >
+        Inactive
+      </button>
+    </div>
               {/* Holiday Date Selection */}
               <div className="mt-4 bg-blue-200 p-4 rounded-lg border border-blue-300">
                 {/* Start Date */}

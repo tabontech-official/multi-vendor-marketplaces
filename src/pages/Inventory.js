@@ -17,7 +17,7 @@ import { HiOutlineRefresh } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
 import { debounce } from "lodash";
 
-const Dashboard = () => {
+const Inventory = () => {
   let admin;
 
   const isAdmin = () => {
@@ -91,22 +91,19 @@ const Dashboard = () => {
 
   const fetchProductData = async () => {
     setLoading(true);
-    const id = localStorage.getItem("userid");
     try {
       const response = await fetch(
-        admin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+        `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
-
+  
       if (response.ok) {
         const data = await response.json();
-
+  
         const sortedProducts = data.products.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-
+  
         setProducts(sortedProducts);
         setFilteredProducts((prev) => [
           ...prev,
@@ -115,7 +112,7 @@ const Dashboard = () => {
               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
           ),
         ]);
-
+  
         setHasMore(page < data.totalPages); // Check if more pages are available
       }
     } catch (error) {
@@ -124,7 +121,7 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-
+  
   const toggleDropdown = (index) => {
     setOpenDropdown(openDropdown === index ? null : index);
   };
@@ -411,8 +408,8 @@ const Dashboard = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold mb-1">Collection</h1>
-          <p className="text-gray-600">Here are your Collection.</p>
+          <h1 className="text-2xl font-semibold mb-1">Inventory</h1>
+          <p className="text-gray-600">Here are your total Collection in Inventory.</p>
         </div>
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
           {/* Buy Credits Button */}
@@ -690,4 +687,4 @@ const Dashboard = () => {
   ) : null;
 };
 
-export default Dashboard;
+export default Inventory;

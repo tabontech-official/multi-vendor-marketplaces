@@ -42,18 +42,16 @@ const SubNavbar = () => {
           <Link to="#">Products </Link>
           {openDropdown === "products" && (
             <div className="absolute top-full left-0 bg-green-600 text-white py-2 px-4 w-48 shadow-lg">
-              <Link to="/dashboard" className="block hover:bg-green-700 px-2 py-1">
+              <Link to="/manageProducts" className="block hover:bg-green-700 px-2 py-1">
                 Manage Products
               </Link>
-              <Link to="/Categories" className="block hover:bg-green-700 px-2 py-1">
+              <Link to="/addproducts" className="block hover:bg-green-700 px-2 py-1">
                 Add a Product
               </Link>
-              <Link to="#" className="block hover:bg-green-700 px-2 py-1">
-                Import Products
+              <Link to="/inventory" className="block hover:bg-green-700 px-2 py-1">
+                Inventory
               </Link>
-              <Link to="#" className="block hover:bg-green-700 px-2 py-1">
-                Manage Images
-              </Link>
+             
             </div>
           )}
         </li>
@@ -67,7 +65,7 @@ const SubNavbar = () => {
           <Link to="#">Orders</Link>
           {openDropdown === "orders" && (
             <div className="absolute top-full left-0 bg-blue-600 text-white py-2 px-4 w-48 shadow-lg">
-              <Link to="#" className="block hover:bg-blue-700 px-2 py-1">
+              <Link to="/Order_Details" className="block hover:bg-blue-700 px-2 py-1">
                 Manage Orders
               </Link>
             </div>

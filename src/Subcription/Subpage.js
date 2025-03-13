@@ -126,28 +126,28 @@ const SubscriptionHistory = () => {
     <div className={`flex flex-col bg-gray-50 px-3 py-6 ${isDialogOpen ? 'blur-background' : ''}`}>
       <div className="flex">
         <div className="pt-4 min-w-full px-3 bg-white shadow-lg rounded-lg">
-          <h2 className="text-center text-2xl font-bold mb-8">Purchase History</h2>
+          <h2 className="text-center text-2xl font-bold mb-8">Order History</h2>
 
           <div className="flex justify-between mb-6">
             <div className="flex flex-row flex-wrap items-center">
               <div className='bg-blue-100 p-2 mr-3 rounded-lg shadow-md max-sm:mb-2'>
-                <span className="font-bold text-green-600">Total Listings: {totalListings}</span>
+                <span className="font-bold text-green-600">Total Orders: {totalListings}</span>
               </div>
-              <div className='bg-blue-100 p-2 mr-3 rounded-lg shadow-md max-sm:mb-2'>
+              {/* <div className='bg-blue-100 p-2 mr-3 rounded-lg shadow-md max-sm:mb-2'>
                 <span className="font-bold text-green-600">Free Listings: {freeListing}</span>
               </div>
               <div className='bg-blue-100 p-2 rounded-lg shadow-md max-sm:mb-2'>
                 <span className="font-bold text-green-600">Paid Listings: {paidListing}</span>
-              </div>
+              </div> */}
             </div>
-            <div className='flex items-center'>
+            {/* <div className='flex items-center'>
             <button
             onClick={() => setIsDialogOpen(true)}
             className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded flex items-center max-sm:text-xs"
           >
             Buy Credits <FaShoppingBasket className="ml-1" />
           </button>
-            </div>
+            </div> */}
           </div>
 
           <div className="w-full  max-sm:w-auto  max-sm:flex items-center">
@@ -163,8 +163,8 @@ const SubscriptionHistory = () => {
                     <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">#</th>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Date Purchased</th>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Product Name</th>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Per Credit Price</th>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Total Credit</th>
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Address</th>
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Country</th>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Total Price</th>
                   </tr>
                 </thead>

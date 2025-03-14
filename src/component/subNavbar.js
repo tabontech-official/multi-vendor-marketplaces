@@ -110,7 +110,7 @@ const SubNavbar = () => {
       path: "#",
       subModules: [
         { name: "Catalog Performance", path: "#" },
-        { name: "eCommenrce Consulttion", path: "#" },
+        { name: "eCommerence Consultion", path: "#" },
         { name: "Seller Rating", path: "#" },
       ],
     },

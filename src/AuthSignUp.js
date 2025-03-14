@@ -107,7 +107,7 @@ const AuthSignUp = () => {
           </p>
         </div>
 
-        <div className="w-full md:w-1/2 p-8  max-h-screen overflow-y-auto">
+        <div className="w-full md:w-1/2 p-8  h-[65vh] overflow-y-auto">
           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
             Welcome Back
           </h2>

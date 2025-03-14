@@ -180,8 +180,8 @@ const AccountPage = () => {
 
   const getRoleOptions = () => {
     if (userRole === "Dev Admin") {
-      return ["DevAdmin", "Master Admin", "Client", "Staff"];
-    } else if (userRole === "MasterAdmin") {
+      return ["DevAdmin", "MasterAdmin", "Client", "Staff"];
+    } else if (userRole === "Master Admin") {
       return ["Client", "Staff"];
     } else if (userRole === "Client") {
       return ["Staff"];
@@ -211,32 +211,34 @@ const AccountPage = () => {
   };
   const [selectedModules, setSelectedModules] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const handleModuleSelection = (module) => {
-    if (!selectedModules.includes(module)) {
-      setSelectedModules([...selectedModules, module]);
-    }
+  const handleModuleSelection = (moduleName) => {
+    setSelectedModules((prev) =>
+      prev.includes(moduleName)
+        ? prev.filter((m) => m !== moduleName)
+        : [...prev, moduleName]
+    );
   };
 
-  // Function to remove selected module
-  const removeModule = (module) => {
-    setSelectedModules(selectedModules.filter((item) => item !== module));
-  };
   const modules = [
-    "Dashboard",
-    "Manage Product",
-    "Add Product",
-    "Products",
-    "Orders",
-    "ManageOrders",
-    "my promitions",
-    "All Promotions",
-    "Promotions",
-    "Reports",
-    "Inventory",
-    "Catalog Performance",
-    "eCommerence Consultion",
-    "Seller Rating"
+    { name: "Dashboard", subModules: [] },
+    {
+      name: "Products",
+      subModules: ["Manage Product", "Add Product", "Inventory"],
+    },
+    {
+      name: "Orders",
+      subModules: ["ManageOrders"],
+    },
+    {
+      name: "Promotions",
+      subModules: ["All Promotions"],
+    },
+    {
+      name: "Reports",
+      subModules: ["Catalog Performance", "eCommerence Consultion"],
+    },
   ];
+
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const handleUpdateTags = async () => {
@@ -247,9 +249,9 @@ const AccountPage = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/updateUserTagsModule",
+        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
         {
-          method: "PATCH",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -399,51 +401,6 @@ const AccountPage = () => {
                   ))}
                 </select>
               </div>
-              {/* Multi-Select Dropdown with Badges */}
-              <div className="flex flex-col w-full relative">
-                <label className="text-sm text-gray-700 mb-1">Modules *</label>
-                <div
-                  className="w-full border px-3 py-2 rounded-md cursor-pointer focus-within:ring-2 focus-within:ring-blue-500"
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                >
-                  {/* Display Selected Modules as Badges */}
-                  <div className="flex flex-wrap gap-2">
-                    {selectedModules.map((module, index) => (
-                      <span
-                        key={index}
-                        className="bg-blue-500 text-white text-sm px-2 py-1 rounded-full flex items-center"
-                      >
-                        {module}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeModule(module);
-                          }}
-                          className="ml-2 text-white hover:text-gray-300"
-                        >
-                          &times;
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Dropdown Menu */}
-                {isDropdownOpen && (
-                  <div className="absolute top-full left-0 w-full bg-white border rounded-md shadow-lg mt-1 max-h-40 overflow-y-auto">
-                    {modules.map((module, index) => (
-                      <div
-                        key={index}
-                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => handleModuleSelection(module)}
-                      >
-                        {module}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {/* Email Input */}
               <div className="flex flex-col w-full">
                 <label className="text-sm text-gray-700 mb-1">Email *</label>
                 <input
@@ -454,17 +411,50 @@ const AccountPage = () => {
                   placeholder="Enter email..."
                 />
               </div>
-              {/* Name Input */}
-              {/* <div className="flex flex-col w-full">
-                <label className="text-sm text-gray-700 mb-1">Name *</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter name..."
-                />
-              </div> */}
+              <div className="flex flex-col w-full">
+                <label className="text-sm text-gray-700 mb-1">Modules *</label>
+                <div className="border px-3 py-2 rounded-md">
+                  {modules.map((module, index) => (
+                    <div key={index} className="flex flex-col">
+                      {/* Main Checkbox */}
+                      <label className="flex items-center gap-2 py-1">
+                        <input
+                          type="checkbox"
+                          checked={selectedModules.includes(module.name)}
+                          onChange={() => handleModuleSelection(module.name)}
+                          className="form-checkbox text-blue-500"
+                        />
+                        <span className="text-sm font-semibold">
+                          {module.name}
+                        </span>
+                      </label>
+
+                      {/* Sub-Modules (Only show if parent is checked) */}
+                      {selectedModules.includes(module.name) &&
+                        module.subModules.length > 0 && (
+                          <div className="pl-6 mt-1">
+                            {module.subModules.map((subModule, subIndex) => (
+                              <label
+                                key={subIndex}
+                                className="flex items-center gap-2 py-1"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={selectedModules.includes(subModule)}
+                                  onChange={() =>
+                                    handleModuleSelection(subModule)
+                                  }
+                                  className="form-checkbox text-blue-500"
+                                />
+                                <span className="text-sm">{subModule}</span>
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                    </div>
+                  ))}
+                </div>
+              </div>
               {/* Save Button */}
               <button
                 onClick={handleUpdateTags}

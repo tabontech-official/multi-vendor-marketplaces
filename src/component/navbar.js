@@ -18,14 +18,14 @@ const Navbar = () => {
       console.log("No token found in localStorage");
       return;
     }
-  
+
     try {
       const decoded = jwtDecode(token);
-      console.log("Decoded Token:", decoded); // Debugging
-  
+      console.log("Decoded Token:", decoded);
+
       if (decoded.payLoad && decoded.payLoad.role) {
         setRole(decoded.payLoad.role);
-        console.log("Role Set in State:", decoded.payLoad.role); // Debugging
+        console.log("Role Set in State:", decoded.payLoad.role);
       } else {
         console.log("Role is missing in decoded token!");
       }
@@ -33,7 +33,6 @@ const Navbar = () => {
       console.error("Error decoding token:", error);
     }
   }, []);
-  
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -114,7 +113,8 @@ const Navbar = () => {
                 <Link
                   to="/admin"
                   className="text-white border border-transparent hover:border-blue-300 hover:bg-blue-700 transition duration-200 rounded-md px-4 py-2 shadow-md"
-                  onClick={(e) => !role && e.preventDefault()}                >
+                  onClick={(e) => !role && e.preventDefault()}
+                >
                   Dev Configuration
                 </Link>
               </li>

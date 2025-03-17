@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { FaCirclePlus } from "react-icons/fa6";
+import { FaTrash, FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 const CategorySelector = () => {
   const [title, setTitle] = useState("");
@@ -17,10 +19,171 @@ const CategorySelector = () => {
   const [trackShipping, setTrackShipping] = useState(false);
   const [weight, setWeight] = useState("");
   const [unit, setUnit] = useState("kg");
-  const [status, setStatus] = useState("publish"); // Default to "draft"
+  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [userId, setUserId] = useState("");
+  const [options, setOptions] = useState([]);
+  const [variants, setVariants] = useState([]);
+  const [expandedGroups, setExpandedGroups] = useState({});
+  const [showVariantForm, setShowVariantForm] = useState(false);
+  const [newOption, setNewOption] = useState({ name: "", values: [""] });
+  const [images, setImages] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]);
+
+  const handleImageChange = (event) => {
+    const files = Array.from(event.target.files);
+    const imagePreviews = files.map((file) => URL.createObjectURL(file));
+    setSelectedImages((prevImages) => [...prevImages, ...imagePreviews]);
+
+    setImages(files);
+  };
+  const generateVariantCombinations = (options, existingVariants = []) => {
+    if (options.length === 0) return [];
+
+    let variants = options[0].values.map((value) => ({
+      [options[0].name]: value,
+    }));
+
+    for (let i = 1; i < options.length; i++) {
+      let currentOption = options[i];
+      let newVariants = [];
+
+      variants.forEach((variant) => {
+        currentOption.values.forEach((value) => {
+          const newVariant = { ...variant, [currentOption.name]: value };
+          const variantName = Object.values(newVariant).join(" / ");
+
+          if (!existingVariants.some((v) => v.name === variantName)) {
+            newVariants.push(newVariant);
+          }
+        });
+      });
+
+      variants = newVariants;
+    }
+
+    return variants;
+  };
+
+  const updateVariants = (updatedOptions) => {
+    setVariants((prevVariants) => {
+      let existingVariants = prevVariants.flatMap((variant) =>
+        variant.subVariants ? variant.subVariants : [variant]
+      );
+
+      const newVariants = generateVariantCombinations(
+        updatedOptions,
+        existingVariants
+      ).map((variant, index) => ({
+        id: index + 1,
+        name: Object.values(variant).join(" / "),
+        group: Object.values(variant)[0],
+        subVariant: Object.values(variant).length > 1,
+        price: 0,
+        quantity: 0,
+      }));
+
+      let updatedVariants = [...prevVariants];
+
+      newVariants.forEach((newVariant) => {
+        let parentVariantIndex = updatedVariants.findIndex(
+          (v) => v.group === newVariant.group && !v.subVariant
+        );
+
+        if (parentVariantIndex !== -1) {
+          let parentVariant = updatedVariants[parentVariantIndex];
+
+          if (newVariant.subVariant) {
+            const existingSubVariants = parentVariant.subVariants || [];
+            const alreadyExists = existingSubVariants.some(
+              (subV) => subV.name === newVariant.name
+            );
+
+            if (!alreadyExists) {
+              parentVariant.subVariants = [...existingSubVariants, newVariant];
+            }
+          }
+        } else {
+          updatedVariants.push({ ...newVariant, subVariants: [] });
+        }
+      });
+
+      return updatedVariants;
+    });
+  };
+
+  useEffect(() => {
+    setVariants((prevVariants) =>
+      prevVariants.map((variant) => {
+        if (variant.subVariants && variant.subVariants.length > 0) {
+          const totalPrice = variant.subVariants.reduce(
+            (sum, v) => sum + Number(v.price || 0),
+            0
+          );
+          const totalQuantity = variant.subVariants.reduce(
+            (sum, v) => sum + Number(v.quantity || 0),
+            0
+          );
+          return { ...variant, price: totalPrice, quantity: totalQuantity };
+        }
+        return variant;
+      })
+    );
+  }, [variants]);
+
+  const toggleGroup = (groupName) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [groupName]: !prev[groupName],
+    }));
+  };
+
+  const handleNestedChange = (variantId, field, value) => {
+    setVariants((prevVariants) =>
+      prevVariants.map((variant) => ({
+        ...variant,
+        subVariants: variant.subVariants
+          ? variant.subVariants.map((subV) =>
+              subV.id === variantId ? { ...subV, [field]: Number(value) } : subV
+            )
+          : variant.subVariants,
+      }))
+    );
+  };
+
+  const handleOpenForm = () => {
+    setNewOption({ name: "", values: [""] });
+    setShowVariantForm(true);
+  };
+
+  const handleNewOptionNameChange = (value) => {
+    setNewOption({ ...newOption, name: value });
+  };
+
+  const handleNewOptionValueChange = (index, value) => {
+    let updatedValues = [...newOption.values];
+    updatedValues[index] = value;
+    setNewOption({ ...newOption, values: updatedValues });
+  };
+
+  const handleAddNewValue = () => {
+    setNewOption({ ...newOption, values: [...newOption.values, ""] });
+  };
+
+  const handleDeleteNewValue = (index) => {
+    let updatedValues = newOption.values.filter((_, i) => i !== index);
+    setNewOption({ ...newOption, values: updatedValues });
+  };
+
+  const handleDone = () => {
+    if (newOption.name.trim() === "" || newOption.values.length === 0) return;
+
+    const updatedOptions = [...options, { ...newOption }];
+    setOptions(updatedOptions);
+    updateVariants(updatedOptions);
+    setShowVariantForm(false);
+  };
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("userid");
@@ -33,6 +196,7 @@ const CategorySelector = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!userId) {
       setMessage({
         type: "error",
@@ -44,36 +208,48 @@ const CategorySelector = () => {
     setLoading(true);
     setMessage(null);
 
-    const productData = {
-      keyWord,
-      title,
-      description,
-      productType,
-      price: parseFloat(price),
-      compare_at_price: compareAtPrice ? parseFloat(compareAtPrice) : null,
-      track_quantity: trackQuantity,
-      quantity: trackQuantity ? parseInt(quantity) : 0,
-      continue_selling: continueSelling,
-      has_sku: hasSKU,
-      sku: hasSKU ? sku : null,
-      barcode: hasSKU ? barcode : null,
-      track_shipping: trackShipping,
-      weight: trackShipping ? parseFloat(weight) : null,
-      weight_unit: trackShipping ? unit : null,
-      status,
-      userId,
-      vendor,
-    };
+    if (images.length === 0) {
+      console.error("No images selected!");
+      setMessage({ type: "error", text: "Please select at least one image." });
+      setLoading(false);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("keyWord", keyWord);
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("productType", productType);
+    formData.append("price", parseFloat(price));
+    formData.append(
+      "compare_at_price",
+      compareAtPrice ? parseFloat(compareAtPrice) : null
+    );
+    formData.append("track_quantity", trackQuantity);
+    formData.append("quantity", trackQuantity ? parseInt(quantity) : 0);
+    formData.append("continue_selling", continueSelling);
+    formData.append("has_sku", hasSKU);
+    formData.append("sku", hasSKU ? sku : null);
+    formData.append("barcode", hasSKU ? barcode : null);
+    formData.append("track_shipping", trackShipping);
+    formData.append("weight", trackShipping ? parseFloat(weight) : null);
+    formData.append("weight_unit", trackShipping ? unit : null);
+    formData.append("status", status);
+    formData.append("userId", userId);
+    formData.append("vendor", vendor);
+    formData.append("options", JSON.stringify(options));
+    formData.append("variants", JSON.stringify(variants));
+
+    images.forEach((image, index) => {
+      formData.append(`images`, image);
+    });
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/addEquipment",
+        "http://localhost:5000/product/addEquipment",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(productData),
+          body: formData,
         }
       );
 
@@ -81,6 +257,26 @@ const CategorySelector = () => {
 
       if (response.ok) {
         setMessage({ type: "success", text: "Product added successfully!" });
+        setTitle("");
+        setDescription("");
+        setProductType("");
+        setPrice("");
+        setCompareAtPrice("");
+        setTrackQuantity(false);
+        setQuantity(0);
+        setContinueSelling(false);
+        setHasSKU(false);
+        setSKU("");
+        setBarcode("");
+        setTrackShipping(false);
+        setWeight("");
+        setUnit("kg");
+        setOptions([]);
+        setVariants([])
+        setVendor("");
+        setImages([])
+        setSelectedImages([])
+        setkeyWord("");
       } else {
         setMessage({
           type: "error",
@@ -88,11 +284,13 @@ const CategorySelector = () => {
         });
       }
     } catch (error) {
+      console.error("Error uploading product:", error);
       setMessage({ type: "error", text: "Failed to connect to server." });
     }
 
     setLoading(false);
   };
+
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <div className="w-full max-w-6xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -122,22 +320,77 @@ const CategorySelector = () => {
             ></textarea>
           </div>
 
-          {/* Media Upload */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Media
-            </label>
-            <div className="border border-dashed border-gray-400 p-6 text-center rounded-xl">
-              <button className="bg-blue-500 text-white px-4 py-2 rounded-md">
-                Upload new
-              </button>
-              <p className="text-gray-500 text-sm mt-2">
-                Accepts images, videos, or 3D models
-              </p>
+          <div>
+            {/* images */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Media
+              </label>
+
+              {selectedImages.length === 0 ? (
+                <div className="border border-dashed border-gray-400 p-6 text-center rounded-xl">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                    className="hidden"
+                    id="fileUpload"
+                  />
+                  <label
+                    htmlFor="fileUpload"
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer"
+                  >
+                    Upload new
+                  </label>
+                  <p className="text-gray-500 text-sm mt-2">
+                    Accepts images, videos, or 3D models
+                  </p>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <div className="mb-2">
+                    <img
+                      src={selectedImages[0]}
+                      alt="Main Upload"
+                      className="w-40 h-40 object-cover rounded-md border border-gray-300"
+                    />
+                  </div>
+
+                  <div className="flex gap-2 flex-wrap">
+                    {selectedImages.slice(1).map((src, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={src}
+                          alt={`Uploaded ${index}`}
+                          className="w-[80px] h-[80px] object-cover rounded-md border border-gray-300"
+                        />
+                      </div>
+                    ))}
+
+                    <div className="w-[80px] h-[80px] border border-gray-300 flex items-center justify-center rounded-md">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageChange}
+                        className="hidden"
+                        id="uploadMore"
+                      />
+                      <label
+                        htmlFor="uploadMore"
+                        className="text-gray-500 text-2xl cursor-pointer"
+                      >
+                        +
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
+          {/* pricing  */}
 
-          {/* Pricing */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700  ">
               Pricing
@@ -165,7 +418,6 @@ const CategorySelector = () => {
               </label>
             </div>
           </div>
-          {/* cost per item */}
 
           {/* <div className="bg-white p-4">
             <div className="grid grid-cols-3 gap-4">
@@ -204,7 +456,7 @@ const CategorySelector = () => {
             </div>
           </div> */}
 
-          {/* Inventory Section */}
+          {/* Inventory  */}
           <div className="border rounded-2xl p-4 bg-white mb-4 border-gray-500">
             <h2 className="font-semibold text-gray-700">Inventory</h2>
             <div className="flex items-center mt-3">
@@ -301,8 +553,8 @@ const CategorySelector = () => {
               </div>
             )}
           </div>
+          {/* shippingh  */}
 
-          {/* Weight Section */}
           <div className="border rounded-2xl p-4 bg-white border-gray-500">
             <div className="flex items-center">
               <input
@@ -346,6 +598,219 @@ const CategorySelector = () => {
               </div>
             )}
           </div>
+          {/* variants  */}
+
+          <div className="border rounded-2xl p-3 mt-3 bg-white border-gray-300 w-full">
+            <h2 className="text-sm font-medium text-gray-800">Variants</h2>
+
+            {!showVariantForm && (
+              <div className="flex gap-2 items-center mt-2">
+                <FaCirclePlus className="text-gray-600 text-sm" />
+                <button
+                  onClick={handleOpenForm}
+                  className="text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-200"
+                >
+                  Add option like size or color
+                </button>
+              </div>
+            )}
+
+            {options.length > 0 && (
+              <div className="mt-3">
+                {options.map((option, optionIndex) => (
+                  <div
+                    key={optionIndex}
+                    className="border p-2 rounded-lg mt-2 bg-gray-50"
+                  >
+                    <h3 className="text-sm font-medium text-gray-800">
+                      {option.name}
+                    </h3>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {option.values.map((value, valueIndex) => (
+                        <span
+                          key={valueIndex}
+                          className="text-sm bg-gray-200 px-2 py-1 rounded-md"
+                        >
+                          {value}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                <button
+                  onClick={handleOpenForm}
+                  className="flex gap-2 items-center text-sm text-blue-600 mt-2 hover:underline"
+                >
+                  <FaCirclePlus /> Add another option
+                </button>
+              </div>
+            )}
+
+            {showVariantForm && (
+              <div className="mt-3 border border-gray-300 rounded-lg p-4 bg-gray-50">
+                <label className="block text-sm font-medium text-gray-700">
+                  Option name
+                </label>
+                <input
+                  type="text"
+                  value={newOption.name}
+                  onChange={(e) => handleNewOptionNameChange(e.target.value)}
+                  placeholder="Size"
+                  className="w-full border-gray-300 rounded-md p-2 mt-1 focus:ring focus:ring-gray-400 focus:border-gray-500"
+                />
+
+                <label className="block text-sm font-medium text-gray-700 mt-3">
+                  Option values
+                </label>
+                {newOption.values.map((value, index) => (
+                  <div key={index} className="flex gap-2 items-center mt-2">
+                    <input
+                      type="text"
+                      value={value}
+                      onChange={(e) =>
+                        handleNewOptionValueChange(index, e.target.value)
+                      }
+                      placeholder="Medium"
+                      className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
+                    />
+                    {newOption.values.length > 1 && (
+                      <button
+                        onClick={() => handleDeleteNewValue(index)}
+                        className="text-red-600 text-sm border rounded-md p-1 hover:bg-red-100"
+                      >
+                        <FaTrash />
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                <button
+                  onClick={handleAddNewValue}
+                  className="text-sm text-blue-600 mt-2 hover:underline"
+                >
+                  + Add another value
+                </button>
+
+                <div className="flex justify-between mt-4">
+                  <button
+                    onClick={() => setShowVariantForm(false)}
+                    className="text-sm text-red-600 border border-red-400 px-3 py-1 rounded-lg hover:bg-red-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDone}
+                    className="text-sm text-white bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-900"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {variants.length > 0 && (
+              <div className="mt-4 border border-gray-300 rounded-lg p-3 bg-white">
+                <h3 className="text-sm font-medium text-gray-800">
+                  Generated Variants
+                </h3>
+                <table className="w-full mt-2 border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-300">
+                      <th className="text-left text-gray-700 text-sm p-2 w-1/2">
+                        Variant
+                      </th>
+                      <th className="text-left text-gray-700 text-sm p-2">
+                        Price
+                      </th>
+                      <th className="text-left text-gray-700 text-sm p-2">
+                        Available
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {variants.map((variant) => (
+                      <React.Fragment key={variant.id}>
+                        <tr className="border-b border-gray-200">
+                          <td className="p-2 text-gray-800">
+                            <button
+                              onClick={() => toggleGroup(variant.group)}
+                              className="flex items-center gap-2"
+                            >
+                              {expandedGroups[variant.group] ? (
+                                <FaChevronUp />
+                              ) : (
+                                <FaChevronDown />
+                              )}
+                              {variant.name}
+                            </button>
+                          </td>
+                          <td className="p-2">
+                            <input
+                              type="number"
+                              className="border-gray-300 rounded-md p-1 w-24"
+                              value={variant.price}
+                              readOnly
+                            />
+                          </td>
+                          <td className="p-2">
+                            <input
+                              type="number"
+                              className="border-gray-300 rounded-md p-1 w-16"
+                              value={variant.quantity}
+                              readOnly
+                            />
+                          </td>
+                        </tr>
+
+                        {expandedGroups[variant.group] &&
+                          variant.subVariants &&
+                          variant.subVariants.length > 0 &&
+                          variant.subVariants.map((sv) => (
+                            <tr
+                              key={sv.id}
+                              className="border-b border-gray-200 bg-gray-50"
+                            >
+                              <td className="p-2 pl-6 text-gray-800">
+                                {sv.name}
+                              </td>
+                              <td className="p-2">
+                                <input
+                                  type="number"
+                                  className="border-gray-300 rounded-md p-1 w-24"
+                                  value={price}
+                                  onChange={(e) =>
+                                    handleNestedChange(
+                                      sv.id,
+                                      "price",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td className="p-2">
+                                <input
+                                  type="number"
+                                  value={quantity}
+                                  className="border-gray-300 rounded-md p-1 w-16"
+                                  onChange={(e) =>
+                                    handleNestedChange(
+                                      sv.id,
+                                      "quantity",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
           <button
             onClick={handleSubmit}
             type="submit"
@@ -366,7 +831,8 @@ const CategorySelector = () => {
           )}
         </div>
         <div className="space-y-6">
-          {/* Status */}
+          {/* Status  */}
+
           <div className="bg-white p-4 border border-gray-300 rounded-xl">
             <label className="block text-sm font-medium text-gray-700">
               Status
@@ -377,11 +843,10 @@ const CategorySelector = () => {
               onChange={(e) => setStatus(e.target.value)}
             >
               <option value="publish">publish</option>
-              <option>Draft</option>
+              <option value={"draft"}>Draft</option>
             </select>
           </div>
 
-          {/* Publishing */}
           <div className="bg-white p-4 border border-gray-300 rounded-xl">
             <label className="block text-sm font-medium text-gray-700">
               Publishing
@@ -396,7 +861,6 @@ const CategorySelector = () => {
             </div>
           </div>
 
-          {/* Product Organization */}
           <div className="bg-white p-4 border border-gray-300 rounded-xl">
             <label className="block text-sm font-medium text-gray-700">
               Product organization

@@ -239,7 +239,6 @@ const AccountPage = () => {
     },
   ];
 
-
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const handleUpdateTags = async () => {
     if (!email) {

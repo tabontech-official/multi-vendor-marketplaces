@@ -83,7 +83,6 @@ const Dashboard = () => {
     }
   };
 
-  // Show toast message
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
@@ -353,7 +352,6 @@ const Dashboard = () => {
           const data = await response.json();
           console.log("Second Product render", data);
 
-          // Sort products by creation date
           const sortedProducts = data.products.sort(
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           );

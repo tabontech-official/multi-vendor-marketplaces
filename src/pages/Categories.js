@@ -246,7 +246,7 @@ const CategorySelector = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/product/addEquipment",
+        "https://multi-vendor-marketplace.vercel.app/product/addEquipment",
         {
           method: "POST",
           body: formData,

@@ -30,6 +30,7 @@ const CategorySelector = () => {
   const [newOption, setNewOption] = useState({ name: "", values: [""] });
   const [images, setImages] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [checkedImages, setCheckedImages] = useState({}); // Track checked images
 
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files);
@@ -38,6 +39,21 @@ const CategorySelector = () => {
 
     setImages(files);
   };
+
+  const toggleImageSelection = (index) => {
+    setCheckedImages((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
+  const handleRemoveSelected = () => {
+    setSelectedImages(
+      selectedImages.filter((_, index) => !checkedImages[index])
+    );
+    setCheckedImages({});
+  };
+
   const generateVariantCombinations = (options, existingVariants = []) => {
     if (options.length === 0) return [];
 
@@ -272,10 +288,10 @@ const CategorySelector = () => {
         setWeight("");
         setUnit("kg");
         setOptions([]);
-        setVariants([])
+        setVariants([]);
         setVendor("");
-        setImages([])
-        setSelectedImages([])
+        setImages([]);
+        setSelectedImages([]);
         setkeyWord("");
       } else {
         setMessage({
@@ -320,77 +336,86 @@ const CategorySelector = () => {
             ></textarea>
           </div>
 
-          <div>
-            {/* images */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Media
-              </label>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Media
+            </label>
+            {Object.values(checkedImages).some((isChecked) => isChecked) && (
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-sm text-gray-700">
+                  {Object.values(checkedImages).filter(Boolean).length} file
+                  selected
+                </p>
+                <button
+                  onClick={handleRemoveSelected}
+                  className="text-red-500 text-sm font-medium hover:underline"
+                >
+                  Remove
+                </button>
+              </div>
+            )}
 
-              {selectedImages.length === 0 ? (
-                <div className="border border-dashed border-gray-400 p-6 text-center rounded-xl">
+            {selectedImages.length === 0 ? (
+              <div className="border border-dashed border-gray-400 p-6 text-center rounded-xl">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageChange}
+                  className="hidden"
+                  id="fileUpload"
+                />
+                <label
+                  htmlFor="fileUpload"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer"
+                >
+                  Upload new
+                </label>
+                <p className="text-gray-500 text-sm mt-2">
+                  Accepts images, videos, or 3D models
+                </p>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                {selectedImages.map((src, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={src}
+                      alt={`Uploaded ${index}`}
+                      className={`w-40 h-40 object-cover rounded-md border border-gray-300 transition ${
+                        checkedImages[index] ? "opacity-50" : "opacity-100"
+                      }`}
+                    />
+
+                    <input
+                      type="checkbox"
+                      className="absolute top-2 left-2 w-5 h-5 cursor-pointer opacity-0 group-hover:opacity-100"
+                      onChange={() => toggleImageSelection(index)}
+                      checked={checkedImages[index] || false}
+                    />
+                  </div>
+                ))}
+                <div className="w-[80px] h-[80px] border border-gray-300 flex items-center justify-center rounded-md">
                   <input
                     type="file"
                     accept="image/*"
                     multiple
                     onChange={handleImageChange}
                     className="hidden"
-                    id="fileUpload"
+                    id="uploadMore"
                   />
                   <label
-                    htmlFor="fileUpload"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer"
+                    htmlFor="uploadMore"
+                    className="text-gray-500 text-2xl cursor-pointer"
                   >
-                    Upload new
+                    +
                   </label>
-                  <p className="text-gray-500 text-sm mt-2">
-                    Accepts images, videos, or 3D models
-                  </p>
                 </div>
-              ) : (
-                <div className="flex gap-2">
-                  <div className="mb-2">
-                    <img
-                      src={selectedImages[0]}
-                      alt="Main Upload"
-                      className="w-40 h-40 object-cover rounded-md border border-gray-300"
-                    />
-                  </div>
-
-                  <div className="flex gap-2 flex-wrap">
-                    {selectedImages.slice(1).map((src, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={src}
-                          alt={`Uploaded ${index}`}
-                          className="w-[80px] h-[80px] object-cover rounded-md border border-gray-300"
-                        />
-                      </div>
-                    ))}
-
-                    <div className="w-[80px] h-[80px] border border-gray-300 flex items-center justify-center rounded-md">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleImageChange}
-                        className="hidden"
-                        id="uploadMore"
-                      />
-                      <label
-                        htmlFor="uploadMore"
-                        className="text-gray-500 text-2xl cursor-pointer"
-                      >
-                        +
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-          {/* pricing  */}
 
+          {/* pricing  */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700  ">
               Pricing
@@ -418,43 +443,6 @@ const CategorySelector = () => {
               </label>
             </div>
           </div>
-
-          {/* <div className="bg-white p-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm text-gray-600">
-                  Cost per item
-                </label>
-                <input
-                  type="text"
-                  placeholder="$ 0.00"
-                  value={costPerItem}
-                  onChange={(e)=>setCostPerItem(e.target.value)}
-                  className="w-full border border-gray-500 p-2 rounded-xl"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600">Profit</label>
-                <input
-                  type="text"
-                  value={profit}
-                  onChange={(e)=>setProfit(e.target.value)}
-                  placeholder="$ 0.00"
-                  className="w-full border border-gray-500 p-2 rounded-xl"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600">Margin</label>
-                <input
-                  type="text"
-                  value={margin}
-                  onChange={(e)=>setMargin(e.target.value)}
-                  placeholder="$ 0.00"
-                  className="w-full border border-gray-500 p-2 rounded-xl"
-                />
-              </div>
-            </div>
-          </div> */}
 
           {/* Inventory  */}
           <div className="border rounded-2xl p-4 bg-white mb-4 border-gray-500">

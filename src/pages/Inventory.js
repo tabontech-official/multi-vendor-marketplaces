@@ -96,14 +96,14 @@ const Inventory = () => {
         `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
-  
+
       if (response.ok) {
         const data = await response.json();
-  
+
         const sortedProducts = data.products.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-  
+
         setProducts(sortedProducts);
         setFilteredProducts((prev) => [
           ...prev,
@@ -112,7 +112,7 @@ const Inventory = () => {
               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
           ),
         ]);
-  
+
         setHasMore(page < data.totalPages); // Check if more pages are available
       }
     } catch (error) {
@@ -121,7 +121,7 @@ const Inventory = () => {
       setLoading(false);
     }
   };
-  
+
   const toggleDropdown = (index) => {
     setOpenDropdown(openDropdown === index ? null : index);
   };
@@ -129,34 +129,9 @@ const Inventory = () => {
   const OnEdit = (product) => {
     console.log(product);
     console.log("clicking");
-    let formPage = "";
-    switch (product.product_type) {
-      case "Used Equipments":
-        formPage = "/Used_Equipment_Listing";
-        break;
-      case "New Equipments":
-        formPage = "/New_Equipment_listing";
-        break;
-      case "Providers Available":
-        formPage = "/Job_Search_listing";
-        break;
-      case "Provider Needed":
-        formPage = "/Job_Provider_listing";
-        break;
-      case "Spa Room For Rent":
-        formPage = "/Rent_Room_listing";
-        break;
-      case "Looking For":
-        formPage = "/I_AM_LOOKING_FOR";
-        break;
-      case "Businesses To Purchase":
-        formPage = "/Business_Equipment_listing";
-        break;
-      default:
-        console.error("Unknown product type:", product.product_type);
-        return;
-    }
-    // setOpenDropdown(null);
+
+    let formPage = "/addproducts";
+
     navigate(formPage, { state: { product } });
   };
 
@@ -336,49 +311,47 @@ const Inventory = () => {
 
   useEffect(() => {
     const fetchProductData2 = async () => {
-      const id = localStorage.getItem("userid");
-
       try {
         const response = await fetch(
-          admin
-            ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-            : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+          `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
           { method: "GET" }
         );
-
+  
         if (response.ok) {
           const data = await response.json();
           console.log("Second Product render", data);
-
+  
           // Sort products by creation date
           const sortedProducts = data.products.sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            (a, b) => new Date(b.created_at) - new Date(a.created_at)
           );
-
-          setProducts((prev) => [
-            ...prev,
-            ...sortedProducts.filter(
+  
+          setProducts((prev) => {
+            const newProducts = sortedProducts.filter(
               (newProduct) =>
                 !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-            ),
-          ]);
-
-          // Append only new products
-          setFilteredProducts((prev) => [
-            ...prev,
-            ...sortedProducts.filter(
+            );
+            return [...prev, ...newProducts];
+          });
+  
+          setFilteredProducts((prev) => {
+            const newProducts = sortedProducts.filter(
               (newProduct) =>
                 !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-            ),
-          ]);
-
-          setHasMore(page < data.totalPages); // Check if more pages are available
-          console.log(hasMore);
+            );
+            return [...prev, ...newProducts];
+          });
+  
+          // Ensure hasMore updates correctly
+          setHasMore(page < data.totalPages);
+        } else {
+          console.error("Failed to fetch products:", response.status);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
       }
     };
+  
     fetchProductData2();
   }, [page]);
 
@@ -409,7 +382,9 @@ const Inventory = () => {
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
         <div className="flex-1">
           <h1 className="text-2xl font-semibold mb-1">Inventory</h1>
-          <p className="text-gray-600">Here are your total Collection in Inventory.</p>
+          <p className="text-gray-600">
+            Here are your total Collection in Inventory.
+          </p>
         </div>
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
           {/* Buy Credits Button */}
@@ -472,43 +447,43 @@ const Inventory = () => {
               <h2>No products available.</h2>
             </div>
           ) : (
-            <div className=" max-sm:overflow-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-100">
-                  <tr className="items-center">
-                    <th className="py-3 pl-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <div className=" max-sm:overflow-auto border rounded-lg">
+              <table className="w-full border-collapse bg-white">
+                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                  <tr >
+                    <th className="p-3">
                       ACTION
                     </th>
-                    <th className="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="p-3">
                       STATUS
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="p-3">
                       LISTING NAME
                     </th>
                     {admin && (
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="p-3">
                         Publisher
                       </th>
                     )}
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="p-3">
+                      PUBLISHER
+                    </th>
+                    <th className="p-3">
                       TYPE
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="p-3">
                       PRICE
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      CREATED AT
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="p-3">
                       EXPIRES AT
                     </th>
                   </tr>
                 </thead>
 
-                <tbody className="bg-white divide-y divide-gray-200 mb-4">
+                <tbody>
                   {filteredProducts.map((product, index) => (
-                    <tr key={product._id}>
-                      <td className="py-4 whitespace-nowrap relative px-4">
+                    <tr key={product._id} className="border-b hover:bg-gray-50">
+                      <td className="p-3">
                         <button
                           onClick={() => toggleDropdown(index)}
                           className="text-gray-600 hover:text-gray-800 focus:outline-none"
@@ -577,9 +552,8 @@ const Inventory = () => {
                         </div>
                       </td>
 
-                      <td className="px-6 py-4 whitespace-nowrap flex items-center">
-                        <div
-                          className={`w-3 h-3 rounded-full ${
+                      <td className="p-3">                        <div
+                          className={`w-2 h-2 rounded-full ${
                             product.status === "active"
                               ? "bg-green-500"
                               : "bg-red-500"
@@ -587,23 +561,18 @@ const Inventory = () => {
                           title={product.status}
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {product.title !== "Job Listing"
+                      <td className="p-3">                        {product.title !== "Job Listing"
                           ? product.title
                           : "Job Search Listing"}
                       </td>
                       {admin && product.tags?.split(",")[1]?.split("_")[1]}
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {product.product_type}
+                      <td className="p-3">                        {product.username}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        ${product.variants[0].price || "..loading"}
+                      <td className="p-3">                        {product.product_type}
                       </td>
-                      <td className="px-4 py-2">
-                        {new Date(product.createdAt).toLocaleDateString()}
+                      <td className="p-3">                        ${product.variants[0].price || "..loading"}{" "}
                       </td>
-                      <td className="px-4 py-2">
-                        {product.expiresAt &&
+                      <td className="p-3">                        {product.expiresAt &&
                         !isNaN(new Date(product.expiresAt))
                           ? new Date(product.expiresAt).toLocaleDateString()
                           : " "}

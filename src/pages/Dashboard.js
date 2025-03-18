@@ -45,43 +45,16 @@ const Dashboard = () => {
   const [searchVal, setSearchVal] = useState("");
   const [loadingId, setLoadingId] = useState(null);
   const [message, setMessage] = useState("");
-  const [credit, setCredit] = useState(0); // Credit state
   const { user } = useAuthContext();
   const dropdownRefs = useRef([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const dialogRef = useRef(null);
-  const pricePerCredit = 10; // Example price per credit
+
   const [errorMessage, setErrorMessage] = useState("");
-  const [quantity, setQuantity] = useState(1);
+
   const [Loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
-  const [Price, setPrice] = useState();
-  let buyCreditUrl = "";
+
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const fetchPrice = async () => {
-    try {
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/getPrice/",
-        { method: "GET" }
-      );
-      const json = await response.json();
-      if (response.ok) {
-        console.log("Price", json);
-        setPrice(json[0].price);
-      }
-    } catch (error) {
-      console.error("Error fetching quantity:", error);
-    }
-  };
 
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
@@ -131,34 +104,9 @@ const Dashboard = () => {
   const OnEdit = (product) => {
     console.log(product);
     console.log("clicking");
-    let formPage = "";
-    switch (product.product_type) {
-      case "Used Equipments":
-        formPage = "/Used_Equipment_Listing";
-        break;
-      case "New Equipments":
-        formPage = "/New_Equipment_listing";
-        break;
-      case "Providers Available":
-        formPage = "/Job_Search_listing";
-        break;
-      case "Provider Needed":
-        formPage = "/Job_Provider_listing";
-        break;
-      case "Spa Room For Rent":
-        formPage = "/Rent_Room_listing";
-        break;
-      case "Looking For":
-        formPage = "/I_AM_LOOKING_FOR";
-        break;
-      case "Businesses To Purchase":
-        formPage = "/Business_Equipment_listing";
-        break;
-      default:
-        console.error("Unknown product type:", product.product_type);
-        return;
-    }
-    // setOpenDropdown(null);
+
+    let formPage = "/addproducts";
+
     navigate(formPage, { state: { product } });
   };
 
@@ -186,22 +134,6 @@ const Dashboard = () => {
     // setOpenDropdown(null);
   };
 
-  const fetchCredits = async () => {
-    const id = localStorage.getItem("userid");
-    try {
-      const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/quantity/${id}`,
-        { method: "GET" }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setCredit(data.quantity);
-      }
-    } catch (error) {
-      console.error("Error fetching quantity:", error);
-    }
-  };
-
   const handlePublish = async (product) => {
     const userId = localStorage.getItem("userid");
     setLoadingId(product.id);
@@ -219,7 +151,6 @@ const Dashboard = () => {
       if (response.ok) {
         showToast("success", json.message || "Product published successfully!");
         setMessage(json.message || "Product published successfully!");
-        await fetchCredits();
         fetchProductData();
       } else {
         showToast(
@@ -241,18 +172,6 @@ const Dashboard = () => {
     } finally {
       setLoadingId(null);
     }
-  };
-
-  const handleClickOutside = (event) => {
-    if (dialogRef.current && !dialogRef.current.contains(event.target)) {
-      fetchCredits();
-      setIsDialogOpen(false);
-    }
-  };
-
-  const handleCancel = () => {
-    fetchCredits();
-    setIsDialogOpen(false);
   };
 
   const handleUnpublish = async (product) => {
@@ -282,19 +201,6 @@ const Dashboard = () => {
     // setOpenDropdown(null);
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      const dropdowns = dropdownRefs.current;
-      if (dropdowns.every((ref) => ref && !ref.contains(event.target))) {
-        setOpenDropdown(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
   const handleSearch = () => {
     let filtered =
       searchVal === ""
@@ -311,29 +217,8 @@ const Dashboard = () => {
     handleSearch();
   }, [searchVal]);
 
-  const handleBuyNow = () => {
-    buyCreditUrl = CreateCheckoutUrl(
-      userData,
-      quantity,
-      loading,
-      error,
-      variantId
-    );
-    console.log(variantId);
-    window.open(buyCreditUrl, "_blank");
-    setIsDialogOpen(false);
-    setTimeout(() => {
-      fetchCredits();
-    }, 20000);
-
-    buyCreditUrl = "";
-    console.log("url", buyCreditUrl);
-  };
-
   useEffect(() => {
-    fetchCredits();
     fetchProductData();
-    fetchPrice();
   }, []);
 
   useEffect(() => {
@@ -401,31 +286,19 @@ const Dashboard = () => {
 
   return user ? (
     <main className="w-full p-4 md:p-8">
-      {/* Credit Display */}
-      {/* <div className="mb-4 text-blue-600 font-semibold text-lg">
-        <span className={credit === 0 ? 'text-red-500' : ''}> Available Credits: {credit}</span>
-      </div> */}
-
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold mb-1">Collection</h1>
-          <p className="text-gray-600">Here are your Collection.</p>
+          <h1 className="text-2xl font-semibold mb-1">Manage Products</h1>
+          <p className="text-gray-600">Here you can manage products.</p>
         </div>
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
-          {/* Buy Credits Button */}
-          {/* <button
-            onClick={() => setIsDialogOpen(true)}
-            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded flex items-center"
+          <Link
+            to="/addproducts"
+            className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
           >
-            Buy Credits <FaShoppingBasket className="ml-1" />
-          </button> */}
-
-          {/* Add Listings Button */}
-          {/* <Link to="/Categories" className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
-    <HiPlus className="w-5 h-5" />
-    <span>Add Listings</span>
-  </Link> */}
+            <HiPlus className="w-5 h-5" />
+            <span>Add Products</span>
+          </Link>
         </div>
         {toast.show && (
           <div
@@ -457,9 +330,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Products Table */}
-      {/* Products Table */}
-      {/* Products Table */}
       {Loading ? (
         <div className="flex justify-center items-center py-10">
           <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
@@ -617,73 +487,6 @@ const Dashboard = () => {
           )}
         </div>
       )}
-
-      <Dialog
-        open={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        className="fixed inset-0 z-10 overflow-y-auto"
-      >
-        <div className="flex items-center justify-center min-h-screen px-4">
-          <div
-            ref={dialogRef}
-            className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg border border-black relative"
-          >
-            <button
-              onClick={handleCancel}
-              className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-            >
-              <FaTimes size={20} />
-            </button>
-
-            <h2 className="text-2xl font-bold mb-1">Buy Credits</h2>
-            <span className="text-base">${Price || "...Loading"}/credit</span>
-
-            <div className="flex items-center justify-between mb-4 mt-2">
-              <label htmlFor="quantity" className="font-medium">
-                Quantity:
-              </label>
-              <div className="flex items-center">
-                <button
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-1 px-4 rounded-l transition duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
-                >
-                  -
-                </button>
-                <input
-                  id="quantity"
-                  type="number"
-                  value={quantity}
-                  onChange={(e) =>
-                    setQuantity(Math.max(1, parseInt(e.target.value) || 1))
-                  }
-                  className="border border-gray-300 rounded text-center w-16 py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm
-                  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  min="1"
-                />
-                <button
-                  onClick={() => setQuantity((q) => q + 1)}
-                  className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-1 px-4 rounded-r transition duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <span className="text-lg font-bold">
-                Price:${quantity * Price || "...Loading"}.00
-              </span>
-            </div>
-
-            <button
-              onClick={handleBuyNow}
-              className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded flex justify-center items-center"
-            >
-              Buy Now <FaShoppingBasket className="ml-2" />
-            </button>
-          </div>
-        </div>
-      </Dialog>
     </main>
   ) : null;
 };

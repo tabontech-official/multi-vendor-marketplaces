@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { HiCamera } from "react-icons/hi";
-import { FaTimes } from "react-icons/fa"; // Import the close icon
-import { Link, useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import { FaTimes } from "react-icons/fa"; 
+import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaBars, FaArrowLeft } from "react-icons/fa";
 import { IoSettings } from "react-icons/io5";
 import { MdIntegrationInstructions } from "react-icons/md";
@@ -12,8 +12,12 @@ import { RiStarSFill } from "react-icons/ri";
 import { MdOutlineHolidayVillage } from "react-icons/md";
 import { FaArrowRight } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
+import { MdManageAccounts } from "react-icons/md";
+
 const AccountPage = () => {
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const navigate = useNavigate(); 
+    const [selectedModule, setSelectedModule] = useState("Manage User");
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -32,12 +36,12 @@ const AccountPage = () => {
     sellerGst: "",
     gstRegistered: "",
   });
-  const [imageFile, setImageFile] = useState(null); // State for storing selected image file
+  const [imageFile, setImageFile] = useState(null); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [info, setInfo] = useState("");
   const [success, setSuccess] = useState("");
-  const [agreedToPolicies, setAgreedToPolicies] = useState(false); // New state for policy agreement
+  const [agreedToPolicies, setAgreedToPolicies] = useState(false); 
   const [activeTab, setActiveTab] = useState("contactDetails");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -112,8 +116,8 @@ const AccountPage = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImageFile(file); // Store the selected file
-      setFormData({ ...formData, profileImage: URL.createObjectURL(file) }); // Update the profile image preview
+      setImageFile(file); 
+      setFormData({ ...formData, profileImage: URL.createObjectURL(file) });
     }
   };
 
@@ -124,7 +128,7 @@ const AccountPage = () => {
       return;
     }
 
-    const form = new FormData(); // Create a new FormData instance
+    const form = new FormData(); 
 
     setLoading(true);
 
@@ -151,9 +155,8 @@ const AccountPage = () => {
     form.append("dispatchCity", formData.dispatchCity);
     form.append("dispatchAddress", formData.dispatchAddress);
 
-    // Append image file if it exists
     if (imageFile) {
-      form.append("images", imageFile); // Ensure the correct file is sent
+      form.append("images", imageFile);
     }
 
     try {
@@ -186,11 +189,11 @@ const AccountPage = () => {
     } else if (userRole === "Client") {
       return ["Staff"];
     }
-    return []; // Default empty array if role is unknown
+    return []; 
   };
 
   const [role, setRole] = useState("");
-  const [activeButton, setActiveButton] = useState("active"); // Default "Active"
+  const [activeButton, setActiveButton] = useState("active");
   const [userRole, setUserRole] = useState(null);
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
@@ -283,7 +286,7 @@ const AccountPage = () => {
   return (
     <div className="flex bg-blue-50 min-h-screen text-blue-900">
       {/* Sidebar */}
-      <aside className="w-64 mt-2 mb-2 ml-4 rounded-r-2xl bg-blue-900 p-6 flex flex-col justify-between min-h-screen">
+      <aside className="w-52 mt-2 mb-2 ml-4 rounded-r-2xl bg-blue-900 p-6 flex flex-col justify-between min-h-screen">
         <div>
           {/* User Info */}
           <div className="flex flex-col items-center border-b-2">
@@ -317,35 +320,60 @@ const AccountPage = () => {
           </div>
 
           {/* Sidebar Navigation */}
-          <nav className="mt-6 space-y-4">
-            <button
-              onClick={togglePopup}
-              className="w-full text-left flex items-center space-x-3 text-blue-300 hover:text-yellow-400"
-            >
-              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
-                <TiUserAdd />
-              </span>
-              <span className="text-sm">Manage User</span>
-            </button>
-            {/* <button className="w-full text-left flex items-center space-x-3 text-blue-300 hover:text-yellow-400">
-              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
-                <IoDocuments />
-              </span>
-              <span className="text-sm">Document Template</span>
-            </button>
-            <button className="w-full text-left flex items-center space-x-3 text-blue-300 hover:text-yellow-400">
-              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
-                <MdIntegrationInstructions />
-              </span>
-              <span className="text-sm">Integration Management</span>
-            </button> */}
-            <button className="w-full text-left flex items-center space-x-3 text-yellow-400">
-              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
-                <IoSettings />
-              </span>
-              <span className="text-sm">Settings</span>
-            </button>
-          </nav>
+         <nav className="mt-6 space-y-4">
+                     <button
+                       onClick={() => {
+                         setSelectedModule("Manage User");
+                       }}
+                       className={`w-full text-left flex items-center space-x-3 ${
+                         selectedModule === "Manage User"
+                           ? "text-yellow-400"
+                           : "text-blue-300"
+                       } hover:text-yellow-400`}
+                     >
+                       <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                         <MdManageAccounts />
+                       </span>
+         
+                       <Link to="/MANAGE_USER">
+                         <span className="text-sm">Manage User</span>
+                       </Link>
+                     </button>
+         {/* 
+                     <button
+                       onClick={() => {
+                         setSelectedModule("Add User");
+                         togglePopup();
+                       }}
+                       className={`w-full text-left flex items-center space-x-3 ${
+                         selectedModule === "Add User"
+                           ? "text-yellow-400"
+                           : "text-blue-300"
+                       } hover:text-yellow-400`}
+                     >
+                       <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                         <TiUserAdd />
+                       </span>
+                       <span className="text-sm">Add User</span>
+                     </button> */}
+         
+                     <button
+                       onClick={() => setSelectedModule("Settings")}
+                       className={`w-full text-left flex items-center space-x-3 ${
+                         selectedModule === "Settings"
+                           ? "text-yellow-400"
+                           : "text-blue-300"
+                       } hover:text-yellow-400`}
+                     >
+                       <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                         <IoSettings />
+                       </span>
+                       <Link to="/edit-account">
+                       <span className="text-sm">Settings</span>
+                       </Link>
+                       
+                     </button>
+                   </nav>
         </div>
 
         {/* Promote Button */}

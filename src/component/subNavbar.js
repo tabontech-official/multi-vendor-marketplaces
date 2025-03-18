@@ -50,10 +50,10 @@ const SubNavbar = () => {
       return;
     }
   
-    const fetchUserModules = async () => {
+    const fetchUserModules = async () => {  
       try {
         console.log("Fetching user modules..."); // Debugging API call
-        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules/${userId}`);
+        const response = await fetch(`http://localhost:5000/auth/getUserWithModules/${userId}`);
   
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
@@ -122,7 +122,6 @@ const SubNavbar = () => {
     <div className="flex items-center bg-white border border-gray-300 px-4 py-2 shadow-sm relative">
        <ul className="flex space-x-6 text-sm text-gray-700">
       {modulesList.map((module) => {
-        // Agar module user ke allowed list me nahi hai to hide karein
         if (!allowedModules.includes(module.name)) return null;
 
         return (

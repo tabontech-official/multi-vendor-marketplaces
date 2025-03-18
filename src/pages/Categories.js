@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { FaCirclePlus } from "react-icons/fa6";
 import { FaTrash, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FcAddImage } from "react-icons/fc";
+import { useLocation } from "react-router-dom";
+import RichTextEditor from "react-rte";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const CategorySelector = () => {
   const [title, setTitle] = useState("");
@@ -19,7 +24,7 @@ const CategorySelector = () => {
   const [trackShipping, setTrackShipping] = useState(false);
   const [weight, setWeight] = useState("");
   const [unit, setUnit] = useState("kg");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("publish");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [userId, setUserId] = useState("");
@@ -30,7 +35,21 @@ const CategorySelector = () => {
   const [newOption, setNewOption] = useState({ name: "", values: [""] });
   const [images, setImages] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
-  const [checkedImages, setCheckedImages] = useState({}); // Track checked images
+  const [checkedImages, setCheckedImages] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
+  const locationData = useLocation();
+
+  const modules = {
+    toolbar: [
+      [{ header: [1, 2, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ align: [] }],
+      [{ color: [] }, { background: [] }],
+      ["link", "image", "video"],
+      ["clean"],
+    ],
+  };
 
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files);
@@ -210,6 +229,35 @@ const CategorySelector = () => {
     }
   }, []);
 
+  const { product } = locationData.state || {};
+  useEffect(() => {
+    if (product) {
+      console.log(product);
+      setIsEditing(true);
+      setTitle(product.title || "");
+      setDescription(product.body_html || "");
+      setProductType(product.product_type || "");
+      setPrice(product.variants.price || "");
+      setCompareAtPrice(product.compare_at_price || "");
+      setTrackQuantity(product.inventory.track_quantity || false);
+      setQuantity(product.inventory.quantity || 0);
+      setContinueSelling(product.inventory.continue_selling || false);
+      setHasSKU(product.inventory.has_sku || false);
+      setSKU(product.inventory.sku || "");
+      setBarcode(product.inventory.barcode || "");
+      setTrackShipping(product.shipping.track_shipping || false);
+      setWeight(product.shipping.weight || "");
+      setUnit(product.shipping.weight_unit || "kg");
+      setStatus(product.status || "publish");
+      setUserId(product.userId || "");
+      setVendor(product.vendor || "");
+      setkeyWord(product.tags || "");
+      setOptions(product.options || []);
+      setVariants(product.variants || []);
+      setImages(product.images || []);
+    }
+  }, [product]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -237,19 +285,22 @@ const CategorySelector = () => {
     formData.append("description", description);
     formData.append("productType", productType);
     formData.append("price", parseFloat(price));
-    formData.append(
-      "compare_at_price",
-      compareAtPrice ? parseFloat(compareAtPrice) : null
-    );
+
+    if (compareAtPrice)
+      formData.append("compare_at_price", parseFloat(compareAtPrice));
     formData.append("track_quantity", trackQuantity);
     formData.append("quantity", trackQuantity ? parseInt(quantity) : 0);
     formData.append("continue_selling", continueSelling);
     formData.append("has_sku", hasSKU);
-    formData.append("sku", hasSKU ? sku : null);
-    formData.append("barcode", hasSKU ? barcode : null);
+
+    if (hasSKU && sku) formData.append("sku", sku);
+    if (hasSKU && barcode) formData.append("barcode", barcode);
+
     formData.append("track_shipping", trackShipping);
-    formData.append("weight", trackShipping ? parseFloat(weight) : null);
-    formData.append("weight_unit", trackShipping ? unit : null);
+
+    if (trackShipping && weight) formData.append("weight", parseFloat(weight));
+    if (trackShipping && unit) formData.append("weight_unit", unit);
+
     formData.append("status", status);
     formData.append("userId", userId);
     formData.append("vendor", vendor);
@@ -257,22 +308,26 @@ const CategorySelector = () => {
     formData.append("variants", JSON.stringify(variants));
 
     images.forEach((image, index) => {
-      formData.append(`images`, image);
+      formData.append("images", image);
     });
 
     try {
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/addEquipment",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const url = isEditing
+        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product.id}`
+        : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+
+      const method = isEditing ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        body: formData,
+      });
 
       const data = await response.json();
 
       if (response.ok) {
         setMessage({ type: "success", text: "Product added successfully!" });
+
         setTitle("");
         setDescription("");
         setProductType("");
@@ -307,6 +362,26 @@ const CategorySelector = () => {
     setLoading(false);
   };
 
+  const handleParentChange = (variantId, field, value) => {
+    setVariants((prevVariants) =>
+      prevVariants.map((variant) =>
+        variant.id === variantId ? { ...variant, [field]: value } : variant
+      )
+    );
+  };
+
+  const handleVariantImageChange = (variantId, event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setVariants((prevVariants) =>
+        prevVariants.map((variant) =>
+          variant.id === variantId ? { ...variant, image: imageUrl } : variant
+        )
+      );
+    }
+  };
+
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <div className="w-full max-w-6xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -325,21 +400,22 @@ const CategorySelector = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block  text-sm font-medium text-gray-700">
               Description
             </label>
-            <textarea
-              rows="4"
+            <ReactQuill
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="mt-1 block w-full border border-gray-500 p-2 rounded-xl"
-            ></textarea>
+              onChange={setDescription}
+              modules={modules}
+              className="mt-1 block w-full border border-gray-300 "
+            />
           </div>
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Media
             </label>
+
             {Object.values(checkedImages).some((isChecked) => isChecked) && (
               <div className="flex justify-between items-center mb-2">
                 <p className="text-sm text-gray-700">
@@ -413,6 +489,27 @@ const CategorySelector = () => {
                 </div>
               </div>
             )}
+
+            {/* Display existing & new images together */}
+            {/* <div className="flex gap-2 flex-wrap">
+              {images.map((img, index) => (
+                <div key={index} className="relative group">
+                  <img
+                    src={img.src || img} // Handle both URL and object preview
+                    alt={`Image ${index}`}
+                    className={`w-40 h-40 object-cover rounded-md border border-gray-300 transition ${
+                      checkedImages[index] ? "opacity-50" : "opacity-100"
+                    }`}
+                  />
+                  <input
+                    type="checkbox"
+                    className="absolute top-2 left-2 w-5 h-5 cursor-pointer opacity-0 group-hover:opacity-100"
+                    onChange={() => toggleImageSelection(index)}
+                    checked={checkedImages[index] || false}
+                  />
+                </div>
+              ))}
+            </div> */}
           </div>
 
           {/* pricing  */}
@@ -720,37 +817,92 @@ const CategorySelector = () => {
                     {variants.map((variant) => (
                       <React.Fragment key={variant.id}>
                         <tr className="border-b border-gray-200">
-                          <td className="p-2 text-gray-800">
-                            <button
-                              onClick={() => toggleGroup(variant.group)}
-                              className="flex items-center gap-2"
-                            >
-                              {expandedGroups[variant.group] ? (
-                                <FaChevronUp />
+                          <td className="p-2 text-gray-800 flex items-center gap-3">
+                            <div className="w-14 h-14 border border-dashed border-gray-300 flex items-center justify-center rounded-md relative">
+                              {variant.image ? (
+                                <img
+                                  src={variant.image}
+                                  alt={variant.name}
+                                  className="w-full h-full object-cover rounded-md"
+                                />
                               ) : (
-                                <FaChevronDown />
+                                <label
+                                  htmlFor={`upload-${variant.id}`}
+                                  className="cursor-pointer"
+                                >
+                                  <span className="text-blue-500 text-3xl">
+                                    <FcAddImage />
+                                  </span>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    id={`upload-${variant.id}`}
+                                    className="hidden"
+                                    onChange={(e) =>
+                                      handleVariantImageChange(variant.id, e)
+                                    }
+                                  />
+                                </label>
                               )}
-                              {variant.name}
-                            </button>
+                            </div>
+
+                            <div className="flex flex-col items-start">
+                              <span className="font-medium text-gray-800">
+                                {variant.name}
+                              </span>
+
+                              <button
+                                onClick={() => toggleGroup(variant.group)}
+                                className="flex items-center gap-2 mt-1 bg-gray-100 px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-200"
+                              >
+                                <span className="text-gray-500 text-sm">
+                                  {variant.subVariants
+                                    ? `${variant.subVariants.length} variants`
+                                    : "0 variants"}
+                                </span>
+                                {expandedGroups[variant.group] ? (
+                                  <FaChevronUp />
+                                ) : (
+                                  <FaChevronDown />
+                                )}
+                              </button>
+                            </div>
                           </td>
+
+                          {/* Parent Price - Editable */}
                           <td className="p-2">
                             <input
                               type="number"
                               className="border-gray-300 rounded-md p-1 w-24"
                               value={variant.price}
-                              readOnly
+                              onChange={(e) =>
+                                handleParentChange(
+                                  variant.id,
+                                  "price",
+                                  e.target.value
+                                )
+                              }
                             />
                           </td>
+
+                          {/* Parent Quantity - Editable */}
                           <td className="p-2">
                             <input
                               type="number"
                               className="border-gray-300 rounded-md p-1 w-16"
                               value={variant.quantity}
-                              readOnly
+                              onChange={(e) =>
+                                handleParentChange(
+                                  variant.id,
+                                  "quantity",
+                                  e.target.value
+                                )
+                              }
                             />
                           </td>
                         </tr>
 
+                        {/* Sub-Variants */}
                         {expandedGroups[variant.group] &&
                           variant.subVariants &&
                           variant.subVariants.length > 0 &&
@@ -759,14 +911,44 @@ const CategorySelector = () => {
                               key={sv.id}
                               className="border-b border-gray-200 bg-gray-50"
                             >
-                              <td className="p-2 pl-6 text-gray-800">
-                                {sv.name}
+                              {/* Sub-Variant Image Upload */}
+                              <td className="p-2 flex items-center gap-3">
+                                <div className="w-14 h-14 border border-dashed border-gray-300 flex items-center justify-center rounded-md relative">
+                                  {sv.image ? (
+                                    <img
+                                      src={sv.image}
+                                      alt={sv.name}
+                                      className="w-full h-full object-cover rounded-md"
+                                    />
+                                  ) : (
+                                    <label
+                                      htmlFor={`upload-${sv.id}`}
+                                      className="cursor-pointer"
+                                    >
+                                      <span className="text-blue-500 text-3xl">
+                                        <FcAddImage />
+                                      </span>
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        id={`upload-${sv.id}`}
+                                        className="hidden"
+                                        onChange={(e) =>
+                                          handleVariantImageChange(sv.id, e)
+                                        }
+                                      />
+                                    </label>
+                                  )}
+                                </div>
+                                <span>{sv.name}</span>
                               </td>
+
+                              {/* Sub-Variant Price */}
                               <td className="p-2">
                                 <input
                                   type="number"
                                   className="border-gray-300 rounded-md p-1 w-24"
-                                  value={price}
+                                  value={sv.price}
                                   onChange={(e) =>
                                     handleNestedChange(
                                       sv.id,
@@ -776,11 +958,13 @@ const CategorySelector = () => {
                                   }
                                 />
                               </td>
+
+                              {/* Sub-Variant Quantity */}
                               <td className="p-2">
                                 <input
                                   type="number"
-                                  value={quantity}
                                   className="border-gray-300 rounded-md p-1 w-16"
+                                  value={sv.quantity}
                                   onChange={(e) =>
                                     handleNestedChange(
                                       sv.id,
@@ -804,7 +988,11 @@ const CategorySelector = () => {
             type="submit"
             className="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded-md"
           >
-            {loading ? "Submitting..." : "Submit"}
+            {loading
+              ? "Submitting..."
+              : isEditing
+              ? "Update Product"
+              : "Add Product"}
           </button>
 
           {/* Status Message */}
@@ -833,20 +1021,6 @@ const CategorySelector = () => {
               <option value="publish">publish</option>
               <option value={"draft"}>Draft</option>
             </select>
-          </div>
-
-          <div className="bg-white p-4 border border-gray-300 rounded-xl">
-            <label className="block text-sm font-medium text-gray-700">
-              Publishing
-            </label>
-            <div className="mt-2 space-y-2">
-              <div>
-                <input type="checkbox" id="online-store" className="mr-2" />
-                <label htmlFor="online-store" className="text-gray-600">
-                  Online Store
-                </label>
-              </div>
-            </div>
           </div>
 
           <div className="bg-white p-4 border border-gray-300 rounded-xl">

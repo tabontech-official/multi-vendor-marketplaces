@@ -29,6 +29,7 @@ import AdminDashboard from "./admin/adminpanel"
 import AuthSignUp from './AuthSignUp';
 import MainDashboard from './pages/MainDashboard';
 import Inventory from './pages/Inventory';
+import ManageUser from './pages/ManageUser';
 const App = () => {
   const [role, setRole] = useState(""); // Default empty string
   const {dispatch} = useAuthContext()
@@ -104,6 +105,8 @@ useEffect(() => {
           <Route path="/Used_Equipment_Listing" element={<ProtectedForms element={<Used_EquipmentForm />} />} />
           <Route path="/I_AM_LOOKING_FOR" element={<ProtectedForms element={<PeopleLooking />} />} />
           <Route path="/edit-account" element={<PrivateRoute element={<AccountPage />} />} />
+          <Route path="/MANAGE_USER" element={<PrivateRoute element={<ManageUser />} />} />
+
           <Route path="*" element={<Navigate to="/" />} />
         </Route>
       </Routes>

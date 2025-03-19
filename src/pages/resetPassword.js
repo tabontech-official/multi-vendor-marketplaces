@@ -12,7 +12,7 @@ const ResetPassword = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const [tokenValid, setTokenValid] = useState(true); // State to track if token exists
+  const [tokenValid, setTokenValid] = useState(true); 
 
   const navigate = useNavigate();
 
@@ -25,11 +25,11 @@ const ResetPassword = () => {
 
 
   useEffect(() => {
-    // If no token is found, mark it as invalid and redirect or show an error
+
     if (!token || isTokenExpired(token)) {
       setTokenValid(false);
       setTimeout(() => {
-        navigate('/Login'); // Redirect to login or forgot password page after 2 seconds
+        navigate('/Login'); 
       }, 1000);
     }
   }, [token, navigate]);

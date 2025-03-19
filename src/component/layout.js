@@ -6,7 +6,7 @@ import SubNavbar from "./subNavbar";
 
 const Layout = () => {
   const location=useLocation()
-  const hideSubNavbar=location.pathname==="/Login" || location.pathname==="/signup" || location.pathname === "/ForgotPassword"
+  const hideSubNavbar=location.pathname==="/Login" || location.pathname==="/signup" || location.pathname === "/ForgotPassword" || location.pathname === "/New"
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />

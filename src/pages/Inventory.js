@@ -113,7 +113,7 @@ const Inventory = () => {
           ),
         ]);
 
-        setHasMore(page < data.totalPages); // Check if more pages are available
+        setHasMore(page < data.totalPages);
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -316,16 +316,16 @@ const Inventory = () => {
           `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
           { method: "GET" }
         );
-  
+
         if (response.ok) {
           const data = await response.json();
           console.log("Second Product render", data);
-  
+
           // Sort products by creation date
           const sortedProducts = data.products.sort(
             (a, b) => new Date(b.created_at) - new Date(a.created_at)
           );
-  
+
           setProducts((prev) => {
             const newProducts = sortedProducts.filter(
               (newProduct) =>
@@ -333,7 +333,7 @@ const Inventory = () => {
             );
             return [...prev, ...newProducts];
           });
-  
+
           setFilteredProducts((prev) => {
             const newProducts = sortedProducts.filter(
               (newProduct) =>
@@ -341,7 +341,7 @@ const Inventory = () => {
             );
             return [...prev, ...newProducts];
           });
-  
+
           // Ensure hasMore updates correctly
           setHasMore(page < data.totalPages);
         } else {
@@ -351,7 +351,7 @@ const Inventory = () => {
         console.error("Error fetching products:", error);
       }
     };
-  
+
     fetchProductData2();
   }, [page]);
 
@@ -432,8 +432,6 @@ const Inventory = () => {
       </div>
 
       {/* Products Table */}
-      {/* Products Table */}
-      {/* Products Table */}
       {Loading ? (
         <div className="flex justify-center items-center py-10">
           <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
@@ -443,40 +441,21 @@ const Inventory = () => {
         <div className="p-4">
           {filteredProducts.length === 0 ? (
             <div className="text-center py-10 text-gray-500">
-              {/* Only show this message if there are no products available */}
               <h2>No products available.</h2>
             </div>
           ) : (
             <div className=" max-sm:overflow-auto border rounded-lg">
               <table className="w-full border-collapse bg-white">
                 <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-                  <tr >
-                    <th className="p-3">
-                      ACTION
-                    </th>
-                    <th className="p-3">
-                      STATUS
-                    </th>
-                    <th className="p-3">
-                      LISTING NAME
-                    </th>
-                    {admin && (
-                      <th className="p-3">
-                        Publisher
-                      </th>
-                    )}
-                    <th className="p-3">
-                      PUBLISHER
-                    </th>
-                    <th className="p-3">
-                      TYPE
-                    </th>
-                    <th className="p-3">
-                      PRICE
-                    </th>
-                    <th className="p-3">
-                      EXPIRES AT
-                    </th>
+                  <tr>
+                    <th className="p-3">ACTION</th>
+                    <th className="p-3">STATUS</th>
+                    <th className="p-3">LISTING NAME</th>
+                    {admin && <th className="p-3">Publisher</th>}
+                    <th className="p-3">PUBLISHER</th>
+                    <th className="p-3">TYPE</th>
+                    <th className="p-3">PRICE</th>
+                    <th className="p-3">EXPIRES AT</th>
                   </tr>
                 </thead>
 
@@ -492,7 +471,7 @@ const Inventory = () => {
                         </button>
                         <div
                           ref={(el) => (dropdownRefs.current[index] = el)}
-                          onMouseLeave={() => setOpenDropdown(null)} // Close dropdown on mouse leave
+                          onMouseLeave={() => setOpenDropdown(null)}
                         >
                           {openDropdown === index && (
                             <div className="absolute bg-white border flex justify-start items-start border-gray-300 rounded-md shadow-lg z-10">
@@ -552,7 +531,9 @@ const Inventory = () => {
                         </div>
                       </td>
 
-                      <td className="p-3">                        <div
+                      <td className="p-3">
+                        {" "}
+                        <div
                           className={`w-2 h-2 rounded-full ${
                             product.status === "active"
                               ? "bg-green-500"
@@ -561,18 +542,22 @@ const Inventory = () => {
                           title={product.status}
                         />
                       </td>
-                      <td className="p-3">                        {product.title !== "Job Listing"
+                      <td className="p-3">
+                        {" "}
+                        {product.title !== "Job Listing"
                           ? product.title
                           : "Job Search Listing"}
                       </td>
                       {admin && product.tags?.split(",")[1]?.split("_")[1]}
-                      <td className="p-3">                        {product.username}
+                      <td className="p-3"> {product.username} </td>
+                      <td className="p-3"> {product.product_type}</td>
+                      <td className="p-3">
+                        {" "}
+                        ${product.variants[0].price || "..loading"}{" "}
                       </td>
-                      <td className="p-3">                        {product.product_type}
-                      </td>
-                      <td className="p-3">                        ${product.variants[0].price || "..loading"}{" "}
-                      </td>
-                      <td className="p-3">                        {product.expiresAt &&
+                      <td className="p-3">
+                        {" "}
+                        {product.expiresAt &&
                         !isNaN(new Date(product.expiresAt))
                           ? new Date(product.expiresAt).toLocaleDateString()
                           : " "}

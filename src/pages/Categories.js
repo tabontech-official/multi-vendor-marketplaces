@@ -11,9 +11,9 @@ const CategorySelector = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [productType, setProductType] = useState("");
-  const [vendor, setVendor] = useState("");
-  const [keyWord, setkeyWord] = useState("");
+  const [productType, setProductType] = useState([]);
+  const [vendor, setVendor] = useState([]);
+  const [keyWord, setKeyWord] = useState([]);
   const [compareAtPrice, setCompareAtPrice] = useState("");
   const [trackQuantity, setTrackQuantity] = useState(false);
   const [quantity, setQuantity] = useState(0);
@@ -51,6 +51,13 @@ const CategorySelector = () => {
     ],
   };
 
+  const handleKeyDown = (e, setState, stateValues) => {
+    if (e.key === "Enter" && e.target.value.trim() !== "") {
+      setState([...stateValues, e.target.value.trim()]);
+      e.target.value = ""; // Clear input after adding tag
+      e.preventDefault();
+    }
+  };
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files);
     const imagePreviews = files.map((file) => URL.createObjectURL(file));
@@ -251,7 +258,7 @@ const CategorySelector = () => {
       setStatus(product.status || "publish");
       setUserId(product.userId || "");
       setVendor(product.vendor || "");
-      setkeyWord(product.tags || "");
+      setKeyWord(product.tags || []);
       setOptions(product.options || []);
       setVariants(product.variants || []);
       setImages(product.images || []);
@@ -347,7 +354,7 @@ const CategorySelector = () => {
         setVendor("");
         setImages([]);
         setSelectedImages([]);
-        setkeyWord("");
+        setKeyWord("");
       } else {
         setMessage({
           type: "error",
@@ -380,6 +387,13 @@ const CategorySelector = () => {
         )
       );
     }
+  };
+  const [inputValue, setInputValue] = useState("");
+
+
+
+  const removeTag = (index, setState, stateValues) => {
+    setState(stateValues.filter((_, i) => i !== index));
   };
 
   return (
@@ -1042,16 +1056,13 @@ const CategorySelector = () => {
                 placeholder="Vendor"
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
-              {/* <input
-                type="text"
-                placeholder="Collections"
-                className="w-full border border-gray-300 p-2 rounded-xl"
-              /> */}
+          
               <input
                 type="text"
                 placeholder="Key Words"
                 value={keyWord}
-                onChange={(e) => setkeyWord(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onChange={(e) => setKeyWord(e.target.value)}
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
             </div>

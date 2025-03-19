@@ -16,12 +16,12 @@ const SubscriptionHistory = () => {
   const [freeListing, setFreeListing] = useState(0);
   const [Price , setPrice] = useState(10)
   const [quantity, setQuantity] = useState(1);
-  const pricePerCredit = 10; // Example price per credit
+  const pricePerCredit = 10; 
   const dynamicPrice = quantity * Price;
  
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // State for dialog visibility
-  const dialogRef = useRef(null); // Reference to the dialog
+  const [isDialogOpen, setIsDialogOpen] = useState(false); 
+  const dialogRef = useRef(null); 
 
   const fetchSubscriptions = async () => {
     const email = localStorage.getItem('email');

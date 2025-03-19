@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { HiCamera } from "react-icons/hi";
-import { FaTimes } from "react-icons/fa"; 
+import { FaTimes } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaBars, FaArrowLeft } from "react-icons/fa";
 import { IoSettings } from "react-icons/io5";
@@ -15,9 +15,9 @@ import { jwtDecode } from "jwt-decode";
 import { MdManageAccounts } from "react-icons/md";
 
 const AccountPage = () => {
-  const navigate = useNavigate(); 
-    const [selectedModule, setSelectedModule] = useState("Manage User");
-  
+  const navigate = useNavigate();
+  const [selectedModule, setSelectedModule] = useState("Manage User");
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -36,12 +36,12 @@ const AccountPage = () => {
     sellerGst: "",
     gstRegistered: "",
   });
-  const [imageFile, setImageFile] = useState(null); 
+  const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [info, setInfo] = useState("");
   const [success, setSuccess] = useState("");
-  const [agreedToPolicies, setAgreedToPolicies] = useState(false); 
+  const [agreedToPolicies, setAgreedToPolicies] = useState(false);
   const [activeTab, setActiveTab] = useState("contactDetails");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -58,12 +58,9 @@ const AccountPage = () => {
       }
 
       try {
-        const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
-          {
-            method: "GET",
-          }
-        );
+        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
+          method: "GET",
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -112,23 +109,22 @@ const AccountPage = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImageFile(file); 
+      setImageFile(file);
       setFormData({ ...formData, profileImage: URL.createObjectURL(file) });
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!agreedToPolicies) {
-      alert("Please agree to the policies before proceeding.");
-      return;
-    }
+    // if (!agreedToPolicies) {
+    //   alert("Please agree to the policies before proceeding.");
+    //   return;
+    // }
 
-    const form = new FormData(); 
+    const form = new FormData();
 
     setLoading(true);
 
@@ -189,11 +185,11 @@ const AccountPage = () => {
     } else if (userRole === "Client") {
       return ["Staff"];
     }
-    return []; 
+    return [];
   };
 
   const [role, setRole] = useState("");
-  const [activeButton, setActiveButton] = useState("active");
+  const [activeButton, setActiveButton] = useState("");
   const [userRole, setUserRole] = useState(null);
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
@@ -220,6 +216,31 @@ const AccountPage = () => {
         ? prev.filter((m) => m !== moduleName)
         : [...prev, moduleName]
     );
+  };
+
+  const updateAllProductsStatus = async (status) => {
+    try {
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/product/holiday",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
+
+      const data = await response.json();
+      if (response.ok) {
+        alert(`All products updated to ${status}`);
+      } else {
+        alert(`Failed to update products: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error updating products:", error);
+      alert("An error occurred while updating product status.");
+    }
   };
 
   const modules = [
@@ -320,26 +341,26 @@ const AccountPage = () => {
           </div>
 
           {/* Sidebar Navigation */}
-         <nav className="mt-6 space-y-4">
-                     <button
-                       onClick={() => {
-                         setSelectedModule("Manage User");
-                       }}
-                       className={`w-full text-left flex items-center space-x-3 ${
-                         selectedModule === "Manage User"
-                           ? "text-yellow-400"
-                           : "text-blue-300"
-                       } hover:text-yellow-400`}
-                     >
-                       <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
-                         <MdManageAccounts />
-                       </span>
-         
-                       <Link to="/MANAGE_USER">
-                         <span className="text-sm">Manage User</span>
-                       </Link>
-                     </button>
-         {/* 
+          <nav className="mt-6 space-y-4">
+            <button
+              onClick={() => {
+                setSelectedModule("Manage User");
+              }}
+              className={`w-full text-left flex items-center space-x-3 ${
+                selectedModule === "Manage User"
+                  ? "text-yellow-400"
+                  : "text-blue-300"
+              } hover:text-yellow-400`}
+            >
+              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                <MdManageAccounts />
+              </span>
+
+              <Link to="/MANAGE_USER">
+                <span className="text-sm">Manage User</span>
+              </Link>
+            </button>
+            {/* 
                      <button
                        onClick={() => {
                          setSelectedModule("Add User");
@@ -356,24 +377,23 @@ const AccountPage = () => {
                        </span>
                        <span className="text-sm">Add User</span>
                      </button> */}
-         
-                     <button
-                       onClick={() => setSelectedModule("Settings")}
-                       className={`w-full text-left flex items-center space-x-3 ${
-                         selectedModule === "Settings"
-                           ? "text-yellow-400"
-                           : "text-blue-300"
-                       } hover:text-yellow-400`}
-                     >
-                       <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
-                         <IoSettings />
-                       </span>
-                       <Link to="/edit-account">
-                       <span className="text-sm">Settings</span>
-                       </Link>
-                       
-                     </button>
-                   </nav>
+
+            <button
+              onClick={() => setSelectedModule("Settings")}
+              className={`w-full text-left flex items-center space-x-3 ${
+                selectedModule === "Settings"
+                  ? "text-yellow-400"
+                  : "text-blue-300"
+              } hover:text-yellow-400`}
+            >
+              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                <IoSettings />
+              </span>
+              <Link to="/edit-account">
+                <span className="text-sm">Settings</span>
+              </Link>
+            </button>
+          </nav>
         </div>
 
         {/* Promote Button */}
@@ -565,7 +585,6 @@ const AccountPage = () => {
                   Edit Profile
                 </h2>
 
-                {/* Account Status Toggle */}
                 <div className="flex items-center space-x-4 mt-4">
                   <p className="text-sm text-blue-700">Account Status</p>
                   <div className="flex space-x-4">
@@ -598,7 +617,6 @@ const AccountPage = () => {
 
                 {/* Form Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* First Name */}
                   <div className="flex flex-col">
                     <label
                       htmlFor="firstName"
@@ -613,7 +631,7 @@ const AccountPage = () => {
                       value={formData.firstName}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
@@ -632,7 +650,7 @@ const AccountPage = () => {
                       value={formData.lastName}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
@@ -651,218 +669,150 @@ const AccountPage = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
                   {/* Phone */}
                   <div className="flex flex-col">
                     <label
-                      htmlFor="phone"
+                      htmlFor="phoneNumber"
                       className="text-sm font-medium text-blue-800"
                     >
                       Phone *
                     </label>
                     <input
                       type="text"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
+                      id="phoneNumber"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="address"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Address *
-                    </label>
-                    <input
-                      type="text"
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
-                  {/* Zip Code Field */}
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="zip"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Zip *
-                    </label>
-                    <input
-                      type="number"
-                      id="zip"
-                      name="zip"
-                      value={formData.zip}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
-                    />
-                  </div>
-
-                  {/* Country Field */}
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="country"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Country *
-                    </label>
-                    <input
-                      type="text"
-                      id="country"
-                      name="country"
-                      value={formData.country}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
-                    />
-                  </div>
-
-                  {/* City Field */}
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="city"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      City *
-                    </label>
-                    <input
-                      type="text"
-                      id="city"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
-                    />
-                  </div>
                   {/* Seller GST */}
-
                   <div className="flex flex-col">
                     <label
-                      htmlFor="Seller GST"
+                      htmlFor="sellerGst"
                       className="block text-sm font-medium text-gray-700"
                     >
                       Seller GST *
                     </label>
                     <input
                       type="text"
-                      id="Seller GST"
-                      name="Seller GST"
+                      id="sellerGst"
+                      name="sellerGst"
                       value={formData.sellerGst}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
-                  {/* Seller GST */}
-
+                  {/* GST Registered */}
                   <div className="flex flex-col">
                     <label
-                      htmlFor="GST Registered"
+                      htmlFor="gstRegistered"
                       className="block text-sm font-medium text-gray-700"
                     >
                       GST Registered *
                     </label>
                     <input
                       type="text"
-                      id="GST Registered"
-                      name="GST Registered"
+                      id="gstRegistered"
+                      name="gstRegistered"
                       value={formData.gstRegistered}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
+                  {/* Dispatch Address */}
                   <div className="flex flex-col">
                     <label
-                      htmlFor="GST Registered"
+                      htmlFor="dispatchAddress"
                       className="block text-sm font-medium text-gray-700"
                     >
                       Dispatch Address *
                     </label>
                     <input
                       type="text"
-                      id="Dispatch Address"
-                      name="Dispatch Address"
+                      id="dispatchAddress"
+                      name="dispatchAddress"
                       value={formData.dispatchAddress}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
+                  {/* Dispatch City */}
                   <div className="flex flex-col">
                     <label
-                      htmlFor="Dispatch City"
+                      htmlFor="dispatchCity"
                       className="block text-sm font-medium text-gray-700"
                     >
                       Dispatch City *
                     </label>
                     <input
                       type="text"
-                      id="Dispatch City"
-                      name="Dispatch City"
+                      id="dispatchCity"
+                      name="dispatchCity"
                       value={formData.dispatchCity}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
+                  {/* Dispatch Country */}
                   <div className="flex flex-col">
                     <label
-                      htmlFor="dipatch Country"
+                      htmlFor="dispatchCountry"
                       className="block text-sm font-medium text-gray-700"
                     >
                       Dispatch Country *
                     </label>
                     <input
                       type="text"
-                      id="dipatch Country"
-                      name="dipatch Country"
+                      id="dispatchCountry"
+                      name="dispatchCountry"
                       value={formData.dispatchCountry}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
+                  {/* Dispatch Zip */}
                   <div className="flex flex-col">
                     <label
-                      htmlFor="dispatch Zip"
+                      htmlFor="dispatchzip"
                       className="block text-sm font-medium text-gray-700"
                     >
                       Dispatch Zip *
                     </label>
                     <input
-                      type="text"
-                      id="dispatch Zip"
-                      name="dispatch Zip"
+                      type="number"
+                      id="dispatchzip"
+                      name="dispatchzip"
                       value={formData.dispatchzip}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-blue-900 text-blue-200 border border-blue-700 rounded-md"
+                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
                 </div>
 
                 {/* Save Button */}
                 <div className="flex justify-end mt-6">
-                  <button className="px-6 py-2 bg-yellow-500 text-black font-semibold rounded-md hover:bg-yellow-600">
+                  <button
+                    onClick={handleSubmit}
+                    className="px-6 py-2 bg-yellow-500 text-black font-semibold rounded-md hover:bg-yellow-600"
+                  >
                     Save
                   </button>
                 </div>
@@ -1049,7 +999,10 @@ const AccountPage = () => {
               <div className="flex gap-3">
                 {/* Active Button */}
                 <button
-                  onClick={() => setActiveButton("active")}
+                  onClick={() => {
+                    setActiveButton("active");
+                    updateAllProductsStatus("active");
+                  }}
                   className={`py-1 px-3 rounded-xl ${
                     activeButton === "active"
                       ? "bg-green-500 text-white"
@@ -1061,7 +1014,10 @@ const AccountPage = () => {
 
                 {/* Inactive Button */}
                 <button
-                  onClick={() => setActiveButton("inactive")}
+                  onClick={() => {
+                    setActiveButton("inactive");
+                    updateAllProductsStatus("draft");
+                  }}
                   className={`py-1 px-3 rounded-xl ${
                     activeButton === "inactive"
                       ? "bg-red-500 text-white"

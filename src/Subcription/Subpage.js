@@ -31,7 +31,7 @@ const SubscriptionHistory = () => {
     }
 
     try {
-      const res = await fetch(`https://multi-vendor-marketplace.vercel.app/order/order/${email}`, { method: "GET" });
+      const res = await fetch(`https://multi-vendor-marketplace.vercel.app/order/order/`, { method: "GET" });
       if (res.ok) {
         const json = await res.json();
         const sortedSubscriptions = json.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -157,32 +157,34 @@ const SubscriptionHistory = () => {
                 <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />loading...
               </div>
             ) : (
-              <table className="max-sm:flex max-sm:flex-col overflow-auto max-sm:items-center w-full max-sm:w-auto">
-                <thead className="bg-gray-200 border-b max-sm:flex max-sm:flex-col w-full max-sm:w-auto">
+             <div className="max-sm:overflow-auto border rounded-lg">
+               <table className="w-full border-collapse bg-white">
+                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
                   <tr>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">#</th>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Date Purchased</th>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Product Name</th>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Address</th>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Country</th>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">Total Price</th>
+                    <th scope="col" className="p-3">#</th>
+                    <th scope="col" className="p-3">Date Purchased</th>
+                    <th scope="col" className="p-3">Product Name</th>
+                    <th scope="col" className="p-3">Address</th>
+                    <th scope="col" className="p-3">Country</th>
+                    <th scope="col" className="p-3">Total Price</th>
                   </tr>
                 </thead>
-                <tbody className="max-sm:flex max-sm:flex-col w-full">
+                <tbody >
                   {subscriptions.map((subscription, index) =>
                     subscription.lineItems.map((item, itemIndex) => (
                       <tr key={`${index}-${itemIndex}`} className={`border-b ${itemIndex % 2 === 0 ? 'bg-white' : 'bg-gray-100'} w-full`}>
-                        <td scope="col" className="px-4 py-2 text-sm font-medium text-gray-900">{index + 1}</td>
-                        <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{formatDate(subscription.createdAt)}</td>
-                        <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{item.name}</td>
-                        <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">${item.price}</td>
-                        <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">{item.quantity}</td>
-                        <td scope="col" className="text-sm text-gray-900 font-light px-4 py-2">${(item.quantity * item.price).toFixed(2)}</td>
+                        <td scope="col" className="p-3">{index + 1}</td>
+                        <td scope="col" className="p-3">{formatDate(subscription.createdAt)}</td>
+                        <td scope="col" className="p-3">{item.name}</td>
+                        <td scope="col" className="p-3">${item.price}</td>
+                        <td scope="col" className="p-3">{item.quantity}</td>
+                        <td scope="col" className="p-3">${(item.quantity * item.price).toFixed(2)}</td>
                       </tr>
                     ))
                   )}
                 </tbody>
               </table>
+             </div>
             )}
           </div>
         </div>

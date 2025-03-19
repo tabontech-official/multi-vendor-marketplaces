@@ -549,7 +549,7 @@ const Inventory = () => {
                           : "Job Search Listing"}
                       </td>
                       {admin && product.tags?.split(",")[1]?.split("_")[1]}
-                      <td className="p-3"> {product.username} </td>
+                      <td className="p-3"> {product.email} </td>
                       <td className="p-3"> {product.product_type}</td>
                       <td className="p-3">
                         {" "}

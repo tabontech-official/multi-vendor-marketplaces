@@ -4,6 +4,7 @@ import { FaUser, FaTimes, FaArrowRight } from "react-icons/fa";
 import { MdManageAccounts } from "react-icons/md";
 import { IoSettings } from "react-icons/io5";
 import { jwtDecode } from "jwt-decode";
+import { HiPlus } from "react-icons/hi";
 const ManageUser = () => {
   const [selectedModule, setSelectedModule] = useState("Manage User");
   const [email, setEmail] = useState("");
@@ -13,71 +14,40 @@ const ManageUser = () => {
   const [selectedModules, setSelectedModules] = useState([]);
   const [userRole, setUserRole] = useState(null);
 
-  const [users] = useState([
-    {
-      id: 1,
-      name: "Timothy Janson",
-      email: "timothy.janson@acme.com",
-      status: "Not signed up",
-      addedOn: "Dec 1, 2023",
-      groups: "Enterprise Account",
-      roles: "Manager +2 more",
-    },
-    {
-      id: 2,
-      name: "Gavin Truman",
-      email: "gavin.truman@acme.com",
-      status: "Active",
-      addedOn: "Dec 8, 2023",
-      groups: "Outbound, +2 more",
-      roles: "Learner",
-    },
-    {
-      id: 3,
-      name: "Ella Torton",
-      email: "ella.torton@acme.com",
-      status: "Deactivated",
-      addedOn: "Dec 1, 2023",
-      groups: "Healthcare, +2 more",
-      roles: "Admin +2 more",
-    },
-    {
-      id: 4,
-      name: "Lance Pereira",
-      email: "lance.pereira@acme.com",
-      status: "Not signed up",
-      addedOn: "Dec 8, 2023",
-      groups: "High-Value +2 more",
-      roles: "Learner",
-    },
-    {
-      id: 5,
-      name: "Laurene Millman",
-      email: "laurene.millman@acme.com",
-      status: "Active",
-      addedOn: "Dec 8, 2023",
-      groups: "New Custo... +2 more",
-      roles: "Admin +2 more",
-    },
-    {
-      id: 6,
-      name: "Takumi Ishida",
-      email: "takumi.ishida@acme.com",
-      status: "Active",
-      addedOn: "Jan 2, 2024",
-      groups: "Online Leads +2 more",
-      roles: "Site owner",
-    },
-    {
-      id: 7,
-      name: "Ben Prothro",
-      email: "ben.prothro@acme.com",
-      status: "Active",
-      addedOn: "Jan 2, 2024",
-      groups: "Northern Re... +2 more",
-      roles: "Site owner",
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("https://multi-vendor-marketplace.vercel.app/auth/getAllUsers"); // API endpoint
+        const data = await response.json();
+        
+        // Ensure response contains valid data
+        if (Array.isArray(data)) {
+          const formattedUsers = data.map((user) => ({
+            id: user._id,
+            name: `${user.firstName} ${user.lastName}`,
+            email: user.email,
+            status: "Active", // Assume all users are active; replace if needed
+            addedOn: new Date().toLocaleDateString(), // Placeholder for added date
+            groups: "General", // Placeholder, modify based on actual data
+            roles: user.role || "User", // Default role if not provided
+          }));
+          setUsers(formattedUsers);
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+
 
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
@@ -256,11 +226,14 @@ const ManageUser = () => {
             placeholder="Search users"
             className="border rounded-md px-3 py-2 text-sm w-1/3"
           />
+          
+
           <button
             onClick={togglePopup}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md"
+            className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
           >
-            + New
+            <HiPlus className="w-5 h-5" />
+            New
           </button>
         </div>
 

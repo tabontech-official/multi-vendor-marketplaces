@@ -240,12 +240,14 @@ const CategorySelector = () => {
   useEffect(() => {
     if (product) {
       console.log(product);
+      console.log("Product ID:", product?.id); // Debugging line
+
       setIsEditing(true);
       setTitle(product.title || "");
       setDescription(product.body_html || "");
       setProductType(product.product_type || "");
-      setPrice(product.variants.price || "");
-      setCompareAtPrice(product.compare_at_price || "");
+      setPrice(product.variants[0].price || "");
+      setCompareAtPrice(product.variants[0].compare_at_price || "");
       setTrackQuantity(product.inventory.track_quantity || false);
       setQuantity(product.inventory.quantity || 0);
       setContinueSelling(product.inventory.continue_selling || false);
@@ -267,6 +269,7 @@ const CategorySelector = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const userId = localStorage.getItem('userid'); 
 
     if (!userId) {
       setMessage({
@@ -279,12 +282,12 @@ const CategorySelector = () => {
     setLoading(true);
     setMessage(null);
 
-    if (images.length === 0) {
-      console.error("No images selected!");
-      setMessage({ type: "error", text: "Please select at least one image." });
-      setLoading(false);
-      return;
-    }
+    // if (images.length === 0) {
+    //   console.error("No images selected!");
+    //   setMessage({ type: "error", text: "Please select at least one image." });
+    //   setLoading(false);
+    //   return;
+    // }
 
     const formData = new FormData();
     formData.append("keyWord", keyWord);
@@ -295,7 +298,7 @@ const CategorySelector = () => {
 
     if (compareAtPrice)
       formData.append("compare_at_price", parseFloat(compareAtPrice));
-    formData.append("track_quantity", trackQuantity);
+    // formData.append("track_quantity", trackQuantity);
     formData.append("quantity", trackQuantity ? parseInt(quantity) : 0);
     formData.append("continue_selling", continueSelling);
     formData.append("has_sku", hasSKU);
@@ -320,7 +323,7 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product.id}`
+        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
         : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";

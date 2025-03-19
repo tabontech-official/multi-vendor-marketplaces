@@ -343,43 +343,25 @@ const Dashboard = () => {
               <h2>No products available.</h2>
             </div>
           ) : (
-            <div className=" max-sm:overflow-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-100">
-                  <tr className="items-center">
-                    <th className="py-3 pl-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ACTION
-                    </th>
-                    <th className="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      STATUS
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      LISTING NAME
-                    </th>
-                    {admin && (
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Publisher
-                      </th>
-                    )}
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      TYPE
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      PRICE
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      CREATED AT
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      EXPIRES AT
-                    </th>
+            <div className=" max-sm:overflow-auto border rounded-lg">
+              <table className="w-full border-collapse bg-white">
+                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                  <tr>
+                    <th className="p-3">ACTION</th>
+                    <th className="p-3">STATUS</th>
+                    <th className="p-3">LISTING NAME</th>
+                    {admin && <th className="p-3">Publisher</th>}
+                    <th className="p-3">PUBLISHER</th>
+                    <th className="p-3">TYPE</th>
+                    <th className="p-3">PRICE</th>
+                    <th className="p-3">EXPIRES AT</th>
                   </tr>
                 </thead>
 
-                <tbody className="bg-white divide-y divide-gray-200 mb-4">
+                <tbody>
                   {filteredProducts.map((product, index) => (
-                    <tr key={product._id}>
-                      <td className="py-4 whitespace-nowrap relative px-4">
+                    <tr key={product._id} className="border-b hover:bg-gray-50">
+                      <td className="p-3">
                         <button
                           onClick={() => toggleDropdown(index)}
                           className="text-gray-600 hover:text-gray-800 focus:outline-none"
@@ -388,7 +370,7 @@ const Dashboard = () => {
                         </button>
                         <div
                           ref={(el) => (dropdownRefs.current[index] = el)}
-                          onMouseLeave={() => setOpenDropdown(null)} // Close dropdown on mouse leave
+                          onMouseLeave={() => setOpenDropdown(null)}
                         >
                           {openDropdown === index && (
                             <div className="absolute bg-white border flex justify-start items-start border-gray-300 rounded-md shadow-lg z-10">
@@ -448,9 +430,10 @@ const Dashboard = () => {
                         </div>
                       </td>
 
-                      <td className="px-6 py-4 whitespace-nowrap flex items-center">
+                      <td className="p-3">
+                        {" "}
                         <div
-                          className={`w-3 h-3 rounded-full ${
+                          className={`w-2 h-2 rounded-full ${
                             product.status === "active"
                               ? "bg-green-500"
                               : "bg-red-500"
@@ -458,22 +441,21 @@ const Dashboard = () => {
                           title={product.status}
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="p-3">
+                        {" "}
                         {product.title !== "Job Listing"
                           ? product.title
                           : "Job Search Listing"}
                       </td>
                       {admin && product.tags?.split(",")[1]?.split("_")[1]}
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {product.product_type}
+                      <td className="p-3"> {product.email} </td>
+                      <td className="p-3"> {product.product_type}</td>
+                      <td className="p-3">
+                        {" "}
+                        ${product.variants[0].price || "..loading"}{" "}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        ${product.variants[0].price || "..loading"}
-                      </td>
-                      <td className="px-4 py-2">
-                        {new Date(product.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-2">
+                      <td className="p-3">
+                        {" "}
                         {product.expiresAt &&
                         !isNaN(new Date(product.expiresAt))
                           ? new Date(product.expiresAt).toLocaleDateString()

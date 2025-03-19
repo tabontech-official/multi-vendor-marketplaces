@@ -3,7 +3,6 @@ import { FaCirclePlus } from "react-icons/fa6";
 import { FaTrash, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FcAddImage } from "react-icons/fc";
 import { useLocation } from "react-router-dom";
-import RichTextEditor from "react-rte";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 

@@ -297,7 +297,7 @@ const CategorySelector = () => {
 
     if (compareAtPrice)
       formData.append("compare_at_price", parseFloat(compareAtPrice));
-    // formData.append("track_quantity", trackQuantity);
+    formData.append("track_quantity", trackQuantity ? "true" : "false")
     formData.append("quantity", trackQuantity ? parseInt(quantity) : 0);
     formData.append("continue_selling", continueSelling);
     formData.append("has_sku", hasSKU);

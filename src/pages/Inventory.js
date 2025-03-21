@@ -78,7 +78,7 @@ const Inventory = () => {
   const fetchPrice = async () => {
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/getPrice/",
+        "http://localhost:5000/product/getPrice/",
         { method: "GET" }
       );
       const json = await response.json();
@@ -101,7 +101,7 @@ const Inventory = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
+        `http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
 
@@ -153,7 +153,7 @@ const Inventory = () => {
       await Promise.all(
         selectedProducts.map(async (id) => {
           const response = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
+            `http://localhost:5000/product/deleteProduct/${id}`,
             { method: "DELETE" }
           );
           if (!response.ok) throw new Error("Failed to delete product");
@@ -180,7 +180,7 @@ const Inventory = () => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "draft") {
             const response = await fetch(
-              `https://multi-vendor-marketplace.vercel.app/product/publishedProduct/${id}`,
+              `http://localhost:5000/product/publishedProduct/${id}`,
               {
                 method: "PUT",
                 body: JSON.stringify({ userId }),
@@ -209,7 +209,7 @@ const Inventory = () => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "active") {
             const response = await fetch(
-              `https://multi-vendor-marketplace.vercel.app/product/unpublished/${id}`,
+              `http://localhost:5000/product/unpublished/${id}`,
               {
                 method: "PUT",
                 headers: {
@@ -237,7 +237,7 @@ const Inventory = () => {
     const id = localStorage.getItem("userid");
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/quantity/${id}`,
+        `http://localhost:5000/auth/quantity/${id}`,
         { method: "GET" }
       );
       if (response.ok) {
@@ -319,7 +319,7 @@ const Inventory = () => {
     const fetchProductData2 = async () => {
       try {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
+          `http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`,
           { method: "GET" }
         );
 

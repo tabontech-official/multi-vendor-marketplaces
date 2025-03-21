@@ -222,8 +222,8 @@ console.log(description)
     try {
       // Determine the API URL and HTTP method based on edit or create action
       const url = isEditing
-        ? `https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}`
-        : "https://multi-vendor-marketplace.vercel.app/product/addRoom";
+        ? `http://localhost:5000/product/updateListing/${product.id}`
+        : "http://localhost:5000/product/addRoom";
   
       const method = isEditing ? "PUT" : "POST";
       if (images.length === 0) {
@@ -273,7 +273,7 @@ console.log(description)
           }
   
           // Save the Cloudinary URLs to the database
-          const imageResponse = await fetch(`https://multi-vendor-marketplace.vercel.app/product/updateImages/${json.product.id}`, {
+          const imageResponse = await fetch(`http://localhost:5000/product/updateImages/${json.product.id}`, {
             method: "PUT",
             headers: {
               'Content-Type': 'application/json',

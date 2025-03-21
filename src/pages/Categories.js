@@ -338,8 +338,8 @@ const navigate=useNavigate()
 
     try {
       const url = isEditing
-        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+        ? `http://localhost:5000/product/updateProducts/${product._id}`
+        : "http://localhost:5000/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 

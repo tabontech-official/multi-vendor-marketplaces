@@ -31,7 +31,7 @@ const SubscriptionHistory = () => {
     }
 
     try {
-      const res = await fetch(`https://multi-vendor-marketplace.vercel.app/order/order/`, { method: "GET" });
+      const res = await fetch(`http://localhost:5000/order/order/`, { method: "GET" });
       if (res.ok) {
         const json = await res.json();
         const sortedSubscriptions = json.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -44,7 +44,7 @@ const SubscriptionHistory = () => {
     }
    
     try {
-      const response =  await fetch("https://multi-vendor-marketplace.vercel.app/product/getPrice/", {method:'GET'})
+      const response =  await fetch("http://localhost:5000/product/getPrice/", {method:'GET'})
       const json = await response.json()
       if(response.ok){
         console.log("Price",json)
@@ -74,7 +74,7 @@ const SubscriptionHistory = () => {
       }
 
       try {
-        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`, { method: 'GET' });
+        const response = await fetch(`http://localhost:5000/product/getProduct/${id}`, { method: 'GET' });
         if (response.ok) {
           const data = await response.json();
            console.log(data)

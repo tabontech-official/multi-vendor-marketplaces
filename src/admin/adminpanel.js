@@ -18,7 +18,7 @@ const AdminDashboard = () => {
   const [editing, setEditing] = useState(false)
   const handleSave = async () => {
     try {
-      await axios.put('https://multi-vendor-marketplace.vercel.app/auth/shopifyConfigurations', {
+      await axios.put('http://localhost:5000/auth/shopifyConfigurations', {
         shopifyAccessToken,
         shopifyApiKey
       });
@@ -49,7 +49,7 @@ const AdminDashboard = () => {
   const fetchPrice = async () => {
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/getPrice/",
+        "http://localhost:5000/product/getPrice/",
         { method: "GET" }
       );
       const json = await response.json();
@@ -89,7 +89,7 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/updateId/",
+        "http://localhost:5000/product/updateId/",
         {
           method: "PUT",
           headers: {
@@ -126,7 +126,7 @@ const AdminDashboard = () => {
   const fetchRequiredCredits = async () => {
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/fetchRequireCredits",
+        "http://localhost:5000/product/fetchRequireCredits",
         { method: "GET" }
       );
       const data = await response.json();
@@ -242,7 +242,7 @@ const AdminDashboard = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/credits/",
+        "http://localhost:5000/product/credits/",
         {
           method: "PUT",
           headers: {
@@ -280,7 +280,7 @@ const AdminDashboard = () => {
     setToast({ show: false, type: "", message: "" }); // Reset toast
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/updatequantity",
+        "http://localhost:5000/auth/updatequantity",
         {
           method: "PUT",
           headers: {

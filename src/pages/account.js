@@ -59,7 +59,7 @@ const AccountPage = () => {
 
       try {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
+          `http://localhost:5000/auth/user/${id}`,
           {
             method: "GET",
           }
@@ -160,7 +160,7 @@ const AccountPage = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`,
+        `http://localhost:5000/auth/editProfile/${userId}`,
         {
           method: "PUT",
           body: form,
@@ -224,7 +224,7 @@ const AccountPage = () => {
   const updateAllProductsStatus = async (status) => {
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/holiday",
+        "http://localhost:5000/product/holiday",
         {
           method: "POST",
           headers: {
@@ -275,7 +275,7 @@ const AccountPage = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+        "http://localhost:5000/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {

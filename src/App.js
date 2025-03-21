@@ -93,7 +93,7 @@ const App = () => {
         <Route path="/" element={<Layout />}>
           <Route index element={<PrivateRoute element={<MainDashboard />} />} />
           <Route
-            path="/manageProducts"
+            path="/MANAGE_PRODUCT"
             element={<PrivateRoute element={<Dashboard />} />}
           />
           <Route
@@ -149,7 +149,7 @@ const App = () => {
             element={<ProtectedForms element={<AddNewEquipmentForm />} />}
           />
           <Route
-            path="/addproducts"
+            path="/PRODUCT_LISTING"
             element={<PrivateRoute element={<CategorySelector />} />}
           />
           <Route

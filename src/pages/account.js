@@ -58,9 +58,12 @@ const AccountPage = () => {
       }
 
       try {
-        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
-          method: "GET",
-        });
+        const response = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
+          {
+            method: "GET",
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
@@ -585,7 +588,7 @@ const AccountPage = () => {
                   Edit Profile
                 </h2>
 
-                <div className="flex items-center space-x-4 mt-4">
+                {/* <div className="flex items-center space-x-4 mt-4">
                   <p className="text-sm text-blue-700">Account Status</p>
                   <div className="flex space-x-4">
                     <button
@@ -613,14 +616,14 @@ const AccountPage = () => {
                       Business
                     </button>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Form Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex flex-col">
                     <label
                       htmlFor="firstName"
-                      className="text-sm font-medium text-blue-800"
+                      className="block text-sm font-medium text-gray-700"
                     >
                       First Name *
                     </label>
@@ -631,7 +634,7 @@ const AccountPage = () => {
                       value={formData.firstName}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
+                      className="w-full p-2 bg-gray-300  focus:outline-none focus:ring-2 focus:ring-indigo-400 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
@@ -639,7 +642,7 @@ const AccountPage = () => {
                   <div className="flex flex-col">
                     <label
                       htmlFor="lastName"
-                      className="text-sm font-medium text-blue-800"
+                      className="block text-sm font-medium text-gray-700"
                     >
                       Last Name *
                     </label>
@@ -650,7 +653,7 @@ const AccountPage = () => {
                       value={formData.lastName}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
+                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
@@ -658,7 +661,7 @@ const AccountPage = () => {
                   <div className="flex flex-col">
                     <label
                       htmlFor="email"
-                      className="text-sm font-medium text-blue-800"
+                      className="block text-sm font-medium text-gray-700"
                     >
                       Email *
                     </label>
@@ -669,12 +672,12 @@ const AccountPage = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
+                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
                   {/* Phone */}
-                  <div className="flex flex-col">
+                  {/* <div className="flex flex-col">
                     <label
                       htmlFor="phoneNumber"
                       className="text-sm font-medium text-blue-800"
@@ -690,8 +693,24 @@ const AccountPage = () => {
                       required
                       className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
+                  </div> */}
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="address"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Address *
+                    </label>
+                    <input
+                      type="text"
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
+                    />
                   </div>
-
                   {/* Seller GST */}
                   <div className="flex flex-col">
                     <label
@@ -707,7 +726,7 @@ const AccountPage = () => {
                       value={formData.sellerGst}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
+                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
@@ -726,7 +745,7 @@ const AccountPage = () => {
                       value={formData.gstRegistered}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
+                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
@@ -745,7 +764,7 @@ const AccountPage = () => {
                       value={formData.dispatchAddress}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
+                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
@@ -764,7 +783,7 @@ const AccountPage = () => {
                       value={formData.dispatchCity}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
+                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
@@ -783,7 +802,7 @@ const AccountPage = () => {
                       value={formData.dispatchCountry}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
+                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
 
@@ -802,7 +821,7 @@ const AccountPage = () => {
                       value={formData.dispatchzip}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
+                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
                     />
                   </div>
                 </div>

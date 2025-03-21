@@ -13,29 +13,48 @@ const ManageUser = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedModules, setSelectedModules] = useState([]);
   const [userRole, setUserRole] = useState(null);
-
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("https://multi-vendor-marketplace.vercel.app/auth/getAllUsers"); // API endpoint
+        const id = localStorage.getItem("userid");
+        if (!id) {
+          console.error("User ID not found in localStorage");
+          return;
+        }
+
+        const response = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/getUserByRole/${id}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
         const data = await response.json();
-        
-        // Ensure response contains valid data
-        if (Array.isArray(data)) {
-          const formattedUsers = data.map((user) => ({
-            id: user._id,
-            name: `${user.firstName} ${user.lastName}`,
-            email: user.email,
-            status: "Active", // Assume all users are active; replace if needed
-            addedOn: new Date().toLocaleDateString(), // Placeholder for added date
-            groups: "General", // Placeholder, modify based on actual data
-            roles: user.role || "User", // Default role if not provided
-          }));
+
+        if (data.users && Array.isArray(data.users)) {
+          const formattedUsers = data.users.map((user) => {
+            const formattedEmail = user.email
+              ? user.email.split("@")[0]
+              : "Unknown";
+
+            return {
+              id: user._id,
+              name: `${user.firstName || ""} ${user.lastName || ""}`,
+              email: user.email,
+              status: "Active",
+              addedOn: new Date().toLocaleDateString(),
+              groups: "General",
+              roles: user.role || "User",
+            };
+          });
+
           setUsers(formattedUsers);
+        } else {
+          console.error("No users found or invalid response format");
         }
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -46,8 +65,6 @@ const ManageUser = () => {
 
     fetchUsers();
   }, []);
-
-
 
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
@@ -226,7 +243,6 @@ const ManageUser = () => {
             placeholder="Search users"
             className="border rounded-md px-3 py-2 text-sm w-1/3"
           />
-          
 
           <button
             onClick={togglePopup}
@@ -401,7 +417,7 @@ const ManageUser = () => {
                   onClick={handleUpdateTags}
                   className="w-full px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
                 >
-                  Update
+                  Create User
                 </button>
               </div>
             </div>

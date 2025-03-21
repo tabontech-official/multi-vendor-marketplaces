@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaCirclePlus } from "react-icons/fa6";
 import { FaTrash, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FcAddImage } from "react-icons/fc";
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
@@ -37,7 +37,7 @@ const CategorySelector = () => {
   const [checkedImages, setCheckedImages] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const locationData = useLocation();
-
+const navigate=useNavigate()
   const modules = {
     toolbar: [
       [{ header: [1, 2, false] }],
@@ -154,25 +154,6 @@ const CategorySelector = () => {
     });
   };
 
-  useEffect(() => {
-    setVariants((prevVariants) =>
-      prevVariants.map((variant) => {
-        if (variant.subVariants && variant.subVariants.length > 0) {
-          const totalPrice = variant.subVariants.reduce(
-            (sum, v) => sum + Number(v.price || 0),
-            0
-          );
-          const totalQuantity = variant.subVariants.reduce(
-            (sum, v) => sum + Number(v.quantity || 0),
-            0
-          );
-          return { ...variant, price: totalPrice, quantity: totalQuantity };
-        }
-        return variant;
-      })
-    );
-  }, [variants]);
-
   const toggleGroup = (groupName) => {
     setExpandedGroups((prev) => ({
       ...prev,
@@ -236,10 +217,37 @@ const CategorySelector = () => {
   }, []);
 
   const { product } = locationData.state || {};
+
+  useEffect(() => {
+    setVariants((prevVariants) =>
+      prevVariants.map((variant) => {
+        if (variant.subVariants && variant.subVariants.length > 0) {
+          const totalPrice = variant.subVariants.reduce(
+            (sum, v) => sum + Number(v.price || 0),
+            0
+          );
+          const totalQuantity = variant.subVariants.reduce(
+            (sum, v) => sum + Number(v.quantity || 0),
+            0
+          );
+          return { ...variant, price: totalPrice, quantity: totalQuantity };
+        }
+        return variant;
+      })
+    );
+  }, [variants]);
+
   useEffect(() => {
     if (product) {
-      console.log(product);
-      console.log("Product ID:", product?.id); // Debugging line
+      console.log("Fetched Product:", product);
+      console.log("Product ID:", product?.id);
+      console.log("Product Options:", product.options); 
+
+      const formattedVariants = product.variants.map((variant) => ({
+        ...variant,
+        subVariants:
+          product.variants.filter((v) => v.parent_id === variant.id) || [],
+      }));
 
       setIsEditing(true);
       setTitle(product.title || "");
@@ -259,16 +267,24 @@ const CategorySelector = () => {
       setStatus(product.status || "publish");
       setUserId(product.userId || "");
       setVendor(product.vendor || "");
-      setKeyWord(product.tags || []);
-      setOptions(product.options || []);
-      setVariants(product.variants || []);
+
+     
+      setOptions(
+        product.options?.map((option) => ({
+          id: option.id || "No ID",
+          name: option.name || "Unnamed Option",
+          values: option.values || [],
+        })) || []
+      );
+
+      setVariants(formattedVariants);
       setImages(product.images || []);
     }
   }, [product]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const userId = localStorage.getItem('userid'); 
+    const userId = localStorage.getItem("userid");
 
     if (!userId) {
       setMessage({
@@ -297,7 +313,7 @@ const CategorySelector = () => {
 
     if (compareAtPrice)
       formData.append("compare_at_price", parseFloat(compareAtPrice));
-    formData.append("track_quantity", trackQuantity ? "true" : "false")
+    formData.append("track_quantity", trackQuantity ? "true" : "false");
     formData.append("quantity", trackQuantity ? parseInt(quantity) : 0);
     formData.append("continue_selling", continueSelling);
     formData.append("has_sku", hasSKU);
@@ -357,6 +373,7 @@ const CategorySelector = () => {
         setImages([]);
         setSelectedImages([]);
         setKeyWord("");
+        navigate("/MANAGE_PRODUCT")
       } else {
         setMessage({
           type: "error",
@@ -391,8 +408,6 @@ const CategorySelector = () => {
     }
   };
   const [inputValue, setInputValue] = useState("");
-
-
 
   const removeTag = (index, setState, stateValues) => {
     setState(stateValues.filter((_, i) => i !== index));
@@ -1044,6 +1059,9 @@ const CategorySelector = () => {
               Product organization
             </label>
             <div className="mt-2 space-y-2">
+              <label htmlFor="keywords" className="block text-gray-600 text-sm">
+                Product Type
+              </label>
               <input
                 type="text"
                 placeholder="Type"
@@ -1051,6 +1069,9 @@ const CategorySelector = () => {
                 onChange={(e) => setProductType(e.target.value)}
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
+              <label htmlFor="keywords" className="block text-gray-600 text-sm">
+                Vendor
+              </label>
               <input
                 type="text"
                 value={vendor}
@@ -1058,7 +1079,9 @@ const CategorySelector = () => {
                 placeholder="Vendor"
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
-          
+              <label htmlFor="keywords" className="block text-gray-600 text-sm">
+                Keywords
+              </label>{" "}
               <input
                 type="text"
                 placeholder="Key Words"

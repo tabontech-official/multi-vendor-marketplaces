@@ -84,8 +84,8 @@ const SubNavbar = () => {
       icon: <FaTh className="text-green-600" />,
       path: "#",
       subModules: [
-        { name: "Manage Product", path: "/manageProducts" },
-        { name: "Add Product", path: "/addproducts" },
+        { name: "Manage Product", path: "/MANAGE_PRODUCT" },
+        { name: "Add Product", path: "/PRODUCT_LISTING" },
         { name: "Inventory", path: "/inventory" },
       ],
     },

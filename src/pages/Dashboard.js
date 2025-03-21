@@ -7,6 +7,8 @@ import {
   HiX,
   Hiload,
 } from "react-icons/hi";
+import { FaFileImport } from "react-icons/fa";
+
 import { Link, useNavigate } from "react-router-dom";
 import UseFetchUserData from "../component/fetchUser";
 import { useAuthContext } from "../Hooks/useAuthContext";
@@ -16,6 +18,7 @@ import { CreateCheckoutUrl } from "../component/Checkout";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
 import { debounce } from "lodash";
+import { MdEdit } from "react-icons/md";
 
 const Dashboard = () => {
   let admin;
@@ -47,6 +50,14 @@ const Dashboard = () => {
   const [message, setMessage] = useState("");
   const { user } = useAuthContext();
   const dropdownRefs = useRef([]);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const toggleSelection = (productId) => {
+    setSelectedProducts((prevSelected) =>
+      prevSelected.includes(productId)
+        ? prevSelected.filter((id) => id !== productId)
+        : [...prevSelected, productId]
+    );
+  };
 
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -105,100 +116,99 @@ const Dashboard = () => {
     console.log(product);
     console.log("clicking");
 
-    let formPage = "/addproducts";
+    let formPage = "/PRODUCT_LISTING";
 
     navigate(formPage, { state: { product } });
   };
 
-  const onDelete = async (id) => {
+  const onDeleteSelected = async () => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this listing?"
+      "Are you sure you want to delete the selected listings?"
     );
     if (!confirmDelete) return;
+
     try {
-      const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
-        {
-          method: "DELETE",
-        }
+      await Promise.all(
+        selectedProducts.map(async (id) => {
+          const response = await fetch(
+            `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
+            { method: "DELETE" }
+          );
+          if (!response.ok) throw new Error("Failed to delete product");
+        })
       );
-      if (response.ok) {
-        setProducts(products.filter((product) => product._id !== id));
-        setFilteredProducts(
-          filteredProducts.filter((product) => product._id !== id)
-        );
-      }
+
+      setProducts(products.filter((p) => !selectedProducts.includes(p._id)));
+      setFilteredProducts(
+        filteredProducts.filter((p) => !selectedProducts.includes(p._id))
+      );
+      setSelectedProducts([]);
     } catch (error) {
-      console.error("Error deleting product:", error);
+      console.error("Error deleting products:", error);
     }
-    // setOpenDropdown(null);
   };
 
-  const handlePublish = async (product) => {
+  const handlePublishSelected = async () => {
     const userId = localStorage.getItem("userid");
-    setLoadingId(product.id);
     setMessage("");
 
     try {
-      const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/publishedProduct/${product.id}`,
-        {
-          method: "PUT",
-          body: JSON.stringify(userId),
-        }
+      await Promise.all(
+        selectedProducts.map(async (id) => {
+          const product = filteredProducts.find((p) => p._id === id);
+          if (product?.status === "draft") {
+            const response = await fetch(
+              `https://multi-vendor-marketplace.vercel.app/product/publishedProduct/${id}`,
+              {
+                method: "PUT",
+                body: JSON.stringify({ userId }),
+                headers: { "Content-Type": "application/json" },
+              }
+            );
+            if (!response.ok) throw new Error("Failed to publish product");
+          }
+        })
       );
-      const json = await response.json();
-      if (response.ok) {
-        showToast("success", json.message || "Product published successfully!");
-        setMessage(json.message || "Product published successfully!");
-        fetchProductData();
-      } else {
-        showToast(
-          "Failed",
-          json.error || "An error occurred while publishing the product."
-        );
-        setErrorMessage(
-          json.error || "An error occurred while publishing the product."
-        );
-      }
+
+      showToast("success", "Selected products published successfully!");
+      fetchProductData();
+      setSelectedProducts([]);
+    } catch (error) {
+      showToast("Failed", error.message || "Error occurred while publishing.");
+    }
+  };
+
+  const handleUnpublishSelected = async () => {
+    setMessage("");
+
+    try {
+      await Promise.all(
+        selectedProducts.map(async (id) => {
+          const product = filteredProducts.find((p) => p._id === id);
+          if (product?.status === "active") {
+            const response = await fetch(
+              `https://multi-vendor-marketplace.vercel.app/product/unpublished/${id}`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+            if (!response.ok) throw new Error("Failed to unpublish product");
+          }
+        })
+      );
+
+      showToast("success", "Selected products unpublished successfully!");
+      fetchProductData();
+      setSelectedProducts([]);
     } catch (error) {
       showToast(
         "Failed",
-        error.message || "An error occurred while publishing the product"
+        error.message || "Error occurred while unpublishing."
       );
-      setErrorMessage(
-        error.message || "An error occurred while publishing the product"
-      );
-    } finally {
-      setLoadingId(null);
     }
-  };
-
-  const handleUnpublish = async (product) => {
-    setLoadingId(product.id);
-    setMessage("");
-
-    try {
-      const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/unpublished/${product.id}`,
-        {
-          method: "PUT",
-        }
-      );
-
-      if (response.ok) {
-        showToast("success", "Product unpublished successfully!");
-        fetchProductData();
-      } else {
-        showToast("Failed", "Failed to unpublish product.");
-      }
-    } catch (error) {
-      showToast("Failed", "An error occurred while unpublishing the product.");
-    } finally {
-      setLoadingId(null);
-    }
-
-    // setOpenDropdown(null);
   };
 
   const handleSearch = () => {
@@ -249,7 +259,6 @@ const Dashboard = () => {
             ),
           ]);
 
-          // Append only new products
           setFilteredProducts((prev) => [
             ...prev,
             ...sortedProducts.filter(
@@ -258,7 +267,7 @@ const Dashboard = () => {
             ),
           ]);
 
-          setHasMore(page < data.totalPages); // Check if more pages are available
+          setHasMore(page < data.totalPages);
           console.log(hasMore);
         }
       } catch (error) {
@@ -290,16 +299,26 @@ const Dashboard = () => {
         <div className="flex-1">
           <h1 className="text-2xl font-semibold mb-1">Manage Products</h1>
           <p className="text-gray-600">Here you can manage products.</p>
+          <div className="w-2/4 max-sm:w-full mt-2">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchVal}
+              onChange={(e) => setSearchVal(e.target.value)}
+              className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
         </div>
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
           <Link
-            to="/addproducts"
+            to="/PRODUCT_LISTING"
             className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
           >
             <HiPlus className="w-5 h-5" />
             <span>Add Products</span>
           </Link>
         </div>
+
         {toast.show && (
           <div
             className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
@@ -316,7 +335,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
+      {/* <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
         <div className="flex flex-col md:flex-row md:items-center w-full md:ml-auto md:space-x-4">
           <div className="flex items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
             <input
@@ -328,7 +347,52 @@ const Dashboard = () => {
             />
           </div>
         </div>
+      </div> */}
+      <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
+        <div className="flex gap-2 items-center w-2/4 max-sm:w-full md:ml-auto justify-end"></div>
+        <button className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
+          <FaFileImport className="w-5 h-5"/>
+          Import
+        </button>
       </div>
+      {selectedProducts.length > 0 && (
+        <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
+          <div className="flex gap-2 items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
+            {filteredProducts.some(
+              (product) =>
+                selectedProducts.includes(product._id) &&
+                product.status === "draft"
+            ) && (
+              <button
+                onClick={handlePublishSelected}
+                className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+              >
+                Publish
+              </button>
+            )}
+
+            {filteredProducts.some(
+              (product) =>
+                selectedProducts.includes(product._id) &&
+                product.status === "active"
+            ) && (
+              <button
+                onClick={handleUnpublishSelected}
+                className="bg-red-500 hover:bg-red-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+              >
+                Unpublish
+              </button>
+            )}
+
+            <button
+              onClick={onDeleteSelected}
+              className="bg-red-500 hover:bg-red-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
 
       {Loading ? (
         <div className="flex justify-center items-center py-10">
@@ -339,7 +403,6 @@ const Dashboard = () => {
         <div className="p-4">
           {filteredProducts.length === 0 ? (
             <div className="text-center py-10 text-gray-500">
-              {/* Only show this message if there are no products available */}
               <h2>No products available.</h2>
             </div>
           ) : (
@@ -354,7 +417,7 @@ const Dashboard = () => {
                     <th className="p-3">PUBLISHER</th>
                     <th className="p-3">TYPE</th>
                     <th className="p-3">PRICE</th>
-                    <th className="p-3">EXPIRES AT</th>
+                    <th className="p-3">EDIT</th>
                   </tr>
                 </thead>
 
@@ -362,72 +425,12 @@ const Dashboard = () => {
                   {filteredProducts.map((product, index) => (
                     <tr key={product._id} className="border-b hover:bg-gray-50">
                       <td className="p-3">
-                        <button
-                          onClick={() => toggleDropdown(index)}
-                          className="text-gray-600 hover:text-gray-800 focus:outline-none"
-                        >
-                          <HiDotsVertical className="w-5 h-5" />
-                        </button>
-                        <div
-                          ref={(el) => (dropdownRefs.current[index] = el)}
-                          onMouseLeave={() => setOpenDropdown(null)}
-                        >
-                          {openDropdown === index && (
-                            <div className="absolute bg-white border flex justify-start items-start border-gray-300 rounded-md shadow-lg z-10">
-                              <ul className="py-1">
-                                {product.status === "draft" ? (
-                                  <li
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handlePublish(product);
-                                    }}
-                                  >
-                                    <button className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100">
-                                      {loadingId === product._id
-                                        ? "Loading..."
-                                        : "Publish"}
-                                    </button>
-                                  </li>
-                                ) : (
-                                  product.status === "active" && (
-                                    <li
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleUnpublish(product);
-                                      }}
-                                    >
-                                      <button className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100">
-                                        {loadingId === product._id
-                                          ? "Loading..."
-                                          : "Unpublish"}
-                                      </button>
-                                    </li>
-                                  )
-                                )}
-                                <li
-                                  onClick={(e) => {
-                                    OnEdit(product);
-                                  }}
-                                >
-                                  <button className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100">
-                                    Edit
-                                  </button>
-                                </li>
-                                <li>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onDelete(product._id);
-                                    }}
-                                    className="px-4 w-full py-2 text-gray-700 hover:bg-gray-100"
-                                  >
-                                    Delete
-                                  </button>
-                                </li>
-                              </ul>
-                            </div>
-                          )}
-                        </div>
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 cursor-pointer"
+                          checked={selectedProducts.includes(product._id)}
+                          onChange={() => toggleSelection(product._id)}
+                        />
                       </td>
 
                       <td className="p-3">
@@ -455,11 +458,13 @@ const Dashboard = () => {
                         ${product.variants[0].price || "..loading"}{" "}
                       </td>
                       <td className="p-3">
-                        {" "}
-                        {product.expiresAt &&
-                        !isNaN(new Date(product.expiresAt))
-                          ? new Date(product.expiresAt).toLocaleDateString()
-                          : " "}
+                        <button
+                          className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
+                          onClick={() => OnEdit(product)}
+                        >
+                          <MdEdit className="mr-1" />
+                          Edit
+                        </button>
                       </td>
                     </tr>
                   ))}

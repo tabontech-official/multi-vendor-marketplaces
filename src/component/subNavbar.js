@@ -109,8 +109,8 @@ const SubNavbar = () => {
       icon: <BsGraphUp className="text-purple-500" />,
       path: "#",
       subModules: [
-        { name: "Catalog Performance", path: "#" },
-        { name: "eCommerence Consultion", path: "#" },
+        { name: "Catalog Performance", path: "/CATALOG_PERFORMANCE" },
+        { name: "eCommerence Consultion", path: "/CONSULTATION" },
         { name: "Seller Rating", path: "#" },
       ],
     },

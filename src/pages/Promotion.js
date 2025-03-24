@@ -69,9 +69,13 @@ const Promotion = () => {
   const [promoPrice, setPromoPrice] = useState("");
   const [allPromotions, setAllPromotions] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
-
   const dropdownRefs = useRef([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [Loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  const [activeTab, setActiveTab] = useState("Active Promotions");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
   const toggleSelection = (productId) => {
     setSelectedProducts((prevSelected) =>
@@ -80,20 +84,6 @@ const Promotion = () => {
         : [...prevSelected, productId]
     );
   };
-
-
-  const [Loading, setLoading] = useState(false);
-  const [toast, setToast] = useState({ show: false, type: "", message: "" });
-  const [activeTab, setActiveTab] = useState("Active Promotions");
-  const getStatusClass = (status) => {
-    if (status === "Active Now")
-      return "bg-green-100 text-green-700 border border-green-400";
-    if (status === "Ending Soon")
-      return "bg-orange-100 text-orange-700 border border-orange-400";
-    return "bg-gray-100 text-gray-600 border border-gray-300";
-  };
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
 
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
@@ -151,20 +141,6 @@ const Promotion = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        closePopup();
-      }
-    };
-    if (isPopupOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isPopupOpen]);
 
   useEffect(() => {
     const fetchPromotions = async () => {
@@ -501,7 +477,7 @@ const Promotion = () => {
               <table className="w-full border-collapse bg-white">
                 <thead className="bg-gray-100 text-left text-gray-600 text-sm">
                   <tr>
-                    <th className="p-3">ACTION</th>
+                    {/* <th className="p-3">ACTION</th> */}
                     <th className="p-3">LISTING NAME</th>
                     <th className="p-3">SELLER_SKU</th>
                     <th className="p-3">CURRENT_PRICE</th>
@@ -514,14 +490,14 @@ const Promotion = () => {
                 <tbody>
                   {filteredProducts.map((product, index) => (
                     <tr key={product._id} className="border-b hover:bg-gray-50">
-                      <td className="p-3">
+                      {/* <td className="p-3">
                         <input
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer"
                           checked={selectedProducts.includes(product._id)}
                           onChange={() => toggleSelection(product._id)}
                         />
-                      </td>
+                      </td> */}
 
                       {/* <td className="p-3">
                                    {" "}

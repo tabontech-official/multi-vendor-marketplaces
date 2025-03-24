@@ -8,6 +8,7 @@ import {
   Hiload,
 } from "react-icons/hi";
 import { FaFileImport } from "react-icons/fa";
+import Papa from 'papaparse';
 
 import { Link, useNavigate } from "react-router-dom";
 import UseFetchUserData from "../component/fetchUser";
@@ -48,6 +49,7 @@ const Dashboard = () => {
   const [searchVal, setSearchVal] = useState("");
   const [loadingId, setLoadingId] = useState(null);
   const [message, setMessage] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuthContext();
   const dropdownRefs = useRef([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -108,6 +110,26 @@ const Dashboard = () => {
     }
   };
 
+ 
+
+  const modalRef=useRef()
+  const openPopup = () => setIsOpen(true);
+  const closePopup = () => setIsOpen(false);
+
+  // Close on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        closePopup();
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
   const toggleDropdown = (index) => {
     setOpenDropdown(openDropdown === index ? null : index);
   };
@@ -292,7 +314,94 @@ const Dashboard = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
-
+  const handleCSVUpload = (event) => {
+    const file = event.target.files[0];
+    const userId = localStorage.getItem('userid');
+  
+    if (!file || !userId) {
+      alert("CSV file or User ID missing.");
+      return;
+    }
+  
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        const products = results.data;
+    
+        for (const product of products) {
+          const formData = new FormData();
+          formData.append("title", product.title || "");
+          formData.append("description", product.description || "");
+          formData.append("price", product.price || 0);
+          formData.append("compare_at_price", product.compare_at_price || 0);
+          formData.append("track_quantity", product.track_quantity || "false");
+          formData.append("quantity", product.quantity || 0);
+          formData.append("continue_selling", product.continue_selling || "false");
+          formData.append("has_sku", product.has_sku || "false");
+          formData.append("sku", product.sku || "");
+          formData.append("barcode", product.barcode || "");
+          formData.append("track_shipping", product.track_shipping || "false");
+          formData.append("weight", product.weight || 0);
+          formData.append("weight_unit", product.weight_unit || "kg");
+          formData.append("status", product.status || "draft");
+          formData.append("userId", userId);
+          formData.append("productType", product.productType || "");
+          formData.append("vendor", product.vendor || "");
+          formData.append("keyWord", product.keyWord || "");
+    
+          // options
+          let parsedOptions = [];
+          try {
+            parsedOptions = typeof product.options === "string"
+              ? JSON.parse(product.options)
+              : product.options;
+          } catch (err) {
+            console.warn("Invalid options JSON:", product.options);
+          }
+          formData.append("options", JSON.stringify(parsedOptions));
+    
+          // variants
+          let parsedVariants = [];
+          try {
+            parsedVariants = typeof product.variants === "string"
+              ? JSON.parse(product.variants)
+              : product.variants;
+          } catch (err) {
+            console.warn("Invalid variants JSON:", product.variants);
+          }
+          formData.append("variants", JSON.stringify(parsedVariants));
+    
+          // 🔍 Log data
+          console.log("FormData values:");
+          for (let pair of formData.entries()) {
+            console.log(`${pair[0]}:`, pair[1]);
+          }
+    
+          // 🛰 API call
+          try {
+            const res = await fetch("http://localhost:5000/product/addEquipment", {
+              method: "POST",
+              body: formData,
+            });
+    
+            const data = await res.json();
+            console.log(`Uploaded product: ${product.title}`, data);
+    
+            if (!res.ok) {
+              console.error("Upload failed:", data.error || data);
+            }
+          } catch (err) {
+            console.error("Fetch error:", err);
+          }
+        }
+    
+        alert("CSV Upload Completed ✅");
+      },
+    });
+    
+    
+  };
   return user ? (
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
@@ -350,8 +459,11 @@ const Dashboard = () => {
       </div> */}
       <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
         <div className="flex gap-2 items-center w-2/4 max-sm:w-full md:ml-auto justify-end"></div>
-        <button className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
-          <FaFileImport className="w-5 h-5"/>
+        <button
+          onClick={openPopup}
+          className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+        >
+          <FaFileImport className="w-5 h-5" />
           Import
         </button>
       </div>
@@ -472,6 +584,50 @@ const Dashboard = () => {
               </table>
             </div>
           )}
+        </div>
+      )}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div ref={modalRef} className="bg-white rounded-lg shadow-lg w-full max-w-xl relative">
+            <div className="border-b px-4 py-3 flex justify-between items-center">
+              <h2 className="text-sm font-semibold text-blue-700">
+                Import products by CSV
+              </h2>
+              <button
+                onClick={closePopup}
+                className="text-gray-600 hover:text-black text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-6">
+            <div className="border-2 border-dashed border-gray-300 rounded-md flex justify-center items-center h-32 mb-4 relative">
+  <input
+    type="file"
+    accept=".csv"
+    onChange={handleCSVUpload}
+    className="absolute w-full h-full opacity-0 cursor-pointer"
+  />
+  <span className="px-4 py-2 text-sm text-white bg-blue-600 border border-gray-300 rounded hover:bg-blue-700">
+    Add file
+  </span>
+</div>
+              <div className="text-sm text-blue-600 underline cursor-pointer mb-4">
+                Download sample CSV
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={closePopup}
+                  className="px-4 py-1 text-sm border text-white bg-red-500 border-gray-300 rounded hover:bg-red-600"
+                >
+                  Cancel
+                </button>
+                <button className="px-4 py-2 text-sm bg-gray-200 text-gray-500 rounded cursor-not-allowed">
+                  Upload and preview
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </main>

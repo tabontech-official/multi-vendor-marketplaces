@@ -36,6 +36,7 @@ import MainDashboard from "./pages/MainDashboard";
 import Inventory from "./pages/Inventory";
 import ManageUser from "./pages/ManageUser";
 import NewPassword from "./pages/NewPassword";
+import Promotion from "./pages/Promotion";
 const App = () => {
   const [role, setRole] = useState(""); // Default empty string
   const { dispatch } = useAuthContext();
@@ -147,6 +148,10 @@ const App = () => {
           <Route
             path="/New_Equipment_listing"
             element={<ProtectedForms element={<AddNewEquipmentForm />} />}
+          />
+            <Route
+            path="/PROMOTIONS"
+            element={<ProtectedForms element={<Promotion />} />}
           />
           <Route
             path="/PRODUCT_LISTING"

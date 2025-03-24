@@ -1,0 +1,854 @@
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  HiDotsVertical,
+  HiOutlineCheckCircle,
+  HiOutlineXCircle,
+  HiPlus,
+  HiX,
+  Hiload,
+} from "react-icons/hi";
+import { FaFileImport } from "react-icons/fa";
+import Papa from "papaparse";
+
+import { Link, useNavigate } from "react-router-dom";
+import UseFetchUserData from "../component/fetchUser";
+import { useAuthContext } from "../Hooks/useAuthContext";
+import { Dialog } from "@headlessui/react";
+import { FaTimes, FaShoppingBasket } from "react-icons/fa";
+import { CreateCheckoutUrl } from "../component/Checkout";
+import { HiOutlineRefresh } from "react-icons/hi";
+import { jwtDecode } from "jwt-decode";
+import { debounce } from "lodash";
+import { MdEdit } from "react-icons/md";
+import axios from "axios";
+
+const Promotion = () => {
+  let admin;
+
+  const isAdmin = () => {
+    const token = localStorage.getItem("usertoken");
+    if (token) {
+      const decoded = jwtDecode(token);
+      if (decoded.payLoad.isAdmin && decoded.exp * 1000 > Date.now()) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  admin = isAdmin();
+
+  const limit = 20;
+
+  const navigate = useNavigate();
+  const { userData, loading, error, variantId } = UseFetchUserData();
+  const [starting, setStarting] = useState(0);
+  const [ending, setEnding] = useState(10);
+  const [products, setProducts] = useState([]);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const openPopup = () => setIsPopupOpen(true);
+  const closePopup = () => setIsPopupOpen(false);
+  const [promoName, setPromoName] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [sku, setSku] = useState("");
+  const [status, setStatus] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [searchVal, setSearchVal] = useState("");
+  
+  const [promotions, setPromotions] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalStartDate, setModalStartDate] = useState("");
+  const [modalEndDate, setModalEndDate] = useState("");
+  const [promoPrices, setPromoPrices] = useState({});
+  const [loadingId, setLoadingId] = useState(null);
+  const [message, setMessage] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuthContext();
+  const [promoPrice, setPromoPrice] = useState("");
+  const [allPromotions, setAllPromotions] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const dropdownRefs = useRef([]);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+
+  const toggleSelection = (productId) => {
+    setSelectedProducts((prevSelected) =>
+      prevSelected.includes(productId)
+        ? prevSelected.filter((id) => id !== productId)
+        : [...prevSelected, productId]
+    );
+  };
+
+
+  const [Loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  const [activeTab, setActiveTab] = useState("Active Promotions");
+  const getStatusClass = (status) => {
+    if (status === "Active Now")
+      return "bg-green-100 text-green-700 border border-green-400";
+    if (status === "Ending Soon")
+      return "bg-orange-100 text-orange-700 border border-orange-400";
+    return "bg-gray-100 text-gray-600 border border-gray-300";
+  };
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+  };
+
+  const fetchProductData = async () => {
+    setLoading(true);
+    const id = localStorage.getItem("userid");
+    try {
+      const response = await fetch(
+        admin
+          ? `http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`
+          : `http://localhost:5000/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+        { method: "GET" }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+
+        const sortedProducts = data.products.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+
+        setProducts(sortedProducts);
+        setFilteredProducts((prev) => [
+          ...prev,
+          ...sortedProducts.filter(
+            (newProduct) =>
+              !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+          ),
+        ]);
+
+        setHasMore(page < data.totalPages); // Check if more pages are available
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const modalRef = useRef();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        closePopup();
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        closePopup();
+      }
+    };
+    if (isPopupOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isPopupOpen]);
+
+  useEffect(() => {
+    const fetchPromotions = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/promo");
+        const data = await res.json();
+        setPromotions(data);
+      } catch (err) {
+        console.error("Failed to fetch promotions:", err);
+      }
+    };
+
+    fetchPromotions();
+  }, []);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const handleSubmitPromotion = async () => {
+    const promoPrice = promoPrices[selectedProduct._id];
+
+    if (!modalStartDate || !modalEndDate) {
+      return alert("Please enter both start and end date.");
+    }
+
+    try {
+      const res = await axios.post(
+        `http://localhost:5000/promo/${selectedProduct._id}`,
+        {
+          promoPrice,
+          startDate: modalStartDate,
+          endDate: modalEndDate,
+        }
+      );
+
+      alert("Promotion added successfully!");
+      setModalOpen(false);
+      setModalStartDate("");
+      setModalEndDate("");
+    } catch (error) {
+      console.error("Error adding promotion:", error);
+      alert("Failed to add promotion.");
+    }
+  };
+  const addToPromotions = (product) => {
+    console.log(product);
+    console.log("clicking");
+
+    setSelectedProduct(product); // set this in your state to pass to the modal
+    setModalOpen(true); // show the modal
+  };
+  const OnEdit = (product) => {
+    console.log(product);
+    console.log("clicking");
+
+    setSelectedProduct(product); 
+    openPopup();
+  };
+
+  const onDeleteSelected = async () => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete the selected listings?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await Promise.all(
+        selectedProducts.map(async (id) => {
+          const response = await fetch(`http://localhost:5000/promo/${id}`, {
+            method: "DELETE",
+          });
+          if (!response.ok) throw new Error("Failed to delete product");
+        })
+      );
+
+      setProducts(products.filter((p) => !selectedProducts.includes(p._id)));
+      setPromotions(
+        promotions.filter((p) => !selectedProducts.includes(p._id))
+      );
+      setSelectedProducts([]);
+    } catch (error) {
+      console.error("Error deleting products:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProductData();
+  }, []);
+
+  useEffect(() => {
+    const fetchProductData2 = async () => {
+      const id = localStorage.getItem("userid");
+
+      try {
+        const response = await fetch(
+          admin
+            ? `http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`
+            : `http://localhost:5000/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+          { method: "GET" }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Second Product render", data);
+
+          const sortedProducts = data.products.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
+
+          setProducts((prev) => [
+            ...prev,
+            ...sortedProducts.filter(
+              (newProduct) =>
+                !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+            ),
+          ]);
+
+          setFilteredProducts((prev) => [
+            ...prev,
+            ...sortedProducts.filter(
+              (newProduct) =>
+                !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+            ),
+          ]);
+
+          setHasMore(page < data.totalPages);
+          console.log(hasMore);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    fetchProductData2();
+  }, [page]);
+
+  const handleScroll = async () => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop + 400 >=
+      document.documentElement.scrollHeight
+    ) {
+      if (hasMore && !loading) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/promo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          promoName,
+          startDate,
+          endDate,
+          productSku: sku,
+          promoPrice,
+          status,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Promotion added successfully!");
+        closePopup();
+        setPromoName("");
+        setStartDate("");
+        setEndDate("");
+        setSku("");
+        setStatus("");
+
+        setPromoPrice("");
+      } else {
+        alert(data.message || "Something went wrong.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Server error. Please try again.");
+    }
+  };
+  
+
+  
+  
+  return user ? (
+    <main className="w-full p-4 md:p-8">
+      <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
+        <div className="flex-1">
+          <h1 className="text-2xl font-semibold mb-1">Promotions</h1>
+          <p className="text-gray-600">Auto-updates in 2 min.</p>
+          <div className="w-2/4 max-sm:w-full mt-2"></div>
+        </div>
+        <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
+          <div className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
+            <HiPlus className="w-5 h-5" />
+            <button onClick={openPopup}>Add Promtion</button>
+          </div>
+        </div>
+
+        {toast.show && (
+          <div
+            className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+              toast.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
+          >
+            {toast.type === "success" ? (
+              <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+            ) : (
+              <HiOutlineXCircle className="w-6 h-6 mr-2" />
+            )}
+            <span>{toast.message}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex justify-between items-center mt-4 space-y-4 mb-4">
+        <div className="flex gap-2">
+          {[
+            "Promotions Details",
+            "Eligible Products",
+            "Submitted Products",
+          ].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 text-sm rounded-lg ${
+                activeTab === tab
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-200 text-gray-700"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex gap-2 items-center">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+
+          <button className="bg-blue-500 hover:bg-blue-400 text-sm text-white py-1 px-3 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
+            Export PDF
+          </button>
+
+          <button className="bg-blue-500 hover:bg-blue-400 text-sm text-white py-1 px-3 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
+            Export Excel
+          </button>
+        </div>
+      </div>
+      {activeTab === "Submitted Products" && selectedProducts.length > 0 && (
+        <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
+          <div className="flex gap-2 items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
+            <button
+              onClick={onDeleteSelected}
+              className="bg-red-500 hover:bg-red-400 text-white py-2 px-6 rounded-md mb-2 transition duration-300 ease-in-out flex items-center space-x-2"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
+
+      {Loading && (
+        <div className="flex justify-center items-center py-10 gap-2">
+          <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
+          Loading...
+        </div>
+      )}
+
+      {!Loading && (
+        <>
+          {activeTab === "Promotions Details" && (
+            <div className="space-y-6">
+              {promotions
+                .filter((product) => product.status === "active")
+                .map((product) => (
+                  <div
+                    key={product._id}
+                    className="border rounded-md bg-white shadow-sm p-6 text-sm text-gray-700 space-y-4"
+                  >
+                    <div className="flex flex-col md:flex-row md:justify-between">
+                      <div>
+                        <p className="font-semibold text-base text-black">
+                          {product.productName}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(product.startDate).toLocaleString()} –{" "}
+                          {new Date(product.endDate).toLocaleString()}
+                        </p>
+                      </div>
+
+                      <CountdownTimer endDate={product.endDate} />
+                    </div>
+
+                    <p className="text-sm mt-2">
+                      Promotion details loaded dynamically.
+                    </p>
+
+                    <div className="flex items-center gap-8 flex-wrap text-xs mt-4">
+                      <div className="flex items-center gap-2">
+                        <img
+                          src="https://img.icons8.com/ios-filled/50/000000/box.png"
+                          alt="Products"
+                          className="w-4 h-4"
+                        />
+                        <span>{product.currentStock || 0}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <p className="text-sm text-gray-600">
+                        Add your products to this promotion, sell them and make
+                        profit.
+                      </p>
+                      <button className="mt-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 text-sm rounded-md">
+                        Select Products for Promotion
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+
+          {activeTab === "Eligible Products" && (
+            <div className=" max-sm:overflow-auto border rounded-lg">
+              <table className="w-full border-collapse bg-white">
+                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                  <tr>
+                    <th className="p-3">ACTION</th>
+                    <th className="p-3">LISTING NAME</th>
+                    <th className="p-3">SELLER_SKU</th>
+                    <th className="p-3">CURRENT_PRICE</th>
+                    <th className="p-3">PROMO_PRICE</th>
+                    <th className="p-3">CURRENT_STOCK</th>
+                    <th className="p-3">ADD PROMOTION</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {filteredProducts.map((product, index) => (
+                    <tr key={product._id} className="border-b hover:bg-gray-50">
+                      <td className="p-3">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 cursor-pointer"
+                          checked={selectedProducts.includes(product._id)}
+                          onChange={() => toggleSelection(product._id)}
+                        />
+                      </td>
+
+                      {/* <td className="p-3">
+                                   {" "}
+                                   <div
+                                     className={`w-2 h-2 rounded-full ${
+                                       product.status === "active"
+                                         ? "bg-green-500"
+                                         : "bg-red-500"
+                                     }`}
+                                     title={product.status}
+                                   />
+                                 </td> */}
+                      <td className="p-3">
+                        {" "}
+                        {product.title !== "Job Listing"
+                          ? product.title
+                          : "Job Search Listing"}
+                      </td>
+                      {admin && product.tags?.split(",")[1]?.split("_")[1]}
+                      <td className="p-3"> {product.variants[0].sku} </td>
+                      <td className="p-3">
+                        {" "}
+                        ${product.variants[0].price || "..loading"}{" "}
+                      </td>
+                      <td className="p-3">
+                        <input
+                          type="text"
+                          value={promoPrices[product._id] || ""}
+                          onChange={(e) =>
+                            setPromoPrices((prev) => ({
+                              ...prev,
+                              [product._id]: e.target.value,
+                            }))
+                          }
+                          className="border border-gray-300 rounded px-2 py-1 text-sm w-full"
+                          placeholder="Enter promo price"
+                        />
+                      </td>
+                      <td className="p-3">
+                        {" "}
+                        {product.variants[0].inventory_quantity}
+                      </td>
+
+                      <td className="p-3">
+                        <button
+                          className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
+                          onClick={() => addToPromotions(product)}
+                        >
+                          Add to promotion
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {activeTab === "Submitted Products" && (
+            <table className="w-full border-collapse bg-white">
+              <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                <tr>
+                  <th className="p-3">ACTION</th>
+                  <th className="p-3">LISTING NAME</th>
+                  <th className="p-3">SELLER_SKU</th>
+                  <th className="p-3">CURRENT_PRICE</th>
+                  <th className="p-3">PROMO_PRICE</th>
+                  <th className="p-3">CURRENT_STOCK</th>
+                  <th className="p-3">EDIT</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {promotions
+                  .filter((product) => product.status === "active")
+                  .map((product) => (
+                    <tr key={product._id} className="border-b hover:bg-gray-50">
+                      <td className="p-3">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 cursor-pointer"
+                          checked={selectedProducts.includes(product._id)}
+                          onChange={() =>
+                            setSelectedProducts((prev) =>
+                              prev.includes(product._id)
+                                ? prev.filter((id) => id !== product._id)
+                                : [...prev, product._id]
+                            )
+                          }
+                        />
+                      </td>
+                      <td className="p-3">{product.productName || "-"}</td>
+                      <td className="p-3">{product.productSku || "-"}</td>
+                      <td className="p-3">${product.currentPrice}</td>
+                      <td className="p-3">${product.promoPrice || "-"}</td>
+                      <td className="p-3">{product.currentStock || "-"}</td>
+                      <td className="p-3">
+                        <button
+                          className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
+                          onClick={() => OnEdit(product)}
+                        >
+                          <MdEdit className="mr-1" />
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+
+                {/* Optional: If no active promotions found */}
+                {promotions.filter((product) => product.status === "active")
+                  .length === 0 && (
+                  <tr>
+                    <td colSpan="7" className="p-4 text-center text-gray-500">
+                      No active submitted products found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
+        </>
+      )}
+      {isPopupOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-xl relative">
+            <div className="border-b px-4 py-3 flex justify-between items-center">
+              <h2 className="text-sm font-semibold text-blue-700">
+                Add Promotion
+              </h2>
+              <button
+                onClick={closePopup}
+                className="text-gray-600 hover:text-black text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Promo Name
+                </label>
+                <input
+                  type="text"
+                  value={promoName}
+                  onChange={(e) => setPromoName(e.target.value)}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                  placeholder="Enter promo name"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Promotion Duration
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-1/2 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                  />
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-1/2 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  SKU
+                </label>
+                <input
+                  type="text"
+                  value={sku}
+                  onChange={(e) => setSku(e.target.value)}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                  placeholder="Enter SKU"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Promo Price
+                </label>
+                <input
+                  type="number"
+                  value={promoPrice}
+                  onChange={(e) => setPromoPrice(e.target.value)}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                  placeholder="Enter promo price"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                >
+                  <option value="">Select status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+
+              <div className="text-right">
+                <button onClick={handleSubmit} className="button">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white p-6 rounded-md w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">
+              Add Promotion Duration
+            </h2>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  value={modalStartDate}
+                  onChange={(e) => setModalStartDate(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  value={modalEndDate}
+                  onChange={(e) => setModalEndDate(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                className="px-4 py-2 text-sm border rounded hover:bg-gray-100"
+                onClick={() => setModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-500"
+                onClick={handleSubmitPromotion}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
+  ) : null;
+};
+
+export default Promotion;
+
+const CountdownTimer = ({ endDate }) => {
+  const [countdown, setCountdown] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
+  useEffect(() => {
+    const target = new Date(endDate).getTime();
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = target - now;
+
+      if (distance < 0) {
+        clearInterval(interval);
+        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      setCountdown({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor(
+          (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        ),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((distance % (1000 * 60)) / 1000),
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [endDate]);
+
+  return (
+    <div className="flex flex-col items-end text-xs text-gray-600 mt-4 md:mt-0">
+      <p className="text-right text-black">Time left</p>
+      <div className="flex gap-2 text-center text-xs font-semibold mt-1">
+        <div>
+          <div className="text-lg">{countdown.days}</div>
+          <div className="text-[10px]">Days</div>
+        </div>
+        <div>
+          <div className="text-lg">{countdown.hours}</div>
+          <div className="text-[10px]">Hours</div>
+        </div>
+        <div>
+          <div className="text-lg">{countdown.minutes}</div>
+          <div className="text-[10px]">Minutes</div>
+        </div>
+        <div>
+          <div className="text-lg">{countdown.seconds}</div>
+          <div className="text-[10px]">Seconds</div>
+        </div>
+      </div>
+    </div>
+  );
+};

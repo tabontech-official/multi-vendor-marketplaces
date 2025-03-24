@@ -101,7 +101,7 @@ const SubNavbar = () => {
       path: "#",
       subModules: [
         { name: "my Promitions", path: "#" },
-        { name: "All Promotions", path: "#" },
+        { name: "All Promotions", path: "/PROMOTIONS" },
       ],
     },
     {

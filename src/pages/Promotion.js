@@ -56,7 +56,7 @@ const Promotion = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [searchVal, setSearchVal] = useState("");
-  
+
   const [promotions, setPromotions] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStartDate, setModalStartDate] = useState("");
@@ -73,22 +73,34 @@ const Promotion = () => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [Loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
-  const [activeTab, setActiveTab] = useState("Active Promotions");
+  // const [activeTab, setActiveTab] = useState("Active Promotions");
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem("Active Promotions") || "Promotions Details";
+  });
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+    localStorage.setItem("activeTab", tabName);
+  };
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
+  const [userRole, setUserRole] = useState("");
+  const [currentUserId, setCurrentUserId] = useState("");
 
-  const toggleSelection = (productId) => {
-    setSelectedProducts((prevSelected) =>
-      prevSelected.includes(productId)
-        ? prevSelected.filter((id) => id !== productId)
-        : [...prevSelected, productId]
-    );
-  };
+  useEffect(() => {
+    const token = localStorage.getItem("usertoken");
+    const uid = localStorage.getItem("userid");
+    if (!token || !uid) return;
 
-  const showToast = (type, message) => {
-    setToast({ show: true, type, message });
-    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
-  };
+    try {
+      const decoded = jwtDecode(token);
+      if (decoded?.payLoad?.role) {
+        setUserRole(decoded.payLoad.role);
+        setCurrentUserId(uid);
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  }, []);
 
   const fetchProductData = async () => {
     setLoading(true);
@@ -96,8 +108,8 @@ const Promotion = () => {
     try {
       const response = await fetch(
         admin
-          ? `http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`
-          : `http://localhost:5000/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+          ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
+          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
 
@@ -145,7 +157,7 @@ const Promotion = () => {
   useEffect(() => {
     const fetchPromotions = async () => {
       try {
-        const res = await fetch("http://localhost:5000/promo");
+        const res = await fetch("https://multi-vendor-marketplace.vercel.app/promo");
         const data = await res.json();
         setPromotions(data);
       } catch (err) {
@@ -158,6 +170,7 @@ const Promotion = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const handleSubmitPromotion = async () => {
+    const userId = localStorage.getItem("userid");
     const promoPrice = promoPrices[selectedProduct._id];
 
     if (!modalStartDate || !modalEndDate) {
@@ -166,11 +179,12 @@ const Promotion = () => {
 
     try {
       const res = await axios.post(
-        `http://localhost:5000/promo/${selectedProduct._id}`,
+        `https://multi-vendor-marketplace.vercel.app/promo/${selectedProduct._id}`,
         {
           promoPrice,
           startDate: modalStartDate,
           endDate: modalEndDate,
+          userId,
         }
       );
 
@@ -187,14 +201,14 @@ const Promotion = () => {
     console.log(product);
     console.log("clicking");
 
-    setSelectedProduct(product); // set this in your state to pass to the modal
-    setModalOpen(true); // show the modal
+    setSelectedProduct(product);
+    setModalOpen(true);
   };
   const OnEdit = (product) => {
     console.log(product);
     console.log("clicking");
 
-    setSelectedProduct(product); 
+    setSelectedProduct(product);
     openPopup();
   };
 
@@ -207,7 +221,7 @@ const Promotion = () => {
     try {
       await Promise.all(
         selectedProducts.map(async (id) => {
-          const response = await fetch(`http://localhost:5000/promo/${id}`, {
+          const response = await fetch(`https://multi-vendor-marketplace.vercel.app/promo/${id}`, {
             method: "DELETE",
           });
           if (!response.ok) throw new Error("Failed to delete product");
@@ -235,8 +249,8 @@ const Promotion = () => {
       try {
         const response = await fetch(
           admin
-            ? `http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`
-            : `http://localhost:5000/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+            ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
+            : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
           { method: "GET" }
         );
 
@@ -292,7 +306,9 @@ const Promotion = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch("http://localhost:5000/promo", {
+      const userId = localStorage.getItem("userid");
+
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/promo", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -304,6 +320,7 @@ const Promotion = () => {
           productSku: sku,
           promoPrice,
           status,
+          userId,
         }),
       });
 
@@ -316,7 +333,6 @@ const Promotion = () => {
         setEndDate("");
         setSku("");
         setStatus("");
-
         setPromoPrice("");
       } else {
         alert(data.message || "Something went wrong.");
@@ -326,10 +342,7 @@ const Promotion = () => {
       alert("Server error. Please try again.");
     }
   };
-  
 
-  
-  
   return user ? (
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
@@ -370,7 +383,10 @@ const Promotion = () => {
           ].map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => {
+                setActiveTab(tab);
+                localStorage.setItem("activeTab", tab);
+              }}
               className={`px-4 py-2 text-sm rounded-lg ${
                 activeTab === tab
                   ? "bg-green-600 text-white"
@@ -382,7 +398,7 @@ const Promotion = () => {
           ))}
         </div>
 
-        <div className="flex gap-2 items-center">
+        {/* <div className="flex gap-2 items-center">
           <input
             type="text"
             placeholder="Search..."
@@ -396,7 +412,7 @@ const Promotion = () => {
           <button className="bg-blue-500 hover:bg-blue-400 text-sm text-white py-1 px-3 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
             Export Excel
           </button>
-        </div>
+        </div> */}
       </div>
       {activeTab === "Submitted Products" && selectedProducts.length > 0 && (
         <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
@@ -423,7 +439,32 @@ const Promotion = () => {
           {activeTab === "Promotions Details" && (
             <div className="space-y-6">
               {promotions
-                .filter((product) => product.status === "active")
+                .filter((product) => {
+                  if (product.status !== "active") return false;
+
+                  if (userRole === "Dev Admin") {
+                    return true;
+                  }
+
+                  if (userRole === "Master Admin") {
+                    return (
+                      product.createdRole === "Master Admin" ||
+                      product.createdRole === "Client"
+                    );
+                  }
+                  if (userRole === "Client") {
+                    return (
+                      product.createdRole === "Client" ||
+                      product.createdRole === "Staff"
+                    );
+                  }
+
+                  if (userRole === "Staff") {
+                    return product.userId === currentUserId;
+                  }
+
+                  return false;
+                })
                 .map((product) => (
                   <div
                     key={product._id}
@@ -439,8 +480,10 @@ const Promotion = () => {
                           {new Date(product.endDate).toLocaleString()}
                         </p>
                       </div>
-
-                      <CountdownTimer endDate={product.endDate} />
+                      <CountdownTimer
+                        startDate={product.startDate}
+                        endDate={product.endDate}
+                      />
                     </div>
 
                     <p className="text-sm mt-2">
@@ -566,13 +609,38 @@ const Promotion = () => {
                   <th className="p-3">CURRENT_PRICE</th>
                   <th className="p-3">PROMO_PRICE</th>
                   <th className="p-3">CURRENT_STOCK</th>
-                  <th className="p-3">EDIT</th>
+                  {/* <th className="p-3">EDIT</th> */}
                 </tr>
               </thead>
 
               <tbody>
                 {promotions
-                  .filter((product) => product.status === "active")
+                  .filter((product) => {
+                    if (product.status !== "active") return false;
+
+                    if (userRole === "Dev Admin") {
+                      return true;
+                    }
+
+                    if (userRole === "Master Admin") {
+                      return (
+                        product.createdRole === "Master Admin" ||
+                        product.createdRole === "Client"
+                      );
+                    }
+                    if (userRole === "Client") {
+                      return (
+                        product.createdRole === "Client" ||
+                        product.createdRole === "Staff"
+                      );
+                    }
+
+                    if (userRole === "Staff") {
+                      return product.userId === currentUserId;
+                    }
+
+                    return false;
+                  })
                   .map((product) => (
                     <tr key={product._id} className="border-b hover:bg-gray-50">
                       <td className="p-3">
@@ -594,7 +662,7 @@ const Promotion = () => {
                       <td className="p-3">${product.currentPrice}</td>
                       <td className="p-3">${product.promoPrice || "-"}</td>
                       <td className="p-3">{product.currentStock || "-"}</td>
-                      <td className="p-3">
+                      {/* <td className="p-3">
                         <button
                           className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
                           onClick={() => OnEdit(product)}
@@ -602,13 +670,26 @@ const Promotion = () => {
                           <MdEdit className="mr-1" />
                           Edit
                         </button>
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
 
                 {/* Optional: If no active promotions found */}
-                {promotions.filter((product) => product.status === "active")
-                  .length === 0 && (
+                {promotions.filter((product) => {
+                  if (product.status !== "active") return false;
+
+                  if (userRole === "dev") return true;
+                  if (userRole === "masterAdmin") {
+                    return (
+                      product.createdByRole === "masterAdmin" ||
+                      product.createdByRole === "clientStaff"
+                    );
+                  }
+                  if (userRole === "clientStaff") {
+                    return product.userId === currentUserId;
+                  }
+                  return false;
+                }).length === 0 && (
                   <tr>
                     <td colSpan="7" className="p-4 text-center text-gray-500">
                       No active submitted products found.
@@ -770,7 +851,7 @@ const Promotion = () => {
 
 export default Promotion;
 
-const CountdownTimer = ({ endDate }) => {
+const CountdownTimer = ({ startDate, endDate }) => {
   const [countdown, setCountdown] = useState({
     days: 0,
     hours: 0,
@@ -778,53 +859,81 @@ const CountdownTimer = ({ endDate }) => {
     seconds: 0,
   });
 
+  const [status, setStatus] = useState(""); 
+
   useEffect(() => {
-    const target = new Date(endDate).getTime();
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
-      const distance = target - now;
 
-      if (distance < 0) {
-        clearInterval(interval);
+      if (now < start) {
+        setStatus("upcoming");
+        const distance = start - now;
+        setCountdown({
+          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+          hours: Math.floor(
+            (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+          ),
+          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((distance % (1000 * 60)) / 1000),
+        });
+      } else if (now >= start && now <= end) {
+        setStatus("running");
+        const distance = end - now;
+        setCountdown({
+          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+          hours: Math.floor(
+            (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+          ),
+          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((distance % (1000 * 60)) / 1000),
+        });
+      } else {
+        setStatus("expired");
         setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        return;
+        clearInterval(interval);
       }
-
-      setCountdown({
-        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-        hours: Math.floor(
-          (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        ),
-        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((distance % (1000 * 60)) / 1000),
-      });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [endDate]);
+  }, [startDate, endDate]);
+
+  const renderLabel = () => {
+    if (status === "upcoming") return "Starts in";
+    if (status === "running") return "Ends in";
+    return "Expired";
+  };
 
   return (
     <div className="flex flex-col items-end text-xs text-gray-600 mt-4 md:mt-0">
-      <p className="text-right text-black">Time left</p>
-      <div className="flex gap-2 text-center text-xs font-semibold mt-1">
-        <div>
-          <div className="text-lg">{countdown.days}</div>
-          <div className="text-[10px]">Days</div>
+      <p className="text-right text-black">{renderLabel()}</p>
+      {status !== "expired" && (
+        <div className="flex gap-2 text-center text-xs font-semibold mt-1">
+          <div>
+            <div className="text-lg">{countdown.days}</div>
+            <div className="text-[10px]">Days</div>
+          </div>
+          <div>
+            <div className="text-lg">{countdown.hours}</div>
+            <div className="text-[10px]">Hours</div>
+          </div>
+          <div>
+            <div className="text-lg">{countdown.minutes}</div>
+            <div className="text-[10px]">Minutes</div>
+          </div>
+          <div>
+            <div className="text-lg">{countdown.seconds}</div>
+            <div className="text-[10px]">Seconds</div>
+          </div>
         </div>
-        <div>
-          <div className="text-lg">{countdown.hours}</div>
-          <div className="text-[10px]">Hours</div>
-        </div>
-        <div>
-          <div className="text-lg">{countdown.minutes}</div>
-          <div className="text-[10px]">Minutes</div>
-        </div>
-        <div>
-          <div className="text-lg">{countdown.seconds}</div>
-          <div className="text-[10px]">Seconds</div>
-        </div>
-      </div>
+      )}
+      {status === "expired" && (
+        <p className="text-red-500 text-xs mt-1 font-semibold">
+          Promotion Ended
+        </p>
+      )}
     </div>
   );
 };

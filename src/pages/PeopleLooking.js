@@ -248,8 +248,8 @@ const PeopleLooking = () => {
   //     // Submit the main form data (excluding images)
   //     const response = await fetch(
   //       isEditing
-  //         ? `http://localhost:5000/product/updateListing/${product.id}`
-  //         : "http://localhost:5000/product/lookingFor",
+  //         ? `https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}`
+  //         : "https://multi-vendor-marketplace.vercel.app/product/lookingFor",
   //       {
   //         method: isEditing ? "PUT" : "POST",
   //         body: formData
@@ -275,7 +275,7 @@ const PeopleLooking = () => {
   //           formDataImages.append('images', images[i]); // Add the image to FormData
 
   //           // Send the request for each image and wait for it to complete before continuing
-  //           const imageResponse = await fetch(`http://localhost:5000/product/updateImages/${createdProductId}`, {
+  //           const imageResponse = await fetch(`https://multi-vendor-marketplace.vercel.app/product/updateImages/${createdProductId}`, {
   //             method: "PUT", // Assuming a PUT request to update the image
   //             body: formDataImages
   //           });
@@ -377,8 +377,8 @@ const PeopleLooking = () => {
     //   // Submit the form data (without images)
     //   const response = await fetch(
     //     isEditing
-    //       ? `http://localhost:5000/product/updateListing/${product.id}`
-    //       : "http://localhost:5000/product/lookingFor",
+    //       ? `https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}`
+    //       : "https://multi-vendor-marketplace.vercel.app/product/lookingFor",
     //     {
     //       method: isEditing ? "PUT" : "POST",
     //       body: formData,
@@ -425,7 +425,7 @@ const PeopleLooking = () => {
     //       }
 
     //       // Once all images are uploaded, save the URLs in the database
-    //       const imageResponse = await fetch(`http://localhost:5000/product/updateImages/${createdProductId}`, {
+    //       const imageResponse = await fetch(`https://multi-vendor-marketplace.vercel.app/product/updateImages/${createdProductId}`, {
     //         method: "PUT",
     //         headers: {
     //           'Content-Type': 'application/json'  // Set the header to send JSON data
@@ -462,11 +462,11 @@ const PeopleLooking = () => {
 
     try {
       // Set the API URL and method (POST for creating new, PUT for updating)
-      let url = "http://localhost:5000/product/lookingFor";
+      let url = "https://multi-vendor-marketplace.vercel.app/product/lookingFor";
       let method = "POST";
 
       if (product && product.id) {
-        url = `http://localhost:5000/product/updateListing/${product.id}`;
+        url = `https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}`;
         method = "PUT";
       }
 
@@ -530,7 +530,7 @@ const PeopleLooking = () => {
 
           // Once all images are uploaded, save the URLs in the database
           const imageResponse = await fetch(
-            `http://localhost:5000/product/updateImages/${createdProductId}`,
+            `https://multi-vendor-marketplace.vercel.app/product/updateImages/${createdProductId}`,
             {
               method: "PUT",
               headers: {

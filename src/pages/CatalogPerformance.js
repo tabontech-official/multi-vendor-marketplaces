@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FaArrowTrendUp, FaArrowTrendDown } from "react-icons/fa6";
 import { RiStore3Line } from "react-icons/ri";
 import { MdOutlineProductionQuantityLimits } from "react-icons/md";
@@ -16,6 +16,16 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const CatalogPerformance = () => {
+  const [summary, setSummary] = useState({
+    totalIncome: 0,
+    incomeGrowth: 0,
+    lastYearIncome: 0,
+    spend: 0,
+    spendGrowth: 0,
+    lastYearSpend: 0,
+  });
+  const [productCount, setProductCount] = useState(0);
+
   const data = {
     labels: ["Dec 22", "Jan 23", "Feb 23", "Mar 23", "Apr 23"],
     datasets: [
@@ -65,6 +75,43 @@ const CatalogPerformance = () => {
       },
     },
   };
+
+  useEffect(() => {
+    const getProductCount = async () => {
+      try {
+        const response = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/product/getProductCount"
+        ); // replace with your actual API URL
+        const data = await response.json();
+        if (response.ok) {
+          setProductCount(data.count);
+        } else {
+          console.error("Failed to fetch count:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching product count:", error);
+      }
+    };
+
+    getProductCount();
+  }, []);
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const response = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/order/recurringFinance"
+        );
+        const data = await response.json();
+        setSummary(data);
+      } catch (error) {
+        console.error("Failed to fetch finance summary:", error);
+      }
+    };
+
+    fetchSummary();
+  }, []);
+
   return (
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
@@ -75,7 +122,6 @@ const CatalogPerformance = () => {
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0"></div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-        {/* Net Profit */}
         <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="bg-cyan-500 text-white px-4 py-2 rounded-full">
@@ -83,7 +129,7 @@ const CatalogPerformance = () => {
             </div>
             <p className="text-sm text-gray-600">Net Profit</p>
           </div>
-          <h2 className="text-2xl font-semibold mt-2">$302.1K</h2>
+          <h2 className="text-2xl font-semibold mt-2">${summary.netProfit}</h2>
           <div className="border-t-2 border-gray-300 pt-2 mt-2">
             <p className="text-xs text-red-500 flex items-center gap-1">
               <FaArrowTrendDown className="text-sm" />
@@ -92,7 +138,6 @@ const CatalogPerformance = () => {
           </div>
         </div>
 
-        {/* Store */}
         <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="bg-gray-300 text-white px-3 py-3 rounded-full">
@@ -109,7 +154,6 @@ const CatalogPerformance = () => {
           </div>
         </div>
 
-        {/* Product */}
         <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="bg-gray-300 text-black px-3 py-3 rounded-full">
@@ -117,7 +161,7 @@ const CatalogPerformance = () => {
             </div>
             <p className="text-sm text-gray-600">Product</p>
           </div>
-          <h2 className="text-2xl font-semibold mt-2">390,040</h2>
+          <h2 className="text-2xl font-semibold mt-2">{productCount}</h2>
           <div className="border-t-2 border-gray-300 pt-2 mt-2">
             <p className="text-xs text-green-500 flex items-center gap-1">
               <FaArrowTrendUp />
@@ -126,7 +170,6 @@ const CatalogPerformance = () => {
           </div>
         </div>
 
-        {/* Visitor */}
         <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="bg-gray-300 text-black px-3 py-3 rounded-full">
@@ -142,8 +185,8 @@ const CatalogPerformance = () => {
           </div>
         </div>
       </div>
+
       <div className="flex gap-6 mt-6">
-        {/* Monthly Recurring Revenue */}
         <div className="bg-gray-100 p-6 rounded-xl shadow-sm w-[65%]">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-gray-700">
@@ -151,28 +194,33 @@ const CatalogPerformance = () => {
             </h2>
             <span className="text-gray-400">•••</span>
           </div>
+
           <div className="flex mb-6">
             <div className="w-1/2 pr-4 border-r border-gray-300">
               <p className="text-sm text-gray-500">Income</p>
-              <h3 className="text-2xl font-semibold text-cyan-600">$156,098.1</h3>
+              <h3 className="text-2xl font-semibold text-cyan-600">
+                ${summary.totalIncome}
+              </h3>
               <p className="text-xs text-green-500">
-                ▲ 7.41% vs 320,583 last year
+                ▲ {summary.incomeGrowth}% vs ${summary.lastYearIncome} last year
               </p>
             </div>
 
             <div className="w-1/2 pl-4">
               <p className="text-sm text-gray-500">Spend</p>
-              <h3 className="text-2xl font-semibold text-gray-700">$80,112.02</h3>
+              <h3 className="text-2xl font-semibold text-gray-700">
+                ${summary.spend || "80,112.02"}
+              </h3>
               <p className="text-xs text-green-500">
-                ▲ 2% vs 77,000.02 last year
+                ▲ {summary.spendGrowth || "2"}% vs $
+                {summary.lastYearSpend || "77,000.02"} last year
               </p>
             </div>
           </div>
-          {/* Placeholder for bar chart */}
+
           <Bar data={data} options={options} />
         </div>
 
-        {/* Selling Product Widget */}
         <div className="bg-cyan-600 text-white p-6 rounded-xl shadow-sm w-[35%]">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">Selling Product</h2>

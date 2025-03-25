@@ -37,7 +37,7 @@ const CategorySelector = () => {
   const [checkedImages, setCheckedImages] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const locationData = useLocation();
-const navigate=useNavigate()
+  const navigate = useNavigate();
   const modules = {
     toolbar: [
       [{ header: [1, 2, false] }],
@@ -154,13 +154,12 @@ const navigate=useNavigate()
     });
   };
 
-  const toggleGroup = (groupName) => {
+  const toggleGroup = (groupId) => {
     setExpandedGroups((prev) => ({
       ...prev,
-      [groupName]: !prev[groupName],
+      [groupId]: !prev[groupId],
     }));
   };
-
   const handleNestedChange = (variantId, field, value) => {
     setVariants((prevVariants) =>
       prevVariants.map((variant) => ({
@@ -239,15 +238,14 @@ const navigate=useNavigate()
 
   useEffect(() => {
     if (product) {
-      console.log("Fetched Product:", product);
-      console.log("Product ID:", product?.id);
-      console.log("Product Options:", product.options); 
-
-      const formattedVariants = product.variants.map((variant) => ({
-        ...variant,
-        subVariants:
-          product.variants.filter((v) => v.parent_id === variant.id) || [],
-      }));
+      const formattedVariants = product.variants
+        .filter((variant) => !variant.parent_id)
+        .map((variant) => ({
+          ...variant,
+          subVariants: product.variants.filter(
+            (v) => v.parent_id === variant.id
+          ),
+        }));
 
       setIsEditing(true);
       setTitle(product.title || "");
@@ -267,8 +265,6 @@ const navigate=useNavigate()
       setStatus(product.status || "publish");
       setUserId(product.userId || "");
       setVendor(product.vendor || "");
-
-     
       setOptions(
         product.options?.map((option) => ({
           id: option.id || "No ID",
@@ -276,7 +272,6 @@ const navigate=useNavigate()
           values: option.values || [],
         })) || []
       );
-
       setVariants(formattedVariants);
       setImages(product.images || []);
     }
@@ -338,8 +333,8 @@ const navigate=useNavigate()
 
     try {
       const url = isEditing
-        ? `http://localhost:5000/product/updateProducts/${product._id}`
-        : "http://localhost:5000/product/addEquipment";
+        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
+        : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -373,7 +368,7 @@ const navigate=useNavigate()
         setImages([]);
         setSelectedImages([]);
         setKeyWord("");
-        navigate("/MANAGE_PRODUCT")
+        navigate("/MANAGE_PRODUCT");
       } else {
         setMessage({
           type: "error",
@@ -412,7 +407,10 @@ const navigate=useNavigate()
   const removeTag = (index, setState, stateValues) => {
     setState(stateValues.filter((_, i) => i !== index));
   };
-
+  const handleSubVariantDropdownChange = (parentId, subVariantId) => {
+    console.log("Parent:", parentId, "Selected Sub Variant:", subVariantId);
+    // Optionally: Set selected sub-variant in state or update pricing, etc.
+  };
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <div className="w-full max-w-6xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -891,16 +889,19 @@ const navigate=useNavigate()
                                     ? `${variant.subVariants.length} variants`
                                     : "0 variants"}
                                 </span>
-                                {expandedGroups[variant.group] ? (
-                                  <FaChevronUp />
-                                ) : (
-                                  <FaChevronDown />
-                                )}
+                                {expandedGroups[variant.group] &&
+                                  variant.subVariants &&
+                                  variant.subVariants.length > 0 && (
+                                    <tr className="border-b border-gray-300 bg-white">
+                                   
+                                 
+                                  </tr>
+                                  
+                                  )}
                               </button>
                             </div>
                           </td>
 
-                          {/* Parent Price - Editable */}
                           <td className="p-2">
                             <input
                               type="number"
@@ -916,7 +917,6 @@ const navigate=useNavigate()
                             />
                           </td>
 
-                          {/* Parent Quantity - Editable */}
                           <td className="p-2">
                             <input
                               type="number"

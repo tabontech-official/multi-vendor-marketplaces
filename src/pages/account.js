@@ -13,10 +13,29 @@ import { MdOutlineHolidayVillage } from "react-icons/md";
 import { FaArrowRight } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import { MdManageAccounts } from "react-icons/md";
-
+import axios from "axios";
 const AccountPage = () => {
   const navigate = useNavigate();
   const [selectedModule, setSelectedModule] = useState("Manage User");
+  const [description, setDescription] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState(null);
+  const [info, setInfo] = useState("");
+  const [success, setSuccess] = useState("");
+  const [agreedToPolicies, setAgreedToPolicies] = useState(false);
+  const [activeTab, setActiveTab] = useState("contactDetails");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+
+  const [role, setRole] = useState("");
+  const [activeButton, setActiveButton] = useState("");
+  const [userRole, setUserRole] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedModules, setSelectedModules] = useState([]);
+  const [inputValue, setInputValue] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -36,15 +55,44 @@ const AccountPage = () => {
     sellerGst: "",
     gstRegistered: "",
   });
-  const [imageFile, setImageFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [info, setInfo] = useState("");
-  const [success, setSuccess] = useState("");
-  const [agreedToPolicies, setAgreedToPolicies] = useState(false);
-  const [activeTab, setActiveTab] = useState("contactDetails");
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  const handleImageChange = (e) => {
+    setImageFile(e.target.files[0]);
+  };
+
+  const handleSubmit2 = async () => {
+    if (!imageFile || !description) {
+      setMessage("Image and description are required");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setMessage("");
+
+      const formData = new FormData();
+      formData.append("description", description);
+      formData.append("images", imageFile); 
+
+      const response = await axios.post(
+        "https://multi-vendor-marketplace.vercel.app/auth/addBrandAsset",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setMessage(" Collection created successfully!");
+      console.log("Response:", response.data);
+    } catch (error) {
+      console.error(" Error:", error.response?.data || error.message);
+      setMessage(" Failed to create collection");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
 
@@ -58,12 +106,9 @@ const AccountPage = () => {
       }
 
       try {
-        const response = await fetch(
-          `http://localhost:5000/auth/user/${id}`,
-          {
-            method: "GET",
-          }
-        );
+        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
+          method: "GET",
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -112,13 +157,6 @@ const AccountPage = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setFormData({ ...formData, profileImage: URL.createObjectURL(file) });
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -160,7 +198,7 @@ const AccountPage = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/auth/editProfile/${userId}`,
+        `https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`,
         {
           method: "PUT",
           body: form,
@@ -191,9 +229,7 @@ const AccountPage = () => {
     return [];
   };
 
-  const [role, setRole] = useState("");
-  const [activeButton, setActiveButton] = useState("");
-  const [userRole, setUserRole] = useState(null);
+
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
     if (!token) return;
@@ -207,12 +243,11 @@ const AccountPage = () => {
       console.error("Error decoding token:", error);
     }
   }, []);
-  const [isOpen, setIsOpen] = useState(false);
+
   const togglePopup = () => {
     setIsOpen(!isOpen);
   };
-  const [selectedModules, setSelectedModules] = useState([]);
-  const [inputValue, setInputValue] = useState("");
+
   const handleModuleSelection = (moduleName) => {
     setSelectedModules((prev) =>
       prev.includes(moduleName)
@@ -223,16 +258,13 @@ const AccountPage = () => {
 
   const updateAllProductsStatus = async (status) => {
     try {
-      const response = await fetch(
-        "http://localhost:5000/product/holiday",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status }),
-        }
-      );
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/product/holiday", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      });
 
       const data = await response.json();
       if (response.ok) {
@@ -266,7 +298,6 @@ const AccountPage = () => {
     },
   ];
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const handleUpdateTags = async () => {
     if (!email) {
       alert("Email is required!");
@@ -275,7 +306,7 @@ const AccountPage = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/auth/createUserTagsModule",
+        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {
@@ -309,10 +340,8 @@ const AccountPage = () => {
 
   return (
     <div className="flex bg-blue-50 min-h-screen text-blue-900">
-      {/* Sidebar */}
       <aside className="w-52 mt-2 mb-2 ml-4 rounded-r-2xl bg-blue-900 p-6 flex flex-col justify-between min-h-screen">
         <div>
-          {/* User Info */}
           <div className="flex flex-col items-center border-b-2">
             <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">
               <FaUser className="text-yellow-400 w-10 h-10" />
@@ -321,7 +350,6 @@ const AccountPage = () => {
               Business Account
             </h2>
 
-            {/* Rating & Profile Completion */}
             <div className="flex items-center space-x-1 mt-1">
               <span className="text-yellow-400 text-sm font-semibold">6.0</span>
               <div className="flex space-x-1">
@@ -335,15 +363,9 @@ const AccountPage = () => {
             <p className="text-green-400 text-sm mt-1 mb-2">
               Profile is 75% complete
             </p>
-            <div className="">
-              {/* Add Info Button */}
-              {/* <button className="mt-2 mb-2 text-yellow-500 px-4 py-1 text-sm font-sans border-2 border-yellow-500 rounded-2xl ">
-                Add Info
-              </button> */}
-            </div>
+           
           </div>
 
-          {/* Sidebar Navigation */}
           <nav className="mt-6 space-y-4">
             <button
               onClick={() => {
@@ -363,23 +385,7 @@ const AccountPage = () => {
                 <span className="text-sm">Manage User</span>
               </Link>
             </button>
-            {/* 
-                     <button
-                       onClick={() => {
-                         setSelectedModule("Add User");
-                         togglePopup();
-                       }}
-                       className={`w-full text-left flex items-center space-x-3 ${
-                         selectedModule === "Add User"
-                           ? "text-yellow-400"
-                           : "text-blue-300"
-                       } hover:text-yellow-400`}
-                     >
-                       <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
-                         <TiUserAdd />
-                       </span>
-                       <span className="text-sm">Add User</span>
-                     </button> */}
+           
 
             <button
               onClick={() => setSelectedModule("Settings")}
@@ -399,12 +405,10 @@ const AccountPage = () => {
           </nav>
         </div>
 
-        {/* Promote Button */}
         <button className="w-full py-2 bg-yellow-500 text-black font-semibold rounded-md hover:bg-yellow-600">
           Promote
         </button>
       </aside>
-      {/* Popup */}
       {isOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
@@ -421,7 +425,6 @@ const AccountPage = () => {
                 <h2 className="text-black text-sm">Add User</h2>
               </div>
 
-              {/* Close (X) Button */}
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-gray-500 hover:text-red-500"
@@ -430,12 +433,9 @@ const AccountPage = () => {
               </button>
             </div>
 
-            {/* Form Content */}
             <h2 className="text-black text-sm font-semibold mt-3">Add User</h2>
             <div className="space-y-4">
               {" "}
-              {/* Added spacing between inputs */}
-              {/* Role Dropdown */}
               <div className="flex flex-col w-full">
                 <label className="text-sm text-gray-700 mb-1">Role *</label>
                 <select
@@ -466,7 +466,6 @@ const AccountPage = () => {
                 <div className="border px-3 py-2 rounded-md">
                   {modules.map((module, index) => (
                     <div key={index} className="flex flex-col">
-                      {/* Main Checkbox */}
                       <label className="flex items-center gap-2 py-1">
                         <input
                           type="checkbox"
@@ -479,7 +478,6 @@ const AccountPage = () => {
                         </span>
                       </label>
 
-                      {/* Sub-Modules (Only show if parent is checked) */}
                       {selectedModules.includes(module.name) &&
                         module.subModules.length > 0 && (
                           <div className="pl-6 mt-1">
@@ -505,7 +503,6 @@ const AccountPage = () => {
                   ))}
                 </div>
               </div>
-              {/* Save Button */}
               <button
                 onClick={handleUpdateTags}
                 className="w-full px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
@@ -517,9 +514,7 @@ const AccountPage = () => {
         </div>
       )}
 
-      {/* Main Content */}
       <main className="flex-1 p-6">
-        {/* Back Button */}
         <Link to={"/"}>
           <button className="flex items-center text-blue-700 hover:text-blue-500 mb-4">
             <FaArrowLeft className="mr-2" /> Back
@@ -553,17 +548,7 @@ const AccountPage = () => {
             <span>Brand Assets</span>
           </button>
 
-          {/* <button
-            className={`pb-2 flex items-center space-x-2 ${
-              activeTab === "profileReviews"
-                ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
-                : "text-blue-500 hover:text-blue-700"
-            }`}
-            onClick={() => setActiveTab("profileReviews")}
-          >
-            <RiStarSFill className="text-xl" />
-            <span>Profile Reviews</span>
-          </button> */}
+        
 
           <button
             className={`pb-2 flex items-center space-x-2 ${
@@ -578,11 +563,9 @@ const AccountPage = () => {
           </button>
         </div>
 
-        {/* Tab Content */}
         <div className="mt-6 p-6 bg-blue-200 rounded-lg">
           {activeTab === "contactDetails" && (
             <div>
-              {/* Form Section */}
               <div className="bg-blue-200 p-6 rounded-lg mt-6">
                 <h2 className="text-lg font-semibold text-blue-800">
                   Edit Profile
@@ -841,7 +824,6 @@ const AccountPage = () => {
 
           {activeTab === "brandassets" && (
             <div className=" p-6 rounded-lg text-blue-900">
-              {/* Header */}
               <div className="flex justify-between">
                 <h2 className="text-xl font-semibold text-blue-900">
                   About Profile
@@ -851,14 +833,11 @@ const AccountPage = () => {
                 </p>
               </div>
 
-              {/* Profile Photo Section */}
               <div className="flex items-center mt-4 space-x-4">
-                {/* Profile Picture */}
                 <div className="w-16 h-16 rounded-full bg-blue-400 flex items-center justify-center">
                   <FaUser className="text-yellow-400 w-8 h-8" />
                 </div>
 
-                {/* Upload & Delete Buttons */}
                 <div className="flex space-x-2">
                   <button className="bg-yellow-500 px-4 py-1 text-black font-semibold rounded-md">
                     Upload New
@@ -869,38 +848,39 @@ const AccountPage = () => {
                 </div>
               </div>
 
-              {/* Cover Photo Upload */}
-              <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300 text-center">
-                <p className="text-blue-500">
-                  Maximum size for a file is 5MB, format: .jpg, .jpeg
-                </p>
-                <p className="text-blue-600">
-                  Recommended image size: 1180×290px
-                </p>
-                <div className="mt-4 h-32 border-2 border-dashed border-blue-500 flex justify-center items-center">
-                  <span className="text-blue-500">Upload Cover Photo</span>
+              <div>
+                <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300 text-center">
+                  <p className="text-blue-500">
+                    Maximum size for a file is 5MB, format: .jpg, .jpeg
+                  </p>
+                  <p className="text-blue-600">
+                    Recommended image size: 1180×290px
+                  </p>
+                  <div className="mt-4 h-32 border-2 border-dashed border-blue-500 flex justify-center items-center relative">
+                    <span className="text-blue-500">Upload Cover Photo</span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/jpg"
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      onChange={handleImageChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <label className="block text-blue-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    className="w-full p-2 bg-blue-200 text-blue-900 border border-blue-400 rounded-md"
+                    placeholder="Minimum 160 and maximum 900 characters"
+                    rows="4"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
                 </div>
               </div>
 
-              {/* Description Field */}
-              <div className="mt-6">
-                <label className="block text-blue-700 mb-1">Description</label>
-                <textarea
-                  className="w-full p-2 bg-blue-200 text-blue-900 border border-blue-400 rounded-md"
-                  placeholder="Minimum 160 and maximum 900 characters"
-                  rows="4"
-                ></textarea>
-              </div>
-
-              {/* Promo Video Upload */}
-              <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300 text-center">
-                <p className="text-blue-500">Upload a promo video</p>
-                <div className="mt-4 h-20 border-2 border-dashed border-blue-500 flex justify-center items-center">
-                  <span className="text-blue-500">Upload Video</span>
-                </div>
-              </div>
-
-              {/* Photo Info Section */}
               <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300">
                 <h3 className="text-lg font-semibold text-blue-900">Photo</h3>
                 <ul className="text-blue-600 text-sm mt-2 space-y-1">
@@ -910,6 +890,21 @@ const AccountPage = () => {
                   <li>- In job search results (if using premium ads)</li>
                 </ul>
               </div>
+              <div className="mt-4 text-center">
+                <button
+                  className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700"
+                  onClick={handleSubmit2}
+                  disabled={loading}
+                >
+                  {loading ? "Creating..." : "Create Collection"}
+                </button>
+              </div>
+
+              {message && (
+                <p className="mt-4 text-center text-blue-700 font-medium">
+                  {message}
+                </p>
+              )}
             </div>
           )}
 
@@ -1031,7 +1026,6 @@ const AccountPage = () => {
                   Active
                 </button>
 
-                {/* Inactive Button */}
                 <button
                   onClick={() => {
                     setActiveButton("inactive");
@@ -1046,9 +1040,7 @@ const AccountPage = () => {
                   Inactive
                 </button>
               </div>
-              {/* Holiday Date Selection */}
               <div className="mt-4 bg-blue-200 p-4 rounded-lg border border-blue-300">
-                {/* Start Date */}
                 <div className="flex items-center space-x-4">
                   <label className="text-blue-900 font-medium w-24">
                     Start Date
@@ -1059,7 +1051,6 @@ const AccountPage = () => {
                   />
                 </div>
 
-                {/* End Date */}
                 <div className="flex items-center space-x-4 mt-4">
                   <label className="text-blue-900 font-medium w-24">
                     End Date
@@ -1071,7 +1062,6 @@ const AccountPage = () => {
                 </div>
               </div>
 
-              {/* Save Button */}
               <div className="flex justify-end mt-6">
                 <button className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">
                   Save

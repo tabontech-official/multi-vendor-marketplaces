@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { HiCamera } from "react-icons/hi";
 import { FaTimes } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaUser, FaBars, FaArrowLeft } from "react-icons/fa";
 import { IoSettings } from "react-icons/io5";
 import { MdIntegrationInstructions } from "react-icons/md";
@@ -18,7 +18,6 @@ const AccountPage = () => {
   const navigate = useNavigate();
   const [selectedModule, setSelectedModule] = useState("Manage User");
   const [description, setDescription] = useState("");
-  const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState(null);
@@ -28,6 +27,7 @@ const AccountPage = () => {
   const [activeTab, setActiveTab] = useState("contactDetails");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const [role, setRole] = useState("");
   const [activeButton, setActiveButton] = useState("");
@@ -55,8 +55,14 @@ const AccountPage = () => {
     sellerGst: "",
     gstRegistered: "",
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const handleImageChange = (e) => {
-    setImageFile(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
   const handleSubmit2 = async () => {
@@ -71,7 +77,7 @@ const AccountPage = () => {
 
       const formData = new FormData();
       formData.append("description", description);
-      formData.append("images", imageFile); 
+      formData.append("images", imageFile);
 
       const response = await axios.post(
         "https://multi-vendor-marketplace.vercel.app/auth/addBrandAsset",
@@ -229,7 +235,6 @@ const AccountPage = () => {
     return [];
   };
 
-
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
     if (!token) return;
@@ -363,45 +368,36 @@ const AccountPage = () => {
             <p className="text-green-400 text-sm mt-1 mb-2">
               Profile is 75% complete
             </p>
-           
           </div>
 
           <nav className="mt-6 space-y-4">
-            <button
-              onClick={() => {
-                setSelectedModule("Manage User");
-              }}
-              className={`w-full text-left flex items-center space-x-3 ${
-                selectedModule === "Manage User"
-                  ? "text-yellow-400"
-                  : "text-blue-300"
-              } hover:text-yellow-400`}
+            <NavLink
+              to="/MANAGE_USER"
+              className={({ isActive }) =>
+                `w-full flex items-center space-x-3 ${
+                  isActive ? "text-yellow-400" : "text-blue-300"
+                } hover:text-yellow-400`
+              }
             >
               <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
                 <MdManageAccounts />
               </span>
+              <span className="text-sm">Manage User</span>
+            </NavLink>
 
-              <Link to="/MANAGE_USER">
-                <span className="text-sm">Manage User</span>
-              </Link>
-            </button>
-           
-
-            <button
-              onClick={() => setSelectedModule("Settings")}
-              className={`w-full text-left flex items-center space-x-3 ${
-                selectedModule === "Settings"
-                  ? "text-yellow-400"
-                  : "text-blue-300"
-              } hover:text-yellow-400`}
+            <NavLink
+              to="/edit-account"
+              className={({ isActive }) =>
+                `w-full flex items-center space-x-3 ${
+                  isActive ? "text-yellow-400" : "text-blue-300"
+                } hover:text-yellow-400`
+              }
             >
               <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
                 <IoSettings />
               </span>
-              <Link to="/edit-account">
-                <span className="text-sm">Settings</span>
-              </Link>
-            </button>
+              <span className="text-sm">Settings</span>
+            </NavLink>
           </nav>
         </div>
 
@@ -547,8 +543,6 @@ const AccountPage = () => {
             <FaUser className="text-xl" />
             <span>Brand Assets</span>
           </button>
-
-        
 
           <button
             className={`pb-2 flex items-center space-x-2 ${
@@ -826,26 +820,8 @@ const AccountPage = () => {
             <div className=" p-6 rounded-lg text-blue-900">
               <div className="flex justify-between">
                 <h2 className="text-xl font-semibold text-blue-900">
-                  About Profile
+                  About Your Brand
                 </h2>
-                <p className="text-green-600 text-sm mt-1">
-                  Profile is 75% complete
-                </p>
-              </div>
-
-              <div className="flex items-center mt-4 space-x-4">
-                <div className="w-16 h-16 rounded-full bg-blue-400 flex items-center justify-center">
-                  <FaUser className="text-yellow-400 w-8 h-8" />
-                </div>
-
-                <div className="flex space-x-2">
-                  <button className="bg-yellow-500 px-4 py-1 text-black font-semibold rounded-md">
-                    Upload New
-                  </button>
-                  <button className="bg-blue-300 px-4 py-1 text-blue-900 font-semibold rounded-md">
-                    Delete Photo
-                  </button>
-                </div>
               </div>
 
               <div>
@@ -857,7 +833,17 @@ const AccountPage = () => {
                     Recommended image size: 1180×290px
                   </p>
                   <div className="mt-4 h-32 border-2 border-dashed border-blue-500 flex justify-center items-center relative">
-                    <span className="text-blue-500">Upload Cover Photo</span>
+                    {imagePreview ? (
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="object-cover h-full w-full"
+                      />
+                    ) : (
+                      <span className="text-blue-500 z-10">
+                        Upload Cover Photo
+                      </span>
+                    )}
                     <input
                       type="file"
                       accept="image/jpeg,image/jpg"

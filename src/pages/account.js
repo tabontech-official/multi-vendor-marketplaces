@@ -112,9 +112,12 @@ const AccountPage = () => {
       }
 
       try {
-        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
-          method: "GET",
-        });
+        const response = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
+          {
+            method: "GET",
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
@@ -263,13 +266,16 @@ const AccountPage = () => {
 
   const updateAllProductsStatus = async (status) => {
     try {
-      const response = await fetch("https://multi-vendor-marketplace.vercel.app/product/holiday", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status }),
-      });
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/product/holiday",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {

@@ -15,12 +15,15 @@ const AdminDashboard = () => {
   ]);
   const [shopifyAccessToken, setShopifyAccessToken] = useState('');
   const [shopifyApiKey, setShopifyApiKey] = useState('');
+  const [shopifyStoreUrl, setShopifyStoreUrl] = useState('');
+
   const [editing, setEditing] = useState(false)
   const handleSave = async () => {
     try {
       await axios.put('https://multi-vendor-marketplace.vercel.app/auth/shopifyConfigurations', {
         shopifyAccessToken,
-        shopifyApiKey
+        shopifyApiKey,
+        shopifyStoreUrl
       });
       setEditing(false);
     } catch (error) {
@@ -298,11 +301,11 @@ const AdminDashboard = () => {
         showToast3("success", json.message || "Credits sent successfully!");
         setGiftQuantity(null);
       } else {
-        const errorData = await response.json(); // Get error message from the response
+        const errorData = await response.json(); 
         showToast3("error", errorData.error || "Failed to send credits.");
       }
     } catch (error) {
-      console.error("Error during the API call:", error); // Log error for debugging
+      console.error("Error during the API call:", error); 
       showToast3("error", "Error during the API call.");
     } finally {
       setLoading(false);
@@ -407,6 +410,25 @@ const AdminDashboard = () => {
           type="text"
           value={shopifyApiKey}
           onChange={(e) => setShopifyApiKey(e.target.value)}
+          className={`border rounded-md px-2 py-1 w-[25rem] ${
+            editing ? "bg-white" : "bg-gray-200"
+          }`}
+        />
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        {/* Same edit buttons not repeated here; handled in the first row */}
+      </td>
+    </tr>
+    <tr>
+      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-700">
+        Shopify Store Url
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <input
+          disabled={!editing}
+          type="text"
+          value={shopifyStoreUrl}
+          onChange={(e) => setShopifyStoreUrl(e.target.value)}
           className={`border rounded-md px-2 py-1 w-[25rem] ${
             editing ? "bg-white" : "bg-gray-200"
           }`}

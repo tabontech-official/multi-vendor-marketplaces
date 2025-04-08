@@ -8,7 +8,7 @@ import {
   Hiload,
 } from "react-icons/hi";
 import { FaFileImport } from "react-icons/fa";
-import Papa from 'papaparse';
+import Papa from "papaparse";
 
 import { Link, useNavigate } from "react-router-dom";
 import UseFetchUserData from "../component/fetchUser";
@@ -110,9 +110,7 @@ const Dashboard = () => {
     }
   };
 
- 
-
-  const modalRef=useRef()
+  const modalRef = useRef();
   const openPopup = () => setIsOpen(true);
   const closePopup = () => setIsOpen(false);
 
@@ -124,10 +122,10 @@ const Dashboard = () => {
       }
     };
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
   const toggleDropdown = (index) => {
@@ -316,19 +314,19 @@ const Dashboard = () => {
   }, [handleScroll]);
   const handleCSVUpload = (event) => {
     const file = event.target.files[0];
-    const userId = localStorage.getItem('userid');
-  
+    const userId = localStorage.getItem("userid");
+
     if (!file || !userId) {
       alert("CSV file or User ID missing.");
       return;
     }
-  
+
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: async (results) => {
         const products = results.data;
-    
+
         for (const product of products) {
           const formData = new FormData();
           formData.append("title", product.title || "");
@@ -337,7 +335,10 @@ const Dashboard = () => {
           formData.append("compare_at_price", product.compare_at_price || 0);
           formData.append("track_quantity", product.track_quantity || "false");
           formData.append("quantity", product.quantity || 0);
-          formData.append("continue_selling", product.continue_selling || "false");
+          formData.append(
+            "continue_selling",
+            product.continue_selling || "false"
+          );
           formData.append("has_sku", product.has_sku || "false");
           formData.append("sku", product.sku || "");
           formData.append("barcode", product.barcode || "");
@@ -349,45 +350,50 @@ const Dashboard = () => {
           formData.append("productType", product.productType || "");
           formData.append("vendor", product.vendor || "");
           formData.append("keyWord", product.keyWord || "");
-    
+
           // options
           let parsedOptions = [];
           try {
-            parsedOptions = typeof product.options === "string"
-              ? JSON.parse(product.options)
-              : product.options;
+            parsedOptions =
+              typeof product.options === "string"
+                ? JSON.parse(product.options)
+                : product.options;
           } catch (err) {
             console.warn("Invalid options JSON:", product.options);
           }
           formData.append("options", JSON.stringify(parsedOptions));
-    
+
           // variants
           let parsedVariants = [];
           try {
-            parsedVariants = typeof product.variants === "string"
-              ? JSON.parse(product.variants)
-              : product.variants;
+            parsedVariants =
+              typeof product.variants === "string"
+                ? JSON.parse(product.variants)
+                : product.variants;
           } catch (err) {
             console.warn("Invalid variants JSON:", product.variants);
           }
           formData.append("variants", JSON.stringify(parsedVariants));
-    
+
           // 🔍 Log data
           console.log("FormData values:");
           for (let pair of formData.entries()) {
             console.log(`${pair[0]}:`, pair[1]);
           }
-    
+
           // 🛰 API call
           try {
-            const res = await fetch("https://multi-vendor-marketplace.vercel.app/product/addEquipment", {
-              method: "POST",
-              body: formData,
-            });
-    
+            const res = await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addEquipment",
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
+
             const data = await res.json();
             console.log(`Uploaded product: ${product.title}`, data);
-    
+
             if (!res.ok) {
               console.error("Upload failed:", data.error || data);
             }
@@ -395,12 +401,10 @@ const Dashboard = () => {
             console.error("Fetch error:", err);
           }
         }
-    
+
         alert("CSV Upload Completed ✅");
       },
     });
-    
-    
   };
   return user ? (
     <main className="w-full p-4 md:p-8">
@@ -588,7 +592,10 @@ const Dashboard = () => {
       )}
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div ref={modalRef} className="bg-white rounded-lg shadow-lg w-full max-w-xl relative">
+          <div
+            ref={modalRef}
+            className="bg-white rounded-lg shadow-lg w-full max-w-xl relative"
+          >
             <div className="border-b px-4 py-3 flex justify-between items-center">
               <h2 className="text-sm font-semibold text-blue-700">
                 Import products by CSV
@@ -601,17 +608,17 @@ const Dashboard = () => {
               </button>
             </div>
             <div className="p-6">
-            <div className="border-2 border-dashed border-gray-300 rounded-md flex justify-center items-center h-32 mb-4 relative">
-  <input
-    type="file"
-    accept=".csv"
-    onChange={handleCSVUpload}
-    className="absolute w-full h-full opacity-0 cursor-pointer"
-  />
-  <span className="px-4 py-2 text-sm text-white bg-blue-600 border border-gray-300 rounded hover:bg-blue-700">
-    Add file
-  </span>
-</div>
+              <div className="border-2 border-dashed border-gray-300 rounded-md flex justify-center items-center h-32 mb-4 relative">
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleCSVUpload}
+                  className="absolute w-full h-full opacity-0 cursor-pointer"
+                />
+                <span className="px-4 py-2 text-sm text-white bg-blue-600 border border-gray-300 rounded hover:bg-blue-700">
+                  Add file
+                </span>
+              </div>
               <div className="text-sm text-blue-600 underline cursor-pointer mb-4">
                 Download sample CSV
               </div>

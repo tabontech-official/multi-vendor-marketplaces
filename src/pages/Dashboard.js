@@ -375,13 +375,11 @@ const Dashboard = () => {
           }
           formData.append("variants", JSON.stringify(parsedVariants));
 
-          // 🔍 Log data
           console.log("FormData values:");
           for (let pair of formData.entries()) {
             console.log(`${pair[0]}:`, pair[1]);
           }
 
-          // 🛰 API call
           try {
             const res = await fetch(
               "https://multi-vendor-marketplace.vercel.app/product/addEquipment",

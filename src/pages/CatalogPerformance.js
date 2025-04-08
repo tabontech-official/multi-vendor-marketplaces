@@ -100,7 +100,7 @@ const CatalogPerformance = () => {
     const fetchSummary = async () => {
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/order/recurringFinance"
+          "http://localhost:5000/order/recurringFinance"
         );
         const data = await response.json();
         setSummary(data);
@@ -143,9 +143,9 @@ const CatalogPerformance = () => {
             <div className="bg-gray-300 text-white px-3 py-3 rounded-full">
               <RiStore3Line className="text-black" />
             </div>
-            <p className="text-sm text-gray-600">Store</p>
+            <p className="text-sm text-gray-600">Orders</p>
           </div>
-          <h2 className="text-2xl font-semibold mt-2">12,900</h2>
+          <h2 className="text-2xl font-semibold mt-2">{summary.totalOrdersInDb}</h2>
           <div className="border-t-2 border-gray-300 pt-2 mt-2">
             <p className="text-xs text-green-500 flex items-center gap-1">
               <FaArrowTrendDown className="text-sm" />
@@ -232,7 +232,7 @@ const CatalogPerformance = () => {
           {/* Circular gauge placeholder */}
           <div className="flex flex-col items-center mb-4">
             <div className="w-32 h-32 rounded-full border-[10px] border-white border-t-cyan-400 flex items-center justify-center text-2xl font-bold">
-              2,609
+            {productCount}
             </div>
             <p className="text-sm mt-1">Product</p>
             <p className="text-xs text-red-300 mt-1">▼ 7% vs 3,000 Expected</p>

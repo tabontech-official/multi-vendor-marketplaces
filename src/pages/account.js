@@ -207,7 +207,7 @@ const AccountPage = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`,
+        `http://localhost:5000/auth/editProfile/${userId}`,
         {
           method: "PUT",
           body: form,

@@ -238,30 +238,63 @@ const CategorySelector = () => {
 
   useEffect(() => {
     if (product) {
-      const formattedVariants = product.variants
-        .filter((variant) => !variant.parent_id)
-        .map((variant) => ({
-          ...variant,
-          subVariants: product.variants.filter(
-            (v) => v.parent_id === variant.id
-          ),
-        }));
-
+      const allVariants = product.variants;
+  
+      // Group variants by the left option (option1)
+      const groupedVariants = allVariants.reduce((acc, variant) => {
+        const leftOption = variant.option1; // This is the left side of the variant
+        const rightOption = variant.option2; // This is the right side (child)
+  
+        if (!acc[leftOption]) {
+          acc[leftOption] = {
+            parent: {
+              ...variant,
+              option1: leftOption,
+              option2: null,
+              option3: null,
+              isParent: true,
+            },
+            children: [],
+          };
+        }
+  
+        // If the variant has a right option (option2), treat it as a child
+        if (rightOption) {
+          acc[leftOption].children.push({
+            ...variant,
+            option1: leftOption,
+            option2: rightOption,
+            option3: null,
+            isParent: false,
+          });
+        }
+  
+        return acc;
+      }, {});
+  
+      // Format the grouped variants into the desired structure
+      const formattedVariants = Object.keys(groupedVariants).map((key, index) => ({
+        ...groupedVariants[key].parent,
+        group: `parent-${index}`,
+        subVariants: groupedVariants[key].children,
+      }));
+  
+      // Set states
       setIsEditing(true);
       setTitle(product.title || "");
       setDescription(product.body_html || "");
       setProductType(product.product_type || "");
-      setPrice(product.variants[0].price || "");
-      setCompareAtPrice(product.variants[0].compare_at_price || "");
-      setTrackQuantity(product.inventory.track_quantity || false);
-      setQuantity(product.inventory.quantity || 0);
-      setContinueSelling(product.inventory.continue_selling || false);
-      setHasSKU(product.inventory.has_sku || false);
-      setSKU(product.inventory.sku || "");
-      setBarcode(product.inventory.barcode || "");
-      setTrackShipping(product.shipping.track_shipping || false);
-      setWeight(product.shipping.weight || "");
-      setUnit(product.shipping.weight_unit || "kg");
+      setPrice(product.variants[0]?.price || "");
+      setCompareAtPrice(product.variants[0]?.compare_at_price || "");
+      setTrackQuantity(product.inventory?.track_quantity || false);
+      setQuantity(product.inventory?.quantity || 0);
+      setContinueSelling(product.inventory?.continue_selling || false);
+      setHasSKU(product.inventory?.has_sku || false);
+      setSKU(product.inventory?.sku || "");
+      setBarcode(product.inventory?.barcode || "");
+      setTrackShipping(product.shipping?.track_shipping || false);
+      setWeight(product.shipping?.weight || "");
+      setUnit(product.shipping?.weight_unit || "kg");
       setStatus(product.status || "publish");
       setUserId(product.userId || "");
       setVendor(product.vendor || "");
@@ -276,7 +309,10 @@ const CategorySelector = () => {
       setImages(product.images || []);
     }
   }, [product]);
-
+  
+  
+  
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
@@ -843,172 +879,136 @@ const CategorySelector = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {variants.map((variant) => (
-                      <React.Fragment key={variant.id}>
-                        <tr className="border-b border-gray-200">
-                          <td className="p-2 text-gray-800 flex items-center gap-3">
-                            <div className="w-14 h-14 border border-dashed border-gray-300 flex items-center justify-center rounded-md relative">
-                              {variant.image ? (
-                                <img
-                                  src={variant.image}
-                                  alt={variant.name}
-                                  className="w-full h-full object-cover rounded-md"
-                                />
-                              ) : (
-                                <label
-                                  htmlFor={`upload-${variant.id}`}
-                                  className="cursor-pointer"
-                                >
-                                  <span className="text-blue-500 text-3xl">
-                                    <FcAddImage />
-                                  </span>
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    id={`upload-${variant.id}`}
-                                    className="hidden"
-                                    onChange={(e) =>
-                                      handleVariantImageChange(variant.id, e)
-                                    }
-                                  />
-                                </label>
-                              )}
-                            </div>
+                  {variants.map((parent) => (
+  <React.Fragment key={parent.group}>
+    <tr className="border-b border-gray-200">
+      <td className="p-2 text-gray-800 flex items-center gap-3">
+        <div className="w-14 h-14 border border-dashed border-gray-300 flex items-center justify-center rounded-md relative">
+          {parent.image ? (
+            <img
+              src={parent.image}
+              alt={parent.name}
+              className="w-full h-full object-cover rounded-md"
+            />
+          ) : (
+            <label htmlFor={`upload-${parent.id}`} className="cursor-pointer">
+              <span className="text-blue-500 text-3xl">
+                <FcAddImage />
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                id={`upload-${parent.id}`}
+                className="hidden"
+                onChange={(e) => handleVariantImageChange(parent.id, e)}
+              />
+            </label>
+          )}
+        </div>
 
-                            <div className="flex flex-col items-start">
-                              <span className="font-medium text-gray-800">
-                                {variant.name}
-                              </span>
+        <div className="flex flex-col items-start">
+          <span className="font-medium text-gray-800">{parent.name}</span>
 
-                              <button
-                                onClick={() => toggleGroup(variant.group)}
-                                className="flex items-center gap-2 mt-1 bg-gray-100 px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-200"
-                              >
-                                <span className="text-gray-500 text-sm">
-                                  {variant.subVariants
-                                    ? `${variant.subVariants.length} variants`
-                                    : "0 variants"}
-                                </span>
-                                {expandedGroups[variant.group] &&
-                                  variant.subVariants &&
-                                  variant.subVariants.length > 0 && (
-                                    <tr className="border-b border-gray-300 bg-white">
-                                   
-                                 
-                                  </tr>
-                                  
-                                  )}
-                              </button>
-                            </div>
-                          </td>
+          <button
+            onClick={() => toggleGroup(parent.group)}
+            className="flex items-center gap-2 mt-1 bg-gray-100 px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-200"
+          >
+            <span className="text-gray-500 text-sm">
+              {parent.subVariants ? `${parent.subVariants.length} variants` : "0 variants"}
+            </span>
+          </button>
+        </div>
+      </td>
 
-                          <td className="p-2">
-                            <input
-                              type="number"
-                              className="border-gray-300 rounded-md p-1 w-24"
-                              value={variant.price}
-                              onChange={(e) =>
-                                handleParentChange(
-                                  variant.id,
-                                  "price",
-                                  e.target.value
-                                )
-                              }
-                            />
-                          </td>
+      <td className="p-2">
+        <input
+          type="number"
+          className="border-gray-300 rounded-md p-1 w-24"
+          value={parent.price}
+          onChange={(e) =>
+            handleParentChange(parent.id, "price", e.target.value)
+          }
+        />
+      </td>
 
-                          <td className="p-2">
-                            <input
-                              type="number"
-                              className="border-gray-300 rounded-md p-1 w-16"
-                              value={variant.quantity}
-                              onChange={(e) =>
-                                handleParentChange(
-                                  variant.id,
-                                  "quantity",
-                                  e.target.value
-                                )
-                              }
-                            />
-                          </td>
-                        </tr>
+      <td className="p-2">
+        <input
+          type="number"
+          className="border-gray-300 rounded-md p-1 w-16"
+          value={parent.quantity}
+          onChange={(e) =>
+            handleParentChange(parent.id, "quantity", e.target.value)
+          }
+        />
+      </td>
+    </tr>
 
-                        {/* Sub-Variants */}
-                        {expandedGroups[variant.group] &&
-                          variant.subVariants &&
-                          variant.subVariants.length > 0 &&
-                          variant.subVariants.map((sv) => (
-                            <tr
-                              key={sv.id}
-                              className="border-b border-gray-200 bg-gray-50"
-                            >
-                              {/* Sub-Variant Image Upload */}
-                              <td className="p-2 flex items-center gap-3">
-                                <div className="w-14 h-14 border border-dashed border-gray-300 flex items-center justify-center rounded-md relative">
-                                  {sv.image ? (
-                                    <img
-                                      src={sv.image}
-                                      alt={sv.name}
-                                      className="w-full h-full object-cover rounded-md"
-                                    />
-                                  ) : (
-                                    <label
-                                      htmlFor={`upload-${sv.id}`}
-                                      className="cursor-pointer"
-                                    >
-                                      <span className="text-blue-500 text-3xl">
-                                        <FcAddImage />
-                                      </span>
-                                      <input
-                                        type="file"
-                                        accept="image/*"
-                                        id={`upload-${sv.id}`}
-                                        className="hidden"
-                                        onChange={(e) =>
-                                          handleVariantImageChange(sv.id, e)
-                                        }
-                                      />
-                                    </label>
-                                  )}
-                                </div>
-                                <span>{sv.name}</span>
-                              </td>
+    {/* Sub-Variants */}
+    {expandedGroups[parent.group] &&
+      parent.subVariants &&
+      parent.subVariants.length > 0 &&
+      parent.subVariants.map((sv) => (
+        <tr
+          key={sv.id}
+          className="border-b border-gray-200 bg-gray-50"
+        >
+          <td className="p-2 flex items-center gap-3">
+            <div className="w-14 h-14 border border-dashed border-gray-300 flex items-center justify-center rounded-md relative">
+              {sv.image ? (
+                <img
+                  src={sv.image}
+                  alt={sv.name}
+                  className="w-full h-full object-cover rounded-md"
+                />
+              ) : (
+                <label
+                  htmlFor={`upload-${sv.id}`}
+                  className="cursor-pointer"
+                >
+                  <span className="text-blue-500 text-3xl">
+                    <FcAddImage />
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id={`upload-${sv.id}`}
+                    className="hidden"
+                    onChange={(e) =>
+                      handleVariantImageChange(sv.id, e)
+                    }
+                  />
+                </label>
+              )}
+            </div>
+            <span>{sv.name}</span>
+          </td>
 
-                              {/* Sub-Variant Price */}
-                              <td className="p-2">
-                                <input
-                                  type="number"
-                                  className="border-gray-300 rounded-md p-1 w-24"
-                                  value={sv.price}
-                                  onChange={(e) =>
-                                    handleNestedChange(
-                                      sv.id,
-                                      "price",
-                                      e.target.value
-                                    )
-                                  }
-                                />
-                              </td>
+          <td className="p-2">
+            <input
+              type="number"
+              className="border-gray-300 rounded-md p-1 w-24"
+              value={sv.price}
+              onChange={(e) =>
+                handleNestedChange(sv.id, "price", e.target.value)
+              }
+            />
+          </td>
 
-                              {/* Sub-Variant Quantity */}
-                              <td className="p-2">
-                                <input
-                                  type="number"
-                                  className="border-gray-300 rounded-md p-1 w-16"
-                                  value={sv.quantity}
-                                  onChange={(e) =>
-                                    handleNestedChange(
-                                      sv.id,
-                                      "quantity",
-                                      e.target.value
-                                    )
-                                  }
-                                />
-                              </td>
-                            </tr>
-                          ))}
-                      </React.Fragment>
-                    ))}
+          <td className="p-2">
+            <input
+              type="number"
+              className="border-gray-300 rounded-md p-1 w-16"
+              value={sv.quantity}
+              onChange={(e) =>
+                handleNestedChange(sv.id, "quantity", e.target.value)
+              }
+            />
+          </td>
+        </tr>
+      ))}
+  </React.Fragment>
+))}
+
                   </tbody>
                 </table>
               </div>

@@ -1,11 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {  useEffect, useRef, useState } from "react";
 import {
-  HiDotsVertical,
+  
   HiOutlineCheckCircle,
   HiOutlineXCircle,
   HiPlus,
-  HiX,
-  Hiload,
 } from "react-icons/hi";
 import { FaFileImport } from "react-icons/fa";
 import Papa from "papaparse";
@@ -60,7 +58,6 @@ const Dashboard = () => {
         : [...prevSelected, productId]
     );
   };
-
   const [errorMessage, setErrorMessage] = useState("");
 
   const [Loading, setLoading] = useState(false);
@@ -114,7 +111,6 @@ const Dashboard = () => {
   const openPopup = () => setIsOpen(true);
   const closePopup = () => setIsOpen(false);
 
-  // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -128,6 +124,7 @@ const Dashboard = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
+
   const toggleDropdown = (index) => {
     setOpenDropdown(openDropdown === index ? null : index);
   };

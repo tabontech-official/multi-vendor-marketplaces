@@ -506,9 +506,7 @@ const Promotion = () => {
                         Add your products to this promotion, sell them and make
                         profit.
                       </p>
-                      <button className="mt-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 text-sm rounded-md">
-                        Select Products for Promotion
-                      </button>
+                     
                     </div>
                   </div>
                 ))}

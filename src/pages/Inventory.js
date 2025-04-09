@@ -1,22 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  HiDotsVertical,
   HiOutlineCheckCircle,
   HiOutlineXCircle,
   HiPlus,
-  HiX,
-  Hiload,
 } from "react-icons/hi";
 import { Link, useNavigate } from "react-router-dom";
 import UseFetchUserData from "../component/fetchUser";
 import { useAuthContext } from "../Hooks/useAuthContext";
-import { Dialog } from "@headlessui/react";
-import { FaTimes, FaShoppingBasket } from "react-icons/fa";
 import { CreateCheckoutUrl } from "../component/Checkout";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
-import { debounce } from "lodash";
-import { MdEdit } from "react-icons/md";
 
 const Inventory = () => {
   let admin;
@@ -25,7 +18,7 @@ const Inventory = () => {
     const token = localStorage.getItem("usertoken");
     if (token) {
       const decoded = jwtDecode(token);
-      if (decoded.payLoad.isAdmin && decoded.exp * 1000 > Date.now()) {
+      if ((decoded.payLoad.isAdmin || decoded.payLoad.role === "DevAdmin") && decoded.exp * 1000 > Date.now()) {
         return true;
       }
     }
@@ -91,7 +84,6 @@ const Inventory = () => {
     }
   };
 
-  // Show toast message
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
@@ -99,19 +91,35 @@ const Inventory = () => {
 
   const fetchProductData = async () => {
     setLoading(true);
+    const token = localStorage.getItem("usertoken");
+    const isAdmin = () => {
+      if (token) {
+        const decoded = jwtDecode(token);
+        if ((decoded.payLoad.isAdmin || decoded.payLoad.role === "Dev Admin") && decoded.exp * 1000 > Date.now()) {
+          return true;
+        }
+      }
+      return false;
+    };
+  
+    const admin = isAdmin();
+  
     try {
+      const id = localStorage.getItem("userid");
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
+        admin
+          ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}` 
+          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`, 
         { method: "GET" }
       );
-
+  
       if (response.ok) {
         const data = await response.json();
-
+  
         const sortedProducts = data.products.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-
+  
         setProducts(sortedProducts);
         setFilteredProducts((prev) => [
           ...prev,
@@ -120,7 +128,7 @@ const Inventory = () => {
               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
           ),
         ]);
-
+  
         setHasMore(page < data.totalPages);
       }
     } catch (error) {

@@ -449,18 +449,21 @@ const Promotion = () => {
                   if (userRole === "Master Admin") {
                     return (
                       product.createdRole === "Master Admin" ||
-                      product.createdRole === "Client"
+                      product.createdRole === "Client" ||
+                      product.createdRole === "Staff"
+
                     );
                   }
                   if (userRole === "Client") {
                     return (
-                      product.createdRole === "Client" ||
+                     product.createdRole === "Client" ||
                       product.createdRole === "Staff"
                     );
                   }
 
                   if (userRole === "Staff") {
-                    return product.userId === currentUserId;
+                    return  product.createdRole === "Client" ||
+                      product.createdRole === "Staff"
                   }
 
                   return false;

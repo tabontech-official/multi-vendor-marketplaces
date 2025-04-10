@@ -51,7 +51,8 @@ const Auth = () => {
           localStorage.setItem("email", json.user.email);
           dispatch({ type: "LOGIN", payload: json });
           setSuccess("Login successful!");
-          navigate(path);
+          // navigate(path);
+          window.location.reload=path
           localStorage.removeItem("path");
         }
       } else {

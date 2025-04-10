@@ -5,6 +5,8 @@ import { FcAddImage } from "react-icons/fc";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { FaPlus, FaMinus } from "react-icons/fa";
+import { FiMinus } from "react-icons/fi";
 
 const CategorySelector = () => {
   const [title, setTitle] = useState("");
@@ -37,6 +39,11 @@ const CategorySelector = () => {
   const [checkedImages, setCheckedImages] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const locationData = useLocation();
+  const [openOptionIndex, setOpenOptionIndex] = useState(null);
+
+  const handleToggleDropdown = (index) => {
+    setOpenOptionIndex(openOptionIndex === index ? null : index);
+  };
   const navigate = useNavigate();
   const modules = {
     toolbar: [
@@ -79,80 +86,72 @@ const CategorySelector = () => {
     setCheckedImages({});
   };
 
-  const generateVariantCombinations = (options, existingVariants = []) => {
-    if (options.length === 0) return [];
+  const generateVariants = () => {
+    if (options.length < 2) return [];
 
-    let variants = options[0].values.map((value) => ({
-      [options[0].name]: value,
-    }));
+    const parentOption = options[0]; // Parent variant (first option)
+    const childOptions = options.slice(1); // Child variants (rest of the options)
 
-    for (let i = 1; i < options.length; i++) {
-      let currentOption = options[i];
-      let newVariants = [];
-
-      variants.forEach((variant) => {
-        currentOption.values.forEach((value) => {
-          const newVariant = { ...variant, [currentOption.name]: value };
-          const variantName = Object.values(newVariant).join(" / ");
-
-          if (!existingVariants.some((v) => v.name === variantName)) {
-            newVariants.push(newVariant);
-          }
+    let combinations = [];
+    parentOption.values.forEach((parentValue) => {
+      childOptions.forEach((childOption) => {
+        childOption.values.forEach((childValue) => {
+          combinations.push({
+            parent: parentValue,
+            child: childValue,
+          });
         });
       });
-
-      variants = newVariants;
-    }
-
-    return variants;
-  };
-
-  const updateVariants = (updatedOptions) => {
-    setVariants((prevVariants) => {
-      let existingVariants = prevVariants.flatMap((variant) =>
-        variant.subVariants ? variant.subVariants : [variant]
-      );
-
-      const newVariants = generateVariantCombinations(
-        updatedOptions,
-        existingVariants
-      ).map((variant, index) => ({
-        id: index + 1,
-        name: Object.values(variant).join(" / "),
-        group: Object.values(variant)[0],
-        subVariant: Object.values(variant).length > 1,
-        price: 0,
-        quantity: 0,
-      }));
-
-      let updatedVariants = [...prevVariants];
-
-      newVariants.forEach((newVariant) => {
-        let parentVariantIndex = updatedVariants.findIndex(
-          (v) => v.group === newVariant.group && !v.subVariant
-        );
-
-        if (parentVariantIndex !== -1) {
-          let parentVariant = updatedVariants[parentVariantIndex];
-
-          if (newVariant.subVariant) {
-            const existingSubVariants = parentVariant.subVariants || [];
-            const alreadyExists = existingSubVariants.some(
-              (subV) => subV.name === newVariant.name
-            );
-
-            if (!alreadyExists) {
-              parentVariant.subVariants = [...existingSubVariants, newVariant];
-            }
-          }
-        } else {
-          updatedVariants.push({ ...newVariant, subVariants: [] });
-        }
-      });
-
-      return updatedVariants;
     });
+
+    return combinations;
   };
+  // const updateVariants = (updatedOptions) => {
+  //   setVariants((prevVariants) => {
+  //     let existingVariants = prevVariants.flatMap((variant) =>
+  //       variant.subVariants ? variant.subVariants : [variant]
+  //     );
+
+  //     const newVariants = generateVariantCombinations(
+  //       updatedOptions,
+  //       existingVariants
+  //     ).map((variant, index) => ({
+  //       id: index + 1,
+  //       name: Object.values(variant).join(" / "),
+  //       group: Object.values(variant)[0],
+  //       subVariant: Object.values(variant).length > 1,
+  //       price: 0,
+  //       quantity: 0,
+  //     }));
+
+  //     let updatedVariants = [...prevVariants];
+
+  //     newVariants.forEach((newVariant) => {
+  //       let parentVariantIndex = updatedVariants.findIndex(
+  //         (v) => v.group === newVariant.group && !v.subVariant
+  //       );
+
+  //       if (parentVariantIndex !== -1) {
+  //         let parentVariant = updatedVariants[parentVariantIndex];
+
+  //         if (newVariant.subVariant) {
+  //           const existingSubVariants = parentVariant.subVariants || [];
+  //           const alreadyExists = existingSubVariants.some(
+  //             (subV) => subV.name === newVariant.name
+  //           );
+
+  //           if (!alreadyExists) {
+  //             parentVariant.subVariants = [...existingSubVariants, newVariant];
+  //           }
+  //         }
+  //       } else {
+  //         updatedVariants.push({ ...newVariant, subVariants: [] });
+  //       }
+  //     });
+
+  //     return updatedVariants;
+  //   });
+  // };
 
   const toggleGroup = (groupId) => {
     setExpandedGroups((prev) => ({
@@ -160,6 +159,7 @@ const CategorySelector = () => {
       [groupId]: !prev[groupId],
     }));
   };
+
   const handleNestedChange = (variantId, field, value) => {
     setVariants((prevVariants) =>
       prevVariants.map((variant) => ({
@@ -202,7 +202,7 @@ const CategorySelector = () => {
 
     const updatedOptions = [...options, { ...newOption }];
     setOptions(updatedOptions);
-    updateVariants(updatedOptions);
+    // updateVariants(updatedOptions);
     setShowVariantForm(false);
   };
 
@@ -239,12 +239,12 @@ const CategorySelector = () => {
   useEffect(() => {
     if (product) {
       const allVariants = product.variants;
-  
+
       // Group variants by the left option (option1)
       const groupedVariants = allVariants.reduce((acc, variant) => {
         const leftOption = variant.option1; // This is the left side of the variant
         const rightOption = variant.option2; // This is the right side (child)
-  
+
         if (!acc[leftOption]) {
           acc[leftOption] = {
             parent: {
@@ -257,7 +257,7 @@ const CategorySelector = () => {
             children: [],
           };
         }
-  
+
         // If the variant has a right option (option2), treat it as a child
         if (rightOption) {
           acc[leftOption].children.push({
@@ -268,17 +268,18 @@ const CategorySelector = () => {
             isParent: false,
           });
         }
-  
+
         return acc;
       }, {});
-  
-      // Format the grouped variants into the desired structure
-      const formattedVariants = Object.keys(groupedVariants).map((key, index) => ({
-        ...groupedVariants[key].parent,
-        group: `parent-${index}`,
-        subVariants: groupedVariants[key].children,
-      }));
-  
+
+      const formattedVariants = Object.keys(groupedVariants).map(
+        (key, index) => ({
+          ...groupedVariants[key].parent,
+          group: `parent-${index}`,
+          subVariants: groupedVariants[key].children,
+        })
+      );
+
       // Set states
       setIsEditing(true);
       setTitle(product.title || "");
@@ -307,12 +308,28 @@ const CategorySelector = () => {
       );
       setVariants(formattedVariants);
       setImages(product.images || []);
+      setKeyWord(product.tags);
     }
   }, [product]);
-  
-  
-  
-  
+
+  const handleAdd = () => {
+    const newWeight = (parseFloat(weight) + 1).toFixed(2);
+    setWeight(newWeight);
+  };
+
+  const handleSubtract = () => {
+    const newWeight = (parseFloat(weight) - 1).toFixed(2);
+    if (newWeight >= 0) {
+      setWeight(newWeight);
+    }
+  };
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*(\.\d{0,2})?$/.test(value)) {
+      setWeight(value);
+    }
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
@@ -465,14 +482,14 @@ const CategorySelector = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block  text-sm font-medium text-gray-700">
+            <label className="block  text-sm font-medium text-gray-700 ">
               Description
             </label>
             <ReactQuill
               value={description}
               onChange={setDescription}
               modules={modules}
-              className="mt-1 block w-full border border-gray-300 "
+              className="mt-1 block w-full border border-gray-300 min-h-[200px]"
             />
           </div>
 
@@ -579,25 +596,37 @@ const CategorySelector = () => {
 
           {/* pricing  */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700  ">
+            <label className="block text-sm font-medium text-gray-700">
               Pricing
             </label>
             <div className="grid grid-cols-2 gap-4 mt-2">
-              <input
-                type="text"
-                placeholder="$ 0.00"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full border p-2 rounded-2xl  border-gray-500"
-              />
-              <input
-                type="text"
-                value={compareAtPrice}
-                onChange={(e) => setCompareAtPrice(e.target.value)}
-                placeholder="$ 0.00"
-                className="w-full border p-2 rounded-2xl  border-gray-500"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Price
+                </label>
+                <input
+                  type="text"
+                  placeholder="$ 0.00"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="w-full border p-2 rounded-2xl border-gray-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Compare at Price
+                </label>
+                <input
+                  type="text"
+                  value={compareAtPrice}
+                  onChange={(e) => setCompareAtPrice(e.target.value)}
+                  placeholder="$ 0.00"
+                  className="w-full border p-2 rounded-2xl border-gray-500"
+                />
+              </div>
             </div>
+
             <div className="mt-2">
               <input type="checkbox" id="charge-tax" className="mr-2" />
               <label htmlFor="charge-tax" className="text-gray-600">
@@ -627,24 +656,23 @@ const CategorySelector = () => {
 
             {/* Quantity Input */}
             {trackQuantity && (
-              <div className="mt-4">
-                <label className="text-sm text-gray-700 border-b border-gray-300 pb-2 block">
-                  Quantity
-                </label>
-                <div className="flex items-center justify-between mt-2">
-                  <label className="text-sm text-gray-700">Shop location</label>
+              <div className="mt-4 border-b border-gray-300">
+                <div className="flex items-center justify-between  ">
+                  <label className="text-sm text-gray-700 block">
+                    Quantity
+                  </label>{" "}
                   <input
-                    type="number"
+                    type="text"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    className="w-16 border px-3 py-1 rounded-md text-right"
+                    className="w-16 border px-3 py-1 rounded-md text-right mb-3"
                   />
                 </div>
               </div>
             )}
 
             {/* Continue Selling Checkbox */}
-            <div className="flex items-start mt-3">
+            {/* <div className="flex items-start mt-3">
               <input
                 type="checkbox"
                 id="continueSelling"
@@ -667,7 +695,7 @@ const CategorySelector = () => {
                   . Staff can still complete sales.
                 </p>
               </div>
-            </div>
+            </div> */}
 
             {/* SKU & Barcode Section */}
             <div className="flex items-center mt-3">
@@ -712,7 +740,7 @@ const CategorySelector = () => {
                 id="trackShipping"
                 checked={trackShipping}
                 onChange={() => setTrackShipping(!trackShipping)}
-                className="h-4 w-4 text-blue-500 "
+                className="h-4 w-4 text-blue-500"
               />
               <label
                 htmlFor="trackShipping"
@@ -727,13 +755,35 @@ const CategorySelector = () => {
                   Weight
                 </label>
                 <div className="flex items-center space-x-2 mt-2">
-                  <input
-                    type="number"
-                    value={weight}
-                    onChange={(e) => setWeight(e.target.value)}
-                    className="w-20 border px-3 py-1 rounded-md text-right"
-                    placeholder="0.00"
-                  />
+                  {/* Weight Input and Minus/Plus Buttons */}
+                  <div className="flex items-center border border-gray-300 rounded-md">
+                    {/* Minus Icon */}
+                    <button
+                      onClick={handleSubtract}
+                      className="px-2 py-1 text-gray-500"
+                    >
+                      <FaMinus />
+                    </button>
+
+                    {/* Weight Input */}
+                    <input
+                      type="text"
+                      value={weight}
+                      onChange={handleChange}
+                      className="w-20 text-center py-1 border-0 focus:ring-0"
+                      placeholder="0.00"
+                    />
+
+                    {/* Plus Icon */}
+                    <button
+                      onClick={handleAdd}
+                      className="px-2 py-1 text-gray-500"
+                    >
+                      <FaPlus />
+                    </button>
+                  </div>
+
+                  {/* Weight Unit Selector */}
                   <select
                     value={unit}
                     onChange={(e) => setUnit(e.target.value)}
@@ -755,7 +805,6 @@ const CategorySelector = () => {
 
             {!showVariantForm && (
               <div className="flex gap-2 items-center mt-2">
-                <FaCirclePlus className="text-gray-600 text-sm" />
                 <button
                   onClick={handleOpenForm}
                   className="text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-200"
@@ -767,7 +816,8 @@ const CategorySelector = () => {
 
             {options.length > 0 && (
               <div className="mt-3">
-                {options.map((option, optionIndex) => (
+                {/* Rendering Parent Option */}
+                {options.slice(0, 1).map((option, optionIndex) => (
                   <div
                     key={optionIndex}
                     className="border p-2 rounded-lg mt-2 bg-gray-50"
@@ -788,15 +838,54 @@ const CategorySelector = () => {
                   </div>
                 ))}
 
+                {/* Rendering Child Options */}
+                {options.slice(1).map((option, optionIndex) => (
+                  <div
+                    key={optionIndex}
+                    className="border p-2 rounded-lg mt-2 bg-gray-50"
+                  >
+                    <h3 className="text-sm font-medium text-gray-800">
+                      {option.name}
+                    </h3>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {option.values.map((value, valueIndex) => (
+                        <span
+                          key={valueIndex}
+                          className="text-sm bg-gray-200 px-2 py-1 rounded-md"
+                        >
+                          {value}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Rendering Variant Combinations */}
+                <div className="mt-3">
+            <h3 className="text-sm font-medium text-gray-800">Variant Combinations</h3>
+            {generateVariants().length > 0 ? (
+              generateVariants().map((combination, index) => (
+                <div key={index} className="text-sm bg-gray-100 p-2 rounded-md mt-2">
+                  <span>{`Parent: ${combination.parent}, Child: ${combination.child}`}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-600">Add more options to generate variants.</p>
+            )}
+          </div>
+
+                {/* Button for adding another option */}
                 <button
                   onClick={handleOpenForm}
                   className="flex gap-2 items-center text-sm text-blue-600 mt-2 hover:underline"
                 >
-                  <FaCirclePlus /> Add another option
+                  Add another option
                 </button>
               </div>
             )}
 
+
+            {/* Variant form for adding options */}
             {showVariantForm && (
               <div className="mt-3 border border-gray-300 rounded-lg p-4 bg-gray-50">
                 <label className="block text-sm font-medium text-gray-700">
@@ -856,161 +945,6 @@ const CategorySelector = () => {
                     Done
                   </button>
                 </div>
-              </div>
-            )}
-
-            {variants.length > 0 && (
-              <div className="mt-4 border border-gray-300 rounded-lg p-3 bg-white">
-                <h3 className="text-sm font-medium text-gray-800">
-                  Generated Variants
-                </h3>
-                <table className="w-full mt-2 border-collapse">
-                  <thead>
-                    <tr className="border-b border-gray-300">
-                      <th className="text-left text-gray-700 text-sm p-2 w-1/2">
-                        Variant
-                      </th>
-                      <th className="text-left text-gray-700 text-sm p-2">
-                        Price
-                      </th>
-                      <th className="text-left text-gray-700 text-sm p-2">
-                        Available
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                  {variants.map((parent) => (
-  <React.Fragment key={parent.group}>
-    <tr className="border-b border-gray-200">
-      <td className="p-2 text-gray-800 flex items-center gap-3">
-        <div className="w-14 h-14 border border-dashed border-gray-300 flex items-center justify-center rounded-md relative">
-          {parent.image ? (
-            <img
-              src={parent.image}
-              alt={parent.name}
-              className="w-full h-full object-cover rounded-md"
-            />
-          ) : (
-            <label htmlFor={`upload-${parent.id}`} className="cursor-pointer">
-              <span className="text-blue-500 text-3xl">
-                <FcAddImage />
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                id={`upload-${parent.id}`}
-                className="hidden"
-                onChange={(e) => handleVariantImageChange(parent.id, e)}
-              />
-            </label>
-          )}
-        </div>
-
-        <div className="flex flex-col items-start">
-          <span className="font-medium text-gray-800">{parent.name}</span>
-
-          <button
-            onClick={() => toggleGroup(parent.group)}
-            className="flex items-center gap-2 mt-1 bg-gray-100 px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-200"
-          >
-            <span className="text-gray-500 text-sm">
-              {parent.subVariants ? `${parent.subVariants.length} variants` : "0 variants"}
-            </span>
-          </button>
-        </div>
-      </td>
-
-      <td className="p-2">
-        <input
-          type="number"
-          className="border-gray-300 rounded-md p-1 w-24"
-          value={parent.price}
-          onChange={(e) =>
-            handleParentChange(parent.id, "price", e.target.value)
-          }
-        />
-      </td>
-
-      <td className="p-2">
-        <input
-          type="number"
-          className="border-gray-300 rounded-md p-1 w-16"
-          value={parent.quantity}
-          onChange={(e) =>
-            handleParentChange(parent.id, "quantity", e.target.value)
-          }
-        />
-      </td>
-    </tr>
-
-    {/* Sub-Variants */}
-    {expandedGroups[parent.group] &&
-      parent.subVariants &&
-      parent.subVariants.length > 0 &&
-      parent.subVariants.map((sv) => (
-        <tr
-          key={sv.id}
-          className="border-b border-gray-200 bg-gray-50"
-        >
-          <td className="p-2 flex items-center gap-3">
-            <div className="w-14 h-14 border border-dashed border-gray-300 flex items-center justify-center rounded-md relative">
-              {sv.image ? (
-                <img
-                  src={sv.image}
-                  alt={sv.name}
-                  className="w-full h-full object-cover rounded-md"
-                />
-              ) : (
-                <label
-                  htmlFor={`upload-${sv.id}`}
-                  className="cursor-pointer"
-                >
-                  <span className="text-blue-500 text-3xl">
-                    <FcAddImage />
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    id={`upload-${sv.id}`}
-                    className="hidden"
-                    onChange={(e) =>
-                      handleVariantImageChange(sv.id, e)
-                    }
-                  />
-                </label>
-              )}
-            </div>
-            <span>{sv.name}</span>
-          </td>
-
-          <td className="p-2">
-            <input
-              type="number"
-              className="border-gray-300 rounded-md p-1 w-24"
-              value={sv.price}
-              onChange={(e) =>
-                handleNestedChange(sv.id, "price", e.target.value)
-              }
-            />
-          </td>
-
-          <td className="p-2">
-            <input
-              type="number"
-              className="border-gray-300 rounded-md p-1 w-16"
-              value={sv.quantity}
-              onChange={(e) =>
-                handleNestedChange(sv.id, "quantity", e.target.value)
-              }
-            />
-          </td>
-        </tr>
-      ))}
-  </React.Fragment>
-))}
-
-                  </tbody>
-                </table>
               </div>
             )}
           </div>

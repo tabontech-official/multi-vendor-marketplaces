@@ -157,7 +157,9 @@ const Promotion = () => {
   useEffect(() => {
     const fetchPromotions = async () => {
       try {
-        const res = await fetch("https://multi-vendor-marketplace.vercel.app/promo");
+        const res = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/promo"
+        );
         const data = await res.json();
         setPromotions(data);
       } catch (err) {
@@ -221,9 +223,12 @@ const Promotion = () => {
     try {
       await Promise.all(
         selectedProducts.map(async (id) => {
-          const response = await fetch(`https://multi-vendor-marketplace.vercel.app/promo/${id}`, {
-            method: "DELETE",
-          });
+          const response = await fetch(
+            `https://multi-vendor-marketplace.vercel.app/promo/${id}`,
+            {
+              method: "DELETE",
+            }
+          );
           if (!response.ok) throw new Error("Failed to delete product");
         })
       );
@@ -308,21 +313,24 @@ const Promotion = () => {
     try {
       const userId = localStorage.getItem("userid");
 
-      const response = await fetch("https://multi-vendor-marketplace.vercel.app/promo", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          promoName,
-          startDate,
-          endDate,
-          productSku: sku,
-          promoPrice,
-          status,
-          userId,
-        }),
-      });
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/promo",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            promoName,
+            startDate,
+            endDate,
+            productSku: sku,
+            promoPrice,
+            status,
+            userId,
+          }),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
@@ -451,19 +459,20 @@ const Promotion = () => {
                       product.createdRole === "Master Admin" ||
                       product.createdRole === "Client" ||
                       product.createdRole === "Staff"
-
                     );
                   }
                   if (userRole === "Client") {
                     return (
-                     product.createdRole === "Client" ||
+                      product.createdRole === "Client" ||
                       product.createdRole === "Staff"
                     );
                   }
 
                   if (userRole === "Staff") {
-                    return  product.createdRole === "Client" ||
+                    return (
+                      product.createdRole === "Client" ||
                       product.createdRole === "Staff"
+                    );
                   }
 
                   return false;
@@ -509,7 +518,6 @@ const Promotion = () => {
                         Add your products to this promotion, sell them and make
                         profit.
                       </p>
-                     
                     </div>
                   </div>
                 ))}
@@ -704,10 +712,10 @@ const Promotion = () => {
       )}
       {isPopupOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-xl relative">
+          <div className="bg-white rounded-2xl shadow-lg w-full max-w-2xl relative">
             <div className="border-b px-4 py-3 flex justify-between items-center">
               <h2 className="text-sm font-semibold text-blue-700">
-                Add Promotion
+                Select Promotion Type
               </h2>
               <button
                 onClick={closePopup}
@@ -716,7 +724,7 @@ const Promotion = () => {
                 ×
               </button>
             </div>
-            <div className="p-6">
+            {/* <div className="p-6">
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Promo Name
@@ -792,6 +800,42 @@ const Promotion = () => {
                   Submit
                 </button>
               </div>
+            </div> */}
+            <div className="">
+              <div className="hover:bg-gray-300 cursor-pointer  p-2 border-b-2">
+                <label>Amount of Products</label>
+                <p className="text-gray-500">
+                  Discount Specific Product or collection of products
+                </p>
+              </div> 
+              <div className="hover:bg-gray-300 cursor-pointer  p-2 border-b-2">
+                <label>Buy X get Y</label>
+                <p className="text-gray-500">
+                  Discount product based on a customer,s purchase
+                </p>
+              </div>
+              <div className="hover:bg-gray-300 cursor-pointer  p-2 border-b-2">
+                <label>Amount of order</label>
+                <p className="text-gray-500">
+                  Discount the total order ammount
+                </p>
+              </div>
+              <div className="hover:bg-gray-300 cursor-pointer  p-2 border-b-2">
+                <label>Free shipping</label>
+                <p className="text-gray-500">Offer free shipping on a order</p>
+              </div>
+              <div className="hover:bg-gray-300 cursor-pointer  p-2 ">
+                <label>Boost bundle</label>
+                <p className="text-gray-500">Discount function extensin</p>
+              </div>
+            </div>
+            <div className="flex justify-end p-4 border-t-2">
+              <button
+                onClick={closePopup}
+                className="bg-gray-400 px-2 py-1 rounded-lg"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -860,7 +904,7 @@ const CountdownTimer = ({ startDate, endDate }) => {
     seconds: 0,
   });
 
-  const [status, setStatus] = useState(""); 
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
     const start = new Date(startDate).getTime();

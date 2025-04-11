@@ -40,8 +40,8 @@ const Promotion = () => {
 
   const limit = 20;
 
-  const {  loading   } = UseFetchUserData();
- 
+  const { loading } = UseFetchUserData();
+
   const [products, setProducts] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const openPopup = () => setIsPopupOpen(true);
@@ -101,8 +101,8 @@ const Promotion = () => {
     try {
       const response = await fetch(
         admin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+          ? `https://multi-vendor-marketplace.vercel.app/product/getAllDataForPromotion/?page=${page}&limit=${limit}`
+          : `https://multi-vendor-marketplace.vercel.app/product/getPromotionProduct/${id}/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
 
@@ -122,7 +122,7 @@ const Promotion = () => {
           ),
         ]);
 
-        setHasMore(page < data.totalPages); 
+        setHasMore(page < data.totalPages);
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -150,9 +150,7 @@ const Promotion = () => {
   useEffect(() => {
     const fetchPromotions = async () => {
       try {
-        const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/promo"
-        );
+        const res = await fetch("https://multi-vendor-marketplace.vercel.app/promo");
         const data = await res.json();
         setPromotions(data);
       } catch (err) {
@@ -215,12 +213,9 @@ const Promotion = () => {
     try {
       await Promise.all(
         selectedProducts.map(async (id) => {
-          const response = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/promo/${id}`,
-            {
-              method: "DELETE",
-            }
-          );
+          const response = await fetch(`https://multi-vendor-marketplace.vercel.app/promo/${id}`, {
+            method: "DELETE",
+          });
           if (!response.ok) throw new Error("Failed to delete product");
         })
       );
@@ -246,8 +241,8 @@ const Promotion = () => {
       try {
         const response = await fetch(
           admin
-            ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-            : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+            ? `https://multi-vendor-marketplace.vercel.app/product/getAllDataForPromotion/?page=${page}&limit=${limit}`
+            : `https://multi-vendor-marketplace.vercel.app/product/getPromotionProduct/${id}/?page=${page}&limit=${limit}`,
           { method: "GET" }
         );
 
@@ -305,24 +300,21 @@ const Promotion = () => {
     try {
       const userId = localStorage.getItem("userid");
 
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/promo",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            promoName,
-            startDate,
-            endDate,
-            productSku: sku,
-            promoPrice,
-            status,
-            userId,
-          }),
-        }
-      );
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/promo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          promoName,
+          startDate,
+          endDate,
+          productSku: sku,
+          promoPrice,
+          status,
+          userId,
+        }),
+      });
 
       const data = await response.json();
       if (response.ok) {
@@ -354,7 +346,7 @@ const Promotion = () => {
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
           <div className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
             <HiPlus className="w-5 h-5" />
-            <button onClick={openPopup}>Add Promtion</button>
+            <button onClick={openPopup}>Add Discount</button>
           </div>
         </div>
 
@@ -378,8 +370,8 @@ const Promotion = () => {
         <div className="flex gap-2">
           {[
             "Promotions Details",
-            "Eligible Products",
-            "Submitted Products",
+            "Add Promotions",
+            "Submitted Promotions",
           ].map((tab) => (
             <button
               key={tab}
@@ -414,7 +406,7 @@ const Promotion = () => {
           </button>
         </div> */}
       </div>
-      {activeTab === "Submitted Products" && selectedProducts.length > 0 && (
+      {activeTab === "Submitted Promotions" && selectedProducts.length > 0 && (
         <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
           <div className="flex gap-2 items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
             <button
@@ -516,7 +508,7 @@ const Promotion = () => {
             </div>
           )}
 
-          {activeTab === "Eligible Products" && (
+          {activeTab === "Add Promotions" && (
             <div className=" max-sm:overflow-auto border rounded-lg">
               <table className="w-full border-collapse bg-white">
                 <thead className="bg-gray-100 text-left text-gray-600 text-sm">
@@ -564,7 +556,7 @@ const Promotion = () => {
                       <td className="p-3"> {product.variants[0].sku} </td>
                       <td className="p-3">
                         {" "}
-                        ${product.variants[0].price || "..loading"}{" "}
+                        ${product.oldPrice || product.variants[0].price}{" "}
                       </td>
                       <td className="p-3">
                         <input
@@ -600,7 +592,7 @@ const Promotion = () => {
             </div>
           )}
 
-          {activeTab === "Submitted Products" && (
+          {activeTab === "Submitted Promotions" && (
             <table className="w-full border-collapse bg-white">
               <thead className="bg-gray-100 text-left text-gray-600 text-sm">
                 <tr>
@@ -707,7 +699,7 @@ const Promotion = () => {
           <div className="bg-white rounded-2xl shadow-lg w-full max-w-2xl relative">
             <div className="border-b px-4 py-3 flex justify-between items-center">
               <h2 className="text-sm font-semibold text-blue-700">
-                Add New Promotion
+                Add New Discount
               </h2>
               <button
                 onClick={closePopup}
@@ -721,7 +713,7 @@ const Promotion = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Promo Name
+                      Discount Name
                     </label>
                     <input
                       type="text"
@@ -798,7 +790,7 @@ const Promotion = () => {
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Promo Price
+                  Discount Price
                 </label>
                 <input
                   type="number"
@@ -811,7 +803,7 @@ const Promotion = () => {
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Promotion Duration
+                  Discount Duration
                 </label>
                 <div className="flex gap-2">
                   <input

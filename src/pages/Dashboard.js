@@ -566,7 +566,7 @@ const Dashboard = () => {
                       <td className="p-3"> {product.product_type}</td>
                       <td className="p-3">
                         {" "}
-                        ${product.variants[0].price || "..loading"}{" "}
+                        ${product.oldPrice || product.variants[0].price}{" "}
                       </td>
                       <td className="p-3">
                         <button

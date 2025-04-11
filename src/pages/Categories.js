@@ -303,7 +303,7 @@ const CategorySelector = () => {
       );
       setVariants(formattedVariants);
       setImages(product.images || []);
-      setKeyWord(product.tags);
+      // setKeyWord(product.tags);
     }
   }, [product]);
 
@@ -383,7 +383,7 @@ const CategorySelector = () => {
     try {
       const url = isEditing
         ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : "http://localhost:5000/product/addEquipment";
+        : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -451,7 +451,7 @@ const CategorySelector = () => {
             />
           </div>
 
-          <div className="mb-4">
+          <div className="mb-4 ">
             <label className="block  text-sm font-medium text-gray-700 ">
               Description
             </label>
@@ -911,82 +911,72 @@ const CategorySelector = () => {
                   )}
                 </div> */}
                 <div className="mt-3">
-                  <div className="grid grid-cols-4 gap-4 mb-2">
-                    <h3 className="font-medium text-lg text-gray-800">
-                      Variants
-                    </h3>
-                    <h3 className="font-medium text-lg text-gray-800">Price</h3>
-                    <h3 className="font-medium text-lg text-gray-800">
-                      Availability
-                    </h3>
-                    <h3 className="font-medium text-lg text-gray-800">
-                      Action
-                    </h3>
-                  </div>
+  <div className="grid grid-cols-5 gap-4 mb-2">
+    <h3 className="font-semibold text-md text-gray-800">Variants</h3>
+    <h3 className="font-semibold text-md text-gray-800">Price</h3>
+    <h3 className="font-semibold text-md text-gray-800">Availability</h3>
+    <h3 className="font-semibold text-md text-gray-800">SKU</h3>
+    <h3 className="font-semibold text-md text-gray-800">Action</h3>
+  </div>
 
-                  {generateVariants().length > 0 ? (
-                    generateVariants().map((combination, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-100 p-6 rounded-md mt-2"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="font-medium text-gray-700">
-                            {combination.parent}
-                          </div>
-                          <button
-                            onClick={() => toggleChildOptions(index)}
-                            className="text-gray-500"
-                          >
-                            {expandedParents.includes(index) ? (
-                              <IoIosArrowUp className="text-xl"/>
-                            ) : (
-                              <MdOutlineKeyboardArrowDown className="text-2xl"/>
-                            )}
-                          </button>
-                        </div>
+  {generateVariants().length > 0 ? (
+    generateVariants().map((combination, index) => (
+      <div key={index} className="bg-gray-100 p-6 rounded-md mt-2">
+        <div className="flex items-center justify-between">
+          <div className="font-medium text-gray-700">{combination.parent}</div>
+          <button
+            onClick={() => toggleChildOptions(index)}
+            className="text-gray-500"
+          >
+            {expandedParents.includes(index) ? (
+              <IoIosArrowUp className="text-xl" />
+            ) : (
+              <MdOutlineKeyboardArrowDown className="text-2xl" />
+            )}
+          </button>
+        </div>
 
-                        {expandedParents.includes(index) && (
-                          <div className="mt-2">
-                            <ul className="space-y-2">
-                              {combination.children.map((child, idx) => (
-                                <li
-                                  key={idx}
-                                  className="grid grid-cols-4 gap-4 items-center"
-                                >
-                                  <span className="font-medium text-gray-700">
-                                    {child}
-                                  </span>
-                                  <input
-                                    type="text"
-                                    value={price}
-                                    placeholder="Price"
-                                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
-                                  />
-                                  <input
-                                    type="text"
-                                    value={quantity}
-                                    placeholder="Availability"
-                                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
-                                  />
-                                    <RiDeleteBin5Fill />
-                                </li>
-                                
-                              ))}
-                              
-                            </ul>
-                          
+        {expandedParents.includes(index) && (
+          <div className="mt-2">
+            <ul className="space-y-2">
+              {combination.children.map((child, idx) => (
+                <li key={idx} className="grid grid-cols-5 gap-4 items-center">
+                  <span className="font-medium text-gray-700">{child}</span>
+                  <input
+                    type="text"
+                    value={price}
+                    placeholder="Price"
+                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
+                  />
+                  <input
+                    type="text"
+                    value={quantity}
+                    placeholder="Availability"
+                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
+                  />
+                  <input
+                    type="text"
+                    value={sku}
+                    placeholder="SKU"
+                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
+                  />
+                  <button className="flex justify-end text-red-500">
+                    <RiDeleteBin5Fill />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    ))
+  ) : (
+    <p className="text-gray-600">
+      Add more options to generate variants.
+    </p>
+  )}
+</div>
 
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-600">
-                      Add more options to generate variants.
-                    </p>
-                  )}
-                </div>
 
                 <button
                   onClick={handleOpenForm}

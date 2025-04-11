@@ -9,6 +9,7 @@ import { FaPlus, FaMinus } from "react-icons/fa";
 import { FiMinus } from "react-icons/fi";
 import { IoIosArrowUp } from "react-icons/io";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
+import { RiDeleteBin5Fill } from "react-icons/ri";
 
 const CategorySelector = () => {
   const [title, setTitle] = useState("");
@@ -106,29 +107,62 @@ const CategorySelector = () => {
     setCheckedImages({});
   };
 
+  // const generateVariants = () => {
+  //   if (options.length < 2) return [];
+
+  //   const parentOption = options[0];
+  //   const childOptions = options.slice(1);
+
+  //   let combinations = [];
+  //   parentOption.values.forEach((parentValue) => {
+  //     let childValues = [];
+  //     childOptions.forEach((childOption) => {
+  //       childOption.values.forEach((childValue) => {
+  //         childValues.push(childValue);
+  //       });
+  //     });
+
+  //     combinations.push({
+  //       parent: parentValue,
+  //       children: childValues,
+  //     });
+  //   });
+
+  //   return combinations;
+  // };
+
   const generateVariants = () => {
     if (options.length < 2) return [];
-
+  
     const parentOption = options[0];
-    const childOptions = options.slice(1);
-
+    const childOptions = options.slice(1); // second & third
+  
     let combinations = [];
+  
     parentOption.values.forEach((parentValue) => {
-      let childValues = [];
-      childOptions.forEach((childOption) => {
-        childOption.values.forEach((childValue) => {
-          childValues.push(childValue);
+      let childCombinations = [];
+  
+      if (childOptions.length === 1) {
+        childOptions[0].values.forEach((val) => {
+          childCombinations.push(`${val}`);
         });
-      });
-
+      } else if (childOptions.length === 2) {
+        childOptions[0].values.forEach((val1) => {
+          childOptions[1].values.forEach((val2) => {
+            childCombinations.push(`${val1} / ${val2}`);
+          });
+        });
+      }
+  
       combinations.push({
         parent: parentValue,
-        children: childValues,
+        children: childCombinations,
       });
     });
-
+  
     return combinations;
   };
+  
 
   const handleOpenForm = () => {
     setNewOption({ name: "", values: [""] });
@@ -349,7 +383,7 @@ const CategorySelector = () => {
     try {
       const url = isEditing
         ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+        : "http://localhost:5000/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -398,25 +432,7 @@ const CategorySelector = () => {
     setLoading(false);
   };
 
-  const handleParentChange = (variantId, field, value) => {
-    setVariants((prevVariants) =>
-      prevVariants.map((variant) =>
-        variant.id === variantId ? { ...variant, [field]: value } : variant
-      )
-    );
-  };
 
-  const handleVariantImageChange = (variantId, event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setVariants((prevVariants) =>
-        prevVariants.map((variant) =>
-          variant.id === variantId ? { ...variant, image: imageUrl } : variant
-        )
-      );
-    }
-  };
 
   return (
     <main className="flex justify-center bg-gray-100 p-6">
@@ -895,13 +911,16 @@ const CategorySelector = () => {
                   )}
                 </div> */}
                 <div className="mt-3">
-                  <div className="grid grid-cols-3 gap-4 mb-2">
+                  <div className="grid grid-cols-4 gap-4 mb-2">
                     <h3 className="font-medium text-lg text-gray-800">
                       Variants
                     </h3>
                     <h3 className="font-medium text-lg text-gray-800">Price</h3>
                     <h3 className="font-medium text-lg text-gray-800">
                       Availability
+                    </h3>
+                    <h3 className="font-medium text-lg text-gray-800">
+                      Action
                     </h3>
                   </div>
 
@@ -933,7 +952,7 @@ const CategorySelector = () => {
                               {combination.children.map((child, idx) => (
                                 <li
                                   key={idx}
-                                  className="grid grid-cols-3 gap-4 items-center"
+                                  className="grid grid-cols-4 gap-4 items-center"
                                 >
                                   <span className="font-medium text-gray-700">
                                     {child}
@@ -950,9 +969,14 @@ const CategorySelector = () => {
                                     placeholder="Availability"
                                     className="w-full p-1 border border-gray-300 rounded-md text-sm"
                                   />
+                                    <RiDeleteBin5Fill />
                                 </li>
+                                
                               ))}
+                              
                             </ul>
+                          
+
                           </div>
                         )}
                       </div>

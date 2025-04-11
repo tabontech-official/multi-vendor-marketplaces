@@ -40,22 +40,22 @@ const Promotion = () => {
 
   const limit = 20;
 
-  const navigate = useNavigate();
-  const { userData, loading, error, variantId } = UseFetchUserData();
-  const [starting, setStarting] = useState(0);
-  const [ending, setEnding] = useState(10);
+  const {  loading   } = UseFetchUserData();
+ 
   const [products, setProducts] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const openPopup = () => setIsPopupOpen(true);
   const closePopup = () => setIsPopupOpen(false);
   const [promoName, setPromoName] = useState("");
+  const [promoCode, setPromoCode] = useState("");
+
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [sku, setSku] = useState("");
   const [status, setStatus] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const [searchVal, setSearchVal] = useState("");
+  const [discountType, setDiscountType] = useState("percentage");
+  const [discountValue, setDiscountValue] = useState("");
 
   const [promotions, setPromotions] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -67,20 +67,13 @@ const Promotion = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuthContext();
   const [promoPrice, setPromoPrice] = useState("");
-  const [allPromotions, setAllPromotions] = useState([]);
-  const [errorMessage, setErrorMessage] = useState("");
-  const dropdownRefs = useRef([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [Loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
-  // const [activeTab, setActiveTab] = useState("Active Promotions");
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("Active Promotions") || "Promotions Details";
   });
-  const handleTabChange = (tabName) => {
-    setActiveTab(tabName);
-    localStorage.setItem("activeTab", tabName);
-  };
+
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [userRole, setUserRole] = useState("");
@@ -129,7 +122,7 @@ const Promotion = () => {
           ),
         ]);
 
-        setHasMore(page < data.totalPages); // Check if more pages are available
+        setHasMore(page < data.totalPages); 
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -715,7 +708,7 @@ const Promotion = () => {
           <div className="bg-white rounded-2xl shadow-lg w-full max-w-2xl relative">
             <div className="border-b px-4 py-3 flex justify-between items-center">
               <h2 className="text-sm font-semibold text-blue-700">
-                Select Promotion Type
+                Add New Promotion
               </h2>
               <button
                 onClick={closePopup}
@@ -724,49 +717,85 @@ const Promotion = () => {
                 ×
               </button>
             </div>
-            {/* <div className="p-6">
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Promo Name
-                </label>
-                <input
-                  type="text"
-                  value={promoName}
-                  onChange={(e) => setPromoName(e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                  placeholder="Enter promo name"
-                />
+            <div className="p-6">
+              <div className="w-full">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Promo Name
+                    </label>
+                    <input
+                      type="text"
+                      value={promoName}
+                      onChange={(e) => setPromoName(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                      placeholder="Enter promo name"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Discount Code
+                    </label>
+                    <input
+                      type="text"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                      placeholder="Enter discount code"
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Promotion Duration
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-1/2 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                  />
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-1/2 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                  />
+
+              <div className="mb-4"></div>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                {/* Type dropdown */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Discount Type
+                  </label>
+                  <select
+                    value={discountType}
+                    onChange={(e) => setDiscountType(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                  >
+                    <option value="percentage">Percentage</option>
+                    <option value="fixed">Fixed Price</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Discount Value
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={discountValue}
+                      onChange={(e) => setDiscountValue(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                      placeholder="Enter value"
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
+                      {discountType === "percentage" ? "%" : "$"}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  SKU
+                  Applies To
                 </label>
-                <input
-                  type="text"
-                  value={sku}
-                  onChange={(e) => setSku(e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                  placeholder="Enter SKU"
-                />
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                >
+                  <option value="">Select product</option>
+                  <option value="active">product 1</option>
+                  <option value="inactive">product 2</option>
+                </select>
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -776,32 +805,33 @@ const Promotion = () => {
                   type="number"
                   value={promoPrice}
                   onChange={(e) => setPromoPrice(e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
                   placeholder="Enter promo price"
                 />
               </div>
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
+                  Promotion Duration
                 </label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                >
-                  <option value="">Select status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                <div className="flex gap-2">
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-1/2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                  />
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-1/2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
+                  />
+                </div>
               </div>
-
-              <div className="text-right">
-                <button onClick={handleSubmit} className="button">
-                  Submit
-                </button>
-              </div>
-            </div> */}
-            <div className="">
+              <div className="text-right"></div>
+            </div>
+            {/* <div className="">
               <div className="hover:bg-gray-300 cursor-pointer  p-2 border-b-2">
                 <label>Amount of Products</label>
                 <p className="text-gray-500">
@@ -828,13 +858,13 @@ const Promotion = () => {
                 <label>Boost bundle</label>
                 <p className="text-gray-500">Discount function extensin</p>
               </div>
-            </div>
+            </div> */}
             <div className="flex justify-end p-4 border-t-2">
               <button
-                onClick={closePopup}
-                className="bg-gray-400 px-2 py-1 rounded-lg"
+                onClick={handleSubmit}
+                className="button bg-blue-500 border rounded-lg px-2 py-1 text-white"
               >
-                Cancel
+                Submit
               </button>
             </div>
           </div>

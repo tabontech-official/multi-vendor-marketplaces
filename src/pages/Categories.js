@@ -7,6 +7,8 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { FaPlus, FaMinus } from "react-icons/fa";
 import { FiMinus } from "react-icons/fi";
+import { IoIosArrowUp } from "react-icons/io";
+import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 
 const CategorySelector = () => {
   const [title, setTitle] = useState("");
@@ -31,7 +33,7 @@ const CategorySelector = () => {
   const [userId, setUserId] = useState("");
   const [options, setOptions] = useState([]);
   const [variants, setVariants] = useState([]);
-  const [expandedGroups, setExpandedGroups] = useState({});
+  const [keywordsList, setKeywordsList] = useState([]);
   const [showVariantForm, setShowVariantForm] = useState(false);
   const [newOption, setNewOption] = useState({ name: "", values: [""] });
   const [images, setImages] = useState([]);
@@ -40,10 +42,15 @@ const CategorySelector = () => {
   const [isEditing, setIsEditing] = useState(false);
   const locationData = useLocation();
   const [openOptionIndex, setOpenOptionIndex] = useState(null);
-
-  const handleToggleDropdown = (index) => {
-    setOpenOptionIndex(openOptionIndex === index ? null : index);
+  const [expandedParents, setExpandedParents] = useState([]);
+  const toggleChildOptions = (parentIndex) => {
+    setExpandedParents((prev) =>
+      prev.includes(parentIndex)
+        ? prev.filter((index) => index !== parentIndex)
+        : [...prev, parentIndex]
+    );
   };
+
   const navigate = useNavigate();
   const modules = {
     toolbar: [
@@ -56,11 +63,24 @@ const CategorySelector = () => {
       ["clean"],
     ],
   };
-
+  const handleKeyDownForKeyWords = (e) => {
+    if (e.key === "Enter" && keyWord.trim() !== "") {
+      e.preventDefault();
+      if (!keywordsList.includes(keyWord.trim())) {
+        setKeywordsList([...keywordsList, keyWord.trim()]);
+        setKeyWord("");
+      }
+    }
+  };
+  const removeKeyword = (index) => {
+    const newList = [...keywordsList];
+    newList.splice(index, 1);
+    setKeywordsList(newList);
+  };
   const handleKeyDown = (e, setState, stateValues) => {
     if (e.key === "Enter" && e.target.value.trim() !== "") {
       setState([...stateValues, e.target.value.trim()]);
-      e.target.value = ""; // Clear input after adding tag
+      e.target.value = "";
       e.preventDefault();
     }
   };
@@ -89,88 +109,25 @@ const CategorySelector = () => {
   const generateVariants = () => {
     if (options.length < 2) return [];
 
-    const parentOption = options[0]; // Parent variant (first option)
-    const childOptions = options.slice(1); // Child variants (rest of the options)
+    const parentOption = options[0];
+    const childOptions = options.slice(1);
 
     let combinations = [];
     parentOption.values.forEach((parentValue) => {
+      let childValues = [];
       childOptions.forEach((childOption) => {
         childOption.values.forEach((childValue) => {
-          combinations.push({
-            parent: parentValue,
-            child: childValue,
-          });
+          childValues.push(childValue);
         });
+      });
+
+      combinations.push({
+        parent: parentValue,
+        children: childValues,
       });
     });
 
     return combinations;
-  };
-  // const updateVariants = (updatedOptions) => {
-  //   setVariants((prevVariants) => {
-  //     let existingVariants = prevVariants.flatMap((variant) =>
-  //       variant.subVariants ? variant.subVariants : [variant]
-  //     );
-
-  //     const newVariants = generateVariantCombinations(
-  //       updatedOptions,
-  //       existingVariants
-  //     ).map((variant, index) => ({
-  //       id: index + 1,
-  //       name: Object.values(variant).join(" / "),
-  //       group: Object.values(variant)[0],
-  //       subVariant: Object.values(variant).length > 1,
-  //       price: 0,
-  //       quantity: 0,
-  //     }));
-
-  //     let updatedVariants = [...prevVariants];
-
-  //     newVariants.forEach((newVariant) => {
-  //       let parentVariantIndex = updatedVariants.findIndex(
-  //         (v) => v.group === newVariant.group && !v.subVariant
-  //       );
-
-  //       if (parentVariantIndex !== -1) {
-  //         let parentVariant = updatedVariants[parentVariantIndex];
-
-  //         if (newVariant.subVariant) {
-  //           const existingSubVariants = parentVariant.subVariants || [];
-  //           const alreadyExists = existingSubVariants.some(
-  //             (subV) => subV.name === newVariant.name
-  //           );
-
-  //           if (!alreadyExists) {
-  //             parentVariant.subVariants = [...existingSubVariants, newVariant];
-  //           }
-  //         }
-  //       } else {
-  //         updatedVariants.push({ ...newVariant, subVariants: [] });
-  //       }
-  //     });
-
-  //     return updatedVariants;
-  //   });
-  // };
-
-  const toggleGroup = (groupId) => {
-    setExpandedGroups((prev) => ({
-      ...prev,
-      [groupId]: !prev[groupId],
-    }));
-  };
-
-  const handleNestedChange = (variantId, field, value) => {
-    setVariants((prevVariants) =>
-      prevVariants.map((variant) => ({
-        ...variant,
-        subVariants: variant.subVariants
-          ? variant.subVariants.map((subV) =>
-              subV.id === variantId ? { ...subV, [field]: Number(value) } : subV
-            )
-          : variant.subVariants,
-      }))
-    );
   };
 
   const handleOpenForm = () => {
@@ -240,10 +197,9 @@ const CategorySelector = () => {
     if (product) {
       const allVariants = product.variants;
 
-      // Group variants by the left option (option1)
       const groupedVariants = allVariants.reduce((acc, variant) => {
-        const leftOption = variant.option1; // This is the left side of the variant
-        const rightOption = variant.option2; // This is the right side (child)
+        const leftOption = variant.option1;
+        const rightOption = variant.option2;
 
         if (!acc[leftOption]) {
           acc[leftOption] = {
@@ -258,7 +214,6 @@ const CategorySelector = () => {
           };
         }
 
-        // If the variant has a right option (option2), treat it as a child
         if (rightOption) {
           acc[leftOption].children.push({
             ...variant,
@@ -298,6 +253,12 @@ const CategorySelector = () => {
       setUnit(product.shipping?.weight_unit || "kg");
       setStatus(product.status || "publish");
       setUserId(product.userId || "");
+      const tagsArray = Array.isArray(product.tags)
+        ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
+        : [];
+
+      setKeywordsList(tagsArray);
+
       setVendor(product.vendor || "");
       setOptions(
         product.options?.map((option) => ({
@@ -353,7 +314,8 @@ const CategorySelector = () => {
     // }
 
     const formData = new FormData();
-    formData.append("keyWord", keyWord);
+    // formData.append("keyWord", keyWord);
+    formData.append("keyWord", keywordsList.join(", "));
     formData.append("title", title);
     formData.append("description", description);
     formData.append("productType", productType);
@@ -455,15 +417,7 @@ const CategorySelector = () => {
       );
     }
   };
-  const [inputValue, setInputValue] = useState("");
 
-  const removeTag = (index, setState, stateValues) => {
-    setState(stateValues.filter((_, i) => i !== index));
-  };
-  const handleSubVariantDropdownChange = (parentId, subVariantId) => {
-    console.log("Parent:", parentId, "Selected Sub Variant:", subVariantId);
-    // Optionally: Set selected sub-variant in state or update pricing, etc.
-  };
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <div className="w-full max-w-6xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -816,7 +770,6 @@ const CategorySelector = () => {
 
             {options.length > 0 && (
               <div className="mt-3">
-                {/* Rendering Parent Option */}
                 {options.slice(0, 1).map((option, optionIndex) => (
                   <div
                     key={optionIndex}
@@ -838,7 +791,6 @@ const CategorySelector = () => {
                   </div>
                 ))}
 
-                {/* Rendering Child Options */}
                 {options.slice(1).map((option, optionIndex) => (
                   <div
                     key={optionIndex}
@@ -861,7 +813,7 @@ const CategorySelector = () => {
                 ))}
 
                 {/* Rendering Variant Combinations */}
-                <div className="mt-3">
+                {/* <div className="mt-3">
             <h3 className="text-sm font-medium text-gray-800">Variant Combinations</h3>
             {generateVariants().length > 0 ? (
               generateVariants().map((combination, index) => (
@@ -872,9 +824,146 @@ const CategorySelector = () => {
             ) : (
               <p className="text-gray-600">Add more options to generate variants.</p>
             )}
-          </div>
+          </div> */}
+                {/* <div className="mt-3">
+                  <div className="flex justify-between">
+                    <h3 className="font-medium text-lg text-gray-800">
+                      Variants
+                    </h3>
+                    <h3 className="font-medium text-lg text-gray-800">Price</h3>
+                    <h3 className="font-medium text-lg text-gray-800">
+                      Availability
+                    </h3>
+                  </div>
 
-                {/* Button for adding another option */}
+                  {generateVariants().length > 0 ? (
+                    generateVariants().map((combination, index) => (
+                      <div
+                        key={index}
+                        className="text-sm bg-gray-100 p-2 rounded-md mt-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="font-medium text-gray-700">
+                            {combination.parent}
+                          </div>
+                          <button
+                            onClick={() => toggleChildOptions(index)}
+                            className="text-gray-500"
+                          >
+                            {expandedParents.includes(index) ? (
+                              <IoIosArrowUp />
+                            ) : (
+                              <MdOutlineKeyboardArrowDown />
+                            )}
+                          </button>
+                        </div>
+
+                        {expandedParents.includes(index) && (
+                          <div className="mt-2">
+                            <ul className="ml-4">
+                              {combination.children.map((child, idx) => (
+                                <li
+                                  key={idx}
+                                  className="flex justify-between items-center text-gray-600"
+                                >
+                                  <div className="flex justify-between w-full">
+                                    <span className="font-medium">{child}</span>
+                                    <div className="flex space-x-4 mt-1">
+                                      <input
+                                        type="number"
+                                        placeholder="Price"
+                                        className="w-32 p-1 border border-gray-300 rounded-md text-sm"
+                                      />
+                                      <input
+                                        type="number"
+                                        placeholder="Availability"
+                                        className="w-32 p-1 border border-gray-300 rounded-md text-sm"
+                                      />
+                                    </div>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-600">
+                      Add more options to generate variants.
+                    </p>
+                  )}
+                </div> */}
+                <div className="mt-3">
+                  <div className="grid grid-cols-3 gap-4 mb-2">
+                    <h3 className="font-medium text-lg text-gray-800">
+                      Variants
+                    </h3>
+                    <h3 className="font-medium text-lg text-gray-800">Price</h3>
+                    <h3 className="font-medium text-lg text-gray-800">
+                      Availability
+                    </h3>
+                  </div>
+
+                  {generateVariants().length > 0 ? (
+                    generateVariants().map((combination, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-100 p-6 rounded-md mt-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="font-medium text-gray-700">
+                            {combination.parent}
+                          </div>
+                          <button
+                            onClick={() => toggleChildOptions(index)}
+                            className="text-gray-500"
+                          >
+                            {expandedParents.includes(index) ? (
+                              <IoIosArrowUp className="text-xl"/>
+                            ) : (
+                              <MdOutlineKeyboardArrowDown className="text-2xl"/>
+                            )}
+                          </button>
+                        </div>
+
+                        {expandedParents.includes(index) && (
+                          <div className="mt-2">
+                            <ul className="space-y-2">
+                              {combination.children.map((child, idx) => (
+                                <li
+                                  key={idx}
+                                  className="grid grid-cols-3 gap-4 items-center"
+                                >
+                                  <span className="font-medium text-gray-700">
+                                    {child}
+                                  </span>
+                                  <input
+                                    type="text"
+                                    value={price}
+                                    placeholder="Price"
+                                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={quantity}
+                                    placeholder="Availability"
+                                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
+                                  />
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-600">
+                      Add more options to generate variants.
+                    </p>
+                  )}
+                </div>
+
                 <button
                   onClick={handleOpenForm}
                   className="flex gap-2 items-center text-sm text-blue-600 mt-2 hover:underline"
@@ -883,7 +972,6 @@ const CategorySelector = () => {
                 </button>
               </div>
             )}
-
 
             {/* Variant form for adding options */}
             {showVariantForm && (
@@ -1015,15 +1103,33 @@ const CategorySelector = () => {
               />
               <label htmlFor="keywords" className="block text-gray-600 text-sm">
                 Keywords
-              </label>{" "}
+              </label>
               <input
                 type="text"
                 placeholder="Key Words"
                 value={keyWord}
-                onKeyDown={handleKeyDown}
+                onKeyDown={handleKeyDownForKeyWords}
                 onChange={(e) => setKeyWord(e.target.value)}
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
+
+              <div className="flex flex-wrap gap-2 mt-2">
+                {keywordsList.map((word, index) => (
+                  <span
+                    key={index}
+                    className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
+                  >
+                    {word}
+                    <button
+                      type="button"
+                      className="ml-2 text-red-500"
+                      onClick={() => removeKeyword(index)}
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>

@@ -194,7 +194,6 @@ const Promotion = () => {
   };
   const addToPromotions = (product) => {
     console.log(product);
-    console.log("clicking");
 
     setSelectedProduct(product);
     setModalOpen(true);

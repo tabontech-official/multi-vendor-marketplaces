@@ -1,22 +1,12 @@
-import React, {  useEffect, useRef, useState } from "react";
-import {
-  
-  HiOutlineCheckCircle,
-  HiOutlineXCircle,
-  HiPlus,
-} from "react-icons/hi";
+import React, { useEffect, useRef, useState } from "react";
+import { HiOutlineCheckCircle, HiOutlineXCircle, HiPlus } from "react-icons/hi";
 import { FaFileImport } from "react-icons/fa";
 import Papa from "papaparse";
-
 import { Link, useNavigate } from "react-router-dom";
 import UseFetchUserData from "../component/fetchUser";
 import { useAuthContext } from "../Hooks/useAuthContext";
-import { Dialog } from "@headlessui/react";
-import { FaTimes, FaShoppingBasket } from "react-icons/fa";
-import { CreateCheckoutUrl } from "../component/Checkout";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
-import { debounce } from "lodash";
 import { MdEdit } from "react-icons/md";
 
 const Dashboard = () => {
@@ -48,6 +38,7 @@ const Dashboard = () => {
   const [loadingId, setLoadingId] = useState(null);
   const [message, setMessage] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { user } = useAuthContext();
   const dropdownRefs = useRef([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -98,7 +89,7 @@ const Dashboard = () => {
           ),
         ]);
 
-        setHasMore(page < data.totalPages); 
+        setHasMore(page < data.totalPages);
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -138,17 +129,16 @@ const Dashboard = () => {
     navigate(formPage, { state: { product } });
   };
 
-  const onDeleteSelected = async () => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete the selected listings?"
-    );
-    if (!confirmDelete) return;
+  const onDeleteSelected = () => {
+    setIsPopupOpen(true);
+  };
 
+  const deleteSelectedProducts = async () => {
     try {
       await Promise.all(
         selectedProducts.map(async (id) => {
           const response = await fetch(
-            ` https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
+            `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
             { method: "DELETE" }
           );
           if (!response.ok) throw new Error("Failed to delete product");
@@ -162,6 +152,8 @@ const Dashboard = () => {
       setSelectedProducts([]);
     } catch (error) {
       console.error("Error deleting products:", error);
+    } finally {
+      setIsPopupOpen(false);
     }
   };
 
@@ -628,6 +620,34 @@ const Dashboard = () => {
                   Upload and preview
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {isPopupOpen && (
+        <div className="fixed inset-0 bg-gradient-to-br from-black/80 to-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-fadeInUp p-8 relative border border-gray-200">
+            <button
+              onClick={() => setIsPopupOpen(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-black transition"
+            >
+              ✕
+            </button>
+
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Approval
+              </h2>
+              <p className="text-gray-600">
+                Are you sure you want to delete the selected products?
+              </p>
+
+              <button
+                onClick={deleteSelectedProducts}
+                className="mt-6 inline-block px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition"
+              >
+                Okay
+              </button>
             </div>
           </div>
         </div>

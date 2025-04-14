@@ -37,18 +37,14 @@ const Promotion = () => {
   };
 
   admin = isAdmin();
-
   const limit = 20;
-
   const { loading } = UseFetchUserData();
-
   const [products, setProducts] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const openPopup = () => setIsPopupOpen(true);
   const closePopup = () => setIsPopupOpen(false);
   const [promoName, setPromoName] = useState("");
   const [promoCode, setPromoCode] = useState("");
-
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [sku, setSku] = useState("");
@@ -56,7 +52,6 @@ const Promotion = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [discountType, setDiscountType] = useState("percentage");
   const [discountValue, setDiscountValue] = useState("");
-
   const [promotions, setPromotions] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStartDate, setModalStartDate] = useState("");
@@ -68,16 +63,16 @@ const Promotion = () => {
   const { user } = useAuthContext();
   const [promoPrice, setPromoPrice] = useState("");
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [Loading, setLoading] = useState(false);
-  const [toast, setToast] = useState({ show: false, type: "", message: "" });
-  const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem("Active Promotions") || "Promotions Details";
-  });
-
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [userRole, setUserRole] = useState("");
   const [currentUserId, setCurrentUserId] = useState("");
+  const [Loading, setLoading] = useState(false);
+  const modalRef = useRef();
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem("Active Promotions") || "Promotions Details";
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
@@ -101,8 +96,8 @@ const Promotion = () => {
     try {
       const response = await fetch(
         admin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getAllDataForPromotion/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app/product/getPromotionProduct/${id}/?page=${page}&limit=${limit}`,
+          ? ` https://multi-vendor-marketplace.vercel.app/product/getAllDataForPromotion/?page=${page}&limit=${limit}`
+          : ` https://multi-vendor-marketplace.vercel.app/product/getPromotionProduct/${id}/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
 
@@ -131,8 +126,6 @@ const Promotion = () => {
     }
   };
 
-  const modalRef = useRef();
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -150,7 +143,9 @@ const Promotion = () => {
   useEffect(() => {
     const fetchPromotions = async () => {
       try {
-        const res = await fetch("https://multi-vendor-marketplace.vercel.app/promo");
+        const res = await fetch(
+          " https://multi-vendor-marketplace.vercel.app/promo"
+        );
         const data = await res.json();
         setPromotions(data);
       } catch (err) {
@@ -172,7 +167,7 @@ const Promotion = () => {
 
     try {
       const res = await axios.post(
-        `https://multi-vendor-marketplace.vercel.app/promo/${selectedProduct._id}`,
+        ` https://multi-vendor-marketplace.vercel.app/promo/${selectedProduct._id}`,
         {
           promoPrice,
           startDate: modalStartDate,
@@ -196,13 +191,6 @@ const Promotion = () => {
     setSelectedProduct(product);
     setModalOpen(true);
   };
-  const OnEdit = (product) => {
-    console.log(product);
-    console.log("clicking");
-
-    setSelectedProduct(product);
-    openPopup();
-  };
 
   const onDeleteSelected = async () => {
     const confirmDelete = window.confirm(
@@ -213,9 +201,12 @@ const Promotion = () => {
     try {
       await Promise.all(
         selectedProducts.map(async (id) => {
-          const response = await fetch(`https://multi-vendor-marketplace.vercel.app/promo/${id}`, {
-            method: "DELETE",
-          });
+          const response = await fetch(
+            ` https://multi-vendor-marketplace.vercel.app/promo/${id}`,
+            {
+              method: "DELETE",
+            }
+          );
           if (!response.ok) throw new Error("Failed to delete product");
         })
       );
@@ -234,52 +225,6 @@ const Promotion = () => {
     fetchProductData();
   }, []);
 
-  useEffect(() => {
-    const fetchProductData2 = async () => {
-      const id = localStorage.getItem("userid");
-
-      try {
-        const response = await fetch(
-          admin
-            ? `https://multi-vendor-marketplace.vercel.app/product/getAllDataForPromotion/?page=${page}&limit=${limit}`
-            : `https://multi-vendor-marketplace.vercel.app/product/getPromotionProduct/${id}/?page=${page}&limit=${limit}`,
-          { method: "GET" }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Second Product render", data);
-
-          const sortedProducts = data.products.sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-          );
-
-          setProducts((prev) => [
-            ...prev,
-            ...sortedProducts.filter(
-              (newProduct) =>
-                !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-            ),
-          ]);
-
-          setFilteredProducts((prev) => [
-            ...prev,
-            ...sortedProducts.filter(
-              (newProduct) =>
-                !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-            ),
-          ]);
-
-          setHasMore(page < data.totalPages);
-          console.log(hasMore);
-        }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
-    fetchProductData2();
-  }, [page]);
-
   const handleScroll = async () => {
     if (
       window.innerHeight + document.documentElement.scrollTop + 400 >=
@@ -296,42 +241,27 @@ const Promotion = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  const handleSubmit = async () => {
+  const endPromotion = async () => {
     try {
-      const userId = localStorage.getItem("userid");
+      await Promise.all(
+        selectedProducts.map(async (id) => {
+          const response = await fetch(
+            `https://multi-vendor-marketplace.vercel.app/promo/endPromotions/${id}`,
+            {
+              method: "DELETE",
+            }
+          );
+          if (!response.ok) throw new Error("Failed to delete product");
+        })
+      );
 
-      const response = await fetch("https://multi-vendor-marketplace.vercel.app/promo", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          promoName,
-          startDate,
-          endDate,
-          productSku: sku,
-          promoPrice,
-          status,
-          userId,
-        }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        alert("Promotion added successfully!");
-        closePopup();
-        setPromoName("");
-        setStartDate("");
-        setEndDate("");
-        setSku("");
-        setStatus("");
-        setPromoPrice("");
-      } else {
-        alert(data.message || "Something went wrong.");
-      }
+      setProducts(products.filter((p) => !selectedProducts.includes(p._id)));
+      setPromotions(
+        promotions.filter((p) => !selectedProducts.includes(p._id))
+      );
+      setSelectedProducts([]);
     } catch (error) {
-      console.error("Error:", error);
-      alert("Server error. Please try again.");
+      console.error("Error deleting products:", error);
     }
   };
 
@@ -342,12 +272,6 @@ const Promotion = () => {
           <h1 className="text-2xl font-semibold mb-1">Promotions</h1>
           <p className="text-gray-600">Auto-updates in 2 min.</p>
           <div className="w-2/4 max-sm:w-full mt-2"></div>
-        </div>
-        <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
-          <div className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
-            <HiPlus className="w-5 h-5" />
-            <button onClick={openPopup}>Add Discount</button>
-          </div>
         </div>
 
         {toast.show && (
@@ -368,26 +292,24 @@ const Promotion = () => {
 
       <div className="flex justify-between items-center mt-4 space-y-4 mb-4">
         <div className="flex gap-2">
-          {[
-            "Promotions Details",
-            "Add Promotions",
-            "Submitted Promotions",
-          ].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => {
-                setActiveTab(tab);
-                localStorage.setItem("activeTab", tab);
-              }}
-              className={`px-4 py-2 text-sm rounded-lg ${
-                activeTab === tab
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-200 text-gray-700"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+          {["Promotions Details", "Add Promotions", "Submitted Promotions"].map(
+            (tab) => (
+              <button
+                key={tab}
+                onClick={() => {
+                  setActiveTab(tab);
+                  localStorage.setItem("activeTab", tab);
+                }}
+                className={`px-4 py-2 text-sm rounded-lg ${
+                  activeTab === tab
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                {tab}
+              </button>
+            )
+          )}
         </div>
 
         {/* <div className="flex gap-2 items-center">
@@ -497,11 +419,18 @@ const Promotion = () => {
                       </div>
                     </div>
 
-                    <div className="mt-4">
+                    <div className="mt-4 flex justify-between">
                       <p className="text-sm text-gray-600">
                         Add your products to this promotion, sell them and make
                         profit.
                       </p>
+
+                      <button
+                        onClick={openPopup}
+                        className="text-blue-600 text-md hover:underline"
+                      >
+                        End Promotion
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -694,7 +623,7 @@ const Promotion = () => {
           )}
         </>
       )}
-      {isPopupOpen && (
+      {/* {isPopupOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-lg w-full max-w-2xl relative">
             <div className="border-b px-4 py-3 flex justify-between items-center">
@@ -741,7 +670,6 @@ const Promotion = () => {
 
               <div className="mb-4"></div>
               <div className="grid grid-cols-2 gap-4 mb-4">
-                {/* Type dropdown */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Discount Type
@@ -850,12 +778,42 @@ const Promotion = () => {
                 <p className="text-gray-500">Discount function extensin</p>
               </div>
             </div> */}
-            <div className="flex justify-end p-4 border-t-2">
+      {/* <div className="flex justify-end p-4 border-t-2">
               <button
                 onClick={handleSubmit}
                 className="button bg-blue-500 border rounded-lg px-2 py-1 text-white"
               >
                 Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}  */}
+
+      {isPopupOpen && (
+        <div className="fixed inset-0 bg-gradient-to-br from-black/80 to-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-fadeInUp p-8 relative border border-gray-200">
+            {/* Close (X) button */}
+            <button
+              onClick={closePopup}
+              className="absolute top-3 right-3 text-gray-400 hover:text-black transition"
+            >
+              ✕
+            </button>
+
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Approval
+              </h2>
+              <p className="text-gray-600">
+                Are you sure you want to end this promotion?
+              </p>
+
+              <button
+                onClick={endPromotion}
+                className="mt-6 inline-block px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition"
+              >
+                Okay
               </button>
             </div>
           </div>

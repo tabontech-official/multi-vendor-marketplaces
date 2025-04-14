@@ -382,8 +382,8 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+        ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
+        : " https://multi-vendor-marketplace.vercel.app/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 

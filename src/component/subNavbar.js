@@ -53,7 +53,7 @@ const SubNavbar = () => {
     const fetchUserModules = async () => {  
       try {
         console.log("Fetching user modules..."); // Debugging API call
-        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules/${userId}`);
+        const response = await fetch(` https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules/${userId}`);
   
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);

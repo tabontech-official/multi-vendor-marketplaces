@@ -31,7 +31,7 @@ const ProtectedForms = ({ element, ...rest }) => {
 
     const fetchCreditsAndProducts = async () => {
       try {
-        const creditResponse = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/quantity/${id}`, { method: 'GET' });
+        const creditResponse = await fetch(` https://multi-vendor-marketplace.vercel.app/auth/quantity/${id}`, { method: 'GET' });
         if (creditResponse.ok) {
           const creditData = await creditResponse.json();
           setCredits(creditData.quantity || 0);
@@ -41,7 +41,7 @@ const ProtectedForms = ({ element, ...rest }) => {
       } 
 
     try {
-      const productResponse = await fetch("https://multi-vendor-marketplace.vercel.app/product/fetchRequireCredits", { method: 'GET' });
+      const productResponse = await fetch(" https://multi-vendor-marketplace.vercel.app/product/fetchRequireCredits", { method: 'GET' });
       if (productResponse.ok) {
         const productData = await productResponse.json();
         setRequiredCredits(productData.data);

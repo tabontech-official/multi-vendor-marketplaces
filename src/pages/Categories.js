@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaCirclePlus } from "react-icons/fa6";
 import { FaTrash, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FcAddImage } from "react-icons/fc";
@@ -10,7 +10,17 @@ import { FiMinus } from "react-icons/fi";
 import { IoIosArrowUp } from "react-icons/io";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { RiDeleteBin5Fill } from "react-icons/ri";
+import RTC from "../component/editor";
+import { Editor } from "react-draft-wysiwyg";
+import draftToHtml from "draftjs-to-html";
+import htmlToDraft from "html-to-draftjs";
 
+import {
+  convertToRaw,
+  EditorState,
+  ContentState,
+  convertFromRaw,
+} from "draft-js";
 const CategorySelector = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -44,6 +54,17 @@ const CategorySelector = () => {
   const locationData = useLocation();
   const [openOptionIndex, setOpenOptionIndex] = useState(null);
   const [expandedParents, setExpandedParents] = useState([]);
+  const [editorState, setEditorState] = useState(() =>
+    EditorState.createEmpty()
+  );
+
+  const onEditorStateChange = (newEditorState) => {
+    setEditorState(newEditorState);
+
+    const rawContent = convertToRaw(newEditorState.getCurrentContent());
+    setDescription(JSON.stringify(rawContent));
+  };
+
   const toggleChildOptions = (parentIndex) => {
     setExpandedParents((prev) =>
       prev.includes(parentIndex)
@@ -64,6 +85,15 @@ const CategorySelector = () => {
       ["clean"],
     ],
   };
+
+  const inputRefs = useRef([]);
+
+  useEffect(() => {
+    if (inputRefs.current.length > 0) {
+      const lastInput = inputRefs.current[inputRefs.current.length - 1];
+      lastInput?.focus();
+    }
+  }, [newOption.values.length]);
   const handleKeyDownForKeyWords = (e) => {
     if (e.key === "Enter" && keyWord.trim() !== "") {
       e.preventDefault();
@@ -133,15 +163,15 @@ const CategorySelector = () => {
 
   const generateVariants = () => {
     if (options.length < 2) return [];
-  
+
     const parentOption = options[0];
-    const childOptions = options.slice(1); // second & third
-  
+    const childOptions = options.slice(1);
+
     let combinations = [];
-  
+
     parentOption.values.forEach((parentValue) => {
       let childCombinations = [];
-  
+
       if (childOptions.length === 1) {
         childOptions[0].values.forEach((val) => {
           childCombinations.push(`${val}`);
@@ -153,16 +183,15 @@ const CategorySelector = () => {
           });
         });
       }
-  
+
       combinations.push({
         parent: parentValue,
         children: childCombinations,
       });
     });
-  
+
     return combinations;
   };
-  
 
   const handleOpenForm = () => {
     setNewOption({ name: "", values: [""] });
@@ -193,7 +222,6 @@ const CategorySelector = () => {
 
     const updatedOptions = [...options, { ...newOption }];
     setOptions(updatedOptions);
-    // updateVariants(updatedOptions);
     setShowVariantForm(false);
   };
 
@@ -226,6 +254,85 @@ const CategorySelector = () => {
       })
     );
   }, [variants]);
+
+  // useEffect(() => {
+  //   if (product) {
+  //     const allVariants = product.variants;
+
+  //     const groupedVariants = allVariants.reduce((acc, variant) => {
+  //       const leftOption = variant.option1;
+  //       const rightOption = variant.option2;
+
+  //       if (!acc[leftOption]) {
+  //         acc[leftOption] = {
+  //           parent: {
+  //             ...variant,
+  //             option1: leftOption,
+  //             option2: null,
+  //             option3: null,
+  //             isParent: true,
+  //           },
+  //           children: [],
+  //         };
+  //       }
+
+  //       if (rightOption) {
+  //         acc[leftOption].children.push({
+  //           ...variant,
+  //           option1: leftOption,
+  //           option2: rightOption,
+  //           option3: null,
+  //           isParent: false,
+  //         });
+  //       }
+
+  //       return acc;
+  //     }, {});
+
+  //     const formattedVariants = Object.keys(groupedVariants).map(
+  //       (key, index) => ({
+  //         ...groupedVariants[key].parent,
+  //         group: `parent-${index}`,
+  //         subVariants: groupedVariants[key].children,
+  //       })
+  //     );
+
+  //     setIsEditing(true);
+  //     setTitle(product.title || "");
+  //     setDescription(product.body_html || "");
+  //     setProductType(product.product_type || "");
+  //     setPrice(product.variants[0]?.price || "");
+  //     setCompareAtPrice(product.variants[0]?.compare_at_price || "");
+  //     setTrackQuantity(product.inventory?.track_quantity || false);
+  //     setQuantity(product.inventory?.quantity || 0);
+  //     setContinueSelling(product.inventory?.continue_selling || false);
+  //     setHasSKU(product.inventory?.has_sku || false);
+  //     setSKU(product.inventory?.sku || "");
+  //     setBarcode(product.inventory?.barcode || "");
+  //     setTrackShipping(product.shipping?.track_shipping || false);
+  //     setWeight(product.shipping?.weight || "");
+  //     setUnit(product.shipping?.weight_unit || "kg");
+  //     setStatus(product.status || "publish");
+  //     setUserId(product.userId || "");
+  //     const tagsArray = Array.isArray(product.tags)
+  //       ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
+  //       : [];
+
+  //     setKeywordsList(tagsArray);
+
+  //     setVendor(product.vendor || "");
+  //     setOptions(
+  //       product.options?.map((option) => ({
+  //         id: option.id || "No ID",
+  //         name: option.name || "Unnamed Option",
+  //         values: option.values || [],
+  //       })) || []
+  //     );
+  //     setVariants(formattedVariants);
+  //     setImages(product.images || []);
+  //   }
+
+  // }, [product]);
 
   useEffect(() => {
     if (product) {
@@ -269,10 +376,8 @@ const CategorySelector = () => {
         })
       );
 
-      // Set states
       setIsEditing(true);
       setTitle(product.title || "");
-      setDescription(product.body_html || "");
       setProductType(product.product_type || "");
       setPrice(product.variants[0]?.price || "");
       setCompareAtPrice(product.variants[0]?.compare_at_price || "");
@@ -287,10 +392,10 @@ const CategorySelector = () => {
       setUnit(product.shipping?.weight_unit || "kg");
       setStatus(product.status || "publish");
       setUserId(product.userId || "");
+
       const tagsArray = Array.isArray(product.tags)
         ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
         : [];
-
       setKeywordsList(tagsArray);
 
       setVendor(product.vendor || "");
@@ -303,21 +408,25 @@ const CategorySelector = () => {
       );
       setVariants(formattedVariants);
       setImages(product.images || []);
-      // setKeyWord(product.tags);
+
+      const rawDescription = product.body_html || "";
+      try {
+        const parsedContent = JSON.parse(rawDescription);
+        const contentState = convertFromRaw(parsedContent);
+        setEditorState(EditorState.createWithContent(contentState));
+      } catch (error) {
+        const contentBlock = htmlToDraft(rawDescription);
+        if (contentBlock) {
+          const contentState = ContentState.createFromBlockArray(
+            contentBlock.contentBlocks
+          );
+          setEditorState(EditorState.createWithContent(contentState));
+        } else {
+          setEditorState(EditorState.createEmpty());
+        }
+      }
     }
   }, [product]);
-
-  const handleAdd = () => {
-    const newWeight = (parseFloat(weight) + 1).toFixed(2);
-    setWeight(newWeight);
-  };
-
-  const handleSubtract = () => {
-    const newWeight = (parseFloat(weight) - 1).toFixed(2);
-    if (newWeight >= 0) {
-      setWeight(newWeight);
-    }
-  };
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -339,19 +448,17 @@ const CategorySelector = () => {
 
     setLoading(true);
     setMessage(null);
-
-    // if (images.length === 0) {
-    //   console.error("No images selected!");
-    //   setMessage({ type: "error", text: "Please select at least one image." });
-    //   setLoading(false);
-    //   return;
-    // }
-
+    const rawContentState = convertToRaw(editorState.getCurrentContent());
+    const htmlContent = draftToHtml(rawContentState);
+    const modifiedContent = htmlContent
+      .replace(/<p>/g, "") // Remove <p> tags
+      .replace(/<\/p>/g, "<br />") // Replace closing </p> tags with <br />
+      .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />") // Avoid double <br /> tags
+      .replace(/&nbsp;/g, " "); // Replace &nbsp; with normal spaces
     const formData = new FormData();
-    // formData.append("keyWord", keyWord);
     formData.append("keyWord", keywordsList.join(", "));
     formData.append("title", title);
-    formData.append("description", description);
+    formData.append("description", modifiedContent);
     formData.append("productType", productType);
     formData.append("price", parseFloat(price));
 
@@ -432,8 +539,6 @@ const CategorySelector = () => {
     setLoading(false);
   };
 
-
-
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <div className="w-full max-w-6xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -455,12 +560,14 @@ const CategorySelector = () => {
             <label className="block  text-sm font-medium text-gray-700 ">
               Description
             </label>
-            <ReactQuill
-              value={description}
-              onChange={setDescription}
-              modules={modules}
-              className="mt-1 block w-full border border-gray-300 min-h-[200px]"
-            />
+            <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-auto">
+              <Editor
+                editorState={editorState}
+                onEditorStateChange={onEditorStateChange}
+                wrapperClassName="border-none"
+                editorClassName="min-h-[200px] bg-white p-2"
+              />
+            </div>
           </div>
 
           <div className="mb-4">
@@ -500,7 +607,7 @@ const CategorySelector = () => {
                   Upload new
                 </label>
                 <p className="text-gray-500 text-sm mt-2">
-                  Accepts images, videos, or 3D models
+                  Accepts images and videos in mp4 format only
                 </p>
               </div>
             ) : (
@@ -574,26 +681,43 @@ const CategorySelector = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   Price
                 </label>
-                <input
-                  type="text"
-                  placeholder="$ 0.00"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  className="w-full border p-2 rounded-2xl border-gray-500"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    value={price}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d*\.?\d{0,2}$/.test(value)) {
+                        setPrice(value);
+                      }
+                    }}
+                    className="w-full pl-7 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Compare at Price
                 </label>
-                <input
-                  type="text"
-                  value={compareAtPrice}
-                  onChange={(e) => setCompareAtPrice(e.target.value)}
-                  placeholder="$ 0.00"
-                  className="w-full border p-2 rounded-2xl border-gray-500"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    value={compareAtPrice}
+                    onChange={(e) => setCompareAtPrice(e.target.value)}
+                    placeholder=" 0.00"
+                    className="w-full pl-7 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
+                  />
+                </div>
               </div>
             </div>
 
@@ -632,10 +756,10 @@ const CategorySelector = () => {
                     Quantity
                   </label>{" "}
                   <input
-                    type="text"
+                    type="number"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    className="w-16 border px-3 py-1 rounded-md text-right mb-3"
+                    className="w-20 border px-3 py-1 rounded-md text-center mb-3 no-spinner"
                   />
                 </div>
               </div>
@@ -725,17 +849,7 @@ const CategorySelector = () => {
                   Weight
                 </label>
                 <div className="flex items-center space-x-2 mt-2">
-                  {/* Weight Input and Minus/Plus Buttons */}
                   <div className="flex items-center border border-gray-300 rounded-md">
-                    {/* Minus Icon */}
-                    <button
-                      onClick={handleSubtract}
-                      className="px-2 py-1 text-gray-500"
-                    >
-                      <FaMinus />
-                    </button>
-
-                    {/* Weight Input */}
                     <input
                       type="text"
                       value={weight}
@@ -743,17 +857,8 @@ const CategorySelector = () => {
                       className="w-20 text-center py-1 border-0 focus:ring-0"
                       placeholder="0.00"
                     />
-
-                    {/* Plus Icon */}
-                    <button
-                      onClick={handleAdd}
-                      className="px-2 py-1 text-gray-500"
-                    >
-                      <FaPlus />
-                    </button>
                   </div>
 
-                  {/* Weight Unit Selector */}
                   <select
                     value={unit}
                     onChange={(e) => setUnit(e.target.value)}
@@ -911,72 +1016,89 @@ const CategorySelector = () => {
                   )}
                 </div> */}
                 <div className="mt-3">
-  <div className="grid grid-cols-5 gap-4 mb-2">
-    <h3 className="font-semibold text-md text-gray-800">Variants</h3>
-    <h3 className="font-semibold text-md text-gray-800">Price</h3>
-    <h3 className="font-semibold text-md text-gray-800">Availability</h3>
-    <h3 className="font-semibold text-md text-gray-800">SKU</h3>
-    <h3 className="font-semibold text-md text-gray-800">Action</h3>
-  </div>
+                  <div className="grid grid-cols-5 gap-4 mb-2">
+                    <h3 className="font-semibold text-md text-gray-800">
+                      Variants
+                    </h3>
+                    <h3 className="font-semibold text-md text-gray-800">
+                      Price
+                    </h3>
+                    <h3 className="font-semibold text-md text-gray-800">
+                      Availability
+                    </h3>
+                    <h3 className="font-semibold text-md text-gray-800">SKU</h3>
+                    <h3 className="font-semibold text-md text-gray-800">
+                      Action
+                    </h3>
+                  </div>
 
-  {generateVariants().length > 0 ? (
-    generateVariants().map((combination, index) => (
-      <div key={index} className="bg-gray-100 p-6 rounded-md mt-2">
-        <div className="flex items-center justify-between">
-          <div className="font-medium text-gray-700">{combination.parent}</div>
-          <button
-            onClick={() => toggleChildOptions(index)}
-            className="text-gray-500"
-          >
-            {expandedParents.includes(index) ? (
-              <IoIosArrowUp className="text-xl" />
-            ) : (
-              <MdOutlineKeyboardArrowDown className="text-2xl" />
-            )}
-          </button>
-        </div>
+                  {generateVariants().length > 0 ? (
+                    generateVariants().map((combination, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-100 p-6 rounded-md mt-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="font-medium text-gray-700">
+                            {combination.parent}
+                          </div>
+                          <button
+                            onClick={() => toggleChildOptions(index)}
+                            className="text-gray-500"
+                          >
+                            {expandedParents.includes(index) ? (
+                              <IoIosArrowUp className="text-xl" />
+                            ) : (
+                              <MdOutlineKeyboardArrowDown className="text-2xl" />
+                            )}
+                          </button>
+                        </div>
 
-        {expandedParents.includes(index) && (
-          <div className="mt-2">
-            <ul className="space-y-2">
-              {combination.children.map((child, idx) => (
-                <li key={idx} className="grid grid-cols-5 gap-4 items-center">
-                  <span className="font-medium text-gray-700">{child}</span>
-                  <input
-                    type="text"
-                    value={price}
-                    placeholder="Price"
-                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
-                  />
-                  <input
-                    type="text"
-                    value={quantity}
-                    placeholder="Availability"
-                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
-                  />
-                  <input
-                    type="text"
-                    value={sku}
-                    placeholder="SKU"
-                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
-                  />
-                  <button className="flex justify-end text-red-500">
-                    <RiDeleteBin5Fill />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-    ))
-  ) : (
-    <p className="text-gray-600">
-      Add more options to generate variants.
-    </p>
-  )}
-</div>
-
+                        {expandedParents.includes(index) && (
+                          <div className="mt-2">
+                            <ul className="space-y-2">
+                              {combination.children.map((child, idx) => (
+                                <li
+                                  key={idx}
+                                  className="grid grid-cols-5 gap-4 items-center"
+                                >
+                                  <span className="font-medium text-gray-700">
+                                    {child}
+                                  </span>
+                                  <input
+                                    type="text"
+                                    value={price}
+                                    placeholder="Price"
+                                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={quantity}
+                                    placeholder="Availability"
+                                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={sku}
+                                    placeholder="SKU"
+                                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
+                                  />
+                                  <button className="flex justify-end text-red-500">
+                                    <RiDeleteBin5Fill />
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-600">
+                      Add more options to generate variants.
+                    </p>
+                  )}
+                </div>
 
                 <button
                   onClick={handleOpenForm}
@@ -987,7 +1109,6 @@ const CategorySelector = () => {
               </div>
             )}
 
-            {/* Variant form for adding options */}
             {showVariantForm && (
               <div className="mt-3 border border-gray-300 rounded-lg p-4 bg-gray-50">
                 <label className="block text-sm font-medium text-gray-700">
@@ -1009,11 +1130,18 @@ const CategorySelector = () => {
                     <input
                       type="text"
                       value={value}
+                      ref={(el) => (inputRefs.current[index] = el)}
                       onChange={(e) =>
                         handleNewOptionValueChange(index, e.target.value)
                       }
                       placeholder="Medium"
                       className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddNewValue();
+                        }
+                      }}
                     />
                     {newOption.values.length > 1 && (
                       <button
@@ -1062,7 +1190,6 @@ const CategorySelector = () => {
               : "Add Product"}
           </button>
 
-          {/* Status Message */}
           {message && (
             <p
               className={`mt-2 text-${
@@ -1074,8 +1201,6 @@ const CategorySelector = () => {
           )}
         </div>
         <div className="space-y-6">
-          {/* Status  */}
-
           <div className="bg-white p-4 border border-gray-300 rounded-xl">
             <label className="block text-sm font-medium text-gray-700">
               Status
@@ -1085,7 +1210,7 @@ const CategorySelector = () => {
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             >
-              <option value="publish">publish</option>
+              <option value="publish">Publish</option>
               <option value={"draft"}>Draft</option>
             </select>
           </div>

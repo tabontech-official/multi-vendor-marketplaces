@@ -392,7 +392,8 @@ const CategorySelector = () => {
       setUnit(product.shipping?.weight_unit || "kg");
       setStatus(product.status || "publish");
       setUserId(product.userId || "");
-
+      const imageURLs = product.images?.map((img) => img.src) || [];
+      setSelectedImages(imageURLs);
       const tagsArray = Array.isArray(product.tags)
         ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
         : [];
@@ -1065,17 +1066,23 @@ const CategorySelector = () => {
                                   <span className="font-medium text-gray-700">
                                     {child}
                                   </span>
+                                  <div className="relative">
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                      $
+                                    </span>
+                                    <input
+                                      type="number"
+                                      value={price}
+                                      placeholder="Price"
+                                      className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
+                                    />
+                                  </div>
+                                  
                                   <input
-                                    type="text"
-                                    value={price}
-                                    placeholder="Price"
-                                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
-                                  />
-                                  <input
-                                    type="text"
+                                    type="number"
                                     value={quantity}
                                     placeholder="Availability"
-                                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
+                                    className="w-full p-1 border border-gray-300 rounded-md text-sm no-spinner"
                                   />
                                   <input
                                     type="text"
@@ -1083,8 +1090,10 @@ const CategorySelector = () => {
                                     placeholder="SKU"
                                     className="w-full p-1 border border-gray-300 rounded-md text-sm"
                                   />
-                                  <button className="flex justify-end text-red-500">
-                                    <RiDeleteBin5Fill />
+                                  <button
+                                    className="text-red-600 text-sm  flex justify-end rounded-md p-1"
+                                  >
+                                    <FaTrash />
                                   </button>
                                 </li>
                               ))}

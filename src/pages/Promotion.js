@@ -70,6 +70,7 @@ const Promotion = () => {
   const [Loading, setLoading] = useState(false);
   const modalRef = useRef();
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
+
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("Active Promotions") || "Promotions Details";
   });
@@ -156,7 +157,10 @@ const Promotion = () => {
     fetchPromotions();
   }, []);
   const [selectedProduct, setSelectedProduct] = useState(null);
-
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+  };
   const handleSubmitPromotion = async () => {
     const userId = localStorage.getItem("userid");
     const promoPrice = promoPrices[selectedProduct._id];
@@ -176,10 +180,11 @@ const Promotion = () => {
         }
       );
 
-      alert("Promotion added successfully!");
+      showToast("success", "Promotion created successfully!");
       setModalOpen(false);
       setModalStartDate("");
       setModalEndDate("");
+      window.location.reload();
     } catch (error) {
       console.error("Error adding promotion:", error);
       alert("Failed to add promotion.");
@@ -276,16 +281,11 @@ const Promotion = () => {
 
         {toast.show && (
           <div
-            className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+            className={`fixed top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-md shadow-lg z-50 text-white text-sm ${
               toast.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+            }`}
           >
-            {toast.type === "success" ? (
-              <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
-            ) : (
-              <HiOutlineXCircle className="w-6 h-6 mr-2" />
-            )}
-            <span>{toast.message}</span>
+            {toast.message}
           </div>
         )}
       </div>

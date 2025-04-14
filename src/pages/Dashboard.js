@@ -98,7 +98,7 @@ const Dashboard = () => {
           ),
         ]);
 
-        setHasMore(page < data.totalPages); // Check if more pages are available
+        setHasMore(page < data.totalPages); 
       }
     } catch (error) {
       console.error("Error fetching products:", error);

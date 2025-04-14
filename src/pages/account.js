@@ -378,7 +378,7 @@ const AccountPage = () => {
 
           <nav className="mt-6 space-y-4">
             <NavLink
-              to="/MANAGE_USER"
+              to="/manage-user"
               className={({ isActive }) =>
                 `w-full flex items-center space-x-3 ${
                   isActive ? "text-yellow-400" : "text-blue-300"

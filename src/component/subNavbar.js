@@ -84,8 +84,8 @@ const SubNavbar = () => {
       icon: <FaTh className="text-green-600" />,
       path: "#",
       subModules: [
-        { name: "Manage Product", path: "/MANAGE_PRODUCT" },
-        { name: "Add Product", path: "/PRODUCT_LISTING" },
+        { name: "Manage Product", path: "/manage-product" },
+        { name: "Add Product", path: "/add-product" },
         { name: "Inventory", path: "/inventory" },
       ],
     },
@@ -101,7 +101,7 @@ const SubNavbar = () => {
       path: "#",
       subModules: [
         { name: "my Promitions", path: "#" },
-        { name: "All Promotions", path: "/PROMOTIONS" },
+        { name: "All Promotions", path: "/promotions" },
       ],
     },
     {
@@ -109,8 +109,8 @@ const SubNavbar = () => {
       icon: <BsGraphUp className="text-purple-500" />,
       path: "#",
       subModules: [
-        { name: "Catalog Performance", path: "/CATALOG_PERFORMANCE" },
-        { name: "eCommerence Consultion", path: "/CONSULTATION" },
+        { name: "Catalog Performance", path: "/catalog-performance" },
+        { name: "eCommerence Consultion", path: "/consultation" },
         { name: "Seller Rating", path: "#" },
       ],
     },

@@ -435,6 +435,7 @@ const CategorySelector = () => {
       setWeight(value);
     }
   };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
@@ -452,38 +453,32 @@ const CategorySelector = () => {
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
     const modifiedContent = htmlContent
-      .replace(/<p>/g, "") // Remove <p> tags
-      .replace(/<\/p>/g, "<br />") // Replace closing </p> tags with <br />
-      .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />") // Avoid double <br /> tags
-      .replace(/&nbsp;/g, " "); // Replace &nbsp; with normal spaces
+      .replace(/<p>/g, "")
+      .replace(/<\/p>/g, "<br />")
+      .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
+      .replace(/&nbsp;/g, " ");
     const formData = new FormData();
     formData.append("keyWord", keywordsList.join(", "));
     formData.append("title", title);
     formData.append("description", modifiedContent);
     formData.append("productType", productType);
     formData.append("price", parseFloat(price));
-
     if (compareAtPrice)
       formData.append("compare_at_price", parseFloat(compareAtPrice));
     formData.append("track_quantity", trackQuantity ? "true" : "false");
     formData.append("quantity", trackQuantity ? parseInt(quantity) : 0);
     formData.append("continue_selling", continueSelling);
     formData.append("has_sku", hasSKU);
-
     if (hasSKU && sku) formData.append("sku", sku);
     if (hasSKU && barcode) formData.append("barcode", barcode);
-
     formData.append("track_shipping", trackShipping);
-
     if (trackShipping && weight) formData.append("weight", parseFloat(weight));
     if (trackShipping && unit) formData.append("weight_unit", unit);
-
     formData.append("status", status);
     formData.append("userId", userId);
     formData.append("vendor", vendor);
     formData.append("options", JSON.stringify(options));
     formData.append("variants", JSON.stringify(variants));
-
     images.forEach((image, index) => {
       formData.append("images", image);
     });
@@ -525,7 +520,7 @@ const CategorySelector = () => {
         setImages([]);
         setSelectedImages([]);
         setKeyWord("");
-        navigate("/MANAGE_PRODUCT");
+        navigate("/manage-product");
       } else {
         setMessage({
           type: "error",
@@ -608,7 +603,8 @@ const CategorySelector = () => {
                   Upload new
                 </label>
                 <p className="text-gray-500 text-sm mt-2">
-                  Accepts images and videos in mp4 format only
+                  {/* Accepts images and videos in mp4 format only */}
+                  Accepts images only
                 </p>
               </div>
             ) : (
@@ -1077,7 +1073,6 @@ const CategorySelector = () => {
                                       className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
                                     />
                                   </div>
-                                  
                                   <input
                                     type="number"
                                     value={quantity}
@@ -1090,9 +1085,7 @@ const CategorySelector = () => {
                                     placeholder="SKU"
                                     className="w-full p-1 border border-gray-300 rounded-md text-sm"
                                   />
-                                  <button
-                                    className="text-red-600 text-sm  flex justify-end rounded-md p-1"
-                                  >
+                                  <button className="text-red-600 text-sm  flex justify-end rounded-md p-1">
                                     <FaTrash />
                                   </button>
                                 </li>

@@ -124,7 +124,7 @@ const Dashboard = () => {
     console.log(product);
     console.log("clicking");
 
-    let formPage = "/PRODUCT_LISTING";
+    let formPage = "/add-product";
 
     navigate(formPage, { state: { product } });
   };
@@ -411,7 +411,7 @@ const Dashboard = () => {
         </div>
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
           <Link
-            to="/PRODUCT_LISTING"
+            to="/add-product"
             className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
           >
             <HiPlus className="w-5 h-5" />

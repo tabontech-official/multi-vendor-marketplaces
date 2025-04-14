@@ -89,7 +89,7 @@ const App = () => {
         <Route path="/" element={<Layout />}>
           <Route index element={<PrivateRoute element={<MainDashboard />} />} />
           <Route
-            path="/MANAGE_PRODUCT"
+            path="/manage-product"
             element={<PrivateRoute element={<Dashboard />} />}
           />
           <Route
@@ -123,7 +123,7 @@ const App = () => {
           />
 
           <Route
-            path="/PROMOTIONS"
+            path="/promotions"
             element={<ProtectedForms element={<Promotion />} />}
           />
           <Route
@@ -131,15 +131,15 @@ const App = () => {
             element={<ProtectedForms element={<SubscriptionHistory />} />}
           />
           <Route
-            path="/CATALOG_PERFORMANCE"
+            path="/catalog-performance"
             element={<ProtectedForms element={<CatalogPerformance />} />}
           />
           <Route
-            path="/CONSULTATION"
+            path="/consultation"
             element={<ProtectedForms element={<EcommerceConsultation />} />}
           />
           <Route
-            path="/PRODUCT_LISTING"
+            path="/add-product"
             element={<PrivateRoute element={<CategorySelector />} />}
           />
 
@@ -148,7 +148,7 @@ const App = () => {
             element={<PrivateRoute element={<AccountPage />} />}
           />
           <Route
-            path="/MANAGE_USER"
+            path="/manage-user"
             element={<PrivateRoute element={<ManageUser />} />}
           />
 

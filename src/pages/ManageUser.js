@@ -207,7 +207,7 @@ const ManageUser = () => {
                 <MdManageAccounts />
               </span>
 
-              <Link to="/MANAGE_USER">
+              <Link to="/manage-user">
                 <span className="text-sm">Manage User</span>
               </Link>
             </button>

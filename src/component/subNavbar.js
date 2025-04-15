@@ -43,7 +43,6 @@ const SubNavbar = () => {
 
   useEffect(() => {
     const userId = localStorage.getItem("userid");
-    console.log("Fetched User ID from localStorage:", userId); // Debugging
   
     if (!userId) {
       console.error("No userId found in localStorage");
@@ -52,7 +51,6 @@ const SubNavbar = () => {
   
     const fetchUserModules = async () => {  
       try {
-        console.log("Fetching user modules..."); // Debugging API call
         const response = await fetch(` https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules/${userId}`);
   
         if (!response.ok) {
@@ -60,7 +58,6 @@ const SubNavbar = () => {
         }
   
         const data = await response.json();
-        console.log("User Modules:", data); // Debugging response
   
         setAllowedModules(data.modules || []);
       } catch (error) {
@@ -138,7 +135,7 @@ const SubNavbar = () => {
             {module.subModules && openDropdown === module.name && (
               <div className="absolute top-full left-0 bg-gray-600 text-white py-2 px-4 w-48 shadow-lg">
                 {module.subModules
-                  .filter((subModule) => allowedModules.includes(subModule.name)) // Filter allowed submodules
+                  .filter((subModule) => allowedModules.includes(subModule.name))
                   .map((subModule) => (
                     <Link
                       key={subModule.name}

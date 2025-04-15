@@ -39,12 +39,12 @@ const Inventory = () => {
   const [searchVal, setSearchVal] = useState("");
   const [loadingId, setLoadingId] = useState(null);
   const [message, setMessage] = useState("");
-  const [credit, setCredit] = useState(0); // Credit state
+  const [credit, setCredit] = useState(0);
   const { user } = useAuthContext();
   const dropdownRefs = useRef([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const dialogRef = useRef(null);
-  const pricePerCredit = 10; // Example price per credit
+  const pricePerCredit = 10; 
   const [errorMessage, setErrorMessage] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [Loading, setLoading] = useState(false);
@@ -335,7 +335,6 @@ const Inventory = () => {
           const data = await response.json();
           console.log("Second Product render", data);
 
-          // Sort products by creation date
           const sortedProducts = data.products.sort(
             (a, b) => new Date(b.created_at) - new Date(a.created_at)
           );
@@ -356,7 +355,6 @@ const Inventory = () => {
             return [...prev, ...newProducts];
           });
 
-          // Ensure hasMore updates correctly
           setHasMore(page < data.totalPages);
         } else {
           console.error("Failed to fetch products:", response.status);

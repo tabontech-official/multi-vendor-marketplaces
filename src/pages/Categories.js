@@ -57,6 +57,33 @@ const CategorySelector = () => {
   const [openOptionIndex, setOpenOptionIndex] = useState(null);
   const [expandedParents, setExpandedParents] = useState([]);
   const [variantImages, setVariantImages] = useState([]);
+  const [productTypesList, setProductTypesList] = useState([]);
+  const [vendorList, setVendorList] = useState([]);
+  const removeProductType = (index) => {
+    const newList = [...productTypesList];
+    newList.splice(index, 1);
+    setProductTypesList(newList);
+  };
+
+  const removeVendor = (index) => {
+    const newList = [...vendorList];
+    newList.splice(index, 1);
+    setVendorList(newList);
+  };
+
+  const handleProductTypeChange = (e) => {
+    if (e.key === "Enter" && productType) {
+      setProductTypesList((prev) => [...prev, productType]);
+      setProductType("");
+    }
+  };
+
+  const handleVendorChange = (e) => {
+    if (e.key === "Enter" && vendor) {
+      setVendorList((prev) => [...prev, vendor]);
+      setVendor("");
+    }
+  };
 
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
@@ -282,6 +309,7 @@ const CategorySelector = () => {
     return combinations;
   };
 
+
   const [combinations, setCombinations] = useState(generateVariants());
   useEffect(() => {
     setCombinations(generateVariants());
@@ -348,84 +376,7 @@ const CategorySelector = () => {
     );
   }, [variants]);
 
-  // useEffect(() => {
-  //   if (product) {
-  //     const allVariants = product.variants;
 
-  //     const groupedVariants = allVariants.reduce((acc, variant) => {
-  //       const leftOption = variant.option1;
-  //       const rightOption = variant.option2;
-
-  //       if (!acc[leftOption]) {
-  //         acc[leftOption] = {
-  //           parent: {
-  //             ...variant,
-  //             option1: leftOption,
-  //             option2: null,
-  //             option3: null,
-  //             isParent: true,
-  //           },
-  //           children: [],
-  //         };
-  //       }
-
-  //       if (rightOption) {
-  //         acc[leftOption].children.push({
-  //           ...variant,
-  //           option1: leftOption,
-  //           option2: rightOption,
-  //           option3: null,
-  //           isParent: false,
-  //         });
-  //       }
-
-  //       return acc;
-  //     }, {});
-
-  //     const formattedVariants = Object.keys(groupedVariants).map(
-  //       (key, index) => ({
-  //         ...groupedVariants[key].parent,
-  //         group: `parent-${index}`,
-  //         subVariants: groupedVariants[key].children,
-  //       })
-  //     );
-
-  //     setIsEditing(true);
-  //     setTitle(product.title || "");
-  //     setDescription(product.body_html || "");
-  //     setProductType(product.product_type || "");
-  //     setPrice(product.variants[0]?.price || "");
-  //     setCompareAtPrice(product.variants[0]?.compare_at_price || "");
-  //     setTrackQuantity(product.inventory?.track_quantity || false);
-  //     setQuantity(product.inventory?.quantity || 0);
-  //     setContinueSelling(product.inventory?.continue_selling || false);
-  //     setHasSKU(product.inventory?.has_sku || false);
-  //     setSKU(product.inventory?.sku || "");
-  //     setBarcode(product.inventory?.barcode || "");
-  //     setTrackShipping(product.shipping?.track_shipping || false);
-  //     setWeight(product.shipping?.weight || "");
-  //     setUnit(product.shipping?.weight_unit || "kg");
-  //     setStatus(product.status || "publish");
-  //     setUserId(product.userId || "");
-  //     const tagsArray = Array.isArray(product.tags)
-  //       ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
-  //       : [];
-
-  //     setKeywordsList(tagsArray);
-
-  //     setVendor(product.vendor || "");
-  //     setOptions(
-  //       product.options?.map((option) => ({
-  //         id: option.id || "No ID",
-  //         name: option.name || "Unnamed Option",
-  //         values: option.values || [],
-  //       })) || []
-  //     );
-  //     setVariants(formattedVariants);
-  //     setImages(product.images || []);
-  //   }
-
-  // }, [product]);
 
   useEffect(() => {
     if (product) {
@@ -471,7 +422,6 @@ const CategorySelector = () => {
 
       setIsEditing(true);
       setTitle(product.title || "");
-      setProductType(product.product_type || "");
       setPrice(product.variants[0]?.price || "");
       setCompareAtPrice(product.variants[0]?.compare_at_price || "");
       setTrackQuantity(product.inventory?.track_quantity || false);
@@ -492,7 +442,19 @@ const CategorySelector = () => {
         : [];
       setKeywordsList(tagsArray);
 
-      setVendor(product.vendor || "");
+      const vendorArray =
+        typeof product.vendor === "string"
+          ? product.vendor.split(",").map((v) => v.trim())
+          : [];
+      setVendorList(vendorArray);
+
+      const productTypeList =
+        typeof product.product_type === "string"
+          ? product.product_type.split(",").map((p) => p.trim())
+          : [];
+      
+      setProductTypesList(productTypeList);
+
       setOptions(
         product.options?.map((option) => ({
           id: option.id || "No ID",
@@ -564,7 +526,7 @@ const CategorySelector = () => {
     formData.append("keyWord", keywordsList.join(", "));
     formData.append("title", title);
     formData.append("description", modifiedContent);
-    formData.append("productType", productType);
+    formData.append("productType", productTypesList.join(","));
     formData.append("price", parseFloat(price));
     if (compareAtPrice)
       formData.append("compare_at_price", parseFloat(compareAtPrice));
@@ -579,7 +541,7 @@ const CategorySelector = () => {
     if (trackShipping && unit) formData.append("weight_unit", unit);
     formData.append("status", status);
     formData.append("userId", userId);
-    formData.append("vendor", vendor);
+    formData.append("vendor", vendorList.join(","));
     formData.append("options", JSON.stringify(options));
     formData.append("variants", JSON.stringify(variants));
     images.forEach((image, index) => {
@@ -593,8 +555,8 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : " https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+        ? ` http://localhost:5000/product/updateProducts/${product._id}`
+        : " http://localhost:5000/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -1358,7 +1320,7 @@ const CategorySelector = () => {
             </select>
           </div>
 
-          <div className="bg-white p-4 border border-gray-300 rounded-xl">
+          {/* <div className="bg-white p-4 border border-gray-300 rounded-xl">
             <label className="block text-sm font-medium text-gray-700">
               Product organization
             </label>
@@ -1395,6 +1357,105 @@ const CategorySelector = () => {
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
 
+              <div className="flex flex-wrap gap-2 mt-2">
+                {keywordsList.map((word, index) => (
+                  <span
+                    key={index}
+                    className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
+                  >
+                    {word}
+                    <button
+                      type="button"
+                      className="ml-2 text-red-500"
+                      onClick={() => removeKeyword(index)}
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div> */}
+          <div className="bg-white p-4 border border-gray-300 rounded-xl">
+            <label className="block text-sm font-medium text-gray-700">
+              Product organization
+            </label>
+            <div className="mt-2 space-y-2">
+              {/* Product Type */}
+              <label
+                htmlFor="productType"
+                className="block text-gray-600 text-sm"
+              >
+                Product Type
+              </label>
+              <input
+                type="text"
+                placeholder="Type"
+                value={productType}
+                onChange={(e) => setProductType(e.target.value)}
+                onKeyDown={handleProductTypeChange}
+                className="w-full border border-gray-300 p-2 rounded-xl"
+              />
+              <div className="flex flex-wrap gap-2 mt-2">
+                {productTypesList.map((type, index) => (
+                  <span
+                    key={index}
+                    className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
+                  >
+                    {type}
+                    <button
+                      type="button"
+                      className="ml-2 text-red-500"
+                      onClick={() => removeProductType(index)}
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+
+              {/* Vendor */}
+              <label htmlFor="vendor" className="block text-gray-600 text-sm">
+                Vendor
+              </label>
+              <input
+                type="text"
+                value={vendor}
+                onChange={(e) => setVendor(e.target.value)}
+                onKeyDown={handleVendorChange}
+                placeholder="Vendor"
+                className="w-full border border-gray-300 p-2 rounded-xl"
+              />
+              <div className="flex flex-wrap gap-2 mt-2">
+                {vendorList.map((v, index) => (
+                  <span
+                    key={index}
+                    className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
+                  >
+                    {v}
+                    <button
+                      type="button"
+                      className="ml-2 text-red-500"
+                      onClick={() => removeVendor(index)}
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+
+              {/* Keywords */}
+              <label htmlFor="keywords" className="block text-gray-600 text-sm">
+                Keywords
+              </label>
+              <input
+                type="text"
+                placeholder="Key Words"
+                value={keyWord}
+                onKeyDown={handleKeyDownForKeyWords}
+                onChange={(e) => setKeyWord(e.target.value)}
+                className="w-full border border-gray-300 p-2 rounded-xl"
+              />
               <div className="flex flex-wrap gap-2 mt-2">
                 {keywordsList.map((word, index) => (
                   <span

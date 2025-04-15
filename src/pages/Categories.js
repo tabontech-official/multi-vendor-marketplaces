@@ -407,14 +407,7 @@ const CategorySelector = () => {
     }
   };
 
-  // const handleVariantImageUpload = (event) => {
-  //   const files = Array.from(event.target.files);
-  //   const variantImagePreviews = files.map((file) => URL.createObjectURL(file));
 
-  //   setVariantImages((prevImages) => [...prevImages, ...variantImagePreviews]);
-
-  //   setVariantImages((prevFiles) => [...prevFiles, ...files]);
-  // };
 
   const handleVariantImageUpload = (event, parentIndex, childIndex) => {
     const file = event.target.files[0];
@@ -474,11 +467,7 @@ const CategorySelector = () => {
     images.forEach((image, index) => {
       formData.append("images", image);
     });
-    // variantImages.forEach((image) => {
-    //   if (image) {
-    //     formData.append("variantImages", image);
-    //   }
-    // });
+    
     Object.entries(variantImages).forEach(([key, { file }]) => {
       formData.append("variantImages", file);
       formData.append("variantImageKeys", key);

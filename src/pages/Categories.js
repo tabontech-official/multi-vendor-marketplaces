@@ -39,6 +39,8 @@ const CategorySelector = () => {
   const [weight, setWeight] = useState("");
   const [unit, setUnit] = useState("kg");
   const [status, setStatus] = useState("publish");
+  const [varinatImages, setVarinatImages] = useState([]); // For storing raw files (for upload)
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [userId, setUserId] = useState("");
@@ -54,6 +56,8 @@ const CategorySelector = () => {
   const locationData = useLocation();
   const [openOptionIndex, setOpenOptionIndex] = useState(null);
   const [expandedParents, setExpandedParents] = useState([]);
+  const [variantImages, setVariantImages] = useState([]);
+
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
   );
@@ -88,12 +92,21 @@ const CategorySelector = () => {
 
   const inputRefs = useRef([]);
 
+  const handleImageUpload = (e, childIndex) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Handle the image upload logic here (e.g., saving it to a server or state)
+      console.log(`Image uploaded for child ${childIndex}:`, file);
+    }
+  };
+
   useEffect(() => {
     if (inputRefs.current.length > 0) {
       const lastInput = inputRefs.current[inputRefs.current.length - 1];
       lastInput?.focus();
     }
   }, [newOption.values.length]);
+
   const handleKeyDownForKeyWords = (e) => {
     if (e.key === "Enter" && keyWord.trim() !== "") {
       e.preventDefault();
@@ -160,7 +173,83 @@ const CategorySelector = () => {
 
   //   return combinations;
   // };
+  const handleDeleteCombination = (parentIndex, childIndex) => {
+    console.log("Attempting to delete combination:", {
+      parentIndex,
+      childIndex,
+    });
+    console.log("Combinations before deletion:", combinations);
 
+    if (combinations[parentIndex]) {
+      console.log("Parent found:", combinations[parentIndex]);
+    } else {
+      console.error("Invalid parentIndex:", parentIndex);
+    }
+
+    if (combinations[parentIndex] && combinations[parentIndex].children) {
+      console.log("Children of parent:", combinations[parentIndex].children);
+    } else {
+      console.error("No children found for parentIndex:", parentIndex);
+    }
+
+    if (
+      combinations[parentIndex] &&
+      Array.isArray(combinations[parentIndex].children) &&
+      combinations[parentIndex].children.length > 0
+    ) {
+      const updatedCombinations = [...combinations];
+      const children = combinations[parentIndex].children;
+
+      if (children[childIndex]) {
+        console.log("Deleting child:", children[childIndex]);
+        children.splice(childIndex, 1);
+        setCombinations(updatedCombinations);
+        console.log(
+          "Updated combinations after deletion:",
+          updatedCombinations
+        );
+      } else {
+        console.error("Invalid childIndex:", childIndex);
+      }
+    } else {
+      console.error(
+        "Invalid parent index or no children found at parentIndex:",
+        parentIndex
+      );
+    }
+  };
+
+  // const generateVariants = () => {
+  //   if (options.length < 2) return [];
+
+  //   const parentOption = options[0];
+  //   const childOptions = options.slice(1);
+
+  //   let combinations = [];
+
+  //   parentOption.values.forEach((parentValue) => {
+  //     let childCombinations = [];
+
+  //     if (childOptions.length === 1) {
+  //       childOptions[0].values.forEach((val) => {
+  //         childCombinations.push(`${val}`);
+  //       });
+  //     } else if (childOptions.length === 2) {
+  //       childOptions[0].values.forEach((val1) => {
+  //         childOptions[1].values.forEach((val2) => {
+  //           childCombinations.push(`${val1} / ${val2}`);
+  //         });
+  //       });
+  //     }
+
+  //     combinations.push({
+  //       parent: parentValue,
+  //       children: childCombinations,
+  //     });
+  //   });
+
+  //   return combinations;
+  // };
   const generateVariants = () => {
     if (options.length < 2) return [];
 
@@ -193,6 +282,10 @@ const CategorySelector = () => {
     return combinations;
   };
 
+  const [combinations, setCombinations] = useState(generateVariants());
+  useEffect(() => {
+    setCombinations(generateVariants());
+  }, [options]);
   const handleOpenForm = () => {
     setNewOption({ name: "", values: [""] });
     setShowVariantForm(true);
@@ -409,6 +502,7 @@ const CategorySelector = () => {
       );
       setVariants(formattedVariants);
       setImages(product.images || []);
+      setVariantImages(product.variants[0].image || []);
 
       const rawDescription = product.body_html || "";
       try {
@@ -435,7 +529,16 @@ const CategorySelector = () => {
       setWeight(value);
     }
   };
-  
+
+  const handleVariantImageUpload = (event) => {
+    const files = Array.from(event.target.files);
+    const variantImagePreviews = files.map((file) => URL.createObjectURL(file));
+
+    setVariantImages((prevImages) => [...prevImages, ...variantImagePreviews]);
+
+    setVariantImages((prevFiles) => [...prevFiles, ...files]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
@@ -481,6 +584,11 @@ const CategorySelector = () => {
     formData.append("variants", JSON.stringify(variants));
     images.forEach((image, index) => {
       formData.append("images", image);
+    });
+    variantImages.forEach((image) => {
+      if (image) {
+        formData.append("variantImages", image);
+      }
     });
 
     try {
@@ -1013,18 +1121,18 @@ const CategorySelector = () => {
                   )}
                 </div> */}
                 <div className="mt-3">
-                  <div className="grid grid-cols-5 gap-4 mb-2">
-                    <h3 className="font-semibold text-md text-gray-800">
-                      Variants
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="w-16"></div>
+                    <h3 className="font-semibold text-md text-gray-800 w-[120px]">
+                      Variant
                     </h3>
-                    <h3 className="font-semibold text-md text-gray-800">
+                    <h3 className="font-semibold text-md text-gray-800 w-24">
                       Price
                     </h3>
-                    <h3 className="font-semibold text-md text-gray-800">
+                    <h3 className="font-semibold text-md text-gray-800 w-24">
                       Availability
                     </h3>
-                    <h3 className="font-semibold text-md text-gray-800">SKU</h3>
-                    <h3 className="font-semibold text-md text-gray-800">
+                    <h3 className="font-semibold text-md text-gray-800 w-12">
                       Action
                     </h3>
                   </div>
@@ -1054,51 +1162,84 @@ const CategorySelector = () => {
                         {expandedParents.includes(index) && (
                           <div className="mt-2">
                             <ul className="space-y-2">
-                              {combination.children.map((child, idx) => (
-                                <li
-                                  key={idx}
-                                  className="grid grid-cols-5 gap-4 items-center"
-                                >
-                                  <span className="font-medium text-gray-700">
-                                    {child}
-                                  </span>
-                                  <div className="relative">
-                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                      $
+                              {combinations[index]?.children?.map(
+                                (child, childIndex) => (
+                                  <li
+                                    key={childIndex}
+                                    className="flex items-center gap-4"
+                                  >
+                                    <div className="w-16">
+                                      <label className="relative flex items-center justify-center w-16 h-16 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
+                                        {variantImages[childIndex] ? (
+                                          <img
+                                            src={variantImages[childIndex]}
+                                            alt={`Variant ${childIndex}`}
+                                            className="w-full h-full object-cover"
+                                          />
+                                        ) : (
+                                          <span className="text-3xl text-gray-400">
+                                            +
+                                          </span>
+                                        )}
+                                        <input
+                                          type="file"
+                                          accept="image/*"
+                                          className="absolute inset-0 opacity-0 cursor-pointer"
+                                          onChange={(e) =>
+                                            handleVariantImageUpload(
+                                              e,
+                                              childIndex
+                                            )
+                                          }
+                                        />
+                                      </label>
+                                    </div>
+
+                                    <span className="font-medium text-gray-700 w-[120px]">
+                                      {child}
                                     </span>
+
+                                    <div className="relative w-24">
+                                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                        $
+                                      </span>
+                                      <input
+                                        type="number"
+                                        value={price}
+                                        placeholder="Price"
+                                        className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
+                                      />
+                                    </div>
+
                                     <input
                                       type="number"
-                                      value={price}
-                                      placeholder="Price"
-                                      className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
+                                      value={quantity}
+                                      placeholder="Availability"
+                                      className="w-24 p-1 border border-gray-300 rounded-md text-sm no-spinner"
                                     />
-                                  </div>
-                                  <input
-                                    type="number"
-                                    value={quantity}
-                                    placeholder="Availability"
-                                    className="w-full p-1 border border-gray-300 rounded-md text-sm no-spinner"
-                                  />
-                                  <input
-                                    type="text"
-                                    value={sku}
-                                    placeholder="SKU"
-                                    className="w-full p-1 border border-gray-300 rounded-md text-sm"
-                                  />
-                                  <button className="text-red-600 text-sm  flex justify-end rounded-md p-1">
-                                    <FaTrash />
-                                  </button>
-                                </li>
-                              ))}
+
+                                    {/* Action */}
+                                    <button
+                                      onClick={() =>
+                                        handleDeleteCombination(
+                                          index,
+                                          childIndex
+                                        )
+                                      }
+                                      className="text-red-600"
+                                    >
+                                      <FaTrash />
+                                    </button>
+                                  </li>
+                                )
+                              )}
                             </ul>
                           </div>
                         )}
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-600">
-                      Add more options to generate variants.
-                    </p>
+                    <p className="text-gray-600"></p>
                   )}
                 </div>
 

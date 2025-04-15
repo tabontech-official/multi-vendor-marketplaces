@@ -445,7 +445,7 @@ const Promotion = () => {
                     {/* <th className="p-3">ACTION</th> */}
                     <th className="p-3">LISTING NAME</th>
                     <th className="p-3">SELLER_SKU</th>
-                    <th className="p-3">CURRENT_PRICE</th>
+                    <th className="p-3">ORIGINAL_PRICE</th>
                     <th className="p-3">PROMO_PRICE</th>
                     <th className="p-3">CURRENT_STOCK</th>
                     <th className="p-3">ADD PROMOTION</th>
@@ -528,7 +528,7 @@ const Promotion = () => {
                   <th className="p-3">ACTION</th>
                   <th className="p-3">LISTING NAME</th>
                   <th className="p-3">SELLER_SKU</th>
-                  <th className="p-3">CURRENT_PRICE</th>
+                  <th className="p-3">ORIGINAL_PRICE</th>
                   <th className="p-3">PROMO_PRICE</th>
                   <th className="p-3">CURRENT_STOCK</th>
                   {/* <th className="p-3">EDIT</th> */}

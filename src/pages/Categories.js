@@ -39,8 +39,6 @@ const CategorySelector = () => {
   const [weight, setWeight] = useState("");
   const [unit, setUnit] = useState("kg");
   const [status, setStatus] = useState("publish");
-  const [varinatImages, setVarinatImages] = useState([]); // For storing raw files (for upload)
-
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [userId, setUserId] = useState("");
@@ -54,11 +52,11 @@ const CategorySelector = () => {
   const [checkedImages, setCheckedImages] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const locationData = useLocation();
-  const [openOptionIndex, setOpenOptionIndex] = useState(null);
   const [expandedParents, setExpandedParents] = useState([]);
-  const [variantImages, setVariantImages] = useState([]);
+  const [variantImages, setVariantImages] = useState({});
   const [productTypesList, setProductTypesList] = useState([]);
   const [vendorList, setVendorList] = useState([]);
+
   const removeProductType = (index) => {
     const newList = [...productTypesList];
     newList.splice(index, 1);
@@ -105,27 +103,8 @@ const CategorySelector = () => {
   };
 
   const navigate = useNavigate();
-  const modules = {
-    toolbar: [
-      [{ header: [1, 2, false] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      [{ align: [] }],
-      [{ color: [] }, { background: [] }],
-      ["link", "image", "video"],
-      ["clean"],
-    ],
-  };
 
   const inputRefs = useRef([]);
-
-  const handleImageUpload = (e, childIndex) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Handle the image upload logic here (e.g., saving it to a server or state)
-      console.log(`Image uploaded for child ${childIndex}:`, file);
-    }
-  };
 
   useEffect(() => {
     if (inputRefs.current.length > 0) {
@@ -148,13 +127,7 @@ const CategorySelector = () => {
     newList.splice(index, 1);
     setKeywordsList(newList);
   };
-  const handleKeyDown = (e, setState, stateValues) => {
-    if (e.key === "Enter" && e.target.value.trim() !== "") {
-      setState([...stateValues, e.target.value.trim()]);
-      e.target.value = "";
-      e.preventDefault();
-    }
-  };
+
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files);
     const imagePreviews = files.map((file) => URL.createObjectURL(file));
@@ -177,29 +150,6 @@ const CategorySelector = () => {
     setCheckedImages({});
   };
 
-  // const generateVariants = () => {
-  //   if (options.length < 2) return [];
-
-  //   const parentOption = options[0];
-  //   const childOptions = options.slice(1);
-
-  //   let combinations = [];
-  //   parentOption.values.forEach((parentValue) => {
-  //     let childValues = [];
-  //     childOptions.forEach((childOption) => {
-  //       childOption.values.forEach((childValue) => {
-  //         childValues.push(childValue);
-  //       });
-  //     });
-
-  //     combinations.push({
-  //       parent: parentValue,
-  //       children: childValues,
-  //     });
-  //   });
-
-  //   return combinations;
-  // };
   const handleDeleteCombination = (parentIndex, childIndex) => {
     console.log("Attempting to delete combination:", {
       parentIndex,
@@ -246,37 +196,6 @@ const CategorySelector = () => {
     }
   };
 
-  // const generateVariants = () => {
-  //   if (options.length < 2) return [];
-
-  //   const parentOption = options[0];
-  //   const childOptions = options.slice(1);
-
-  //   let combinations = [];
-
-  //   parentOption.values.forEach((parentValue) => {
-  //     let childCombinations = [];
-
-  //     if (childOptions.length === 1) {
-  //       childOptions[0].values.forEach((val) => {
-  //         childCombinations.push(`${val}`);
-  //       });
-  //     } else if (childOptions.length === 2) {
-  //       childOptions[0].values.forEach((val1) => {
-  //         childOptions[1].values.forEach((val2) => {
-  //           childCombinations.push(`${val1} / ${val2}`);
-  //         });
-  //       });
-  //     }
-
-  //     combinations.push({
-  //       parent: parentValue,
-  //       children: childCombinations,
-  //     });
-  //   });
-
-  //   return combinations;
-  // };
   const generateVariants = () => {
     if (options.length < 2) return [];
 
@@ -308,7 +227,6 @@ const CategorySelector = () => {
 
     return combinations;
   };
-
 
   const [combinations, setCombinations] = useState(generateVariants());
   useEffect(() => {
@@ -355,8 +273,6 @@ const CategorySelector = () => {
     }
   }, []);
 
-  const { product } = locationData.state || {};
-
   useEffect(() => {
     setVariants((prevVariants) =>
       prevVariants.map((variant) => {
@@ -375,8 +291,7 @@ const CategorySelector = () => {
       })
     );
   }, [variants]);
-
-
+  const { product } = locationData.state || {};
 
   useEffect(() => {
     if (product) {
@@ -452,7 +367,7 @@ const CategorySelector = () => {
         typeof product.product_type === "string"
           ? product.product_type.split(",").map((p) => p.trim())
           : [];
-      
+
       setProductTypesList(productTypeList);
 
       setOptions(
@@ -492,13 +407,25 @@ const CategorySelector = () => {
     }
   };
 
-  const handleVariantImageUpload = (event) => {
-    const files = Array.from(event.target.files);
-    const variantImagePreviews = files.map((file) => URL.createObjectURL(file));
+  // const handleVariantImageUpload = (event) => {
+  //   const files = Array.from(event.target.files);
+  //   const variantImagePreviews = files.map((file) => URL.createObjectURL(file));
 
-    setVariantImages((prevImages) => [...prevImages, ...variantImagePreviews]);
+  //   setVariantImages((prevImages) => [...prevImages, ...variantImagePreviews]);
 
-    setVariantImages((prevFiles) => [...prevFiles, ...files]);
+  //   setVariantImages((prevFiles) => [...prevFiles, ...files]);
+  // };
+
+  const handleVariantImageUpload = (event, parentIndex, childIndex) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const imagePreview = URL.createObjectURL(file);
+
+    setVariantImages((prev) => ({
+      ...prev,
+      [`${parentIndex}-${childIndex}`]: { file, preview: imagePreview },
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -547,10 +474,14 @@ const CategorySelector = () => {
     images.forEach((image, index) => {
       formData.append("images", image);
     });
-    variantImages.forEach((image) => {
-      if (image) {
-        formData.append("variantImages", image);
-      }
+    // variantImages.forEach((image) => {
+    //   if (image) {
+    //     formData.append("variantImages", image);
+    //   }
+    // });
+    Object.entries(variantImages).forEach(([key, { file }]) => {
+      formData.append("variantImages", file);
+      formData.append("variantImageKeys", key);
     });
 
     try {
@@ -673,7 +604,6 @@ const CategorySelector = () => {
                   Upload new
                 </label>
                 <p className="text-gray-500 text-sm mt-2">
-                  {/* Accepts images and videos in mp4 format only */}
                   Accepts images only
                 </p>
               </div>
@@ -715,30 +645,8 @@ const CategorySelector = () => {
                 </div>
               </div>
             )}
-
-            {/* Display existing & new images together */}
-            {/* <div className="flex gap-2 flex-wrap">
-              {images.map((img, index) => (
-                <div key={index} className="relative group">
-                  <img
-                    src={img.src || img} // Handle both URL and object preview
-                    alt={`Image ${index}`}
-                    className={`w-40 h-40 object-cover rounded-md border border-gray-300 transition ${
-                      checkedImages[index] ? "opacity-50" : "opacity-100"
-                    }`}
-                  />
-                  <input
-                    type="checkbox"
-                    className="absolute top-2 left-2 w-5 h-5 cursor-pointer opacity-0 group-hover:opacity-100"
-                    onChange={() => toggleImageSelection(index)}
-                    checked={checkedImages[index] || false}
-                  />
-                </div>
-              ))}
-            </div> */}
           </div>
 
-          {/* pricing  */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">
               Pricing
@@ -796,7 +704,6 @@ const CategorySelector = () => {
             </div>
           </div>
 
-          {/* Inventory  */}
           <div className="border rounded-2xl p-4 bg-white mb-4 border-gray-500">
             <h2 className="font-semibold text-gray-700">Inventory</h2>
             <div className="flex items-center mt-3">
@@ -815,7 +722,6 @@ const CategorySelector = () => {
               </label>
             </div>
 
-            {/* Quantity Input */}
             {trackQuantity && (
               <div className="mt-4 border-b border-gray-300">
                 <div className="flex items-center justify-between  ">
@@ -832,32 +738,6 @@ const CategorySelector = () => {
               </div>
             )}
 
-            {/* Continue Selling Checkbox */}
-            {/* <div className="flex items-start mt-3">
-              <input
-                type="checkbox"
-                id="continueSelling"
-                checked={continueSelling}
-                onChange={() => setContinueSelling(!continueSelling)}
-                className="h-4 w-4 text-blue-500"
-              />
-              <div className="ml-2">
-                <label
-                  htmlFor="continueSelling"
-                  className="text-sm text-gray-700"
-                >
-                  Continue selling when out of stock
-                </label>
-                <p className="text-xs text-gray-500">
-                  This won’t affect{" "}
-                  <a href="#" className="text-blue-500">
-                    Shopify POS
-                  </a>
-                  . Staff can still complete sales.
-                </p>
-              </div>
-            </div> */}
-
             {/* SKU & Barcode Section */}
             <div className="flex items-center mt-3">
               <input
@@ -872,7 +752,6 @@ const CategorySelector = () => {
               </label>
             </div>
 
-            {/* SKU & Barcode Inputs */}
             {hasSKU && (
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <input
@@ -892,7 +771,6 @@ const CategorySelector = () => {
               </div>
             )}
           </div>
-          {/* shippingh  */}
 
           <div className="border rounded-2xl p-4 bg-white border-gray-500">
             <div className="flex items-center">
@@ -940,7 +818,6 @@ const CategorySelector = () => {
               </div>
             )}
           </div>
-          {/* variants  */}
 
           <div className="border rounded-2xl p-3 mt-3 bg-white border-gray-300 w-full">
             <h2 className="text-sm font-medium text-gray-800">Variants</h2>
@@ -1000,88 +877,6 @@ const CategorySelector = () => {
                   </div>
                 ))}
 
-                {/* Rendering Variant Combinations */}
-                {/* <div className="mt-3">
-            <h3 className="text-sm font-medium text-gray-800">Variant Combinations</h3>
-            {generateVariants().length > 0 ? (
-              generateVariants().map((combination, index) => (
-                <div key={index} className="text-sm bg-gray-100 p-2 rounded-md mt-2">
-                  <span>{`Parent: ${combination.parent}, Child: ${combination.child}`}</span>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-600">Add more options to generate variants.</p>
-            )}
-          </div> */}
-                {/* <div className="mt-3">
-                  <div className="flex justify-between">
-                    <h3 className="font-medium text-lg text-gray-800">
-                      Variants
-                    </h3>
-                    <h3 className="font-medium text-lg text-gray-800">Price</h3>
-                    <h3 className="font-medium text-lg text-gray-800">
-                      Availability
-                    </h3>
-                  </div>
-
-                  {generateVariants().length > 0 ? (
-                    generateVariants().map((combination, index) => (
-                      <div
-                        key={index}
-                        className="text-sm bg-gray-100 p-2 rounded-md mt-2"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="font-medium text-gray-700">
-                            {combination.parent}
-                          </div>
-                          <button
-                            onClick={() => toggleChildOptions(index)}
-                            className="text-gray-500"
-                          >
-                            {expandedParents.includes(index) ? (
-                              <IoIosArrowUp />
-                            ) : (
-                              <MdOutlineKeyboardArrowDown />
-                            )}
-                          </button>
-                        </div>
-
-                        {expandedParents.includes(index) && (
-                          <div className="mt-2">
-                            <ul className="ml-4">
-                              {combination.children.map((child, idx) => (
-                                <li
-                                  key={idx}
-                                  className="flex justify-between items-center text-gray-600"
-                                >
-                                  <div className="flex justify-between w-full">
-                                    <span className="font-medium">{child}</span>
-                                    <div className="flex space-x-4 mt-1">
-                                      <input
-                                        type="number"
-                                        placeholder="Price"
-                                        className="w-32 p-1 border border-gray-300 rounded-md text-sm"
-                                      />
-                                      <input
-                                        type="number"
-                                        placeholder="Availability"
-                                        className="w-32 p-1 border border-gray-300 rounded-md text-sm"
-                                      />
-                                    </div>
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-600">
-                      Add more options to generate variants.
-                    </p>
-                  )}
-                </div> */}
                 <div className="mt-3">
                   <div className="flex items-center gap-4 mb-2">
                     <div className="w-16"></div>
@@ -1125,75 +920,80 @@ const CategorySelector = () => {
                           <div className="mt-2">
                             <ul className="space-y-2">
                               {combinations[index]?.children?.map(
-                                (child, childIndex) => (
-                                  <li
-                                    key={childIndex}
-                                    className="flex items-center gap-4"
-                                  >
-                                    <div className="w-16">
-                                      <label className="relative flex items-center justify-center w-16 h-16 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
-                                        {variantImages[childIndex] ? (
-                                          <img
-                                            src={variantImages[childIndex]}
-                                            alt={`Variant ${childIndex}`}
-                                            className="w-full h-full object-cover"
+                                (child, childIndex) => {
+                                  const key = `${index}-${childIndex}`;
+                                  const image = variantImages[key];
+
+                                  return (
+                                    <li
+                                      key={childIndex}
+                                      className="flex items-center gap-4"
+                                    >
+                                      <div className="w-16">
+                                        <label className="relative flex items-center justify-center w-16 h-16 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
+                                          {image?.preview ? (
+                                            <img
+                                              src={image.preview}
+                                              alt={`Variant ${childIndex}`}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          ) : (
+                                            <span className="text-3xl text-gray-400">
+                                              +
+                                            </span>
+                                          )}
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onChange={(e) =>
+                                              handleVariantImageUpload(
+                                                e,
+                                                index,
+                                                childIndex
+                                              )
+                                            }
                                           />
-                                        ) : (
-                                          <span className="text-3xl text-gray-400">
-                                            +
-                                          </span>
-                                        )}
-                                        <input
-                                          type="file"
-                                          accept="image/*"
-                                          className="absolute inset-0 opacity-0 cursor-pointer"
-                                          onChange={(e) =>
-                                            handleVariantImageUpload(
-                                              e,
-                                              childIndex
-                                            )
-                                          }
-                                        />
-                                      </label>
-                                    </div>
+                                        </label>
+                                      </div>
 
-                                    <span className="font-medium text-gray-700 w-[120px]">
-                                      {child}
-                                    </span>
-
-                                    <div className="relative w-24">
-                                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                        $
+                                      <span className="font-medium text-gray-700 w-[120px]">
+                                        {child}
                                       </span>
+
+                                      <div className="relative w-24">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                          $
+                                        </span>
+                                        <input
+                                          type="number"
+                                          value={price}
+                                          placeholder="Price"
+                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
+                                        />
+                                      </div>
+
                                       <input
                                         type="number"
-                                        value={price}
-                                        placeholder="Price"
-                                        className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
+                                        value={quantity}
+                                        placeholder="Availability"
+                                        className="w-24 p-1 border border-gray-300 rounded-md text-sm no-spinner"
                                       />
-                                    </div>
 
-                                    <input
-                                      type="number"
-                                      value={quantity}
-                                      placeholder="Availability"
-                                      className="w-24 p-1 border border-gray-300 rounded-md text-sm no-spinner"
-                                    />
-
-                                    {/* Action */}
-                                    <button
-                                      onClick={() =>
-                                        handleDeleteCombination(
-                                          index,
-                                          childIndex
-                                        )
-                                      }
-                                      className="text-red-600"
-                                    >
-                                      <FaTrash />
-                                    </button>
-                                  </li>
-                                )
+                                      <button
+                                        onClick={() =>
+                                          handleDeleteCombination(
+                                            index,
+                                            childIndex
+                                          )
+                                        }
+                                        className="text-red-600"
+                                      >
+                                        <FaTrash />
+                                      </button>
+                                    </li>
+                                  );
+                                }
                               )}
                             </ul>
                           </div>
@@ -1320,68 +1120,11 @@ const CategorySelector = () => {
             </select>
           </div>
 
-          {/* <div className="bg-white p-4 border border-gray-300 rounded-xl">
-            <label className="block text-sm font-medium text-gray-700">
-              Product organization
-            </label>
-            <div className="mt-2 space-y-2">
-              <label htmlFor="keywords" className="block text-gray-600 text-sm">
-                Product Type
-              </label>
-              <input
-                type="text"
-                placeholder="Type"
-                value={productType}
-                onChange={(e) => setProductType(e.target.value)}
-                className="w-full border border-gray-300 p-2 rounded-xl"
-              />
-              <label htmlFor="keywords" className="block text-gray-600 text-sm">
-                Vendor
-              </label>
-              <input
-                type="text"
-                value={vendor}
-                onChange={(e) => setVendor(e.target.value)}
-                placeholder="Vendor"
-                className="w-full border border-gray-300 p-2 rounded-xl"
-              />
-              <label htmlFor="keywords" className="block text-gray-600 text-sm">
-                Keywords
-              </label>
-              <input
-                type="text"
-                placeholder="Key Words"
-                value={keyWord}
-                onKeyDown={handleKeyDownForKeyWords}
-                onChange={(e) => setKeyWord(e.target.value)}
-                className="w-full border border-gray-300 p-2 rounded-xl"
-              />
-
-              <div className="flex flex-wrap gap-2 mt-2">
-                {keywordsList.map((word, index) => (
-                  <span
-                    key={index}
-                    className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
-                  >
-                    {word}
-                    <button
-                      type="button"
-                      className="ml-2 text-red-500"
-                      onClick={() => removeKeyword(index)}
-                    >
-                      &times;
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div> */}
           <div className="bg-white p-4 border border-gray-300 rounded-xl">
             <label className="block text-sm font-medium text-gray-700">
               Product organization
             </label>
             <div className="mt-2 space-y-2">
-              {/* Product Type */}
               <label
                 htmlFor="productType"
                 className="block text-gray-600 text-sm"
@@ -1414,7 +1157,6 @@ const CategorySelector = () => {
                 ))}
               </div>
 
-              {/* Vendor */}
               <label htmlFor="vendor" className="block text-gray-600 text-sm">
                 Vendor
               </label>
@@ -1444,7 +1186,6 @@ const CategorySelector = () => {
                 ))}
               </div>
 
-              {/* Keywords */}
               <label htmlFor="keywords" className="block text-gray-600 text-sm">
                 Keywords
               </label>

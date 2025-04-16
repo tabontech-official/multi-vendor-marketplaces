@@ -706,7 +706,7 @@ const CategorySelector = () => {
         variantForm.append("upload_preset", "images");
   
         const uploadVariantRes = await fetch(
-          "https://api.cloudinary.com/v1_1/djocrwprs/image/upload",
+          "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
           {
             method: "POST",
             body: variantForm,

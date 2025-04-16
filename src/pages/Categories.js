@@ -56,6 +56,19 @@ const CategorySelector = () => {
   const [variantImages, setVariantImages] = useState({});
   const [productTypesList, setProductTypesList] = useState([]);
   const [vendorList, setVendorList] = useState([]);
+  const [variantDetails, setVariantDetails] = useState({});
+
+  const handleVariantDetailChange = (parentIndex, child, field, value) => {
+    const key = `${parentIndex}-${child}`;
+
+    setVariantDetails((prev) => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
+        [field]: value,
+      },
+    }));
+  };
 
   const removeProductType = (index) => {
     const newList = [...productTypesList];
@@ -150,50 +163,87 @@ const CategorySelector = () => {
     setCheckedImages({});
   };
 
+  // const handleDeleteCombination = (parentIndex, childIndex) => {
+  //   console.log("Attempting to delete combination:", {
+  //     parentIndex,
+  //     childIndex,
+  //   });
+  //   console.log("Combinations before deletion:", combinations);
+
+  //   if (combinations[parentIndex]) {
+  //     console.log("Parent found:", combinations[parentIndex]);
+  //   } else {
+  //     console.error("Invalid parentIndex:", parentIndex);
+  //   }
+
+  //   if (combinations[parentIndex] && combinations[parentIndex].children) {
+  //     console.log("Children of parent:", combinations[parentIndex].children);
+  //   } else {
+  //     console.error("No children found for parentIndex:", parentIndex);
+  //   }
+
+  //   if (
+  //     combinations[parentIndex] &&
+  //     Array.isArray(combinations[parentIndex].children) &&
+  //     combinations[parentIndex].children.length > 0
+  //   ) {
+  //     const updatedCombinations = [...combinations];
+  //     const children = combinations[parentIndex].children;
+
+  //     if (children[childIndex]) {
+  //       console.log("Deleting child:", children[childIndex]);
+  //       children.splice(childIndex, 1);
+  //       setCombinations(updatedCombinations);
+  //       console.log(
+  //         "Updated combinations after deletion:",
+  //         updatedCombinations
+  //       );
+  //     } else {
+  //       console.error("Invalid childIndex:", childIndex);
+  //     }
+  //   } else {
+  //     console.error(
+  //       "Invalid parent index or no children found at parentIndex:",
+  //       parentIndex
+  //     );
+  //   }
+  // };
+
   const handleDeleteCombination = (parentIndex, childIndex) => {
-    console.log("Attempting to delete combination:", {
-      parentIndex,
-      childIndex,
-    });
-    console.log("Combinations before deletion:", combinations);
+    setCombinations((prevCombinations) => {
+      const updatedCombinations = [...prevCombinations];
+      const updatedChildren = [...updatedCombinations[parentIndex].children];
+      updatedChildren.splice(childIndex, 1);
 
-    if (combinations[parentIndex]) {
-      console.log("Parent found:", combinations[parentIndex]);
-    } else {
-      console.error("Invalid parentIndex:", parentIndex);
-    }
-
-    if (combinations[parentIndex] && combinations[parentIndex].children) {
-      console.log("Children of parent:", combinations[parentIndex].children);
-    } else {
-      console.error("No children found for parentIndex:", parentIndex);
-    }
-
-    if (
-      combinations[parentIndex] &&
-      Array.isArray(combinations[parentIndex].children) &&
-      combinations[parentIndex].children.length > 0
-    ) {
-      const updatedCombinations = [...combinations];
-      const children = combinations[parentIndex].children;
-
-      if (children[childIndex]) {
-        console.log("Deleting child:", children[childIndex]);
-        children.splice(childIndex, 1);
-        setCombinations(updatedCombinations);
-        console.log(
-          "Updated combinations after deletion:",
-          updatedCombinations
-        );
+      if (updatedChildren.length === 0) {
+        updatedCombinations.splice(parentIndex, 1);
       } else {
-        console.error("Invalid childIndex:", childIndex);
+        updatedCombinations[parentIndex] = {
+          ...updatedCombinations[parentIndex],
+          children: updatedChildren,
+        };
       }
-    } else {
-      console.error(
-        "Invalid parent index or no children found at parentIndex:",
-        parentIndex
-      );
-    }
+
+      return updatedCombinations;
+    });
+
+    setOptions((prevOptions) => {
+      const updated = prevOptions.map((option) => {
+        const updatedValues = option.values.filter((val) => {
+          const parent = combinations[parentIndex]?.parent || "";
+          const child = combinations[parentIndex]?.children?.[childIndex] || "";
+
+          return val !== child;
+        });
+
+        return {
+          ...option,
+          values: updatedValues,
+        };
+      });
+
+      return updated;
+    });
   };
 
   const generateVariants = () => {
@@ -407,9 +457,19 @@ const CategorySelector = () => {
     }
   };
 
+  // const handleVariantImageUpload = (event, parentIndex, childIndex) => {
+  //   const file = event.target.files[0];
+  //   if (!file) return;
 
+  //   const imagePreview = URL.createObjectURL(file);
 
-  const handleVariantImageUpload = (event, parentIndex, childIndex) => {
+  //   setVariantImages((prev) => ({
+  //     ...prev,
+  //     [`${parentIndex}-${childIndex}`]: { file, preview: imagePreview },
+  //   }));
+  // };
+
+  const handleVariantImageUpload = (event, parentIndex, child) => {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -417,8 +477,16 @@ const CategorySelector = () => {
 
     setVariantImages((prev) => ({
       ...prev,
-      [`${parentIndex}-${childIndex}`]: { file, preview: imagePreview },
+      [`${parentIndex}-${child}`]: { file, preview: imagePreview },
     }));
+  };
+
+  const handleRemoveVariantImages = (parentIndex, child) => {
+    setVariantImages((prev) => {
+      const newImages = { ...prev };
+      delete newImages[`${parentIndex}-${child}`];
+      return newImages;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -467,7 +535,7 @@ const CategorySelector = () => {
     images.forEach((image, index) => {
       formData.append("images", image);
     });
-    
+
     Object.entries(variantImages).forEach(([key, { file }]) => {
       formData.append("variantImages", file);
       formData.append("variantImageKeys", key);
@@ -910,7 +978,7 @@ const CategorySelector = () => {
                             <ul className="space-y-2">
                               {combinations[index]?.children?.map(
                                 (child, childIndex) => {
-                                  const key = `${index}-${childIndex}`;
+                                  const key = `${index}-${child}`;
                                   const image = variantImages[key];
 
                                   return (
@@ -918,12 +986,12 @@ const CategorySelector = () => {
                                       key={childIndex}
                                       className="flex items-center gap-4"
                                     >
-                                      <div className="w-16">
-                                        <label className="relative flex items-center justify-center w-16 h-16 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
+                                      <div className="w-16 relative">
+                                        <label className="flex items-center justify-center w-16 h-16 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
                                           {image?.preview ? (
                                             <img
                                               src={image.preview}
-                                              alt={`Variant ${childIndex}`}
+                                              alt={`Variant ${child}`}
                                               className="w-full h-full object-cover"
                                             />
                                           ) : (
@@ -939,10 +1007,27 @@ const CategorySelector = () => {
                                               handleVariantImageUpload(
                                                 e,
                                                 index,
-                                                childIndex
+                                                child
                                               )
                                             }
                                           />
+                                          {image?.preview && (
+                                            <button
+                                              onClick={() =>
+                                                handleRemoveVariantImages(
+                                                  index,
+                                                  child
+                                                )
+                                              }
+                                              className="absolute top-0 right-0 text-white bg-red-600 rounded-full px-2 py-1 text-xs"
+                                              style={{
+                                                transform:
+                                                  "translate(25%, -25%)",
+                                              }}
+                                            >
+                                              X
+                                            </button>
+                                          )}
                                         </label>
                                       </div>
 
@@ -956,7 +1041,17 @@ const CategorySelector = () => {
                                         </span>
                                         <input
                                           type="number"
-                                          value={price}
+                                          value={
+                                            variantDetails[key]?.price || ""
+                                          }
+                                          onChange={(e) =>
+                                            handleVariantDetailChange(
+                                              index,
+                                              child,
+                                              "price",
+                                              e.target.value
+                                            )
+                                          }
                                           placeholder="Price"
                                           className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
                                         />
@@ -964,7 +1059,17 @@ const CategorySelector = () => {
 
                                       <input
                                         type="number"
-                                        value={quantity}
+                                        value={
+                                          variantDetails[key]?.quantity || ""
+                                        }
+                                        onChange={(e) =>
+                                          handleVariantDetailChange(
+                                            index,
+                                            child,
+                                            "quantity",
+                                            e.target.value
+                                          )
+                                        }
                                         placeholder="Availability"
                                         className="w-24 p-1 border border-gray-300 rounded-md text-sm no-spinner"
                                       />

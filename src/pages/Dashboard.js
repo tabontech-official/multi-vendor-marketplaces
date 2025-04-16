@@ -556,10 +556,7 @@ const Dashboard = () => {
                       {admin && product.tags?.split(",")[1]?.split("_")[1]}
                       <td className="p-3"> {product.email} </td>
                       <td className="p-3"> {product.product_type}</td>
-                      <td className="p-3">
-                        {" "}
-                        ${ product.variants[0].price}{" "}
-                      </td>
+                      <td className="p-3"> ${product.variants[0].price} </td>
                       <td className="p-3">
                         <button
                           className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"

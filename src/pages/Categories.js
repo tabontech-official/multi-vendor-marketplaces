@@ -56,19 +56,7 @@ const CategorySelector = () => {
   const [variantImages, setVariantImages] = useState({});
   const [productTypesList, setProductTypesList] = useState([]);
   const [vendorList, setVendorList] = useState([]);
-  const [variantDetails, setVariantDetails] = useState({});
-
-  const handleVariantDetailChange = (parentIndex, child, field, value) => {
-    const key = `${parentIndex}-${child}`;
-
-    setVariantDetails((prev) => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        [field]: value,
-      },
-    }));
-  };
+  // const [variantPrices, setVariantPrices] = useState({});
 
   const removeProductType = (index) => {
     const newList = [...productTypesList];
@@ -489,6 +477,9 @@ const CategorySelector = () => {
     });
   };
 
+  const [variantPrices, setVariantPrices] = useState({}); // Keep as object
+  const [variantQuantities, setVariantQuantities] = useState({});
+
   // const handleSubmit = async (e) => {
   //   e.preventDefault();
   //   const userId = localStorage.getItem("userid");
@@ -510,6 +501,16 @@ const CategorySelector = () => {
   //     .replace(/<\/p>/g, "<br />")
   //     .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
   //     .replace(/&nbsp;/g, " ");
+
+  //     const prepareVariantPrices = () => {
+  //       // Create array in the exact order of variants
+  //       return combinations.flatMap((combination, index) => {
+  //         return combination.children.map(child => {
+  //           const key = `${index}-${child}`;
+  //           return variantPrices[key] !== undefined ? variantPrices[key] : null;
+  //         });
+  //       });
+  //     };
   //   const formData = new FormData();
   //   formData.append("keyWord", keywordsList.join(", "));
   //   formData.append("title", title);
@@ -532,6 +533,12 @@ const CategorySelector = () => {
   //   formData.append("vendor", vendorList.join(","));
   //   formData.append("options", JSON.stringify(options));
   //   formData.append("variants", JSON.stringify(variants));
+  //   const formattedVariantPrices = prepareVariantPrices();
+  //   console.log("Variant prices being sent:", formattedVariantPrices); // Debug log
+  //   formData.append("variantPrices", JSON.stringify(formattedVariantPrices));
+  //   console.log("Combinations:", combinations);
+  //   console.log("Variant prices state:", variantPrices);
+  //   console.log("Prepared variant prices:", prepareVariantPrices());
   //   images.forEach((image, index) => {
   //     formData.append("images", image);
   //   });
@@ -596,7 +603,7 @@ const CategorySelector = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
-  
+
     if (!userId) {
       setMessage({
         type: "error",
@@ -604,10 +611,10 @@ const CategorySelector = () => {
       });
       return;
     }
-  
+
     setLoading(true);
     setMessage(null);
-  
+
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
     const modifiedContent = htmlContent
@@ -615,179 +622,409 @@ const CategorySelector = () => {
       .replace(/<\/p>/g, "<br />")
       .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
       .replace(/&nbsp;/g, " ");
-  
-    const formData = new FormData();
-    formData.append("keyWord", keywordsList.join(", "));
-    formData.append("title", title);
-    formData.append("description", modifiedContent);
-    formData.append("productType", productTypesList.join(","));
-    formData.append("price", parseFloat(price));
-    if (compareAtPrice)
-      formData.append("compare_at_price", parseFloat(compareAtPrice));
-    formData.append("track_quantity", trackQuantity ? "true" : "false");
-    formData.append("quantity", trackQuantity ? parseInt(quantity) : 0);
-    formData.append("continue_selling", continueSelling);
-    formData.append("has_sku", hasSKU);
-    if (hasSKU && sku) formData.append("sku", sku);
-    if (hasSKU && barcode) formData.append("barcode", barcode);
-    formData.append("track_shipping", trackShipping);
-    if (trackShipping && weight) formData.append("weight", parseFloat(weight));
-    if (trackShipping && unit) formData.append("weight_unit", unit);
-    formData.append("status", status);
-    formData.append("userId", userId);
-    formData.append("vendor", vendorList.join(","));
-    formData.append("options", JSON.stringify(options));
-    formData.append("variants", JSON.stringify(variants));
-  
-    // Append local files (but we won't send them directly to backend here)
-    images.forEach((image) => formData.append("images", image));
-    Object.entries(variantImages).forEach(([key, { file }]) => {
-      formData.append("variantImages", file);
-      formData.append("variantImageKeys", key);
-    });
-  
+
+    const prepareVariantPrices = () => {
+      return combinations.flatMap((combination, index) => {
+        return combination.children.map((child) => {
+          const key = `${index}-${child}`;
+          return variantPrices[key] !== undefined ? variantPrices[key] : null;
+        });
+      });
+    };
+
+    const payload = {
+      keyWord: keywordsList.join(", "),
+      title,
+      description: modifiedContent,
+      productType: productTypesList.join(","),
+      price: parseFloat(price),
+      compare_at_price: compareAtPrice ? parseFloat(compareAtPrice) : undefined,
+      track_quantity: trackQuantity,
+      quantity: trackQuantity ? parseInt(quantity) : 0,
+      continue_selling: continueSelling,
+      has_sku: hasSKU,
+      sku: hasSKU && sku ? sku : undefined,
+      barcode: hasSKU && barcode ? barcode : undefined,
+      track_shipping: trackShipping,
+      weight: trackShipping && weight ? parseFloat(weight) : undefined,
+      weight_unit: trackShipping && unit ? unit : undefined,
+      status,
+      userId,
+      vendor: vendorList.join(","),
+      options,
+      variants,
+      variantPrices: prepareVariantPrices(),
+    };
+
+    console.log("Payload being sent:", payload);
+
     try {
       const url = isEditing
         ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
         : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+
       const method = isEditing ? "PUT" : "POST";
-  
-      // First, submit main product info
+
       const response = await fetch(url, {
         method,
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
-  
+
       const data = await response.json();
-  
-      if (!response.ok) {
+      const productId = data.product.id;
+
+      if (response.ok) {
+        setMessage({ type: "success", text: "Product added successfully!" });
+
+        const cloudinaryURLs = [];
+        const variantCloudinaryURLs = [];
+
+        // Upload product images to Cloudinary
+        for (let i = 0; i < images.length; i++) {
+          try {
+            const formDataImages = new FormData();
+            formDataImages.append("file", images[i]);
+            formDataImages.append("upload_preset", "images");
+
+            const cloudinaryResponse = await fetch(
+              "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+              {
+                method: "POST",
+                body: formDataImages,
+              }
+            );
+
+            const cloudinaryJson = await cloudinaryResponse.json();
+
+            if (cloudinaryResponse.ok) {
+              cloudinaryURLs.push(cloudinaryJson.secure_url);
+              console.log(
+                `Product Image ${i + 1} uploaded successfully:`,
+                cloudinaryJson.secure_url
+              );
+            } else {
+              console.error(
+                `Error uploading image ${i + 1}:`,
+                cloudinaryJson.error?.message
+              );
+            }
+          } catch (error) {
+            console.error(
+              `Image upload error for image ${i + 1}:`,
+              error.message
+            );
+          }
+        }
+
+        // Handle Variant Images
+        for (const variant of variants) {
+          for (let i = 0; i < variant.images.length; i++) {
+            try {
+              const formDataVariantImages = new FormData();
+              formDataVariantImages.append("file", variant.images[i]);
+              formDataVariantImages.append("upload_preset", "images");
+
+              const cloudinaryResponse = await fetch(
+                "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+                {
+                  method: "POST",
+                  body: formDataVariantImages,
+                }
+              );
+
+              const cloudinaryJson = await cloudinaryResponse.json();
+
+              if (cloudinaryResponse.ok) {
+                variantCloudinaryURLs.push(cloudinaryJson.secure_url);
+                console.log(
+                  `Variant Image ${i + 1} uploaded successfully:`,
+                  cloudinaryJson.secure_url
+                );
+              } else {
+                console.error(
+                  `Error uploading variant image ${i + 1}:`,
+                  cloudinaryJson.error?.message
+                );
+              }
+            } catch (error) {
+              console.error(
+                `Variant image upload error for image ${i + 1}:`,
+                error.message
+              );
+            }
+          }
+        }
+
+        // Save both product and variant images URLs to the database
+        const allImageURLs = [...cloudinaryURLs, ...variantCloudinaryURLs];
+
+        if (allImageURLs.length > 0) {
+          try {
+            const imageResponse = await fetch(
+              `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ images: allImageURLs }),
+              }
+            );
+
+            const imageJson = await imageResponse.json();
+
+            if (imageResponse.ok) {
+              console.log("Images URLs saved successfully:", imageJson);
+            } else {
+              console.error(
+                "Error saving image URLs in the database:",
+                imageJson.error
+              );
+            }
+          } catch (error) {
+            console.error("Database update error for images:", error.message);
+          }
+        }
+
+        setTitle("");
+        setDescription("");
+        setProductType("");
+        setPrice("");
+        setCompareAtPrice("");
+        setTrackQuantity(false);
+        setQuantity(0);
+        setContinueSelling(false);
+        setHasSKU(false);
+        setSKU("");
+        setBarcode("");
+        setTrackShipping(false);
+        setWeight("");
+        setUnit("kg");
+        setOptions([]);
+        setVariants([]);
+        setVendor("");
+        setKeyWord("");
+        navigate("/manage-product");
+      } else {
         setMessage({
           type: "error",
           text: data.error || "Something went wrong!",
         });
-        setLoading(false);
-        return;
       }
-  
-      const cloudinaryURLs = [];
-      const uploadedVariantImages = [];
-  
-      for (let i = 0; i < images.length; i++) {
-        const imageForm = new FormData();
-        imageForm.append("file", images[i]);
-        imageForm.append("upload_preset", "images");
-  
-        const uploadRes = await fetch(
-          "https://api.cloudinary.com/v1_1/djocrwprs/image/upload",
-          {
-            method: "POST",
-            body: imageForm,
-          }
-        );
-  
-        const uploadJson = await uploadRes.json();
-  
-        if (uploadRes.ok) {
-          cloudinaryURLs.push(uploadJson.secure_url);
-        } else {
-          setMessage({
-            type: "error",
-            text: `Failed to upload image ${i + 1}`,
-          });
-          setLoading(false);
-          return;
-        }
-      }
-  
-      for (let i = 0; i < Object.entries(variantImages).length; i++) {
-        const [key, { file }] = Object.entries(variantImages)[i];
-        const variantForm = new FormData();
-        variantForm.append("file", file);
-        variantForm.append("upload_preset", "images");
-  
-        const uploadVariantRes = await fetch(
-          "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-          {
-            method: "POST",
-            body: variantForm,
-          }
-        );
-  
-        const variantUploadJson = await uploadVariantRes.json();
-  
-        if (uploadVariantRes.ok) {
-          uploadedVariantImages.push({
-            key,
-            url: variantUploadJson.secure_url,
-          });
-        } else {
-          setMessage({
-            type: "error",
-            text: `Failed to upload variant image ${i + 1}`,
-          });
-          setLoading(false);
-          return;
-        }
-      }
-  
-      const imageSaveResponse = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            images: cloudinaryURLs,
-            variantImages: uploadedVariantImages,
-          }),
-        }
-      );
-  
-      const imageSaveJson = await imageSaveResponse.json();
-  
-      if (!imageSaveResponse.ok) {
-        setMessage({
-          type: "error",
-          text: imageSaveJson.error || "Failed to save image URLs",
-        });
-        setLoading(false);
-        return;
-      }
-  
-      setMessage({ type: "success", text: "Product added successfully!" });
-  
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setProductType("");
-      setPrice("");
-      setCompareAtPrice("");
-      setTrackQuantity(false);
-      setQuantity(0);
-      setContinueSelling(false);
-      setHasSKU(false);
-      setSKU("");
-      setBarcode("");
-      setTrackShipping(false);
-      setWeight("");
-      setUnit("kg");
-      setOptions([]);
-      setVariants([]);
-      setVendor("");
-      setImages([]);
-      setSelectedImages([]);
-      setKeyWord("");
-  
-      navigate("/manage-product");
     } catch (error) {
       console.error("Error uploading product:", error);
       setMessage({ type: "error", text: "Failed to connect to server." });
     }
-  
+
     setLoading(false);
   };
-  
+
+  const handlePriceChange = (index, child, value) => {
+    const key = `${index}-${child}`;
+    setVariantPrices((prev) => ({
+      ...prev,
+      [key]: value === "" ? "" : parseFloat(value),
+    }));
+  };
+
+  const handleQuantityChange = (index, child, value) => {
+    const key = `${index}-${child}`;
+    setVariantQuantities((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const userId = localStorage.getItem("userid");
+
+  //   if (!userId) {
+  //     setMessage({
+  //       type: "error",
+  //       text: "User ID is missing. Cannot submit form.",
+  //     });
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   setMessage(null);
+
+  //   const rawContentState = convertToRaw(editorState.getCurrentContent());
+  //   const htmlContent = draftToHtml(rawContentState);
+  //   const modifiedContent = htmlContent
+  //     .replace(/<p>/g, "")
+  //     .replace(/<\/p>/g, "<br />")
+  //     .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
+  //     .replace(/&nbsp;/g, " ");
+
+  //   const formData = new FormData();
+  //   formData.append("keyWord", keywordsList.join(", "));
+  //   formData.append("title", title);
+  //   formData.append("description", modifiedContent);
+  //   formData.append("productType", productTypesList.join(","));
+  //   formData.append("price", parseFloat(price));
+  //   if (compareAtPrice)
+  //     formData.append("compare_at_price", parseFloat(compareAtPrice));
+  //   formData.append("track_quantity", trackQuantity ? "true" : "false");
+  //   formData.append("quantity", trackQuantity ? parseInt(quantity) : 0);
+  //   formData.append("continue_selling", continueSelling);
+  //   formData.append("has_sku", hasSKU);
+  //   if (hasSKU && sku) formData.append("sku", sku);
+  //   if (hasSKU && barcode) formData.append("barcode", barcode);
+  //   formData.append("track_shipping", trackShipping);
+  //   if (trackShipping && weight) formData.append("weight", parseFloat(weight));
+  //   if (trackShipping && unit) formData.append("weight_unit", unit);
+  //   formData.append("status", status);
+  //   formData.append("userId", userId);
+  //   formData.append("vendor", vendorList.join(","));
+  //   formData.append("options", JSON.stringify(options));
+  //   formData.append("variants", JSON.stringify(variants));
+
+  //   try {
+  //     const url = isEditing
+  //       ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
+  //       : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+  //     const method = isEditing ? "PUT" : "POST";
+
+  //     const response = await fetch(url, {
+  //       method,
+  //       body: formData,
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       setMessage({
+  //         type: "error",
+  //         text: data.error || "Something went wrong!",
+  //       });
+  //       setLoading(false);
+  //       return;
+  //     }
+  // images.forEach((image) => formData.append("images", image));
+  // Object.entries(variantImages).forEach(([key, { file }]) => {
+  //   formData.append("variantImages", file);
+  //   formData.append("variantImageKeys", key);
+  // });
+  // const cloudinaryURLs = [];
+  // const uploadedVariantImages = [];
+
+  // for (let i = 0; i < images.length; i++) {
+  //   const imageForm = new FormData();
+  //   imageForm.append("file", images[i]);
+  //   imageForm.append("upload_preset", "images");
+
+  //   const uploadRes = await fetch(
+  //     "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+  //     {
+  //       method: "POST",
+  //       body: imageForm,
+  //     }
+  //   );
+
+  //   const uploadJson = await uploadRes.json();
+
+  //   if (uploadRes.ok) {
+  //     cloudinaryURLs.push(uploadJson.secure_url);
+  //   } else {
+  //     setMessage({
+  //       type: "error",
+  //       text: `Failed to upload image ${i + 1}`,
+  //     });
+  //     setLoading(false);
+  //     return;
+  //   }
+  // }
+
+  // for (let i = 0; i < Object.entries(variantImages).length; i++) {
+  //   const [key, { file }] = Object.entries(variantImages)[i];
+  //   const variantForm = new FormData();
+  //   variantForm.append("file", file);
+  //   variantForm.append("upload_preset", "images");
+
+  //   const uploadVariantRes = await fetch(
+  //     "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+  //     {
+  //       method: "POST",
+  //       body: variantForm,
+  //     }
+  //   );
+
+  //   const variantUploadJson = await uploadVariantRes.json();
+
+  //   if (uploadVariantRes.ok) {
+  //     uploadedVariantImages.push({
+  //       key,
+  //       url: variantUploadJson.secure_url,
+  //     });
+  //   } else {
+  //     setMessage({
+  //       type: "error",
+  //       text: `Failed to upload variant image ${i + 1}`,
+  //     });
+  //     setLoading(false);
+  //     return;
+  //   }
+  // }
+
+  // const imageSaveResponse = await fetch(
+  //   `https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
+  //   {
+  //     method: "PUT",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       images: cloudinaryURLs,
+  //       variantImages: uploadedVariantImages,
+  //     }),
+  //   }
+  // );
+
+  // const imageSaveJson = await imageSaveResponse.json();
+
+  // if (!imageSaveResponse.ok) {
+  //   setMessage({
+  //     type: "error",
+  //     text: imageSaveJson.error || "Failed to save image URLs",
+  //   });
+  //   setLoading(false);
+  //   return;
+  // }
+
+  //     setMessage({ type: "success", text: "Product added successfully!" });
+
+  //     // Reset form
+  //     setTitle("");
+  //     setDescription("");
+  //     setProductType("");
+  //     setPrice("");
+  //     setCompareAtPrice("");
+  //     setTrackQuantity(false);
+  //     setQuantity(0);
+  //     setContinueSelling(false);
+  //     setHasSKU(false);
+  //     setSKU("");
+  //     setBarcode("");
+  //     setTrackShipping(false);
+  //     setWeight("");
+  //     setUnit("kg");
+  //     setOptions([]);
+  //     setVariants([]);
+  //     setVendor("");
+  //     setImages([]);
+  //     setSelectedImages([]);
+  //     setKeyWord("");
+
+  //     navigate("/manage-product");
+  //   } catch (error) {
+  //     console.error("Error uploading product:", error);
+  //     setMessage({ type: "error", text: "Failed to connect to server." });
+  //   }
+
+  //   setLoading(false);
+  // };
 
   return (
     <main className="flex justify-center bg-gray-100 p-6">
@@ -1176,7 +1413,8 @@ const CategorySelector = () => {
                                 (child, childIndex) => {
                                   const key = `${index}-${child}`;
                                   const image = variantImages[key];
-
+                                  const variantPrice = variantPrices[key] || "";
+                                  const quantity = variantQuantities[key] || "";
                                   return (
                                     <li
                                       key={childIndex}
@@ -1237,37 +1475,31 @@ const CategorySelector = () => {
                                         </span>
                                         <input
                                           type="number"
-                                          value={
-                                            variantDetails[key]?.price || ""
-                                          }
+                                          value={variantPrice}
+                                          placeholder="Price"
+                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
                                           onChange={(e) =>
-                                            handleVariantDetailChange(
+                                            handlePriceChange(
                                               index,
                                               child,
-                                              "price",
                                               e.target.value
                                             )
                                           }
-                                          placeholder="Price"
-                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
                                         />
                                       </div>
 
                                       <input
                                         type="number"
-                                        value={
-                                          variantDetails[key]?.quantity || ""
-                                        }
+                                        value={quantity}
+                                        placeholder="Availability"
+                                        className="w-24 p-1 border border-gray-300 rounded-md text-sm no-spinner"
                                         onChange={(e) =>
-                                          handleVariantDetailChange(
+                                          handleQuantityChange(
                                             index,
                                             child,
-                                            "quantity",
                                             e.target.value
                                           )
                                         }
-                                        placeholder="Availability"
-                                        className="w-24 p-1 border border-gray-300 rounded-md text-sm no-spinner"
                                       />
 
                                       <button

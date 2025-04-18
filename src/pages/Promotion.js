@@ -1,25 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  HiDotsVertical,
-  HiOutlineCheckCircle,
-  HiOutlineXCircle,
-  HiPlus,
-  HiX,
-  Hiload,
-} from "react-icons/hi";
-import { FaFileImport } from "react-icons/fa";
-import Papa from "papaparse";
-
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
 import UseFetchUserData from "../component/fetchUser";
 import { useAuthContext } from "../Hooks/useAuthContext";
-import { Dialog } from "@headlessui/react";
-import { FaTimes, FaShoppingBasket } from "react-icons/fa";
-import { CreateCheckoutUrl } from "../component/Checkout";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
-import { debounce } from "lodash";
-import { MdEdit } from "react-icons/md";
 import axios from "axios";
 
 const Promotion = () => {
@@ -70,7 +53,6 @@ const Promotion = () => {
   const [Loading, setLoading] = useState(false);
   const modalRef = useRef();
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
-
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("Active Promotions") || "Promotions Details";
   });
@@ -156,6 +138,7 @@ const Promotion = () => {
 
     fetchPromotions();
   }, []);
+  
   const [selectedProduct, setSelectedProduct] = useState(null);
   const showToast = (type, message) => {
     setToast({ show: true, type, message });

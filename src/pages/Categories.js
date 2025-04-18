@@ -839,7 +839,6 @@ const CategorySelector = () => {
               </div>
             )}
 
-            {/* SKU & Barcode Section */}
             <div className="flex items-center mt-3">
               <input
                 type="checkbox"

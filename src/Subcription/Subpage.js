@@ -29,7 +29,7 @@ const SubscriptionHistory = () => {
     }
 
     try {
-      const res = await fetch(` https://multi-vendor-marketplace.vercel.app/order/order/`, {
+      const res = await fetch(` http://localhost:5000/order/order/`, {
         method: "GET",
       });
       if (res.ok) {
@@ -68,7 +68,7 @@ const SubscriptionHistory = () => {
 
       try {
         const response = await fetch(
-          ` https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
+          ` http://localhost:5000/product/getProduct/${id}`,
           { method: "GET" }
         );
         if (response.ok) {

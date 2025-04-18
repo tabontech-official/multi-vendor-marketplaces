@@ -14,7 +14,6 @@ import RTC from "../component/editor";
 import { Editor } from "react-draft-wysiwyg";
 import draftToHtml from "draftjs-to-html";
 import htmlToDraft from "html-to-draftjs";
-
 import {
   convertToRaw,
   EditorState,
@@ -56,8 +55,8 @@ const CategorySelector = () => {
   const [variantImages, setVariantImages] = useState({});
   const [productTypesList, setProductTypesList] = useState([]);
   const [vendorList, setVendorList] = useState([]);
-  // const [variantPrices, setVariantPrices] = useState({});
-
+  const [variantPrices, setVariantPrices] = useState({});
+  const [variantQuantities, setVariantQuantities] = useState({});
   const removeProductType = (index) => {
     const newList = [...productTypesList];
     newList.splice(index, 1);
@@ -150,52 +149,6 @@ const CategorySelector = () => {
     );
     setCheckedImages({});
   };
-
-  // const handleDeleteCombination = (parentIndex, childIndex) => {
-  //   console.log("Attempting to delete combination:", {
-  //     parentIndex,
-  //     childIndex,
-  //   });
-  //   console.log("Combinations before deletion:", combinations);
-
-  //   if (combinations[parentIndex]) {
-  //     console.log("Parent found:", combinations[parentIndex]);
-  //   } else {
-  //     console.error("Invalid parentIndex:", parentIndex);
-  //   }
-
-  //   if (combinations[parentIndex] && combinations[parentIndex].children) {
-  //     console.log("Children of parent:", combinations[parentIndex].children);
-  //   } else {
-  //     console.error("No children found for parentIndex:", parentIndex);
-  //   }
-
-  //   if (
-  //     combinations[parentIndex] &&
-  //     Array.isArray(combinations[parentIndex].children) &&
-  //     combinations[parentIndex].children.length > 0
-  //   ) {
-  //     const updatedCombinations = [...combinations];
-  //     const children = combinations[parentIndex].children;
-
-  //     if (children[childIndex]) {
-  //       console.log("Deleting child:", children[childIndex]);
-  //       children.splice(childIndex, 1);
-  //       setCombinations(updatedCombinations);
-  //       console.log(
-  //         "Updated combinations after deletion:",
-  //         updatedCombinations
-  //       );
-  //     } else {
-  //       console.error("Invalid childIndex:", childIndex);
-  //     }
-  //   } else {
-  //     console.error(
-  //       "Invalid parent index or no children found at parentIndex:",
-  //       parentIndex
-  //     );
-  //   }
-  // };
 
   const handleDeleteCombination = (parentIndex, childIndex) => {
     setCombinations((prevCombinations) => {
@@ -329,6 +282,7 @@ const CategorySelector = () => {
       })
     );
   }, [variants]);
+
   const { product } = locationData.state || {};
 
   useEffect(() => {
@@ -445,18 +399,6 @@ const CategorySelector = () => {
     }
   };
 
-  // const handleVariantImageUpload = (event, parentIndex, childIndex) => {
-  //   const file = event.target.files[0];
-  //   if (!file) return;
-
-  //   const imagePreview = URL.createObjectURL(file);
-
-  //   setVariantImages((prev) => ({
-  //     ...prev,
-  //     [`${parentIndex}-${childIndex}`]: { file, preview: imagePreview },
-  //   }));
-  // };
-
   const handleVariantImageUpload = (event, parentIndex, child) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -476,129 +418,6 @@ const CategorySelector = () => {
       return newImages;
     });
   };
-
-  const [variantPrices, setVariantPrices] = useState({}); // Keep as object
-  const [variantQuantities, setVariantQuantities] = useState({});
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   const userId = localStorage.getItem("userid");
-
-  //   if (!userId) {
-  //     setMessage({
-  //       type: "error",
-  //       text: "User ID is missing. Cannot submit form.",
-  //     });
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   setMessage(null);
-  //   const rawContentState = convertToRaw(editorState.getCurrentContent());
-  //   const htmlContent = draftToHtml(rawContentState);
-  //   const modifiedContent = htmlContent
-  //     .replace(/<p>/g, "")
-  //     .replace(/<\/p>/g, "<br />")
-  //     .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
-  //     .replace(/&nbsp;/g, " ");
-
-  //     const prepareVariantPrices = () => {
-  //       // Create array in the exact order of variants
-  //       return combinations.flatMap((combination, index) => {
-  //         return combination.children.map(child => {
-  //           const key = `${index}-${child}`;
-  //           return variantPrices[key] !== undefined ? variantPrices[key] : null;
-  //         });
-  //       });
-  //     };
-  //   const formData = new FormData();
-  //   formData.append("keyWord", keywordsList.join(", "));
-  //   formData.append("title", title);
-  //   formData.append("description", modifiedContent);
-  //   formData.append("productType", productTypesList.join(","));
-  //   formData.append("price", parseFloat(price));
-  //   if (compareAtPrice)
-  //     formData.append("compare_at_price", parseFloat(compareAtPrice));
-  //   formData.append("track_quantity", trackQuantity ? "true" : "false");
-  //   formData.append("quantity", trackQuantity ? parseInt(quantity) : 0);
-  //   formData.append("continue_selling", continueSelling);
-  //   formData.append("has_sku", hasSKU);
-  //   if (hasSKU && sku) formData.append("sku", sku);
-  //   if (hasSKU && barcode) formData.append("barcode", barcode);
-  //   formData.append("track_shipping", trackShipping);
-  //   if (trackShipping && weight) formData.append("weight", parseFloat(weight));
-  //   if (trackShipping && unit) formData.append("weight_unit", unit);
-  //   formData.append("status", status);
-  //   formData.append("userId", userId);
-  //   formData.append("vendor", vendorList.join(","));
-  //   formData.append("options", JSON.stringify(options));
-  //   formData.append("variants", JSON.stringify(variants));
-  //   const formattedVariantPrices = prepareVariantPrices();
-  //   console.log("Variant prices being sent:", formattedVariantPrices); // Debug log
-  //   formData.append("variantPrices", JSON.stringify(formattedVariantPrices));
-  //   console.log("Combinations:", combinations);
-  //   console.log("Variant prices state:", variantPrices);
-  //   console.log("Prepared variant prices:", prepareVariantPrices());
-  //   images.forEach((image, index) => {
-  //     formData.append("images", image);
-  //   });
-
-  //   Object.entries(variantImages).forEach(([key, { file }]) => {
-  //     formData.append("variantImages", file);
-  //     formData.append("variantImageKeys", key);
-  //   });
-
-  //   try {
-  //     const url = isEditing
-  //       ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-  //       : " https://multi-vendor-marketplace.vercel.app/product/addEquipment";
-
-  //     const method = isEditing ? "PUT" : "POST";
-
-  //     const response = await fetch(url, {
-  //       method,
-  //       body: formData,
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (response.ok) {
-  //       setMessage({ type: "success", text: "Product added successfully!" });
-
-  //       setTitle("");
-  //       setDescription("");
-  //       setProductType("");
-  //       setPrice("");
-  //       setCompareAtPrice("");
-  //       setTrackQuantity(false);
-  //       setQuantity(0);
-  //       setContinueSelling(false);
-  //       setHasSKU(false);
-  //       setSKU("");
-  //       setBarcode("");
-  //       setTrackShipping(false);
-  //       setWeight("");
-  //       setUnit("kg");
-  //       setOptions([]);
-  //       setVariants([]);
-  //       setVendor("");
-  //       setImages([]);
-  //       setSelectedImages([]);
-  //       setKeyWord("");
-  //       navigate("/manage-product");
-  //     } else {
-  //       setMessage({
-  //         type: "error",
-  //         text: data.error || "Something went wrong!",
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error("Error uploading product:", error);
-  //     setMessage({ type: "error", text: "Failed to connect to server." });
-  //   }
-
-  //   setLoading(false);
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -660,8 +479,8 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+        ? `http://localhost:5000/product/updateProducts/${product._id}`
+        : "http://localhost:5000/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -676,144 +495,127 @@ const CategorySelector = () => {
       const data = await response.json();
       const productId = data.product.id;
 
-      if (response.ok) {
-        setMessage({ type: "success", text: "Product added successfully!" });
-
-        const cloudinaryURLs = [];
-        const variantCloudinaryURLs = [];
-
-        // Upload product images to Cloudinary
-        for (let i = 0; i < images.length; i++) {
-          try {
-            const formDataImages = new FormData();
-            formDataImages.append("file", images[i]);
-            formDataImages.append("upload_preset", "images");
-
-            const cloudinaryResponse = await fetch(
-              "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-              {
-                method: "POST",
-                body: formDataImages,
-              }
-            );
-
-            const cloudinaryJson = await cloudinaryResponse.json();
-
-            if (cloudinaryResponse.ok) {
-              cloudinaryURLs.push(cloudinaryJson.secure_url);
-              console.log(
-                `Product Image ${i + 1} uploaded successfully:`,
-                cloudinaryJson.secure_url
-              );
-            } else {
-              console.error(
-                `Error uploading image ${i + 1}:`,
-                cloudinaryJson.error?.message
-              );
-            }
-          } catch (error) {
-            console.error(
-              `Image upload error for image ${i + 1}:`,
-              error.message
-            );
-          }
-        }
-
-        // Handle Variant Images
-        for (const variant of variants) {
-          for (let i = 0; i < variant.images.length; i++) {
-            try {
-              const formDataVariantImages = new FormData();
-              formDataVariantImages.append("file", variant.images[i]);
-              formDataVariantImages.append("upload_preset", "images");
-
-              const cloudinaryResponse = await fetch(
-                "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-                {
-                  method: "POST",
-                  body: formDataVariantImages,
-                }
-              );
-
-              const cloudinaryJson = await cloudinaryResponse.json();
-
-              if (cloudinaryResponse.ok) {
-                variantCloudinaryURLs.push(cloudinaryJson.secure_url);
-                console.log(
-                  `Variant Image ${i + 1} uploaded successfully:`,
-                  cloudinaryJson.secure_url
-                );
-              } else {
-                console.error(
-                  `Error uploading variant image ${i + 1}:`,
-                  cloudinaryJson.error?.message
-                );
-              }
-            } catch (error) {
-              console.error(
-                `Variant image upload error for image ${i + 1}:`,
-                error.message
-              );
-            }
-          }
-        }
-
-        // Save both product and variant images URLs to the database
-        const allImageURLs = [...cloudinaryURLs, ...variantCloudinaryURLs];
-
-        if (allImageURLs.length > 0) {
-          try {
-            const imageResponse = await fetch(
-              `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
-              {
-                method: "PUT",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ images: allImageURLs }),
-              }
-            );
-
-            const imageJson = await imageResponse.json();
-
-            if (imageResponse.ok) {
-              console.log("Images URLs saved successfully:", imageJson);
-            } else {
-              console.error(
-                "Error saving image URLs in the database:",
-                imageJson.error
-              );
-            }
-          } catch (error) {
-            console.error("Database update error for images:", error.message);
-          }
-        }
-
-        setTitle("");
-        setDescription("");
-        setProductType("");
-        setPrice("");
-        setCompareAtPrice("");
-        setTrackQuantity(false);
-        setQuantity(0);
-        setContinueSelling(false);
-        setHasSKU(false);
-        setSKU("");
-        setBarcode("");
-        setTrackShipping(false);
-        setWeight("");
-        setUnit("kg");
-        setOptions([]);
-        setVariants([]);
-        setVendor("");
-        setKeyWord("");
-        navigate("/manage-product");
-      } else {
+      if (!response.ok) {
         setMessage({
           type: "error",
           text: data.error || "Something went wrong!",
         });
+        setLoading(false);
+        return;
       }
+
+      const formData = new FormData();
+
+      images.forEach((image) => formData.append("images", image));
+      Object.entries(variantImages).forEach(([key, { file }]) => {
+        formData.append("variantImages", file);
+        formData.append("variantImageKeys", key);
+      });
+
+      const cloudinaryURLs = [];
+      const uploadedVariantImages = [];
+
+      for (let i = 0; i < images.length; i++) {
+        const imageForm = new FormData();
+        imageForm.append("file", images[i]);
+        imageForm.append("upload_preset", "images");
+
+        const uploadRes = await fetch(
+          "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+          {
+            method: "POST",
+            body: imageForm,
+          }
+        );
+
+        const uploadJson = await uploadRes.json();
+
+        if (uploadRes.ok) {
+          cloudinaryURLs.push(uploadJson.secure_url);
+        } else {
+          setMessage({
+            type: "error",
+            text: `Failed to upload image ${i + 1}`,
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
+      for (let i = 0; i < Object.entries(variantImages).length; i++) {
+        const [key, { file }] = Object.entries(variantImages)[i];
+        const variantForm = new FormData();
+        variantForm.append("file", file);
+        variantForm.append("upload_preset", "images");
+
+        const uploadVariantRes = await fetch(
+          "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+          {
+            method: "POST",
+            body: variantForm,
+          }
+        );
+
+        const variantUploadJson = await uploadVariantRes.json();
+
+        if (uploadVariantRes.ok) {
+          uploadedVariantImages.push({
+            key,
+            url: variantUploadJson.secure_url,
+          });
+        } else {
+          setMessage({
+            type: "error",
+            text: `Failed to upload variant image ${i + 1}`,
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
+      const imageSaveResponse = await fetch(
+        `http://localhost:5000/product/updateImages/${data.product.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            images: cloudinaryURLs,
+            variantImages: uploadedVariantImages,
+          }),
+        }
+      );
+
+      const imageSaveJson = await imageSaveResponse.json();
+
+      if (!imageSaveResponse.ok) {
+        setMessage({
+          type: "error",
+          text: imageSaveJson.error || "Failed to save image URLs",
+        });
+        setLoading(false);
+        return;
+      }
+      setTitle("");
+      setDescription("");
+      setProductType("");
+      setPrice("");
+      setCompareAtPrice("");
+      setTrackQuantity(false);
+      setQuantity(0);
+      setContinueSelling(false);
+      setHasSKU(false);
+      setSKU("");
+      setBarcode("");
+      setTrackShipping(false);
+      setWeight("");
+      setUnit("kg");
+      setOptions([]);
+      setVariants([]);
+      setVendor("");
+      setKeyWord("");
+      navigate("/manage-product");
     } catch (error) {
       console.error("Error uploading product:", error);
       setMessage({ type: "error", text: "Failed to connect to server." });
@@ -834,197 +636,6 @@ const CategorySelector = () => {
     const key = `${index}-${child}`;
     setVariantQuantities((prev) => ({ ...prev, [key]: value }));
   };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   const userId = localStorage.getItem("userid");
-
-  //   if (!userId) {
-  //     setMessage({
-  //       type: "error",
-  //       text: "User ID is missing. Cannot submit form.",
-  //     });
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   setMessage(null);
-
-  //   const rawContentState = convertToRaw(editorState.getCurrentContent());
-  //   const htmlContent = draftToHtml(rawContentState);
-  //   const modifiedContent = htmlContent
-  //     .replace(/<p>/g, "")
-  //     .replace(/<\/p>/g, "<br />")
-  //     .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
-  //     .replace(/&nbsp;/g, " ");
-
-  //   const formData = new FormData();
-  //   formData.append("keyWord", keywordsList.join(", "));
-  //   formData.append("title", title);
-  //   formData.append("description", modifiedContent);
-  //   formData.append("productType", productTypesList.join(","));
-  //   formData.append("price", parseFloat(price));
-  //   if (compareAtPrice)
-  //     formData.append("compare_at_price", parseFloat(compareAtPrice));
-  //   formData.append("track_quantity", trackQuantity ? "true" : "false");
-  //   formData.append("quantity", trackQuantity ? parseInt(quantity) : 0);
-  //   formData.append("continue_selling", continueSelling);
-  //   formData.append("has_sku", hasSKU);
-  //   if (hasSKU && sku) formData.append("sku", sku);
-  //   if (hasSKU && barcode) formData.append("barcode", barcode);
-  //   formData.append("track_shipping", trackShipping);
-  //   if (trackShipping && weight) formData.append("weight", parseFloat(weight));
-  //   if (trackShipping && unit) formData.append("weight_unit", unit);
-  //   formData.append("status", status);
-  //   formData.append("userId", userId);
-  //   formData.append("vendor", vendorList.join(","));
-  //   formData.append("options", JSON.stringify(options));
-  //   formData.append("variants", JSON.stringify(variants));
-
-  //   try {
-  //     const url = isEditing
-  //       ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-  //       : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
-  //     const method = isEditing ? "PUT" : "POST";
-
-  //     const response = await fetch(url, {
-  //       method,
-  //       body: formData,
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (!response.ok) {
-  //       setMessage({
-  //         type: "error",
-  //         text: data.error || "Something went wrong!",
-  //       });
-  //       setLoading(false);
-  //       return;
-  //     }
-  // images.forEach((image) => formData.append("images", image));
-  // Object.entries(variantImages).forEach(([key, { file }]) => {
-  //   formData.append("variantImages", file);
-  //   formData.append("variantImageKeys", key);
-  // });
-  // const cloudinaryURLs = [];
-  // const uploadedVariantImages = [];
-
-  // for (let i = 0; i < images.length; i++) {
-  //   const imageForm = new FormData();
-  //   imageForm.append("file", images[i]);
-  //   imageForm.append("upload_preset", "images");
-
-  //   const uploadRes = await fetch(
-  //     "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-  //     {
-  //       method: "POST",
-  //       body: imageForm,
-  //     }
-  //   );
-
-  //   const uploadJson = await uploadRes.json();
-
-  //   if (uploadRes.ok) {
-  //     cloudinaryURLs.push(uploadJson.secure_url);
-  //   } else {
-  //     setMessage({
-  //       type: "error",
-  //       text: `Failed to upload image ${i + 1}`,
-  //     });
-  //     setLoading(false);
-  //     return;
-  //   }
-  // }
-
-  // for (let i = 0; i < Object.entries(variantImages).length; i++) {
-  //   const [key, { file }] = Object.entries(variantImages)[i];
-  //   const variantForm = new FormData();
-  //   variantForm.append("file", file);
-  //   variantForm.append("upload_preset", "images");
-
-  //   const uploadVariantRes = await fetch(
-  //     "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-  //     {
-  //       method: "POST",
-  //       body: variantForm,
-  //     }
-  //   );
-
-  //   const variantUploadJson = await uploadVariantRes.json();
-
-  //   if (uploadVariantRes.ok) {
-  //     uploadedVariantImages.push({
-  //       key,
-  //       url: variantUploadJson.secure_url,
-  //     });
-  //   } else {
-  //     setMessage({
-  //       type: "error",
-  //       text: `Failed to upload variant image ${i + 1}`,
-  //     });
-  //     setLoading(false);
-  //     return;
-  //   }
-  // }
-
-  // const imageSaveResponse = await fetch(
-  //   `https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
-  //   {
-  //     method: "PUT",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({
-  //       images: cloudinaryURLs,
-  //       variantImages: uploadedVariantImages,
-  //     }),
-  //   }
-  // );
-
-  // const imageSaveJson = await imageSaveResponse.json();
-
-  // if (!imageSaveResponse.ok) {
-  //   setMessage({
-  //     type: "error",
-  //     text: imageSaveJson.error || "Failed to save image URLs",
-  //   });
-  //   setLoading(false);
-  //   return;
-  // }
-
-  //     setMessage({ type: "success", text: "Product added successfully!" });
-
-  //     // Reset form
-  //     setTitle("");
-  //     setDescription("");
-  //     setProductType("");
-  //     setPrice("");
-  //     setCompareAtPrice("");
-  //     setTrackQuantity(false);
-  //     setQuantity(0);
-  //     setContinueSelling(false);
-  //     setHasSKU(false);
-  //     setSKU("");
-  //     setBarcode("");
-  //     setTrackShipping(false);
-  //     setWeight("");
-  //     setUnit("kg");
-  //     setOptions([]);
-  //     setVariants([]);
-  //     setVendor("");
-  //     setImages([]);
-  //     setSelectedImages([]);
-  //     setKeyWord("");
-
-  //     navigate("/manage-product");
-  //   } catch (error) {
-  //     console.error("Error uploading product:", error);
-  //     setMessage({ type: "error", text: "Failed to connect to server." });
-  //   }
-
-  //   setLoading(false);
-  // };
 
   return (
     <main className="flex justify-center bg-gray-100 p-6">
@@ -1605,6 +1216,18 @@ const CategorySelector = () => {
               </div>
             )}
           </div>
+          {loading && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-80 flex flex-col justify-center items-center z-50">
+              <img
+                src="https://i.gifer.com/4V0b.gif"
+                alt="Loading..."
+                className="w-16 h-16"
+              />
+              <p className="mt-4 text-white font-semibold">
+                Please do not close window
+              </p>
+            </div>
+          )}
           <button
             onClick={handleSubmit}
             type="submit"
@@ -1662,21 +1285,26 @@ const CategorySelector = () => {
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
               <div className="flex flex-wrap gap-2 mt-2">
-                {productTypesList.map((type, index) => (
-                  <span
-                    key={index}
-                    className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
-                  >
-                    {type}
-                    <button
-                      type="button"
-                      className="ml-2 text-red-500"
-                      onClick={() => removeProductType(index)}
-                    >
-                      &times;
-                    </button>
-                  </span>
-                ))}
+                {productTypesList.filter((word) => word.trim() !== "").length >
+                  0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {productTypesList.map((type, index) => (
+                      <span
+                        key={index}
+                        className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
+                      >
+                        {type}
+                        <button
+                          type="button"
+                          className="ml-2 text-red-500"
+                          onClick={() => removeProductType(index)}
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <label htmlFor="vendor" className="block text-gray-600 text-sm">
@@ -1691,21 +1319,25 @@ const CategorySelector = () => {
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
               <div className="flex flex-wrap gap-2 mt-2">
-                {vendorList.map((v, index) => (
-                  <span
-                    key={index}
-                    className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
-                  >
-                    {v}
-                    <button
-                      type="button"
-                      className="ml-2 text-red-500"
-                      onClick={() => removeVendor(index)}
-                    >
-                      &times;
-                    </button>
-                  </span>
-                ))}
+                {vendorList.filter((word) => word.trim() !== "").length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {vendorList.map((v, index) => (
+                      <span
+                        key={index}
+                        className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
+                      >
+                        {v}
+                        <button
+                          type="button"
+                          className="ml-2 text-red-500"
+                          onClick={() => removeVendor(index)}
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <label htmlFor="keywords" className="block text-gray-600 text-sm">
@@ -1720,21 +1352,28 @@ const CategorySelector = () => {
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
               <div className="flex flex-wrap gap-2 mt-2">
-                {keywordsList.map((word, index) => (
-                  <span
-                    key={index}
-                    className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
-                  >
-                    {word}
-                    <button
-                      type="button"
-                      className="ml-2 text-red-500"
-                      onClick={() => removeKeyword(index)}
-                    >
-                      &times;
-                    </button>
-                  </span>
-                ))}
+                {keywordsList.filter((word) => word.trim() !== "").length >
+                  0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {keywordsList
+                      .filter((word) => word.trim() !== "")
+                      .map((word, index) => (
+                        <span
+                          key={index}
+                          className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
+                        >
+                          {word}
+                          <button
+                            type="button"
+                            className="ml-2 text-red-500"
+                            onClick={() => removeKeyword(index)}
+                          >
+                            &times;
+                          </button>
+                        </span>
+                      ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

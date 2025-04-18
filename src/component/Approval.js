@@ -34,7 +34,7 @@ const ApprovalPopup = () => {
       const userid = localStorage.getItem("userid");
       if (userid) {
         await fetch(
-          ` https://multi-vendor-marketplace.vercel.app/auth/logout/${userid}`,
+          ` http://localhost:5000/auth/logout/${userid}`,
           {
             method: "POST",
           }

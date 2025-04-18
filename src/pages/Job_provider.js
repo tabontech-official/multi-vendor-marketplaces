@@ -176,8 +176,8 @@ const AddNewJobForm = () => {
 
     // try {
     //     const response = await fetch(isEditing
-    //       ? ` https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}`
-    //       : " https://multi-vendor-marketplace.vercel.app/product/addProvider", {
+    //       ? ` http://localhost:5000/product/updateListing/${product.id}`
+    //       : " http://localhost:5000/product/addProvider", {
     //       method: isEditing ? "PUT" : "POST",
     //       body: formData,
     //     });;
@@ -216,11 +216,11 @@ const AddNewJobForm = () => {
 
     try {
       // Set the API URL and method (POST for creating new, PUT for updating)
-      let url = " https://multi-vendor-marketplace.vercel.app/product/addProvider";
+      let url = " http://localhost:5000/product/addProvider";
       let method = "POST";
   
       if (product && product.id) {
-        url = ` https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}`;
+        url = ` http://localhost:5000/product/updateListing/${product.id}`;
         method = "PUT";
       }
   
@@ -271,7 +271,7 @@ const AddNewJobForm = () => {
         //   }
   
         //   // Once all images are uploaded, save the URLs in the database
-        //   const imageResponse = await fetch(` https://multi-vendor-marketplace.vercel.app/product/updateImages/${createdProductId}`, {
+        //   const imageResponse = await fetch(` http://localhost:5000/product/updateImages/${createdProductId}`, {
         //     method: "PUT",
         //     headers: {
         //       'Content-Type': 'application/json',

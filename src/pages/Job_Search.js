@@ -242,8 +242,8 @@ console.log(description)
     // try {
     //   // API URL and method based on whether it's editing or adding a new job
     //   const url = isEditing
-    //     ? ` http://localhost:5000/product/updateListing/${product.id}`
-    //     : " http://localhost:5000/product/addJob";
+    //     ? ` https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}`
+    //     : " https://multi-vendor-marketplace.vercel.app/product/addJob";
   
     //   const method = isEditing ? "PUT" : "POST";
   
@@ -288,7 +288,7 @@ console.log(description)
     //       }
   
     //       // Save the Cloudinary URLs to the database
-    //       const imageResponse = await fetch(` http://localhost:5000/product/updateImages/${json.product.id}`, {
+    //       const imageResponse = await fetch(` https://multi-vendor-marketplace.vercel.app/product/updateImages/${json.product.id}`, {
     //         method: "PUT",
     //         headers: {
     //           'Content-Type': 'application/json',
@@ -327,11 +327,11 @@ console.log(description)
 
     try {
       // Set the API URL and method (POST for creating new, PUT for updating)
-      let url = " http://localhost:5000/product/addJob";
+      let url = " https://multi-vendor-marketplace.vercel.app/product/addJob";
       let method = "POST";
   
       if (product && product.id) {
-        url = ` http://localhost:5000/product/updateListing/${product.id}`;
+        url = ` https://multi-vendor-marketplace.vercel.app/product/updateListing/${product.id}`;
         method = "PUT";
       }
 
@@ -390,7 +390,7 @@ console.log(description)
           }
   
           // Once all images are uploaded, save the URLs in the database
-          const imageResponse = await fetch(` http://localhost:5000/product/updateImages/${createdProductId}`, {
+          const imageResponse = await fetch(` https://multi-vendor-marketplace.vercel.app/product/updateImages/${createdProductId}`, {
             method: "PUT",
             headers: {
               'Content-Type': 'application/json',

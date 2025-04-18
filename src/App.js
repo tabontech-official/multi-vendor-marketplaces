@@ -31,6 +31,7 @@ import NewPassword from "./pages/NewPassword";
 import Promotion from "./pages/Promotion";
 import CatalogPerformance from "./pages/CatalogPerformance";
 import EcommerceConsultation from "./pages/Consultation";
+import Variants from "./pages/Variants";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -125,6 +126,10 @@ const App = () => {
           <Route
             path="/promotions"
             element={<ProtectedForms element={<Promotion />} />}
+          />
+           <Route
+            path="/variants"
+            element={<ProtectedForms element={<Variants />} />}
           />
           <Route
             path="/Order_Details"

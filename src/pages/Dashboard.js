@@ -68,8 +68,8 @@ const Dashboard = () => {
     try {
       const response = await fetch(
         admin
-          ? ` http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`
-          : ` http://localhost:5000/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+          ? ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
+          : ` https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
 
@@ -138,7 +138,7 @@ const Dashboard = () => {
       await Promise.all(
         selectedProducts.map(async (id) => {
           const response = await fetch(
-            `http://localhost:5000/product/deleteProduct/${id}`,
+            `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
             { method: "DELETE" }
           );
           if (!response.ok) throw new Error("Failed to delete product");
@@ -167,7 +167,7 @@ const Dashboard = () => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "draft") {
             const response = await fetch(
-              ` http://localhost:5000/product/publishedProduct/${id}`,
+              ` https://multi-vendor-marketplace.vercel.app/product/publishedProduct/${id}`,
               {
                 method: "PUT",
                 body: JSON.stringify({ userId }),
@@ -196,7 +196,7 @@ const Dashboard = () => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "active") {
             const response = await fetch(
-              ` http://localhost:5000/product/unpublished/${id}`,
+              ` https://multi-vendor-marketplace.vercel.app/product/unpublished/${id}`,
               {
                 method: "PUT",
                 headers: {
@@ -247,8 +247,8 @@ const Dashboard = () => {
       try {
         const response = await fetch(
           admin
-            ? ` http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`
-            : ` http://localhost:5000/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+            ? ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
+            : ` https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
           { method: "GET" }
         );
 
@@ -371,7 +371,7 @@ const Dashboard = () => {
 
           try {
             const res = await fetch(
-              " http://localhost:5000/product/addEquipment",
+              " https://multi-vendor-marketplace.vercel.app/product/addEquipment",
               {
                 method: "POST",
                 body: formData,

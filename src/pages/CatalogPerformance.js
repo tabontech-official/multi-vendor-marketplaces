@@ -80,7 +80,7 @@ const CatalogPerformance = () => {
     const getProductCount = async () => {
       try {
         const response = await fetch(
-          " http://localhost:5000/product/getProductCount"
+          " https://multi-vendor-marketplace.vercel.app/product/getProductCount"
         ); // replace with your actual API URL
         const data = await response.json();
         if (response.ok) {
@@ -100,7 +100,7 @@ const CatalogPerformance = () => {
     const fetchSummary = async () => {
       try {
         const response = await fetch(
-          " http://localhost:5000/order/recurringFinance"
+          " https://multi-vendor-marketplace.vercel.app/order/recurringFinance"
         );
         const data = await response.json();
         setSummary(data);

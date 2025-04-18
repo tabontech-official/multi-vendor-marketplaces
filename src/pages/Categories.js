@@ -479,8 +479,8 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? `http://localhost:5000/product/updateProducts/${product._id}`
-        : "http://localhost:5000/product/addEquipment";
+        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
+        : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -574,7 +574,7 @@ const CategorySelector = () => {
       }
 
       const imageSaveResponse = await fetch(
-        `http://localhost:5000/product/updateImages/${data.product.id}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
         {
           method: "PUT",
           headers: {
@@ -1076,7 +1076,24 @@ const CategorySelector = () => {
                                         </label>
                                       </div>
 
-                                      <span className="font-medium text-gray-700 w-[120px]">
+                                      <span
+                                        className="font-medium text-gray-700 w-[120px] cursor-pointer"
+                                        onClick={() => {
+                                          const variantId =
+                                            product.variants[index]?.id ||
+                                            child.id ||
+                                            child;
+
+                                          navigate("/variants", {
+                                            state: {
+                                              productId: product.id,
+                                              variantId: variantId,
+                                              isEditing: true, 
+
+                                            },
+                                          });
+                                        }}
+                                      >
                                         {child}
                                       </span>
 

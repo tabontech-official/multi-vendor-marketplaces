@@ -97,8 +97,8 @@ const Promotion = () => {
     try {
       const response = await fetch(
         admin
-          ? ` http://localhost:5000/product/getAllDataForPromotion/?page=${page}&limit=${limit}`
-          : ` http://localhost:5000/product/getPromotionProduct/${id}/?page=${page}&limit=${limit}`,
+          ? ` https://multi-vendor-marketplace.vercel.app/product/getAllDataForPromotion/?page=${page}&limit=${limit}`
+          : ` https://multi-vendor-marketplace.vercel.app/product/getPromotionProduct/${id}/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
 
@@ -145,7 +145,7 @@ const Promotion = () => {
     const fetchPromotions = async () => {
       try {
         const res = await fetch(
-          " http://localhost:5000/promo"
+          " https://multi-vendor-marketplace.vercel.app/promo"
         );
         const data = await res.json();
         setPromotions(data);
@@ -171,7 +171,7 @@ const Promotion = () => {
 
     try {
       const res = await axios.post(
-        ` http://localhost:5000/promo/${selectedProduct._id}`,
+        ` https://multi-vendor-marketplace.vercel.app/promo/${selectedProduct._id}`,
         {
           promoPrice,
           startDate: modalStartDate,
@@ -207,7 +207,7 @@ const Promotion = () => {
       await Promise.all(
         selectedProducts.map(async (id) => {
           const response = await fetch(
-            ` http://localhost:5000/promo/${id}`,
+            ` https://multi-vendor-marketplace.vercel.app/promo/${id}`,
             {
               method: "DELETE",
             }
@@ -251,7 +251,7 @@ const Promotion = () => {
       await Promise.all(
         selectedProducts.map(async (id) => {
           const response = await fetch(
-            `http://localhost:5000/promo/endPromotions/${id}`,
+            `https://multi-vendor-marketplace.vercel.app/promo/endPromotions/${id}`,
             {
               method: "DELETE",
             }

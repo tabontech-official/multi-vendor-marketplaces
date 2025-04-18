@@ -20,7 +20,7 @@ const AdminDashboard = () => {
   const [editing, setEditing] = useState(false)
   const handleSave = async () => {
     try {
-      await axios.put(' http://localhost:5000/auth/shopifyConfigurations', {
+      await axios.put(' https://multi-vendor-marketplace.vercel.app/auth/shopifyConfigurations', {
         shopifyAccessToken,
         shopifyApiKey,
         shopifyStoreUrl
@@ -52,7 +52,7 @@ const AdminDashboard = () => {
   const fetchPrice = async () => {
     try {
       const response = await fetch(
-        " http://localhost:5000/product/getPrice/",
+        " https://multi-vendor-marketplace.vercel.app/product/getPrice/",
         { method: "GET" }
       );
       const json = await response.json();
@@ -92,7 +92,7 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        " http://localhost:5000/product/updateId/",
+        " https://multi-vendor-marketplace.vercel.app/product/updateId/",
         {
           method: "PUT",
           headers: {
@@ -129,7 +129,7 @@ const AdminDashboard = () => {
   const fetchRequiredCredits = async () => {
     try {
       const response = await fetch(
-        " http://localhost:5000/product/fetchRequireCredits",
+        " https://multi-vendor-marketplace.vercel.app/product/fetchRequireCredits",
         { method: "GET" }
       );
       const data = await response.json();
@@ -245,7 +245,7 @@ const AdminDashboard = () => {
 
     try {
       const response = await fetch(
-        " http://localhost:5000/product/credits/",
+        " https://multi-vendor-marketplace.vercel.app/product/credits/",
         {
           method: "PUT",
           headers: {
@@ -283,7 +283,7 @@ const AdminDashboard = () => {
     setToast({ show: false, type: "", message: "" }); // Reset toast
     try {
       const response = await fetch(
-        " http://localhost:5000/auth/updatequantity",
+        " https://multi-vendor-marketplace.vercel.app/auth/updatequantity",
         {
           method: "PUT",
           headers: {

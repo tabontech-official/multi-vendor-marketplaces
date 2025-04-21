@@ -1,26 +1,20 @@
-import React, { useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuthContext } from '../Hooks/useAuthContext';
+import React, { useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuthContext } from "../Hooks/useAuthContext";
 
 const ProtectedRoute = ({ element, ...rest }) => {
   const { user } = useAuthContext();
   const location = useLocation();
   const { pathname } = location;
 
-
-  console.log(pathname)
+  console.log(pathname);
   useEffect(() => {
-    // Set the path in local storage only if the user is not logged in
     if (!user) {
-      localStorage.setItem('path', pathname);
+      localStorage.setItem("path", pathname);
     }
   }, [user, pathname]);
 
-  return user ? (
-    element
-  ) : (
-    <Navigate to={'/Login'} replace />
-  );
+  return user ? element : <Navigate to={"/Login"} replace />;
 };
 
 export default ProtectedRoute;

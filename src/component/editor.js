@@ -19,9 +19,7 @@ export default function RTC({ editorState, onEditorStateChange, name }) {
       // Replace line breaks with <br /> tags
       const modifiedContent = htmlContent.replace(/<p><br><\/p>/g, '<br />');
 
-      // Store or send the modified content
       setContent(modifiedContent);
-      console.log(modifiedContent); // Use this modified content as needed
     }
   };
 

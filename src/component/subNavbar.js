@@ -21,19 +21,15 @@ const SubNavbar = () => {
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
     if (!token) {
-      console.log("No token found in localStorage");
       return;
     }
 
     try {
       const decoded = jwtDecode(token);
-      console.log("Decoded Token:", decoded);
 
       if (decoded.payLoad.role) {
-        console.log("Setting role state:", decoded.payLoad.role);
         setRole(decoded.payLoad.role);
       } else {
-        console.log("Role is missing in decoded token!");
       }
     } catch (error) {
       console.error("Error decoding token:", error);

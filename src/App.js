@@ -14,7 +14,7 @@ import ResetPassword from "./pages/resetPassword";
 import PrivateRoute from "./context api/protectedRoutes";
 import AccountPage from "./pages/account";
 import Auth from "./AuthForms";
-import CategorySelector from "./pages/Categories";
+import CategorySelector from "./pages/AddProduct";
 import "./App.css";
 import { useAuthContext } from "./Hooks/useAuthContext";
 import { useEffect, useState } from "react";
@@ -46,21 +46,17 @@ const App = () => {
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
     if (!token) {
-      console.log("No token found in localStorage");
       setLoading(false);
       return;
     }
 
     try {
       const decoded = jwtDecode(token);
-      console.log("Decoded Token:", decoded); // Debugging
 
       if (decoded?.payLoad?.role) {
         setRole(decoded.payLoad.role);
-        console.log("Role Set in State:", decoded.payLoad.role); // Debugging
       } else {
-        console.log("Role is missing in decoded token! Setting default value.");
-        setRole(""); // Default value to avoid null
+        setRole("");
       }
     } catch (error) {
       console.error("Error decoding token:", error);
@@ -127,7 +123,7 @@ const App = () => {
             path="/promotions"
             element={<ProtectedForms element={<Promotion />} />}
           />
-           <Route
+          <Route
             path="/variants"
             element={<ProtectedForms element={<Variants />} />}
           />

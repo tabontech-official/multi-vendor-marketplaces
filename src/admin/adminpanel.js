@@ -57,7 +57,6 @@ const AdminDashboard = () => {
       );
       const json = await response.json();
       if (response.ok) {
-        console.log("Price", json);
         setProductId(json[0].creditId);
         setPrice(json[0].price);
         setChangePrice(json[0].price);

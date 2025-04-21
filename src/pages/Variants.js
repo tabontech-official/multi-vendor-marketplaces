@@ -5,9 +5,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const Variants = () => {
   const [variantData, setVariantData] = useState(null);
+  const [updatedVariant, setUpdatedVariant] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [trackQuantity, setTrackQuantity] = useState(false);
+
   const location = useLocation();
   const navigate = useNavigate();
-  const { productId, variantId, isEditing } = location.state || {};
+  const { productId, variantId } = location.state || {};
 
   useEffect(() => {
     const fetchVariantData = async () => {
@@ -16,6 +20,7 @@ const Variants = () => {
           `https://multi-vendor-marketplace.vercel.app/product/getSingleVariant/${productId}/variants/${variantId}`
         );
         setVariantData(response.data);
+        setUpdatedVariant(response.data);
       } catch (error) {
         console.error("Error fetching variant data:", error);
       }
@@ -24,6 +29,32 @@ const Variants = () => {
     fetchVariantData();
   }, [productId, variantId]);
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setUpdatedVariant((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+
+      const response = await axios.put(
+        `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
+        {
+          variant: updatedVariant,
+        }
+      );
+      console.log("Variant updated successfully", response.data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error updating variant:", error);
+      setIsLoading(false);
+    }
+  };
+
   if (!variantData) {
     return <p>Loading...</p>;
   }
@@ -31,17 +62,31 @@ const Variants = () => {
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <div className="w-full max-w-2xl shadow-lg p-3 rounded-md">
-        <FaArrowLeft
-          onClick={() =>
-            navigate("/add-product", {
-              state: {
-                isEditing: true,
-              },
-            })
-          }
-          className="text-gray-500 hover:text-gray-600 cursor-pointer"
-        />
-
+        <div className="flex justify-between">
+          <FaArrowLeft
+            onClick={() =>
+              navigate("/add-product", {
+                state: {
+                  isEditing: true,
+                },
+              })
+            }
+            className="text-gray-500 hover:text-gray-600 cursor-pointer"
+          />
+          <button
+            onClick={handleSave}
+            className={`mt-6 inline-block px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition ${
+              isLoading ? "opacity-50 cursor-wait" : ""
+            }`}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="spinner-border animate-spin w-5 h-5 border-t-2 border-b-2 border-white rounded-full"></div>
+            ) : (
+              "Save"
+            )}
+          </button>
+        </div>
         {/* Option box */}
         <div className="mt-4 bg-white p-3 border border-gray-300 rounded-2xl">
           <h3 className="font-semibold text-md">Options</h3>
@@ -54,8 +99,9 @@ const Variants = () => {
                 <input
                   type="text"
                   className="w-full pl-2 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
-                  value={variantData[`option${index + 1}`] || ""}
-                  readOnly
+                  name={`option${index + 1}`}
+                  value={updatedVariant[`option${index + 1}`] || ""}
+                  onChange={handleInputChange}
                 />
               </div>
             </div>
@@ -79,8 +125,9 @@ const Variants = () => {
                 <input
                   type="number"
                   className="w-full pl-7 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
-                  value={variantData.price || ""}
-                  readOnly
+                  name="price"
+                  value={updatedVariant.price || ""}
+                  onChange={handleInputChange}
                 />
               </div>
             </div>
@@ -96,8 +143,9 @@ const Variants = () => {
                 <input
                   type="number"
                   className="w-full pl-7 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
-                  value={variantData.compare_at_price || ""}
-                  readOnly
+                  name="compare_at_price"
+                  value={updatedVariant.compare_at_price || ""}
+                  onChange={handleInputChange}
                 />
               </div>
             </div>
@@ -117,8 +165,9 @@ const Variants = () => {
               <input
                 type="text"
                 className="w-full pl-4 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
-                value={variantData.sku || ""}
-                readOnly
+                name="sku"
+                value={updatedVariant.sku || ""}
+                onChange={handleInputChange}
               />
             </div>
             <div>
@@ -128,11 +177,106 @@ const Variants = () => {
               <input
                 type="text"
                 className="w-full pl-4 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
-                value={variantData.barcode || ""}
-                readOnly
+                name="barcode"
+                value={updatedVariant.barcode || ""}
+                onChange={handleInputChange}
               />
             </div>
           </div>
+          <div className=" items-center mt-3">
+            <input
+              type="checkbox"
+              id="trackQuantity"
+              checked={trackQuantity}
+              onChange={() => setTrackQuantity(!trackQuantity)}
+              className="h-4 w-4 text-blue-500"
+            />
+            <label
+              htmlFor="trackQuantity"
+              className="ml-2 text-sm text-gray-700"
+            >
+              Track quantity
+            </label>
+          </div>
+
+          {trackQuantity && (
+            <div className="mt-4 border-b border-gray-300">
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-gray-700 block font-semibold mb-2">
+                  Quantity
+                </label>
+              </div>
+
+              <div className="flex justify-between border-t border-gray-300 p-2">
+                <h1 className="text-sm font-semibold text-gray-700">
+                  Unavailable
+                </h1>
+                <h1 className="text-sm font-semibold text-gray-700">
+                  Committed
+                </h1>
+                <h1 className="text-sm font-semibold text-gray-700">
+                  Available
+                </h1>
+                <h1 className="text-sm font-semibold text-gray-700">On hand</h1>
+              </div>
+
+              <div className="flex justify-between border-t border-gray-300 p-2 gap-3">
+                <div className="flex flex-col items-center w-1/4">
+                  <input
+                    type="text"
+                    className="border border-gray-400 w-full p-1 rounded-md text-sm"
+                    placeholder="0"
+                    pattern="\d*"
+                    inputMode="numeric"
+                    onInput={(e) => {
+                      e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                    }}
+                  />
+                </div>
+
+                <div className="flex flex-col items-center w-1/4">
+                  <input
+                    type="text"
+                    className="border border-gray-400 w-full p-1 rounded-md text-sm"
+                    placeholder="0"
+                    pattern="\d*"
+                    inputMode="numeric"
+                    onInput={(e) => {
+                      e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                    }}
+                  />
+                </div>
+
+                <div className="flex flex-col items-center w-1/4">
+                  <input
+                    type="text"
+                    className="border border-gray-400 w-full p-1 rounded-md text-sm"
+                    value={variantData.inventory_quantity}
+                    placeholder="0"
+                    pattern="\d*"
+                    inputMode="numeric"
+                    onInput={(e) => {
+                      e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                    }}
+                  />
+                </div>
+
+                <div className="flex flex-col items-center w-1/4">
+                  <input
+                    type="text"
+                    className="border border-gray-400 w-full p-1 rounded-md text-sm"
+                    placeholder="0"
+                    value={variantData.inventory_quantity}
+                    pattern="\d*"
+                    inputMode="numeric"
+                    onInput={(e) => {
+                      e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Shipping box */}
@@ -146,13 +290,15 @@ const Variants = () => {
               <input
                 type="text"
                 className="w-20 text-center py-1 border-0 focus:ring-0"
-                value={variantData.weight || ""}
-                readOnly
+                name="weight"
+                value={updatedVariant.weight || ""}
+                onChange={handleInputChange}
               />
               <select
                 className="border px-2 py-1 rounded-md"
-                value={variantData.weight_unit}
-                readOnly
+                name="weight_unit"
+                value={updatedVariant.weight_unit}
+                onChange={handleInputChange}
               >
                 <option value="kg">kg</option>
                 <option value="lb">lb</option>

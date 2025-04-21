@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { useAuthContext } from '../Hooks/useAuthContext';
-import { FiLoader } from 'react-icons/fi'; // Import loader icon
+import { useAuthContext } from "../Hooks/useAuthContext";
+import { FiLoader } from "react-icons/fi"; // Import loader icon
 import { height } from "@fortawesome/free-solid-svg-icons/fa0";
 const ProtectedForms = ({ element, ...rest }) => {
   const [credits, setCredits] = useState(0);
@@ -13,17 +13,17 @@ const ProtectedForms = ({ element, ...rest }) => {
   const { user } = useAuthContext();
 
   const productTypeMap = {
-    '/Used_Equipment_Listing': 'Used Equipments',
-    '/New_Equipment_listing': 'New Equipments',
-    '/Job_Search_listing': 'Providers Available',
-    '/Job_Provider_listing': 'Provider Needed',
-    '/Rent_Room_listing': 'Spa Room For Rent',
-    '/Business_Equipment_listing': 'Businesses To Purchase',
-    '/I_AM_LOOKING_FOR': 'Looking For',
+    "/Used_Equipment_Listing": "Used Equipments",
+    "/New_Equipment_listing": "New Equipments",
+    "/Job_Search_listing": "Providers Available",
+    "/Job_Provider_listing": "Provider Needed",
+    "/Rent_Room_listing": "Spa Room For Rent",
+    "/Business_Equipment_listing": "Businesses To Purchase",
+    "/I_AM_LOOKING_FOR": "Looking For",
   };
 
   useEffect(() => {
-    const id = localStorage.getItem('userid');
+    const id = localStorage.getItem("userid");
     if (!id) {
       setLoading(false);
       return;
@@ -31,79 +31,83 @@ const ProtectedForms = ({ element, ...rest }) => {
 
     const fetchCreditsAndProducts = async () => {
       try {
-        const creditResponse = await fetch(` https://multi-vendor-marketplace.vercel.app/auth/quantity/${id}`, { method: 'GET' });
+        const creditResponse = await fetch(
+          ` https://multi-vendor-marketplace.vercel.app/auth/quantity/${id}`,
+          { method: "GET" }
+        );
         if (creditResponse.ok) {
           const creditData = await creditResponse.json();
           setCredits(creditData.quantity || 0);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
-      } 
-
-    try {
-      const productResponse = await fetch(" https://multi-vendor-marketplace.vercel.app/product/fetchRequireCredits", { method: 'GET' });
-      if (productResponse.ok) {
-        const productData = await productResponse.json();
-        setRequiredCredits(productData.data);
-        console.log("Fetched required credits: ", productData.data); // Debugging log
+        console.error("Error fetching data:", error);
       }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }finally{
-      setLoading(false)
-    }
 
+      try {
+        const productResponse = await fetch(
+          " https://multi-vendor-marketplace.vercel.app/product/fetchRequireCredits",
+          { method: "GET" }
+        );
+        if (productResponse.ok) {
+          const productData = await productResponse.json();
+          setRequiredCredits(productData.data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchCreditsAndProducts();
   }, []);
 
   if (loading) {
-    return  <div className="m-auto flex justify-center items-center " style={{height:"70vh"}} > <FiLoader className="animate-spin text-2xl"/> </div>;
-    
+    return (
+      <div
+        className="m-auto flex justify-center items-center "
+        style={{ height: "70vh" }}
+      >
+        {" "}
+        <FiLoader className="animate-spin text-2xl" />{" "}
+      </div>
+    );
   }
 
   // Match pathname with product_type
   const matchedProductType = productTypeMap[pathname];
-  console.log("Matched product type:", matchedProductType); // Debugging log
-  
+
   if (matchedProductType) {
-    if (requiredCredits !== 0  && requiredCredits.length > 0) {
-    const product = requiredCredits.find((item) => item.product_type === matchedProductType);
-    console.log("Found product:", product); // Debugging log
-    if (product && user) {
-      if (product.credit_required > 0 && credits === 0  ) {
-        // Redirect if product requires credits but user has none
-        setTimeout(()=>{
-         navigate('/')
-        },2000)
-        return(
-          <>
-          <h1 className="text-xl">
-          This is Paid Listing . First Buy Credits from dash board.
-          </h1>
-          </>
-        )
+    if (requiredCredits !== 0 && requiredCredits.length > 0) {
+      const product = requiredCredits.find(
+        (item) => item.product_type === matchedProductType
+      );
+      if (product && user) {
+        if (product.credit_required > 0 && credits === 0) {
+          // Redirect if product requires credits but user has none
+          setTimeout(() => {
+            navigate("/");
+          }, 2000);
+          return (
+            <>
+              <h1 className="text-xl">
+                This is Paid Listing . First Buy Credits from dash board.
+              </h1>
+            </>
+          );
+        }
+      } else {
       }
     } else {
-      console.log("No matching product found for:", matchedProductType); // Handle no match case
-    } 
-  
-  }else{
-    navigate('/')
-  }
-
+      navigate("/");
+    }
   }
 
   if (user) {
     return element;
   }
 
-  return(
-    <>
-    This is Paid Listing . First Buy Credits.
-    </>
-  )
+  return <>This is Paid Listing . First Buy Credits.</>;
 };
 
 export default ProtectedForms;

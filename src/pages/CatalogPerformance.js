@@ -81,7 +81,7 @@ const CatalogPerformance = () => {
       try {
         const response = await fetch(
           " https://multi-vendor-marketplace.vercel.app/product/getProductCount"
-        ); // replace with your actual API URL
+        ); 
         const data = await response.json();
         if (response.ok) {
           setProductCount(data.count);
@@ -229,7 +229,6 @@ const CatalogPerformance = () => {
             </button>
           </div>
 
-          {/* Circular gauge placeholder */}
           <div className="flex flex-col items-center mb-4">
             <div className="w-32 h-32 rounded-full border-[10px] border-white border-t-cyan-400 flex items-center justify-center text-2xl font-bold">
             {productCount}

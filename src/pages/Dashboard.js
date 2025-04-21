@@ -41,6 +41,7 @@ const Dashboard = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { user } = useAuthContext();
   const dropdownRefs = useRef([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const toggleSelection = (productId) => {
     setSelectedProducts((prevSelected) =>
@@ -135,6 +136,7 @@ const Dashboard = () => {
 
   const deleteSelectedProducts = async () => {
     try {
+      setIsLoading(true);
       await Promise.all(
         selectedProducts.map(async (id) => {
           const response = await fetch(
@@ -153,6 +155,7 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error deleting products:", error);
     } finally {
+      setIsLoading(false);
       setIsPopupOpen(false);
     }
   };
@@ -641,9 +644,16 @@ const Dashboard = () => {
 
               <button
                 onClick={deleteSelectedProducts}
-                className="mt-6 inline-block px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition"
+                className={`mt-6 inline-block px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition ${
+                  isLoading ? "opacity-50 cursor-wait" : ""
+                }`}
+                disabled={isLoading}
               >
-                Okay
+                {isLoading ? (
+                  <div className="spinner-border animate-spin w-5 h-5 border-t-2 border-b-2 border-white rounded-full"></div>
+                ) : (
+                  "Okay"
+                )}
               </button>
             </div>
           </div>

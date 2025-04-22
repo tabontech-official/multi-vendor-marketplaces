@@ -80,7 +80,7 @@ const CatalogPerformance = () => {
     const getProductCount = async () => {
       try {
         const response = await fetch(
-          " https://multi-vendor-marketplace.vercel.app/product/getProductCount"
+          "  http://localhost:5000/product/getProductCount"
         ); 
         const data = await response.json();
         if (response.ok) {
@@ -100,7 +100,7 @@ const CatalogPerformance = () => {
     const fetchSummary = async () => {
       try {
         const response = await fetch(
-          " https://multi-vendor-marketplace.vercel.app/order/recurringFinance"
+          "  http://localhost:5000/order/recurringFinance"
         );
         const data = await response.json();
         setSummary(data);

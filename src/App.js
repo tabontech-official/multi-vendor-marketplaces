@@ -124,7 +124,8 @@ const App = () => {
             element={<ProtectedForms element={<Promotion />} />}
           />
           <Route
-            path="/variants"
+            // path="/variants"
+            path="/product/:productId/variants/:variantId"
             element={<ProtectedForms element={<Variants />} />}
           />
           <Route

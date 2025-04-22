@@ -23,7 +23,7 @@ const Variants = () => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`
+          ` http://localhost:5000/product/getSingleProductForVariants/${productId}`
         );
         setProduct(response.data);
         setLoading(false);
@@ -45,7 +45,7 @@ const Variants = () => {
     const fetchVariantData = async () => {
       try {
         const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/product/getSingleVariant/${productId}/variants/${variantId}`
+          ` http://localhost:5000/product/getSingleVariant/${productId}/variants/${variantId}`
         );
         setVariantData(response.data);
         setUpdatedVariant(response.data);
@@ -70,7 +70,7 @@ const Variants = () => {
       setIsLoading(true);
 
       const response = await axios.put(
-        `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
+        ` http://localhost:5000/product/updateVariant/${productId}/${variantId}`,
         {
           variant: updatedVariant,
         }
@@ -93,7 +93,7 @@ const Variants = () => {
       <div className="w-1/4 bg-white shadow-md p-4 rounded-md">
         <div className="flex items-center space-x-4 mb-4 border-b-2">
           <div className="w-12 h-12 bg-gray-200 rounded-md flex items-center justify-center mb-4">
-            {product.images?.length ? (
+            {product?.images?.length ? (
               <img
                 // src={product.images[0]}
                 alt="Product"
@@ -105,9 +105,9 @@ const Variants = () => {
           </div>
 
           <div className="mb-4">
-            <h2 className="text-lg font-semibold">{product.title}</h2>
+            <h2 className="text-lg font-semibold">{product?.title}</h2>
             <span className="text-sm text-gray-500">
-              {product.variants?.length || 0} variants
+              {product?.variants?.length || 0} variants
             </span>
           </div>
           <div className="ml-auto mb-4 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
@@ -116,13 +116,13 @@ const Variants = () => {
         </div>
 
         <ul className="space-y-2">
-          {product.variants?.map((variant, index) => (
+          {product?.variants?.map((variant, index) => (
             <li
               key={variant.id}
               className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
             >
               <div className="w-8 h-8 bg-gray-200 rounded-md flex items-center justify-center">
-                {variant.image ? (
+                {variant?.image ? (
                   <img
                     // src={variant.image}
                     alt={variant.title}
@@ -142,16 +142,16 @@ const Variants = () => {
 
       <div className="w-full max-w-2xl shadow-lg p-3 rounded-md pl-4">
         <div className="flex justify-end">
-          {/* <FaArrowLeft
+          <FaArrowLeft
             onClick={() =>
-              navigate("/add-product", {
+              navigate("/manage-product", {
                 state: {
                   isEditing: true,
                 },
               })
             }
             className="text-gray-500 hover:text-gray-600 cursor-pointer"
-          /> */}
+          />
           <button
             onClick={handleSave}
             className={`mt-6 inline-block px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition ${
@@ -230,7 +230,7 @@ const Variants = () => {
             </div>
           </div>
         </div>
-
+       
         {/* Inventory box */}
         <div className="mt-4 bg-white p-3 border border-gray-300 rounded-2xl">
           <label className="block text-sm font-medium text-gray-700">

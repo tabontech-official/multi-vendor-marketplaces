@@ -32,7 +32,7 @@ const ProtectedForms = ({ element, ...rest }) => {
     const fetchCreditsAndProducts = async () => {
       try {
         const creditResponse = await fetch(
-          ` https://multi-vendor-marketplace.vercel.app/auth/quantity/${id}`,
+          `  http://localhost:5000/auth/quantity/${id}`,
           { method: "GET" }
         );
         if (creditResponse.ok) {
@@ -45,7 +45,7 @@ const ProtectedForms = ({ element, ...rest }) => {
 
       try {
         const productResponse = await fetch(
-          " https://multi-vendor-marketplace.vercel.app/product/fetchRequireCredits",
+          "  http://localhost:5000/product/fetchRequireCredits",
           { method: "GET" }
         );
         if (productResponse.ok) {

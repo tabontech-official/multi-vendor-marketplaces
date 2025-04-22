@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Variants = () => {
   const [variantData, setVariantData] = useState(null);
@@ -42,12 +44,12 @@ const Variants = () => {
       setIsLoading(true);
 
       const response = await axios.put(
-        `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
+        `http://localhost:5000/product/updateVariant/${productId}/${variantId}`,
         {
           variant: updatedVariant,
         }
       );
-      console.log("Variant updated successfully", response.data);
+      toast.success("Variant updated successfully!");
       setIsLoading(false);
     } catch (error) {
       console.error("Error updating variant:", error);
@@ -61,6 +63,8 @@ const Variants = () => {
 
   return (
     <main className="flex justify-center bg-gray-100 p-6">
+      <ToastContainer />
+
       <div className="w-full max-w-2xl shadow-lg p-3 rounded-md">
         <div className="flex justify-between">
           <FaArrowLeft

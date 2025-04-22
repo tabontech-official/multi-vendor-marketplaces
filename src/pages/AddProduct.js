@@ -480,7 +480,7 @@ const CategorySelector = () => {
     try {
       const url = isEditing
         ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+        : "http://localhost:5000/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -574,7 +574,7 @@ const CategorySelector = () => {
       }
 
       const imageSaveResponse = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
+        `http://localhost:5000/product/updateImages/${data.product.id}`,
         {
           method: "PUT",
           headers: {

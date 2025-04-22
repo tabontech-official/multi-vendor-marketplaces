@@ -4,18 +4,44 @@ import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { CiImageOn } from "react-icons/ci";
 
 const Variants = () => {
   const [variantData, setVariantData] = useState(null);
   const [updatedVariant, setUpdatedVariant] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [trackQuantity, setTrackQuantity] = useState(false);
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [product, setProduct] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const { productId, variantId } = location.state || {};
+  const { productId, variantId: initialVariantId } = location.state || {};
+  const [variantId, setVariantId] = useState(initialVariantId);
 
   useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.get(
+          `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`
+        );
+        setProduct(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch product data.");
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [productId]);
+
+  const handleVariantClick = (id) => {
+    setVariantId(id);
+  };
+
+  useEffect(() => {
+    if (!variantId) return;
+
     const fetchVariantData = async () => {
       try {
         const response = await axios.get(
@@ -44,7 +70,7 @@ const Variants = () => {
       setIsLoading(true);
 
       const response = await axios.put(
-        `http://localhost:5000/product/updateVariant/${productId}/${variantId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
         {
           variant: updatedVariant,
         }
@@ -64,10 +90,59 @@ const Variants = () => {
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <ToastContainer />
+      <div className="w-1/4 bg-white shadow-md p-4 rounded-md">
+        <div className="flex items-center space-x-4 mb-4 border-b-2">
+          <div className="w-12 h-12 bg-gray-200 rounded-md flex items-center justify-center mb-4">
+            {product.images?.length ? (
+              <img
+                // src={product.images[0]}
+                alt="Product"
+                className="w-10 h-10 object-cover"
+              />
+            ) : (
+              <CiImageOn className="text-gray-400 text-2xl" />
+            )}
+          </div>
 
-      <div className="w-full max-w-2xl shadow-lg p-3 rounded-md">
-        <div className="flex justify-between">
-          <FaArrowLeft
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">{product.title}</h2>
+            <span className="text-sm text-gray-500">
+              {product.variants?.length || 0} variants
+            </span>
+          </div>
+          <div className="ml-auto mb-4 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+            Active
+          </div>
+        </div>
+
+        <ul className="space-y-2">
+          {product.variants?.map((variant, index) => (
+            <li
+              key={variant.id}
+              className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
+            >
+              <div className="w-8 h-8 bg-gray-200 rounded-md flex items-center justify-center">
+                {variant.image ? (
+                  <img
+                    // src={variant.image}
+                    alt={variant.title}
+                    className="w-10 h-10 object-cover"
+                  />
+                ) : (
+                  <CiImageOn className="text-gray-400 text-2xl" />
+                )}
+              </div>
+              <button onClick={() => handleVariantClick(variant.id)}>
+                {variant.title || "Unknown variant"}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="w-full max-w-2xl shadow-lg p-3 rounded-md pl-4">
+        <div className="flex justify-end">
+          {/* <FaArrowLeft
             onClick={() =>
               navigate("/add-product", {
                 state: {
@@ -76,7 +151,7 @@ const Variants = () => {
               })
             }
             className="text-gray-500 hover:text-gray-600 cursor-pointer"
-          />
+          /> */}
           <button
             onClick={handleSave}
             className={`mt-6 inline-block px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition ${
@@ -87,7 +162,7 @@ const Variants = () => {
             {isLoading ? (
               <div className="spinner-border animate-spin w-5 h-5 border-t-2 border-b-2 border-white rounded-full"></div>
             ) : (
-              "Save"
+              "Update"
             )}
           </button>
         </div>

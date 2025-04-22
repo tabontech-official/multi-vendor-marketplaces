@@ -56,32 +56,32 @@ const CategorySelector = () => {
   const [productTypesList, setProductTypesList] = useState([]);
   const [vendorList, setVendorList] = useState([]);
   const [variantPrices, setVariantPrices] = useState({});
+  const [variantCompareAtPrices, setVariantComparePrices] = useState({});
+  const [variantSku, setVariantSku] = useState({});
+
   const [variantQuantities, setVariantQuantities] = useState({});
-  const removeProductType = (index) => {
-    const newList = [...productTypesList];
-    newList.splice(index, 1);
-    setProductTypesList(newList);
+  const [variantSKUs, setVariantSKUs] = useState({});
+  const [compareAtPrices, setCompareAtPrices] = useState({});
+  const navigateVariant = (index, child, parentValue) => {
+    // Example logic, replace with actual implementation
+    console.log(`Navigating to variant: ${parentValue} / ${child}`);
+  };
+  const handleCompareAtPriceChange = (index, child, value) => {
+    const key = `${index}-${child}`;
+    setCompareAtPrices((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+  const handleSKUChange = (index, child, value) => {
+    const key = `${index}-${child}`;
+    setVariantSKUs((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
   };
 
-  const removeVendor = (index) => {
-    const newList = [...vendorList];
-    newList.splice(index, 1);
-    setVendorList(newList);
-  };
-
-  const handleProductTypeChange = (e) => {
-    if (e.key === "Enter" && productType) {
-      setProductTypesList((prev) => [...prev, productType]);
-      setProductType("");
-    }
-  };
-
-  const handleVendorChange = (e) => {
-    if (e.key === "Enter" && vendor) {
-      setVendorList((prev) => [...prev, vendor]);
-      setVendor("");
-    }
-  };
+  
 
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
@@ -348,20 +348,8 @@ const CategorySelector = () => {
         ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
         : [];
       setKeywordsList(tagsArray);
-
-      const vendorArray =
-        typeof product.vendor === "string"
-          ? product.vendor.split(",").map((v) => v.trim())
-          : [];
-      setVendorList(vendorArray);
-
-      const productTypeList =
-        typeof product.product_type === "string"
-          ? product.product_type.split(",").map((p) => p.trim())
-          : [];
-
-      setProductTypesList(productTypeList);
-
+      setVendor(product.vendor);
+      setProductType(product.product_type);
       setOptions(
         product.options?.map((option) => ({
           id: option.id || "No ID",
@@ -450,12 +438,39 @@ const CategorySelector = () => {
         });
       });
     };
-
+    const prepareVariantCompareAtPrices = () => {
+      return combinations.flatMap((combination, index) => {
+        return combination.children.map((child) => {
+          const key = `${index}-${child}`;
+          return variantCompareAtPrices[key] !== undefined
+            ? variantCompareAtPrices[key]
+            : null;
+        });
+      });
+    };
+    const prepareVarianQuantities = () => {
+      return combinations.flatMap((combination, index) => {
+        return combination.children.map((child) => {
+          const key = `${index}-${child}`;
+          return variantQuantities[key] !== undefined
+            ? variantQuantities[key]
+            : null;
+        });
+      });
+    };
+    const prepareVariansku = () => {
+      return combinations.flatMap((combination, index) => {
+        return combination.children.map((child) => {
+          const key = `${index}-${child}`;
+          return variantSku[key] !== undefined ? variantSku[key] : null;
+        });
+      });
+    };
     const payload = {
       keyWord: keywordsList.join(", "),
       title,
       description: modifiedContent,
-      productType: productTypesList.join(","),
+      productType: productType,
       price: parseFloat(price),
       compare_at_price: compareAtPrice ? parseFloat(compareAtPrice) : undefined,
       track_quantity: trackQuantity,
@@ -469,10 +484,13 @@ const CategorySelector = () => {
       weight_unit: trackShipping && unit ? unit : undefined,
       status,
       userId,
-      vendor: vendorList.join(","),
+      vendor: vendor,
       options,
       variants,
       variantPrices: prepareVariantPrices(),
+      variantCompareAtPrices: prepareVariantCompareAtPrices(),
+      variantQuantites: prepareVarianQuantities(),
+      variantSku: prepareVariansku(),
     };
 
     console.log("Payload being sent:", payload);
@@ -480,7 +498,7 @@ const CategorySelector = () => {
     try {
       const url = isEditing
         ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : "http://localhost:5000/product/addEquipment";
+        : "https://multi-vendor-marketplace.vercel.app/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -574,7 +592,7 @@ const CategorySelector = () => {
       }
 
       const imageSaveResponse = await fetch(
-        `http://localhost:5000/product/updateImages/${data.product.id}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
         {
           method: "PUT",
           headers: {
@@ -631,12 +649,22 @@ const CategorySelector = () => {
       [key]: value === "" ? "" : parseFloat(value),
     }));
   };
+  const handleVariantComparePriceChange = (index, child, value) => {
+    const key = `${index}-${child}`;
+    setVariantComparePrices((prev) => ({
+      ...prev,
+      [key]: value === "" ? "" : parseFloat(value),
+    }));
+  };
 
   const handleQuantityChange = (index, child, value) => {
     const key = `${index}-${child}`;
     setVariantQuantities((prev) => ({ ...prev, [key]: value }));
   };
-
+  const handleVariantSkuChange = (index, child, value) => {
+    const key = `${index}-${child}`;
+    setVariantSku((prev) => ({ ...prev, [key]: value }));
+  };
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <div className="w-full max-w-6xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -980,17 +1008,23 @@ const CategorySelector = () => {
                 <div className="mt-3">
                   <div className="flex items-center gap-4 mb-2">
                     <div className="w-16"></div>
-                    <h3 className="font-semibold text-md text-gray-800 w-[120px]">
-                      Variant
+                    <h3 className="font-semibold text-sm text-gray-800 w-[120px]">
+                      VARIANT
                     </h3>
-                    <h3 className="font-semibold text-md text-gray-800 w-24">
-                      Price
+                    <h3 className="font-semibold text-sm text-gray-800 w-24">
+                      PRICE
                     </h3>
-                    <h3 className="font-semibold text-md text-gray-800 w-24">
-                      Availability
+                    <h3 className="font-semibold text-sm text-gray-800 w-24">
+                      COMPAREAT
                     </h3>
-                    <h3 className="font-semibold text-md text-gray-800 w-12">
-                      Action
+                    <h3 className="font-semibold text-sm text-gray-800 w-24">
+                      SKU
+                    </h3>
+                    <h3 className="font-semibold text-sm text-gray-800 w-24">
+                      AVAILABILITY
+                    </h3>
+                    <h3 className="font-semibold text-sm text-gray-800 w-12">
+                      ACTION
                     </h3>
                   </div>
 
@@ -1025,8 +1059,12 @@ const CategorySelector = () => {
                                   const image = variantImages[key];
                                   const variantPrice = variantPrices[key] || "";
                                   const quantity = variantQuantities[key] || "";
+                                  const variantSKU = variantSku[key] || ""; 
+                                  const compareAtPrice =
+                                    variantCompareAtPrices[key] || "";
                                   const parentValue =
                                     combinations[index]?.parent;
+
                                   return (
                                     <li
                                       key={childIndex}
@@ -1173,11 +1211,44 @@ const CategorySelector = () => {
                                         />
                                       </div>
 
+                                      <div className="relative w-24">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                          $
+                                        </span>
+                                        <input
+                                          type="number"
+                                          value={compareAtPrice}
+                                          placeholder="Compare-at"
+                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
+                                          onChange={(e) =>
+                                            handleVariantComparePriceChange(
+                                              index,
+                                              child,
+                                              e.target.value
+                                            )
+                                          }
+                                        />
+                                      </div>
+
+                                      <input
+                                        type="text"
+                                        value={variantSKU}
+                                        placeholder="SKU"
+                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm"
+                                        onChange={(e) =>
+                                          handleVariantSkuChange(
+                                            index,
+                                            child,
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+
                                       <input
                                         type="number"
                                         value={quantity}
                                         placeholder="Availability"
-                                        className="w-24 p-1 border border-gray-300 rounded-md text-sm no-spinner"
+                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm no-spinner"
                                         onChange={(e) =>
                                           handleQuantityChange(
                                             index,
@@ -1205,6 +1276,7 @@ const CategorySelector = () => {
                             </ul>
                           </div>
                         )}
+
                         {/* {expandedParents.includes(index) && (
                           <div className="mt-2">
                             <ul className="space-y-2">
@@ -1534,31 +1606,8 @@ const CategorySelector = () => {
                 placeholder="Type"
                 value={productType}
                 onChange={(e) => setProductType(e.target.value)}
-                onKeyDown={handleProductTypeChange}
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
-              <div className="flex flex-wrap gap-2 mt-2">
-                {productTypesList.filter((word) => word.trim() !== "").length >
-                  0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {productTypesList.map((type, index) => (
-                      <span
-                        key={index}
-                        className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
-                      >
-                        {type}
-                        <button
-                          type="button"
-                          className="ml-2 text-red-500"
-                          onClick={() => removeProductType(index)}
-                        >
-                          &times;
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
 
               <label htmlFor="vendor" className="block text-gray-600 text-sm">
                 Vendor
@@ -1567,31 +1616,9 @@ const CategorySelector = () => {
                 type="text"
                 value={vendor}
                 onChange={(e) => setVendor(e.target.value)}
-                onKeyDown={handleVendorChange}
                 placeholder="Vendor"
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
-              <div className="flex flex-wrap gap-2 mt-2">
-                {vendorList.filter((word) => word.trim() !== "").length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {vendorList.map((v, index) => (
-                      <span
-                        key={index}
-                        className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
-                      >
-                        {v}
-                        <button
-                          type="button"
-                          className="ml-2 text-red-500"
-                          onClick={() => removeVendor(index)}
-                        >
-                          &times;
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
 
               <label htmlFor="keywords" className="block text-gray-600 text-sm">
                 Keywords

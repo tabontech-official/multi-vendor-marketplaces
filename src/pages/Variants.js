@@ -23,7 +23,7 @@ const Variants = () => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(
-          ` https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`
+          `http://localhost:5000/product/getSingleProductForVariants/${productId}`
         );
         setProduct(response.data);
         setLoading(false);
@@ -86,7 +86,7 @@ const Variants = () => {
   if (!variantData) {
     return <p>Loading...</p>;
   }
-
+  
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <ToastContainer />

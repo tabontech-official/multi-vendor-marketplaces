@@ -14,6 +14,8 @@ import RTC from "../component/editor";
 import { Editor } from "react-draft-wysiwyg";
 import draftToHtml from "draftjs-to-html";
 import htmlToDraft from "html-to-draftjs";
+import { RxCross1 } from "react-icons/rx";
+
 import {
   convertToRaw,
   EditorState,
@@ -60,26 +62,8 @@ const CategorySelector = () => {
   const [variantSku, setVariantSku] = useState({});
 
   const [variantQuantities, setVariantQuantities] = useState({});
-  const [variantSKUs, setVariantSKUs] = useState({});
-  const [compareAtPrices, setCompareAtPrices] = useState({});
-  const navigateVariant = (index, child, parentValue) => {
-    // Example logic, replace with actual implementation
-    console.log(`Navigating to variant: ${parentValue} / ${child}`);
-  };
-  const handleCompareAtPriceChange = (index, child, value) => {
-    const key = `${index}-${child}`;
-    setCompareAtPrices((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-  const handleSKUChange = (index, child, value) => {
-    const key = `${index}-${child}`;
-    setVariantSKUs((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
@@ -401,7 +385,21 @@ const CategorySelector = () => {
       [`${parentIndex}-${child}`]: { file, preview: imagePreview },
     }));
   };
-
+  const files = [
+    {
+      id: 1,
+      name: "file1.png",
+      type: "PNG",
+      src: "https://cdn.shopify.com/s/files/1/0730/5553/5360/files/wnxzfpn2njdvpmlmel1o.png?v=1745405853",
+    },
+    {
+      id: 2,
+      name: "file2.jpg",
+      type: "JPG",
+      src: "https://cdn.shopify.com/s/files/1/0730/5553/5360/files/wnxzfpn2njdvpmlmel1o.png?v=1745405853",
+    },
+    // Add more file objects as needed
+  ];
   const handleRemoveVariantImages = (parentIndex, child) => {
     setVariantImages((prev) => {
       const newImages = { ...prev };
@@ -668,6 +666,10 @@ const CategorySelector = () => {
     const key = `${index}-${child}`;
     setVariantSku((prev) => ({ ...prev, [key]: value }));
   };
+
+
+
+  
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <div className="w-full max-w-7xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1124,16 +1126,20 @@ const CategorySelector = () => {
                                             </span>
                                           )}
                                           <input
-                                            type="file"
-                                            accept="image/*"
+                                            // type="file"
+                                            // accept="image/*"
                                             className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onChange={(e) =>
-                                              handleVariantImageUpload(
-                                                e,
-                                                index,
-                                                child
-                                              )
+                                            onClick={() =>
+                                              setIsPopupVisible(true)
                                             }
+
+                                            // onChange={(e) =>
+                                            //   handleVariantImageUpload(
+                                            //     e,
+                                            //     index,
+                                            //     child
+                                            //   )
+                                            // }
                                           />
                                           {image?.preview && (
                                             <button
@@ -1474,6 +1480,67 @@ const CategorySelector = () => {
             </div>
           </div>
         </div>
+        {isPopupVisible && (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+            <div className="bg-white w-[60%] max-w-5xl rounded-lg shadow-lg p-6 relative">
+              <div className="flex justify-between items-center pb-4 border-b">
+                <h2 className="text-lg font-medium">Select image</h2>
+                <button
+                  onClick={() => setIsPopupVisible(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <RxCross1 />
+                </button>
+              </div>
+
+              <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-2">
+                <button
+                  type="file"
+                  accept="images/"
+                  className="bg-blue-500 text-white px-3 py-1 rounded-md"
+                >
+                  Add images
+                </button>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4 mt-6">
+                {product.images.map((file) => (
+                  <div
+                    key={file.id}
+                    className={`border rounded p-2 relative ${
+                      selectedFiles.includes(file.id)
+                        ? "border-blue-500"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    <img
+                      src={file.src}
+                      alt={file.name}
+                      className="w-full h-24 object-cover rounded"
+                    />
+                    <input type="checkbox" className="absolute top-2 left-2" />
+                    <p className="text-sm text-center mt-2">{file.name}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end mt-6 border-t ">
+                <button
+                  onClick={() => setIsPopupVisible(false)}
+                  className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => console.log(selectedFiles)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

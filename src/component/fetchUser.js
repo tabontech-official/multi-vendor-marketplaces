@@ -17,7 +17,7 @@ const UseFetchUserData = () => {
     }
 
     try {
-      const response = await fetch(`  http://localhost:5000/auth/user/${id}`, {
+      const response = await fetch(` https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
         method: 'GET',
       });
 
@@ -36,7 +36,7 @@ const UseFetchUserData = () => {
 
     const fetchVariantId = async () => {
       try {
-        const response = await axios.get("  http://localhost:5000/product/getPrice");
+        const response = await axios.get(" https://multi-vendor-marketplace.vercel.app/product/getPrice");
         setVariantId(response.data[0].variantId); // assuming response structure
       } catch (error) {
         console.error("Error fetching variant ID", error);

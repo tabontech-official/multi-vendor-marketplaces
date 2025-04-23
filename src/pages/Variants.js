@@ -23,7 +23,7 @@ const Variants = () => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(
-          ` http://localhost:5000/product/getSingleProductForVariants/${productId}`
+          ` https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`
         );
         setProduct(response.data);
         setLoading(false);
@@ -45,7 +45,7 @@ const Variants = () => {
     const fetchVariantData = async () => {
       try {
         const response = await axios.get(
-          ` http://localhost:5000/product/getSingleVariant/${productId}/variants/${variantId}`
+          ` https://multi-vendor-marketplace.vercel.app/product/getSingleVariant/${productId}/variants/${variantId}`
         );
         setVariantData(response.data);
         setUpdatedVariant(response.data);
@@ -70,7 +70,7 @@ const Variants = () => {
       setIsLoading(true);
 
       const response = await axios.put(
-        ` http://localhost:5000/product/updateVariant/${productId}/${variantId}`,
+        ` https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
         {
           variant: updatedVariant,
         }
@@ -95,7 +95,7 @@ const Variants = () => {
           <div className="w-12 h-12 bg-gray-200 rounded-md flex items-center justify-center mb-4">
             {product?.images?.length ? (
               <img
-                // src={product.images[0]}
+                src={product.images[0].src}
                 alt="Product"
                 className="w-10 h-10 object-cover"
               />
@@ -114,11 +114,11 @@ const Variants = () => {
             Active
           </div>
         </div>
-
         <ul className="space-y-2">
           {product?.variants?.map((variant, index) => (
             <li
               key={variant.id}
+              onClick={() => handleVariantClick(variant.id)}
               className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
             >
               <div className="w-8 h-8 bg-gray-200 rounded-md flex items-center justify-center">
@@ -132,7 +132,7 @@ const Variants = () => {
                   <CiImageOn className="text-gray-400 text-2xl" />
                 )}
               </div>
-              <button onClick={() => handleVariantClick(variant.id)}>
+              <button >
                 {variant.title || "Unknown variant"}
               </button>
             </li>
@@ -141,7 +141,7 @@ const Variants = () => {
       </div>
 
       <div className="w-full max-w-2xl shadow-lg p-3 rounded-md pl-4">
-        <div className="flex justify-end">
+        <div className="flex justify-between">
           <FaArrowLeft
             onClick={() =>
               navigate("/manage-product", {

@@ -1,1 +1,1 @@
-  http://localhost:5000/auth/user/UserId
+ https://multi-vendor-marketplace.vercel.app/auth/user/UserId

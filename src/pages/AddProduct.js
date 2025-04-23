@@ -500,8 +500,8 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? ` http://localhost:5000/product/updateProducts/${product._id}`
-        : " http://localhost:5000/product/addEquipment";
+        ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
+        : " https://multi-vendor-marketplace.vercel.app/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -595,7 +595,7 @@ const CategorySelector = () => {
       }
 
       const imageSaveResponse = await fetch(
-        ` http://localhost:5000/product/updateImages/${data.product.id}`,
+        ` https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
         {
           method: "PUT",
           headers: {
@@ -1010,23 +1010,23 @@ const CategorySelector = () => {
 
                 <div className="mt-3">
                   <div className="flex items-center gap-4 mb-2">
-                    <div className="w-16"></div>
-                    <h3 className="font-semibold text-sm text-gray-800 w-[120px]">
+                    <div className="w-8"></div>
+                    <h3 className="font-semibold text-xs text-gray-800 w-[85px]">
                       VARIANT
                     </h3>
-                    <h3 className="font-semibold text-sm text-gray-800 w-24">
+                    <h3 className="font-semibold text-xs text-gray-800 w-24">
                       PRICE
                     </h3>
-                    <h3 className="font-semibold text-sm text-gray-800 w-24">
-                      COMPAREAT
+                    <h3 className="font-semibold text-xs text-gray-800 w-24">
+                      COMPARE_AT
                     </h3>
-                    <h3 className="font-semibold text-sm text-gray-800 w-24">
+                    <h3 className="font-semibold text-xs text-gray-800 w-24">
                       SKU
                     </h3>
-                    <h3 className="font-semibold text-sm text-gray-800 w-24">
-                        QTY
+                    <h3 className="font-semibold text-xs text-gray-800 w-24">
+                      QTY
                     </h3>
-                    <h3 className="font-semibold text-sm text-gray-800 w-12">
+                    <h3 className="font-semibold text-xs text-gray-800 w-12">
                       ACTION
                     </h3>
                   </div>
@@ -1292,23 +1292,49 @@ const CategorySelector = () => {
                             <ul className="space-y-2">
                               {combinations[index]?.children?.map(
                                 (child, childIndex) => {
-                                  const key = `${index}-${child}`; 
+                                  const key = `${index}-${child}`;
                                   const image = variantImages[key];
-                                  const variantPrice = variantPrices[key] || ""; 
-                                  const quantities = variantQuantities[key] || "";
+                                  const variantPrice = variantPrices[key] || "";
+                                  const quantities =
+                                    variantQuantities[key] || "";
                                   const variantSKU = variantSku[key] || "";
                                   const compareAtPrices =
                                     variantCompareAtPrices[key] || "";
                                   const parentValue =
                                     combinations[index]?.parent;
+                                  const normalizeString = (str) =>
+                                    str.trim().toLowerCase();
 
+                                  const combinationString = `${parentValue} / ${child}`;
+
+                                  const normalizedCombination =
+                                    normalizeString(combinationString);
+
+                                  const matchingVariant = product?.variants?.find(
+                                    (variant) => {
+                                      const normalizedVariantTitle =
+                                        normalizeString(variant.title);
+
+                                      return (
+                                        normalizedVariantTitle ===
+                                        normalizedCombination
+                                      );
+                                    }
+                                  );
+                                  const price = matchingVariant?.price;
+                                  const compareAtPrice =
+                                    matchingVariant?.compare_at_price;
+                                  const sku = matchingVariant?.sku;
+                                  const quantity =
+                                    matchingVariant?.inventory_quantity;
+                                  const variantId = matchingVariant?.id;
                                   return (
                                     <li
                                       key={childIndex}
-                                      className="flex items-center gap-4"
+                                      className="flex items-center gap-6"
                                     >
-                                      <div className="w-16 relative">
-                                        <label className="flex items-center justify-center w-16 h-16 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
+                                      <div className="w-12 relative">
+                                        <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
                                           {image?.preview ? (
                                             <img
                                               src={image.preview}
@@ -1353,85 +1379,17 @@ const CategorySelector = () => {
                                       </div>
 
                                       <span
-                                        className="font-medium text-gray-700 w-[120px] cursor-pointer"
+                                        className="font-medium text-gray-700  cursor-pointer"
                                         onClick={() => {
-                                          try {
-                                            const normalizeString = (str) =>
-                                              str.trim().toLowerCase();
-
-                                            console.log("Child value:", child);
-                                            console.log(
-                                              "Product variants:",
-                                              product.variants
-                                            );
-
-                                            const combinationString = `${parentValue} / ${child}`;
-
-                                            const normalizedCombination =
-                                              normalizeString(
-                                                combinationString
-                                              );
-
-                                            const matchingVariant =
-                                              product.variants.find(
-                                                (variant) => {
-                                                  const normalizedVariantTitle =
-                                                    normalizeString(
-                                                      variant.title
-                                                    );
-
-                                                  console.log(
-                                                    "Comparing:",
-                                                    normalizedVariantTitle,
-                                                    "with",
-                                                    normalizedCombination
-                                                  );
-
-                                                  return (
-                                                    normalizedVariantTitle ===
-                                                    normalizedCombination
-                                                  );
-                                                }
-                                              );
-
-                                            if (matchingVariant) {
-                                              const variantId =
-                                                matchingVariant.id;
-                                              console.log(
-                                                "trackkkkk",
-                                                trackQuantity
-                                              );
-                                              const queryString=new URLSearchParams({
-                                                productId:product.id,
-                                                variantId:variantId
-                                              })
-                                              navigate(`/product/${product.id}/variants/${variantId}`, {
-                                                state: {
-                                                  productId: product.id,
-                                                  variantId: variantId,
-                                                  isEditing: true,
-                                                  trackQuantity: trackQuantity,
-                                                },
-                                              });
-                                              
-
-                                            } else {
-                                              console.error(
-                                                `Variant ID not found for: ${child}`
-                                              );
-                                              console.error(
-                                                "Available Variants:",
-                                                product.variants.map(
-                                                  (v) => v.title
-                                                )
-                                              );
+                                          navigate(
+                                            `/product/${product.id}/variants/${variantId}`,
+                                            {
+                                              state: {
+                                                productId: product.id,
+                                                variantId: variantId,
+                                              },
                                             }
-                                          } catch (error) {
-                                            console.error(
-                                              "Error resolving variant ID:",
-                                              error
-                                            );
-                                          }
+                                          );
                                         }}
                                       >
                                         {child}
@@ -1488,10 +1446,8 @@ const CategorySelector = () => {
                                         type="text"
                                         // value={variantSKU}
                                         value={
-                                          variantSKU !== ""
-                                            ? variantSKU
-                                            : sku
-                                        } 
+                                          variantSKU !== "" ? variantSKU : sku
+                                        }
                                         placeholder="SKU"
                                         className="w-20 p-1 border border-gray-300 rounded-md text-sm"
                                         onChange={(e) =>
@@ -1540,7 +1496,6 @@ const CategorySelector = () => {
                             </ul>
                           </div>
                         )}
-
                         {/* {expandedParents.includes(index) && (
                           <div className="mt-2">
                             <ul className="space-y-2">

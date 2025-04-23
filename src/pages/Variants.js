@@ -16,7 +16,7 @@ const Variants = () => {
   const [product, setProduct] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const { productId, variantId: initialVariantId } = location.state || {};
+  const { productId, variantId: initialVariantId,imageSrc, imageAlt } = location.state || {};
   const [variantId, setVariantId] = useState(initialVariantId);
 
   useEffect(() => {

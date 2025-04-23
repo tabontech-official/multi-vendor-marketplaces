@@ -670,7 +670,7 @@ const CategorySelector = () => {
   };
   return (
     <main className="flex justify-center bg-gray-100 p-6">
-      <div className="w-full max-w-6xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="w-full max-w-7xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 bg-white p-6 border border-gray-300 rounded-2xl">
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">
@@ -1009,24 +1009,26 @@ const CategorySelector = () => {
                 ))}
 
                 <div className="mt-3">
-                  <div className="flex items-center gap-4 mb-2">
-                    <div className="w-8"></div>
-                    <h3 className="font-semibold text-xs text-gray-800 w-[85px]">
+                  <div className="grid grid-cols-7 items-center gap-20 mb-2 p-3">
+                    <h3 className="font-semibold text-xs text-gray-800">
+                      VARIANT_IMG
+                    </h3>
+                    <h3 className="font-semibold text-xs text-gray-800">
                       VARIANT
                     </h3>
-                    <h3 className="font-semibold text-xs text-gray-800 w-24">
+                    <h3 className="font-semibold text-xs text-gray-800 ">
                       PRICE
                     </h3>
-                    <h3 className="font-semibold text-xs text-gray-800 w-24">
+                    <h3 className="font-semibold text-xs text-gray-800 ">
                       COMPARE_AT
                     </h3>
-                    <h3 className="font-semibold text-xs text-gray-800 w-24">
+                    <h3 className="font-semibold text-xs text-gray-800 ">
                       SKU
                     </h3>
-                    <h3 className="font-semibold text-xs text-gray-800 w-24">
+                    <h3 className="font-semibold text-xs text-gray-800 ">
                       QTY
                     </h3>
-                    <h3 className="font-semibold text-xs text-gray-800 w-12">
+                    <h3 className="font-semibold text-xs text-gray-800 ">
                       ACTION
                     </h3>
                   </div>
@@ -1035,9 +1037,9 @@ const CategorySelector = () => {
                     generateVariants().map((combination, index) => (
                       <div
                         key={index}
-                        className="bg-gray-100 p-6 rounded-md mt-2"
+                        className="bg-gray-100 p-4 rounded-md mt-2"
                       >
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between gap-6">
                           <div className="font-medium text-gray-700">
                             {combination.parent}
                           </div>
@@ -1053,240 +1055,6 @@ const CategorySelector = () => {
                           </button>
                         </div>
 
-                        {/* {expandedParents.includes(index) && (
-                          <div className="mt-2">
-                            <ul className="space-y-2">
-                              {combinations[index]?.children?.map(
-                                (child, childIndex) => {
-                                  const key = `${index}-${child}`;
-                                  const image = variantImages[key];
-                                  const variantPrice = variantPrices[key] || "";
-                                  const quantity = variantQuantities[key] || "";
-                                  const variantSKU = variantSku[key] || "";
-                                  const compareAtPrice =
-                                    variantCompareAtPrices[key] || "";
-                                  const parentValue =
-                                    combinations[index]?.parent;
-
-                                  return (
-                                    <li
-                                      key={childIndex}
-                                      className="flex items-center gap-4"
-                                    >
-                                      <div className="w-16 relative">
-                                        <label className="flex items-center justify-center w-16 h-16 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
-                                          {image?.preview ? (
-                                            <img
-                                              src={image.preview}
-                                              alt={`Variant ${child}`}
-                                              className="w-full h-full object-cover"
-                                            />
-                                          ) : (
-                                            <span className="text-3xl text-gray-400">
-                                              +
-                                            </span>
-                                          )}
-                                          <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onChange={(e) =>
-                                              handleVariantImageUpload(
-                                                e,
-                                                index,
-                                                child
-                                              )
-                                            }
-                                          />
-                                          {image?.preview && (
-                                            <button
-                                              onClick={() =>
-                                                handleRemoveVariantImages(
-                                                  index,
-                                                  child
-                                                )
-                                              }
-                                              className="absolute top-0 right-0 text-white bg-red-600 rounded-full px-2 py-1 text-xs"
-                                              style={{
-                                                transform:
-                                                  "translate(25%, -25%)",
-                                              }}
-                                            >
-                                              X
-                                            </button>
-                                          )}
-                                        </label>
-                                      </div>
-
-                                      <span
-                                        className="font-medium text-gray-700 w-[120px] cursor-pointer"
-                                        onClick={() => {
-                                          try {
-                                            const normalizeString = (str) =>
-                                              str.trim().toLowerCase();
-
-                                            console.log("Child value:", child);
-                                            console.log(
-                                              "Product variants:",
-                                              product.variants
-                                            );
-
-                                            const combinationString = `${parentValue} / ${child}`;
-
-                                            const normalizedCombination =
-                                              normalizeString(
-                                                combinationString
-                                              );
-
-                                            const matchingVariant =
-                                              product.variants.find(
-                                                (variant) => {
-                                                  const normalizedVariantTitle =
-                                                    normalizeString(
-                                                      variant.title
-                                                    );
-
-                                                  console.log(
-                                                    "Comparing:",
-                                                    normalizedVariantTitle,
-                                                    "with",
-                                                    normalizedCombination
-                                                  );
-
-                                                  return (
-                                                    normalizedVariantTitle ===
-                                                    normalizedCombination
-                                                  );
-                                                }
-                                              );
-
-                                            if (matchingVariant) {
-                                              const variantId =
-                                                matchingVariant.id;
-                                              console.log(
-                                                "trackkkkk",
-                                                trackQuantity
-                                              );
-
-                                              navigate("/variants", {
-                                                state: {
-                                                  productId: product.id,
-                                                  variantId: variantId,
-                                                  isEditing: true,
-                                                  trackQuantityy: trackQuantity,
-                                                },
-                                              });
-                                            } else {
-                                              console.error(
-                                                `Variant ID not found for: ${child}`
-                                              );
-                                              console.error(
-                                                "Available Variants:",
-                                                product.variants.map(
-                                                  (v) => v.title
-                                                )
-                                              );
-                                            }
-                                          } catch (error) {
-                                            console.error(
-                                              "Error resolving variant ID:",
-                                              error
-                                            );
-                                          }
-                                        }}
-                                      >
-                                        {child}
-                                      </span>
-
-                                      <div className="relative w-24">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <input
-                                          type="number"
-                                          // value={variantPrice}
-                                          value={
-                                            variantPrice !== ""
-                                              ? variantPrice
-                                              : price
-                                          }
-                                          placeholder="Price"
-                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
-                                          onChange={(e) =>
-                                            handlePriceChange(
-                                              index,
-                                              child,
-                                              e.target.value
-                                            )
-                                          }
-                                        />
-                                      </div>
-
-                                      <div className="relative w-24">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <input
-                                          type="number"
-                                          value={compareAtPrice}
-                                          placeholder="Compare-at"
-                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
-                                          onChange={(e) =>
-                                            handleVariantComparePriceChange(
-                                              index,
-                                              child,
-                                              e.target.value
-                                            )
-                                          }
-                                        />
-                                      </div>
-
-                                      <input
-                                        type="text"
-                                        value={variantSKU}
-                                        placeholder="SKU"
-                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm"
-                                        onChange={(e) =>
-                                          handleVariantSkuChange(
-                                            index,
-                                            child,
-                                            e.target.value
-                                          )
-                                        }
-                                      />
-
-                                      <input
-                                        type="number"
-                                        value={quantity}
-                                        placeholder="Availability"
-                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm no-spinner"
-                                        onChange={(e) =>
-                                          handleQuantityChange(
-                                            index,
-                                            child,
-                                            e.target.value
-                                          )
-                                        }
-                                      />
-
-                                      <button
-                                        onClick={() =>
-                                          handleDeleteCombination(
-                                            index,
-                                            childIndex
-                                          )
-                                        }
-                                        className="text-red-600"
-                                      >
-                                        <FaTrash />
-                                      </button>
-                                    </li>
-                                  );
-                                }
-                              )}
-                            </ul>
-                          </div>
-                        )} */}
                         {expandedParents.includes(index) && (
                           <div className="mt-2">
                             <ul className="space-y-2">
@@ -1310,8 +1078,8 @@ const CategorySelector = () => {
                                   const normalizedCombination =
                                     normalizeString(combinationString);
 
-                                  const matchingVariant = product?.variants?.find(
-                                    (variant) => {
+                                  const matchingVariant =
+                                    product?.variants?.find((variant) => {
                                       const normalizedVariantTitle =
                                         normalizeString(variant.title);
 
@@ -1319,8 +1087,7 @@ const CategorySelector = () => {
                                         normalizedVariantTitle ===
                                         normalizedCombination
                                       );
-                                    }
-                                  );
+                                    });
                                   const price = matchingVariant?.price;
                                   const compareAtPrice =
                                     matchingVariant?.compare_at_price;
@@ -1328,10 +1095,20 @@ const CategorySelector = () => {
                                   const quantity =
                                     matchingVariant?.inventory_quantity;
                                   const variantId = matchingVariant?.id;
+
+                                  const image_id = matchingVariant?.image_id;
+                                  const matchedImage = product?.images?.find(
+                                    (image) => {
+                                      return (
+                                        String(image?.id) === String(image_id)
+                                      );
+                                    }
+                                  );
+
                                   return (
                                     <li
                                       key={childIndex}
-                                      className="flex items-center gap-6"
+                                      className="grid grid-cols-7 items-center gap-20"
                                     >
                                       <div className="w-12 relative">
                                         <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
@@ -1379,7 +1156,7 @@ const CategorySelector = () => {
                                       </div>
 
                                       <span
-                                        className="font-medium text-gray-700  cursor-pointer"
+                                        className="font-medium text-sm  text-gray-700  cursor-pointer"
                                         onClick={() => {
                                           navigate(
                                             `/product/${product.id}/variants/${variantId}`,
@@ -1395,7 +1172,7 @@ const CategorySelector = () => {
                                         {child}
                                       </span>
 
-                                      <div className="relative w-24">
+                                      <div className="relative w-20">
                                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
                                           $
                                         </span>
@@ -1418,13 +1195,12 @@ const CategorySelector = () => {
                                         />
                                       </div>
 
-                                      <div className="relative w-24">
+                                      <div className="relative w-20 ">
                                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
                                           $
                                         </span>
                                         <input
                                           type="number"
-                                          // value={compareAtPrice}
                                           value={
                                             compareAtPrices !== ""
                                               ? compareAtPrices
@@ -1467,7 +1243,7 @@ const CategorySelector = () => {
                                             ? quantities
                                             : quantity
                                         }
-                                        placeholder="Availability"
+                                        placeholder="QTY"
                                         className="w-20 p-1 border border-gray-300 rounded-md text-sm no-spinner"
                                         onChange={(e) =>
                                           handleQuantityChange(
@@ -1496,185 +1272,6 @@ const CategorySelector = () => {
                             </ul>
                           </div>
                         )}
-                        {/* {expandedParents.includes(index) && (
-                          <div className="mt-2">
-                            <ul className="space-y-2">
-                              {combinations[index]?.children?.map(
-                                (child, childIndex) => {
-                                  const key = `${index}-${child}`;
-                                  const image = variantImages[key];
-                                  const variantPrice = variantPrices[key] || ""; 
-                                  const quantity = variantQuantities[key] || "";
-
-                                  const matchingVariant = product.variants.find(
-                                    (variant) =>
-                                      variant.title
-                                        .toLowerCase()
-                                        .includes(child.toLowerCase())
-                                  );
-
-                                  const price = matchingVariant
-                                    ? matchingVariant.price
-                                    : "N/A";
-                                  const inventoryQuantity = matchingVariant
-                                    ? matchingVariant.inventory_quantity
-                                    : 0;
-
-                                  return (
-                                    <li
-                                      key={childIndex}
-                                      className="flex items-center gap-4"
-                                    >
-                                      <div className="w-16 relative">
-                                        <label className="flex items-center justify-center w-16 h-16 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
-                                          {image?.preview ? (
-                                            <img
-                                              src={image.preview}
-                                              alt={`Variant ${child}`}
-                                              className="w-full h-full object-cover"
-                                            />
-                                          ) : (
-                                            <span className="text-3xl text-gray-400">
-                                              +
-                                            </span>
-                                          )}
-                                          <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onChange={(e) =>
-                                              handleVariantImageUpload(
-                                                e,
-                                                index,
-                                                child
-                                              )
-                                            }
-                                          />
-                                          {image?.preview && (
-                                            <button
-                                              onClick={() =>
-                                                handleRemoveVariantImages(
-                                                  index,
-                                                  child
-                                                )
-                                              }
-                                              className="absolute top-0 right-0 text-white bg-red-600 rounded-full px-2 py-1 text-xs"
-                                              style={{
-                                                transform:
-                                                  "translate(25%, -25%)",
-                                              }}
-                                            >
-                                              X
-                                            </button>
-                                          )}
-                                        </label>
-                                      </div>
-
-                                      <span
-                                        className="font-medium text-gray-700 w-[120px] cursor-pointer"
-                                        onClick={() => {
-                                          try {
-                                            const normalizeString = (str) =>
-                                              str.trim().toLowerCase();
-
-                                            const matchingVariant =
-                                              product.variants.find((variant) =>
-                                                normalizeString(
-                                                  variant.title
-                                                ).includes(
-                                                  normalizeString(child)
-                                                )
-                                              );
-
-                                            const variantId = matchingVariant
-                                              ? matchingVariant.id
-                                              : null;
-
-                                            if (variantId) {
-                                              navigate("/variants", {
-                                                state: {
-                                                  productId: product.id,
-                                                  variantId: variantId,
-                                                  isEditing: true,
-                                                },
-                                              });
-                                            } else {
-                                              console.error(
-                                                `Variant ID not found for: ${child}`
-                                              );
-                                              console.error(
-                                                "Available Variants:",
-                                                product.variants.map(
-                                                  (v) => v.title
-                                                )
-                                              );
-                                            }
-                                          } catch (error) {
-                                            console.error(
-                                              "Error resolving variant ID:",
-                                              error
-                                            );
-                                          }
-                                        }}
-                                      >
-                                        {child}
-                                      </span>
-
-                                      <div className="relative w-24">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <input
-                                          type="number"
-                                          value={
-                                            variantPrice !== ""
-                                              ? variantPrice
-                                              : price
-                                          }
-                                          placeholder="Price"
-                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
-                                          onChange={(e) =>
-                                            handlePriceChange(
-                                              index,
-                                              child,
-                                              e.target.value
-                                            )
-                                          } 
-                                        />
-                                      </div>
-
-                                      <input
-                                        type="number"
-                                        value={inventoryQuantity}
-                                        placeholder="Availability"
-                                        className="w-24 p-1 border border-gray-300 rounded-md text-sm no-spinner"
-                                        onChange={(e) =>
-                                          handleQuantityChange(
-                                            index,
-                                            child,
-                                            e.target.value
-                                          )
-                                        }
-                                      />
-
-                                      <button
-                                        onClick={() =>
-                                          handleDeleteCombination(
-                                            index,
-                                            childIndex
-                                          )
-                                        }
-                                        className="text-red-600"
-                                      >
-                                        <FaTrash />
-                                      </button>
-                                    </li>
-                                  );
-                                }
-                              )}
-                            </ul>
-                          </div>
-                        )} */}
                       </div>
                     ))
                   ) : (
@@ -1768,7 +1365,7 @@ const CategorySelector = () => {
                 className="w-16 h-16"
               />
               <p className="mt-4 text-white font-semibold">
-                Please do not close window
+                Please wait, images are being uploaded...{" "}
               </p>
             </div>
           )}

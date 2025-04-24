@@ -23,7 +23,7 @@ const Variants = () => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/product/getSingleProductForVariants/${productId}`
+          ` https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`
         );
         setProduct(response.data);
         setLoading(false);

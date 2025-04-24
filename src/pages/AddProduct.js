@@ -60,10 +60,23 @@ const CategorySelector = () => {
   const [variantPrices, setVariantPrices] = useState({});
   const [variantCompareAtPrices, setVariantComparePrices] = useState({});
   const [variantSku, setVariantSku] = useState({});
+  const [currentVariant, setCurrentVariant] = useState(null);
 
   const [variantQuantities, setVariantQuantities] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [galleryImages, setGalleryImages] = useState([]);
+  useEffect(() => {
+    if (isPopupVisible) {
+      fetch(" https://multi-vendor-marketplace.vercel.app/product/getImageGallery")
+        .then((res) => res.json())
+        .then((data) => {
+          const allImages = data.flatMap((item) => item.images);
+          setGalleryImages(allImages);
+        })
+        .catch((err) => console.error("Failed to fetch images:", err));
+    }
+  }, [isPopupVisible]);
 
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
@@ -110,13 +123,13 @@ const CategorySelector = () => {
     setKeywordsList(newList);
   };
 
-  const handleImageChange = (event) => {
-    const files = Array.from(event.target.files);
-    const imagePreviews = files.map((file) => URL.createObjectURL(file));
-    setSelectedImages((prevImages) => [...prevImages, ...imagePreviews]);
+  // const handleImageChange = (event) => {
+  //   const files = Array.from(event.target.files);
+  //   const imagePreviews = files.map((file) => URL.createObjectURL(file));
+  //   setSelectedImages((prevImages) => [...prevImages, ...imagePreviews]);
 
-    setImages(files);
-  };
+  //   setImages(files);
+  // };
 
   const toggleImageSelection = (index) => {
     setCheckedImages((prev) => ({
@@ -126,9 +139,8 @@ const CategorySelector = () => {
   };
 
   const handleRemoveSelected = () => {
-    setSelectedImages(
-      selectedImages.filter((_, index) => !checkedImages[index])
-    );
+    const filtered = selectedImages.filter((_, index) => !checkedImages[index]);
+    setSelectedImages(filtered);
     setCheckedImages({});
   };
 
@@ -308,7 +320,27 @@ const CategorySelector = () => {
           subVariants: groupedVariants[key].children,
         })
       );
+      const hydratedVariantImages = {};
+      formattedVariants.forEach((variantGroup, index) => {
+        const parent = variantGroup.option1;
+        const children = variantGroup.subVariants;
 
+        children.forEach((childVariant) => {
+          const key = `${index}-${childVariant.option2}`;
+          const imageId = childVariant.image_id;
+
+          const matched = product.variantImages?.find(
+            (img) => String(img.id) === String(imageId)
+          );
+
+          if (matched?.src) {
+            hydratedVariantImages[key] = {
+              preview: matched.src,
+              loading: false,
+            };
+          }
+        });
+      });
       setIsEditing(true);
       setTitle(product.title || "");
       setPrice(product.variants[0]?.price || "");
@@ -324,7 +356,11 @@ const CategorySelector = () => {
       setUnit(product.shipping?.weight_unit || "kg");
       setStatus(product.status || "publish");
       setUserId(product.userId || "");
-      const imageURLs = product.images?.map((img) => img.src) || [];
+      const imageURLs =
+        product.images?.map((img) => ({
+          cloudUrl: img.src,
+          loading: false,
+        })) || [];
       setSelectedImages(imageURLs);
       const tagsArray = Array.isArray(product.tags)
         ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
@@ -346,7 +382,7 @@ const CategorySelector = () => {
       );
       setVariantSku(product.variants.map((v) => v.sku || ""));
       setImages(product.images || []);
-      setVariantImages(product.variants[0].image || []);
+      setVariantImages(hydratedVariantImages);
 
       const rawDescription = product.body_html || "";
       try {
@@ -366,6 +402,64 @@ const CategorySelector = () => {
       }
     }
   }, [product]);
+
+  const handleImageChange = async (event) => {
+    const files = Array.from(event.target.files);
+    const previews = files.map((file) => ({
+      localUrl: URL.createObjectURL(file),
+      loading: true,
+      cloudUrl: null,
+    }));
+
+    const updatedImages = [...selectedImages, ...previews];
+    setSelectedImages(updatedImages);
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "images");
+
+      try {
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        const data = await res.json();
+
+        if (data.secure_url) {
+          await fetch(" https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              images: [data.secure_url],
+            }),
+          });
+
+          setSelectedImages((prev) => {
+            const updated = [...prev];
+            const target = updated.find(
+              (img) => img.localUrl === previews[i].localUrl
+            );
+            if (target) {
+              target.cloudUrl = data.secure_url;
+              target.loading = false;
+            }
+            return updated;
+          });
+        }
+      } catch (error) {
+        console.error("Image upload failed:", error);
+      }
+    }
+  };
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -531,66 +625,19 @@ const CategorySelector = () => {
         formData.append("variantImageKeys", key);
       });
 
-      const cloudinaryURLs = [];
-      const uploadedVariantImages = [];
+      // const cloudinaryURLs = [];
+      // const uploadedVariantImages = [];
 
-      for (let i = 0; i < images.length; i++) {
-        const imageForm = new FormData();
-        imageForm.append("file", images[i]);
-        imageForm.append("upload_preset", "images");
+      const cloudinaryURLs = selectedImages
+        .filter((img) => img.cloudUrl)
+        .map((img) => img.cloudUrl);
 
-        const uploadRes = await fetch(
-          "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-          {
-            method: "POST",
-            body: imageForm,
-          }
-        );
-
-        const uploadJson = await uploadRes.json();
-
-        if (uploadRes.ok) {
-          cloudinaryURLs.push(uploadJson.secure_url);
-        } else {
-          setMessage({
-            type: "error",
-            text: `Failed to upload image ${i + 1}`,
-          });
-          setLoading(false);
-          return;
-        }
-      }
-
-      for (let i = 0; i < Object.entries(variantImages).length; i++) {
-        const [key, { file }] = Object.entries(variantImages)[i];
-        const variantForm = new FormData();
-        variantForm.append("file", file);
-        variantForm.append("upload_preset", "images");
-
-        const uploadVariantRes = await fetch(
-          "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-          {
-            method: "POST",
-            body: variantForm,
-          }
-        );
-
-        const variantUploadJson = await uploadVariantRes.json();
-
-        if (uploadVariantRes.ok) {
-          uploadedVariantImages.push({
-            key,
-            url: variantUploadJson.secure_url,
-          });
-        } else {
-          setMessage({
-            type: "error",
-            text: `Failed to upload variant image ${i + 1}`,
-          });
-          setLoading(false);
-          return;
-        }
-      }
+      const uploadedVariantImages = Object.entries(variantImages).map(
+        ([key, { preview }]) => ({
+          key,
+          url: preview,
+        })
+      );
 
       const imageSaveResponse = await fetch(
         ` https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
@@ -667,9 +714,6 @@ const CategorySelector = () => {
     setVariantSku((prev) => ({ ...prev, [key]: value }));
   };
 
-
-
-  
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <div className="w-full max-w-7xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -743,16 +787,20 @@ const CategorySelector = () => {
               </div>
             ) : (
               <div className="flex gap-2">
-                {selectedImages.map((src, index) => (
+                {selectedImages.map((img, index) => (
                   <div key={index} className="relative group">
                     <img
-                      src={src}
+                      src={img.cloudUrl || img.localUrl}
                       alt={`Uploaded ${index}`}
                       className={`w-40 h-40 object-cover rounded-md border border-gray-300 transition ${
                         checkedImages[index] ? "opacity-50" : "opacity-100"
                       }`}
                     />
-
+                    {img.loading && (
+                      <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center rounded-md">
+                        <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                      </div>
+                    )}
                     <input
                       type="checkbox"
                       className="absolute top-2 left-2 w-5 h-5 cursor-pointer opacity-0 group-hover:opacity-100"
@@ -761,6 +809,7 @@ const CategorySelector = () => {
                     />
                   </div>
                 ))}
+
                 <div className="w-[80px] h-[80px] border border-gray-300 flex items-center justify-center rounded-md">
                   <input
                     type="file"
@@ -1116,7 +1165,13 @@ const CategorySelector = () => {
                                         <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
                                           {image?.preview ? (
                                             <img
-                                              src={image.preview}
+                                              src={
+                                                variantImages[
+                                                  `${index}-${child}`
+                                                ]?.preview ||
+                                                image?.preview ||
+                                                ""
+                                              }
                                               alt={`Variant ${child}`}
                                               className="w-full h-full object-cover"
                                             />
@@ -1129,9 +1184,13 @@ const CategorySelector = () => {
                                             // type="file"
                                             // accept="image/*"
                                             className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onClick={() =>
-                                              setIsPopupVisible(true)
-                                            }
+                                            onClick={() => {
+                                              setCurrentVariant({
+                                                index,
+                                                child,
+                                              });
+                                              setIsPopupVisible(true);
+                                            }}
 
                                             // onChange={(e) =>
                                             //   handleVariantImageUpload(
@@ -1480,7 +1539,7 @@ const CategorySelector = () => {
             </div>
           </div>
         </div>
-        {isPopupVisible && (
+        {/* {isPopupVisible && (
           <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
             <div className="bg-white w-[60%] max-w-5xl rounded-lg shadow-lg p-6 relative">
               <div className="flex justify-between items-center pb-4 border-b">
@@ -1504,7 +1563,7 @@ const CategorySelector = () => {
               </div>
 
               <div className="grid grid-cols-4 gap-4 mt-6">
-                {product.images.map((file) => (
+                {galleryImages.map((file) => (
                   <div
                     key={file.id}
                     className={`border rounded p-2 relative ${
@@ -1518,13 +1577,123 @@ const CategorySelector = () => {
                       alt={file.name}
                       className="w-full h-24 object-cover rounded"
                     />
-                    <input type="checkbox" className="absolute top-2 left-2" />
+                    <input
+                      type="checkbox"
+                      className="absolute top-2 left-2"
+                      checked={
+                        currentVariant &&
+                        variantImages[
+                          `${currentVariant.index}-${currentVariant.child}`
+                        ]?.preview === file.src
+                      }
+                      onChange={() => {
+                        if (currentVariant) {
+                          const key = `${currentVariant.index}-${currentVariant.child}`;
+                          setVariantImages((prev) => ({
+                            ...prev,
+                            [key]: { preview: file.src },
+                          }));
+                          setIsPopupVisible(false);
+                        }
+                      }}
+                    />{" "}
                     <p className="text-sm text-center mt-2">{file.name}</p>
                   </div>
                 ))}
               </div>
 
               <div className="flex justify-end mt-6 border-t ">
+                <button
+                  onClick={() => setIsPopupVisible(false)}
+                  className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => console.log(selectedFiles)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        )} */}
+        {isPopupVisible && (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+            <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">
+              <div className="sticky top-0 bg-white z-10 pb-4 border-b flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Select Image
+                </h2>
+                <button
+                  onClick={() => setIsPopupVisible(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <RxCross1 />
+                </button>
+              </div>
+
+              <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
+                <button
+                  type="file"
+                  accept="images/*"
+                  className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
+                >
+                  Add images
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
+                {galleryImages.map((file) => (
+                  <div
+                    key={file.id || file.src}
+                    className={`border rounded p-2 relative ${
+                      selectedFiles.includes(file.id)
+                        ? "border-blue-500"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    <div
+                      onClick={() => {
+                        if (currentVariant) {
+                          const key = `${currentVariant.index}-${currentVariant.child}`;
+                          setVariantImages((prev) => ({
+                            ...prev,
+                            [key]: { preview: file.src },
+                          }));
+                          setIsPopupVisible(false);
+                        }
+                      }}
+                      className="cursor-pointer hover:opacity-80 transition"
+                    >
+                      <img
+                        src={file.src}
+                        alt={file.name || "Image"}
+                        className="w-full h-24 object-cover rounded"
+                      />
+                    </div>
+
+                    <input
+                      type="checkbox"
+                      className="absolute top-2 left-2 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      checked={
+                        currentVariant &&
+                        variantImages[
+                          `${currentVariant.index}-${currentVariant.child}`
+                        ]?.preview === file.src
+                      }
+                      readOnly
+                    />
+
+                    <p className="text-sm text-center mt-2 truncate">
+                      {file.name || "Image"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end mt-6 border-t pt-4">
                 <button
                   onClick={() => setIsPopupVisible(false)}
                   className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"

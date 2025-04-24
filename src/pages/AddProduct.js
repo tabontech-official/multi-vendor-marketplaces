@@ -1634,7 +1634,7 @@ const CategorySelector = () => {
                 </button>
               </div>
 
-              <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
+              {/* <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
                 <button
                   type="file"
                   accept="images/*"
@@ -1642,7 +1642,7 @@ const CategorySelector = () => {
                 >
                   Add images
                 </button>
-              </div>
+              </div> */}
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
                 {galleryImages.map((file) => (

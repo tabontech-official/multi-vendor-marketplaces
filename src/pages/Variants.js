@@ -16,7 +16,7 @@ const Variants = () => {
   const [product, setProduct] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const { productId, variantId: initialVariantId,imageSrc, imageAlt } = location.state || {};
+  const { productId, variantId: initialVariantId } = location.state || {};
   const [variantId, setVariantId] = useState(initialVariantId);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ const Variants = () => {
   if (!variantData) {
     return <p>Loading...</p>;
   }
-  
+
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <ToastContainer />
@@ -115,28 +115,38 @@ const Variants = () => {
           </div>
         </div>
         <ul className="space-y-2">
-          {product?.variants?.map((variant, index) => (
-            <li
-              key={variant.id}
-              onClick={() => handleVariantClick(variant.id)}
-              className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
-            >
-              <div className="w-8 h-8 bg-gray-200 rounded-md flex items-center justify-center">
-                {variant?.image ? (
-                  <img
-                    // src={variant.image}
-                    alt={variant.title}
-                    className="w-10 h-10 object-cover"
-                  />
-                ) : (
-                  <CiImageOn className="text-gray-400 text-2xl" />
-                )}
-              </div>
-              <button >
-                {variant.title || "Unknown variant"}
-              </button>
-            </li>
-          ))}
+          {product?.variants?.map((variant) => {
+            const matchedImage = product?.variantImages?.find(
+              (img) => img.id === variant.image_id
+            );
+
+            return (
+              <li
+                key={variant.id}
+                onClick={() => {
+                  handleVariantClick(variant.id);
+                  navigate(`/product/${productId}/variants/${variant.id}`, {
+                    state: { productId, variantId: variant.id },
+                  });
+                }}
+                
+                className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
+              >
+                <div className="w-8 h-8 bg-gray-200 rounded-md flex items-center justify-center overflow-hidden">
+                  {matchedImage?.src ? (
+                    <img
+                      src={matchedImage.src}
+                      alt={matchedImage.alt || variant.title}
+                      className="w-full h-full object-cover rounded"
+                    />
+                  ) : (
+                    <CiImageOn className="text-gray-400 text-2xl" />
+                  )}
+                </div>
+                <button>{variant.title || "Unknown variant"}</button>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
@@ -230,7 +240,7 @@ const Variants = () => {
             </div>
           </div>
         </div>
-       
+
         {/* Inventory box */}
         <div className="mt-4 bg-white p-3 border border-gray-300 rounded-2xl">
           <label className="block text-sm font-medium text-gray-700">

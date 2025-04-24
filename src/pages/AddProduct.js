@@ -67,8 +67,9 @@ const CategorySelector = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
   useEffect(() => {
+    const userId=localStorage.getItem('userid')
     if (isPopupVisible) {
-      fetch(" https://multi-vendor-marketplace.vercel.app/product/getImageGallery")
+      fetch(` https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}`)
         .then((res) => res.json())
         .then((data) => {
           const allImages = data.flatMap((item) => item.images);
@@ -413,6 +414,7 @@ const CategorySelector = () => {
 
     const updatedImages = [...selectedImages, ...previews];
     setSelectedImages(updatedImages);
+    const userId = localStorage.getItem("userid");
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -439,6 +441,7 @@ const CategorySelector = () => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
+              userId,
               images: [data.secure_url],
             }),
           });

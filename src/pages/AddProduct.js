@@ -66,19 +66,7 @@ const CategorySelector = () => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
-  useEffect(() => {
-    const userId=localStorage.getItem('userid')
-    if (isPopupVisible) {
-      fetch(` https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          const allImages = data.flatMap((item) => item.images);
-          setGalleryImages(allImages);
-        })
-        .catch((err) => console.error("Failed to fetch images:", err));
-    }
-  }, [isPopupVisible]);
-
+ 
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
   );
@@ -281,6 +269,26 @@ const CategorySelector = () => {
   const { product } = locationData.state || {};
 
   useEffect(() => {
+    const userId = localStorage.getItem('userid');
+  
+    // 🧠 If popup is visible and user is present
+    if (isPopupVisible && userId) {
+      const productId = product?.id || "null"; // fallback to "null" for cloudinary only
+  
+      fetch(` https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          const allImages = data.flatMap((item) => item.images);
+          setGalleryImages(allImages);
+        })
+        .catch((err) => console.error("Failed to fetch images:", err));
+    }
+  }, [isPopupVisible, product]);
+  
+
+
+
+  useEffect(() => {
     if (product) {
       const allVariants = product.variants;
 
@@ -404,6 +412,8 @@ const CategorySelector = () => {
     }
   }, [product]);
 
+  
+  
   const handleImageChange = async (event) => {
     const files = Array.from(event.target.files);
     const previews = files.map((file) => ({
@@ -435,7 +445,7 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(" https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+          await fetch("  https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -595,8 +605,8 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : " https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+        ? `  https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
+        : "  https://multi-vendor-marketplace.vercel.app/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -643,7 +653,7 @@ const CategorySelector = () => {
       );
 
       const imageSaveResponse = await fetch(
-        ` https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
+        `  https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
         {
           method: "PUT",
           headers: {

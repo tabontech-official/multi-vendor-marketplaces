@@ -8,6 +8,8 @@ import { useAuthContext } from "../Hooks/useAuthContext";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
 import { MdEdit } from "react-icons/md";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Dashboard = () => {
   let admin;
@@ -41,8 +43,28 @@ const Dashboard = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { user } = useAuthContext();
   const dropdownRefs = useRef([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStarted, setUploadStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const modalRef = useRef();
+  const openPopup = () => setIsOpen(true);
+  const closePopup = () => setIsOpen(false);
+  const [Loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+
+
+  const handleCSVUpload = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+  };
+
+ 
+  
   const toggleSelection = (productId) => {
     setSelectedProducts((prevSelected) =>
       prevSelected.includes(productId)
@@ -50,13 +72,8 @@ const Dashboard = () => {
         : [...prevSelected, productId]
     );
   };
-  const [errorMessage, setErrorMessage] = useState("");
 
-  const [Loading, setLoading] = useState(false);
-  const [toast, setToast] = useState({ show: false, type: "", message: "" });
 
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
 
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
@@ -99,9 +116,36 @@ const Dashboard = () => {
     }
   };
 
-  const modalRef = useRef();
-  const openPopup = () => setIsOpen(true);
-  const closePopup = () => setIsOpen(false);
+  const handleUploadAndPreview = async () => {
+    if (!selectedFile) return;
+    setIsUploading(true);
+    setUploadStarted(true);
+
+    setTimeout(async () => {
+      try {
+        const userId=localStorage.getItem("userid")
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        formData.append("userId",userId); 
+
+        const response = await fetch("http://localhost:5000/product/upload-csv-body", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await response.json();
+        showToast("success", "products imported successfully!");
+        closePopup();
+      } catch (error) {
+        showToast("Failed", error.message || "Error occurred while importing file.");
+      } finally {
+        setIsUploading(false);
+        setUploadStarted(false);
+        setSelectedFile(null);
+      }
+    }, 2000); 
+  };
+ 
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -304,98 +348,98 @@ const Dashboard = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
-  const handleCSVUpload = (event) => {
-    const file = event.target.files[0];
-    const userId = localStorage.getItem("userid");
+  // const handleCSVUpload = (event) => {
+  //   const file = event.target.files[0];
+  //   const userId = localStorage.getItem("userid");
 
-    if (!file || !userId) {
-      alert("CSV file or User ID missing.");
-      return;
-    }
+  //   if (!file || !userId) {
+  //     alert("CSV file or User ID missing.");
+  //     return;
+  //   }
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: async (results) => {
-        const products = results.data;
+  //   Papa.parse(file, {
+  //     header: true,
+  //     skipEmptyLines: true,
+  //     complete: async (results) => {
+  //       const products = results.data;
 
-        for (const product of products) {
-          const formData = new FormData();
-          formData.append("title", product.title || "");
-          formData.append("description", product.description || "");
-          formData.append("price", product.price || 0);
-          formData.append("compare_at_price", product.compare_at_price || 0);
-          formData.append("track_quantity", product.track_quantity || "false");
-          formData.append("quantity", product.quantity || 0);
-          formData.append(
-            "continue_selling",
-            product.continue_selling || "false"
-          );
-          formData.append("has_sku", product.has_sku || "false");
-          formData.append("sku", product.sku || "");
-          formData.append("barcode", product.barcode || "");
-          formData.append("track_shipping", product.track_shipping || "false");
-          formData.append("weight", product.weight || 0);
-          formData.append("weight_unit", product.weight_unit || "kg");
-          formData.append("status", product.status || "draft");
-          formData.append("userId", userId);
-          formData.append("productType", product.productType || "");
-          formData.append("vendor", product.vendor || "");
-          formData.append("keyWord", product.keyWord || "");
+  //       for (const product of products) {
+  //         const formData = new FormData();
+  //         formData.append("title", product.title || "");
+  //         formData.append("description", product.description || "");
+  //         formData.append("price", product.price || 0);
+  //         formData.append("compare_at_price", product.compare_at_price || 0);
+  //         formData.append("track_quantity", product.track_quantity || "false");
+  //         formData.append("quantity", product.quantity || 0);
+  //         formData.append(
+  //           "continue_selling",
+  //           product.continue_selling || "false"
+  //         );
+  //         formData.append("has_sku", product.has_sku || "false");
+  //         formData.append("sku", product.sku || "");
+  //         formData.append("barcode", product.barcode || "");
+  //         formData.append("track_shipping", product.track_shipping || "false");
+  //         formData.append("weight", product.weight || 0);
+  //         formData.append("weight_unit", product.weight_unit || "kg");
+  //         formData.append("status", product.status || "draft");
+  //         formData.append("userId", userId);
+  //         formData.append("productType", product.productType || "");
+  //         formData.append("vendor", product.vendor || "");
+  //         formData.append("keyWord", product.keyWord || "");
 
-          // options
-          let parsedOptions = [];
-          try {
-            parsedOptions =
-              typeof product.options === "string"
-                ? JSON.parse(product.options)
-                : product.options;
-          } catch (err) {
-            console.warn("Invalid options JSON:", product.options);
-          }
-          formData.append("options", JSON.stringify(parsedOptions));
+  //         // options
+  //         let parsedOptions = [];
+  //         try {
+  //           parsedOptions =
+  //             typeof product.options === "string"
+  //               ? JSON.parse(product.options)
+  //               : product.options;
+  //         } catch (err) {
+  //           console.warn("Invalid options JSON:", product.options);
+  //         }
+  //         formData.append("options", JSON.stringify(parsedOptions));
 
-          // variants
-          let parsedVariants = [];
-          try {
-            parsedVariants =
-              typeof product.variants === "string"
-                ? JSON.parse(product.variants)
-                : product.variants;
-          } catch (err) {
-            console.warn("Invalid variants JSON:", product.variants);
-          }
-          formData.append("variants", JSON.stringify(parsedVariants));
+  //         // variants
+  //         let parsedVariants = [];
+  //         try {
+  //           parsedVariants =
+  //             typeof product.variants === "string"
+  //               ? JSON.parse(product.variants)
+  //               : product.variants;
+  //         } catch (err) {
+  //           console.warn("Invalid variants JSON:", product.variants);
+  //         }
+  //         formData.append("variants", JSON.stringify(parsedVariants));
 
-          console.log("FormData values:");
-          for (let pair of formData.entries()) {
-            console.log(`${pair[0]}:`, pair[1]);
-          }
+  //         console.log("FormData values:");
+  //         for (let pair of formData.entries()) {
+  //           console.log(`${pair[0]}:`, pair[1]);
+  //         }
 
-          try {
-            const res = await fetch(
-              " https://multi-vendor-marketplace.vercel.app/product/addEquipment",
-              {
-                method: "POST",
-                body: formData,
-              }
-            );
+  //         try {
+  //           const res = await fetch(
+  //             " https://multi-vendor-marketplace.vercel.app/product/addEquipment",
+  //             {
+  //               method: "POST",
+  //               body: formData,
+  //             }
+  //           );
 
-            const data = await res.json();
-            console.log(`Uploaded product: ${product.title}`, data);
+  //           const data = await res.json();
+  //           console.log(`Uploaded product: ${product.title}`, data);
 
-            if (!res.ok) {
-              console.error("Upload failed:", data.error || data);
-            }
-          } catch (err) {
-            console.error("Fetch error:", err);
-          }
-        }
+  //           if (!res.ok) {
+  //             console.error("Upload failed:", data.error || data);
+  //           }
+  //         } catch (err) {
+  //           console.error("Fetch error:", err);
+  //         }
+  //       }
 
-        alert("CSV Upload Completed ✅");
-      },
-    });
-  };
+  //       alert("CSV Upload Completed ✅");
+  //     },
+  //   });
+  // };
   return user ? (
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
@@ -424,7 +468,7 @@ const Dashboard = () => {
 
         {toast.show && (
           <div
-            className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+            className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
               toast.type === "success" ? "bg-green-500" : "bg-red-500"
             } text-white`}
           >
@@ -605,6 +649,11 @@ const Dashboard = () => {
                 <span className="px-4 py-2 text-sm text-white bg-blue-600 border border-gray-300 rounded hover:bg-blue-700">
                   Add file
                 </span>
+                {selectedFile && (
+                <span className="absolute bottom-2 text-sm text-gray-600">
+                  {selectedFile.name}
+                </span>
+              )}
               </div>
               <div className="text-sm text-blue-600 underline cursor-pointer mb-4">
                 Download sample CSV
@@ -616,8 +665,16 @@ const Dashboard = () => {
                 >
                   Cancel
                 </button>
-                <button className="px-4 py-2 text-sm bg-gray-200 text-gray-500 rounded cursor-not-allowed">
-                  Upload and preview
+                <button
+                  onClick={handleUploadAndPreview}
+                  disabled={!selectedFile || isUploading}
+                  className={`px-4 py-2 text-sm ${
+                    selectedFile && !isUploading
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  } rounded`}
+                >
+                  {isUploading ? "Uploading..." : "Upload and preview"}
                 </button>
               </div>
             </div>

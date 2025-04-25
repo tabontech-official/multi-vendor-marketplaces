@@ -271,9 +271,8 @@ const CategorySelector = () => {
   useEffect(() => {
     const userId = localStorage.getItem('userid');
   
-    // 🧠 If popup is visible and user is present
     if (isPopupVisible && userId) {
-      const productId = product?.id || "null"; // fallback to "null" for cloudinary only
+      const productId = product?.id || "null";
   
       fetch(` https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`)
         .then((res) => res.json())

@@ -128,7 +128,7 @@ const Dashboard = () => {
         formData.append("file", selectedFile);
         formData.append("userId",userId); 
 
-        const response = await fetch("http://localhost:5000/product/upload-csv-body", {
+        const response = await fetch(" https://multi-vendor-marketplace.vercel.app/product/upload-csv-body", {
           method: "POST",
           body: formData,
         });

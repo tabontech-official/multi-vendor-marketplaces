@@ -66,7 +66,7 @@ const CategorySelector = () => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
- 
+
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
   );
@@ -269,12 +269,14 @@ const CategorySelector = () => {
   const { product } = locationData.state || {};
 
   useEffect(() => {
-    const userId = localStorage.getItem('userid');
-  
+    const userId = localStorage.getItem("userid");
+
     if (isPopupVisible && userId) {
       const productId = product?.id || "null";
-  
-      fetch(` https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`)
+
+      fetch(
+        ` https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`
+      )
         .then((res) => res.json())
         .then((data) => {
           const allImages = data.flatMap((item) => item.images);
@@ -283,9 +285,6 @@ const CategorySelector = () => {
         .catch((err) => console.error("Failed to fetch images:", err));
     }
   }, [isPopupVisible, product]);
-  
-
-
 
   useEffect(() => {
     if (product) {
@@ -411,8 +410,6 @@ const CategorySelector = () => {
     }
   }, [product]);
 
-  
-  
   const handleImageChange = async (event) => {
     const files = Array.from(event.target.files);
     const previews = files.map((file) => ({
@@ -444,16 +441,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("  https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            "  https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setSelectedImages((prev) => {
             const updated = [...prev];
@@ -567,20 +567,20 @@ const CategorySelector = () => {
     // };
     const defaultQuantity = parseFloat(quantity) || 0;
 
-const prepareVarianQuantities = () => {
-  return combinations.flatMap((combination, index) => {
-    return combination.children.map((child) => {
-      const key = `${index}-${child}`;
-      const variantQty = parseFloat(variantQuantities[key]);
-      
-      if (!isNaN(variantQty) && variantQty > 0) {
-        return variantQty; 
-      } else {
-        return defaultQuantity; 
-      }
-    });
-  });
-};
+    const prepareVarianQuantities = () => {
+      return combinations.flatMap((combination, index) => {
+        return combination.children.map((child) => {
+          const key = `${index}-${child}`;
+          const variantQty = parseFloat(variantQuantities[key]);
+
+          if (!isNaN(variantQty) && variantQty > 0) {
+            return variantQty;
+          } else {
+            return defaultQuantity;
+          }
+        });
+      });
+    };
     const prepareVariansku = () => {
       return combinations.flatMap((combination, index) => {
         return combination.children.map((child) => {
@@ -621,7 +621,7 @@ const prepareVarianQuantities = () => {
     try {
       const url = isEditing
         ? `  https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : "  http://localhost:5000/product/addEquipment";
+        : "   https://multi-vendor-marketplace.vercel.app/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -1663,7 +1663,7 @@ const prepareVarianQuantities = () => {
               </div>
 
               <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
-              <input
+                <input
                   type="file"
                   accept="image/*"
                   multiple
@@ -1678,8 +1678,7 @@ const prepareVarianQuantities = () => {
                   Add images
                 </label>
               </div>
-              
-                
+
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
                 {galleryImages.map((file) => (
                   <div

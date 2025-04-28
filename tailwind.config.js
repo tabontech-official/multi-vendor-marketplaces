@@ -13,6 +13,8 @@ module.exports = {
       },
       animation: {
         fadeInUp: 'fadeInUp 0.4s ease-out',
+        zoomIn: 'zoomIn 0.3s ease-out',
+
       },
     },
   },

@@ -136,6 +136,7 @@ const Dashboard = () => {
         const result = await response.json();
         showToast("success", "products imported successfully!");
         closePopup();
+        window.location.reload()
       } catch (error) {
         showToast("Failed", error.message || "Error occurred while importing file.");
       } finally {
@@ -622,19 +623,19 @@ const Dashboard = () => {
         </div>
       )}
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
           <div
             ref={modalRef}
-            className="bg-white rounded-lg shadow-lg w-full max-w-xl relative"
-          >
+            className="bg-white rounded-xl shadow-2xl w-full max-w-lg relative transform scale-95 animate-zoomIn transition-all duration-300"
+            >
             <div className="border-b px-4 py-3 flex justify-between items-center">
               <h2 className="text-sm font-semibold text-blue-700">
                 Import products by CSV
               </h2>
               <button
                 onClick={closePopup}
-                className="text-gray-600 hover:text-black text-2xl"
-              >
+                className="text-gray-500 hover:text-red-600 text-xl font-bold"
+                >
                 ×
               </button>
             </div>
@@ -668,11 +669,11 @@ const Dashboard = () => {
                 <button
                   onClick={handleUploadAndPreview}
                   disabled={!selectedFile || isUploading}
-                  className={`px-4 py-2 text-sm ${
+                  className={`px-4 py-2 text-sm rounded transition ${
                     selectedFile && !isUploading
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  } rounded`}
+                  }`}
                 >
                   {isUploading ? "Uploading..." : "Upload and preview"}
                 </button>

@@ -1646,16 +1646,24 @@ const CategorySelector = () => {
                 </button>
               </div>
 
-              {/* <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
-                <button
+              <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
+              <input
                   type="file"
-                  accept="images/*"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageChange}
+                  className="hidden"
+                  id="fileUpload"
+                />
+                <label
+                  htmlFor="fileUpload"
                   className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
                 >
                   Add images
-                </button>
-              </div> */}
-
+                </label>
+              </div>
+              
+                
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
                 {galleryImages.map((file) => (
                   <div

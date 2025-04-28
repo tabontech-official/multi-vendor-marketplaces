@@ -95,6 +95,7 @@ const Inventory = () => {
     const isAdmin = () => {
       if (token) {
         const decoded = jwtDecode(token);
+        console.log("token decodeddd",decoded)
         if ((decoded.payLoad.isAdmin || decoded.payLoad.role === "Dev Admin") && decoded.exp * 1000 > Date.now()) {
           return true;
         }
@@ -108,8 +109,8 @@ const Inventory = () => {
       const id = localStorage.getItem("userid");
       const response = await fetch(
         admin
-          ? ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}` 
-          : ` https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`, 
+          ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}` 
+          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`, 
         { method: "GET" }
       );
   
@@ -323,49 +324,49 @@ const Inventory = () => {
     fetchPrice();
   }, []);
 
-  useEffect(() => {
-    const fetchProductData2 = async () => {
-      try {
-        const response = await fetch(
-          ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
-          { method: "GET" }
-        );
+  // useEffect(() => {
+  //   const fetchProductData2 = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
+  //         { method: "GET" }
+  //       );
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Second Product render", data);
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         console.log("Second Product render", data);
 
-          const sortedProducts = data.products.sort(
-            (a, b) => new Date(b.created_at) - new Date(a.created_at)
-          );
+  //         const sortedProducts = data.products.sort(
+  //           (a, b) => new Date(b.created_at) - new Date(a.created_at)
+  //         );
 
-          setProducts((prev) => {
-            const newProducts = sortedProducts.filter(
-              (newProduct) =>
-                !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-            );
-            return [...prev, ...newProducts];
-          });
+  //         setProducts((prev) => {
+  //           const newProducts = sortedProducts.filter(
+  //             (newProduct) =>
+  //               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+  //           );
+  //           return [...prev, ...newProducts];
+  //         });
 
-          setFilteredProducts((prev) => {
-            const newProducts = sortedProducts.filter(
-              (newProduct) =>
-                !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-            );
-            return [...prev, ...newProducts];
-          });
+  //         setFilteredProducts((prev) => {
+  //           const newProducts = sortedProducts.filter(
+  //             (newProduct) =>
+  //               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+  //           );
+  //           return [...prev, ...newProducts];
+  //         });
 
-          setHasMore(page < data.totalPages);
-        } else {
-          console.error("Failed to fetch products:", response.status);
-        }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
+  //         setHasMore(page < data.totalPages);
+  //       } else {
+  //         console.error("Failed to fetch products:", response.status);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching products:", error);
+  //     }
+  //   };
 
-    fetchProductData2();
-  }, [page]);
+  //   fetchProductData2();
+  // }, [page]);
 
   const handleScroll = async () => {
     if (

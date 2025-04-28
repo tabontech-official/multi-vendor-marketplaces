@@ -555,16 +555,32 @@ const CategorySelector = () => {
         });
       });
     };
-    const prepareVarianQuantities = () => {
-      return combinations.flatMap((combination, index) => {
-        return combination.children.map((child) => {
-          const key = `${index}-${child}`;
-          return variantQuantities[key] !== undefined
-            ? variantQuantities[key]
-            : null;
-        });
-      });
-    };
+    // const prepareVarianQuantities = () => {
+    //   return combinations.flatMap((combination, index) => {
+    //     return combination.children.map((child) => {
+    //       const key = `${index}-${child}`;
+    //       return variantQuantities[key] !== undefined
+    //         ? variantQuantities[key]
+    //         : null;
+    //     });
+    //   });
+    // };
+    const defaultQuantity = parseFloat(quantity) || 0;
+
+const prepareVarianQuantities = () => {
+  return combinations.flatMap((combination, index) => {
+    return combination.children.map((child) => {
+      const key = `${index}-${child}`;
+      const variantQty = parseFloat(variantQuantities[key]);
+      
+      if (!isNaN(variantQty) && variantQty > 0) {
+        return variantQty; 
+      } else {
+        return defaultQuantity; 
+      }
+    });
+  });
+};
     const prepareVariansku = () => {
       return combinations.flatMap((combination, index) => {
         return combination.children.map((child) => {
@@ -581,7 +597,7 @@ const CategorySelector = () => {
       price: parseFloat(price),
       compare_at_price: compareAtPrice ? parseFloat(compareAtPrice) : undefined,
       track_quantity: trackQuantity,
-      quantity: trackQuantity ? parseInt(quantity) : 0,
+      quantity: trackQuantity ? parseFloat(quantity) : 0,
       continue_selling: continueSelling,
       has_sku: hasSKU,
       sku: hasSKU && sku ? sku : undefined,
@@ -605,7 +621,7 @@ const CategorySelector = () => {
     try {
       const url = isEditing
         ? `  https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : "  https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+        : "  http://localhost:5000/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 

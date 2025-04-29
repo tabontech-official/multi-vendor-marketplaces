@@ -29,9 +29,11 @@ const SubscriptionHistory = () => {
     }
 
     try {
-      const res = await fetch(`https://multi-vendor-marketplace.vercel.app/order/order/`, {
-        method: "GET",
-      });
+      const res = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/order/order/${email}`,
+        { method: "GET" }
+      );
+
       if (res.ok) {
         const json = await res.json();
         const sortedSubscriptions = json.data.sort(
@@ -180,7 +182,7 @@ const SubscriptionHistory = () => {
                       <th scope="col" className="p-3">
                         Date Purchased
                       </th>
-                      
+
                       <th scope="col" className="p-3">
                         Product Name
                       </th>
@@ -220,9 +222,7 @@ const SubscriptionHistory = () => {
                                 SKU: {item.sku || "N/A"}
                               </span>
                             </td>
-                            <td className="p-3">
-                              {item.quantity}
-                            </td>
+                            <td className="p-3">{item.quantity}</td>
                             <td className="p-3">
                               {address
                                 ? `${address.address1}, ${address.city}, ${address.province}`

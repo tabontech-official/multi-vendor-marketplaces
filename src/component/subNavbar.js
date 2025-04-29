@@ -47,7 +47,7 @@ const SubNavbar = () => {
   
     const fetchUserModules = async () => {  
       try {
-        const response = await fetch(` https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules/${userId}`);
+        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules/${userId}`);
   
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
@@ -106,6 +106,11 @@ const SubNavbar = () => {
         { name: "eCommerence Consultion", path: "/consultation" },
         { name: "Seller Rating", path: "#" },
       ],
+    },
+    {
+      name: "OnBoardUser",
+      icon: <MdDashboard className="text-green-600" />,
+      path: "/on-board-users",
     },
   ];
 

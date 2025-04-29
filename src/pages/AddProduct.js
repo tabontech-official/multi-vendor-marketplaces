@@ -206,6 +206,7 @@ const CategorySelector = () => {
   useEffect(() => {
     setCombinations(generateVariants());
   }, [options]);
+
   const handleOpenForm = () => {
     setNewOption({ name: "", values: [""] });
     setShowVariantForm(true);
@@ -275,7 +276,7 @@ const CategorySelector = () => {
       const productId = product?.id || "null";
 
       fetch(
-        ` https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`
       )
         .then((res) => res.json())
         .then((data) => {
@@ -286,8 +287,140 @@ const CategorySelector = () => {
     }
   }, [isPopupVisible, product]);
 
+  // useEffect(() => {
+  //   if (product) {
+  //     const allVariants = product.variants;
+
+  //     const groupedVariants = allVariants.reduce((acc, variant) => {
+  //       const leftOption = variant.option1;
+  //       const rightOption = variant.option2;
+
+  //       if (!acc[leftOption]) {
+  //         acc[leftOption] = {
+  //           parent: {
+  //             ...variant,
+  //             option1: leftOption,
+  //             option2: null,
+  //             option3: null,
+  //             isParent: true,
+  //           },
+  //           children: [],
+  //         };
+  //       }
+
+  //       if (rightOption) {
+  //         acc[leftOption].children.push({
+  //           ...variant,
+  //           option1: leftOption,
+  //           option2: rightOption,
+  //           option3: null,
+  //           isParent: false,
+  //         });
+  //       }
+
+  //       return acc;
+  //     }, {});
+
+  //     const formattedVariants = Object.keys(groupedVariants).map(
+  //       (key, index) => ({
+  //         ...groupedVariants[key].parent,
+  //         group: `parent-${index}`,
+  //         subVariants: groupedVariants[key].children,
+  //       })
+  //     );
+  //     const hydratedVariantImages = {};
+  //     formattedVariants.forEach((variantGroup, index) => {
+  //       const parent = variantGroup.option1;
+  //       const children = variantGroup.subVariants;
+
+  //       children.forEach((childVariant) => {
+  //         const key = `${index}-${childVariant.option2}`;
+  //         const imageId = childVariant.image_id;
+
+  //         const matched = product.variantImages?.find(
+  //           (img) => String(img.id) === String(imageId)
+  //         );
+
+  //         if (matched?.src) {
+  //           hydratedVariantImages[key] = {
+  //             preview: matched.src,
+  //             loading: false,
+  //           };
+  //         }
+  //       });
+  //     });
+  //     setIsEditing(true);
+  //     setTitle(product.title || "");
+  //     setPrice(product.variants[0]?.price || "");
+  //     setCompareAtPrice(product.variants[0]?.compare_at_price || "");
+  //     setTrackQuantity(product.inventory?.track_quantity || false);
+  //     setQuantity(product.inventory?.quantity || 0);
+  //     setContinueSelling(product.inventory?.continue_selling || false);
+  //     setHasSKU(product.inventory?.has_sku || false);
+  //     setSKU(product.inventory?.sku || "");
+  //     setBarcode(product.inventory?.barcode || "");
+  //     setTrackShipping(product.shipping?.track_shipping || false);
+  //     setWeight(product.shipping?.weight || "");
+  //     setUnit(product.shipping?.weight_unit || "kg");
+  //     setStatus(product.status || "publish");
+  //     setUserId(product.userId || "");
+  //     const imageURLs =
+  //       product.images?.map((img) => ({
+  //         cloudUrl: img.src,
+  //         loading: false,
+  //       })) || [];
+  //     setSelectedImages(imageURLs);
+  //     const tagsArray = Array.isArray(product.tags)
+  //       ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
+  //       : [];
+  //     setKeywordsList(tagsArray);
+  //     setVendor(product.vendor);
+  //     setProductType(product.product_type);
+  //     setOptions(
+  //       product.options?.map((option) => ({
+  //         id: option.id || "No ID",
+  //         name: option.name || "Unnamed Option",
+  //         values: option.values || [],
+  //       })) || []
+  //     );
+  //     setVariants(formattedVariants);
+  //     setVariantPrices(product.variants.map((v) => v.price || ""));
+  //     setVariantQuantities(
+  //       product.variants.map((v) => v.inventory_quantity || 0)
+  //     );
+  //     setVariantSku(product.variants.map((v) => v.sku || ""));
+  //     setImages(product.images || []);
+  //     setVariantImages(hydratedVariantImages);
+
+  //     const rawDescription = product.body_html || "";
+  //     try {
+  //       const parsedContent = JSON.parse(rawDescription);
+  //       const contentState = convertFromRaw(parsedContent);
+  //       setEditorState(EditorState.createWithContent(contentState));
+  //     } catch (error) {
+  //       const contentBlock = htmlToDraft(rawDescription);
+  //       if (contentBlock) {
+  //         const contentState = ContentState.createFromBlockArray(
+  //           contentBlock.contentBlocks
+  //         );
+  //         setEditorState(EditorState.createWithContent(contentState));
+  //       } else {
+  //         setEditorState(EditorState.createEmpty());
+  //       }
+  //     }
+  //   }
+  // }, [product]);
+  const normalizeKey = (index, option) => {
+    return `${index}-${String(option)
+      .replace(/['"]/g, "") // remove quotes
+      .replace(/\s+/g, " ") // multiple spaces -> single space
+      .trim()}`;
+  };
+
   useEffect(() => {
     if (product) {
+      const normalizeString = (str) => String(str).replace(/['"]/g, "").trim();
+
       const allVariants = product.variants;
 
       const groupedVariants = allVariants.reduce((acc, variant) => {
@@ -327,13 +460,16 @@ const CategorySelector = () => {
           subVariants: groupedVariants[key].children,
         })
       );
+
+      // Step 1: Try to hydrate images from formattedVariants
       const hydratedVariantImages = {};
-      formattedVariants.forEach((variantGroup, index) => {
-        const parent = variantGroup.option1;
+
+      formattedVariants.forEach((variantGroup) => {
         const children = variantGroup.subVariants;
 
         children.forEach((childVariant) => {
-          const key = `${index}-${childVariant.option2}`;
+          const titleKey = normalizeString(childVariant.title || "");
+
           const imageId = childVariant.image_id;
 
           const matched = product.variantImages?.find(
@@ -341,13 +477,53 @@ const CategorySelector = () => {
           );
 
           if (matched?.src) {
-            hydratedVariantImages[key] = {
+            hydratedVariantImages[titleKey] = {
               preview: matched.src,
               loading: false,
             };
           }
         });
       });
+
+      console.log(
+        "Hydrated Images from formattedVariants (title based):",
+        hydratedVariantImages
+      );
+
+      if (Object.keys(hydratedVariantImages).length > 0) {
+        setVariantImages(hydratedVariantImages);
+      } else {
+        // Fallback if no images found
+        const fallbackVariantImages = {};
+
+        product?.variants?.forEach((variant) => {
+          const titleKey = normalizeString(variant.title || "");
+
+          const matchedImage = product?.variantImages?.find(
+            (img) => String(img.id) === String(variant.image_id)
+          );
+
+          if (matchedImage?.src) {
+            fallbackVariantImages[titleKey] = {
+              preview: matchedImage.src,
+              loading: false,
+            };
+          }
+        });
+
+        console.log(
+          "Fallback Images from product.variants (title based):",
+          fallbackVariantImages
+        );
+
+        if (Object.keys(fallbackVariantImages).length > 0) {
+          setVariantImages(fallbackVariantImages);
+        } else {
+          console.log("❌ No images found from either method");
+        }
+      }
+
+      // --- Rest of your product setup ---
       setIsEditing(true);
       setTitle(product.title || "");
       setPrice(product.variants[0]?.price || "");
@@ -363,18 +539,21 @@ const CategorySelector = () => {
       setUnit(product.shipping?.weight_unit || "kg");
       setStatus(product.status || "publish");
       setUserId(product.userId || "");
+
       const imageURLs =
         product.images?.map((img) => ({
           cloudUrl: img.src,
           loading: false,
         })) || [];
       setSelectedImages(imageURLs);
+
       const tagsArray = Array.isArray(product.tags)
         ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
         : [];
       setKeywordsList(tagsArray);
       setVendor(product.vendor);
       setProductType(product.product_type);
+
       setOptions(
         product.options?.map((option) => ({
           id: option.id || "No ID",
@@ -382,6 +561,7 @@ const CategorySelector = () => {
           values: option.values || [],
         })) || []
       );
+
       setVariants(formattedVariants);
       setVariantPrices(product.variants.map((v) => v.price || ""));
       setVariantQuantities(
@@ -389,8 +569,8 @@ const CategorySelector = () => {
       );
       setVariantSku(product.variants.map((v) => v.sku || ""));
       setImages(product.images || []);
-      setVariantImages(hydratedVariantImages);
 
+      // Description setup
       const rawDescription = product.body_html || "";
       try {
         const parsedContent = JSON.parse(rawDescription);
@@ -441,19 +621,16 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "  https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch(" https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setSelectedImages((prev) => {
             const updated = [...prev];
@@ -620,8 +797,8 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? `  https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : "   https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+        ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
+        : "  https://multi-vendor-marketplace.vercel.app/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -668,7 +845,7 @@ const CategorySelector = () => {
       );
 
       const imageSaveResponse = await fetch(
-        `  https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
+        ` https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
         {
           method: "PUT",
           headers: {
@@ -1134,7 +1311,7 @@ const CategorySelector = () => {
                           </button>
                         </div>
 
-                        {expandedParents.includes(index) && (
+                        {/* {expandedParents.includes(index) && (
                           <div className="mt-2">
                             <ul className="space-y-2">
                               {combinations[index]?.children?.map(
@@ -1364,6 +1541,212 @@ const CategorySelector = () => {
                               )}
                             </ul>
                           </div>
+                        )} */}
+                        {expandedParents.includes(index) && (
+                          <div className="mt-2">
+                            <ul className="space-y-2">
+                              {combinations[index]?.children?.map(
+                                (child, childIndex) => {
+                                  const parentValue =
+                                    combinations[index]?.parent;
+                                  const combinationString = `${parentValue} / ${child}`; // Use as it is
+
+                                  const image =
+                                    variantImages[combinationString];
+                                  const variantPrice =
+                                    variantPrices[combinationString] || "";
+                                  const quantities =
+                                    variantQuantities[combinationString] || "";
+                                  const variantSKU =
+                                    variantSku[combinationString] || "";
+                                  const compareAtPrices =
+                                    variantCompareAtPrices[combinationString] ||
+                                    "";
+
+                                  const matchingVariant =
+                                    product?.variants?.find(
+                                      (variant) =>
+                                        variant.title === combinationString
+                                    );
+
+                                  const price = matchingVariant?.price;
+                                  const compareAtPrice =
+                                    matchingVariant?.compare_at_price;
+                                  const sku = matchingVariant?.sku;
+                                  const quantity =
+                                    matchingVariant?.inventory_quantity;
+                                  const variantId = matchingVariant?.id;
+
+                                  return (
+                                    <li
+                                      key={childIndex}
+                                      className="grid grid-cols-7 items-center gap-20"
+                                    >
+                                      <div className="w-12 relative">
+                                        <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
+                                          {image?.preview ? (
+                                            <img
+                                              src={
+                                                variantImages[
+                                                  `${index}-${child}`
+                                                ]?.preview ||
+                                                image?.preview ||
+                                                ""
+                                              }
+                                              alt={`Variant ${child}`}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          ) : (
+                                            <span className="text-3xl text-gray-400">
+                                              +
+                                            </span>
+                                          )}
+                                          <input
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onClick={() => {
+                                              setCurrentVariant({
+                                                index,
+                                                child,
+                                              });
+                                              setIsPopupVisible(true);
+                                            }}
+                                          />
+                                          {image?.preview && (
+                                            <button
+                                              onClick={() =>
+                                                handleRemoveVariantImages(
+                                                  index,
+                                                  child
+                                                )
+                                              }
+                                              className="absolute top-0 right-0 text-white bg-red-600 rounded-full px-2 py-1 text-xs"
+                                              style={{
+                                                transform:
+                                                  "translate(25%, -25%)",
+                                              }}
+                                            >
+                                              X
+                                            </button>
+                                          )}
+                                        </label>
+                                      </div>
+
+                                      <span
+                                        className="font-medium text-sm  text-gray-700  cursor-pointer"
+                                        onClick={() => {
+                                          navigate(
+                                            `/product/${product.id}/variants/${variantId}`,
+                                            {
+                                              state: {
+                                                productId: product.id,
+                                                variantId: variantId,
+                                              },
+                                            }
+                                          );
+                                        }}
+                                      >
+                                        {child}
+                                      </span>
+
+                                      <div className="relative w-20">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                          $
+                                        </span>
+                                        <input
+                                          type="number"
+                                          value={
+                                            variantPrice !== ""
+                                              ? variantPrice
+                                              : price
+                                          }
+                                          placeholder="Price"
+                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
+                                          onChange={(e) =>
+                                            handlePriceChange(
+                                              index,
+                                              child,
+                                              e.target.value
+                                            )
+                                          }
+                                        />
+                                      </div>
+
+                                      <div className="relative w-20 ">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                          $
+                                        </span>
+                                        <input
+                                          type="number"
+                                          value={
+                                            compareAtPrices !== ""
+                                              ? compareAtPrices
+                                              : compareAtPrice
+                                          }
+                                          placeholder="Compare-at"
+                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
+                                          onChange={(e) =>
+                                            handleVariantComparePriceChange(
+                                              index,
+                                              child,
+                                              e.target.value
+                                            )
+                                          }
+                                        />
+                                      </div>
+
+                                      <input
+                                        type="text"
+                                        // value={variantSKU}
+                                        value={
+                                          variantSKU !== "" ? variantSKU : sku
+                                        }
+                                        placeholder="SKU"
+                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm"
+                                        onChange={(e) =>
+                                          handleVariantSkuChange(
+                                            index,
+                                            child,
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+
+                                      <input
+                                        type="number"
+                                        // value={quantity}
+                                        value={
+                                          quantities !== ""
+                                            ? quantities
+                                            : quantity
+                                        }
+                                        placeholder="QTY"
+                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm no-spinner"
+                                        onChange={(e) =>
+                                          handleQuantityChange(
+                                            index,
+                                            child,
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+
+                                      <button
+                                        onClick={() =>
+                                          handleDeleteCombination(
+                                            index,
+                                            childIndex
+                                          )
+                                        }
+                                        className="text-red-600"
+                                      >
+                                        <FaTrash />
+                                      </button>
+                                    </li>
+                                  );
+                                }
+                              )}
+                            </ul>
+                          </div>
                         )}
                       </div>
                     ))
@@ -1450,6 +1833,35 @@ const CategorySelector = () => {
               </div>
             )}
           </div>
+
+          <div className="border rounded-lg p-4 shadow-sm bg-white mt-3">
+            {/* Section Title */}
+            <h2 className="text-md font-medium text-gray-800 mb-2">
+              Search engine listing
+            </h2>
+
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <div className="text-sm text-gray-500 mb-1">Aydi Active</div>
+              <div className="text-sm text-blue-700 truncate mb-2">
+                https://www.aydiactive.com/products/samson-handwoven-indoor-outdoor-rug-1
+              </div>
+
+              <div className="text-lg text-blue-800 font-semibold leading-snug mb-1">
+                Samson Handwoven Indoor/Outdoor Rug
+              </div>
+
+              <div className="text-sm text-gray-600 leading-relaxed">
+                Fade-resistant dhurrie woven from recycled polyester bottles.
+                Soft, low-profile, washable and reversible. Perfect for
+                high-traffic indoor or outdoor areas. Made...
+              </div>
+
+              <div className="text-sm text-gray-600 font-medium mt-2">
+                $0.00 AUD
+              </div>
+            </div>
+          </div>
+
           {loading && (
             <div className="fixed inset-0 bg-gray-600 bg-opacity-80 flex flex-col justify-center items-center z-50">
               <img
@@ -1692,11 +2104,15 @@ const CategorySelector = () => {
                     <div
                       onClick={() => {
                         if (currentVariant) {
-                          const key = `${currentVariant.index}-${currentVariant.child}`;
+                          const parentValue =
+                            combinations[currentVariant.index]?.parent;
+                          const combinationString = `${parentValue} / ${currentVariant.child}`;
+
                           setVariantImages((prev) => ({
                             ...prev,
-                            [key]: { preview: file.src },
+                            [combinationString]: { preview: file.src },
                           }));
+
                           setIsPopupVisible(false);
                         }
                       }}
@@ -1715,7 +2131,9 @@ const CategorySelector = () => {
                       checked={
                         currentVariant &&
                         variantImages[
-                          `${currentVariant.index}-${currentVariant.child}`
+                          `${combinations[currentVariant.index]?.parent} / ${
+                            currentVariant.child
+                          }`
                         ]?.preview === file.src
                       }
                       readOnly

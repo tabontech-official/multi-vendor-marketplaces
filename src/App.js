@@ -32,6 +32,7 @@ import Promotion from "./pages/Promotion";
 import CatalogPerformance from "./pages/CatalogPerformance";
 import EcommerceConsultation from "./pages/Consultation";
 import Variants from "./pages/Variants";
+import OnBoard from "./pages/OnBoardUser";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -122,6 +123,10 @@ const App = () => {
           <Route
             path="/promotions"
             element={<ProtectedForms element={<Promotion />} />}
+          />
+          <Route
+            path="/on-board-users"
+            element={<ProtectedForms element={<OnBoard />} />}
           />
           <Route
             // path="/variants"

@@ -57,14 +57,11 @@ const Dashboard = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
 
-
   const handleCSVUpload = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
   };
 
- 
-  
   const toggleSelection = (productId) => {
     setSelectedProducts((prevSelected) =>
       prevSelected.includes(productId)
@@ -72,8 +69,6 @@ const Dashboard = () => {
         : [...prevSelected, productId]
     );
   };
-
-
 
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
@@ -123,30 +118,35 @@ const Dashboard = () => {
 
     setTimeout(async () => {
       try {
-        const userId=localStorage.getItem("userid")
+        const userId = localStorage.getItem("userid");
         const formData = new FormData();
         formData.append("file", selectedFile);
-        formData.append("userId",userId); 
+        formData.append("userId", userId);
 
-        const response = await fetch(" https://multi-vendor-marketplace.vercel.app/product/upload-csv-body", {
-          method: "POST",
-          body: formData,
-        });
+        const response = await fetch(
+          " https://multi-vendor-marketplace.vercel.app/product/upload-csv-body",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
 
         const result = await response.json();
         showToast("success", "products imported successfully!");
         closePopup();
-        window.location.reload()
+        window.location.reload();
       } catch (error) {
-        showToast("Failed", error.message || "Error occurred while importing file.");
+        showToast(
+          "Failed",
+          error.message || "Error occurred while importing file."
+        );
       } finally {
         setIsUploading(false);
         setUploadStarted(false);
         setSelectedFile(null);
       }
-    }, 2000); 
+    }, 2000);
   };
- 
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -349,7 +349,7 @@ const Dashboard = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
-  
+
   return user ? (
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
@@ -473,8 +473,13 @@ const Dashboard = () => {
                     <th className="p-3">ACTION</th>
                     <th className="p-3">STATUS</th>
                     <th className="p-3">LISTING NAME</th>
-                    {admin && <th className="p-3">Publisher</th>}
-                    <th className="p-3">PUBLISHER</th>
+                    <th className="p-3">SKU</th>
+                    <th className="p-3">INVENTORY</th>
+                    <th className="p-3">VENDOR</th>
+                    <th className="p-3">COMPARE_AT_PRICE</th>
+
+                    {admin && <th className="p-3">PUBLISHER</th>}
+                    {/* <th className="p-3">PUBLISHER</th> */}
                     <th className="p-3">TYPE</th>
                     <th className="p-3">PRICE</th>
                     <th className="p-3">EDIT</th>
@@ -510,8 +515,19 @@ const Dashboard = () => {
                           ? product.title
                           : "Job Search Listing"}
                       </td>
-                      {admin && product.tags?.split(",")[1]?.split("_")[1]}
-                      <td className="p-3"> {product.email} </td>
+                      <td className="p-3"> {product.variants[0].sku}</td>
+                      <td className="p-3">
+                        {" "}
+                        {product.variants[0].inventory_quantity}
+                      </td>
+                      <td className="p-3"> {product.vendor}</td>
+                      <td className="p-3">
+                        {" "}
+                        {product.variants[0].compare_at_price || 0.0}
+                      </td>
+
+                      {admin && `#${product.shopifyId}`}
+                      {/* <td className="p-3"> {product.email} </td> */}
                       <td className="p-3"> {product.product_type}</td>
                       <td className="p-3"> ${product.variants[0].price} </td>
                       <td className="p-3">
@@ -532,11 +548,11 @@ const Dashboard = () => {
         </div>
       )}
       {isOpen && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
           <div
             ref={modalRef}
             className="bg-white rounded-xl shadow-2xl w-full max-w-lg relative transform scale-95 animate-zoomIn transition-all duration-300"
-            >
+          >
             <div className="border-b px-4 py-3 flex justify-between items-center">
               <h2 className="text-sm font-semibold text-blue-700">
                 Import products by CSV
@@ -544,7 +560,7 @@ const Dashboard = () => {
               <button
                 onClick={closePopup}
                 className="text-gray-500 hover:text-red-600 text-xl font-bold"
-                >
+              >
                 ×
               </button>
             </div>
@@ -560,10 +576,10 @@ const Dashboard = () => {
                   Add file
                 </span>
                 {selectedFile && (
-                <span className="absolute bottom-2 text-sm text-gray-600">
-                  {selectedFile.name}
-                </span>
-              )}
+                  <span className="absolute bottom-2 text-sm text-gray-600">
+                    {selectedFile.name}
+                  </span>
+                )}
               </div>
               <div className="text-sm text-blue-600 underline cursor-pointer mb-4">
                 Download sample CSV

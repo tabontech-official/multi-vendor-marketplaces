@@ -23,7 +23,7 @@ const Variants = () => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(
-          ` https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`
+          `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`
         );
         setProduct(response.data);
         setLoading(false);
@@ -45,7 +45,7 @@ const Variants = () => {
     const fetchVariantData = async () => {
       try {
         const response = await axios.get(
-          ` https://multi-vendor-marketplace.vercel.app/product/getSingleVariant/${productId}/variants/${variantId}`
+          `https://multi-vendor-marketplace.vercel.app/product/getSingleVariant/${productId}/variants/${variantId}`
         );
         setVariantData(response.data);
         setUpdatedVariant(response.data);
@@ -70,7 +70,7 @@ const Variants = () => {
       setIsLoading(true);
 
       const response = await axios.put(
-        ` https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
         {
           variant: updatedVariant,
         }

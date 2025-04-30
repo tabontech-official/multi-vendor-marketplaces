@@ -8,7 +8,7 @@ import "react-quill/dist/quill.snow.css";
 import { FaPlus, FaMinus } from "react-icons/fa";
 import { FiMinus } from "react-icons/fi";
 import { IoIosArrowUp } from "react-icons/io";
-import { MdOutlineKeyboardArrowDown } from "react-icons/md";
+import { MdEdit, MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import RTC from "../component/editor";
 import { Editor } from "react-draft-wysiwyg";
@@ -23,10 +23,24 @@ import {
   convertFromRaw,
 } from "draft-js";
 const CategorySelector = () => {
+  const stripHtml = (html) => {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || "";
+  };
+
+  const locationData = useLocation();
+  const { product } = locationData.state || {};
+  const [editing, setEditing] = useState(false);
+ 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [productType, setProductType] = useState([]);
+  const [seoHandle, setSeoHandle] = useState(
+    `https://www.aydiactive.com/products/${product?.title || ""} ` 
+  );
+
   const [vendor, setVendor] = useState([]);
   const [keyWord, setKeyWord] = useState([]);
   const [compareAtPrice, setCompareAtPrice] = useState("");
@@ -52,7 +66,7 @@ const CategorySelector = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [checkedImages, setCheckedImages] = useState({});
   const [isEditing, setIsEditing] = useState(false);
-  const locationData = useLocation();
+
   const [expandedParents, setExpandedParents] = useState([]);
   const [variantImages, setVariantImages] = useState({});
   const [productTypesList, setProductTypesList] = useState([]);
@@ -61,12 +75,18 @@ const CategorySelector = () => {
   const [variantCompareAtPrices, setVariantComparePrices] = useState({});
   const [variantSku, setVariantSku] = useState({});
   const [currentVariant, setCurrentVariant] = useState(null);
+  const [isSeoEditing, setIsSeoEditing] = useState(false);
+  const [seoTitle, setSeoTitle] = useState(product?.title || "");
+  const [seoDescription, setSeoDescription] = useState(
+    stripHtml(product?.body_html || "") 
+  );
+  const [seoPrice, setSeoPrice] = useState(product?.variants?.[0]?.price || "");
+  const [handle, setHandle] = useState(product?.handle || "");
 
   const [variantQuantities, setVariantQuantities] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
-
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
   );
@@ -266,8 +286,6 @@ const CategorySelector = () => {
       })
     );
   }, [variants]);
-
-  const { product } = locationData.state || {};
 
   useEffect(() => {
     const userId = localStorage.getItem("userid");
@@ -621,16 +639,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(" https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            " https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setSelectedImages((prev) => {
             const updated = [...prev];
@@ -1835,31 +1856,100 @@ const CategorySelector = () => {
           </div>
 
           <div className="border rounded-lg p-4 shadow-sm bg-white mt-3">
-            {/* Section Title */}
-            <h2 className="text-md font-medium text-gray-800 mb-2">
+            <h2 className="text-md font-medium text-gray-800 mb-3">
               Search engine listing
             </h2>
 
             <div className="border rounded-lg p-4 bg-gray-50">
-              <div className="text-sm text-gray-500 mb-1">Aydi Active</div>
-              <div className="text-sm text-blue-700 truncate mb-2">
-                https://www.aydiactive.com/products/samson-handwoven-indoor-outdoor-rug-1
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-sm text-gray-600">Aydi Active</span>
+                <button onClick={() => setEditing(true)}>
+                  <MdEdit className="text-gray-500 hover:text-blue-500" />
+                </button>
               </div>
-
-              <div className="text-lg text-blue-800 font-semibold leading-snug mb-1">
-                Samson Handwoven Indoor/Outdoor Rug
+              <div className="text-sm text-blue-700 truncate">
+                {seoHandle}
               </div>
-
-              <div className="text-sm text-gray-600 leading-relaxed">
-                Fade-resistant dhurrie woven from recycled polyester bottles.
-                Soft, low-profile, washable and reversible. Perfect for
-                high-traffic indoor or outdoor areas. Made...
+              <div className="text-lg text-blue-800 font-semibold mt-1">
+                {seoTitle}
               </div>
-
-              <div className="text-sm text-gray-600 font-medium mt-2">
-                $0.00 AUD
+              <div className="text-sm text-gray-700 mt-1 leading-snug">
+                {seoDescription.length > 120
+                  ? `${seoDescription.slice(0, 120)}...`
+                  : seoDescription}
+              </div>
+              <div className="text-sm text-gray-700 font-medium mt-1">
+                ${product?.variants?.[0]?.price} AUD
               </div>
             </div>
+
+            {editing && (
+              <div className="mt-6 space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">
+                    Page title
+                  </label>
+                  <input
+                    type="text"
+                    value={seoTitle}
+                    maxLength={70}
+                    onChange={(e) => setSeoTitle(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {seoTitle.length} of 70 characters used
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">
+                    Meta description
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={seoDescription}
+                    maxLength={160}
+                    onChange={(e) => setSeoDescription(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {seoDescription.length} of 160 characters used
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">
+                    URL handle
+                  </label>
+                  <input
+                    type="text"
+                    value={seoHandle}
+                    onChange={(e) => setSeoHandle(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    https://www.aydiactive.com/products/{seoTitle}
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <button
+                    className="px-4 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
+                    onClick={() => setEditing(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded"
+                    onClick={() => {
+                      setEditing(false);
+                    }}
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {loading && (

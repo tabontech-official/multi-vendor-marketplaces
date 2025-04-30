@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { HiOutlineCheckCircle, HiOutlineXCircle, HiPlus } from "react-icons/hi";
-import { FaFileImport } from "react-icons/fa";
+import { FaCross, FaFileImport } from "react-icons/fa";
 import Papa from "papaparse";
 import { Link, useNavigate } from "react-router-dom";
 import UseFetchUserData from "../component/fetchUser";
@@ -10,6 +10,8 @@ import { jwtDecode } from "jwt-decode";
 import { MdEdit } from "react-icons/md";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { CiImport } from "react-icons/ci";
+import { RxCross1 } from "react-icons/rx";
 
 const Dashboard = () => {
   let admin;
@@ -56,12 +58,19 @@ const Dashboard = () => {
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-
+  const [isExportOpen, setIsexportOpen] = useState(false);
+  const [exportOption, setExportOption] = useState('current');
+  const [exportAs, setExportAs] = useState('csv');
   const handleCSVUpload = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
   };
-
+  const togglePopup = () => setIsexportOpen(!isOpen);
+  const handleExport = () => {
+    // You can replace this with actual export logic
+    console.log('Exporting as:', exportOption, exportAs);
+    setIsOpen(false);
+  };
   const toggleSelection = (productId) => {
     setSelectedProducts((prevSelected) =>
       prevSelected.includes(productId)
@@ -372,7 +381,7 @@ const Dashboard = () => {
             className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
           >
             <HiPlus className="w-5 h-5" />
-            <span>Add Products</span>
+            <span>Add Product</span>
           </Link>
         </div>
 
@@ -406,14 +415,23 @@ const Dashboard = () => {
         </div>
       </div> */}
       <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
-        <div className="flex gap-2 items-center w-2/4 max-sm:w-full md:ml-auto justify-end"></div>
-        <button
-          onClick={openPopup}
-          className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-        >
-          <FaFileImport className="w-5 h-5" />
-          Import
-        </button>
+        <div className="flex gap-4 items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
+          <button
+            onClick={openPopup}
+            className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+          >
+            <CiImport className="w-5 h-5" />
+            Import
+          </button>
+
+          <button
+            onClick={togglePopup }
+            className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+          >
+            <FaFileImport className="w-5 h-5" />
+            Export
+          </button>
+        </div>
       </div>
       {selectedProducts.length > 0 && (
         <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
@@ -470,19 +488,20 @@ const Dashboard = () => {
               <table className="w-full border-collapse bg-white">
                 <thead className="bg-gray-100 text-left text-gray-600 text-sm">
                   <tr>
-                    <th className="p-3">ACTION</th>
-                    <th className="p-3">STATUS</th>
-                    <th className="p-3">LISTING NAME</th>
-                    <th className="p-3">SKU</th>
-                    <th className="p-3">INVENTORY</th>
-                    <th className="p-3">VENDOR</th>
-                    <th className="p-3">COMPARE_AT_PRICE</th>
+                    <th className="p-3">Action</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3">Listing_name</th>
+                    <th className="p-3">Sku</th>
+                    <th className="p-3">Price</th>
+                    <th className="p-3">Compare_at_price</th>
+                    <th className="p-3">Type</th>
+                    <th className="p-3">Inventory</th>
+                    <th className="p-3">Vendor</th>
 
                     {admin && <th className="p-3">PUBLISHER</th>}
                     {/* <th className="p-3">PUBLISHER</th> */}
-                    <th className="p-3">TYPE</th>
-                    <th className="p-3">PRICE</th>
-                    <th className="p-3">EDIT</th>
+
+                    <th className="p-3">Edit</th>
                   </tr>
                 </thead>
 
@@ -516,20 +535,21 @@ const Dashboard = () => {
                           : "Job Search Listing"}
                       </td>
                       <td className="p-3"> {product.variants[0].sku}</td>
+                      <td className="p-3"> ${product.variants[0].price} </td>
+                      <td className="p-3">
+                        {" "}
+                        ${product.variants[0].compare_at_price || 0.0}
+                      </td>
+                      <td className="p-3"> {product.product_type}</td>
+
                       <td className="p-3">
                         {" "}
                         {product.variants[0].inventory_quantity}
                       </td>
                       <td className="p-3"> {product.vendor}</td>
-                      <td className="p-3">
-                        {" "}
-                        {product.variants[0].compare_at_price || 0.0}
-                      </td>
 
                       {admin && `#${product.shopifyId}`}
                       {/* <td className="p-3"> {product.email} </td> */}
-                      <td className="p-3"> {product.product_type}</td>
-                      <td className="p-3"> ${product.variants[0].price} </td>
                       <td className="p-3">
                         <button
                           className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
@@ -637,6 +657,92 @@ const Dashboard = () => {
                 ) : (
                   "Okay"
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+       {isExportOpen && (
+        <div onClick={()=>setIsexportOpen(false)} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
+          <div onClick={(e)=>e.stopPropagation()}             className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative transform scale-95 animate-zoomIn transition-all duration-300"
+          >
+            <div className="flex justify-between border-b border-gray-200">
+            <h2 className="text-md text-gray-600 font-semibold mb-2">Export products</h2>
+            <RxCross1 onClick={()=>setIsexportOpen(false)} className="hover:text-red-500 cursor-pointer"/>
+            </div>
+
+            <p className="text-sm mb-3 mt-3">
+              This CSV file can update all product information. To update just
+              inventory quantities use the{' '}
+              <a href="#" className="text-blue-600 underline">
+                CSV file for inventory
+              </a>.
+            </p>
+
+            <div className="mb-4">
+              <label className="text-md text-gray-600 font-semibold  block mb-2">Export</label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="exportOption"
+                    value="current"
+                    checked={exportOption === 'current'}
+                    onChange={() => setExportOption('current')}
+                  />
+                  Current page
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="exportOption"
+                    value="all"
+                    checked={exportOption === 'all'}
+                    onChange={() => setExportOption('all')}
+                  />
+                  All products
+                </label>
+               
+               
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="text-md text-gray-600 font-semibold  block mb-2">Export as</label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="exportAs"
+                  value="csv"
+                  checked={exportAs === 'csv'}
+                  onChange={() => setExportAs('csv')}
+                />
+                CSV for Excel, Numbers, or other spreadsheet programs
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="exportAs"
+                  value="plain"
+                  checked={exportAs === 'plain'}
+                  onChange={() => setExportAs('plain')}
+                />
+                Plain CSV file
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-gray-300">
+              <button
+                onClick={()=>setIsexportOpen(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded mt-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleExport}
+                className="px-4 py-2 bg-gray-800 text-white rounded mt-2"
+              >
+                Export products
               </button>
             </div>
           </div>

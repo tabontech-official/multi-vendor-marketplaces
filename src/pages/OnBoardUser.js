@@ -286,11 +286,11 @@ const OnBoard = () => {
                 ].map(([label, value], index) => (
                   <div
                     key={index}
-                    className="flex justify-between items-center border-b pb-2"
+                    className="flex justify-between  items-center border-b pb-2"
                   >
-                    <span className="text-sm text-gray-600">{label}</span>
-                    <span className="text-base font-semibold text-gray-900">
-                      {value || "-"}
+                    <span className="text-sm font-semibold  text-gray-600">{label}</span>
+                    <span className="text-base  text-gray-900">
+                      {value || "N/A"}
                     </span>
                   </div>
                 ))}

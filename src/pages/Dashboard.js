@@ -59,18 +59,16 @@ const Dashboard = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [isExportOpen, setIsexportOpen] = useState(false);
-  const [exportOption, setExportOption] = useState('current');
-  const [exportAs, setExportAs] = useState('csv');
+  const [exportOption, setExportOption] = useState("current");
+  const [isExporting, setIsExporting] = useState(false);
+
+  const [exportAs, setExportAs] = useState("csv");
   const handleCSVUpload = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
   };
   const togglePopup = () => setIsexportOpen(!isOpen);
-  const handleExport = () => {
-    // You can replace this with actual export logic
-    console.log('Exporting as:', exportOption, exportAs);
-    setIsOpen(false);
-  };
+
   const toggleSelection = (productId) => {
     setSelectedProducts((prevSelected) =>
       prevSelected.includes(productId)
@@ -359,6 +357,49 @@ const Dashboard = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+      const userId = localStorage.getItem("userid");
+      if (!userId) {
+        alert("User ID not found in localStorage");
+        return;
+      }
+
+      const queryParams = new URLSearchParams({
+        userId,
+        type: exportOption,
+        ...(exportOption === "current" && { page, limit: 10 }),
+      });
+
+      const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvEportFile/?${queryParams.toString()}`;
+      const response = await fetch(exportUrl);
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Export failed");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `products-${exportOption}-${Date.now()}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      setIsexportOpen(false);
+    } catch (error) {
+      alert("Export failed: " + error.message);
+    } finally {
+      setIsExporting(false); // Hide loader
+    }
+  };
+
   return user ? (
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
@@ -425,7 +466,7 @@ const Dashboard = () => {
           </button>
 
           <button
-            onClick={togglePopup }
+            onClick={togglePopup}
             className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
           >
             <FaFileImport className="w-5 h-5" />
@@ -662,33 +703,46 @@ const Dashboard = () => {
           </div>
         </div>
       )}
-       {isExportOpen && (
-        <div onClick={()=>setIsexportOpen(false)} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
-          <div onClick={(e)=>e.stopPropagation()}             className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative transform scale-95 animate-zoomIn transition-all duration-300"
+      {isExportOpen && (
+        <div
+          onClick={() => setIsexportOpen(false)}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative transform scale-95 animate-zoomIn transition-all duration-300"
           >
             <div className="flex justify-between border-b border-gray-200">
-            <h2 className="text-md text-gray-600 font-semibold mb-2">Export products</h2>
-            <RxCross1 onClick={()=>setIsexportOpen(false)} className="hover:text-red-500 cursor-pointer"/>
+              <h2 className="text-md text-gray-600 font-semibold mb-2">
+                Export products
+              </h2>
+              <RxCross1
+                onClick={() => setIsexportOpen(false)}
+                className="hover:text-red-500 cursor-pointer"
+              />
             </div>
 
             <p className="text-sm mb-3 mt-3">
               This CSV file can update all product information. To update just
-              inventory quantities use the{' '}
+              inventory quantities use the{" "}
               <a href="#" className="text-blue-600 underline">
                 CSV file for inventory
-              </a>.
+              </a>
+              .
             </p>
 
             <div className="mb-4">
-              <label className="text-md text-gray-600 font-semibold  block mb-2">Export</label>
+              <label className="text-md text-gray-600 font-semibold block mb-2">
+                Export
+              </label>
               <div className="space-y-2">
                 <label className="flex items-center gap-2">
                   <input
                     type="radio"
                     name="exportOption"
                     value="current"
-                    checked={exportOption === 'current'}
-                    onChange={() => setExportOption('current')}
+                    checked={exportOption === "current"}
+                    onChange={() => setExportOption("current")}
                   />
                   Current page
                 </label>
@@ -697,25 +751,25 @@ const Dashboard = () => {
                     type="radio"
                     name="exportOption"
                     value="all"
-                    checked={exportOption === 'all'}
-                    onChange={() => setExportOption('all')}
+                    checked={exportOption === "all"}
+                    onChange={() => setExportOption("all")}
                   />
                   All products
                 </label>
-               
-               
               </div>
             </div>
 
             <div className="mb-6">
-              <label className="text-md text-gray-600 font-semibold  block mb-2">Export as</label>
+              <label className="text-md text-gray-600 font-semibold block mb-2">
+                Export as
+              </label>
               <label className="flex items-center gap-2">
                 <input
                   type="radio"
                   name="exportAs"
                   value="csv"
-                  checked={exportAs === 'csv'}
-                  onChange={() => setExportAs('csv')}
+                  checked={exportAs === "csv"}
+                  onChange={() => setExportAs("csv")}
                 />
                 CSV for Excel, Numbers, or other spreadsheet programs
               </label>
@@ -724,8 +778,8 @@ const Dashboard = () => {
                   type="radio"
                   name="exportAs"
                   value="plain"
-                  checked={exportAs === 'plain'}
-                  onChange={() => setExportAs('plain')}
+                  checked={exportAs === "plain"}
+                  onChange={() => setExportAs("plain")}
                 />
                 Plain CSV file
               </label>
@@ -733,16 +787,45 @@ const Dashboard = () => {
 
             <div className="flex justify-end gap-2 border-t border-gray-300">
               <button
-                onClick={()=>setIsexportOpen(false)}
+                onClick={() => setIsexportOpen(false)}
                 className="px-4 py-2 bg-gray-200 text-gray-800 rounded mt-2"
               >
                 Cancel
               </button>
               <button
                 onClick={handleExport}
-                className="px-4 py-2 bg-gray-800 text-white rounded mt-2"
+                disabled={isExporting}
+                className={`px-4 py-2 rounded mt-2 flex items-center gap-2 ${
+                  isExporting ? "bg-gray-500" : "bg-gray-800"
+                } text-white`}
               >
-                Export products
+                {isExporting ? (
+                  <>
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                    Exporting...
+                  </>
+                ) : (
+                  "Export products"
+                )}
               </button>
             </div>
           </div>

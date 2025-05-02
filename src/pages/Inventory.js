@@ -831,12 +831,13 @@ const Inventory = () => {
   
       const failedUpdates = results.filter((r) => !r.success);
       if (failedUpdates.length > 0) {
-        alert(
+        showToast(
           `${failedUpdates.length} product(s) failed to update.\n` +
             failedUpdates.map((r) => `• ${r.productId}: ${r.message}`).join("\n")
         );
+        
       } else {
-        alert("All selected products updated successfully.");
+        showToast("success", "  Inventory updated successfully!");
       }
   
       setShowPopup(false);

@@ -715,8 +715,8 @@ const Inventory = () => {
       const id = localStorage.getItem("userid");
       const response = await fetch(
         admin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+          ? `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`
+          : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
 
@@ -785,23 +785,33 @@ const Inventory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
-
+  
     if (selectedProducts.length === 0) {
       alert("Please select at least one product.");
       return;
     }
-
-    const payload = {
-      price,
-      quantity,
-      compareAtPrice,
-      userId,
-    };
-
+  
+    const payload =
+      activeTab === "price"
+        ? {
+            price,
+            compareAtPrice,
+            userId,
+          }
+        : {
+            quantity,
+            userId,
+          };
+  
+    const endpoint =
+      activeTab === "price"
+        ? "updateInventoryPrice"
+        : "updateInventoryQuantity";
+  
     try {
       const updatePromises = selectedProducts.map(async (productId) => {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/updateInventory/${productId}`,
+          ` https://multi-vendor-marketplace.vercel.app/product/${endpoint}/${productId}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -809,28 +819,26 @@ const Inventory = () => {
           }
         );
         const result = await response.json();
-
+  
         if (!response.ok) {
           console.error(`Error updating product ${productId}:`, result.message);
         }
-
+  
         return { productId, success: response.ok, message: result.message };
       });
-
+  
       const results = await Promise.all(updatePromises);
-
+  
       const failedUpdates = results.filter((r) => !r.success);
       if (failedUpdates.length > 0) {
         alert(
           `${failedUpdates.length} product(s) failed to update.\n` +
-            failedUpdates
-              .map((r) => `• ${r.productId}: ${r.message}`)
-              .join("\n")
+            failedUpdates.map((r) => `• ${r.productId}: ${r.message}`).join("\n")
         );
       } else {
         alert("All selected products updated successfully.");
       }
-
+  
       setShowPopup(false);
       fetchProductData();
     } catch (error) {
@@ -838,8 +846,9 @@ const Inventory = () => {
       alert("Unexpected error occurred while updating products.");
     }
   };
+  
 
-  const handleRowUpdate = async (productId) => {
+  const handlePriceUpdate = async (productId) => {
     const userId = localStorage.getItem("userid");
 
     const productToUpdate = filteredProducts.find((p) => p._id === productId);
@@ -848,13 +857,12 @@ const Inventory = () => {
     const payload = {
       price: productToUpdate.variants[0].price,
       compareAtPrice: productToUpdate.variants[0].compare_at_price,
-      quantity: productToUpdate.variants[0].inventory_quantity, // ✅ corrected
       userId,
     };
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateInventory/${productId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/${productId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -865,16 +873,52 @@ const Inventory = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert(`Product ${productToUpdate.title} updated successfully`);
-        fetchProductData(); // refresh if needed
+        alert(`Price updated for ${productToUpdate.title}`);
+        fetchProductData();
       } else {
-        alert(result.message || "Update failed");
+        alert(result.message || "Price update failed");
       }
     } catch (error) {
-      console.error("Error updating product:", error);
-      alert("An error occurred while updating.");
+      console.error("Error updating price:", error);
+      alert("An error occurred while updating price.");
     }
   };
+
+  const handleQuantityUpdate = async (productId) => {
+    const userId = localStorage.getItem("userid");
+
+    const productToUpdate = filteredProducts.find((p) => p._id === productId);
+    if (!productToUpdate) return alert("Product not found.");
+
+    const payload = {
+      quantity: productToUpdate.variants[0].inventory_quantity,
+      userId,
+    };
+
+    try {
+      const response = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/${productId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(`Quantity updated for ${productToUpdate.title}`);
+        fetchProductData();
+      } else {
+        alert(result.message || "Quantity update failed");
+      }
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+      alert("An error occurred while updating quantity.");
+    }
+  };
+
   const [popupProductId, setPopupProductId] = useState(null);
 
   return user ? (
@@ -1068,7 +1112,7 @@ const Inventory = () => {
                         </td>
                         <td
                           onClick={() => {
-                            setPopupProductId(product._id); 
+                            setPopupProductId(product._id);
                             setIsPopupOpen(true);
                           }}
                           className="p-3 text-blue-600 hover:underline cursor-pointer"
@@ -1171,7 +1215,7 @@ const Inventory = () => {
                         </td>
                         <td
                           onClick={() => {
-                            setPopupProductId(product._id); 
+                            setPopupProductId(product._id);
                             setIsPopupOpen(true);
                           }}
                           className="p-3 text-blue-600 hover:underline cursor-pointer"
@@ -1315,7 +1359,11 @@ const Inventory = () => {
 
               <button
                 onClick={() => {
-                  handleRowUpdate(popupProductId);
+                  if (activeTab === "quantity") {
+                    handleQuantityUpdate(popupProductId);
+                  } else if (activeTab === "price") {
+                    handlePriceUpdate(popupProductId);
+                  }
                   setIsPopupOpen(false);
                 }}
                 className="mt-6 inline-block px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition"

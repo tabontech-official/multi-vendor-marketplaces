@@ -396,7 +396,7 @@ const Dashboard = () => {
     } catch (error) {
       alert("Export failed: " + error.message);
     } finally {
-      setIsExporting(false); // Hide loader
+      setIsExporting(false);
     }
   };
 

@@ -626,6 +626,8 @@ import { HiOutlineRefresh } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
 import { MdModeEdit } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
+import { CiImport } from "react-icons/ci";
+import { FaCross, FaFileImport } from "react-icons/fa";
 
 const Inventory = () => {
   let admin;
@@ -670,7 +672,16 @@ const Inventory = () => {
   const [Loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [activeTab, setActiveTab] = useState("price");
-
+  const [isExportOpen, setIsexportOpen] = useState(false);
+  const [exportOption, setExportOption] = useState("current");
+  const [isExporting, setIsExporting] = useState(false);
+  const [isOpenImport, setIsOpenImport] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStarted, setUploadStarted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [exportAs, setExportAs] = useState("csv");
   let buyCreditUrl = "";
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -678,6 +689,13 @@ const Inventory = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [showPromoPopup, setShowPromoPopup] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
+  const modalRef = useRef();
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [popupProductId, setPopupProductId] = useState(null);
+  const openPopupImport = () => setIsOpenImport(true);
+  const closePopupImport = () => setIsOpenImport(false);
+
+
   const toggleSelection = (productId) => {
     setSelectedProducts((prevSelected) =>
       prevSelected.includes(productId)
@@ -686,11 +704,30 @@ const Inventory = () => {
     );
   };
 
+  const togglePopup = () => setIsexportOpen(!isOpen);
+
+  const handleCSVUpload = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        closePopupImport();
+      }
+    };
+    if (isOpenImport) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpenImport]);
+
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
-  const [selectedProductId, setSelectedProductId] = useState(null);
 
   const fetchProductData = async () => {
     setLoading(true);
@@ -785,12 +822,12 @@ const Inventory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
-  
+
     if (selectedProducts.length === 0) {
       alert("Please select at least one product.");
       return;
     }
-  
+
     const payload =
       activeTab === "price"
         ? {
@@ -802,12 +839,12 @@ const Inventory = () => {
             quantity,
             userId,
           };
-  
+
     const endpoint =
       activeTab === "price"
         ? "updateInventoryPrice"
         : "updateInventoryQuantity";
-  
+
     try {
       const updatePromises = selectedProducts.map(async (productId) => {
         const response = await fetch(
@@ -819,27 +856,28 @@ const Inventory = () => {
           }
         );
         const result = await response.json();
-  
+
         if (!response.ok) {
           console.error(`Error updating product ${productId}:`, result.message);
         }
-  
+
         return { productId, success: response.ok, message: result.message };
       });
-  
+
       const results = await Promise.all(updatePromises);
-  
+
       const failedUpdates = results.filter((r) => !r.success);
       if (failedUpdates.length > 0) {
         showToast(
           `${failedUpdates.length} product(s) failed to update.\n` +
-            failedUpdates.map((r) => `• ${r.productId}: ${r.message}`).join("\n")
+            failedUpdates
+              .map((r) => `• ${r.productId}: ${r.message}`)
+              .join("\n")
         );
-        
       } else {
         showToast("success", "  Inventory updated successfully!");
       }
-  
+
       setShowPopup(false);
       fetchProductData();
     } catch (error) {
@@ -847,7 +885,6 @@ const Inventory = () => {
       alert("Unexpected error occurred while updating products.");
     }
   };
-  
 
   const handlePriceUpdate = async (productId) => {
     const userId = localStorage.getItem("userid");
@@ -920,7 +957,84 @@ const Inventory = () => {
     }
   };
 
-  const [popupProductId, setPopupProductId] = useState(null);
+
+  const handleUploadAndPreview = async () => {
+    if (!selectedFile) return;
+
+    setIsUploading(true);
+
+    try {
+      const userId = localStorage.getItem("userid");
+      if (!userId) {
+        alert("User ID not found");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("userId", userId);
+
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("✅ Products updated successfully!");
+        closePopupImport();
+        setSelectedFile(null);
+      } else {
+        alert(`❌ Error: ${result.message || "Upload failed"}`);
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("❌ Upload failed.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+      const userId = localStorage.getItem("userid");
+      if (!userId) {
+        alert("User ID not found in localStorage");
+        return;
+      }
+
+      const queryParams = new URLSearchParams({ userId });
+      const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/?${queryParams.toString()}`;
+
+      const response = await fetch(exportUrl);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Export failed");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `products-export-${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setIsexportOpen(false);
+    } catch (error) {
+      alert("Export failed: " + error.message);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return user ? (
     <main className="w-full p-4 md:p-8">
@@ -986,6 +1100,25 @@ const Inventory = () => {
         >
           Update Quantity
         </button>
+      </div>
+      <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
+        <div className="flex gap-4 items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
+          <button
+            onClick={openPopupImport}
+            className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+          >
+            <CiImport className="w-5 h-5" />
+            Import
+          </button>
+
+          <button
+            onClick={togglePopup}
+            className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+          >
+            <FaFileImport className="w-5 h-5" />
+            Export
+          </button>
+        </div>
       </div>
       {selectedProducts.length > 0 && (
         <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
@@ -1371,6 +1504,194 @@ const Inventory = () => {
               >
                 Okay
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isExportOpen && (
+        <div
+          onClick={() => setIsexportOpen(false)}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative transform scale-95 animate-zoomIn transition-all duration-300"
+          >
+            <div className="flex justify-between border-b border-gray-200">
+              <h2 className="text-md text-gray-600 font-semibold mb-2">
+                Export products
+              </h2>
+              <RxCross1
+                onClick={() => setIsexportOpen(false)}
+                className="hover:text-red-500 cursor-pointer"
+              />
+            </div>
+
+            <p className="text-sm mb-3 mt-3">
+              This CSV file can update all product information. To update just
+              inventory quantities use the{" "}
+              <a href="#" className="text-blue-600 underline">
+                CSV file for inventory
+              </a>
+              .
+            </p>
+
+            <div className="mb-4">
+              <label className="text-md text-gray-600 font-semibold block mb-2">
+                Export
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="exportOption"
+                    value="current"
+                    checked={exportOption === "current"}
+                    onChange={() => setExportOption("current")}
+                  />
+                  Current page
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="exportOption"
+                    value="all"
+                    checked={exportOption === "all"}
+                    onChange={() => setExportOption("all")}
+                  />
+                  All products
+                </label>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="text-md text-gray-600 font-semibold block mb-2">
+                Export as
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="exportAs"
+                  value="csv"
+                  checked={exportAs === "csv"}
+                  onChange={() => setExportAs("csv")}
+                />
+                CSV for Excel, Numbers, or other spreadsheet programs
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="exportAs"
+                  value="plain"
+                  checked={exportAs === "plain"}
+                  onChange={() => setExportAs("plain")}
+                />
+                Plain CSV file
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-gray-300">
+              <button
+                onClick={() => setIsexportOpen(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded mt-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleExport}
+                disabled={isExporting}
+                className={`px-4 py-2 rounded mt-2 flex items-center gap-2 ${
+                  isExporting ? "bg-gray-500" : "bg-gray-800"
+                } text-white`}
+              >
+                {isExporting ? (
+                  <>
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                    Exporting...
+                  </>
+                ) : (
+                  "Export products"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isOpenImport && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
+          <div
+            ref={modalRef}
+            className="bg-white rounded-xl shadow-2xl w-full max-w-lg relative transform scale-95 animate-zoomIn transition-all duration-300"
+          >
+            <div className="border-b px-4 py-3 flex justify-between items-center">
+              <h2 className="text-sm font-semibold text-blue-700">
+                Import products by CSV
+              </h2>
+              <button
+                onClick={closePopupImport}
+                className="text-gray-500 hover:text-red-600 text-xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="border-2 border-dashed border-gray-300 rounded-md flex justify-center items-center h-32 mb-4 relative">
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleCSVUpload}
+                  className="absolute w-full h-full opacity-0 cursor-pointer"
+                />
+                <span className="px-4 py-2 text-sm text-white bg-blue-600 border border-gray-300 rounded hover:bg-blue-700">
+                  Add file
+                </span>
+                {selectedFile && (
+                  <span className="absolute bottom-2 text-sm text-gray-600">
+                    {selectedFile.name}
+                  </span>
+                )}
+              </div>
+              <div className="text-sm text-blue-600 underline cursor-pointer mb-4">
+                Download sample CSV
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={closePopupImport}
+                  className="px-4 py-1 text-sm border text-white bg-red-500 border-gray-300 rounded hover:bg-red-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUploadAndPreview}
+                  disabled={!selectedFile || isUploading}
+                  className={`px-4 py-2 text-sm rounded transition ${
+                    selectedFile && !isUploading
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  {isUploading ? "Uploading..." : "Upload and preview"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

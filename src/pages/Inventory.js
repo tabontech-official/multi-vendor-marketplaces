@@ -1352,7 +1352,6 @@ const Inventory = () => {
   const handlePriceUpdate = async (variantId) => {
     const userId = localStorage.getItem("userid");
 
-    // Find variant by string ID match
     const variantToUpdate = filteredProducts.find(
       (v) => `${v.id}` === `${variantId}`
     );
@@ -1599,7 +1598,7 @@ const Inventory = () => {
               onClick={() => {
                 const selectedId = selectedProducts[0];
                 const variant = filteredProducts.find(
-                  (v) => `${v.id}` === `${selectedId}` // ✅ Shopify Variant ID
+                  (v) => `${v.id}` === `${selectedId}`
                 );
 
                 if (variant) {
@@ -1637,6 +1636,7 @@ const Inventory = () => {
                     <tr>
                       <th className="p-3">Action</th>
                       <th className="p-3">Status</th>
+                      <th className="p-3">Image</th>
                       <th className="p-3">SKU</th>
                       <th className="p-3">Price</th>
                       <th className="p-3">Compare_at_price</th>
@@ -1654,8 +1654,8 @@ const Inventory = () => {
                           <input
                             type="checkbox"
                             className="w-4 h-4 cursor-pointer"
-                            checked={selectedProducts.includes(variant.id)} // Use Shopify ID
-                            onChange={() => toggleSelection(variant.id)} // Use Shopify ID
+                            checked={selectedProducts.includes(variant.id)}
+                            onChange={() => toggleSelection(variant.id)}
                           />
                         </td>
                         <td className="p-3">
@@ -1668,6 +1668,32 @@ const Inventory = () => {
                             title={variant.status}
                           />
                         </td>
+                        <td className="p-3">
+                          {variant.variantImages && variant.image_id ? (
+                            (() => {
+                              const matchedImage = variant.variantImages.find(
+                                (img) =>
+                                  String(img.id) === String(variant.image_id)
+                              );
+                              return matchedImage ? (
+                                <img
+                                  src={matchedImage.src}
+                                  alt={matchedImage.alt || "Variant image"}
+                                  className="w-16 h-16 object-contain rounded border"
+                                />
+                              ) : (
+                                <span className="text-gray-400 text-sm">
+                                  No Image
+                                </span>
+                              );
+                            })()
+                          ) : (
+                            <span className="text-gray-400 text-sm">
+                              No Image
+                            </span>
+                          )}
+                        </td>
+
                         <td className="p-3">{variant.sku || "N/A"}</td>
                         <td className="p-3">
                           <div className="relative w-32">
@@ -1741,6 +1767,8 @@ const Inventory = () => {
                     <tr>
                       <th className="p-3">Action</th>
                       <th className="p-3">Status</th>
+                      <th className="p-3">Images</th>
+
                       <th className="p-3">SKU</th>
                       <th className="p-3">Price</th>
                       <th className="p-3">Compare_at_price</th>
@@ -1772,6 +1800,31 @@ const Inventory = () => {
                             }`}
                             title={variant.status}
                           />
+                        </td>
+                        <td className="p-3">
+                          {variant.variantImages && variant.image_id ? (
+                            (() => {
+                              const matchedImage = variant.variantImages.find(
+                                (img) =>
+                                  String(img.id) === String(variant.image_id)
+                              );
+                              return matchedImage ? (
+                                <img
+                                  src={matchedImage.src}
+                                  alt={matchedImage.alt || "Variant image"}
+                                  className="w-16 h-16 object-contain rounded border"
+                                />
+                              ) : (
+                                <span className="text-gray-400 text-sm">
+                                  No Image
+                                </span>
+                              );
+                            })()
+                          ) : (
+                            <span className="text-gray-400 text-sm">
+                              No Image
+                            </span>
+                          )}
                         </td>
                         <td className="p-3">{variant.sku || "N/A"}</td>
                         <td className="p-3">{variant.price || "0.00"}</td>

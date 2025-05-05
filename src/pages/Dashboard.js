@@ -531,6 +531,7 @@ const Dashboard = () => {
                   <tr>
                     <th className="p-3">Action</th>
                     <th className="p-3">Status</th>
+                    <th className="p-3">Image</th>
                     <th className="p-3">Listing_name</th>
                     <th className="p-3">Sku</th>
                     <th className="p-3">Price</th>
@@ -568,6 +569,19 @@ const Dashboard = () => {
                           }`}
                           title={product.status}
                         />
+                      </td>
+                      <td className="p-3">
+                        {product.images && product.images.length > 0 ? (
+                          <img
+                            src={product.images[0].src}
+                            alt={product.images[0].alt || "Product image"}
+                            className="w-16 h-16 object-contain rounded border"
+                          />
+                        ) : (
+                          <span className="text-gray-400 text-sm">
+                            No Image
+                          </span>
+                        )}
                       </td>
                       <td className="p-3">
                         {" "}

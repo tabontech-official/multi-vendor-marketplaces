@@ -26,7 +26,7 @@ const ManageUser = () => {
         }
 
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getUserByRole/${id}`
+          `https://multi-vendor-marketplace.vercel.app//auth/getUserByRole/${id}`
         );
 
         if (!response.ok) {
@@ -104,7 +104,7 @@ const ManageUser = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+        "https://multi-vendor-marketplace.vercel.app//auth/createUserTagsModule",
         {
           method: "POST",
           headers: {

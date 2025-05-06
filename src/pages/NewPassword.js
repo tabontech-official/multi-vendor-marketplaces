@@ -53,7 +53,7 @@ const NewPassword = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/createpassword",
+        "https://multi-vendor-marketplace.vercel.app//auth/createpassword",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

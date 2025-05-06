@@ -133,8 +133,8 @@
 //       const id = localStorage.getItem("userid");
 //       const response = await fetch(
 //         admin
-//           ? `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`
-//           : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
+//           ? `https://multi-vendor-marketplace.vercel.app//product/getProduct/${id}/?page=${page}&limit=${limit}`
+//           : `https://multi-vendor-marketplace.vercel.app//product/getAllData/?page=${page}&limit=${limit}`,
 //         { method: "GET" }
 //       );
 
@@ -229,7 +229,7 @@
 //     try {
 //       const updatePromises = selectedProducts.map(async (productId) => {
 //         const response = await fetch(
-//           ` https://multi-vendor-marketplace.vercel.app/product/${endpoint}/${productId}`,
+//           ` https://multi-vendor-marketplace.vercel.app//product/${endpoint}/${productId}`,
 //           {
 //             method: "PUT",
 //             headers: { "Content-Type": "application/json" },
@@ -281,7 +281,7 @@
 
 //     try {
 //       const response = await fetch(
-//         `https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/${productId}`,
+//         `https://multi-vendor-marketplace.vercel.app//product/updateInventoryPrice/${productId}`,
 //         {
 //           method: "PUT",
 //           headers: { "Content-Type": "application/json" },
@@ -316,7 +316,7 @@
 
 //     try {
 //       const response = await fetch(
-//         `https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/${productId}`,
+//         `https://multi-vendor-marketplace.vercel.app//product/updateInventoryQuantity/${productId}`,
 //         {
 //           method: "PUT",
 //           headers: { "Content-Type": "application/json" },
@@ -355,7 +355,7 @@
 //       formData.append("userId", userId);
 
 //       const response = await fetch(
-//         "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
+//         "https://multi-vendor-marketplace.vercel.app//product/upload-csv-for-inventory",
 //         {
 //           method: "POST",
 //           body: formData,
@@ -389,7 +389,7 @@
 //       }
 
 //       const queryParams = new URLSearchParams({ userId });
-//       const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/?${queryParams.toString()}`;
+//       const exportUrl = `https://multi-vendor-marketplace.vercel.app//product/csvInventoryEportFile/?${queryParams.toString()}`;
 
 //       const response = await fetch(exportUrl);
 //       if (!response.ok) {
@@ -1214,8 +1214,8 @@ const Inventory = () => {
       const id = localStorage.getItem("userid");
       const response = await fetch(
         admin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
+          ? `https://multi-vendor-marketplace.vercel.app//product/getAllVariants/${id}/?page=${page}&limit=${limit}`
+          : `https://multi-vendor-marketplace.vercel.app//product/getAllData/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
 
@@ -1311,7 +1311,7 @@ const Inventory = () => {
     try {
       const updatePromises = selectedProducts.map(async (variantId) => {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/${endpoint}/${variantId}`,
+          `https://multi-vendor-marketplace.vercel.app//product/${endpoint}/${variantId}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -1368,7 +1368,7 @@ const Inventory = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/${variantId}`,
+        `https://multi-vendor-marketplace.vercel.app//product/updateInventoryPrice/${variantId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -1408,7 +1408,7 @@ const Inventory = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/${variantId}`,
+        `https://multi-vendor-marketplace.vercel.app//product/updateInventoryQuantity/${variantId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -1447,7 +1447,7 @@ const Inventory = () => {
       formData.append("userId", userId);
 
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
+        "https://multi-vendor-marketplace.vercel.app//product/upload-csv-for-inventory",
         {
           method: "POST",
           body: formData,
@@ -1481,7 +1481,7 @@ const Inventory = () => {
       }
 
       const queryParams = new URLSearchParams({ userId });
-      const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/?${queryParams.toString()}`;
+      const exportUrl = `https://multi-vendor-marketplace.vercel.app//product/csvInventoryEportFile/?${queryParams.toString()}`;
 
       const response = await fetch(exportUrl);
       if (!response.ok) {
@@ -1611,7 +1611,11 @@ const Inventory = () => {
               }}
               className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
             >
-              Update Inventory
+              {activeTab === "price"
+                ? "Update Price"
+                : activeTab === "quantity"
+                ? "Update Quantity"
+                : "Update"}
             </button>
           </div>
         </div>
@@ -1640,7 +1644,7 @@ const Inventory = () => {
                       <th className="p-3">SKU</th>
                       <th className="p-3">Price</th>
                       <th className="p-3">Compare_at_price</th>
-                      <th className="p-3">Inventory</th>
+                      {/* <th className="p-3">Inventory</th> */}
                       <th className="p-3">Update</th>
                     </tr>
                   </thead>
@@ -1724,9 +1728,9 @@ const Inventory = () => {
                             />
                           </div>
                         </td>
-                        <td className="p-3">
+                        {/* <td className="p-3">
                           {variant.inventory_quantity || 0}
-                        </td>
+                        </td> */}
                         <td
                           onClick={() => {
                             setPopupProductId(variant.id);
@@ -1770,8 +1774,8 @@ const Inventory = () => {
                       <th className="p-3">Images</th>
 
                       <th className="p-3">SKU</th>
-                      <th className="p-3">Price</th>
-                      <th className="p-3">Compare_at_price</th>
+                      {/* <th className="p-3">Price</th>
+                      <th className="p-3">Compare_at_price</th> */}
                       <th className="p-3">Inventory</th>
                       <th className="p-3">Update</th>
                     </tr>
@@ -1827,10 +1831,10 @@ const Inventory = () => {
                           )}
                         </td>
                         <td className="p-3">{variant.sku || "N/A"}</td>
-                        <td className="p-3">{variant.price || "0.00"}</td>
+                        {/* <td className="p-3">{variant.price || "0.00"}</td>
                         <td className="p-3">
                           {variant.compare_at_price || "0.00"}
-                        </td>
+                        </td> */}
                         <td className="p-3">
                           <div className="relative w-32">
                             <input
@@ -1889,7 +1893,6 @@ const Inventory = () => {
             </h2>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
-              {/* SKU - always read-only */}
               <div>
                 <label className="text-sm font-medium text-gray-700">SKU</label>
                 <input
@@ -1900,62 +1903,50 @@ const Inventory = () => {
                 />
               </div>
 
-              {/* Price - editable only on price tab */}
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Price
-                </label>
-                <input
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="Enter price"
-                  readOnly={activeTab !== "price"}
-                  className={`mt-1 w-full border border-gray-300 rounded-md px-3 py-2 no-spinner ${
-                    activeTab !== "price"
-                      ? "bg-gray-100 text-gray-500"
-                      : "bg-white"
-                  }`}
-                />
-              </div>
+              {activeTab === "price" && (
+                <>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Price
+                    </label>
+                    <input
+                      type="number"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      placeholder="Enter price"
+                      className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white no-spinner"
+                    />
+                  </div>
 
-              {/* Compare at Price - editable only on price tab */}
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Compare at Price
-                </label>
-                <input
-                  type="number"
-                  value={compareAtPrice}
-                  onChange={(e) => setCompareAtPrice(e.target.value)}
-                  placeholder="Enter compare at price"
-                  readOnly={activeTab !== "price"}
-                  className={`mt-1 w-full border border-gray-300 rounded-md px-3 py-2 no-spinner ${
-                    activeTab !== "price"
-                      ? "bg-gray-100 text-gray-500"
-                      : "bg-white"
-                  }`}
-                />
-              </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Compare at Price
+                    </label>
+                    <input
+                      type="number"
+                      value={compareAtPrice}
+                      onChange={(e) => setCompareAtPrice(e.target.value)}
+                      placeholder="Enter compare at price"
+                      className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white no-spinner"
+                    />
+                  </div>
+                </>
+              )}
 
-              {/* Quantity - editable only on quantity tab */}
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Quantity
-                </label>
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  placeholder="Enter quantity"
-                  readOnly={activeTab !== "quantity"}
-                  className={`mt-1 w-full border border-gray-300 rounded-md px-3 py-2 ${
-                    activeTab !== "quantity"
-                      ? "bg-gray-100 text-gray-500"
-                      : "bg-white"
-                  }`}
-                />
-              </div>
+              {activeTab === "quantity" && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    placeholder="Enter quantity"
+                    className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white no-spinner"
+                  />
+                </div>
+              )}
 
               <button
                 type="submit"

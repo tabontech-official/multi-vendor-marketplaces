@@ -88,8 +88,8 @@ const Dashboard = () => {
     try {
       const response = await fetch(
         admin
-          ? ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-          : ` https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+          ? ` https://multi-vendor-marketplace.vercel.app//product/getAllData/?page=${page}&limit=${limit}`
+          : ` https://multi-vendor-marketplace.vercel.app//product/getProduct/${id}/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
 
@@ -131,7 +131,7 @@ const Dashboard = () => {
         formData.append("userId", userId);
 
         const response = await fetch(
-          " https://multi-vendor-marketplace.vercel.app/product/upload-csv-body",
+          " https://multi-vendor-marketplace.vercel.app//product/upload-csv-body",
           {
             method: "POST",
             body: formData,
@@ -192,7 +192,7 @@ const Dashboard = () => {
       await Promise.all(
         selectedProducts.map(async (id) => {
           const response = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
+            `https://multi-vendor-marketplace.vercel.app//product/deleteProduct/${id}`,
             { method: "DELETE" }
           );
           if (!response.ok) throw new Error("Failed to delete product");
@@ -222,7 +222,7 @@ const Dashboard = () => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "draft") {
             const response = await fetch(
-              ` https://multi-vendor-marketplace.vercel.app/product/publishedProduct/${id}`,
+              ` https://multi-vendor-marketplace.vercel.app//product/publishedProduct/${id}`,
               {
                 method: "PUT",
                 body: JSON.stringify({ userId }),
@@ -251,7 +251,7 @@ const Dashboard = () => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "active") {
             const response = await fetch(
-              ` https://multi-vendor-marketplace.vercel.app/product/unpublished/${id}`,
+              ` https://multi-vendor-marketplace.vercel.app//product/unpublished/${id}`,
               {
                 method: "PUT",
                 headers: {
@@ -275,18 +275,35 @@ const Dashboard = () => {
     }
   };
 
+  // const handleSearch = () => {
+  //   let filtered =
+  //     searchVal === ""
+  //       ? products
+  //       : products.filter(
+  //           (product) =>
+  //             product.title.includes(searchVal) ||
+  //             product.product_type.includes(searchVal)
+  //         );
+  //   setFilteredProducts(filtered);
+  // };
   const handleSearch = () => {
     let filtered =
       searchVal === ""
         ? products
-        : products.filter(
-            (product) =>
-              product.title.includes(searchVal) ||
-              product.product_type.includes(searchVal)
-          );
+        : products.filter((product) => {
+            const titleMatch = product.title?.toLowerCase().includes(searchVal.toLowerCase());
+            const typeMatch = product.product_type?.toLowerCase().includes(searchVal.toLowerCase());
+  
+            const skuMatch = product.variants?.some((variant) =>
+              variant.sku?.toLowerCase().includes(searchVal.toLowerCase())
+            );
+  
+            return titleMatch || typeMatch || skuMatch;
+          });
+  
     setFilteredProducts(filtered);
   };
-
+  
   useEffect(() => {
     handleSearch();
   }, [searchVal]);
@@ -302,8 +319,8 @@ const Dashboard = () => {
       try {
         const response = await fetch(
           admin
-            ? ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-            : ` https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+            ? ` https://multi-vendor-marketplace.vercel.app//product/getAllData/?page=${page}&limit=${limit}`
+            : ` https://multi-vendor-marketplace.vercel.app//product/getProduct/${id}/?page=${page}&limit=${limit}`,
           { method: "GET" }
         );
 
@@ -372,7 +389,7 @@ const Dashboard = () => {
         ...(exportOption === "current" && { page, limit: 10 }),
       });
 
-      const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvEportFile/?${queryParams.toString()}`;
+      const exportUrl = `https://multi-vendor-marketplace.vercel.app//product/csvEportFile/?${queryParams.toString()}`;
       const response = await fetch(exportUrl);
 
       if (!response.ok) {

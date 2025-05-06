@@ -79,8 +79,8 @@ const Promotion = () => {
     try {
       const response = await fetch(
         admin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getAllDataForPromotion/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app/product/getPromotionProduct/${id}/?page=${page}&limit=${limit}`,
+          ? `https://multi-vendor-marketplace.vercel.app//product/getAllDataForPromotion/?page=${page}&limit=${limit}`
+          : `https://multi-vendor-marketplace.vercel.app//product/getPromotionProduct/${id}/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
 
@@ -127,7 +127,7 @@ const Promotion = () => {
     const fetchPromotions = async () => {
       try {
         const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/promo"
+          "https://multi-vendor-marketplace.vercel.app//promo"
         );
         const data = await res.json();
         setPromotions(data);
@@ -154,7 +154,7 @@ const Promotion = () => {
 
     try {
       const res = await axios.post(
-        `https://multi-vendor-marketplace.vercel.app/promo/${selectedProduct._id}`,
+        `https://multi-vendor-marketplace.vercel.app//promo/${selectedProduct._id}`,
         {
           promoPrice,
           startDate: modalStartDate,
@@ -190,7 +190,7 @@ const Promotion = () => {
       await Promise.all(
         selectedProducts.map(async (id) => {
           const response = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/promo/${id}`,
+            `https://multi-vendor-marketplace.vercel.app//promo/${id}`,
             {
               method: "DELETE",
             }
@@ -234,7 +234,7 @@ const Promotion = () => {
       await Promise.all(
         selectedProducts.map(async (id) => {
           const response = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/promo/endPromotions/${id}`,
+            `https://multi-vendor-marketplace.vercel.app//promo/endPromotions/${id}`,
             {
               method: "DELETE",
             }

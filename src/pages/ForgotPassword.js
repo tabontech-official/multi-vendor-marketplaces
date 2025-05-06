@@ -23,7 +23,7 @@ const ForgotPassword = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app//auth/forgot",
+        "https://multi-vendor-marketplace.vercel.app/auth/forgot",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

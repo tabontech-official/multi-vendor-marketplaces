@@ -133,8 +133,8 @@
 //       const id = localStorage.getItem("userid");
 //       const response = await fetch(
 //         admin
-//           ? `https://multi-vendor-marketplace.vercel.app//product/getProduct/${id}/?page=${page}&limit=${limit}`
-//           : `https://multi-vendor-marketplace.vercel.app//product/getAllData/?page=${page}&limit=${limit}`,
+//           ? `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`
+//           : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
 //         { method: "GET" }
 //       );
 
@@ -229,7 +229,7 @@
 //     try {
 //       const updatePromises = selectedProducts.map(async (productId) => {
 //         const response = await fetch(
-//           ` https://multi-vendor-marketplace.vercel.app//product/${endpoint}/${productId}`,
+//           ` https://multi-vendor-marketplace.vercel.app/product/${endpoint}/${productId}`,
 //           {
 //             method: "PUT",
 //             headers: { "Content-Type": "application/json" },
@@ -281,7 +281,7 @@
 
 //     try {
 //       const response = await fetch(
-//         `https://multi-vendor-marketplace.vercel.app//product/updateInventoryPrice/${productId}`,
+//         `https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/${productId}`,
 //         {
 //           method: "PUT",
 //           headers: { "Content-Type": "application/json" },
@@ -316,7 +316,7 @@
 
 //     try {
 //       const response = await fetch(
-//         `https://multi-vendor-marketplace.vercel.app//product/updateInventoryQuantity/${productId}`,
+//         `https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/${productId}`,
 //         {
 //           method: "PUT",
 //           headers: { "Content-Type": "application/json" },
@@ -355,7 +355,7 @@
 //       formData.append("userId", userId);
 
 //       const response = await fetch(
-//         "https://multi-vendor-marketplace.vercel.app//product/upload-csv-for-inventory",
+//         "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
 //         {
 //           method: "POST",
 //           body: formData,
@@ -389,7 +389,7 @@
 //       }
 
 //       const queryParams = new URLSearchParams({ userId });
-//       const exportUrl = `https://multi-vendor-marketplace.vercel.app//product/csvInventoryEportFile/?${queryParams.toString()}`;
+//       const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/?${queryParams.toString()}`;
 
 //       const response = await fetch(exportUrl);
 //       if (!response.ok) {
@@ -1214,8 +1214,8 @@ const Inventory = () => {
       const id = localStorage.getItem("userid");
       const response = await fetch(
         admin
-          ? `https://multi-vendor-marketplace.vercel.app//product/getAllVariants/${id}/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app//product/getAllData/?page=${page}&limit=${limit}`,
+          ? `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
+          : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
         { method: "GET" }
       );
 
@@ -1311,7 +1311,7 @@ const Inventory = () => {
     try {
       const updatePromises = selectedProducts.map(async (variantId) => {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app//product/${endpoint}/${variantId}`,
+          `https://multi-vendor-marketplace.vercel.app/product/${endpoint}/${variantId}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -1368,7 +1368,7 @@ const Inventory = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app//product/updateInventoryPrice/${variantId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/${variantId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -1408,7 +1408,7 @@ const Inventory = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app//product/updateInventoryQuantity/${variantId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/${variantId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -1447,7 +1447,7 @@ const Inventory = () => {
       formData.append("userId", userId);
 
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app//product/upload-csv-for-inventory",
+        "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
         {
           method: "POST",
           body: formData,
@@ -1481,7 +1481,7 @@ const Inventory = () => {
       }
 
       const queryParams = new URLSearchParams({ userId });
-      const exportUrl = `https://multi-vendor-marketplace.vercel.app//product/csvInventoryEportFile/?${queryParams.toString()}`;
+      const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/?${queryParams.toString()}`;
 
       const response = await fetch(exportUrl);
       if (!response.ok) {

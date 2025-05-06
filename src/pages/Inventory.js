@@ -1245,18 +1245,37 @@ const Inventory = () => {
     }
   };
 
+  // const handleSearch = () => {
+  //   let filtered =
+  //     searchVal === ""
+  //       ? products
+  //       : products.filter(
+  //           (product) =>
+  //             product.title.includes(searchVal) ||
+  //             product.product_type.includes(searchVal)
+  //         );
+  //   setFilteredProducts(filtered);
+  // };
   const handleSearch = () => {
     let filtered =
       searchVal === ""
         ? products
-        : products.filter(
-            (product) =>
-              product.title.includes(searchVal) ||
-              product.product_type.includes(searchVal)
-          );
+        : products.filter((product) => {
+            const val = searchVal.toLowerCase();
+  
+            return (
+              product.title?.toLowerCase()?.includes(val) ||
+              product.product_type?.toLowerCase()?.includes(val) ||
+              product.sku?.toLowerCase()?.includes(val) ||
+              product.price?.toString()?.includes(val) ||
+              product.compare_at_price?.toString()?.includes(val) ||
+              product.inventory_quantity?.toString()?.includes(val)
+            );
+          });
+  
     setFilteredProducts(filtered);
   };
-
+  
   useEffect(() => {
     handleSearch();
   }, [searchVal]);

@@ -19,12 +19,38 @@ const Variants = () => {
   const { productId, variantId: initialVariantId } = location.state || {};
   const [variantId, setVariantId] = useState(initialVariantId);
 
+  // useEffect(() => {
+  //   const fetchProduct = async () => {
+  //     const token=localStorage.getItem('usertoken')
+  //     try {
+  //       const response = await axios.get(
+  //         `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`
+  //       );
+  //       setProduct(response.data);
+  //       setLoading(false);
+  //     } catch (err) {
+  //       setError("Failed to fetch product data.");
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchProduct();
+  // }, [productId]);
+
   useEffect(() => {
     const fetchProduct = async () => {
+      const token = localStorage.getItem("usertoken");
+
       try {
         const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`
+          `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
         );
+
         setProduct(response.data);
         setLoading(false);
       } catch (err) {
@@ -32,6 +58,7 @@ const Variants = () => {
         setLoading(false);
       }
     };
+
     fetchProduct();
   }, [productId]);
 
@@ -43,10 +70,19 @@ const Variants = () => {
     if (!variantId) return;
 
     const fetchVariantData = async () => {
+      const token = localStorage.getItem("usertoken");
+
       try {
         const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/product/getSingleVariant/${productId}/variants/${variantId}`
+          `https://multi-vendor-marketplace.vercel.app/product/getSingleVariant/${productId}/variants/${variantId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
         );
+
         setVariantData(response.data);
         setUpdatedVariant(response.data);
       } catch (error) {
@@ -56,7 +92,7 @@ const Variants = () => {
 
     fetchVariantData();
   }, [productId, variantId]);
-
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUpdatedVariant((prevState) => ({
@@ -65,7 +101,27 @@ const Variants = () => {
     }));
   };
 
+  // const handleSave = async () => {
+  //   try {
+  //     setIsLoading(true);
+
+  //     const response = await axios.put(
+  //       `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
+  //       {
+  //         variant: updatedVariant,
+  //       }
+  //     );
+  //     toast.success("Variant updated successfully!");
+  //     setIsLoading(false);
+  //   } catch (error) {
+  //     console.error("Error updating variant:", error);
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const handleSave = async () => {
+    const token = localStorage.getItem("usertoken");
+
     try {
       setIsLoading(true);
 
@@ -73,8 +129,15 @@ const Variants = () => {
         `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
         {
           variant: updatedVariant,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
+
       toast.success("Variant updated successfully!");
       setIsLoading(false);
     } catch (error) {
@@ -129,7 +192,6 @@ const Variants = () => {
                     state: { productId, variantId: variant.id },
                   });
                 }}
-                
                 className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
               >
                 <div className="w-8 h-8 bg-gray-200 rounded-md flex items-center justify-center overflow-hidden">

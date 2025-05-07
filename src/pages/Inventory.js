@@ -1216,7 +1216,12 @@ const Inventory = () => {
         admin
           ? `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
           : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
-        { method: "GET" }
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (response.ok) {
@@ -1262,7 +1267,7 @@ const Inventory = () => {
         ? products
         : products.filter((product) => {
             const val = searchVal.toLowerCase();
-  
+
             return (
               product.title?.toLowerCase()?.includes(val) ||
               product.product_type?.toLowerCase()?.includes(val) ||
@@ -1272,10 +1277,10 @@ const Inventory = () => {
               product.inventory_quantity?.toString()?.includes(val)
             );
           });
-  
+
     setFilteredProducts(filtered);
   };
-  
+
   useEffect(() => {
     handleSearch();
   }, [searchVal]);
@@ -1304,7 +1309,7 @@ const Inventory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
-
+    const token = localStorage.getItem("usertoken");
     if (selectedProducts.length === 0) {
       alert("Please select at least one variant.");
       return;
@@ -1333,7 +1338,10 @@ const Inventory = () => {
           `https://multi-vendor-marketplace.vercel.app/product/${endpoint}/${variantId}`,
           {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify(payload),
           }
         );
@@ -1370,7 +1378,7 @@ const Inventory = () => {
 
   const handlePriceUpdate = async (variantId) => {
     const userId = localStorage.getItem("userid");
-
+    const token = localStorage.getItem("usertoken");
     const variantToUpdate = filteredProducts.find(
       (v) => `${v.id}` === `${variantId}`
     );
@@ -1390,7 +1398,10 @@ const Inventory = () => {
         `https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/${variantId}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(payload),
         }
       );
@@ -1411,7 +1422,7 @@ const Inventory = () => {
 
   const handleQuantityUpdate = async (variantId) => {
     const userId = localStorage.getItem("userid");
-
+    const token = localStorage.getItem("usertoken");
     const variantToUpdate = filteredProducts.find(
       (v) => `${v.id}` === `${variantId}`
     );
@@ -1430,7 +1441,10 @@ const Inventory = () => {
         `https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/${variantId}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(payload),
         }
       );

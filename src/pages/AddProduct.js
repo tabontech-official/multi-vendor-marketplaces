@@ -32,13 +32,13 @@ const CategorySelector = () => {
   const locationData = useLocation();
   const { product } = locationData.state || {};
   const [editing, setEditing] = useState(false);
- 
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [productType, setProductType] = useState([]);
   const [seoHandle, setSeoHandle] = useState(
-    `https://www.aydiactive.com/products/${product?.title || ""} ` 
+    `https://www.aydiactive.com/products/${product?.title || ""} `
   );
 
   const [vendor, setVendor] = useState([]);
@@ -78,7 +78,7 @@ const CategorySelector = () => {
   const [isSeoEditing, setIsSeoEditing] = useState(false);
   const [seoTitle, setSeoTitle] = useState(product?.title || "");
   const [seoDescription, setSeoDescription] = useState(
-    stripHtml(product?.body_html || "") 
+    stripHtml(product?.body_html || "")
   );
   const [seoPrice, setSeoPrice] = useState(product?.variants?.[0]?.price || "");
   const [handle, setHandle] = useState(product?.handle || "");
@@ -287,14 +287,39 @@ const CategorySelector = () => {
     );
   }, [variants]);
 
+  // useEffect(() => {
+  //   const userId = localStorage.getItem("userid");
+
+  //   if (isPopupVisible && userId) {
+  //     const productId = product?.id || "null";
+
+  //     fetch(
+  //       `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`
+  //     )
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         const allImages = data.flatMap((item) => item.images);
+  //         setGalleryImages(allImages);
+  //       })
+  //       .catch((err) => console.error("Failed to fetch images:", err));
+  //   }
+  // }, [isPopupVisible, product]);
+
   useEffect(() => {
     const userId = localStorage.getItem("userid");
+    const token = localStorage.getItem("usertoken");
+    const productId = product?.id || "null";
 
     if (isPopupVisible && userId) {
-      const productId = product?.id || "null";
-
       fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       )
         .then((res) => res.json())
         .then((data) => {
@@ -305,133 +330,10 @@ const CategorySelector = () => {
     }
   }, [isPopupVisible, product]);
 
-  // useEffect(() => {
-  //   if (product) {
-  //     const allVariants = product.variants;
-
-  //     const groupedVariants = allVariants.reduce((acc, variant) => {
-  //       const leftOption = variant.option1;
-  //       const rightOption = variant.option2;
-
-  //       if (!acc[leftOption]) {
-  //         acc[leftOption] = {
-  //           parent: {
-  //             ...variant,
-  //             option1: leftOption,
-  //             option2: null,
-  //             option3: null,
-  //             isParent: true,
-  //           },
-  //           children: [],
-  //         };
-  //       }
-
-  //       if (rightOption) {
-  //         acc[leftOption].children.push({
-  //           ...variant,
-  //           option1: leftOption,
-  //           option2: rightOption,
-  //           option3: null,
-  //           isParent: false,
-  //         });
-  //       }
-
-  //       return acc;
-  //     }, {});
-
-  //     const formattedVariants = Object.keys(groupedVariants).map(
-  //       (key, index) => ({
-  //         ...groupedVariants[key].parent,
-  //         group: `parent-${index}`,
-  //         subVariants: groupedVariants[key].children,
-  //       })
-  //     );
-  //     const hydratedVariantImages = {};
-  //     formattedVariants.forEach((variantGroup, index) => {
-  //       const parent = variantGroup.option1;
-  //       const children = variantGroup.subVariants;
-
-  //       children.forEach((childVariant) => {
-  //         const key = `${index}-${childVariant.option2}`;
-  //         const imageId = childVariant.image_id;
-
-  //         const matched = product.variantImages?.find(
-  //           (img) => String(img.id) === String(imageId)
-  //         );
-
-  //         if (matched?.src) {
-  //           hydratedVariantImages[key] = {
-  //             preview: matched.src,
-  //             loading: false,
-  //           };
-  //         }
-  //       });
-  //     });
-  //     setIsEditing(true);
-  //     setTitle(product.title || "");
-  //     setPrice(product.variants[0]?.price || "");
-  //     setCompareAtPrice(product.variants[0]?.compare_at_price || "");
-  //     setTrackQuantity(product.inventory?.track_quantity || false);
-  //     setQuantity(product.inventory?.quantity || 0);
-  //     setContinueSelling(product.inventory?.continue_selling || false);
-  //     setHasSKU(product.inventory?.has_sku || false);
-  //     setSKU(product.inventory?.sku || "");
-  //     setBarcode(product.inventory?.barcode || "");
-  //     setTrackShipping(product.shipping?.track_shipping || false);
-  //     setWeight(product.shipping?.weight || "");
-  //     setUnit(product.shipping?.weight_unit || "kg");
-  //     setStatus(product.status || "publish");
-  //     setUserId(product.userId || "");
-  //     const imageURLs =
-  //       product.images?.map((img) => ({
-  //         cloudUrl: img.src,
-  //         loading: false,
-  //       })) || [];
-  //     setSelectedImages(imageURLs);
-  //     const tagsArray = Array.isArray(product.tags)
-  //       ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
-  //       : [];
-  //     setKeywordsList(tagsArray);
-  //     setVendor(product.vendor);
-  //     setProductType(product.product_type);
-  //     setOptions(
-  //       product.options?.map((option) => ({
-  //         id: option.id || "No ID",
-  //         name: option.name || "Unnamed Option",
-  //         values: option.values || [],
-  //       })) || []
-  //     );
-  //     setVariants(formattedVariants);
-  //     setVariantPrices(product.variants.map((v) => v.price || ""));
-  //     setVariantQuantities(
-  //       product.variants.map((v) => v.inventory_quantity || 0)
-  //     );
-  //     setVariantSku(product.variants.map((v) => v.sku || ""));
-  //     setImages(product.images || []);
-  //     setVariantImages(hydratedVariantImages);
-
-  //     const rawDescription = product.body_html || "";
-  //     try {
-  //       const parsedContent = JSON.parse(rawDescription);
-  //       const contentState = convertFromRaw(parsedContent);
-  //       setEditorState(EditorState.createWithContent(contentState));
-  //     } catch (error) {
-  //       const contentBlock = htmlToDraft(rawDescription);
-  //       if (contentBlock) {
-  //         const contentState = ContentState.createFromBlockArray(
-  //           contentBlock.contentBlocks
-  //         );
-  //         setEditorState(EditorState.createWithContent(contentState));
-  //       } else {
-  //         setEditorState(EditorState.createEmpty());
-  //       }
-  //     }
-  //   }
-  // }, [product]);
   const normalizeKey = (index, option) => {
     return `${index}-${String(option)
-      .replace(/['"]/g, "") // remove quotes
-      .replace(/\s+/g, " ") // multiple spaces -> single space
+      .replace(/['"]/g, "")
+      .replace(/\s+/g, " ")
       .trim()}`;
   };
 
@@ -479,7 +381,6 @@ const CategorySelector = () => {
         })
       );
 
-      // Step 1: Try to hydrate images from formattedVariants
       const hydratedVariantImages = {};
 
       formattedVariants.forEach((variantGroup) => {
@@ -537,11 +438,10 @@ const CategorySelector = () => {
         if (Object.keys(fallbackVariantImages).length > 0) {
           setVariantImages(fallbackVariantImages);
         } else {
-          console.log("❌ No images found from either method");
+          console.log("No images found from either method");
         }
       }
 
-      // --- Rest of your product setup ---
       setIsEditing(true);
       setTitle(product.title || "");
       setPrice(product.variants[0]?.price || "");
@@ -588,7 +488,6 @@ const CategorySelector = () => {
       setVariantSku(product.variants.map((v) => v.sku || ""));
       setImages(product.images || []);
 
-      // Description setup
       const rawDescription = product.body_html || "";
       try {
         const parsedContent = JSON.parse(rawDescription);
@@ -619,7 +518,7 @@ const CategorySelector = () => {
     const updatedImages = [...selectedImages, ...previews];
     setSelectedImages(updatedImages);
     const userId = localStorage.getItem("userid");
-
+    const token = localStorage.getItem("usertoken");
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
 
@@ -639,19 +538,17 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            " https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch(" https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setSelectedImages((prev) => {
             const updated = [...prev];
@@ -715,7 +612,7 @@ const CategorySelector = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
-
+    const token = localStorage.getItem("usertoken");
     if (!userId) {
       setMessage({
         type: "error",
@@ -826,6 +723,7 @@ const CategorySelector = () => {
       const response = await fetch(url, {
         method,
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
@@ -870,6 +768,7 @@ const CategorySelector = () => {
         {
           method: "PUT",
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -1867,9 +1766,7 @@ const CategorySelector = () => {
                   <MdEdit className="text-gray-500 hover:text-blue-500" />
                 </button>
               </div>
-              <div className="text-sm text-blue-700 truncate">
-                {seoHandle}
-              </div>
+              <div className="text-sm text-blue-700 truncate">{seoHandle}</div>
               <div className="text-lg text-blue-800 font-semibold mt-1">
                 {seoTitle}
               </div>

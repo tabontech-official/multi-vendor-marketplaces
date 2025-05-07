@@ -82,16 +82,60 @@ const Dashboard = () => {
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
 
+  // const fetchProductData = async () => {
+  //   setLoading(true);
+  //   const id = localStorage.getItem("userid");
+  //   try {
+  //     const response = await fetch(
+  //       admin
+  //         ? ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
+  //         : ` https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+  //       { method: "GET" },
+
+  //     );
+
+  //     if (response.ok) {
+  //       const data = await response.json();
+
+  //       const sortedProducts = data.products.sort(
+  //         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  //       );
+
+  //       setProducts(sortedProducts);
+  //       setFilteredProducts((prev) => [
+  //         ...prev,
+  //         ...sortedProducts.filter(
+  //           (newProduct) =>
+  //             !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+  //         ),
+  //       ]);
+
+  //       setHasMore(page < data.totalPages);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching products:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchProductData = async () => {
     setLoading(true);
     const id = localStorage.getItem("userid");
+    const token = localStorage.getItem("usertoken");
+
     try {
-      const response = await fetch(
-        admin
-          ? ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-          : ` https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
-        { method: "GET" }
-      );
+      const url = admin
+        ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
+        : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -110,6 +154,8 @@ const Dashboard = () => {
         ]);
 
         setHasMore(page < data.totalPages);
+      } else {
+        console.error("Unauthorized or server error:", response.status);
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -187,13 +233,19 @@ const Dashboard = () => {
   };
 
   const deleteSelectedProducts = async () => {
+    const token=localStorage.getItem('usertoken')
     try {
       setIsLoading(true);
       await Promise.all(
         selectedProducts.map(async (id) => {
           const response = await fetch(
             `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
-            { method: "DELETE" }
+            { method: "DELETE",
+              headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+             }
           );
           if (!response.ok) throw new Error("Failed to delete product");
         })
@@ -214,6 +266,7 @@ const Dashboard = () => {
 
   const handlePublishSelected = async () => {
     const userId = localStorage.getItem("userid");
+    const token = localStorage.getItem("usertoken");
     setMessage("");
 
     try {
@@ -226,7 +279,10 @@ const Dashboard = () => {
               {
                 method: "PUT",
                 body: JSON.stringify({ userId }),
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
               }
             );
             if (!response.ok) throw new Error("Failed to publish product");
@@ -244,7 +300,7 @@ const Dashboard = () => {
 
   const handleUnpublishSelected = async () => {
     setMessage("");
-
+    const token = localStorage.getItem("usertoken");
     try {
       await Promise.all(
         selectedProducts.map(async (id) => {
@@ -255,6 +311,7 @@ const Dashboard = () => {
               {
                 method: "PUT",
                 headers: {
+                  Authorization: `Bearer ${token}`,
                   "Content-Type": "application/json",
                 },
               }
@@ -291,19 +348,23 @@ const Dashboard = () => {
       searchVal === ""
         ? products
         : products.filter((product) => {
-            const titleMatch = product.title?.toLowerCase().includes(searchVal.toLowerCase());
-            const typeMatch = product.product_type?.toLowerCase().includes(searchVal.toLowerCase());
-  
+            const titleMatch = product.title
+              ?.toLowerCase()
+              .includes(searchVal.toLowerCase());
+            const typeMatch = product.product_type
+              ?.toLowerCase()
+              .includes(searchVal.toLowerCase());
+
             const skuMatch = product.variants?.some((variant) =>
               variant.sku?.toLowerCase().includes(searchVal.toLowerCase())
             );
-  
+
             return titleMatch || typeMatch || skuMatch;
           });
-  
+
     setFilteredProducts(filtered);
   };
-  
+
   useEffect(() => {
     handleSearch();
   }, [searchVal]);
@@ -312,17 +373,69 @@ const Dashboard = () => {
     fetchProductData();
   }, []);
 
+  // useEffect(() => {
+  //   const fetchProductData2 = async () => {
+  //     const id = localStorage.getItem("userid");
+
+  //     try {
+  //       const response = await fetch(
+  //         admin
+  //           ? ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
+  //           : ` https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
+  //         { method: "GET" }
+  //       );
+
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         console.log("Second Product render", data);
+
+  //         const sortedProducts = data.products.sort(
+  //           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  //         );
+
+  //         setProducts((prev) => [
+  //           ...prev,
+  //           ...sortedProducts.filter(
+  //             (newProduct) =>
+  //               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+  //           ),
+  //         ]);
+
+  //         setFilteredProducts((prev) => [
+  //           ...prev,
+  //           ...sortedProducts.filter(
+  //             (newProduct) =>
+  //               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+  //           ),
+  //         ]);
+
+  //         setHasMore(page < data.totalPages);
+  //         console.log(hasMore);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching products:", error);
+  //     }
+  //   };
+  //   fetchProductData2();
+  // }, [page]);
+
   useEffect(() => {
     const fetchProductData2 = async () => {
       const id = localStorage.getItem("userid");
+      const token = localStorage.getItem("usertoken"); // Make sure token is stored after login
 
       try {
-        const response = await fetch(
-          admin
-            ? ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-            : ` https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
-          { method: "GET" }
-        );
+        const url = admin
+          ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
+          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`;
+
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -350,11 +463,14 @@ const Dashboard = () => {
 
           setHasMore(page < data.totalPages);
           console.log(hasMore);
+        } else {
+          console.error("Unauthorized or error status:", response.status);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
       }
     };
+
     fetchProductData2();
   }, [page]);
 

@@ -294,7 +294,7 @@ const CategorySelector = () => {
   //     const productId = product?.id || "null";
 
   //     fetch(
-  //       `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`
+  //       `http://localhost:5000/product/getImageGallery/${userId}/${productId}`
   //     )
   //       .then((res) => res.json())
   //       .then((data) => {
@@ -313,7 +313,7 @@ const CategorySelector = () => {
 
     if (isPopupVisible && userId) {
       fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`,
+        `http://localhost:5000/product/getImageGallery/${userId}/${productId}`,
         {
           method: "GET",
           headers: {
@@ -541,7 +541,7 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(" https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+          await fetch(" http://localhost:5000/product/addImageGallery", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -615,8 +615,7 @@ const CategorySelector = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+  
   
     if (!userId) {
       setMessage({
@@ -720,16 +719,14 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : "  https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+        ? ` http://localhost:5000/product/updateProducts/${product._id}`
+        : "  http://localhost:5000/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
         headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
@@ -770,13 +767,10 @@ const CategorySelector = () => {
       );
 
       const imageSaveResponse = await fetch(
-        ` https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
+        ` http://localhost:5000/product/updateImages/${data.product.id}`,
         {
           method: "PUT",
           headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-
             "Content-Type": "application/json",
           },
           body: JSON.stringify({

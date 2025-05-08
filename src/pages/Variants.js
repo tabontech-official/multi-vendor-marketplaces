@@ -39,13 +39,16 @@ const Variants = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       const token = localStorage.getItem("usertoken");
-
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
       try {
         const response = await axios.get(
           `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+
               "Content-Type": "application/json",
             },
           }
@@ -70,14 +73,15 @@ const Variants = () => {
     if (!variantId) return;
 
     const fetchVariantData = async () => {
-      const token = localStorage.getItem("usertoken");
-
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
       try {
         const response = await axios.get(
           `https://multi-vendor-marketplace.vercel.app/product/getSingleVariant/${productId}/variants/${variantId}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
               "Content-Type": "application/json",
             },
           }
@@ -92,7 +96,7 @@ const Variants = () => {
 
     fetchVariantData();
   }, [productId, variantId]);
-  
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUpdatedVariant((prevState) => ({
@@ -120,8 +124,8 @@ const Variants = () => {
   // };
 
   const handleSave = async () => {
-    const token = localStorage.getItem("usertoken");
-
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     try {
       setIsLoading(true);
 
@@ -132,7 +136,8 @@ const Variants = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,           
             "Content-Type": "application/json",
           },
         }

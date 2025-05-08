@@ -1196,7 +1196,8 @@ const Inventory = () => {
   const fetchProductData = async () => {
     setLoading(true);
     const token = localStorage.getItem("usertoken");
-
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     const isAdmin = () => {
       if (token) {
         const decoded = jwtDecode(token);
@@ -1219,7 +1220,8 @@ const Inventory = () => {
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,           
           },
         }
       );
@@ -1309,8 +1311,8 @@ const Inventory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
-    const token = localStorage.getItem("usertoken");
-    if (selectedProducts.length === 0) {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");    if (selectedProducts.length === 0) {
       alert("Please select at least one variant.");
       return;
     }
@@ -1339,7 +1341,8 @@ const Inventory = () => {
           {
             method: "PUT",
             headers: {
-              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,             
               "Content-Type": "application/json",
             },
             body: JSON.stringify(payload),
@@ -1378,8 +1381,8 @@ const Inventory = () => {
 
   const handlePriceUpdate = async (variantId) => {
     const userId = localStorage.getItem("userid");
-    const token = localStorage.getItem("usertoken");
-    const variantToUpdate = filteredProducts.find(
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");    const variantToUpdate = filteredProducts.find(
       (v) => `${v.id}` === `${variantId}`
     );
     if (!variantToUpdate) {
@@ -1399,7 +1402,8 @@ const Inventory = () => {
         {
           method: "PUT",
           headers: {
-            Authorization: `Bearer ${token}`,
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
@@ -1422,8 +1426,8 @@ const Inventory = () => {
 
   const handleQuantityUpdate = async (variantId) => {
     const userId = localStorage.getItem("userid");
-    const token = localStorage.getItem("usertoken");
-    const variantToUpdate = filteredProducts.find(
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");    const variantToUpdate = filteredProducts.find(
       (v) => `${v.id}` === `${variantId}`
     );
     if (!variantToUpdate) {
@@ -1442,7 +1446,8 @@ const Inventory = () => {
         {
           method: "PUT",
           headers: {
-            Authorization: `Bearer ${token}`,
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),

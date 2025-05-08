@@ -33,6 +33,7 @@ import CatalogPerformance from "./pages/CatalogPerformance";
 import EcommerceConsultation from "./pages/Consultation";
 import Variants from "./pages/Variants";
 import OnBoard from "./pages/OnBoardUser";
+import ApiCredentials from "./pages/ApiCredentials";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -93,6 +94,10 @@ const App = () => {
           <Route
             path="/inventory"
             element={<PrivateRoute element={<Inventory />} />}
+          />
+          <Route
+            path="/api-credentials"
+            element={<PrivateRoute element={<ApiCredentials />} />}
           />
           <Route
             path="/Login"

@@ -404,6 +404,19 @@ const AccountPage = () => {
               </span>
               <span className="text-sm">Settings</span>
             </NavLink>
+            <NavLink
+              to="/api-credentials"
+              className={({ isActive }) =>
+                `w-full flex items-center space-x-3 ${
+                  isActive ? "text-yellow-400" : "text-blue-300"
+                } hover:text-yellow-400`
+              }
+            >
+              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                <IoSettings />
+              </span>
+              <span className="text-sm">Api credentials</span>
+            </NavLink>
           </nav>
         </div>
 

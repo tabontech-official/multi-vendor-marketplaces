@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Chart from "react-apexcharts";
+import CredentialCheckModal from "../component/credentialModal";
 
 const MainDashboard = () => {
   const pendingOrdersOptions = {
@@ -174,14 +175,17 @@ const MainDashboard = () => {
     const annoucementSeries = [
       {
         name: "Announcements",
-        data: [5, 8, 4, 10, 6, 12, 8, 5, 9, 6, 7, 4] // Number of announcements per month
+        data: [5, 8, 4, 10, 6, 12, 8, 5, 9, 6, 7, 4] 
       }
     ];
+    const userId = localStorage.getItem("userid");
+
   return (
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
         <div className="flex-1">
           <h1 className="text-2xl font-semibold mb-1">Dashboard</h1>
+          <CredentialCheckModal userId={userId} />
         </div>
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0"></div>
       </div>

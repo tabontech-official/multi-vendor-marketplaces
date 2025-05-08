@@ -123,7 +123,8 @@ const Dashboard = () => {
     setLoading(true);
     const id = localStorage.getItem("userid");
     const token = localStorage.getItem("usertoken");
-
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     try {
       const url = admin
         ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
@@ -132,7 +133,8 @@ const Dashboard = () => {
       const response = await fetch(url, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
           "Content-Type": "application/json",
         },
       });
@@ -233,19 +235,21 @@ const Dashboard = () => {
   };
 
   const deleteSelectedProducts = async () => {
-    const token=localStorage.getItem('usertoken')
-    try {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");    try {
       setIsLoading(true);
       await Promise.all(
         selectedProducts.map(async (id) => {
           const response = await fetch(
             `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
-            { method: "DELETE",
+            {
+              method: "DELETE",
               headers: {
-                "Authorization": `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
                 "Content-Type": "application/json",
               },
-             }
+            }
           );
           if (!response.ok) throw new Error("Failed to delete product");
         })
@@ -266,7 +270,8 @@ const Dashboard = () => {
 
   const handlePublishSelected = async () => {
     const userId = localStorage.getItem("userid");
-    const token = localStorage.getItem("usertoken");
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     setMessage("");
 
     try {
@@ -280,7 +285,8 @@ const Dashboard = () => {
                 method: "PUT",
                 body: JSON.stringify({ userId }),
                 headers: {
-                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
                   "Content-Type": "application/json",
                 },
               }
@@ -300,7 +306,8 @@ const Dashboard = () => {
 
   const handleUnpublishSelected = async () => {
     setMessage("");
-    const token = localStorage.getItem("usertoken");
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     try {
       await Promise.all(
         selectedProducts.map(async (id) => {
@@ -311,7 +318,8 @@ const Dashboard = () => {
               {
                 method: "PUT",
                 headers: {
-                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
                   "Content-Type": "application/json",
                 },
               }
@@ -422,8 +430,8 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchProductData2 = async () => {
       const id = localStorage.getItem("userid");
-      const token = localStorage.getItem("usertoken"); // Make sure token is stored after login
-
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
       try {
         const url = admin
           ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
@@ -432,7 +440,8 @@ const Dashboard = () => {
         const response = await fetch(url, {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
         });

@@ -307,7 +307,8 @@ const CategorySelector = () => {
 
   useEffect(() => {
     const userId = localStorage.getItem("userid");
-    const token = localStorage.getItem("usertoken");
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     const productId = product?.id || "null";
 
     if (isPopupVisible && userId) {
@@ -316,7 +317,9 @@ const CategorySelector = () => {
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+
             "Content-Type": "application/json",
           },
         }
@@ -612,7 +615,9 @@ const CategorySelector = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
-    const token = localStorage.getItem("usertoken");
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+  
     if (!userId) {
       setMessage({
         type: "error",
@@ -723,7 +728,8 @@ const CategorySelector = () => {
       const response = await fetch(url, {
         method,
         headers: {
-          Authorization: `Bearer ${token}`,
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
@@ -768,7 +774,9 @@ const CategorySelector = () => {
         {
           method: "PUT",
           headers: {
-            Authorization: `Bearer ${token}`,
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+
             "Content-Type": "application/json",
           },
           body: JSON.stringify({

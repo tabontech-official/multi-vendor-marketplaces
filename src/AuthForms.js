@@ -12,51 +12,106 @@ const Auth = () => {
   const [loading, setLoading] = useState(false); 
   const [success, setSuccess] = useState("");
 
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   setError(""); 
+  //   setSuccess("");
+  //   setLoading(true);
+
+  //   if (!email || !password) {
+  //     setError("All fields are required.");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  //   if (!emailPattern.test(email)) {
+  //     setError("Please enter a valid email address.");
+  //     setLoading(false); 
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch(
+  //       "https://multi-vendor-marketplace.vercel.app/auth/signIn",
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({ email, password }),
+  //       }
+  //     );
+
+  //     const json = await response.json();
+  //     const path = localStorage.getItem("path") || "/";
+
+  //     if (response.ok) {
+  //       if (json.token && json.user._id && json.user.email) {
+  //         localStorage.setItem("usertoken", json.token);
+  //         localStorage.setItem("userid", json.user._id);
+  //         localStorage.setItem("email", json.user.email);
+  //         dispatch({ type: "LOGIN", payload: json });
+  //         setSuccess("Login successful!");
+  //         // navigate(path);
+  //         window.location.reload=path
+  //         localStorage.removeItem("path");
+  //       }
+  //     } else {
+  //       setError(json.error || "An error occurred during login.");
+  //     }
+  //   } catch (error) {
+  //     setError("An error occurred. Please try again.");
+  //   } finally {
+  //     setLoading(false); 
+  //   }
+  // };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(""); 
     setSuccess("");
     setLoading(true);
-
+  
     if (!email || !password) {
       setError("All fields are required.");
       setLoading(false);
       return;
     }
-
+  
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
       setError("Please enter a valid email address.");
       setLoading(false); 
       return;
     }
-
+  
     try {
-      const response = await fetch(
-        "http://localhost:5000/auth/signIn",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
-
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/auth/signIn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+  
       const json = await response.json();
       const path = localStorage.getItem("path") || "/";
-
+  
       if (response.ok) {
-        if (json.token && json.user._id && json.user.email) {
+        if (json.token && json.user && json.user._id && json.user.email) {
           localStorage.setItem("usertoken", json.token);
           localStorage.setItem("userid", json.user._id);
           localStorage.setItem("email", json.user.email);
+  
+          if (json.apiKey && json.apiSecretKey) {
+            localStorage.setItem("apiKey", json.apiKey);
+            localStorage.setItem("apiSecretKey", json.apiSecretKey);
+          }
+  
           dispatch({ type: "LOGIN", payload: json });
           setSuccess("Login successful!");
-          // navigate(path);
-          window.location.reload=path
           localStorage.removeItem("path");
+          window.location.reload = path;
         }
       } else {
-        setError(json.error || "An error occurred during login.");
+        setError(json.error || json.message || "An error occurred during login.");
       }
     } catch (error) {
       setError("An error occurred. Please try again.");
@@ -64,8 +119,7 @@ const Auth = () => {
       setLoading(false); 
     }
   };
-
-  
+    
   if (user) {
     return <MainDashboard />; 
   }

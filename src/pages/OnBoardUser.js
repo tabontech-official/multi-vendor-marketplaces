@@ -25,7 +25,7 @@ const OnBoard = () => {
       setSelectedUserId(id);
 
       const response = await fetch(
-        `http://localhost:5000/auth/getSingleUser/${id}`
+        `https://multi-vendor-marketplace.vercel.app/auth/getSingleUser/${id}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch user details");
@@ -47,7 +47,7 @@ const OnBoard = () => {
         }
 
         const response = await fetch(
-          `http://localhost:5000/auth/getUserByRole/${id}`
+          `https://multi-vendor-marketplace.vercel.app/auth/getUserByRole/${id}`
         );
 
         if (!response.ok) {
@@ -126,7 +126,7 @@ const OnBoard = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/auth/createUserTagsModule",
+        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {

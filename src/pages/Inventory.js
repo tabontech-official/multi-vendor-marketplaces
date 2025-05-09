@@ -133,8 +133,8 @@
 //       const id = localStorage.getItem("userid");
 //       const response = await fetch(
 //         admin
-//           ? `http://localhost:5000/product/getProduct/${id}/?page=${page}&limit=${limit}`
-//           : `http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`,
+//           ? `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`
+//           : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
 //         { method: "GET" }
 //       );
 
@@ -229,7 +229,7 @@
 //     try {
 //       const updatePromises = selectedProducts.map(async (productId) => {
 //         const response = await fetch(
-//           ` http://localhost:5000/product/${endpoint}/${productId}`,
+//           ` https://multi-vendor-marketplace.vercel.app/product/${endpoint}/${productId}`,
 //           {
 //             method: "PUT",
 //             headers: { "Content-Type": "application/json" },
@@ -281,7 +281,7 @@
 
 //     try {
 //       const response = await fetch(
-//         `http://localhost:5000/product/updateInventoryPrice/${productId}`,
+//         `https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/${productId}`,
 //         {
 //           method: "PUT",
 //           headers: { "Content-Type": "application/json" },
@@ -316,7 +316,7 @@
 
 //     try {
 //       const response = await fetch(
-//         `http://localhost:5000/product/updateInventoryQuantity/${productId}`,
+//         `https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/${productId}`,
 //         {
 //           method: "PUT",
 //           headers: { "Content-Type": "application/json" },
@@ -355,7 +355,7 @@
 //       formData.append("userId", userId);
 
 //       const response = await fetch(
-//         "http://localhost:5000/product/upload-csv-for-inventory",
+//         "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
 //         {
 //           method: "POST",
 //           body: formData,
@@ -389,7 +389,7 @@
 //       }
 
 //       const queryParams = new URLSearchParams({ userId });
-//       const exportUrl = `http://localhost:5000/product/csvInventoryEportFile/?${queryParams.toString()}`;
+//       const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/?${queryParams.toString()}`;
 
 //       const response = await fetch(exportUrl);
 //       if (!response.ok) {
@@ -1196,7 +1196,8 @@ const Inventory = () => {
   const fetchProductData = async () => {
     setLoading(true);
     const token = localStorage.getItem("usertoken");
-   
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     const isAdmin = () => {
       if (token) {
         const decoded = jwtDecode(token);
@@ -1214,11 +1215,14 @@ const Inventory = () => {
       const id = localStorage.getItem("userid");
       const response = await fetch(
         admin
-          ? `http://localhost:5000/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
-          : `http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`,
+          ? `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
+          : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
         {
           method: "GET",
-         
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+          },
         }
       );
 
@@ -1305,9 +1309,11 @@ const Inventory = () => {
   }, [handleScroll]);
 
   const handleSubmit = async (e) => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     e.preventDefault();
     const userId = localStorage.getItem("userid");
-       if (selectedProducts.length === 0) {
+    if (selectedProducts.length === 0) {
       alert("Please select at least one variant.");
       return;
     }
@@ -1332,10 +1338,12 @@ const Inventory = () => {
     try {
       const updatePromises = selectedProducts.map(async (variantId) => {
         const response = await fetch(
-          `http://localhost:5000/product/${endpoint}/${variantId}`,
+          `https://multi-vendor-marketplace.vercel.app/product/${endpoint}/${variantId}`,
           {
             method: "PUT",
-            headers: {            
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
               "Content-Type": "application/json",
             },
             body: JSON.stringify(payload),
@@ -1374,7 +1382,9 @@ const Inventory = () => {
 
   const handlePriceUpdate = async (variantId) => {
     const userId = localStorage.getItem("userid");
-     const variantToUpdate = filteredProducts.find(
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+    const variantToUpdate = filteredProducts.find(
       (v) => `${v.id}` === `${variantId}`
     );
     if (!variantToUpdate) {
@@ -1390,10 +1400,12 @@ const Inventory = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/product/updateInventoryPrice/${variantId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/${variantId}`,
         {
           method: "PUT",
           headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
@@ -1416,7 +1428,9 @@ const Inventory = () => {
 
   const handleQuantityUpdate = async (variantId) => {
     const userId = localStorage.getItem("userid");
-        const variantToUpdate = filteredProducts.find(
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+    const variantToUpdate = filteredProducts.find(
       (v) => `${v.id}` === `${variantId}`
     );
     if (!variantToUpdate) {
@@ -1431,10 +1445,12 @@ const Inventory = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/product/updateInventoryQuantity/${variantId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/${variantId}`,
         {
           method: "PUT",
           headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
@@ -1472,7 +1488,7 @@ const Inventory = () => {
       formData.append("userId", userId);
 
       const response = await fetch(
-        "http://localhost:5000/product/upload-csv-for-inventory",
+        "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
         {
           method: "POST",
           body: formData,
@@ -1506,7 +1522,7 @@ const Inventory = () => {
       }
 
       const queryParams = new URLSearchParams({ userId });
-      const exportUrl = `http://localhost:5000/product/csvInventoryEportFile/?${queryParams.toString()}`;
+      const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/?${queryParams.toString()}`;
 
       const response = await fetch(exportUrl);
       if (!response.ok) {
@@ -1723,7 +1739,22 @@ const Inventory = () => {
                           )}
                         </td>
 
-                        <td className="p-3">{variant.sku || "N/A"}</td>
+                        <td
+                          className="p-3 cursor-pointer hover:underline"
+                          onClick={() => {
+                            navigate(
+                              `/product/${variant.shopifyId}/variants/${variant.id}`,
+                              {
+                                state: {
+                                  productId: variant.shopifyId,
+                                  variantId: variant.id,
+                                },
+                              }
+                            );
+                          }}
+                        >
+                          {variant.sku || "N/A"}
+                        </td>
                         <td className="p-3">
                           <div className="relative w-32">
                             <input
@@ -2004,15 +2035,19 @@ const Inventory = () => {
                 Approval
               </h2>
               <p className="text-gray-600">
-                Are you sure you want to update inventory?
+                {activeTab === "price"
+                  ? "Are you sure you want to update price?"
+                  : activeTab === "quantity"
+                  ? "Are you sure you want to update quantity?"
+                  : "Are you sure you want to update inventory?"}
               </p>
 
               <button
                 onClick={() => {
                   if (activeTab === "quantity") {
-                    handleQuantityUpdate(popupProductId); // now variant ID
+                    handleQuantityUpdate(popupProductId); 
                   } else if (activeTab === "price") {
-                    handlePriceUpdate(popupProductId); // now variant ID
+                    handlePriceUpdate(popupProductId);
                   }
                   setIsPopupOpen(false);
                 }}

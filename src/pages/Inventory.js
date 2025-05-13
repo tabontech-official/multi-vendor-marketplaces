@@ -1415,10 +1415,13 @@ const Inventory = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert(`Price updated for SKU: ${variantToUpdate.sku}`);
+        // alert(`Price updated for SKU: ${variantToUpdate.sku}`);
+        showToast("success", `Price updated for SKU: ${variantToUpdate.sku}`);
+
         fetchProductData();
       } else {
-        alert(result.message || "Price update failed");
+        // alert(result.message || "Price update failed");
+        showToast("Failed", result.message || "Price update failed.");
       }
     } catch (error) {
       console.error("Error updating price:", error);
@@ -1460,16 +1463,68 @@ const Inventory = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert(`Quantity updated for SKU: ${variantToUpdate.sku}`);
+        // alert(`Quantity updated for SKU: ${variantToUpdate.sku}`);
+        showToast(
+          "success",
+          `Quantity updated for SKU: ${variantToUpdate.sku}`
+        );
+
         fetchProductData();
       } else {
-        alert(result.message || "Quantity update failed");
+        showToast("Failed", result.message || "Quantity update failed.");
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
       alert("An error occurred while updating quantity.");
     }
   };
+
+  // const handleUploadAndPreview = async () => {
+  //   if (!selectedFile) return;
+
+  //   setIsUploading(true);
+
+  //   try {
+  //     const userId = localStorage.getItem("userid");
+  //     if (!userId) {
+  //       alert("User ID not found");
+  //       return;
+  //     }
+
+  //     const formData = new FormData();
+  //     formData.append("file", selectedFile);
+  //     formData.append("userId", userId);
+
+  //     const response = await fetch(
+  //       "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
+  //       {
+  //         method: "POST",
+  //         body: formData,
+  //       }
+  //     );
+
+  //     const result = await response.json();
+
+  //     if (response.ok) {
+  //       // alert(" Products updated successfully!");
+  //       showToast("success", " Products updated successfully!!");
+
+  //       closePopupImport();
+  //       setSelectedFile(null);
+  //     } else {
+  //       showToast(
+  //         "Failed",
+  //         result.message || "Upload failed"
+  //       );
+  //       // alert(` Error: ${result.message || "Upload failed"}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Upload error:", error);
+  //     alert(" Upload failed.");
+  //   } finally {
+  //     setIsUploading(false);
+  //   }
+  // };
 
   const handleUploadAndPreview = async () => {
     if (!selectedFile) return;
@@ -1487,25 +1542,30 @@ const Inventory = () => {
       formData.append("file", selectedFile);
       formData.append("userId", userId);
 
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      fetch("https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result?.message) {
+            showToast("success", result.message);
+          } else {
+            showToast(
+              "info",
+              "CSV upload triggered. Processing in background."
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Upload error:", error);
+          showToast("error", "Upload triggered but failed to track result.");
+        });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        alert(" Products updated successfully!");
-        closePopupImport();
-        setSelectedFile(null);
-      } else {
-        alert(` Error: ${result.message || "Upload failed"}`);
-      }
+      closePopupImport();
+      setSelectedFile(null);
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error("Upload trigger error:", error);
       alert(" Upload failed.");
     } finally {
       setIsUploading(false);
@@ -2045,7 +2105,7 @@ const Inventory = () => {
               <button
                 onClick={() => {
                   if (activeTab === "quantity") {
-                    handleQuantityUpdate(popupProductId); 
+                    handleQuantityUpdate(popupProductId);
                   } else if (activeTab === "price") {
                     handlePriceUpdate(popupProductId);
                   }
@@ -2222,9 +2282,13 @@ const Inventory = () => {
                   </span>
                 )}
               </div>
-              <div className="text-sm text-blue-600 underline cursor-pointer mb-4">
+              <a
+                href="/sample-inventory.csv"
+                download
+                className="text-sm text-blue-600 underline cursor-pointer mb-4 inline-block"
+              >
                 Download sample CSV
-              </div>
+              </a>
               <div className="flex justify-end gap-2">
                 <button
                   onClick={closePopupImport}

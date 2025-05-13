@@ -800,9 +800,13 @@ const Dashboard = () => {
                   </span>
                 )}
               </div>
-              <div className="text-sm text-blue-600 underline cursor-pointer mb-4">
+              <a
+                href="/sample-product.csv"
+                download
+                className="text-sm text-blue-600 underline cursor-pointer mb-4 inline-block"
+              >
                 Download sample CSV
-              </div>
+              </a>
               <div className="flex justify-end gap-2">
                 <button
                   onClick={closePopup}

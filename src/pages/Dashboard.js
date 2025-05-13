@@ -12,9 +12,10 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { CiImport } from "react-icons/ci";
 import { RxCross1 } from "react-icons/rx";
-
+import { useNotification } from "../context api/NotificationContext";
 const Dashboard = () => {
   let admin;
+  const { addNotification } = useNotification();
 
   const isAdmin = () => {
     const token = localStorage.getItem("usertoken");
@@ -81,43 +82,6 @@ const Dashboard = () => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
-
-  // const fetchProductData = async () => {
-  //   setLoading(true);
-  //   const id = localStorage.getItem("userid");
-  //   try {
-  //     const response = await fetch(
-  //       admin
-  //         ? ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-  //         : ` https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
-  //       { method: "GET" },
-
-  //     );
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-
-  //       const sortedProducts = data.products.sort(
-  //         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  //       );
-
-  //       setProducts(sortedProducts);
-  //       setFilteredProducts((prev) => [
-  //         ...prev,
-  //         ...sortedProducts.filter(
-  //           (newProduct) =>
-  //             !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-  //         ),
-  //       ]);
-
-  //       setHasMore(page < data.totalPages);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching products:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const fetchProductData = async () => {
     setLoading(true);
@@ -188,6 +152,8 @@ const Dashboard = () => {
 
         const result = await response.json();
         showToast("success", "products imported successfully!");
+        addNotification("products imported successfully!");
+
         closePopup();
         window.location.reload();
       } catch (error) {
@@ -234,13 +200,53 @@ const Dashboard = () => {
     setIsPopupOpen(true);
   };
 
+  // const deleteSelectedProducts = async () => {
+  //   const apiKey = localStorage.getItem("apiKey");
+  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
+  //   try {
+  //     setIsLoading(true);
+  //     await Promise.all(
+  //       selectedProducts.map(async (id) => {
+  //         const response = await fetch(
+  //           `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
+  //           {
+  //             method: "DELETE",
+  //             headers: {
+  //               "x-api-key": apiKey,
+  //               "x-api-secret": apiSecretKey,
+  //               "Content-Type": "application/json",
+  //             },
+  //           }
+  //         );
+  //         if (!response.ok) throw new Error("Failed to delete product");
+  //         addNotification(`${product.title} unpublished successfully!`);
+
+  //       })
+  //     );
+
+  //     setProducts(products.filter((p) => !selectedProducts.includes(p._id)));
+  //     setFilteredProducts(
+  //       filteredProducts.filter((p) => !selectedProducts.includes(p._id))
+  //     );
+  //     setSelectedProducts([]);
+  //   } catch (error) {
+  //     console.error("Error deleting products:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //     setIsPopupOpen(false);
+  //   }
+  // };
+
   const deleteSelectedProducts = async () => {
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
+
     try {
       setIsLoading(true);
       await Promise.all(
         selectedProducts.map(async (id) => {
+          const product = filteredProducts.find((p) => p._id === id);
+
           const response = await fetch(
             `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
             {
@@ -252,7 +258,12 @@ const Dashboard = () => {
               },
             }
           );
+
           if (!response.ok) throw new Error("Failed to delete product");
+
+          if (product) {
+            addNotification(`${product.title} deleted successfully!`);
+          }
         })
       );
 
@@ -293,6 +304,7 @@ const Dashboard = () => {
               }
             );
             if (!response.ok) throw new Error("Failed to publish product");
+            addNotification(`${product.title} published successfully!`);
           }
         })
       );
@@ -327,6 +339,7 @@ const Dashboard = () => {
               }
             );
             if (!response.ok) throw new Error("Failed to unpublish product");
+            addNotification(`${product.title} unpublished successfully!`);
           }
         })
       );
@@ -523,6 +536,7 @@ const Dashboard = () => {
         const error = await response.json();
         throw new Error(error.message || "Export failed");
       }
+      addNotification("products export succesfully");
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);

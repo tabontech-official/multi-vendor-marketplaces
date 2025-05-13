@@ -34,6 +34,7 @@ import EcommerceConsultation from "./pages/Consultation";
 import Variants from "./pages/Variants";
 import OnBoard from "./pages/OnBoardUser";
 import ApiCredentials from "./pages/ApiCredentials";
+import { NotificationProvider } from "./context api/NotificationContext";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -83,6 +84,8 @@ const App = () => {
   };
   const { user } = useAuthContext();
   return (
+    <NotificationProvider>
+
     <Router>
       <Routes>
         <Route path="/" element={<Layout />}>
@@ -168,6 +171,8 @@ const App = () => {
         </Route>
       </Routes>
     </Router>
+    </NotificationProvider>
+
   );
 };
 

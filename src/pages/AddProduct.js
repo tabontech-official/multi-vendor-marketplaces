@@ -511,6 +511,8 @@ const CategorySelector = () => {
   }, [product]);
 
   const handleImageChange = async (event) => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     const files = Array.from(event.target.files);
     const previews = files.map((file) => ({
       localUrl: URL.createObjectURL(file),
@@ -541,17 +543,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setSelectedImages((prev) => {
             const updated = [...prev];
@@ -615,8 +622,8 @@ const CategorySelector = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
-  
-  
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     if (!userId) {
       setMessage({
         type: "error",
@@ -727,6 +734,8 @@ const CategorySelector = () => {
       const response = await fetch(url, {
         method,
         headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
@@ -771,6 +780,8 @@ const CategorySelector = () => {
         {
           method: "PUT",
           headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -1471,7 +1482,7 @@ const CategorySelector = () => {
                                 (child, childIndex) => {
                                   const parentValue =
                                     combinations[index]?.parent;
-                                  const combinationString = `${parentValue} / ${child}`; // Use as it is
+                                  const combinationString = `${parentValue} / ${child}`;
 
                                   const image =
                                     variantImages[combinationString];
@@ -1554,7 +1565,7 @@ const CategorySelector = () => {
                                       </div>
 
                                       <span
-                                        className="font-medium text-sm  text-gray-700  cursor-pointer"
+                                        className="font-medium text-sm  text-gray-700  cursor-pointer hover:underline"
                                         onClick={() => {
                                           navigate(
                                             `/product/${product.id}/variants/${variantId}`,
@@ -1581,8 +1592,9 @@ const CategorySelector = () => {
                                               ? variantPrice
                                               : price
                                           }
+                                          readOnly
                                           placeholder="Price"
-                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
+                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm bg-gray-400 bg-opacity-60 backdrop-blur-sm no-spinner"
                                           onChange={(e) =>
                                             handlePriceChange(
                                               index,
@@ -1604,8 +1616,9 @@ const CategorySelector = () => {
                                               ? compareAtPrices
                                               : compareAtPrice
                                           }
+                                          readOnly
                                           placeholder="Compare-at"
-                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
+                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm bg-gray-400 bg-opacity-60 backdrop-blur-sm no-spinner "
                                           onChange={(e) =>
                                             handleVariantComparePriceChange(
                                               index,
@@ -1623,7 +1636,8 @@ const CategorySelector = () => {
                                           variantSKU !== "" ? variantSKU : sku
                                         }
                                         placeholder="SKU"
-                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm"
+                                        readOnly
+                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm bg-gray-400 bg-opacity-60 backdrop-blur-sm no-spinner"
                                         onChange={(e) =>
                                           handleVariantSkuChange(
                                             index,
@@ -1642,7 +1656,8 @@ const CategorySelector = () => {
                                             : quantity
                                         }
                                         placeholder="QTY"
-                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm no-spinner"
+                                        readOnly
+                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm bg-gray-400 bg-opacity-60 backdrop-blur-sm no-spinner"
                                         onChange={(e) =>
                                           handleQuantityChange(
                                             index,

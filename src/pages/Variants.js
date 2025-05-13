@@ -137,7 +137,7 @@ const Variants = () => {
         {
           headers: {
             "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,           
+            "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
         }
@@ -407,12 +407,16 @@ const Variants = () => {
                   <input
                     type="text"
                     className="border border-gray-400 w-full p-1 rounded-md text-sm"
-                    value={variantData.inventory_quantity}
                     placeholder="0"
                     pattern="\d*"
                     inputMode="numeric"
-                    onInput={(e) => {
-                      e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                    value={updatedVariant.inventory_quantity}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, "");
+                      setUpdatedVariant((prev) => ({
+                        ...prev,
+                        inventory_quantity: parseInt(value || "0"),
+                      }));
                     }}
                   />
                 </div>
@@ -420,14 +424,9 @@ const Variants = () => {
                 <div className="flex flex-col items-center w-1/4">
                   <input
                     type="text"
-                    className="border border-gray-400 w-full p-1 rounded-md text-sm"
-                    placeholder="0"
-                    value={variantData.inventory_quantity}
-                    pattern="\d*"
-                    inputMode="numeric"
-                    onInput={(e) => {
-                      e.target.value = e.target.value.replace(/[^0-9]/g, "");
-                    }}
+                    readOnly
+                    value={updatedVariant.inventory_quantity}
+                    className="border border-gray-400 w-full p-1 rounded-md text-sm bg-gray-100"
                   />
                 </div>
               </div>
@@ -445,7 +444,7 @@ const Variants = () => {
             <div className="flex items-center space-x-2 mt-2">
               <input
                 type="text"
-                className="w-20 text-center py-1 border-0 focus:ring-0"
+                className="w-20 text-center py-1 border-2 border-gray-600 focus:ring-0 rounded-md"
                 name="weight"
                 value={updatedVariant.weight || ""}
                 onChange={handleInputChange}

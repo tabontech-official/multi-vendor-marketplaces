@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { FaUser, FaTimes, FaArrowRight } from "react-icons/fa";
 import { MdManageAccounts } from "react-icons/md";
 import { IoSettings } from "react-icons/io5";
@@ -15,6 +15,8 @@ const ManageUser = () => {
   const [userRole, setUserRole] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchVal, setSearchVal] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -36,23 +38,19 @@ const ManageUser = () => {
         const data = await response.json();
 
         if (data.users && Array.isArray(data.users)) {
-          const formattedUsers = data.users.map((user) => {
-            const formattedEmail = user.email
-              ? user.email.split("@")[0]
-              : "Unknown";
-
-            return {
-              id: user._id,
-              name: `${user.firstName || ""} ${user.lastName || ""}`,
-              email: user.email,
-              status: "Active",
-              addedOn: new Date().toLocaleDateString(),
-              groups: "General",
-              roles: user.role || "User",
-            };
-          });
+          const formattedUsers = data.users.map((user) => ({
+            id: user._id,
+            name: `${user.firstName || ""} ${user.lastName || ""}`,
+            email: user.email,
+            status: "Active",
+            addedOn: new Date().toLocaleDateString(),
+            groups: "General",
+            roles: user.role || "User",
+            shopifyId: user.shopifyId || "",
+          }));
 
           setUsers(formattedUsers);
+          setFilteredUsers(formattedUsers);
         } else {
           console.error("No users found or invalid response format");
         }
@@ -161,9 +159,33 @@ const ManageUser = () => {
         : [...prev, moduleName]
     );
   };
+
+  const handleSearch = () => {
+    const searchTerm = searchVal.toLowerCase();
+
+    const filtered =
+      searchTerm === ""
+        ? users
+        : users.filter((user) => {
+            return (
+              user.email?.toLowerCase().includes(searchTerm) ||
+              user.name?.toLowerCase().includes(searchTerm) ||
+              user.id?.toString().toLowerCase().includes(searchTerm) ||
+              user.status?.toLowerCase().includes(searchTerm) ||
+              user.roles?.toLowerCase().includes(searchTerm) ||
+              user.shopifyId?.toString().toLowerCase().includes(searchTerm)
+            );
+          });
+
+    setFilteredUsers(filtered);
+  };
+
+  useEffect(() => {
+    handleSearch();
+  }, [searchVal, users]);
+
   return (
     <div className="flex">
-      {/* Sidebar */}
       <aside className="w-52 mt-2 mb-2 ml-4 rounded-r-2xl bg-blue-900 p-6 flex flex-col justify-between min-h-screen">
         <div>
           {/* User Info */}
@@ -192,7 +214,7 @@ const ManageUser = () => {
           </div>
 
           {/* Sidebar Navigation */}
-          <nav className="mt-6 space-y-4">
+          {/* <nav className="mt-6 space-y-4">
             <button
               onClick={() => {
                 setSelectedModule("Manage User");
@@ -226,6 +248,48 @@ const ManageUser = () => {
                 <span className="text-sm">Settings</span>
               </Link>
             </button>
+          </nav> */}
+          <nav className="mt-6 space-y-4">
+            <NavLink
+              to="/manage-user"
+              className={({ isActive }) =>
+                `w-full flex items-center space-x-3 ${
+                  isActive ? "text-yellow-400" : "text-blue-300"
+                } hover:text-yellow-400`
+              }
+            >
+              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                <MdManageAccounts />
+              </span>
+              <span className="text-sm">Manage User</span>
+            </NavLink>
+
+            <NavLink
+              to="/edit-account"
+              className={({ isActive }) =>
+                `w-full flex items-center space-x-3 ${
+                  isActive ? "text-yellow-400" : "text-blue-300"
+                } hover:text-yellow-400`
+              }
+            >
+              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                <IoSettings />
+              </span>
+              <span className="text-sm">Settings</span>
+            </NavLink>
+            <NavLink
+              to="/api-credentials"
+              className={({ isActive }) =>
+                `w-full flex items-center space-x-3 ${
+                  isActive ? "text-yellow-400" : "text-blue-300"
+                } hover:text-yellow-400`
+              }
+            >
+              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                <IoSettings />
+              </span>
+              <span className="text-sm">Api credentials</span>
+            </NavLink>
           </nav>
         </div>
 
@@ -235,13 +299,14 @@ const ManageUser = () => {
         </button>
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1 p-6">
         <div className="flex justify-between items-center mb-4">
           <input
             type="text"
-            placeholder="Search users"
-            className="border rounded-md px-3 py-2 text-sm w-1/3"
+            placeholder="Search..."
+            value={searchVal}
+            onChange={(e) => setSearchVal(e.target.value)}
+            className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
           <button
@@ -266,7 +331,7 @@ const ManageUser = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr key={user.id} className="border-b hover:bg-gray-50">
                   <td className="p-3">
                     <div className="flex items-center space-x-3">
@@ -322,7 +387,6 @@ const ManageUser = () => {
                   <h2 className="text-black text-sm">Add User</h2>
                 </div>
 
-                {/* Close (X) Button */}
                 <button
                   onClick={() => setIsOpen(false)}
                   className="text-gray-500 hover:text-red-500"
@@ -331,14 +395,11 @@ const ManageUser = () => {
                 </button>
               </div>
 
-              {/* Form Content */}
               <h2 className="text-black text-sm font-semibold mt-3">
                 Add User
               </h2>
               <div className="space-y-4">
                 {" "}
-                {/* Added spacing between inputs */}
-                {/* Role Dropdown */}
                 <div className="flex flex-col w-full">
                   <label className="text-sm text-gray-700 mb-1">Role *</label>
                   <select
@@ -371,7 +432,6 @@ const ManageUser = () => {
                   <div className="border px-3 py-2 rounded-md">
                     {modules.map((module, index) => (
                       <div key={index} className="flex flex-col">
-                        {/* Main Checkbox */}
                         <label className="flex items-center gap-2 py-1">
                           <input
                             type="checkbox"
@@ -384,7 +444,6 @@ const ManageUser = () => {
                           </span>
                         </label>
 
-                        {/* Sub-Modules (Only show if parent is checked) */}
                         {selectedModules.includes(module.name) &&
                           module.subModules.length > 0 && (
                             <div className="pl-6 mt-1">
@@ -412,7 +471,6 @@ const ManageUser = () => {
                     ))}
                   </div>
                 </div>
-                {/* Save Button */}
                 <button
                   onClick={handleUpdateTags}
                   className="w-full px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"

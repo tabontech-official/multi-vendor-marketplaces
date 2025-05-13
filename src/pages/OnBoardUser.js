@@ -18,6 +18,8 @@ const OnBoard = () => {
   const [shopifyId, setShopifyId] = useState("");
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
+  const [searchVal, setSearchVal] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
 
   const handleShowDetails = async (id) => {
     try {
@@ -74,7 +76,7 @@ const OnBoard = () => {
             };
           });
 
-          setUsers(formattedUsers);
+          setFilteredUsers(formattedUsers);
         } else {
           console.error("No users found or invalid response format");
         }
@@ -183,14 +185,41 @@ const OnBoard = () => {
         : [...prev, moduleName]
     );
   };
+  const handleSearch = () => {
+    let filtered =
+      searchVal === ""
+        ? users
+        : users.filter((user) => {
+            const emailMatch = user.email
+              ?.toLowerCase()
+              .includes(searchVal.toLowerCase());
+            const nameMatch = user.name
+              ?.toLowerCase()
+              .includes(searchVal.toLowerCase());
+            const idMatch = user.id
+              ?.toLowerCase()
+              .includes(searchVal.toLowerCase());
+
+            return emailMatch || nameMatch || idMatch;
+          });
+
+    setFilteredUsers(filtered);
+  };
+
+  useEffect(() => {
+    handleSearch();
+  }, [searchVal]);
+
   return (
     <div className="flex">
       <div className="flex-1 p-6">
         <div className="flex justify-between items-center mb-4">
           <input
             type="text"
-            placeholder="Search users"
-            className="border rounded-md px-3 py-2 text-sm w-1/3"
+            placeholder="Search..."
+            value={searchVal}
+            onChange={(e) => setSearchVal(e.target.value)}
+            className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -207,7 +236,7 @@ const OnBoard = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr key={user.id} className="border-b hover:bg-gray-50">
                   <td className="p-3">
                     <div className="flex items-center space-x-3">
@@ -288,7 +317,9 @@ const OnBoard = () => {
                     key={index}
                     className="flex justify-between  items-center border-b pb-2"
                   >
-                    <span className="text-sm font-semibold  text-gray-600">{label}</span>
+                    <span className="text-sm font-semibold  text-gray-600">
+                      {label}
+                    </span>
                     <span className="text-base  text-gray-900">
                       {value || "N/A"}
                     </span>

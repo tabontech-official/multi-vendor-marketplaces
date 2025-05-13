@@ -19,13 +19,6 @@ const ApiCredentials = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const generateNewSecretKey = () => {
-    console.log("Generate new secret key");
-  };
-
-  const generateNewRefreshToken = () => {
-    console.log("Generate new refresh token");
-  };
   const generateCredentials = async () => {
     try {
       const userId = localStorage.getItem('userid');
@@ -51,11 +44,40 @@ const ApiCredentials = () => {
     }
   };
   
+  useEffect(() => {
+    const fetchApiCredentials = async () => {
+      const userId = localStorage.getItem("userid");
+
+      if (!userId) {
+        console.error("User ID not found in localStorage");
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/generateAcessKeys/getApiCredentialByUserId/${userId}`
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch API credentials");
+        }
+
+        const data = await res.json();
+
+        setApiKey(data.apiKey || "");
+        setSecretKey(data.apiSecretKey || "");
+      } catch (err) {
+        console.error("Error fetching API credentials:", err);
+      }
+    };
+
+    fetchApiCredentials();
+  }, []);
+
   return (
     <div className="flex">
       <aside className="w-52 mt-2 mb-2 ml-4 rounded-r-2xl bg-blue-900 p-6 flex flex-col justify-between min-h-screen">
         <div>
-          {/* User Info */}
           <div className="flex flex-col items-center border-b-2">
             <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">
               <FaUser className="text-yellow-400 w-10 h-10" />
@@ -80,7 +102,6 @@ const ApiCredentials = () => {
             <div className=""></div>
           </div>
 
-          {/* Sidebar Navigation */}
           <nav className="mt-6 space-y-4">
             <button
               onClick={() => {
@@ -133,7 +154,6 @@ const ApiCredentials = () => {
           </nav>
         </div>
 
-        {/* Promote Button */}
         <button className="w-full py-2 bg-yellow-500 text-black font-semibold rounded-md hover:bg-yellow-600">
           Promote
         </button>

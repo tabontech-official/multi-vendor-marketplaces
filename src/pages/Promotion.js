@@ -74,6 +74,8 @@ const Promotion = () => {
   }, []);
 
   const fetchProductData = async () => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     setLoading(true);
     const id = localStorage.getItem("userid");
     try {
@@ -81,7 +83,14 @@ const Promotion = () => {
         admin
           ? `https://multi-vendor-marketplace.vercel.app/product/getAllDataForPromotion/?page=${page}&limit=${limit}`
           : `https://multi-vendor-marketplace.vercel.app/product/getPromotionProduct/${id}/?page=${page}&limit=${limit}`,
-        { method: "GET" }
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       if (response.ok) {
@@ -138,7 +147,7 @@ const Promotion = () => {
 
     fetchPromotions();
   }, []);
-  
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const showToast = (type, message) => {
     setToast({ show: true, type, message });

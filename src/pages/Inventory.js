@@ -1093,8 +1093,11 @@ import { MdModeEdit } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
 import { CiImport } from "react-icons/ci";
 import { FaCross, FaFileImport } from "react-icons/fa";
+import { useNotification } from "../context api/NotificationContext";
 
 const Inventory = () => {
+  const { addNotification } = useNotification();
+
   let admin;
 
   const isAdmin = () => {
@@ -1370,6 +1373,7 @@ const Inventory = () => {
         );
       } else {
         showToast("success", "Inventory updated successfully!");
+        addNotification("Inventory updated successfully!");
       }
 
       setShowPopup(false);
@@ -1417,7 +1421,7 @@ const Inventory = () => {
       if (response.ok) {
         // alert(`Price updated for SKU: ${variantToUpdate.sku}`);
         showToast("success", `Price updated for SKU: ${variantToUpdate.sku}`);
-
+        addNotification(`Price updated for SKU: ${variantToUpdate.sku}`);
         fetchProductData();
       } else {
         // alert(result.message || "Price update failed");
@@ -1468,6 +1472,7 @@ const Inventory = () => {
           "success",
           `Quantity updated for SKU: ${variantToUpdate.sku}`
         );
+        addNotification(`Quantity updated for SKU: ${variantToUpdate.sku}`);
 
         fetchProductData();
       } else {
@@ -1541,20 +1546,28 @@ const Inventory = () => {
       const formData = new FormData();
       formData.append("file", selectedFile);
       formData.append("userId", userId);
+      addNotification(
+        "Inventory CSV upload triggered. Processing in background."
+      );
 
-      fetch("https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory", {
-        method: "POST",
-        body: formData,
-      })
+      fetch(
+        "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
+        {
+          method: "POST",
+          body: formData,
+        }
+      )
         .then((res) => res.json())
         .then((result) => {
           if (result?.message) {
             showToast("success", result.message);
+            addNotification(result.message);
           } else {
             showToast(
               "info",
               "CSV upload triggered. Processing in background."
             );
+            addNotification("CSV upload triggered. Processing in background.");
           }
         })
         .catch((error) => {
@@ -1589,11 +1602,12 @@ const Inventory = () => {
         const error = await response.json();
         throw new Error(error.message || "Export failed");
       }
-
+      addNotification("Csv for inventory export successfully!");
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
+
       link.setAttribute("download", `products-export-${Date.now()}.csv`);
       document.body.appendChild(link);
       link.click();
@@ -1773,7 +1787,7 @@ const Inventory = () => {
                             title={variant.status}
                           />
                         </td>
-                        <td className="p-3">
+                        {/* <td className="p-3">
                           {variant.variantImages && variant.image_id ? (
                             (() => {
                               const matchedImage = variant.variantImages.find(
@@ -1792,6 +1806,22 @@ const Inventory = () => {
                                 </span>
                               );
                             })()
+                          ) : (
+                            <span className="text-gray-400 text-sm">
+                              No Image
+                            </span>
+                          )}
+                        </td> */}
+                        <td className="p-3">
+                          {variant.variantImages &&
+                          variant.variantImages.length > 0 ? (
+                            <img
+                              src={variant.variantImages[0].src}
+                              alt={
+                                variant.variantImages[0].alt || "Variant image"
+                              }
+                              className="w-16 h-16 object-contain rounded border"
+                            />
                           ) : (
                             <span className="text-gray-400 text-sm">
                               No Image

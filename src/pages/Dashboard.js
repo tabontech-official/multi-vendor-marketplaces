@@ -130,20 +130,70 @@ const Dashboard = () => {
     }
   };
 
+  // const handleUploadAndPreview = async () => {
+  //   if (!selectedFile) return;
+  //   setIsUploading(true);
+  //   setUploadStarted(true);
+
+  //   setTimeout(async () => {
+  //     try {
+  //       const userId = localStorage.getItem("userid");
+  //       const formData = new FormData();
+  //       formData.append("file", selectedFile);
+  //       formData.append("userId", userId);
+
+  //       const response = await fetch(
+  //         " https://multi-vendor-marketplace.vercel.app/product/upload-csv-body",
+  //         {
+  //           method: "POST",
+  //           body: formData,
+  //         }
+  //       );
+
+  //       const result = await response.json();
+  //       showToast("success", "products imported successfully!");
+  //       addNotification("products imported successfully!");
+
+  //       closePopup();
+  //       window.location.reload();
+  //     } catch (error) {
+  //       showToast(
+  //         "Failed",
+  //         error.message || "Error occurred while importing file."
+  //       );
+  //     } finally {
+  //       setIsUploading(false);
+  //       setUploadStarted(false);
+  //       setSelectedFile(null);
+  //     }
+  //   }, 2000);
+  // };
+
   const handleUploadAndPreview = async () => {
     if (!selectedFile) return;
+
     setIsUploading(true);
     setUploadStarted(true);
+
+    closePopup();
 
     setTimeout(async () => {
       try {
         const userId = localStorage.getItem("userid");
+        if (!userId) {
+          showToast("error", "User ID not found.");
+          return;
+        }
+
         const formData = new FormData();
         formData.append("file", selectedFile);
         formData.append("userId", userId);
+        addNotification(
+          "Product CSV upload triggered. Processing in background."
+        );
 
         const response = await fetch(
-          " https://multi-vendor-marketplace.vercel.app/product/upload-csv-body",
+          "https://multi-vendor-marketplace.vercel.app/product/upload-csv-body",
           {
             method: "POST",
             body: formData,
@@ -151,15 +201,17 @@ const Dashboard = () => {
         );
 
         const result = await response.json();
-        showToast("success", "products imported successfully!");
-        addNotification("products imported successfully!");
 
-        closePopup();
-        window.location.reload();
+        showToast("success", "Products imported successfully!");
+        addNotification("Products imported successfully!");
       } catch (error) {
         showToast(
-          "Failed",
-          error.message || "Error occurred while importing file."
+          "error",
+          error.message || "Error occurred while importing the file."
+        );
+        addNotification(
+          "error",
+          error.message || "Error occurred while importing the file."
         );
       } finally {
         setIsUploading(false);

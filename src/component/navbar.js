@@ -142,7 +142,7 @@ const Navbar = () => {
               </button>
 
               {isNotificationOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-xl z-20">
+                <div className="absolute right-0 mt-2 w-96 bg-white rounded-md shadow-xl z-20">
                   <div className="p-4 border-b font-semibold text-gray-800">
                     <div className="flex justify-between items-center">
                       <span>Changelog</span>
@@ -177,7 +177,7 @@ const Navbar = () => {
                               )}{" "}
                             •{" "}
                             <span className="capitalize">
-                              {note.type || "Admin"}
+                              {`${note.firstName} ${note.lastName}`}
                             </span>
                           </p>
                           <p className="text-sm">{note.message}</p>

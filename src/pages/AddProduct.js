@@ -1475,7 +1475,7 @@ const CategorySelector = () => {
                             </ul>
                           </div>
                         )} */}
-                        {expandedParents.includes(index) && (
+                        {/* {expandedParents.includes(index) && (
                           <div className="mt-2">
                             <ul className="space-y-2">
                               {combinations[index]?.children?.map(
@@ -1666,6 +1666,140 @@ const CategorySelector = () => {
                                           )
                                         }
                                       />
+
+                                      <button
+                                        onClick={() =>
+                                          handleDeleteCombination(
+                                            index,
+                                            childIndex
+                                          )
+                                        }
+                                        className="text-red-600"
+                                      >
+                                        <FaTrash />
+                                      </button>
+                                    </li>
+                                  );
+                                }
+                              )}
+                            </ul>
+                          </div>
+                        )} */}
+                        {expandedParents.includes(index) && (
+                          <div className="mt-2">
+                            <ul className="space-y-2">
+                              {combinations[index]?.children?.map(
+                                (child, childIndex) => {
+                                  const parentValue =
+                                    combinations[index]?.parent;
+                                  const combinationString = `${parentValue} / ${child}`;
+
+                                  const image =
+                                    variantImages[combinationString];
+
+                                  const matchingVariant =
+                                    product?.variants?.find(
+                                      (variant) =>
+                                        variant.title === combinationString
+                                    );
+
+                                  const variantId = matchingVariant?.id;
+
+                                  return (
+                                    <li
+                                      key={childIndex}
+                                      className="grid grid-cols-7 items-center gap-20"
+                                    >
+                                      <div className="w-12 relative">
+                                        <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
+                                          {image?.preview ? (
+                                            <img
+                                              src={
+                                                variantImages[
+                                                  `${index}-${child}`
+                                                ]?.preview ||
+                                                image?.preview ||
+                                                ""
+                                              }
+                                              alt={`Variant ${child}`}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          ) : (
+                                            <span className="text-3xl text-gray-400">
+                                              +
+                                            </span>
+                                          )}
+                                          <input
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onClick={() => {
+                                              setCurrentVariant({
+                                                index,
+                                                child,
+                                              });
+                                              setIsPopupVisible(true);
+                                            }}
+                                          />
+                                          {image?.preview && (
+                                            <button
+                                              onClick={() =>
+                                                handleRemoveVariantImages(
+                                                  index,
+                                                  child
+                                                )
+                                              }
+                                              className="absolute top-0 right-0 text-white bg-red-600 rounded-full px-2 py-1 text-xs"
+                                              style={{
+                                                transform:
+                                                  "translate(25%, -25%)",
+                                              }}
+                                            >
+                                              X
+                                            </button>
+                                          )}
+                                        </label>
+                                      </div>
+
+                                      <span
+                                        className="font-medium text-sm text-gray-700 cursor-pointer hover:underline whitespace-nowrap"
+                                        onClick={() => {
+                                          navigate(
+                                            `/product/${product.id}/variants/${variantId}`,
+                                            {
+                                              state: {
+                                                productId: product.id,
+                                                variantId: variantId,
+                                              },
+                                            }
+                                          );
+                                        }}
+                                      >
+                                        {child}
+                                      </span>
+
+                                      <div className="relative w-20">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                          $
+                                        </span>
+                                        <span className="w-20 p-1 pl-6   text-sm ">
+                                          {price || "N/A"}
+                                        </span>
+                                      </div>
+
+                                      <div className="relative w-20 ">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                          $
+                                        </span>
+                                        <span className="w-20 p-1 pl-6   text-sm r">
+                                          {compareAtPrice || "N/A"}
+                                        </span>
+                                      </div>
+
+                                      <span className="w-20 p-1  text-sm r">
+                                        {sku || "N/A"}
+                                      </span>
+                                      <span className="w-20 p-1  text-sm r">
+                                        {quantity}
+                                      </span>
 
                                       <button
                                         onClick={() =>

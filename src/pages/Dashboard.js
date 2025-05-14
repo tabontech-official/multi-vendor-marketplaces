@@ -190,6 +190,7 @@ const Dashboard = () => {
         formData.append("userId", userId);
         addNotification(
           "Product CSV upload triggered. Processing in background."
+          ,"Manage product"
         );
 
         const response = await fetch(
@@ -314,7 +315,7 @@ const Dashboard = () => {
           if (!response.ok) throw new Error("Failed to delete product");
 
           if (product) {
-            addNotification(`${product.title} deleted successfully!`);
+            addNotification(`${product.title} deleted successfully!`,"Manage product");
           }
         })
       );
@@ -356,7 +357,7 @@ const Dashboard = () => {
               }
             );
             if (!response.ok) throw new Error("Failed to publish product");
-            addNotification(`${product.title} published successfully!`);
+            addNotification(`${product.title} published successfully!`,"Manage product");
           }
         })
       );
@@ -391,7 +392,7 @@ const Dashboard = () => {
               }
             );
             if (!response.ok) throw new Error("Failed to unpublish product");
-            addNotification(`${product.title} unpublished successfully!`);
+            addNotification(`${product.title} unpublished successfully!`,"Manage product");
           }
         })
       );
@@ -588,7 +589,7 @@ const Dashboard = () => {
         const error = await response.json();
         throw new Error(error.message || "Export failed");
       }
-      addNotification("products export succesfully");
+      addNotification("products export succesfully","Manage product");
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);

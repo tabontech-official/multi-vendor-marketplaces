@@ -41,7 +41,7 @@ const Notification = () => {
 
               <div className="flex space-x-2 mt-2">
                 <span className="bg-teal-100 text-teal-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                  {note.tag || "Feature"}
+                  {note.source || "Feature"}
                 </span>
                 <span className="text-xs text-gray-500 font-medium">
                   {`${note.firstName} ${note.lastName}` || "Admin"}

@@ -1373,7 +1373,7 @@ const Inventory = () => {
         );
       } else {
         showToast("success", "Inventory updated successfully!");
-        addNotification("Inventory updated successfully!");
+        addNotification("Inventory updated successfully!","inventory");
       }
 
       setShowPopup(false);
@@ -1421,7 +1421,7 @@ const Inventory = () => {
       if (response.ok) {
         // alert(`Price updated for SKU: ${variantToUpdate.sku}`);
         showToast("success", `Price updated for SKU: ${variantToUpdate.sku}`);
-        addNotification(`Price updated for SKU: ${variantToUpdate.sku}`);
+        addNotification(`Price updated for SKU: ${variantToUpdate.sku}`,"inventory");
         fetchProductData();
       } else {
         // alert(result.message || "Price update failed");
@@ -1472,7 +1472,7 @@ const Inventory = () => {
           "success",
           `Quantity updated for SKU: ${variantToUpdate.sku}`
         );
-        addNotification(`Quantity updated for SKU: ${variantToUpdate.sku}`);
+        addNotification(`Quantity updated for SKU: ${variantToUpdate.sku}`,"inventory");
 
         fetchProductData();
       } else {
@@ -1547,7 +1547,7 @@ const Inventory = () => {
       formData.append("file", selectedFile);
       formData.append("userId", userId);
       addNotification(
-        "Inventory CSV upload triggered. Processing in background."
+        "Inventory CSV upload triggered. Processing in background.","inventory"
       );
 
       fetch(
@@ -1561,13 +1561,13 @@ const Inventory = () => {
         .then((result) => {
           if (result?.message) {
             showToast("success", result.message);
-            addNotification(result.message);
+            addNotification(result.message,"inventory");
           } else {
             showToast(
               "info",
               "CSV upload triggered. Processing in background."
             );
-            addNotification("CSV upload triggered. Processing in background.");
+            addNotification("CSV upload triggered. Processing in background.","inventory");
           }
         })
         .catch((error) => {
@@ -1602,7 +1602,7 @@ const Inventory = () => {
         const error = await response.json();
         throw new Error(error.message || "Export failed");
       }
-      addNotification("Csv for inventory export successfully!");
+      addNotification("Csv for inventory export successfully!","inventory");
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");

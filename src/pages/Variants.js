@@ -220,15 +220,15 @@ const Variants = () => {
       <div className="w-full max-w-2xl shadow-lg p-3 rounded-md pl-4">
         <div className="flex justify-between">
           <FaArrowLeft
-            onClick={() =>
-              navigate("/manage-product", {
-                state: {
-                  isEditing: true,
-                },
-              })
-            }
+            onClick={() => {
+              console.log("Navigating with product:", product);
+              navigate("/add-product", {
+                state: { product: product },
+              });
+            }}
             className="text-gray-500 hover:text-gray-600 cursor-pointer"
           />
+
           <button
             onClick={handleSave}
             className={`mt-6 inline-block px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition ${

@@ -29,7 +29,7 @@ export const useNotification = () => useContext(NotificationContext);
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
 
-  const addNotification = async (message) => {
+  const addNotification = async (message,source) => {
     try {
       const userId = localStorage.getItem("userid");
 
@@ -39,13 +39,14 @@ export const NotificationProvider = ({ children }) => {
       }
 
       setNotifications((prev) => [
-        { id: Date.now(), message },
+        { id: Date.now(), message,source },
         ...prev.slice(0, 2),
       ]);
 
       await axios.post("https://multi-vendor-marketplace.vercel.app/notifications/addNotofication", {
         userId,
         message,
+        source,
       });
     } catch (error) {
       console.error("Failed to save notification:", error);

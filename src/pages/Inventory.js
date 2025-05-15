@@ -1092,7 +1092,7 @@ import { jwtDecode } from "jwt-decode";
 import { MdModeEdit } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
 import { CiImport } from "react-icons/ci";
-import { FaCross, FaFileImport } from "react-icons/fa";
+import { FaCross, FaEdit, FaFileImport, FaTimes } from "react-icons/fa";
 import { useNotification } from "../context api/NotificationContext";
 
 const Inventory = () => {
@@ -1373,7 +1373,7 @@ const Inventory = () => {
         );
       } else {
         showToast("success", "Inventory updated successfully!");
-        addNotification("Inventory updated successfully!","inventory");
+        addNotification("Inventory updated successfully!", "inventory");
       }
 
       setShowPopup(false);
@@ -1421,7 +1421,10 @@ const Inventory = () => {
       if (response.ok) {
         // alert(`Price updated for SKU: ${variantToUpdate.sku}`);
         showToast("success", `Price updated for SKU: ${variantToUpdate.sku}`);
-        addNotification(`Price updated for SKU: ${variantToUpdate.sku}`,"inventory");
+        addNotification(
+          `Price updated for SKU: ${variantToUpdate.sku}`,
+          "inventory"
+        );
         fetchProductData();
       } else {
         // alert(result.message || "Price update failed");
@@ -1472,7 +1475,10 @@ const Inventory = () => {
           "success",
           `Quantity updated for SKU: ${variantToUpdate.sku}`
         );
-        addNotification(`Quantity updated for SKU: ${variantToUpdate.sku}`,"inventory");
+        addNotification(
+          `Quantity updated for SKU: ${variantToUpdate.sku}`,
+          "inventory"
+        );
 
         fetchProductData();
       } else {
@@ -1547,7 +1553,8 @@ const Inventory = () => {
       formData.append("file", selectedFile);
       formData.append("userId", userId);
       addNotification(
-        "Inventory CSV upload triggered. Processing in background.","inventory"
+        "Inventory CSV upload triggered. Processing in background.",
+        "inventory"
       );
 
       fetch(
@@ -1561,13 +1568,16 @@ const Inventory = () => {
         .then((result) => {
           if (result?.message) {
             showToast("success", result.message);
-            addNotification(result.message,"inventory");
+            addNotification(result.message, "inventory");
           } else {
             showToast(
               "info",
               "CSV upload triggered. Processing in background."
             );
-            addNotification("CSV upload triggered. Processing in background.","inventory");
+            addNotification(
+              "CSV upload triggered. Processing in background.",
+              "inventory"
+            );
           }
         })
         .catch((error) => {
@@ -1585,6 +1595,42 @@ const Inventory = () => {
     }
   };
 
+  // const handleExport = async () => {
+  //   try {
+  //     setIsExporting(true);
+  //     const userId = localStorage.getItem("userid");
+  //     if (!userId) {
+  //       alert("User ID not found in localStorage");
+  //       return;
+  //     }
+
+  //     const queryParams = new URLSearchParams({ userId });
+  //     const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/?${queryParams.toString()}`;
+
+  //     const response = await fetch(exportUrl);
+  //     if (!response.ok) {
+  //       const error = await response.json();
+  //       throw new Error(error.message || "Export failed");
+  //     }
+  //     addNotification("Csv for inventory export successfully!", "inventory");
+  //     const blob = await response.blob();
+  //     const url = window.URL.createObjectURL(blob);
+  //     const link = document.createElement("a");
+  //     link.href = url;
+
+  //     link.setAttribute("download", `products-export-${Date.now()}.csv`);
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     link.remove();
+  //     window.URL.revokeObjectURL(url);
+
+  //     setIsexportOpen(false);
+  //   } catch (error) {
+  //     alert("Export failed: " + error.message);
+  //   } finally {
+  //     setIsExporting(false);
+  //   }
+  // };
   const handleExport = async () => {
     try {
       setIsExporting(true);
@@ -1594,15 +1640,29 @@ const Inventory = () => {
         return;
       }
 
+      let exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/`;
+
       const queryParams = new URLSearchParams({ userId });
-      const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/?${queryParams.toString()}`;
+
+      if (exportOption === "selected") {
+        if (!selectedProducts.length) {
+          showToast("No variants selected for export.");
+          setIsExporting(false);
+          return;
+        }
+        queryParams.append("variantIds", selectedProducts.join(","));
+      } else if (exportOption === "current") {
+      }
+
+      exportUrl += `?${queryParams.toString()}`;
 
       const response = await fetch(exportUrl);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Export failed");
       }
-      addNotification("Csv for inventory export successfully!","inventory");
+      addNotification("CSV export started successfully!", "inventory");
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -1640,14 +1700,85 @@ const Inventory = () => {
             />
           </div>
         </div>
-        <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
-          <Link
-            to="/add-product"
-            className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-          >
-            <HiPlus className="w-5 h-5" />
-            <span>Add Products</span>
-          </Link>
+        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
+          <div className="flex gap-4 items-center w-full justify-end">
+            <button
+              onClick={openPopupImport}
+              className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+            >
+              <CiImport className="w-5 h-5" />
+              Import
+            </button>
+
+            <button
+              onClick={togglePopup}
+              className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+            >
+              <FaFileImport className="w-5 h-5" />
+              Export
+            </button>
+            {/* {filteredProducts.some((p) => p.isEditable) && (
+              <button
+                onClick={() => {
+                  const selectedId = selectedProducts[0];
+                  const variant = filteredProducts.find(
+                    (v) => `${v.id}` === `${selectedId}`
+                  );
+
+                  if (variant) {
+                    setSelectedProduct(variant);
+                    setPrice(variant.price || "");
+                    setCompareAtPrice(variant.compare_at_price || "");
+                    setQuantity(variant.inventory_quantity || "");
+                    setShowPopup(true);
+                  }
+                }}
+                className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+              >
+                {activeTab === "price"
+                  ? "Update all"
+                  : activeTab === "quantity"
+                  ? "Update all"
+                  : "Update"}
+              </button>
+            )} */}
+            {filteredProducts.some((v) => v.isEditable) && (
+              <button
+                onClick={() => {
+                  const reference = filteredProducts.find((v) => v.isEditable);
+
+                  if (!reference) {
+                    alert("Please edit a variant first.");
+                    return;
+                  }
+
+                  const updated = [...filteredProducts];
+
+                  updated.forEach((variant, index) => {
+                    if (activeTab === "price") {
+                      variant.price = reference.price;
+                      variant.compare_at_price = reference.compare_at_price;
+                    } else if (activeTab === "quantity") {
+                      variant.inventory_quantity = reference.inventory_quantity;
+                    }
+
+                    setTimeout(() => {
+                      if (activeTab === "price") {
+                        handlePriceUpdate(variant.id);
+                      } else {
+                        handleQuantityUpdate(variant.id);
+                      }
+                    }, index * 100);
+                  });
+
+                  setFilteredProducts(updated);
+                }}
+                className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+              >
+                {activeTab === "price" ? "Update All " : "Update All "}
+              </button>
+            )}
+          </div>
         </div>
 
         {toast.show && (
@@ -1687,26 +1818,8 @@ const Inventory = () => {
           Update Quantity
         </button>
       </div>
-      <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
-        <div className="flex gap-4 items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
-          <button
-            onClick={openPopupImport}
-            className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-          >
-            <CiImport className="w-5 h-5" />
-            Import
-          </button>
-
-          <button
-            onClick={togglePopup}
-            className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-          >
-            <FaFileImport className="w-5 h-5" />
-            Export
-          </button>
-        </div>
-      </div>
-      {selectedProducts.length > 0 && (
+      <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0"></div>
+      {/* {selectedProducts.length > 0 && (
         <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
           <div className="flex gap-2 items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
             <button
@@ -1734,7 +1847,7 @@ const Inventory = () => {
             </button>
           </div>
         </div>
-      )}
+      )} */}
 
       {activeTab === "price" &&
         (Loading ? (
@@ -1759,8 +1872,6 @@ const Inventory = () => {
                       <th className="p-3">SKU</th>
                       <th className="p-3">Price</th>
                       <th className="p-3">Compare_at_price</th>
-                      {/* <th className="p-3">Inventory</th> */}
-                      <th className="p-3">Update</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1787,31 +1898,6 @@ const Inventory = () => {
                             title={variant.status}
                           />
                         </td>
-                        {/* <td className="p-3">
-                          {variant.variantImages && variant.image_id ? (
-                            (() => {
-                              const matchedImage = variant.variantImages.find(
-                                (img) =>
-                                  String(img.id) === String(variant.image_id)
-                              );
-                              return matchedImage ? (
-                                <img
-                                  src={matchedImage.src}
-                                  alt={matchedImage.alt || "Variant image"}
-                                  className="w-16 h-16 object-contain rounded border"
-                                />
-                              ) : (
-                                <span className="text-gray-400 text-sm">
-                                  No Image
-                                </span>
-                              );
-                            })()
-                          ) : (
-                            <span className="text-gray-400 text-sm">
-                              No Image
-                            </span>
-                          )}
-                        </td> */}
                         <td className="p-3">
                           {variant.variantImages &&
                           variant.variantImages.length > 0 ? (
@@ -1845,50 +1931,116 @@ const Inventory = () => {
                         >
                           {variant.sku || "N/A"}
                         </td>
+
+                        {/* Price Field */}
+                        {/* Price Field */}
                         <td className="p-3">
-                          <div className="relative w-32">
+                          <div className="relative w-36 flex items-center">
                             <input
                               type="text"
                               value={variant.price || ""}
+                              readOnly={!variant.isEditable}
                               onChange={(e) => {
                                 const updated = [...filteredProducts];
                                 updated[index].price = e.target.value;
                                 setFilteredProducts(updated);
                               }}
-                              className="w-full text-sm px-2 py-1 border border-gray-300 rounded-md bg-white text-black"
+                              className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
+                                variant.isEditable ? "bg-white" : "bg-gray-100"
+                              } text-black pr-12`} // padding for icon space
                             />
+
+                            {/* Icon Group (Edit / Tick / Cross) */}
+                            <div className="absolute right-2 flex gap-1 items-center">
+                              {!variant.isEditable ? (
+                                <FaEdit
+                                  className="text-gray-400 cursor-pointer"
+                                  onClick={() => {
+                                    const updated = [...filteredProducts];
+                                    updated[index].isEditable = true;
+                                    setFilteredProducts(updated);
+                                  }}
+                                />
+                              ) : (
+                                <>
+                                  <button
+                                    className="text-green-600 text-sm"
+                                    onClick={() =>
+                                      handlePriceUpdate(variant.id)
+                                    }
+                                  >
+                                    ✔
+                                  </button>
+                                  <button
+                                    className="text-red-600 text-sm"
+                                    onClick={() => {
+                                      const updated = [...filteredProducts];
+                                      updated[index].isEditable = false;
+                                      setFilteredProducts(updated);
+                                    }}
+                                  >
+                                    ✖
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </td>
+
+                        {/* Compare-at-price Field */}
                         <td className="p-3">
-                          <div className="relative w-32">
+                          <div className="relative w-36 flex items-center">
                             <input
                               type="text"
                               value={variant.compare_at_price || ""}
+                              readOnly={!variant.isEditable}
                               onChange={(e) => {
                                 const updated = [...filteredProducts];
                                 updated[index].compare_at_price =
                                   e.target.value;
                                 setFilteredProducts(updated);
                               }}
-                              className="w-full text-sm px-2 py-1 border border-gray-300 rounded-md bg-white text-black"
+                              className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
+                                variant.isEditable ? "bg-white" : "bg-gray-100"
+                              } text-black pr-12`} // padding for icon space
                             />
+
+                            {/* Icon Group (Edit / Tick / Cross) */}
+                            <div className="absolute right-2 flex gap-1 items-center">
+                              {!variant.isEditable ? (
+                                <FaEdit
+                                  className="text-gray-400 cursor-pointer"
+                                  onClick={() => {
+                                    const updated = [...filteredProducts];
+                                    updated[index].isEditable = true;
+                                    setFilteredProducts(updated);
+                                  }}
+                                />
+                              ) : (
+                                <>
+                                  <button
+                                    className="text-green-600 text-sm"
+                                    onClick={() =>
+                                      handlePriceUpdate(variant.id)
+                                    }
+                                  >
+                                    ✔
+                                  </button>
+                                  <button
+                                    className="text-red-600 text-sm"
+                                    onClick={() => {
+                                      const updated = [...filteredProducts];
+                                      updated[index].isEditable = false;
+                                      setFilteredProducts(updated);
+                                    }}
+                                  >
+                                    ✖
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </td>
-                        {/* <td className="p-3">
-                          {variant.inventory_quantity || 0}
-                        </td> */}
-                        <td
-                          onClick={() => {
-                            setPopupProductId(variant.id);
-                            setIsPopupOpen(true);
-                          }}
-                          className="p-3 text-blue-600 hover:underline cursor-pointer"
-                        >
-                          Update
-                        </td>
-                        {admin && (
-                          <td className="p-3 text-xs">#{variant.shopifyId}</td>
-                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -1918,12 +2070,8 @@ const Inventory = () => {
                       <th className="p-3">Action</th>
                       <th className="p-3">Status</th>
                       <th className="p-3">Images</th>
-
                       <th className="p-3">SKU</th>
-                      {/* <th className="p-3">Price</th>
-                      <th className="p-3">Compare_at_price</th> */}
                       <th className="p-3">Inventory</th>
-                      <th className="p-3">Update</th>
                     </tr>
                   </thead>
 
@@ -1977,11 +2125,8 @@ const Inventory = () => {
                           )}
                         </td>
                         <td className="p-3">{variant.sku || "N/A"}</td>
-                        {/* <td className="p-3">{variant.price || "0.00"}</td>
-                        <td className="p-3">
-                          {variant.compare_at_price || "0.00"}
-                        </td> */}
-                        <td className="p-3">
+
+                        {/* <td className="p-3">
                           <div className="relative w-32">
                             <input
                               type="text"
@@ -1995,15 +2140,58 @@ const Inventory = () => {
                               className="w-full text-sm px-2 py-1 border border-gray-300 rounded-md bg-white text-black"
                             />
                           </div>
-                        </td>
-                        <td
-                          onClick={() => {
-                            setPopupProductId(variant.id);
-                            setIsPopupOpen(true);
-                          }}
-                          className="p-3 text-blue-600 hover:underline cursor-pointer"
-                        >
-                          Update
+                        </td> */}
+                        <td className="p-3">
+                          <div className="relative w-36 flex items-center">
+                            <input
+                              type="text"
+                              value={variant.inventory_quantity || "0.00"}
+                              readOnly={!variant.isEditable}
+                              onChange={(e) => {
+                                const updated = [...filteredProducts];
+                                updated[index].inventory_quantity =
+                                  e.target.value;
+                                setFilteredProducts(updated);
+                              }}
+                              className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
+                                variant.isEditable ? "bg-white" : "bg-gray-100"
+                              } text-black pr-12`}
+                            />
+
+                            <div className="absolute right-2 flex gap-1 items-center">
+                              {!variant.isEditable ? (
+                                <FaEdit
+                                  className="text-gray-400 cursor-pointer"
+                                  onClick={() => {
+                                    const updated = [...filteredProducts];
+                                    updated[index].isEditable = true;
+                                    setFilteredProducts(updated);
+                                  }}
+                                />
+                              ) : (
+                                <>
+                                  <button
+                                    className="text-green-600 text-sm"
+                                    onClick={() =>
+                                      handleQuantityUpdate(variant.id)
+                                    }
+                                  >
+                                    ✔
+                                  </button>
+                                  <button
+                                    className="text-red-600 text-sm"
+                                    onClick={() => {
+                                      const updated = [...filteredProducts];
+                                      updated[index].isEditable = false;
+                                      setFilteredProducts(updated);
+                                    }}
+                                  >
+                                    ✖
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
                         </td>
                         {admin && (
                           <td className="p-3 text-xs">#{variant.shopifyId}</td>
@@ -2202,6 +2390,16 @@ const Inventory = () => {
                     onChange={() => setExportOption("all")}
                   />
                   All products
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="exportOption"
+                    value="selected"
+                    checked={exportOption === "selected"}
+                    onChange={() => setExportOption("selected")}
+                  />
+                  Selected variants only
                 </label>
               </div>
             </div>

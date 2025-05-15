@@ -133,8 +133,8 @@
 //       const id = localStorage.getItem("userid");
 //       const response = await fetch(
 //         admin
-//           ? `http://localhost:5000/product/getProduct/${id}/?page=${page}&limit=${limit}`
-//           : `http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`,
+//           ? `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`
+//           : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
 //         { method: "GET" }
 //       );
 
@@ -229,7 +229,7 @@
 //     try {
 //       const updatePromises = selectedProducts.map(async (productId) => {
 //         const response = await fetch(
-//           ` http://localhost:5000/product/${endpoint}/${productId}`,
+//           ` https://multi-vendor-marketplace.vercel.app/product/${endpoint}/${productId}`,
 //           {
 //             method: "PUT",
 //             headers: { "Content-Type": "application/json" },
@@ -281,7 +281,7 @@
 
 //     try {
 //       const response = await fetch(
-//         `http://localhost:5000/product/updateInventoryPrice/${productId}`,
+//         `https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/${productId}`,
 //         {
 //           method: "PUT",
 //           headers: { "Content-Type": "application/json" },
@@ -316,7 +316,7 @@
 
 //     try {
 //       const response = await fetch(
-//         `http://localhost:5000/product/updateInventoryQuantity/${productId}`,
+//         `https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/${productId}`,
 //         {
 //           method: "PUT",
 //           headers: { "Content-Type": "application/json" },
@@ -355,7 +355,7 @@
 //       formData.append("userId", userId);
 
 //       const response = await fetch(
-//         "http://localhost:5000/product/upload-csv-for-inventory",
+//         "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
 //         {
 //           method: "POST",
 //           body: formData,
@@ -389,7 +389,7 @@
 //       }
 
 //       const queryParams = new URLSearchParams({ userId });
-//       const exportUrl = `http://localhost:5000/product/csvInventoryEportFile/?${queryParams.toString()}`;
+//       const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/?${queryParams.toString()}`;
 
 //       const response = await fetch(exportUrl);
 //       if (!response.ok) {
@@ -1218,8 +1218,8 @@ const Inventory = () => {
       const id = localStorage.getItem("userid");
       const response = await fetch(
         admin
-          ? `http://localhost:5000/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
-          : `http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`,
+          ? `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
+          : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
         {
           method: "GET",
           headers: {
@@ -1341,7 +1341,7 @@ const Inventory = () => {
     try {
       const updatePromises = selectedProducts.map(async (variantId) => {
         const response = await fetch(
-          `http://localhost:5000/product/${endpoint}/${variantId}`,
+          `https://multi-vendor-marketplace.vercel.app/product/${endpoint}/${variantId}`,
           {
             method: "PUT",
             headers: {
@@ -1404,7 +1404,7 @@ const Inventory = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/product/updateInventoryPrice/${variantId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/${variantId}`,
         {
           method: "PUT",
           headers: {
@@ -1430,9 +1430,10 @@ const Inventory = () => {
         // alert(result.message || "Price update failed");
         showToast("Failed", result.message || "Price update failed.");
       }
+      window.location.reload()
     } catch (error) {
       console.error("Error updating price:", error);
-      alert("An error occurred while updating price.");
+      showToast("An error occurred while updating price.");
     }
   };
 
@@ -1455,7 +1456,7 @@ const Inventory = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/product/updateInventoryQuantity/${variantId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/${variantId}`,
         {
           method: "PUT",
           headers: {
@@ -1470,7 +1471,6 @@ const Inventory = () => {
       const result = await response.json();
 
       if (response.ok) {
-        // alert(`Quantity updated for SKU: ${variantToUpdate.sku}`);
         showToast(
           "success",
           `Quantity updated for SKU: ${variantToUpdate.sku}`
@@ -1479,63 +1479,16 @@ const Inventory = () => {
           `Quantity updated for SKU: ${variantToUpdate.sku}`,
           "inventory"
         );
-
+        window.location.reload();
         fetchProductData();
       } else {
         showToast("Failed", result.message || "Quantity update failed.");
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
-      alert("An error occurred while updating quantity.");
+      showToast("An error occurred while updating quantity.");
     }
   };
-
-  // const handleUploadAndPreview = async () => {
-  //   if (!selectedFile) return;
-
-  //   setIsUploading(true);
-
-  //   try {
-  //     const userId = localStorage.getItem("userid");
-  //     if (!userId) {
-  //       alert("User ID not found");
-  //       return;
-  //     }
-
-  //     const formData = new FormData();
-  //     formData.append("file", selectedFile);
-  //     formData.append("userId", userId);
-
-  //     const response = await fetch(
-  //       "http://localhost:5000/product/upload-csv-for-inventory",
-  //       {
-  //         method: "POST",
-  //         body: formData,
-  //       }
-  //     );
-
-  //     const result = await response.json();
-
-  //     if (response.ok) {
-  //       // alert(" Products updated successfully!");
-  //       showToast("success", " Products updated successfully!!");
-
-  //       closePopupImport();
-  //       setSelectedFile(null);
-  //     } else {
-  //       showToast(
-  //         "Failed",
-  //         result.message || "Upload failed"
-  //       );
-  //       // alert(` Error: ${result.message || "Upload failed"}`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Upload error:", error);
-  //     alert(" Upload failed.");
-  //   } finally {
-  //     setIsUploading(false);
-  //   }
-  // };
 
   const handleUploadAndPreview = async () => {
     if (!selectedFile) return;
@@ -1557,13 +1510,10 @@ const Inventory = () => {
         "inventory"
       );
 
-      fetch(
-        "http://localhost:5000/product/upload-csv-for-inventory",
-        {
-          method: "POST",
-          body: formData,
-        }
-      )
+      fetch("https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory", {
+        method: "POST",
+        body: formData,
+      })
         .then((res) => res.json())
         .then((result) => {
           if (result?.message) {
@@ -1589,48 +1539,12 @@ const Inventory = () => {
       setSelectedFile(null);
     } catch (error) {
       console.error("Upload trigger error:", error);
-      alert(" Upload failed.");
+          showToast("error", "Upload triggered but failed to track result.");
     } finally {
       setIsUploading(false);
     }
   };
 
-  // const handleExport = async () => {
-  //   try {
-  //     setIsExporting(true);
-  //     const userId = localStorage.getItem("userid");
-  //     if (!userId) {
-  //       alert("User ID not found in localStorage");
-  //       return;
-  //     }
-
-  //     const queryParams = new URLSearchParams({ userId });
-  //     const exportUrl = `http://localhost:5000/product/csvInventoryEportFile/?${queryParams.toString()}`;
-
-  //     const response = await fetch(exportUrl);
-  //     if (!response.ok) {
-  //       const error = await response.json();
-  //       throw new Error(error.message || "Export failed");
-  //     }
-  //     addNotification("Csv for inventory export successfully!", "inventory");
-  //     const blob = await response.blob();
-  //     const url = window.URL.createObjectURL(blob);
-  //     const link = document.createElement("a");
-  //     link.href = url;
-
-  //     link.setAttribute("download", `products-export-${Date.now()}.csv`);
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     link.remove();
-  //     window.URL.revokeObjectURL(url);
-
-  //     setIsexportOpen(false);
-  //   } catch (error) {
-  //     alert("Export failed: " + error.message);
-  //   } finally {
-  //     setIsExporting(false);
-  //   }
-  // };
   const handleExport = async () => {
     try {
       setIsExporting(true);
@@ -1640,7 +1554,7 @@ const Inventory = () => {
         return;
       }
 
-      let exportUrl = `http://localhost:5000/product/csvInventoryEportFile/`;
+      let exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/`;
 
       const queryParams = new URLSearchParams({ userId });
 
@@ -1914,7 +1828,7 @@ const Inventory = () => {
                             </span>
                           )}
                         </td> */}
-<td className="p-3">
+                        <td className="p-3">
                           {variant.variantImages && variant.image_id ? (
                             (() => {
                               const matchedImage = variant.variantImages.find(
@@ -1956,7 +1870,6 @@ const Inventory = () => {
                           {variant.sku || "N/A"}
                         </td>
 
-                      
                         <td className="p-3">
                           <div className="relative w-36 flex items-center">
                             <input

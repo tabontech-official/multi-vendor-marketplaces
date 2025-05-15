@@ -1430,7 +1430,7 @@ const Inventory = () => {
         // alert(result.message || "Price update failed");
         showToast("Failed", result.message || "Price update failed.");
       }
-      window.location.reload()
+      // window.location.reload()
     } catch (error) {
       console.error("Error updating price:", error);
       showToast("An error occurred while updating price.");
@@ -1479,7 +1479,7 @@ const Inventory = () => {
           `Quantity updated for SKU: ${variantToUpdate.sku}`,
           "inventory"
         );
-        window.location.reload();
+        // window.location.reload();
         fetchProductData();
       } else {
         showToast("Failed", result.message || "Quantity update failed.");

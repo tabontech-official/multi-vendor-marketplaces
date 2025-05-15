@@ -131,7 +131,9 @@ const Navbar = () => {
           } md:block z-10 transition-transform duration-500 ease-in-out`}
         >
           <ul className="flex flex-col md:flex-row md:space-x-8 space-y-4 items-center md:space-y-0">
-            <li className="relative" ref={notificationRef}>
+          
+{isLoggedIn && (
+               <li className="relative" ref={notificationRef}>
               <button
                 onClick={handleToggle}
                 ref={buttonRef}
@@ -207,7 +209,7 @@ const Navbar = () => {
                 </div>
               )}
             </li>
-
+            )}
             {isLoggedIn && role === "Dev Admin" && (
               <li>
                 <Link
@@ -218,7 +220,7 @@ const Navbar = () => {
                 </Link>
               </li>
             )}
-
+ 
             {isLoggedIn && (
               <li className="relative" ref={dropdownRef}>
                 <button

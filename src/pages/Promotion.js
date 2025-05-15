@@ -4,6 +4,7 @@ import { useAuthContext } from "../Hooks/useAuthContext";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 
 const Promotion = () => {
   let admin;
@@ -56,7 +57,22 @@ const Promotion = () => {
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("Active Promotions") || "Promotions Details";
   });
+  const [collapsedProducts, setCollapsedProducts] = useState({});
+  useEffect(() => {
+    // On products load, set all as expanded (collapsed = false)
+    const initialState = {};
+    filteredProducts.forEach((p) => {
+      initialState[p._id] = false; // false means expanded
+    });
+    setCollapsedProducts(initialState);
+  }, [filteredProducts]);
 
+  const toggleCollapse = (productId) => {
+    setCollapsedProducts((prev) => ({
+      ...prev,
+      [productId]: !prev[productId],
+    }));
+  };
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
     const uid = localStorage.getItem("userid");
@@ -429,12 +445,11 @@ const Promotion = () => {
             </div>
           )}
 
-          {activeTab === "Add Promotions" && (
+          {/* {activeTab === "Add Promotions" && (
             <div className=" max-sm:overflow-auto border rounded-lg">
               <table className="w-full border-collapse bg-white">
                 <thead className="bg-gray-100 text-left text-gray-600 text-sm">
                   <tr>
-                    {/* <th className="p-3">ACTION</th> */}
                     <th className="p-3">LISTING NAME</th>
                     <th className="p-3">SELLER_SKU</th>
                     <th className="p-3">ORIGINAL_PRICE</th>
@@ -447,26 +462,9 @@ const Promotion = () => {
                 <tbody>
                   {filteredProducts.map((product, index) => (
                     <tr key={product._id} className="border-b hover:bg-gray-50">
-                      {/* <td className="p-3">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer"
-                          checked={selectedProducts.includes(product._id)}
-                          onChange={() => toggleSelection(product._id)}
-                        />
-                      </td> */}
+                      
 
-                      {/* <td className="p-3">
-                                   {" "}
-                                   <div
-                                     className={`w-2 h-2 rounded-full ${
-                                       product.status === "active"
-                                         ? "bg-green-500"
-                                         : "bg-red-500"
-                                     }`}
-                                     title={product.status}
-                                   />
-                                 </td> */}
+                     
                       <td className="p-3">
                         {" "}
                         {product.title !== "Job Listing"
@@ -511,8 +509,96 @@ const Promotion = () => {
                 </tbody>
               </table>
             </div>
-          )}
+          )} */}
+          {activeTab === "Add Promotions" && (
+            <div className="max-sm:overflow-auto border rounded-lg">
+              <table className="w-full border-collapse bg-white">
+                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                  <tr>
+                    <th className="p-3">LISTING NAME</th>
+                    <th className="p-3">SELLER_SKU</th>
+                    <th className="p-3">ORIGINAL_PRICE</th>
+                    <th className="p-3">PROMO_PRICE</th>
+                    <th className="p-3">ADD PROMOTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredProducts.map((product) => {
+                    const isCollapsed = collapsedProducts[product._id];
 
+                    return (
+                      <React.Fragment key={product._id}>
+                        {/* Product Row (clickable) */}
+                        <tr
+                          className="font-semibold cursor-pointer select-none"
+                          onClick={() => toggleCollapse(product._id)}
+                        >
+                          <td className="p-3 flex items-center" colSpan={5}>
+                            {isCollapsed ? (
+                              <FiChevronRight className="mr-2" />
+                            ) : (
+                              <FiChevronDown className="mr-2" />
+                            )}
+                            {product.title !== "Job Listing"
+                              ? product.title
+                              : "Job Search Listing"}
+                          </td>
+                        </tr>
+
+                        {/* Variant rows, show only if expanded (not collapsed) */}
+                        {!isCollapsed &&
+                          product.variants.map((variant) => (
+                            <tr
+                              key={variant.id}
+                              className="border-b hover:bg-gray-50"
+                            >
+                              <td className="p-3">
+                                {variant.title ||
+                                  [
+                                    variant.option1,
+                                    variant.option2,
+                                    variant.option3,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" / ")}
+                              </td>
+                              <td className="p-3">{variant.sku || "N/A"}</td>
+                              <td className="p-3">
+                                ${variant.price || product.oldPrice || "N/A"}
+                              </td>
+                              <td className="p-3">
+                                <input
+                                  type="text"
+                                  value={promoPrices[variant.id] || ""}
+                                  onChange={(e) =>
+                                    setPromoPrices((prev) => ({
+                                      ...prev,
+                                      [variant.id]: e.target.value,
+                                    }))
+                                  }
+                                  className="border border-gray-300 rounded px-2 py-1 text-sm w-full"
+                                  placeholder="Enter promo price"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <button
+                                  className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
+                                  onClick={() =>
+                                    addToPromotions(product, variant)
+                                  }
+                                >
+                                  Add to promotion
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                      </React.Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
           {activeTab === "Submitted Promotions" && (
             <table className="w-full border-collapse bg-white">
               <thead className="bg-gray-100 text-left text-gray-600 text-sm">

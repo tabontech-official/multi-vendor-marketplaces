@@ -1510,10 +1510,13 @@ const Inventory = () => {
         "inventory"
       );
 
-      fetch("https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory", {
-        method: "POST",
-        body: formData,
-      })
+      fetch(
+        "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
+        {
+          method: "POST",
+          body: formData,
+        }
+      )
         .then((res) => res.json())
         .then((result) => {
           if (result?.message) {
@@ -1539,7 +1542,7 @@ const Inventory = () => {
       setSelectedFile(null);
     } catch (error) {
       console.error("Upload trigger error:", error);
-          showToast("error", "Upload triggered but failed to track result.");
+      showToast("error", "Upload triggered but failed to track result.");
     } finally {
       setIsUploading(false);
     }
@@ -1684,7 +1687,9 @@ const Inventory = () => {
                       }
                     }, index * 100);
                   });
-
+updated.forEach((variant) => {
+        variant.isEditable = false;
+      });
                   setFilteredProducts(updated);
                 }}
                 className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
@@ -1898,11 +1903,23 @@ const Inventory = () => {
                                 />
                               ) : (
                                 <>
-                                  <button
+                                  {/* <button
                                     className="text-green-600 text-sm"
                                     onClick={() =>
                                       handlePriceUpdate(variant.id)
                                     }
+                                  >
+                                    ✔
+                                  </button> */}
+                                  <button
+                                    className="text-green-600 text-sm"
+                                    onClick={async () => {
+                                      await handlePriceUpdate(variant.id);
+
+                                      const updated = [...filteredProducts];
+                                      updated[index].isEditable = false;
+                                      setFilteredProducts(updated);
+                                    }}
                                   >
                                     ✔
                                   </button>
@@ -2106,9 +2123,13 @@ const Inventory = () => {
                                 <>
                                   <button
                                     className="text-green-600 text-sm"
-                                    onClick={() =>
-                                      handleQuantityUpdate(variant.id)
-                                    }
+                                     onClick={async () => {
+                                      await handleQuantityUpdate(variant.id);
+
+                                      const updated = [...filteredProducts];
+                                      updated[index].isEditable = false;
+                                      setFilteredProducts(updated);
+                                    }}
                                   >
                                     ✔
                                   </button>

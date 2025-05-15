@@ -1162,6 +1162,7 @@ const Inventory = () => {
   const [popupProductId, setPopupProductId] = useState(null);
   const openPopupImport = () => setIsOpenImport(true);
   const closePopupImport = () => setIsOpenImport(false);
+  const [loadingIds, setLoadingIds] = useState([]);
 
   const toggleSelection = (productId) => {
     setSelectedProducts((prevSelected) =>
@@ -1687,9 +1688,9 @@ const Inventory = () => {
                       }
                     }, index * 100);
                   });
-updated.forEach((variant) => {
-        variant.isEditable = false;
-      });
+                  updated.forEach((variant) => {
+                    variant.isEditable = false;
+                  });
                   setFilteredProducts(updated);
                 }}
                 className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
@@ -1781,32 +1782,39 @@ updated.forEach((variant) => {
                 <h2>No products available.</h2>
               </div>
             ) : (
-              <div className="max-sm:overflow-auto border rounded-lg">
-                <table className="w-full border-collapse bg-white">
-                  <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-                    <tr>
-                      <th className="p-3">Action</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3">Image</th>
-                      <th className="p-3">SKU</th>
-                      <th className="p-3">Price</th>
-                      <th className="p-3">Compare_at_price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredProducts.map((variant, index) => (
+              <table className="w-full border-collapse bg-white">
+                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                  <tr>
+                    <th className="p-3">Action</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3">Image</th>
+                    <th className="p-3">SKU</th>
+                    <th className="p-3">Price</th>
+                    <th className="p-3">Compare_at_price</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {filteredProducts.map((variant, index) => {
+                    const isLoading = loadingIds.includes(variant.id);
+
+                    return (
                       <tr
                         key={variant._id}
                         className="border-b hover:bg-gray-50"
                       >
+                        {/* Action checkbox */}
                         <td className="p-3">
                           <input
                             type="checkbox"
                             className="w-4 h-4 cursor-pointer"
                             checked={selectedProducts.includes(variant.id)}
                             onChange={() => toggleSelection(variant.id)}
+                            disabled={isLoading}
                           />
                         </td>
+
+                        {/* Status */}
                         <td className="p-3">
                           <div
                             className={`w-2 h-2 rounded-full ${
@@ -1817,22 +1825,8 @@ updated.forEach((variant) => {
                             title={variant.status}
                           />
                         </td>
-                        {/* <td className="p-3">
-                          {variant.variantImages &&
-                          variant.variantImages.length > 0 ? (
-                            <img
-                              src={variant.variantImages[0].src}
-                              alt={
-                                variant.variantImages[0].alt || "Variant image"
-                              }
-                              className="w-16 h-16 object-contain rounded border"
-                            />
-                          ) : (
-                            <span className="text-gray-400 text-sm">
-                              No Image
-                            </span>
-                          )}
-                        </td> */}
+
+                        {/* Image */}
                         <td className="p-3">
                           {variant.variantImages && variant.image_id ? (
                             (() => {
@@ -1858,36 +1852,34 @@ updated.forEach((variant) => {
                             </span>
                           )}
                         </td>
+
+                        {/* SKU */}
                         <td
                           className="p-3 cursor-pointer hover:underline"
                           onClick={() => {
-                            navigate(
-                              `/product/${variant.shopifyId}/variants/${variant.id}`,
-                              {
-                                state: {
-                                  productId: variant.shopifyId,
-                                  variantId: variant.id,
-                                },
-                              }
-                            );
+                            // your navigation logic here
+                            // e.g. navigate(`/product/${variant.shopifyId}/variants/${variant.id}`, { state: { productId: variant.shopifyId, variantId: variant.id } });
                           }}
                         >
                           {variant.sku || "N/A"}
                         </td>
 
+                        {/* Price Input + Edit / Tick / Cancel buttons */}
                         <td className="p-3">
                           <div className="relative w-36 flex items-center">
                             <input
                               type="text"
                               value={variant.price || ""}
-                              readOnly={!variant.isEditable}
+                              readOnly={!variant.isEditable || isLoading}
                               onChange={(e) => {
                                 const updated = [...filteredProducts];
                                 updated[index].price = e.target.value;
                                 setFilteredProducts(updated);
                               }}
                               className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
-                                variant.isEditable ? "bg-white" : "bg-gray-100"
+                                variant.isEditable && !isLoading
+                                  ? "bg-white"
+                                  : "bg-gray-100"
                               } text-black pr-12`}
                             />
 
@@ -1900,31 +1892,60 @@ updated.forEach((variant) => {
                                     updated[index].isEditable = true;
                                     setFilteredProducts(updated);
                                   }}
+                                  disabled={isLoading}
                                 />
                               ) : (
                                 <>
-                                  {/* <button
-                                    className="text-green-600 text-sm"
-                                    onClick={() =>
-                                      handlePriceUpdate(variant.id)
-                                    }
-                                  >
-                                    ✔
-                                  </button> */}
                                   <button
-                                    className="text-green-600 text-sm"
+                                    className="text-green-600 text-sm flex items-center justify-center"
+                                    disabled={isLoading}
                                     onClick={async () => {
-                                      await handlePriceUpdate(variant.id);
-
-                                      const updated = [...filteredProducts];
-                                      updated[index].isEditable = false;
-                                      setFilteredProducts(updated);
+                                      setLoadingIds((prev) => [
+                                        ...prev,
+                                        variant.id,
+                                      ]);
+                                      try {
+                                        await handlePriceUpdate(variant.id);
+                                        const updated = [...filteredProducts];
+                                        updated[index].isEditable = false;
+                                        setFilteredProducts(updated);
+                                      } catch (error) {
+                                        alert("Update failed");
+                                      }
+                                      setLoadingIds((prev) =>
+                                        prev.filter((id) => id !== variant.id)
+                                      );
                                     }}
                                   >
-                                    ✔
+                                    {isLoading ? (
+                                      <svg
+                                        className="animate-spin h-4 w-4 text-green-600"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <circle
+                                          className="opacity-25"
+                                          cx="12"
+                                          cy="12"
+                                          r="10"
+                                          stroke="currentColor"
+                                          strokeWidth="4"
+                                        />
+                                        <path
+                                          className="opacity-75"
+                                          fill="currentColor"
+                                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                        />
+                                      </svg>
+                                    ) : (
+                                      "✔"
+                                    )}
                                   </button>
+
                                   <button
                                     className="text-red-600 text-sm"
+                                    disabled={isLoading}
                                     onClick={() => {
                                       const updated = [...filteredProducts];
                                       updated[index].isEditable = false;
@@ -1939,12 +1960,13 @@ updated.forEach((variant) => {
                           </div>
                         </td>
 
+                        {/* Compare_at_price input + Edit / Tick / Cancel buttons */}
                         <td className="p-3">
                           <div className="relative w-36 flex items-center">
                             <input
                               type="text"
                               value={variant.compare_at_price || ""}
-                              readOnly={!variant.isEditable}
+                              readOnly={!variant.isEditable || isLoading}
                               onChange={(e) => {
                                 const updated = [...filteredProducts];
                                 updated[index].compare_at_price =
@@ -1952,11 +1974,12 @@ updated.forEach((variant) => {
                                 setFilteredProducts(updated);
                               }}
                               className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
-                                variant.isEditable ? "bg-white" : "bg-gray-100"
-                              } text-black pr-12`} // padding for icon space
+                                variant.isEditable && !isLoading
+                                  ? "bg-white"
+                                  : "bg-gray-100"
+                              } text-black pr-12`}
                             />
 
-                            {/* Icon Group (Edit / Tick / Cross) */}
                             <div className="absolute right-2 flex gap-1 items-center">
                               {!variant.isEditable ? (
                                 <FaEdit
@@ -1966,19 +1989,60 @@ updated.forEach((variant) => {
                                     updated[index].isEditable = true;
                                     setFilteredProducts(updated);
                                   }}
+                                  disabled={isLoading}
                                 />
                               ) : (
                                 <>
                                   <button
-                                    className="text-green-600 text-sm"
-                                    onClick={() =>
-                                      handlePriceUpdate(variant.id)
-                                    }
+                                    className="text-green-600 text-sm flex items-center justify-center"
+                                    disabled={isLoading}
+                                    onClick={async () => {
+                                      setLoadingIds((prev) => [
+                                        ...prev,
+                                        variant.id,
+                                      ]);
+                                      try {
+                                        await handlePriceUpdate(variant.id);
+                                        const updated = [...filteredProducts];
+                                        updated[index].isEditable = false;
+                                        setFilteredProducts(updated);
+                                      } catch (error) {
+                                        alert("Update failed");
+                                      }
+                                      setLoadingIds((prev) =>
+                                        prev.filter((id) => id !== variant.id)
+                                      );
+                                    }}
                                   >
-                                    ✔
+                                    {isLoading ? (
+                                      <svg
+                                        className="animate-spin h-4 w-4 text-green-600"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <circle
+                                          className="opacity-25"
+                                          cx="12"
+                                          cy="12"
+                                          r="10"
+                                          stroke="currentColor"
+                                          strokeWidth="4"
+                                        />
+                                        <path
+                                          className="opacity-75"
+                                          fill="currentColor"
+                                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                        />
+                                      </svg>
+                                    ) : (
+                                      "✔"
+                                    )}
                                   </button>
+
                                   <button
                                     className="text-red-600 text-sm"
+                                    disabled={isLoading}
                                     onClick={() => {
                                       const updated = [...filteredProducts];
                                       updated[index].isEditable = false;
@@ -1993,10 +2057,10 @@ updated.forEach((variant) => {
                           </div>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    );
+                  })}
+                </tbody>
+              </table>
             )}
           </div>
         ))}
@@ -2023,136 +2087,174 @@ updated.forEach((variant) => {
                       <th className="p-3">Images</th>
                       <th className="p-3">SKU</th>
                       <th className="p-3">Inventory</th>
+                      {admin && <th className="p-3 text-xs">Shopify ID</th>}
                     </tr>
                   </thead>
 
                   <tbody>
-                    {filteredProducts.map((variant, index) => (
-                      <tr
-                        key={variant.id}
-                        className="border-b hover:bg-gray-50"
-                      >
-                        <td className="p-3">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4 cursor-pointer"
-                            checked={selectedProducts.includes(variant.id)}
-                            onChange={() => toggleSelection(variant.id)}
-                          />
-                        </td>
-                        <td className="p-3">
-                          <div
-                            className={`w-2 h-2 rounded-full ${
-                              variant.status === "active"
-                                ? "bg-green-500"
-                                : "bg-red-500"
-                            }`}
-                            title={variant.status}
-                          />
-                        </td>
-                        <td className="p-3">
-                          {variant.variantImages && variant.image_id ? (
-                            (() => {
-                              const matchedImage = variant.variantImages.find(
-                                (img) =>
-                                  String(img.id) === String(variant.image_id)
-                              );
-                              return matchedImage ? (
-                                <img
-                                  src={matchedImage.src}
-                                  alt={matchedImage.alt || "Variant image"}
-                                  className="w-16 h-16 object-contain rounded border"
-                                />
-                              ) : (
-                                <span className="text-gray-400 text-sm">
-                                  No Image
-                                </span>
-                              );
-                            })()
-                          ) : (
-                            <span className="text-gray-400 text-sm">
-                              No Image
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-3">{variant.sku || "N/A"}</td>
+                    {filteredProducts.map((variant, index) => {
+                      const isLoading = loadingIds.includes(variant.id);
 
-                        {/* <td className="p-3">
-                          <div className="relative w-32">
+                      return (
+                        <tr
+                          key={variant.id}
+                          className="border-b hover:bg-gray-50"
+                        >
+                          <td className="p-3">
                             <input
-                              type="text"
-                              value={variant.inventory_quantity || "0.00"}
-                              onChange={(e) => {
-                                const updated = [...filteredProducts];
-                                updated[index].inventory_quantity =
-                                  e.target.value;
-                                setFilteredProducts(updated);
-                              }}
-                              className="w-full text-sm px-2 py-1 border border-gray-300 rounded-md bg-white text-black"
+                              type="checkbox"
+                              className="w-4 h-4 cursor-pointer"
+                              checked={selectedProducts.includes(variant.id)}
+                              onChange={() => toggleSelection(variant.id)}
+                              disabled={isLoading}
                             />
-                          </div>
-                        </td> */}
-                        <td className="p-3">
-                          <div className="relative w-36 flex items-center">
-                            <input
-                              type="text"
-                              value={variant.inventory_quantity || "0"}
-                              readOnly={!variant.isEditable}
-                              onChange={(e) => {
-                                const updated = [...filteredProducts];
-                                updated[index].inventory_quantity =
-                                  e.target.value;
-                                setFilteredProducts(updated);
-                              }}
-                              className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
-                                variant.isEditable ? "bg-white" : "bg-gray-100"
-                              } text-black pr-12`}
+                          </td>
+
+                          <td className="p-3">
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                variant.status === "active"
+                                  ? "bg-green-500"
+                                  : "bg-red-500"
+                              }`}
+                              title={variant.status}
                             />
+                          </td>
 
-                            <div className="absolute right-2 flex gap-1 items-center">
-                              {!variant.isEditable ? (
-                                <FaEdit
-                                  className="text-gray-400 cursor-pointer"
-                                  onClick={() => {
-                                    const updated = [...filteredProducts];
-                                    updated[index].isEditable = true;
-                                    setFilteredProducts(updated);
-                                  }}
-                                />
-                              ) : (
-                                <>
-                                  <button
-                                    className="text-green-600 text-sm"
-                                     onClick={async () => {
-                                      await handleQuantityUpdate(variant.id);
+                          <td className="p-3">
+                            {variant.variantImages && variant.image_id ? (
+                              (() => {
+                                const matchedImage = variant.variantImages.find(
+                                  (img) =>
+                                    String(img.id) === String(variant.image_id)
+                                );
+                                return matchedImage ? (
+                                  <img
+                                    src={matchedImage.src}
+                                    alt={matchedImage.alt || "Variant image"}
+                                    className="w-16 h-16 object-contain rounded border"
+                                  />
+                                ) : (
+                                  <span className="text-gray-400 text-sm">
+                                    No Image
+                                  </span>
+                                );
+                              })()
+                            ) : (
+                              <span className="text-gray-400 text-sm">
+                                No Image
+                              </span>
+                            )}
+                          </td>
 
-                                      const updated = [...filteredProducts];
-                                      updated[index].isEditable = false;
-                                      setFilteredProducts(updated);
-                                    }}
-                                  >
-                                    ✔
-                                  </button>
-                                  <button
-                                    className="text-red-600 text-sm"
+                          <td className="p-3">{variant.sku || "N/A"}</td>
+
+                          <td className="p-3">
+                            <div className="relative w-36 flex items-center">
+                              <input
+                                type="text"
+                                value={variant.inventory_quantity || "0"}
+                                readOnly={!variant.isEditable || isLoading}
+                                onChange={(e) => {
+                                  const updated = [...filteredProducts];
+                                  updated[index].inventory_quantity =
+                                    e.target.value;
+                                  setFilteredProducts(updated);
+                                }}
+                                className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
+                                  variant.isEditable && !isLoading
+                                    ? "bg-white"
+                                    : "bg-gray-100"
+                                } text-black pr-12`}
+                              />
+
+                              <div className="absolute right-2 flex gap-1 items-center">
+                                {!variant.isEditable ? (
+                                  <FaEdit
+                                    className="text-gray-400 cursor-pointer"
                                     onClick={() => {
-                                      const updated = [...filteredProducts];
-                                      updated[index].isEditable = false;
-                                      setFilteredProducts(updated);
+                                      if (!isLoading) {
+                                        const updated = [...filteredProducts];
+                                        updated[index].isEditable = true;
+                                        setFilteredProducts(updated);
+                                      }
                                     }}
-                                  >
-                                    ✖
-                                  </button>
-                                </>
-                              )}
+                                  />
+                                ) : (
+                                  <>
+                                    <button
+                                      className="text-green-600 text-sm flex items-center justify-center"
+                                      disabled={isLoading}
+                                      onClick={async () => {
+                                        setLoadingIds((prev) => [
+                                          ...prev,
+                                          variant.id,
+                                        ]);
+                                        try {
+                                          await handleQuantityUpdate(
+                                            variant.id
+                                          );
+                                          const updated = [...filteredProducts];
+                                          updated[index].isEditable = false;
+                                          setFilteredProducts(updated);
+                                        } catch (error) {
+                                          alert("Update failed");
+                                        }
+                                        setLoadingIds((prev) =>
+                                          prev.filter((id) => id !== variant.id)
+                                        );
+                                      }}
+                                    >
+                                      {isLoading ? (
+                                        <svg
+                                          className="animate-spin h-4 w-4 text-green-600"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                          />
+                                          <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                          />
+                                        </svg>
+                                      ) : (
+                                        "✔"
+                                      )}
+                                    </button>
+                                    <button
+                                      className="text-red-600 text-sm"
+                                      disabled={isLoading}
+                                      onClick={() => {
+                                        const updated = [...filteredProducts];
+                                        updated[index].isEditable = false;
+                                        setFilteredProducts(updated);
+                                      }}
+                                    >
+                                      ✖
+                                    </button>
+                                  </>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        {admin && (
-                          <td className="p-3 text-xs">#{variant.shopifyId}</td>
-                        )}
-                      </tr>
-                    ))}
+                          </td>
+
+                          {admin && (
+                            <td className="p-3 text-xs">
+                              #{variant.shopifyId}
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

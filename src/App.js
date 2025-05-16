@@ -36,6 +36,7 @@ import OnBoard from "./pages/OnBoardUser";
 import ApiCredentials from "./pages/ApiCredentials";
 import { NotificationProvider } from "./context api/NotificationContext";
 import Notification from "./pages/Notification";
+import OrdersDetails from "./Subcription/ordersDetails";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -132,6 +133,10 @@ const App = () => {
           <Route
             path="/promotions"
             element={<ProtectedForms element={<Promotion />} />}
+          />
+          <Route
+            path="/order/:orderId"
+            element={<ProtectedForms element={<OrdersDetails />} />}
           />
            <Route
             path="/notifications"

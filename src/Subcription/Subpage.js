@@ -5,6 +5,7 @@ import { FaTimes } from "react-icons/fa";
 import { CreateCheckoutUrl } from "../component/Checkout";
 import UseFetchUserData from "../component/fetchUser";
 import { HiOutlineRefresh } from "react-icons/hi";
+import { useNavigate } from "react-router-dom";
 const SubscriptionHistory = () => {
   const { userData, loading, error, variantId } = UseFetchUserData();
 
@@ -17,38 +18,36 @@ const SubscriptionHistory = () => {
   const [quantity, setQuantity] = useState(1);
   const pricePerCredit = 10;
   const dynamicPrice = quantity * Price;
-
+  const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const dialogRef = useRef(null);
 
   const fetchSubscriptions = async () => {
-  const userId = localStorage.getItem("userid");
+    const userId = localStorage.getItem("userid");
 
-  if (!userId) {
-    console.error("User ID not found in localStorage.");
-    return;
-  }
-
-  try {
-    const res = await fetch(
-      `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`,
-      { method: "GET" }
-    );
-
-    if (res.ok) {
-      const json = await res.json();
-      const sortedSubscriptions = json.data.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-      setSubscriptions(sortedSubscriptions);
-    } else {
-      console.error("Failed to fetch subscriptions:", res.status);
+    if (!userId) {
+      console.error("User ID not found in localStorage.");
+      return;
     }
-  } catch (error) {
-    console.error("Error fetching subscriptions:", error);
-  }
-};
 
+    try {
+      const res = await fetch(`https://multi-vendor-marketplace.vercel.app/order/order/${userId}`, {
+        method: "GET",
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const sortedSubscriptions = json.data.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setSubscriptions(sortedSubscriptions);
+      } else {
+        console.error("Failed to fetch subscriptions:", res.status);
+      }
+    } catch (error) {
+      console.error("Error fetching subscriptions:", error);
+    }
+  };
 
   const handleBuyNow = () => {
     const buyCreditUrl = CreateCheckoutUrl(
@@ -213,11 +212,22 @@ const SubscriptionHistory = () => {
                               itemIndex % 2 === 0 ? "bg-white" : "bg-gray-100"
                             } w-full`}
                           >
-                            <td className="p-3">{index + 1}</td>
+                            <td className="p-3">#{101 + index}</td>
                             <td className="p-3">
                               {formatDate(subscription.createdAt)}
                             </td>
-                            <td className="p-3">
+                            <td
+                              className="p-3 cursor-pointer hover:underline"
+                              onClick={() => {
+                                console.log(
+                                  "Navigating with order data:",
+                                  subscription
+                                );
+                                navigate(`/order/${item.id}`, {
+                                  state: { order: subscription,productName:item.name,sku:item.sku },
+                                });
+                              }}
+                            >
                               {item.name}
                               <br />
                               <span className="text-xs text-gray-500">

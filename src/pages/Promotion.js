@@ -54,6 +54,8 @@ const Promotion = () => {
   const [Loading, setLoading] = useState(false);
   const modalRef = useRef();
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  const [selectedVariant, setSelectedVariant] = useState(null);
+
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("Active Promotions") || "Promotions Details";
   });
@@ -170,38 +172,43 @@ const Promotion = () => {
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
   const handleSubmitPromotion = async () => {
-    const userId = localStorage.getItem("userid");
-    const promoPrice = promoPrices[selectedProduct._id];
+  const userId = localStorage.getItem("userid");
 
-    if (!modalStartDate || !modalEndDate) {
-      return alert("Please enter both start and end date.");
-    }
+  // Ensure selectedVariant holds the actual variant object
+  const promoPrice = promoPrices[selectedVariant.id]; // Shopify Variant ID
 
-    try {
-      const res = await axios.post(
-        `https://multi-vendor-marketplace.vercel.app/promo/${selectedProduct._id}`,
-        {
-          promoPrice,
-          startDate: modalStartDate,
-          endDate: modalEndDate,
-          userId,
-        }
-      );
+  if (!modalStartDate || !modalEndDate) {
+    return alert("Please enter both start and end date.");
+  }
 
-      showToast("success", "Promotion created successfully!");
-      setModalOpen(false);
-      setModalStartDate("");
-      setModalEndDate("");
-      window.location.reload();
-    } catch (error) {
-      console.error("Error adding promotion:", error);
-      alert("Failed to add promotion.");
-    }
-  };
-  const addToPromotions = (product) => {
+  try {
+    const res = await axios.post(
+      `https://multi-vendor-marketplace.vercel.app/promo/${selectedVariant.id}`, // variant ID as param
+      {
+        promoPrice,
+        startDate: modalStartDate,
+        endDate: modalEndDate,
+        userId,
+      }
+    );
+
+    showToast("success", "Promotion created successfully!");
+    setModalOpen(false);
+    setModalStartDate("");
+    setModalEndDate("");
+    window.location.reload();
+  } catch (error) {
+    console.error("Error adding promotion:", error);
+    alert("Failed to add promotion.");
+  }
+};
+
+  const addToPromotions = (product,variant) => {
     console.log(product);
 
     setSelectedProduct(product);
+      setSelectedVariant(variant);     // Crucial: use this in handleSubmitPromotion
+
     setModalOpen(true);
   };
 
@@ -399,7 +406,7 @@ const Promotion = () => {
                     <div className="flex flex-col md:flex-row md:justify-between">
                       <div>
                         <p className="font-semibold text-base text-black">
-                          {product.productName}
+                          {product.variantName}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
                           {new Date(product.startDate).toLocaleString()} –{" "}
@@ -423,7 +430,7 @@ const Promotion = () => {
                           alt="Products"
                           className="w-4 h-4"
                         />
-                        <span>{product.currentStock || 0}</span>
+                        <span>{product.variantQuantity || 0}</span>
                       </div>
                     </div>
 
@@ -511,94 +518,102 @@ const Promotion = () => {
             </div>
           )} */}
           {activeTab === "Add Promotions" && (
-            <div className="max-sm:overflow-auto border rounded-lg">
-              <table className="w-full border-collapse bg-white">
-                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-                  <tr>
-                    <th className="p-3">LISTING NAME</th>
-                    <th className="p-3">SELLER_SKU</th>
-                    <th className="p-3">ORIGINAL_PRICE</th>
-                    <th className="p-3">PROMO_PRICE</th>
-                    <th className="p-3">ADD PROMOTION</th>
+  <div className="max-sm:overflow-auto border rounded-lg">
+    <table className="w-full border-collapse bg-white">
+      <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+        <tr>
+          <th className="p-3">LISTING NAME</th>
+          <th className="p-3">SELLER_SKU</th>
+          <th className="p-3">ORIGINAL_PRICE</th>
+          <th className="p-3">PROMO_PRICE</th>
+          <th className="p-3">ADD PROMOTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        {filteredProducts.map((product) => {
+          const isCollapsed = collapsedProducts[product._id];
+
+          return (
+            <React.Fragment key={product._id}>
+              {/* Product Row (clickable, highlighted and right-aligned arrow) */}
+              <tr
+                className="font-semibold cursor-pointer select-none bg-blue-50"
+                onClick={() => toggleCollapse(product._id)}
+              >
+                <td className="p-3" colSpan={5}>
+                  <div className="flex justify-between items-center">
+                    <span>
+                      {product.title !== "Job Listing"
+                        ? product.title
+                        : "Job Search Listing"}
+                    </span>
+                    {isCollapsed ? (
+                      <FiChevronRight className="ml-2" />
+                    ) : (
+                      <FiChevronDown className="ml-2" />
+                    )}
+                  </div>
+                </td>
+              </tr>
+
+              {/* Variant rows */}
+              {!isCollapsed &&
+                product.variants.map((variant) => (
+                  <tr key={variant.id} className="border-b hover:bg-gray-50">
+                    <td className="p-3">
+                      <div className="font-medium text-gray-800">
+                        {variant.title ||
+                          [
+                            variant.option1,
+                            variant.option2,
+                            variant.option3,
+                          ]
+                            .filter(Boolean)
+                            .join(" / ")}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Listing:{" "}
+                        {product.title !== "Job Listing"
+                          ? product.title
+                          : "Job Search Listing"}
+                      </div>
+                    </td>
+                    <td className="p-3">{variant.sku || "N/A"}</td>
+                    <td className="p-3">
+                      ${variant.price || product.oldPrice || "N/A"}
+                    </td>
+                    <td className="p-3">
+                      <input
+                        type="text"
+                        value={promoPrices[variant.id] || ""}
+                        onChange={(e) =>
+                          setPromoPrices((prev) => ({
+                            ...prev,
+                            [variant.id]: e.target.value,
+                          }))
+                        }
+                        className="border border-gray-300 rounded px-2 py-1 text-sm w-full"
+                        placeholder="Enter promo price"
+                      />
+                    </td>
+                    <td className="p-3">
+                      <button
+                        className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
+                        onClick={() => addToPromotions(product, variant)}
+                      >
+                        Add to promotion
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredProducts.map((product) => {
-                    const isCollapsed = collapsedProducts[product._id];
+                ))}
+            </React.Fragment>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+)}
 
-                    return (
-                      <React.Fragment key={product._id}>
-                        {/* Product Row (clickable) */}
-                        <tr
-                          className="font-semibold cursor-pointer select-none"
-                          onClick={() => toggleCollapse(product._id)}
-                        >
-                          <td className="p-3 flex items-center" colSpan={5}>
-                            {isCollapsed ? (
-                              <FiChevronRight className="mr-2" />
-                            ) : (
-                              <FiChevronDown className="mr-2" />
-                            )}
-                            {product.title !== "Job Listing"
-                              ? product.title
-                              : "Job Search Listing"}
-                          </td>
-                        </tr>
-
-                        {/* Variant rows, show only if expanded (not collapsed) */}
-                        {!isCollapsed &&
-                          product.variants.map((variant) => (
-                            <tr
-                              key={variant.id}
-                              className="border-b hover:bg-gray-50"
-                            >
-                              <td className="p-3">
-                                {variant.title ||
-                                  [
-                                    variant.option1,
-                                    variant.option2,
-                                    variant.option3,
-                                  ]
-                                    .filter(Boolean)
-                                    .join(" / ")}
-                              </td>
-                              <td className="p-3">{variant.sku || "N/A"}</td>
-                              <td className="p-3">
-                                ${variant.price || product.oldPrice || "N/A"}
-                              </td>
-                              <td className="p-3">
-                                <input
-                                  type="text"
-                                  value={promoPrices[variant.id] || ""}
-                                  onChange={(e) =>
-                                    setPromoPrices((prev) => ({
-                                      ...prev,
-                                      [variant.id]: e.target.value,
-                                    }))
-                                  }
-                                  className="border border-gray-300 rounded px-2 py-1 text-sm w-full"
-                                  placeholder="Enter promo price"
-                                />
-                              </td>
-                              <td className="p-3">
-                                <button
-                                  className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
-                                  onClick={() =>
-                                    addToPromotions(product, variant)
-                                  }
-                                >
-                                  Add to promotion
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                      </React.Fragment>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
           {activeTab === "Submitted Promotions" && (
             <table className="w-full border-collapse bg-white">
               <thead className="bg-gray-100 text-left text-gray-600 text-sm">

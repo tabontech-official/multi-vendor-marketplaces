@@ -22,31 +22,33 @@ const SubscriptionHistory = () => {
   const dialogRef = useRef(null);
 
   const fetchSubscriptions = async () => {
-    const email = localStorage.getItem("email");
-    if (!email) {
-      console.error("Email not found in localStorage.");
-      return;
-    }
+  const userId = localStorage.getItem("userid");
 
-    try {
-      const res = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/order/order/${email}`,
-        { method: "GET" }
+  if (!userId) {
+    console.error("User ID not found in localStorage.");
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`,
+      { method: "GET" }
+    );
+
+    if (res.ok) {
+      const json = await res.json();
+      const sortedSubscriptions = json.data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
-
-      if (res.ok) {
-        const json = await res.json();
-        const sortedSubscriptions = json.data.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        setSubscriptions(sortedSubscriptions);
-      } else {
-        console.error("Failed to fetch subscriptions:", res.status);
-      }
-    } catch (error) {
-      console.error("Error fetching subscriptions:", error);
+      setSubscriptions(sortedSubscriptions);
+    } else {
+      console.error("Failed to fetch subscriptions:", res.status);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching subscriptions:", error);
+  }
+};
+
 
   const handleBuyNow = () => {
     const buyCreditUrl = CreateCheckoutUrl(

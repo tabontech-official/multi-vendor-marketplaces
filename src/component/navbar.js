@@ -148,6 +148,12 @@ const Navbar = () => {
                   <div className="p-4 border-b font-semibold text-gray-800">
                     <div className="flex justify-between items-center">
                       <span>Changelog</span>
+                        <a
+                        href="/notifications"
+                        className="text-blue-600 text-sm hover:underline"
+                      >
+                        Show more
+                      </a>
                       {/* <svg
                         className="w-4 h-4 text-gray-400"
                         fill="none"
@@ -186,14 +192,14 @@ const Navbar = () => {
                         </div>
                       </li>
                     ))}
-                    <div className="border-t px-4 py-2">
+                    {/* <div className="border-t px-4 py-2">
                       <a
                         href="/notifications"
                         className="text-blue-600 text-sm hover:underline"
                       >
                         Show more
                       </a>
-                    </div>
+                    </div> */}
                   </ul>
                   {/* 
                   {notifications.length > 10 && (

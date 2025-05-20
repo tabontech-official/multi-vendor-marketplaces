@@ -11,6 +11,8 @@ const OnBoard = () => {
   const [name, setName] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenPopup, setIsOpenPopup] = useState(false);
+
   const [selectedModules, setSelectedModules] = useState([]);
   const [userRole, setUserRole] = useState(null);
   const [users, setUsers] = useState([]);
@@ -115,6 +117,10 @@ const OnBoard = () => {
     return [];
   };
 
+  const togglePopupForAddinOrganizations = () => {
+    setIsOpenPopup(!isOpenPopup);
+  };
+
   const togglePopup = () => {
     setIsOpen(!isOpen);
   };
@@ -138,6 +144,7 @@ const OnBoard = () => {
             email,
             role,
             modules: selectedModules,
+            creatorId: localStorage.getItem("userid")
           }),
         }
       );
@@ -176,6 +183,10 @@ const OnBoard = () => {
     {
       name: "Reports",
       subModules: ["Catalog Performance", "eCommerence Consultion"],
+    },
+     {
+      name: "OnBoardUser",
+      subModules: [],
     },
   ];
   const handleModuleSelection = (moduleName) => {
@@ -221,6 +232,13 @@ const OnBoard = () => {
             onChange={(e) => setSearchVal(e.target.value)}
             className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <button
+            onClick={togglePopupForAddinOrganizations}
+            className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+          >
+            <HiPlus className="w-5 h-5" />
+            New
+          </button>
         </div>
 
         <div className="overflow-x-auto border rounded-lg">
@@ -330,6 +348,110 @@ const OnBoard = () => {
           </div>
         )}
       </div>
+      {isOpenPopup && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => setIsOpenPopup(false)}
+        >
+          <div
+            className="bg-white p-4 rounded-lg shadow-lg w-2/4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm">Manage User</h2>
+                <FaArrowRight className="text-sm" />
+                <h2 className="text-black text-sm">Add User</h2>
+              </div>
+
+              <button
+                onClick={() => setIsOpenPopup(false)}
+                className="text-gray-500 hover:text-red-500"
+              >
+                <FaTimes size={16} />
+              </button>
+            </div>
+
+            <h2 className="text-black text-sm font-semibold mt-3">Add User</h2>
+            <div className="space-y-4">
+              {" "}
+              <div className="flex flex-col w-full">
+                <label className="text-sm text-gray-700 mb-1">Role *</label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Role</option>
+                  {getRoleOptions().map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col w-full">
+                <label className="text-sm text-gray-700 mb-1">Email *</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter email..."
+                />
+              </div>
+              <div className="flex flex-col w-full">
+                <label className="text-sm text-gray-700 mb-1">Modules *</label>
+                <div className="border px-3 py-2 rounded-md">
+                  {modules.map((module, index) => (
+                    <div key={index} className="flex flex-col">
+                      <label className="flex items-center gap-2 py-1">
+                        <input
+                          type="checkbox"
+                          checked={selectedModules.includes(module.name)}
+                          onChange={() => handleModuleSelection(module.name)}
+                          className="form-checkbox text-blue-500"
+                        />
+                        <span className="text-sm font-semibold">
+                          {module.name}
+                        </span>
+                      </label>
+
+                      {selectedModules.includes(module.name) &&
+                        module.subModules.length > 0 && (
+                          <div className="pl-6 mt-1">
+                            {module.subModules.map((subModule, subIndex) => (
+                              <label
+                                key={subIndex}
+                                className="flex items-center gap-2 py-1"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={selectedModules.includes(subModule)}
+                                  onChange={() =>
+                                    handleModuleSelection(subModule)
+                                  }
+                                  className="form-checkbox text-blue-500"
+                                />
+                                <span className="text-sm">{subModule}</span>
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <button
+                onClick={handleUpdateTags}
+                className="w-full px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
+              >
+                Create User
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

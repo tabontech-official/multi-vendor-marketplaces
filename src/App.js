@@ -37,6 +37,7 @@ import ApiCredentials from "./pages/ApiCredentials";
 import { NotificationProvider } from "./context api/NotificationContext";
 import Notification from "./pages/Notification";
 import OrdersDetails from "./Subcription/ordersDetails";
+import FullItem from "./pages/FullItem";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -95,6 +96,10 @@ const App = () => {
           <Route
             path="/manage-product"
             element={<PrivateRoute element={<Dashboard />} />}
+          />
+           <Route
+            path="/order/:orderId/fulfillment_orders"
+            element={<PrivateRoute element={<FullItem />} />}
           />
           <Route
             path="/inventory"

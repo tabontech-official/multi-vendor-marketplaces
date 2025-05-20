@@ -221,10 +221,11 @@ const SubscriptionHistory = () => {
                               onClick={() => {
                                 console.log(
                                   "Navigating with order data:",
-                                  subscription
+                                  subscription,
+                                  index
                                 );
                                 navigate(`/order/${item.id}`, {
-                                  state: { order: subscription,productName:item.name,sku:item.sku },
+                                  state: { order: subscription,productName:item.name,sku:item.sku,index: 101 + index, },
                                 });
                               }}
                             >

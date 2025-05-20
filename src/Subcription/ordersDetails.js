@@ -1,10 +1,12 @@
 import React from "react";
 import { MdEdit } from "react-icons/md";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const OrdersDetails = () => {
   const location = useLocation();
-  const { order, productName, sku } = location.state || {};
+    const navigate = useNavigate();
+  
+  const { order, productName, sku,index } = location.state || {};
   const totalPrice = order?.lineItems
     .reduce((acc, item) => {
       const price = parseFloat(item.price);
@@ -12,7 +14,11 @@ const OrdersDetails = () => {
       return acc + (isNaN(price) || isNaN(qty) ? 0 : price * qty);
     }, 0)
     .toFixed(2);
-
+const formattedDate = new Date(order.createdAt).toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
       <div className="w-full max-w-6xl grid grid-cols-12 gap-6">
@@ -21,10 +27,10 @@ const OrdersDetails = () => {
           <div class="flex space-x-8">
             <div>
               <span class="text-gray-900 font-semibold block">
-                Orderno: #101
+                Orderno: #{index}
               </span>
               <span class="text-gray-900 font-semibold block mt-1">
-                May 16, 2025 at 8:07 pm from Online store
+                {formattedDate} from Online store
               </span>
             </div>
           </div>
@@ -45,7 +51,7 @@ const OrdersDetails = () => {
                   d="M9 12h6m-3 3v-6m8 6v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2"
                 />
               </svg> */}
-              <span>Unfulfilled (1)</span>
+              <span>Unfulfilled ({order?.lineItems[0].quantity})</span>
             </div>
 
             <div className="border border-gray-200 rounded-lg p-4 space-y-4">
@@ -66,7 +72,17 @@ const OrdersDetails = () => {
               {/* Product item */}
               <div className="flex items-center space-x-4">
                 <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs font-semibold">
-                  Image
+                  {order?.lineItems[0]?.image?.src ? (
+                    <img
+                      src={order.lineItems[0].image.src}
+                      alt={order.lineItems[0].image.alt || "Variant Image"}
+                      className="w-full h-full object-contain rounded"
+                    />
+                  ) : (
+                    <span className="text-gray-400 text-xs font-semibold">
+                      No Image
+                    </span>
+                  )}{" "}
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -92,7 +108,15 @@ const OrdersDetails = () => {
 
               {/* Buttons */}
               <div className="flex space-x-2 justify-end">
-                <button className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition">
+                <button   onClick={() => {
+                                console.log(
+                                  "Navigating with order data:",
+                                  order
+                                );
+                                navigate(`/order/${order.orderId}/fulfillment_orders`, {
+                                  state: { order: order,productName:order.name,sku:order.sku,index },
+                                });
+                              }} className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition">
                   Fulfill item
                 </button>
                 <button className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition">

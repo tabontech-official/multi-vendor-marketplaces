@@ -31,9 +31,12 @@ const SubscriptionHistory = () => {
     }
 
     try {
-      const res = await fetch(`https://multi-vendor-marketplace.vercel.app/order/order/${userId}`, {
-        method: "GET",
-      });
+      const res = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`,
+        {
+          method: "GET",
+        }
+      );
 
       if (res.ok) {
         const json = await res.json();
@@ -188,7 +191,7 @@ const SubscriptionHistory = () => {
                         Product Name
                       </th>
                       <th scope="col" className="p-3">
-                        Quantity
+                        Item
                       </th>
                       <th scope="col" className="p-3">
                         Address
@@ -202,7 +205,7 @@ const SubscriptionHistory = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {subscriptions.map((subscription, index) =>
+                    {/* {subscriptions.map((subscription, index) =>
                       subscription.lineItems.map((item, itemIndex) => {
                         const address = subscription.customer?.default_address;
                         return (
@@ -251,7 +254,72 @@ const SubscriptionHistory = () => {
                           </tr>
                         );
                       })
-                    )}
+                    )} */}
+                    {subscriptions.map((subscription, index) => {
+                      const address = subscription.customer?.default_address;
+                      const firstItem = subscription.lineItems[0];
+                      return (
+                        <tr
+                          key={subscription.orderId}
+                          className={`border-b ${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } w-full`}
+                        >
+                          <td className="p-3">#{subscription.serialNumber}</td>
+                          <td className="p-3">
+                            {formatDate(subscription.createdAt)}
+                          </td>
+                          <td
+                            className="p-3 cursor-pointer hover:underline"
+                            onClick={() => {
+                              navigate(`/order/${firstItem.id}`, {
+                                state: {
+                                  order: subscription,
+                                  productName: firstItem.name,
+                                  sku: firstItem.sku,
+                                  index: 101 + index,
+                                  serialNumber:subscription.serialNumber
+                                },
+                              });
+                            }}
+                          >
+                            {firstItem.name}
+                            <br />
+                            <span className="text-xs text-gray-500">
+                              SKU: {firstItem.sku || "N/A"}
+                            </span>
+                            {/* {subscription.lineItems.length > 1 && (
+                              <div className="text-xs text-blue-500 mt-1">
+                                +{subscription.lineItems.length - 1} more
+                                item(s)
+                              </div>
+                            )} */}
+                          </td>
+                          {/* <td className="p-3">{firstItem.quantity}</td> */}
+                          <td className="p-3">
+                            <div className="text-xs text-blue-500 mt-1">
+                              {subscription.lineItems.length}{" "}
+                              {subscription.lineItems.length === 1
+                                ? "item"
+                                : "items"}
+                            </div>
+                          </td>
+
+                          <td className="p-3">
+                            {address
+                              ? `${address.address1}, ${address.city}, ${address.province}`
+                              : "N/A"}
+                          </td>
+                          <td className="p-3">{address?.country || "N/A"}</td>
+                          <td className="p-3">
+                            $
+                            {(
+                              parseFloat(firstItem.price) * firstItem.quantity
+                            ).toFixed(2)}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

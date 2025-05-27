@@ -22,146 +22,227 @@ const OrdersDetails = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
       <div className="w-full max-w-6xl grid grid-cols-12 gap-6">
-        {/* Left main section */}
         <div className="col-span-8 space-y-6">
           <div class="flex space-x-8">
             <div>
               <span class="text-gray-900 font-semibold block">
-                Orderno: #{index}
+                Orderno: #{order.serialNumber}
               </span>
               <span class="text-gray-900 font-semibold block mt-1">
                 {formattedDate} from Online store
               </span>
             </div>
           </div>
-          {/* Unfulfilled box */}
-          <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
-            <div
-              className={`inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 ${
-                order?.lineItems[0]?.fulfillment_status === "fulfilled"
-                  ? "bg-green-300 text-green-900"
-                  : "bg-yellow-300 text-yellow-900"
-              }`}
-            >
-              {" "}
-              {/* <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12h6m-3 3v-6m8 6v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2"
-                />
-              </svg> */}
-              <span>
-                {order?.lineItems[0].fulfillment_status || "Unfulfilled"} (
-                {order?.lineItems[0].quantity})
-              </span>
-            </div>
-
-            <div className="border border-gray-200 rounded-lg p-4 space-y-4">
-              {/* Location and Delivery */}
-              <div className="text-sm space-y-2">
-                <div>
-                  <p className="text-gray-600 font-semibold">Location</p>
-                  <p className="text-gray-900">Shop location</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 font-semibold">Delivery method</p>
-                  <p className="text-gray-900">Standard</p>
-                </div>
+          {order.lineItems.some((i) => i.fulfillment_status === null) && (
+            <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
+              <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
+                <span>
+                  Unfulfilled (
+                  {
+                    order.lineItems.filter((i) => i.fulfillment_status === null)
+                      .length
+                  }
+                  )
+                </span>
               </div>
 
-              <hr className="border-gray-200" />
-
-              {/* Product item */}
-              <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs font-semibold">
-                  {order?.lineItems[0]?.image?.src ? (
-                    <img
-                      src={order.lineItems[0].image.src}
-                      alt={order.lineItems[0].image.alt || "Variant Image"}
-                      className="w-full h-full object-contain rounded"
-                    />
-                  ) : (
-                    <span className="text-gray-400 text-xs font-semibold">
-                      No Image
-                    </span>
-                  )}{" "}
+              <div className="border border-gray-200 rounded-lg p-4 space-y-4">
+                <div className="text-sm space-y-2">
+                  <div>
+                    <p className="text-gray-600 font-semibold">Location</p>
+                    <p className="text-gray-900">Shop location</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-semibold">
+                      Delivery method
+                    </p>
+                    <p className="text-gray-900">Standard</p>
+                  </div>
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 truncate">
-                    {productName}
-                  </p>
-                  <p className="text-xs text-gray-600 mt-1">
-                    2 <span className="text-gray-400">/ 7</span>
-                  </p>
-                  <p className="text-xs text-gray-500">SKU: {sku}</p>
+                <hr className="border-gray-200" />
+
+                <div className="divide-y border rounded mb-4">
+                  {order.lineItems
+                    .filter((item) => item.fulfillment_status === null)
+                    .map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+                            {item.image?.src ? (
+                              <img
+                                src={item.image.src}
+                                alt={item.image.alt || "Product image"}
+                                className="w-full h-full object-contain rounded"
+                              />
+                            ) : (
+                              <span className="text-gray-400 text-xs font-semibold">
+                                No Image
+                              </span>
+                            )}
+                          </div>
+
+                          <div>
+                            <p className="text-sm font-medium text-gray-800">
+                              {item.name}
+                            </p>
+
+                            {item.variant_title && (
+                              <span className="inline-block text-[10px] px-2 py-1 bg-gray-200 text-gray-600 rounded mt-1">
+                                {item.variant_title}
+                              </span>
+                            )}
+
+                            <p className="text-xs text-gray-500 mt-1">
+                              SKU: {item.sku || "N/A"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <p className="text-sm text-gray-800 font-medium">
+                            ${parseFloat(item.price).toFixed(2)} ×{" "}
+                            {item.quantity - (item.fulfilled_quantity || 0)}
+                          </p>
+                          <p className="text-sm font-semibold text-gray-900">
+                            $
+                            {(
+                              parseFloat(item.price) *
+                              (item.quantity - (item.fulfilled_quantity || 0))
+                            ).toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                 </div>
 
-                <div className="text-right min-w-[90px] font-semibold text-gray-900">
-                  ${order?.lineItems[0].price} × {order?.lineItems[0].quantity}
-                </div>
-
-                {/* <div className="text-gray-600 font-semibold">× 1</div> */}
-
-                <div className="text-right min-w-[90px] font-semibold text-gray-900">
-                  ${totalPrice}
+                <div className="flex space-x-2 justify-end">
+                  <button
+                    onClick={() => {
+                      console.log("Navigating with order data:", order);
+                      navigate(`/order/${order.orderId}/fulfillment_orders`, {
+                        state: {
+                          order: order,
+                          productName: order.name,
+                          sku: order.sku,
+                        },
+                      });
+                    }}
+                    className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
+                  >
+                    Fulfill item
+                  </button>
+                  <button className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition">
+                    Create shipping label
+                  </button>
                 </div>
               </div>
-
-              {/* Buttons */}
-              {/* <div className="flex space-x-2 justify-end">
-                <button
-                  onClick={() => {
-                    console.log("Navigating with order data:", order);
-                    navigate(`/order/${order.orderId}/fulfillment_orders`, {
-                      state: {
-                        order: order,
-                        productName: order.name,
-                        sku: order.sku,
-                        index,
-                      },
-                    });
-                  }}
-                  className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
-                >
-                  Fulfill item
-                </button>
-                <button className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition">
-                  Create shipping label
-                </button>
-              </div> */}
-              {order?.lineItems[0]?.fulfillment_status !== 'fulfilled' && (
-  <div className="flex space-x-2 justify-end">
-    <button
-      onClick={() => {
-        console.log("Navigating with order data:", order);
-        navigate(`/order/${order.orderId}/fulfillment_orders`, {
-          state: {
-            order: order,
-            productName: order.name,
-            sku: order.sku,
-            index,
-          },
-        });
-      }}
-      className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
-    >
-      Fulfill item
-    </button>
-   
-  </div>
-)}
-
             </div>
-          </div>
+          )}
+
+          {/* fullfill box */}
+
+          {order.lineItems.some((i) => Number(i.fulfilled_quantity) > 0) && (
+            <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200">
+                <span className="flex items-center gap-2 text-green-700 text-sm font-semibold">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-300 border rounded text-xs">
+                    Fulfilled (
+                    {
+                      order.lineItems.filter(
+                        (i) => Number(i.fulfilled_quantity) > 0
+                      ).length
+                    }
+                    )
+                  </span>
+                </span>
+                <span className="text-xs text-gray-500 font-medium">
+                  #1018-F1
+                </span>
+              </div>
+
+              {/* Fulfillment info */}
+              <div className="px-4 py-3 text-sm text-gray-700 space-y-1 border-b">
+                <p>
+                  <strong>Location:</strong> Shop location
+                </p>
+                <p>
+                  <strong>Fulfilled:</strong>{" "}
+                  {new Date().toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+                <p>
+                  <strong>Tracking number:</strong>{" "}
+                  {order?.shopifyFulfillments?.[0]?.trackingInfo?.number ||
+                    "N/A"}
+                </p>
+              </div>
+
+              {order.lineItems
+                .filter((item) => Number(item.fulfilled_quantity) > 0)
+                .map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between px-4 py-3 border-t last:border-b"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
+                        {item.image?.src ? (
+                          <img
+                            src={item.image.src}
+                            alt={item.image.alt || "Product"}
+                            className="w-full h-full object-contain rounded"
+                          />
+                        ) : (
+                          <span className="text-gray-400 text-xs">
+                            No Image
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm">
+                        <p className="font-medium text-gray-800">
+                          {item.title}
+                        </p>
+                        {item.variant_title && (
+                          <div className="flex gap-1 flex-wrap mt-1 text-[10px]">
+                            {item.variant_title.split(" / ").map((opt, i) => (
+                              <span
+                                key={i}
+                                className="bg-gray-200 text-gray-600 px-2 py-0.5 rounded"
+                              >
+                                {opt}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          SKU: {item.sku || "N/A"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right text-sm text-gray-800">
+                      <p>
+                        ${parseFloat(item.price).toFixed(2)} ×{" "}
+                        {item.fulfilled_quantity}
+                      </p>
+                      <p className="font-semibold text-gray-900">
+                        $
+                        {(
+                          parseFloat(item.price) * item.fulfilled_quantity
+                        ).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
 
           {/* Paid box */}
           <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-4">
@@ -209,9 +290,7 @@ const OrdersDetails = () => {
           </div>
         </div>
 
-        {/* Right sidebar */}
         <div className="col-span-4 space-y-4">
-          {/* Notes box */}
           <div className="bg-white p-4 border border-gray-300 rounded-xl">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold text-gray-900">Notes</h3>
@@ -225,7 +304,6 @@ const OrdersDetails = () => {
             <p className="text-gray-600 text-sm">No notes from customer</p>
           </div>
 
-          {/* Customer info box */}
           <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
             <h3 className="font-semibold text-gray-900">Customer</h3>
             <button

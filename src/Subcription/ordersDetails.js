@@ -1,12 +1,35 @@
-import React from "react";
+import React, { useState,useEffect } from "react";
 import { MdEdit } from "react-icons/md";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import axios from 'axios';
 
 const OrdersDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [orderData, setOrderData] = useState(null);     
+  const [isLoading, setIsLoading] = useState(true);     
+  const [fetchError, setFetchError] = useState('');      
+ 
 
   const { order, productName, sku, index } = location.state || {};
+useEffect(() => {
+  const fetchOrderData = async () => {
+    try {
+      const response = await axios.get(`https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${order?.orderId}`);
+      setOrderData(response.data.order);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error fetching order:', err);
+      setFetchError('Failed to load order');
+      setIsLoading(false);
+    }
+  };
+
+  if (order?.orderId) {
+    fetchOrderData();
+  }
+}, [order?.orderId]);
   const totalPrice = order?.lineItems
     .reduce((acc, item) => {
       const price = parseFloat(item.price);
@@ -30,6 +53,9 @@ const OrdersDetails = () => {
               </span>
               <span class="text-gray-900 font-semibold block mt-1">
                 {formattedDate} from Online store
+              </span>
+              <span class="text-gray-900 font-semibold block mt-1">
+               {orderData?.name}
               </span>
             </div>
           </div>

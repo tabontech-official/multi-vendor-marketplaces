@@ -4,9 +4,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const OrdersDetails = () => {
   const location = useLocation();
-    const navigate = useNavigate();
-  
-  const { order, productName, sku,index } = location.state || {};
+  const navigate = useNavigate();
+
+  const { order, productName, sku, index } = location.state || {};
   const totalPrice = order?.lineItems
     .reduce((acc, item) => {
       const price = parseFloat(item.price);
@@ -14,11 +14,11 @@ const OrdersDetails = () => {
       return acc + (isNaN(price) || isNaN(qty) ? 0 : price * qty);
     }, 0)
     .toFixed(2);
-const formattedDate = new Date(order.createdAt).toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
+  const formattedDate = new Date(order.createdAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
       <div className="w-full max-w-6xl grid grid-cols-12 gap-6">
@@ -36,7 +36,14 @@ const formattedDate = new Date(order.createdAt).toLocaleDateString('en-US', {
           </div>
           {/* Unfulfilled box */}
           <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
-            <div className="inline-flex items-center space-x-2 bg-yellow-300 text-yellow-900 text-xs font-semibold rounded px-2 py-1 w-max mb-2">
+            <div
+              className={`inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 ${
+                order?.lineItems[0]?.fulfillment_status === "fulfilled"
+                  ? "bg-green-300 text-green-900"
+                  : "bg-yellow-300 text-yellow-900"
+              }`}
+            >
+              {" "}
               {/* <svg
                 className="w-4 h-4"
                 fill="none"
@@ -51,7 +58,10 @@ const formattedDate = new Date(order.createdAt).toLocaleDateString('en-US', {
                   d="M9 12h6m-3 3v-6m8 6v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2"
                 />
               </svg> */}
-              <span>Unfulfilled ({order?.lineItems[0].quantity})</span>
+              <span>
+                {order?.lineItems[0].fulfillment_status || "Unfulfilled"} (
+                {order?.lineItems[0].quantity})
+              </span>
             </div>
 
             <div className="border border-gray-200 rounded-lg p-4 space-y-4">
@@ -107,22 +117,49 @@ const formattedDate = new Date(order.createdAt).toLocaleDateString('en-US', {
               </div>
 
               {/* Buttons */}
-              <div className="flex space-x-2 justify-end">
-                <button   onClick={() => {
-                                console.log(
-                                  "Navigating with order data:",
-                                  order
-                                );
-                                navigate(`/order/${order.orderId}/fulfillment_orders`, {
-                                  state: { order: order,productName:order.name,sku:order.sku,index },
-                                });
-                              }} className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition">
+              {/* <div className="flex space-x-2 justify-end">
+                <button
+                  onClick={() => {
+                    console.log("Navigating with order data:", order);
+                    navigate(`/order/${order.orderId}/fulfillment_orders`, {
+                      state: {
+                        order: order,
+                        productName: order.name,
+                        sku: order.sku,
+                        index,
+                      },
+                    });
+                  }}
+                  className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
+                >
                   Fulfill item
                 </button>
                 <button className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition">
                   Create shipping label
                 </button>
-              </div>
+              </div> */}
+              {order?.lineItems[0]?.fulfillment_status !== 'fulfilled' && (
+  <div className="flex space-x-2 justify-end">
+    <button
+      onClick={() => {
+        console.log("Navigating with order data:", order);
+        navigate(`/order/${order.orderId}/fulfillment_orders`, {
+          state: {
+            order: order,
+            productName: order.name,
+            sku: order.sku,
+            index,
+          },
+        });
+      }}
+      className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
+    >
+      Fulfill item
+    </button>
+   
+  </div>
+)}
+
             </div>
           </div>
 

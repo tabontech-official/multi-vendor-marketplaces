@@ -12,7 +12,7 @@ const FullItem = () => {
   setMessage("");
 
   try {
-    const response = await fetch("https://multi-vendor-marketplace.vercel.app/order/fullFillOrder", {
+    const response = await fetch("http://localhost:5000/order/fullFillOrder", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -128,9 +128,9 @@ const FullItem = () => {
                 <option>UPS</option>
               </select>
             </div>
-            <button className="text-blue-600 text-sm mt-2 hover:underline">
+            {/* <button className="text-blue-600 text-sm mt-2 hover:underline">
               + Add another tracking number
-            </button>
+            </button> */}
           </div>
         </div>
 

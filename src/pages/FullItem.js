@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const FullItem = () => {
   const location = useLocation();
-  const { order, productName, sku, index } = location.state || {};
+const { order: rawOrder, fullOrder, sku, index } = location.state || {};
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");
   const [carrier, setCarrier] = useState("");
-
-
+const navigate=useNavigate()
+const order = {
+  ...rawOrder,
+  lineItems: rawOrder?.lineItems || rawOrder?.line_items || [],
+};
 
   const handleFulfill = async () => {
     setLoading(true);
     setMessage("");
 
-    const itemsToFulfill = order.lineItems
+    const itemsToFulfill = fullOrder.lineItems
       .filter((item) => item.fulfillment_status === null) 
       .map((item) => {
         const qty = quantities[item.id];
@@ -36,7 +39,7 @@ const FullItem = () => {
     }
 
     const payload = {
-      orderId: order.orderId,
+      orderId: fullOrder.orderId,
       trackingInfo: {
         number: trackingNumber,
         company: carrier,
@@ -62,6 +65,7 @@ const FullItem = () => {
 
       if (response.ok) {
         setMessage(" Items fulfilled and inventory updated!");
+        // navigate(`/order/${fullOrder.orderId}`)
       } else {
         setMessage(` Error: ${result.error || "Unknown error"}`);
       }
@@ -76,14 +80,14 @@ const FullItem = () => {
   const [quantities, setQuantities] = useState({});
 
   useEffect(() => {
-    if (order?.lineItems) {
-      const initialQuantities = order.lineItems.reduce((acc, item) => {
+    if (fullOrder?.lineItems) {
+      const initialQuantities = fullOrder.lineItems.reduce((acc, item) => {
         acc[item.id] = item.quantity;
         return acc;
       }, {});
       setQuantities(initialQuantities);
     }
-  }, [order]);
+  }, [fullOrder]);
 
   const handleQuantityChange = (lineItemId, qty) => {
     setQuantities((prev) => ({ ...prev, [lineItemId]: qty }));
@@ -92,7 +96,7 @@ const FullItem = () => {
   return (
     <div className="p-6 min-h-screen">
       <div className="text-sm text-gray-500 mb-2">
-        #{order.serialNumber} &rsaquo;{" "}
+        #{fullOrder.serialNumber} &rsaquo;{" "}
         <span className="text-gray-900 font-semibold">Fulfill item</span>
       </div>
 
@@ -103,7 +107,7 @@ const FullItem = () => {
               <span className="bg-yellow-100 text-yellow-800 px-2 py-1 text-xs font-semibold rounded">
                 Unfulfilled
               </span>
-              <span className="text-sm font-medium">#{index}</span>
+              <span className="text-sm font-medium">{order.name}</span>
             </div>
             <div className="border rounded-lg p-2">
               <div className="text-sm font-semibold border-b-1">
@@ -112,8 +116,8 @@ const FullItem = () => {
 
               <div className="flex items-center gap-4 mt-3">
                 <div>
-                  {order?.lineItems
-                    ?.filter((item) => item.fulfillment_status === null)
+                  {fullOrder?.lineItems
+                    ?.filter((item) => item.fulfillment_status === null || item.fulfillment_status==="partial")
                     .map((item, index) => {
                       const productName = item.name?.split(" - ")[0];
                       const variantOptions =
@@ -208,16 +212,16 @@ const FullItem = () => {
           <div className="border border-gray-200 shadow rounded-lg p-4 space-y-2 text-sm">
             <div className="font-medium">Shipping address</div>
             <div>
-              {order.customer.first_name}
-              {order.customer.last_name}
+              {fullOrder.customer.first_name}
+              {fullOrder.customer.last_name}
             </div>
-            <div>{order.customer?.default_address.address1}</div>
+            <div>{fullOrder.customer?.default_address.address1}</div>
             <div>
-              {order.customer?.default_address.city}{" "}
-              {order.customer?.default_address.province}{" "}
-              {order.customer?.default_address.province_code}
+              {fullOrder.customer?.default_address.city}{" "}
+              {fullOrder.customer?.default_address.province}{" "}
+              {fullOrder.customer?.default_address.province_code}
             </div>
-            <div>{order.customer?.default_address.country_name}</div>
+            <div>{fullOrder.customer?.default_address.country_name}</div>
             {/* <a href="#" className="text-blue-600 text-xs hover:underline">
               View map
             </a> */}

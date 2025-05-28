@@ -17,6 +17,22 @@ const ManageUser = () => {
   const [loading, setLoading] = useState(true);
   const [searchVal, setSearchVal] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedModules([]);
+    } else {
+      const allModules = modules.reduce((acc, module) => {
+        acc.push(module.name);
+        if (module.subModules.length > 0) {
+          acc = acc.concat(module.subModules);
+        }
+        return acc;
+      }, []);
+      setSelectedModules(allModules);
+    }
+    setSelectAll(!selectAll);
+  };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -79,12 +95,20 @@ const ManageUser = () => {
   }, []);
 
   const getRoleOptions = () => {
-    if (userRole === "Dev Admin") {
-      return ["DevAdmin", "MasterAdmin", "Client", "Staff"];
+    if (userRole === "Merchant ") {
+      return [
+        "DevAdmin",
+        "MasterAdmin",
+        "Support Staff",
+        "Merchant",
+        "Merchant Staff",
+      ];
     } else if (userRole === "Master Admin") {
-      return ["Client", "Staff"];
-    } else if (userRole === "Client") {
-      return ["Staff"];
+      return ["Support Staff", "Merchant", "Merchant Staff"];
+    } else if (userRole === "Support Staf") {
+      return ["Merchant", "Merchant Staff"];
+    } else if (userRole === "Merchant") {
+      return ["Merchant Staff"];
     }
     return [];
   };
@@ -94,45 +118,108 @@ const ManageUser = () => {
   };
   const [role, setRole] = useState("");
 
+  // const handleUpdateTags = async () => {
+  //   if (!email) {
+  //     alert("Email is required!");
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch(
+  //       "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           email,
+  //           role,
+  //           modules: selectedModules,
+  //           creatorId: localStorage.getItem("userid"),
+  //         }),
+  //       }
+  //     );
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(data.error || "Failed to update user");
+  //     }
+
+  //     alert("User updated successfully!");
+  //     setIsOpen(false);
+  //     setName("");
+  //     setEmail("");
+  //     setSelectedModules([]);
+  //     setIsDropdownOpen(false);
+  //   } catch (error) {
+  //     console.error("Error updating user:", error);
+  //     alert("Error updating user: " + error.message);
+  //   }
+  // };
+  
   const handleUpdateTags = async () => {
-    if (!email) {
-      alert("Email is required!");
-      return;
-    }
+  if (!email) {
+    alert("Email is required!");
+    return;
+  }
 
-    try {
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            role,
-            modules: selectedModules,
-          }),
-        }
-      );
+  const loggedInUserId = localStorage.getItem("userid");
+  const token = localStorage.getItem("usertoken");
 
-      const data = await response.json();
+  let creatorIdToSend = loggedInUserId;
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to update user");
+  try {
+    const decoded = jwtDecode(token);
+    const userRole = decoded?.payLoad?.role;
+
+    if (
+      role === "Merchant Staff" &&
+      (userRole === "Dev Admin" || userRole === "Master Admin")
+    ) {
+      if (!selectedMerchantId) {
+        alert("Please select a merchant for this Merchant Staff.");
+        return;
       }
-
-      alert("User updated successfully!");
-      setIsOpen(false);
-      setName("");
-      setEmail("");
-      setSelectedModules([]);
-      setIsDropdownOpen(false);
-    } catch (error) {
-      console.error("Error updating user:", error);
-      alert("Error updating user: " + error.message);
+      creatorIdToSend = selectedMerchantId;
     }
-  };
+
+    const response = await fetch(
+      "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          role,
+          modules: selectedModules,
+          creatorId: creatorIdToSend,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to update user");
+    }
+
+    alert("User updated successfully!");
+    setIsOpen(false);
+    setName("");
+    setEmail("");
+    setSelectedModules([]);
+    setIsDropdownOpen(false);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    alert("Error updating user: " + error.message);
+  }
+};
+
+  
   const modules = [
     { name: "Dashboard", subModules: [] },
     {
@@ -183,6 +270,22 @@ const ManageUser = () => {
   useEffect(() => {
     handleSearch();
   }, [searchVal, users]);
+  const [merchantList, setMerchantList] = useState([]);
+const [selectedMerchantId, setSelectedMerchantId] = useState("");
+
+useEffect(() => {
+  if (
+    (userRole === "Dev Admin" || userRole === "Master Admin") &&
+    role === "Merchant Staff"
+  ) {
+    fetch(`https://multi-vendor-marketplace.vercel.app/auth/getAllMerchant`)
+      .then((res) => res.json())
+      .then((data) => setMerchantList(data))
+      .catch((err) => console.error("Failed to load merchants", err));
+  } else {
+    setMerchantList([]); // Clear if condition not met
+  }
+}, [role, userRole]);
 
   return (
     <div className="flex">
@@ -415,6 +518,26 @@ const ManageUser = () => {
                     ))}
                   </select>
                 </div>
+                {(userRole === "Dev Admin" || userRole === "Master Admin") &&
+                  role === "Merchant Staff" && (
+                    <div className="flex flex-col w-full">
+                      <label className="text-sm text-gray-700 mb-1">
+                        Select Merchant *
+                      </label>
+                      <select
+                        value={selectedMerchantId}
+                        onChange={(e) => setSelectedMerchantId(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select Merchant</option>
+                        {merchantList.map((merchant) => (
+                          <option key={merchant._id} value={merchant._id}>
+                            {merchant.email}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 <div className="flex flex-col w-full">
                   <label className="text-sm text-gray-700 mb-1">Email *</label>
                   <input
@@ -426,9 +549,21 @@ const ManageUser = () => {
                   />
                 </div>
                 <div className="flex flex-col w-full">
-                  <label className="text-sm text-gray-700 mb-1">
-                    Modules *
-                  </label>
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm text-gray-700 mb-1">
+                      Modules *
+                    </label>
+
+                    <label className="flex items-center gap-2 py-1 mb-2">
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                        className="form-checkbox text-blue-500"
+                      />
+                      <span className="text-sm font-semibold">Select All</span>
+                    </label>
+                  </div>
                   <div className="border px-3 py-2 rounded-md">
                     {modules.map((module, index) => (
                       <div key={index} className="flex flex-col">

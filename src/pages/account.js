@@ -377,7 +377,8 @@ const AccountPage = () => {
           </div>
 
           <nav className="mt-6 space-y-4">
-            <NavLink
+           {userRole === "Merchant" && (
+             <NavLink
               to="/manage-user"
               className={({ isActive }) =>
                 `w-full flex items-center space-x-3 ${
@@ -391,6 +392,7 @@ const AccountPage = () => {
               <span className="text-sm">Manage User</span>
             </NavLink>
 
+           )}
             <NavLink
               to="/edit-account"
               className={({ isActive }) =>

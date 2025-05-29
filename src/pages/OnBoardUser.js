@@ -4,6 +4,9 @@ import { FaUser, FaTimes, FaArrowRight } from "react-icons/fa";
 import { MdManageAccounts } from "react-icons/md";
 import { IoSettings } from "react-icons/io5";
 import { jwtDecode } from "jwt-decode";
+import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowUp } from "react-icons/io";
+
 import { HiPlus } from "react-icons/hi";
 const OnBoard = () => {
   const [selectedModule, setSelectedModule] = useState("Manage User");
@@ -21,7 +24,17 @@ const OnBoard = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
   const [searchVal, setSearchVal] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [merchantList, setMerchantList] = useState([]);
+  const [selectedMerchantId, setSelectedMerchantId] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState({
+    type: "",
+    supportStaff: [],
+    merchantGroups: [],
+  });
+  const [expandedMerchants, setExpandedMerchants] = useState([]);
+  const [role, setRole] = useState("");
+
+  // const [filteredUsers, setFilteredUsers] = useState([]);
 
   const handleShowDetails = async (id) => {
     try {
@@ -45,55 +58,99 @@ const OnBoard = () => {
     const fetchUsers = async () => {
       try {
         const id = localStorage.getItem("userid");
-        if (!id) {
-          console.error("User ID not found in localStorage");
-          return;
-        }
+        if (!id) return;
 
         const response = await fetch(
           `https://multi-vendor-marketplace.vercel.app/auth/getAllOnboardUsers/${id}`
         );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
         const data = await response.json();
-        const usersArray = Array.isArray(data) ? data : data.users;
 
-        if (Array.isArray(usersArray)) {
-          const formattedUsers = usersArray.map((user) => {
-            const first = user.firstName || "";
-            const last = user.lastName || "";
-            const fullName = `${first} ${last}`.trim();
+        const formatUser = (user) => ({
+          id: user.id,
+          name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+          email: user.email || "N/A",
+          status: "Active",
+          addedOn: new Date(user.createdAt || Date.now()).toLocaleDateString(),
+          shopifyId: user.shopifyId || "N/A",
+          role: user.role,
+        });
 
-            return {
-              id: user._id,
-              name: fullName || "N/A",
-              email: user.email || "N/A",
-              status: "Active",
-              addedOn: new Date(
-                user.createdAt || Date.now()
-              ).toLocaleDateString(),
-              groups: "General",
-              roles: user.role || "User",
-              shopifyId: user.shopifyId || "N/A",
-            };
+        if (data.type === "dev" && data.users) {
+          const merchantMap = {};
+
+          data.users.forEach((user) => {
+            const formattedUser = formatUser(user);
+
+            if (["Merchant", "Master Admin"].includes(user.role)) {
+              merchantMap[user.id] = {
+                merchant: formattedUser,
+                staff: [],
+              };
+            } else if (user.role === "Merchant Staff" && user.createdBy) {
+              if (!merchantMap[user.createdBy]) {
+                merchantMap[user.createdBy] = {
+                  merchant: null,
+                  staff: [],
+                };
+              }
+              merchantMap[user.createdBy].staff.push(formattedUser);
+            } else if (user.role === "Support Staff" && user.createdBy) {
+              if (!merchantMap[user.createdBy]) {
+                merchantMap[user.createdBy] = {
+                  merchant: null,
+                  staff: [],
+                };
+              }
+              merchantMap[user.createdBy].staff.push(formattedUser);
+            } else {
+              merchantMap[user.id] = {
+                merchant: formattedUser,
+                staff: [],
+              };
+            }
           });
 
-          setFilteredUsers(formattedUsers);
-        } else {
-          console.error("No users found or invalid response format");
+          const merchantGroups = Object.values(merchantMap).filter(
+            (group) => group.merchant !== null
+          );
+
+          setFilteredUsers({
+            type: "dev",
+            merchantGroups,
+          });
+
+          return;
         }
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      } finally {
-        setLoading(false);
+
+        if (data.type === "master") {
+          const supportStaff = data.supportStaff.map(formatUser);
+
+          const merchantGroups = data.merchantGroups.map((group) => ({
+            merchant: formatUser(group.merchant),
+            staff: group.staff.map(formatUser),
+          }));
+
+          setFilteredUsers({
+            type: "master",
+            supportStaff,
+            merchantGroups,
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching users:", err);
       }
     };
 
     fetchUsers();
   }, []);
+
+  const toggleMerchant = (merchantId) => {
+    setExpandedMerchants((prev) =>
+      prev.includes(merchantId)
+        ? prev.filter((id) => id !== merchantId)
+        : [...prev, merchantId]
+    );
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
@@ -135,67 +192,66 @@ const OnBoard = () => {
   const togglePopup = () => {
     setIsOpen(!isOpen);
   };
-  const [role, setRole] = useState("");
 
   const handleUpdateTags = async () => {
-   if (!email) {
-     alert("Email is required!");
-     return;
-   }
- 
-   const loggedInUserId = localStorage.getItem("userid");
-   const token = localStorage.getItem("usertoken");
- 
-   let creatorIdToSend = loggedInUserId;
- 
-   try {
-     const decoded = jwtDecode(token);
-     const userRole = decoded?.payLoad?.role;
- 
-     if (
-       role === "Merchant Staff" &&
-       (userRole === "Dev Admin" || userRole === "Master Admin")
-     ) {
-       if (!selectedMerchantId) {
-         alert("Please select a merchant for this Merchant Staff.");
-         return;
-       }
-       creatorIdToSend = selectedMerchantId;
-     }
- 
-     const response = await fetch(
-       "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
-       {
-         method: "POST",
-         headers: {
-           "Content-Type": "application/json",
-         },
-         body: JSON.stringify({
-           email,
-           role,
-           modules: selectedModules,
-           creatorId: creatorIdToSend,
-         }),
-       }
-     );
- 
-     const data = await response.json();
- 
-     if (!response.ok) {
-       throw new Error(data.error || "Failed to update user");
-     }
- 
-     alert("User updated successfully!");
-     setIsOpen(false);
-     setName("");
-     setEmail("");
-     setSelectedModules([]);
-     setIsDropdownOpen(false);
-   } catch (error) {
-     console.error("Error updating user:", error);
-     alert("Error updating user: " + error.message);
-   }
- };
+    if (!email) {
+      alert("Email is required!");
+      return;
+    }
+
+    const loggedInUserId = localStorage.getItem("userid");
+    const token = localStorage.getItem("usertoken");
+
+    let creatorIdToSend = loggedInUserId;
+
+    try {
+      const decoded = jwtDecode(token);
+      const userRole = decoded?.payLoad?.role;
+
+      if (
+        role === "Merchant Staff" &&
+        (userRole === "Dev Admin" || userRole === "Master Admin")
+      ) {
+        if (!selectedMerchantId) {
+          alert("Please select a merchant for this Merchant Staff.");
+          return;
+        }
+        creatorIdToSend = selectedMerchantId;
+      }
+
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            role,
+            modules: selectedModules,
+            creatorId: creatorIdToSend,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update user");
+      }
+
+      alert("User updated successfully!");
+      setIsOpen(false);
+      setName("");
+      setEmail("");
+      setSelectedModules([]);
+      setIsDropdownOpen(false);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      alert("Error updating user: " + error.message);
+    }
+  };
   const modules = [
     { name: "Dashboard", subModules: [] },
     {
@@ -219,6 +275,7 @@ const OnBoard = () => {
       subModules: [],
     },
   ];
+
   const handleModuleSelection = (moduleName) => {
     setSelectedModules((prev) =>
       prev.includes(moduleName)
@@ -226,6 +283,7 @@ const OnBoard = () => {
         : [...prev, moduleName]
     );
   };
+
   const handleSearch = () => {
     let filtered =
       searchVal === ""
@@ -251,9 +309,6 @@ const OnBoard = () => {
     handleSearch();
   }, [searchVal]);
 
-  const [merchantList, setMerchantList] = useState([]);
-  const [selectedMerchantId, setSelectedMerchantId] = useState("");
-
   useEffect(() => {
     if (
       (userRole === "Dev Admin" || userRole === "Master Admin") &&
@@ -264,9 +319,10 @@ const OnBoard = () => {
         .then((data) => setMerchantList(data))
         .catch((err) => console.error("Failed to load merchants", err));
     } else {
-      setMerchantList([]); // Clear if condition not met
+      setMerchantList([]);
     }
   }, [role, userRole]);
+
   return (
     <div className="flex">
       <div className="flex-1 p-6">
@@ -288,7 +344,7 @@ const OnBoard = () => {
         </div>
 
         <div className="overflow-x-auto border rounded-lg">
-          <table className="w-full border-collapse bg-white">
+          <table className="w-full table-fixed border-collapse bg-white">
             <thead className="bg-gray-100 text-left text-gray-600 text-sm">
               <tr>
                 <th className="p-3">Name</th>
@@ -296,22 +352,100 @@ const OnBoard = () => {
                 <th className="p-3">Added on</th>
                 <th className="p-3">Customer_Id</th>
                 <th className="p-3">Roles</th>
-                <th className="p-3">Actions</th>
+                <th className="p-3">Details</th>
+                <th className="p-3 text-right">Action</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user) => {
-                const nameParts = user.name?.trim().split(" ") || [];
-                const firstInitial = nameParts[0]?.[0] || "";
-                const secondInitial = nameParts[1]?.[0] || "";
+              {filteredUsers.merchantGroups?.map((group) => {
+                const merchant = group.merchant;
+                const staff = group.staff || [];
+                const isExpanded = expandedMerchants.includes(merchant?.id);
 
                 return (
+                  <React.Fragment key={merchant?.id}>
+                    <tr className="border-b hover:bg-gray-50 bg-gray-100">
+                      <td className="p-3 font-bold">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-yellow-800 font-semibold">
+                            {(merchant?.name?.[0] || "") +
+                              (merchant?.name?.split(" ")[1]?.[0] || "")}
+                          </div>
+                          <div>
+                            <p className="font-semibold">{merchant?.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {merchant?.email}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-3">{merchant?.status}</td>
+                      <td className="p-3">{merchant?.addedOn}</td>
+                      <td className="p-3">#{merchant?.shopifyId}</td>
+                      <td className="p-3">{merchant?.role}</td>
+                      <td className="p-3">
+                        <button
+                          onClick={() => handleShowDetails(merchant?.id)}
+                          className="text-blue-600 hover:underline"
+                        >
+                          Show Details
+                        </button>
+                      </td>
+                      <td className="p-3 text-right">
+                        {merchant?.role === "Merchant" && (
+                          <button onClick={() => toggleMerchant(merchant?.id)}>
+                            {isExpanded ? <IoIosArrowUp /> : <IoIosArrowDown />}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+
+                    {isExpanded &&
+                      staff.map((user) => (
+                        <tr
+                          key={user?.id}
+                          className="border-b hover:bg-gray-50"
+                        >
+                          <td className="p-3">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-700 font-semibold">
+                                {(user.name?.[0] || "") +
+                                  (user.name?.split(" ")[1]?.[0] || "")}
+                              </div>
+                              <div>
+                                <p className="font-semibold">{user.name}</p>
+                                <p className="text-xs text-gray-500">
+                                  {user.email}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-3">{user.status}</td>
+                          <td className="p-3">{user.addedOn}</td>
+                          <td className="p-3">#{user.shopifyId}</td>
+                          <td className="p-3">{user.role}</td>
+                          <td className="p-3">
+                            <button
+                              onClick={() => handleShowDetails(user.id)}
+                              className="text-blue-600 hover:underline"
+                            >
+                              Show Details
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </React.Fragment>
+                );
+              })}
+
+              {filteredUsers.type === "master" &&
+                filteredUsers.supportStaff?.map((user) => (
                   <tr key={user.id} className="border-b hover:bg-gray-50">
                     <td className="p-3">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-700 font-semibold">
-                          {firstInitial}
-                          {secondInitial}
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold">
+                          {(user.name?.[0] || "") +
+                            (user.name?.split(" ")[1]?.[0] || "")}
                         </div>
                         <div>
                           <p className="font-semibold">{user.name}</p>
@@ -319,22 +453,10 @@ const OnBoard = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="p-3">
-                      <span
-                        className={`px-2 py-1 rounded-md text-xs font-semibold ${
-                          user.status === "Active"
-                            ? "bg-green-100 text-green-600"
-                            : user.status === "Deactivated"
-                            ? "bg-red-100 text-red-600"
-                            : "bg-yellow-100 text-yellow-600"
-                        }`}
-                      >
-                        {user.status}
-                      </span>
-                    </td>
+                    <td className="p-3">{user.status}</td>
                     <td className="p-3">{user.addedOn}</td>
-                    <td className="p-3">{`#${user.shopifyId}`}</td>
-                    <td className="p-3">{user.roles}</td>
+                    <td className="p-3">#{user.shopifyId}</td>
+                    <td className="p-3">{user.role}</td>
                     <td className="p-3">
                       <button
                         onClick={() => handleShowDetails(user.id)}
@@ -343,9 +465,9 @@ const OnBoard = () => {
                         Show Details
                       </button>
                     </td>
+                    <td className="p-3 text-right">—</td>
                   </tr>
-                );
-              })}
+                ))}
             </tbody>
           </table>
         </div>

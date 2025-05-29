@@ -239,11 +239,13 @@ const AccountsNavbar = () => {
                 <MdManageAccounts />
               </span>
 
-              <Link to="/manage-user">
-                <span className="text-sm">Manage User</span>
-              </Link>
+              {userRole === "Merchant" && (
+                <Link to="/manage-user">
+                  <span className="text-sm">Manage User</span>
+                </Link>
+              )}
             </button>
-{/* 
+            {/* 
             <button
               onClick={() => {
                 setSelectedModule("Add User");
@@ -273,9 +275,8 @@ const AccountsNavbar = () => {
                 <IoSettings />
               </span>
               <Link to="/edit-account">
-              <span className="text-sm">Settings</span>
+                <span className="text-sm">Settings</span>
               </Link>
-              
             </button>
           </nav>
         </div>

@@ -12,6 +12,8 @@ const ApiCredentials = () => {
   const [showSecret, setShowSecret] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedSecret, setCopiedSecret] = useState(false);
+    const [userRole, setUserRole] = useState(null);
+  
 
   const copyText = (text, setCopied) => {
     navigator.clipboard.writeText(text);
@@ -74,6 +76,20 @@ const ApiCredentials = () => {
     fetchApiCredentials();
   }, []);
 
+  useEffect(() => {
+    const token = localStorage.getItem("usertoken");
+    if (!token) return;
+
+    try {
+      const decoded = jwtDecode(token);
+      if (decoded?.payLoad?.role) {
+        setUserRole(decoded.payLoad.role);
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  }, []);
+
   return (
     <div className="flex">
       <aside className="w-52 mt-2 mb-2 ml-4 rounded-r-2xl bg-blue-900 p-6 flex flex-col justify-between min-h-screen">
@@ -103,7 +119,8 @@ const ApiCredentials = () => {
           </div>
 
           <nav className="mt-6 space-y-4">
-            <button
+         {userRole === "Merchant" && (
+             <button
               onClick={() => {
                 setSelectedModule("Manage User");
               }}
@@ -121,6 +138,7 @@ const ApiCredentials = () => {
                 <span className="text-sm">Manage User</span>
               </Link>
             </button>
+         )}
             <button
               onClick={() => setSelectedModule("Settings")}
               className={`w-full text-left flex items-center space-x-3 ${

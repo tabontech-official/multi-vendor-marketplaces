@@ -42,7 +42,7 @@ const OnBoard = () => {
       setSelectedUserId(id);
 
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/getSingleUser/${id}`
+        `http://localhost:5000/auth/getSingleUser/${id}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch user details");
@@ -61,7 +61,7 @@ const OnBoard = () => {
         if (!id) return;
 
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getAllOnboardUsers/${id}`
+          `http://localhost:5000/auth/getAllOnboardUsers/${id}`
         );
         const data = await response.json();
 
@@ -220,7 +220,7 @@ const OnBoard = () => {
       }
 
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+        "http://localhost:5000/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {
@@ -314,7 +314,7 @@ const OnBoard = () => {
       (userRole === "Dev Admin" || userRole === "Master Admin") &&
       role === "Merchant Staff"
     ) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/auth/getAllMerchant`)
+      fetch(`http://localhost:5000/auth/getAllMerchant`)
         .then((res) => res.json())
         .then((data) => setMerchantList(data))
         .catch((err) => console.error("Failed to load merchants", err));

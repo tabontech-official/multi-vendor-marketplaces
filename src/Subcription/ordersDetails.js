@@ -19,7 +19,7 @@ const OrdersDetails = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:5000/order/getOrderFromShopify/${order?.orderId}/${userId}`
+        `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${order?.orderId}/${userId}`
       );
       setOrderData(response.data?.data); // ✅ Use correct key
       setIsLoading(false);

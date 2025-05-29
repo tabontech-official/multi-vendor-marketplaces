@@ -52,7 +52,6 @@ import { jwtDecode } from 'jwt-decode';
 
 export const AuthContext = createContext();
 
-// Reducer function
 export const authReducer = (state, action) => {
   switch (action.type) {
     case 'LOGIN': {
@@ -93,7 +92,6 @@ export const authReducer = (state, action) => {
   }
 };
 
-// Initial state function
 const InitialState = () => {
   try {
     const storedUser = localStorage.getItem('usertoken');
@@ -111,7 +109,6 @@ const InitialState = () => {
   return { user: null, showApprovalPopup: false };
 };
 
-// Provider
 export const AuthContextProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, InitialState());
 

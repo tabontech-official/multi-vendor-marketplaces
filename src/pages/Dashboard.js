@@ -187,14 +187,14 @@ const Dashboard = () => {
 
         const formData = new FormData();
         formData.append("file", selectedFile);
-        formData.append("userId", userId);
+        // formData.append("userId", userId);
         addNotification(
           "Product CSV upload triggered. Processing in background.",
           "Manage product"
         );
 
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/product/upload-csv-body",
+          `https://multi-vendor-marketplace.vercel.app/product/upload-csv-body/${userId}`, 
           {
             method: "POST",
             body: formData,
@@ -620,60 +620,60 @@ const Dashboard = () => {
   //   }
   // };
 
-const handleExport = async () => {
-  try {
-    setIsExporting(true);
-    const userId = localStorage.getItem("userid");
-    if (!userId) {
-      alert("User ID not found in localStorage");
-      return;
-    }
-
-    const queryParams = new URLSearchParams({
-      userId,
-      type: exportOption,
-      ...(exportOption === "current" && { page, limit: 10 }),
-    });
-
-    if (exportOption === "selected") {
-      if (!selectedProducts.length) {
-        alert("No products selected for export.");
-        setIsExporting(false);
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+      const userId = localStorage.getItem("userid");
+      if (!userId) {
+        alert("User ID not found in localStorage");
         return;
       }
-      queryParams.append("productIds", selectedProducts.join(","));
+
+      const queryParams = new URLSearchParams({
+        userId,
+        type: exportOption,
+        ...(exportOption === "current" && { page, limit: 10 }),
+      });
+
+      if (exportOption === "selected") {
+        if (!selectedProducts.length) {
+          alert("No products selected for export.");
+          setIsExporting(false);
+          return;
+        }
+        queryParams.append("productIds", selectedProducts.join(","));
+      }
+
+      const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvEportFile/?${queryParams.toString()}`;
+
+      const response = await fetch(exportUrl);
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Export failed");
+      }
+
+      addNotification("Products export successfully", "Manage product");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `products-${exportOption}-${Date.now()}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      setIsexportOpen(false);
+    } catch (error) {
+      alert("Export failed: " + error.message);
+    } finally {
+      setIsExporting(false);
     }
-
-    const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvEportFile/?${queryParams.toString()}`;
-
-    const response = await fetch(exportUrl);
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Export failed");
-    }
-
-    addNotification("Products export successfully", "Manage product");
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute(
-      "download",
-      `products-${exportOption}-${Date.now()}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-    setIsexportOpen(false);
-  } catch (error) {
-    alert("Export failed: " + error.message);
-  } finally {
-    setIsExporting(false);
-  }
-};
+  };
 
   return user ? (
     <main className="w-full p-4 md:p-8">
@@ -1101,16 +1101,15 @@ const handleExport = async () => {
                   All products
                 </label>
                 <label className="flex items-center gap-2">
-  <input
-    type="radio"
-    name="exportOption"
-    value="selected"
-    checked={exportOption === "selected"}
-    onChange={() => setExportOption("selected")}
-  />
-  Selected products only
-</label>
-
+                  <input
+                    type="radio"
+                    name="exportOption"
+                    value="selected"
+                    checked={exportOption === "selected"}
+                    onChange={() => setExportOption("selected")}
+                  />
+                  Selected products only
+                </label>
               </div>
             </div>
 

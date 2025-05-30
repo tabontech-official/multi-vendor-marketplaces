@@ -7,7 +7,7 @@ import { jwtDecode } from "jwt-decode";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoIosArrowUp } from "react-icons/io";
 
-import { HiPlus } from "react-icons/hi";
+import { HiOutlineCheckCircle, HiOutlineXCircle, HiPlus } from "react-icons/hi";
 const OnBoard = () => {
   const [selectedModule, setSelectedModule] = useState("Manage User");
   const [email, setEmail] = useState("");
@@ -33,6 +33,37 @@ const OnBoard = () => {
   });
   const [expandedMerchants, setExpandedMerchants] = useState([]);
   const [role, setRole] = useState("");
+  const [selectAll, setSelectAll] = useState(false);
+
+  
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedModules([]);
+    } else {
+      const allModules = modules.reduce((acc, module) => {
+        if (
+          (role === "merchant" || role === "merchant staff") &&
+          module.name === "OnBoardUser"
+        ) {
+          return acc;
+        }
+        acc.push(module.name);
+        if (module.subModules.length > 0) {
+          acc = acc.concat(module.subModules);
+        }
+        return acc;
+      }, []);
+      setSelectedModules(allModules);
+    }
+    setSelectAll(!selectAll);
+  };
+
+
+  useEffect(() => {
+    if (role === "Merchant" || role === "Merchant Staff") {
+      setSelectedModules((prev) => prev.filter((mod) => mod !== "OnBoardUser"));
+    }
+  }, [role]);
 
   // const [filteredUsers, setFilteredUsers] = useState([]);
 
@@ -192,6 +223,12 @@ const OnBoard = () => {
   const togglePopup = () => {
     setIsOpen(!isOpen);
   };
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
+
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+  };
 
   const handleUpdateTags = async () => {
     if (!email) {
@@ -241,7 +278,7 @@ const OnBoard = () => {
         throw new Error(data.error || "Failed to update user");
       }
 
-      alert("User updated successfully!");
+      showToast("success", `${role} created successfully`);
       setIsOpen(false);
       setName("");
       setEmail("");
@@ -326,6 +363,20 @@ const OnBoard = () => {
   return (
     <div className="flex">
       <div className="flex-1 p-6">
+        {toast.show && (
+          <div
+            className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+              toast.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
+          >
+            {toast.type === "success" ? (
+              <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+            ) : (
+              <HiOutlineXCircle className="w-6 h-6 mr-2" />
+            )}
+            <span>{toast.message}</span>
+          </div>
+        )}
         <div className="flex justify-between items-center mb-4">
           <input
             type="text"
@@ -465,7 +516,7 @@ const OnBoard = () => {
                         Show Details
                       </button>
                     </td>
-                    <td className="p-3 text-right">—</td>
+                    {/* <td className="p-3 text-right">—</td> */}
                   </tr>
                 ))}
             </tbody>
@@ -499,10 +550,10 @@ const OnBoard = () => {
                   ["Email", userDetails?.email],
                   ["Address", userDetails?.address],
                   ["Role", userDetails?.role],
-                  ["ZIP Code", userDetails?.zip],
-                  ["Country", userDetails?.country],
-                  ["State", userDetails?.state],
-                  ["City", userDetails?.city],
+                  ["ZIP Code", userDetails?.zip || userDetails?.dispatchzip],
+                  ["Country", userDetails?.country || userDetails?.dispatchCountry],
+                  ["State", userDetails?.state || userDetails?.dispatchCountry],
+                  ["City", userDetails?.city || userDetails?.dispatchCity],
                   ["Dispatch Address", userDetails?.address],
                 ].map(([label, value], index) => (
                   <div
@@ -595,45 +646,72 @@ const OnBoard = () => {
                 />
               </div>
               <div className="flex flex-col w-full">
-                <label className="text-sm text-gray-700 mb-1">Modules *</label>
-                <div className="border px-3 py-2 rounded-md">
-                  {modules.map((module, index) => (
-                    <div key={index} className="flex flex-col">
-                      <label className="flex items-center gap-2 py-1">
-                        <input
-                          type="checkbox"
-                          checked={selectedModules.includes(module.name)}
-                          onChange={() => handleModuleSelection(module.name)}
-                          className="form-checkbox text-blue-500"
-                        />
-                        <span className="text-sm font-semibold">
-                          {module.name}
-                        </span>
-                      </label>
+                <div className="flex justify-between items-center">
+                  <label className="text-sm text-gray-700 mb-1">
+                    Modules *
+                  </label>
 
-                      {selectedModules.includes(module.name) &&
-                        module.subModules.length > 0 && (
-                          <div className="pl-6 mt-1">
-                            {module.subModules.map((subModule, subIndex) => (
-                              <label
-                                key={subIndex}
-                                className="flex items-center gap-2 py-1"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={selectedModules.includes(subModule)}
-                                  onChange={() =>
-                                    handleModuleSelection(subModule)
-                                  }
-                                  className="form-checkbox text-blue-500"
-                                />
-                                <span className="text-sm">{subModule}</span>
-                              </label>
-                            ))}
-                          </div>
-                        )}
-                    </div>
-                  ))}
+                  <label className="flex items-center gap-2 py-1 mb-2">
+                    <input
+                      type="checkbox"
+                      checked={selectAll}
+                      onChange={handleSelectAll}
+                      className="form-checkbox text-blue-500"
+                    />
+                    <span className="text-sm font-semibold">Select All</span>
+                  </label>
+                </div>
+                {/* <label className="text-sm text-gray-700 mb-1">Modules *</label> */}
+                <div className="border px-3 py-2 rounded-md">
+                  {modules
+                    .filter((module) => {
+                      if (
+                        (role === "Merchant" || role === "Merchant Staff") &&
+                        module.name === "OnBoardUser"
+                      ) {
+                        return false;
+                      }
+                      return true;
+                    })
+                    .map((module, index) => (
+                      <div key={index} className="flex flex-col">
+                        <label className="flex items-center gap-2 py-1">
+                          <input
+                            type="checkbox"
+                            checked={selectedModules.includes(module.name)}
+                            onChange={() => handleModuleSelection(module.name)}
+                            className="form-checkbox text-blue-500"
+                          />
+                          <span className="text-sm font-semibold">
+                            {module.name}
+                          </span>
+                        </label>
+
+                        {selectedModules.includes(module.name) &&
+                          module.subModules.length > 0 && (
+                            <div className="pl-6 mt-1">
+                              {module.subModules.map((subModule, subIndex) => (
+                                <label
+                                  key={subIndex}
+                                  className="flex items-center gap-2 py-1"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedModules.includes(
+                                      subModule
+                                    )}
+                                    onChange={() =>
+                                      handleModuleSelection(subModule)
+                                    }
+                                    className="form-checkbox text-blue-500"
+                                  />
+                                  <span className="text-sm">{subModule}</span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                      </div>
+                    ))}
                 </div>
               </div>
               <button

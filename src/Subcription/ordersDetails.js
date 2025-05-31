@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MdEdit } from "react-icons/md";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const OrdersDetails = () => {
   const location = useLocation();
@@ -17,28 +18,54 @@ const OrdersDetails = () => {
     order?.lineItems || order?.lineItemsByMerchant?.[selectedMerchantId] || [];
   useEffect(() => {
     const fetchOrderData = async () => {
-      const userId = localStorage.getItem("userid");
-      console.log("⏳ Fetching order...");
-      console.log("🧾 orderId from params:", orderId);
-      console.log("👤 userId from localStorage:", userId);
+      const token = localStorage.getItem("usertoken");
 
-      if (!userId || !orderId) return;
+      if (!token || typeof token !== "string") {
+        console.error("❌ No valid token found in localStorage");
+        return;
+      }
+
+      let decoded;
+      try {
+        decoded = jwtDecode(token);
+      } catch (error) {
+        console.error("❌ Failed to decode token:", error);
+        return;
+      }
+
+      const role = decoded?.payLoad?.role;
+      const isTokenValid = decoded?.exp * 1000 > Date.now();
+      const isAdminFlag =
+        isTokenValid && (role === "Master Admin" || role === "Dev Admin");
+
+      const userIdFromStorage = localStorage.getItem("userid");
+      const merchantIdFromParams = selectedMerchantId;
+      const finalUserId = isAdminFlag
+        ? merchantIdFromParams
+        : userIdFromStorage;
+
+      console.log("🧾 orderId:", orderId);
+      console.log("🛂 Role:", role);
+      console.log("🔐 Token valid:", isTokenValid);
+      console.log("👤 Final userId for request:", finalUserId);
+
+      if (!finalUserId || !orderId) return;
 
       try {
         const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${orderId}/${userId}`
+          `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${orderId}/${finalUserId}`
         );
         setOrderData(response.data?.data);
         setIsLoading(false);
       } catch (err) {
-        console.error("Error fetching order:", err);
+        console.error("❌ Error fetching order:", err);
         setFetchError("Failed to load order");
         setIsLoading(false);
       }
     };
 
     fetchOrderData();
-  }, [orderId]);
+  }, [orderId, selectedMerchantId]);
 
   const totalPrice = Array.isArray(lineItems)
     ? lineItems
@@ -49,7 +76,6 @@ const OrdersDetails = () => {
         }, 0)
         .toFixed(2)
     : "0.00";
-
 
   const customerCreatedAt =
     order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]?.customer?.[0]

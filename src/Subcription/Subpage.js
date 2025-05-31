@@ -23,8 +23,8 @@ const SubscriptionHistory = () => {
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const dialogRef = useRef(null);
-  const [selectedMerchants, setSelectedMerchants] = useState({}); // per order row
-  const [isAdmin, setIsAdmin] = useState(false); // ⬅️ define here
+  const [selectedMerchants, setSelectedMerchants] = useState({});
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // const fetchSubscriptions = async () => {
   //   const userId = localStorage.getItem("userid");
@@ -73,7 +73,7 @@ const SubscriptionHistory = () => {
       const isAdminFlag =
         isTokenValid && (role === "Master Admin" || role === "Dev Admin");
 
-      setIsAdmin(isAdminFlag); // ⬅️ update global state
+      setIsAdmin(isAdminFlag);
 
       const url = isAdminFlag
         ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrderForMerchants`
@@ -251,68 +251,8 @@ const SubscriptionHistory = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* {subscriptions.map((subscription, index) => {
-                      const address = subscription.customer?.default_address;
-                      const firstItem = subscription.lineItems[0];
-                      return (
-                        <tr
-                          key={subscription.orderId}
-                          className={`border-b ${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } w-full`}
-                        >
-                          <td className="p-3">#{subscription.serialNumber}</td>
-                          <td className="p-3">
-                            {formatDate(subscription.createdAt)}
-                          </td>
-                          <td
-                            className="p-3 cursor-pointer hover:underline"
-                            onClick={() => {
-                              navigate(`/order/${firstItem.id}`, {
-                                state: {
-                                  order: subscription,
-                                  productName: firstItem.name,
-                                  sku: firstItem.sku,
-                                  index: 101 + index,
-                                  serialNumber:subscription.serialNumber
-                                },
-                              });
-                            }}
-                          >
-                            {firstItem.name}
-                            <br />
-                            <span className="text-xs text-gray-500">
-                              SKU: {firstItem.sku || "N/A"}
-                            </span>
-                           
-                          </td>
-                          <td className="p-3">
-                            <div className="text-xs text-blue-500 mt-1">
-                              {subscription.lineItems.length}{" "}
-                              {subscription.lineItems.length === 1
-                                ? "item"
-                                : "items"}
-                            </div>
-                          </td>
-
-                          <td className="p-3">
-                            {address
-                              ? `${address.address1}, ${address.city}, ${address.province}`
-                              : "N/A"}
-                          </td>
-                          <td className="p-3">{address?.country || "N/A"}</td>
-                          <td className="p-3">
-                            $
-                            {(
-                              parseFloat(firstItem.price) * firstItem.quantity
-                            ).toFixed(2)}
-                          </td>
-                        </tr>
-                      );
-                    })} */}
                     {isAdmin
-                      ? // === ADMIN VIEW ===
-                        subscriptions.map((subscription, index) => {
+                      ? subscriptions.map((subscription, index) => {
                           const orderId = subscription.serialNo;
 
                           const selectedMerchantId =
@@ -326,196 +266,54 @@ const SubscriptionHistory = () => {
                               selectedMerchantId
                             ] || [];
 
-                          const address =
-                            merchantItems[0]?.shipping_address ||
-                            subscription.customer?.default_address;
+                          const selectedMerchant = subscription.merchants.find(
+                            (m) => m.id === selectedMerchantId
+                          );
+                          const customer = merchantItems[0]?.customer?.[0];
+
+                          const orderDate = customer?.created_at;
+
+                          const totalQuantity = merchantItems.reduce(
+                            (sum, item) => sum + (item.quantity || 0),
+                            0
+                          );
+
+                          const totalPrice = merchantItems.reduce(
+                            (sum, item) => {
+                              const price = parseFloat(item.price || 0);
+                              const qty = parseInt(item.quantity || 0);
+                              return sum + price * qty;
+                            },
+                            0
+                          );
 
                           return (
-                            <React.Fragment key={orderId}>
-                              <tr
-                                className={`border-b ${
-                                  index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                                } w-full`}
-                              >
-                                <td className="p-3">#{orderId}</td>
-                                <td className="p-3">
-                                  {/* {formatDate(subscription.createdAt)} */}
-                                </td>
-
-                                {/* <td className="p-3">
-                                  <select
-                                    value={selectedMerchantId}
-                                    onChange={(e) =>
-                                      setSelectedMerchants((prev) => ({
-                                        ...prev,
-                                        [orderId]: e.target.value,
-                                      }))
-                                    }
-                                    className="text-sm border rounded px-2 py-1"
-                                  >
-                                    {subscription.merchants.map(
-                                      (merchant, idx) => (
-                                        <option
-                                          key={merchant.id}
-                                          value={merchant.id}
-                                        >
-                                          {merchant.info?.name ||
-                                            `Merchant ${idx + 1}`}
-                                        </option>
-                                      )
-                                    )}
-                                  </select>
-                                </td> */}
-                                <td className="p-3 text-sm">
-                                  {(() => {
-                                    const selectedMerchant =
-                                      subscription.merchants.find(
-                                        (m) => m.id === selectedMerchantId
-                                      );
-                                    return (
-                                      selectedMerchant?.info?.name || "N/A"
-                                    );
-                                  })()}
-                                </td>
-
-                                <td className="p-3">
-                                  <div className="text-xs text-blue-500 mt-1">
-                                    {merchantItems.length} item
-                                    {merchantItems.length > 1 ? "s" : ""}
-                                  </div>
-                                </td>
-
-                                <td className="p-3">
-                                  {(() => {
-                                    const selectedMerchant =
-                                      subscription.merchants.find(
-                                        (m) => m.id === selectedMerchantId
-                                      );
-                                    return (
-                                      selectedMerchant?.info?.dispatchAddress ||
-                                      "N/A"
-                                    );
-                                  })()}
-                                </td>
-
-                                <td className="p-3">
-                                  {(() => {
-                                    const selectedMerchant =
-                                      subscription.merchants.find(
-                                        (m) => m.id === selectedMerchantId
-                                      );
-                                    return (
-                                      selectedMerchant?.info?.dispatchCountry ||
-                                      "N/A"
-                                    );
-                                  })()}
-                                </td>
-
-                                <td className="p-3">
-                                  $
-                                  {merchantItems
-                                    .reduce(
-                                      (total, item) =>
-                                        total +
-                                        parseFloat(item.price || 0) *
-                                          (item.quantity || 1),
-                                      0
-                                    )
-                                    .toFixed(2)}
-                                </td>
-                              </tr>
-
-                              {merchantItems.map((item, itemIdx) => {
-                                const customer = item.customer?.[0];
-                                return (
-                                  <tr
-                                    key={`${orderId}-${item.id}`}
-                                    className="bg-gray-50 border-b text-sm text-gray-700"
-                                  >
-                                    {/* <td colSpan={1}></td> */}
-                                    <td className="p-3">#{orderId}</td>
-
-                                    <td className="p-3">
-                                      {customer?.created_at
-                                        ? formatDate(customer.created_at)
-                                        : "N/A"}
-                                    </td>
-
-                                    {/* Product Name & SKU */}
-                                    <td
-                                      className="p-3 cursor-pointer hover:underline"
-                                      onClick={() => {
-                                        console.log(
-                                          "🧾 Full Subscription Object:",
-                                          subscription
-                                        );
-                                        console.log(
-                                          "📦 Product Name:",
-                                          item.name
-                                        );
-                                        console.log("🔖 SKU:", item.sku);
-                                        console.log("🔢 Index:", 101 + index);
-                                        console.log(
-                                          "🔗 Order ID (Serial Number):",
-                                          item.orderId
-                                        );
-                                        console.log(
-                                          "🏪 Selected Merchant ID:",
-                                          selectedMerchantId
-                                        );
-                                        console.log(
-                                          "👤 Customer Created At:",
-                                          item.customer?.[0]?.created_at
-                                        );
-                                        console.log(
-                                          "🌍 Customer Address:",
-                                          item.customer?.[0]?.default_address
-                                        );
-
-                                        navigate(`/order/${item.orderId}`, {
-                                          state: {
-                                            order: subscription,
-                                            productName: item.name,
-                                            sku: item.sku,
-                                            index: 101 + index,
-                                            serialNumber: item.orderId,
-                                            selectedMerchantId,
-                                          },
-                                        });
-                                      }}
-                                    >
-                                      {item.name}
-                                      <br />
-                                      <span className="text-xs text-gray-500">
-                                        SKU: {item.sku || "N/A"}
-                                      </span>
-                                    </td>
-
-                                    {/* Quantity */}
-                                    <td className="p-3">{item.quantity}</td>
-
-                                    {/* Address Line 1 */}
-                                    <td className="p-3">
-                                      {customer?.default_address?.address1 ||
-                                        "N/A"}
-                                    </td>
-
-                                    {/* Country */}
-                                    <td className="p-3">
-                                      {customer?.default_address
-                                        ?.country_name || "N/A"}
-                                    </td>
-
-                                    {/* Price */}
-                                    <td className="p-3">
-                                      {item.price ? `$${item.price}` : "N/A"}
-                                    </td>
-
-                                    {/* <td className="p-3" colSpan={4}></td> */}
-                                  </tr>
-                                );
-                              })}
-                            </React.Fragment>
+                            <tr
+                              key={orderId}
+                              className={`border-b ${
+                                index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                              } w-full`}
+                            >
+                              <td className="p-3">#{orderId}</td>
+                              <td className="p-3">
+                                {orderDate ? formatDate(orderDate) : "N/A"}
+                              </td>
+                              <td className="p-3 text-sm">
+                                {selectedMerchant?.info?.name || "N/A"}
+                              </td>
+                              <td className="p-3">
+                                {totalQuantity} items
+                              </td>
+                              <td className="p-3">
+                                {selectedMerchant?.info?.dispatchAddress ||
+                                  "N/A"}
+                              </td>
+                              <td className="p-3">
+                                {selectedMerchant?.info?.dispatchCountry ||
+                                  "N/A"}
+                              </td>
+                              <td className="p-3">${totalPrice.toFixed(2)}</td>
+                            </tr>
                           );
                         })
                       : // === MERCHANT VIEW ===

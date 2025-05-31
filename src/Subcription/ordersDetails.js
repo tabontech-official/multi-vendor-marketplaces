@@ -21,7 +21,7 @@ const OrdersDetails = () => {
       const token = localStorage.getItem("usertoken");
 
       if (!token || typeof token !== "string") {
-        console.error("❌ No valid token found in localStorage");
+        console.error(" No valid token found in localStorage");
         return;
       }
 
@@ -29,7 +29,7 @@ const OrdersDetails = () => {
       try {
         decoded = jwtDecode(token);
       } catch (error) {
-        console.error("❌ Failed to decode token:", error);
+        console.error(" Failed to decode token:", error);
         return;
       }
 
@@ -44,10 +44,10 @@ const OrdersDetails = () => {
         ? merchantIdFromParams
         : userIdFromStorage;
 
-      console.log("🧾 orderId:", orderId);
-      console.log("🛂 Role:", role);
-      console.log("🔐 Token valid:", isTokenValid);
-      console.log("👤 Final userId for request:", finalUserId);
+      console.log(" orderId:", orderId);
+      console.log(" Role:", role);
+      console.log(" Token valid:", isTokenValid);
+      console.log(" Final userId for request:", finalUserId);
 
       if (!finalUserId || !orderId) return;
 
@@ -310,7 +310,7 @@ const OrdersDetails = () => {
                     <button
                       onClick={() => {
                         const merchantId =
-                          selectedMerchantId || order?.merchantId || ""; // fallback if needed
+                          selectedMerchantId || order?.merchantId || ""; 
 
                         console.log("📦 fullOrder:", order);
                         console.log("🏪 selectedMerchantId:", merchantId);

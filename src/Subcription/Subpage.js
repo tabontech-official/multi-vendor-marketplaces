@@ -6,6 +6,8 @@ import { CreateCheckoutUrl } from "../component/Checkout";
 import UseFetchUserData from "../component/fetchUser";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+
 const SubscriptionHistory = () => {
   const { userData, loading, error, variantId } = UseFetchUserData();
 
@@ -21,22 +23,65 @@ const SubscriptionHistory = () => {
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const dialogRef = useRef(null);
+  const [selectedMerchants, setSelectedMerchants] = useState({}); // per order row
+  const [isAdmin, setIsAdmin] = useState(false); // ⬅️ define here
+
+  // const fetchSubscriptions = async () => {
+  //   const userId = localStorage.getItem("userid");
+
+  //   if (!userId) {
+  //     console.error("User ID not found in localStorage.");
+  //     return;
+  //   }
+
+  //   try {
+  //     const res = await fetch(
+  //       `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`,
+  //       {
+  //         method: "GET",
+  //       }
+  //     );
+
+  //     if (res.ok) {
+  //       const json = await res.json();
+  //       const sortedSubscriptions = json.data.sort(
+  //         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  //       );
+  //       setSubscriptions(sortedSubscriptions);
+  //     } else {
+  //       console.error("Failed to fetch subscriptions:", res.status);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching subscriptions:", error);
+  //   }
+  // };
 
   const fetchSubscriptions = async () => {
     const userId = localStorage.getItem("userid");
+    const token = localStorage.getItem("usertoken");
 
-    if (!userId) {
-      console.error("User ID not found in localStorage.");
+    if (!userId || !token) {
+      console.error("User ID or token not found in localStorage.");
       return;
     }
 
     try {
-      const res = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`,
-        {
-          method: "GET",
-        }
-      );
+      const decoded = jwtDecode(token);
+      const role = decoded.payLoad?.role;
+      const isTokenValid = decoded.exp * 1000 > Date.now();
+
+      const isAdminFlag =
+        isTokenValid && (role === "Master Admin" || role === "Dev Admin");
+
+      setIsAdmin(isAdminFlag); // ⬅️ update global state
+
+      const url = isAdminFlag
+        ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrderForMerchants`
+        : `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`;
+
+      const res = await fetch(url, {
+        method: "GET",
+      });
 
       if (res.ok) {
         const json = await res.json();
@@ -48,9 +93,13 @@ const SubscriptionHistory = () => {
         console.error("Failed to fetch subscriptions:", res.status);
       }
     } catch (error) {
-      console.error("Error fetching subscriptions:", error);
+      console.error("Error decoding token or fetching subscriptions:", error);
     }
   };
+
+  useEffect(() => {
+    fetchSubscriptions();
+  }, []);
 
   const handleBuyNow = () => {
     const buyCreditUrl = CreateCheckoutUrl(
@@ -134,6 +183,18 @@ const SubscriptionHistory = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const token = localStorage.getItem("usertoken");
+    if (token) {
+      const decoded = jwtDecode(token);
+      const role = decoded?.payLoad?.role;
+      const isTokenValid = decoded.exp * 1000 > Date.now();
+      setIsAdmin(
+        isTokenValid && (role === "Master Admin" || role === "Dev Admin")
+      );
+    }
+  }, []);
+
   return (
     <div
       className={`flex flex-col bg-gray-50 px-3 py-6 ${
@@ -151,25 +212,10 @@ const SubscriptionHistory = () => {
                   Total Orders: {totalListings}
                 </span>
               </div>
-              {/* <div className='bg-blue-100 p-2 mr-3 rounded-lg shadow-md max-sm:mb-2'>
-                <span className="font-bold text-green-600">Free Listings: {freeListing}</span>
-              </div>
-              <div className='bg-blue-100 p-2 rounded-lg shadow-md max-sm:mb-2'>
-                <span className="font-bold text-green-600">Paid Listings: {paidListing}</span>
-              </div> */}
             </div>
-            {/* <div className='flex items-center'>
-            <button
-            onClick={() => setIsDialogOpen(true)}
-            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded flex items-center max-sm:text-xs"
-          >
-            Buy Credits <FaShoppingBasket className="ml-1" />
-          </button>
-            </div> */}
           </div>
 
           <div className="w-full  max-sm:w-auto  max-sm:flex items-center">
-            {/* Render loading icon or table based on loading state */}
             {loading ? (
               <div className="flex justify-center items-center py-10">
                 <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
@@ -205,57 +251,7 @@ const SubscriptionHistory = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* {subscriptions.map((subscription, index) =>
-                      subscription.lineItems.map((item, itemIndex) => {
-                        const address = subscription.customer?.default_address;
-                        return (
-                          <tr
-                            key={`${index}-${itemIndex}`}
-                            className={`border-b ${
-                              itemIndex % 2 === 0 ? "bg-white" : "bg-gray-100"
-                            } w-full`}
-                          >
-                            <td className="p-3">#{101 + index}</td>
-                            <td className="p-3">
-                              {formatDate(subscription.createdAt)}
-                            </td>
-                            <td
-                              className="p-3 cursor-pointer hover:underline"
-                              onClick={() => {
-                                console.log(
-                                  "Navigating with order data:",
-                                  subscription,
-                                  index
-                                );
-                                navigate(`/order/${item.id}`, {
-                                  state: { order: subscription,productName:item.name,sku:item.sku,index: 101 + index, },
-                                });
-                              }}
-                            >
-                              {item.name}
-                              <br />
-                              <span className="text-xs text-gray-500">
-                                SKU: {item.sku || "N/A"}
-                              </span>
-                            </td>
-                            <td className="p-3">{item.quantity}</td>
-                            <td className="p-3">
-                              {address
-                                ? `${address.address1}, ${address.city}, ${address.province}`
-                                : "N/A"}
-                            </td>
-                            <td className="p-3">{address?.country || "N/A"}</td>
-                            <td className="p-3">
-                              $
-                              {(parseFloat(item.price) * item.quantity).toFixed(
-                                2
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )} */}
-                    {subscriptions.map((subscription, index) => {
+                    {/* {subscriptions.map((subscription, index) => {
                       const address = subscription.customer?.default_address;
                       const firstItem = subscription.lineItems[0];
                       return (
@@ -288,14 +284,8 @@ const SubscriptionHistory = () => {
                             <span className="text-xs text-gray-500">
                               SKU: {firstItem.sku || "N/A"}
                             </span>
-                            {/* {subscription.lineItems.length > 1 && (
-                              <div className="text-xs text-blue-500 mt-1">
-                                +{subscription.lineItems.length - 1} more
-                                item(s)
-                              </div>
-                            )} */}
+                           
                           </td>
-                          {/* <td className="p-3">{firstItem.quantity}</td> */}
                           <td className="p-3">
                             <div className="text-xs text-blue-500 mt-1">
                               {subscription.lineItems.length}{" "}
@@ -319,7 +309,279 @@ const SubscriptionHistory = () => {
                           </td>
                         </tr>
                       );
-                    })}
+                    })} */}
+                    {isAdmin
+                      ? // === ADMIN VIEW ===
+                        subscriptions.map((subscription, index) => {
+                          const orderId = subscription.serialNo;
+
+                          const selectedMerchantId =
+                            selectedMerchants[orderId] ||
+                            (Array.isArray(subscription.merchants) &&
+                              subscription.merchants[0]?.id) ||
+                            null;
+
+                          const merchantItems =
+                            subscription.lineItemsByMerchant?.[
+                              selectedMerchantId
+                            ] || [];
+
+                          const address =
+                            merchantItems[0]?.shipping_address ||
+                            subscription.customer?.default_address;
+
+                          return (
+                            <React.Fragment key={orderId}>
+                              <tr
+                                className={`border-b ${
+                                  index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                                } w-full`}
+                              >
+                                <td className="p-3">#{orderId}</td>
+                                <td className="p-3">
+                                  {formatDate(subscription.createdAt)}
+                                </td>
+
+                                {/* <td className="p-3">
+                                  <select
+                                    value={selectedMerchantId}
+                                    onChange={(e) =>
+                                      setSelectedMerchants((prev) => ({
+                                        ...prev,
+                                        [orderId]: e.target.value,
+                                      }))
+                                    }
+                                    className="text-sm border rounded px-2 py-1"
+                                  >
+                                    {subscription.merchants.map(
+                                      (merchant, idx) => (
+                                        <option
+                                          key={merchant.id}
+                                          value={merchant.id}
+                                        >
+                                          {merchant.info?.name ||
+                                            `Merchant ${idx + 1}`}
+                                        </option>
+                                      )
+                                    )}
+                                  </select>
+                                </td> */}
+                                <td className="p-3 text-sm">
+                                  {(() => {
+                                    const selectedMerchant =
+                                      subscription.merchants.find(
+                                        (m) => m.id === selectedMerchantId
+                                      );
+                                    return (
+                                      selectedMerchant?.info?.name || "N/A"
+                                    );
+                                  })()}
+                                </td>
+
+                                <td className="p-3">
+                                  <div className="text-xs text-blue-500 mt-1">
+                                    {merchantItems.length} item
+                                    {merchantItems.length > 1 ? "s" : ""}
+                                  </div>
+                                </td>
+
+                                <td className="p-3">
+                                  {(() => {
+                                    const selectedMerchant =
+                                      subscription.merchants.find(
+                                        (m) => m.id === selectedMerchantId
+                                      );
+                                    return (
+                                      selectedMerchant?.info?.dispatchAddress ||
+                                      "N/A"
+                                    );
+                                  })()}
+                                </td>
+
+                                <td className="p-3">
+                                  {(() => {
+                                    const selectedMerchant =
+                                      subscription.merchants.find(
+                                        (m) => m.id === selectedMerchantId
+                                      );
+                                    return (
+                                      selectedMerchant?.info?.dispatchCountry ||
+                                      "N/A"
+                                    );
+                                  })()}
+                                </td>
+
+                                <td className="p-3">
+                                  $
+                                  {merchantItems
+                                    .reduce(
+                                      (total, item) =>
+                                        total +
+                                        parseFloat(item.price || 0) *
+                                          (item.quantity || 1),
+                                      0
+                                    )
+                                    .toFixed(2)}
+                                </td>
+                              </tr>
+
+                              {merchantItems.map((item, itemIdx) => {
+                                const customer = item.customer?.[0];
+                                return (
+                                  <tr
+                                    key={`${orderId}-${item.id}`}
+                                    className="bg-gray-50 border-b text-sm text-gray-700"
+                                  >
+                                    {/* <td colSpan={1}></td> */}
+                                    <td className="p-3">#{orderId}</td>
+
+                                    <td className="p-3">
+                                      {customer?.created_at
+                                        ? formatDate(customer.created_at)
+                                        : "N/A"}
+                                    </td>
+
+                                    {/* Product Name & SKU */}
+                                    <td
+                                      className="p-3 cursor-pointer hover:underline"
+                                      onClick={() => {
+                                        console.log(
+                                          "🧾 Full Subscription Object:",
+                                          subscription
+                                        );
+                                        console.log(
+                                          "📦 Product Name:",
+                                          item.name
+                                        );
+                                        console.log("🔖 SKU:", item.sku);
+                                        console.log("🔢 Index:", 101 + index);
+                                        console.log(
+                                          "🔗 Order ID (Serial Number):",
+                                          item.orderId
+                                        );
+                                        console.log(
+                                          "🏪 Selected Merchant ID:",
+                                          selectedMerchantId
+                                        );
+                                        console.log(
+                                          "👤 Customer Created At:",
+                                          item.customer?.[0]?.created_at
+                                        );
+                                        console.log(
+                                          "🌍 Customer Address:",
+                                          item.customer?.[0]?.default_address
+                                        );
+
+                                        navigate(`/order/${item.orderId}`, {
+                                          state: {
+                                            order: subscription,
+                                            productName: item.name,
+                                            sku: item.sku,
+                                            index: 101 + index,
+                                            serialNumber: item.orderId,
+                                            selectedMerchantId,
+                                          },
+                                        });
+                                      }}
+                                    >
+                                      {item.name}
+                                      <br />
+                                      <span className="text-xs text-gray-500">
+                                        SKU: {item.sku || "N/A"}
+                                      </span>
+                                    </td>
+
+                                    {/* Quantity */}
+                                    <td className="p-3">{item.quantity}</td>
+
+                                    {/* Address Line 1 */}
+                                    <td className="p-3">
+                                      {customer?.default_address?.address1 ||
+                                        "N/A"}
+                                    </td>
+
+                                    {/* Country */}
+                                    <td className="p-3">
+                                      {customer?.default_address
+                                        ?.country_name || "N/A"}
+                                    </td>
+
+                                    {/* Price */}
+                                    <td className="p-3">
+                                      {item.price ? `$${item.price}` : "N/A"}
+                                    </td>
+
+                                    {/* <td className="p-3" colSpan={4}></td> */}
+                                  </tr>
+                                );
+                              })}
+                            </React.Fragment>
+                          );
+                        })
+                      : // === MERCHANT VIEW ===
+                        subscriptions.map((subscription, index) => {
+                          const address =
+                            subscription.customer?.default_address;
+                          const firstItem = subscription.lineItems?.[0];
+                          if (!firstItem) return null;
+
+                          return (
+                            <tr
+                              key={subscription.orderId}
+                              className={`border-b ${
+                                index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                              } w-full`}
+                            >
+                              <td className="p-3">#{subscription.orderId}</td>
+                              <td className="p-3">
+                                {formatDate(subscription.createdAt)}
+                              </td>
+                              <td
+                                className="p-3 cursor-pointer hover:underline"
+                                onClick={() =>
+                                  navigate(`/order/${subscription.orderId}`, {
+                                    state: {
+                                      order: subscription,
+                                      productName: firstItem.name,
+                                      sku: firstItem.sku,
+                                      index: 101 + index,
+                                      serialNumber: subscription.orderId,
+                                    },
+                                  })
+                                }
+                              >
+                                {firstItem.name}
+                                <br />
+                                <span className="text-xs text-gray-500">
+                                  SKU: {firstItem.sku || "N/A"}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <div className="text-xs text-blue-500 mt-1">
+                                  {subscription.lineItems.length}{" "}
+                                  {subscription.lineItems.length === 1
+                                    ? "item"
+                                    : "items"}
+                                </div>
+                              </td>
+                              <td className="p-3">
+                                {address
+                                  ? `${address.address1}, ${address.city}, ${address.province}`
+                                  : "N/A"}
+                              </td>
+                              <td className="p-3">
+                                {address?.country || "N/A"}
+                              </td>
+                              <td className="p-3">
+                                $
+                                {(
+                                  parseFloat(firstItem.price || 0) *
+                                  (firstItem.quantity || 1)
+                                ).toFixed(2)}
+                              </td>
+                            </tr>
+                          );
+                        })}
                   </tbody>
                 </table>
               </div>

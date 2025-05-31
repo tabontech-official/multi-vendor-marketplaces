@@ -6,47 +6,63 @@ import axios from "axios";
 const OrdersDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { orderId } = useParams();
   const [orderData, setOrderData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
 
-  const { order, productName, sku, index } = location.state || {};
- useEffect(() => {
-  const fetchOrderData = async () => {
-    const userId = localStorage.getItem("userid");
-    if (!userId) return;
+  const { order, productName, sku, index, selectedMerchantId } =
+    location.state || {};
+  const lineItems =
+    order?.lineItems || order?.lineItemsByMerchant?.[selectedMerchantId] || [];
+  useEffect(() => {
+    const fetchOrderData = async () => {
+      const userId = localStorage.getItem("userid");
+      console.log("⏳ Fetching order...");
+      console.log("🧾 orderId from params:", orderId);
+      console.log("👤 userId from localStorage:", userId);
 
-    try {
-      const response = await axios.get(
-        `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${order?.orderId}/${userId}`
-      );
-      setOrderData(response.data?.data); // ✅ Use correct key
-      setIsLoading(false);
-    } catch (err) {
-      console.error("Error fetching order:", err);
-      setFetchError("Failed to load order");
-      setIsLoading(false);
-    }
-  };
+      if (!userId || !orderId) return;
 
-  if (order?.orderId) {
+      try {
+        const response = await axios.get(
+          `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${orderId}/${userId}`
+        );
+        setOrderData(response.data?.data);
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error fetching order:", err);
+        setFetchError("Failed to load order");
+        setIsLoading(false);
+      }
+    };
+
     fetchOrderData();
-  }
-}, [order?.orderId]);
+  }, [orderId]);
 
-  const totalPrice = order?.lineItems
-    .reduce((acc, item) => {
-      const price = parseFloat(item.price);
-      const qty = Number(item.quantity);
-      return acc + (isNaN(price) || isNaN(qty) ? 0 : price * qty);
-    }, 0)
-    .toFixed(2);
-  const formattedDate = new Date(order?.createdAt).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const totalPrice = Array.isArray(lineItems)
+    ? lineItems
+        .reduce((acc, item) => {
+          const price = parseFloat(item.price);
+          const qty = Number(item.quantity);
+          return acc + (isNaN(price) || isNaN(qty) ? 0 : price * qty);
+        }, 0)
+        .toFixed(2)
+    : "0.00";
+
+
+  const customerCreatedAt =
+    order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]?.customer?.[0]
+      ?.created_at;
+
+  const formattedDate = customerCreatedAt
+    ? new Date(customerCreatedAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "N/A";
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
       <div className="w-full max-w-6xl grid grid-cols-12 gap-6">
@@ -54,7 +70,7 @@ const OrdersDetails = () => {
           <div class="flex space-x-8">
             <div>
               <span class="text-gray-900 font-semibold block">
-                Orderno: #{order?.serialNumber}
+                Orderno: #{order?.serialNo}
               </span>
               <span class="text-gray-900 font-semibold block mt-1">
                 {formattedDate} from Online store
@@ -179,119 +195,140 @@ const OrdersDetails = () => {
               </div>
             </div>
           )} */}
-       {order?.lineItems.some((i) => i.fulfillment_status === null) && (
-            <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
-              <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
-                <span>
-                  Unfulfilled (
-                  {
-                    order.lineItems.filter((i) => i.fulfillment_status === null)
-                      .length
-                  }
-                  )
-                </span>
-              </div>
-
-              <div className="border border-gray-200 rounded-lg p-4 space-y-4">
-                <div className="text-sm space-y-2">
-                  <div>
-                    <p className="text-gray-600 font-semibold">Location</p>
-                    <p className="text-gray-900">Shop location</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600 font-semibold">
-                      Delivery method
-                    </p>
-                    <p className="text-gray-900">Standard</p>
-                  </div>
+          {Array.isArray(lineItems) &&
+            lineItems.some((i) => i.fulfillment_status === null) && (
+              <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
+                <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
+                  <span>
+                    Unfulfilled (
+                    {
+                      lineItems.filter((i) => i.fulfillment_status === null)
+                        .length
+                    }
+                    )
+                  </span>
                 </div>
 
-                <hr className="border-gray-200" />
+                <div className="border border-gray-200 rounded-lg p-4 space-y-4">
+                  <div className="text-sm space-y-2">
+                    <div>
+                      <p className="text-gray-600 font-semibold">Location</p>
+                      <p className="text-gray-900">Shop location</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600 font-semibold">
+                        Delivery method
+                      </p>
+                      <p className="text-gray-900">Standard</p>
+                    </div>
+                  </div>
 
-                <div className="divide-y border rounded mb-4">
-                  {order.lineItems
-                    .filter((item) => item.fulfillment_status === null)
-                    .map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-3"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-                            {item.image?.src ? (
-                              <img
-                                src={item.image.src}
-                                alt={item.image.alt || "Product image"}
-                                className="w-full h-full object-contain rounded"
-                              />
-                            ) : (
-                              <span className="text-gray-400 text-xs font-semibold">
-                                No Image
-                              </span>
-                            )}
+                  <hr className="border-gray-200" />
+
+                  <div className="divide-y border rounded mb-4">
+                    {lineItems
+                      .filter((item) => item.fulfillment_status === null)
+                      .map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+                              {item.image?.src ? (
+                                <img
+                                  src={item.image.src}
+                                  alt={item.image.alt || "Product image"}
+                                  className="w-full h-full object-contain rounded"
+                                />
+                              ) : (
+                                <span className="text-gray-400 text-xs font-semibold">
+                                  No Image
+                                </span>
+                              )}
+                            </div>
+
+                            <div>
+                              <p className="text-sm font-medium text-gray-800">
+                                {item.name}
+                              </p>
+                              {item.variant_title && (
+                                <span className="inline-block text-[10px] px-2 py-1 bg-gray-200 text-gray-600 rounded mt-1">
+                                  {item.variant_title}
+                                </span>
+                              )}
+                              <p className="text-xs text-gray-500 mt-1">
+                                SKU: {item.sku || "N/A"}
+                              </p>
+                            </div>
                           </div>
 
-                          <div>
-                            <p className="text-sm font-medium text-gray-800">
-                              {item.name}
+                          <div className="text-right">
+                            <p className="text-sm text-gray-800 font-medium">
+                              ${parseFloat(item.price).toFixed(2)} ×{" "}
+                              {item.quantity - (item.fulfilled_quantity || 0)}
                             </p>
-
-                            {item.variant_title && (
-                              <span className="inline-block text-[10px] px-2 py-1 bg-gray-200 text-gray-600 rounded mt-1">
-                                {item.variant_title}
-                              </span>
-                            )}
-
-                            <p className="text-xs text-gray-500 mt-1">
-                              SKU: {item.sku || "N/A"}
+                            <p className="text-sm font-semibold text-gray-900">
+                              $
+                              {(
+                                parseFloat(item.price) *
+                                (item.quantity - (item.fulfilled_quantity || 0))
+                              ).toFixed(2)}
                             </p>
                           </div>
                         </div>
+                      ))}
+                  </div>
 
-                        <div className="text-right">
-                          <p className="text-sm text-gray-800 font-medium">
-                            ${parseFloat(item.price).toFixed(2)} ×{" "}
-                            {item.quantity - (item.fulfilled_quantity || 0)}
-                          </p>
-                          <p className="text-sm font-semibold text-gray-900">
-                            $
-                            {(
-                              parseFloat(item.price) *
-                              (item.quantity - (item.fulfilled_quantity || 0))
-                            ).toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                </div>
+                  <div className="flex space-x-2 justify-end">
+                    <button
+                      onClick={() => {
+                        const merchantId =
+                          selectedMerchantId || order?.merchantId || ""; // fallback if needed
 
-                <div className="flex space-x-2 justify-end">
-                  <button
-                    onClick={() => {
-                      console.log("Navigating with orderData:", orderData);
+                        console.log("📦 fullOrder:", order);
+                        console.log("🏪 selectedMerchantId:", merchantId);
 
-                      navigate(`/order/${orderData?.id}/fulfillment_orders`, {
-                        state: {
-                          order: orderData,
-                          fullOrder: order,
-                          productName: orderData?.name,
-                          sku: orderData?.line_items?.[0]?.sku || "",
-                          index: 1,
-                        },
-                      });
-                    }}
-                    className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
-                  >
-                    Fulfill item
-                  </button>
+                        navigate(`/order/${orderId}/fulfillment_orders`, {
+                          state: {
+                            order: orderData,
+                            fullOrder: order,
+                            productName: orderData?.name,
+                            sku:
+                              Array.isArray(orderData?.line_items) &&
+                              orderData.line_items.length > 0
+                                ? orderData.line_items[0]?.sku
+                                : "",
 
-                  <button className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition">
-                    Create shipping label
-                  </button>
+                            fulfillable_quantity:
+                              Array.isArray(orderData?.fulfillments) &&
+                              orderData.fulfillments.length > 0 &&
+                              Array.isArray(
+                                orderData.fulfillments[0]?.line_items
+                              ) &&
+                              orderData.fulfillments[0].line_items.length > 0
+                                ? orderData.fulfillments[0].line_items[0]
+                                    ?.fulfillable_quantity
+                                : 0,
+
+                            orderId: orderId,
+                            selectedMerchantId: merchantId,
+                            index: 1,
+                          },
+                        });
+                      }}
+                      className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      Fulfill item
+                    </button>
+
+                    <button className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition">
+                      Create shipping label
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* fullfill box */}
 
@@ -398,7 +435,10 @@ const OrdersDetails = () => {
             <div className="space-y-3 border rounded-xl p-3">
               <div className="flex justify-between text-gray-700 text-sm">
                 <span>Subtotal</span>
-                <span>{order?.lineItems[0].quantity}item</span>
+                <span>
+                  {Array.isArray(lineItems) ? lineItems.length : 0} item
+                  {lineItems?.length !== 1 ? "s" : ""}
+                </span>
                 <span className="font-semibold">${totalPrice}</span>
               </div>
               <div className="flex justify-between text-gray-700 text-sm">
@@ -446,7 +486,14 @@ const OrdersDetails = () => {
               href="#"
               className="text-blue-600 hover:underline block font-semibold"
             >
-              {order?.customer.first_name} {order?.customer.last_name}
+              {
+                order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
+                  ?.customer?.[0].first_name
+              }{" "}
+              {
+                order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
+                  ?.customer?.[0].last_name
+              }
             </a>
             <p className="text-gray-600 text-sm mb-2 ">No orders</p>
 
@@ -457,7 +504,10 @@ const OrdersDetails = () => {
               href="mailto:medspatrader23@gmail.com"
               className="text-blue-600 hover:underline text-sm"
             >
-              {order?.customer.email}
+              {
+                order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
+                  ?.customer?.[0].email
+              }{" "}
             </a>
             <p className="text-gray-600 text-sm">No phone number</p>
 
@@ -470,13 +520,28 @@ const OrdersDetails = () => {
             <address className="text-gray-900 not-italic text-sm leading-snug space-y-1">
               <p>
                 {" "}
-                {order?.customer.first_name} {order?.customer.last_name}
+                {
+                  order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
+                    ?.customer?.[0].first_name
+                }{" "}
+                {
+                  order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
+                    ?.customer?.[0].last_name
+                }
               </p>
-              <p>{order?.customer.default_address.address1}</p>
+              <p>
+                {
+                  order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
+                    ?.customer?.[0].default_address.address1
+                }{" "}
+              </p>
               {/* <p>isb VIC 3000</p> */}
               <p>
                 {" "}
-                <p>{order?.customer.default_address.country}</p>
+                {
+                  order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
+                    ?.customer?.[0].default_address.country
+                }{" "}
               </p>
               <a
                 href="https://maps.google.com"

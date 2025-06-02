@@ -121,12 +121,14 @@ import axios from "axios";
 import UseFetchUserData from "../component/fetchUser";
 import { useAuthContext } from "../Hooks/useAuthContext";
 import { useNotification } from "../context api/NotificationContext";
-
+import dayjs from 'dayjs';
+import minMax from 'dayjs/plugin/minMax';
+dayjs.extend(minMax); 
 const Finance = () => {
   const { addNotification } = useNotification();
   const { userData, loading } = UseFetchUserData();
   const [userRole, setUserRole] = useState("");
-
+  const [payouts, setPayouts] = useState([]);
   const { user } = useAuthContext();
 
   const [searchVal, setSearchVal] = useState("");
@@ -271,6 +273,26 @@ useEffect(() => {
     }
   };
 
+useEffect(() => {
+  const fetchPayouts = async () => {
+    const res = await fetch('https://multi-vendor-marketplace.vercel.app/order/getPayout');
+    const data = await res.json();
+
+    const updates = data.updates || [];
+
+    const formatted = updates.map(order => ({
+      payoutDate: dayjs(order.scheduledPayoutDate).format('MMM D, YYYY'),
+      transactionDates: `${dayjs(order.createdAt).format('MMM D')} – ${dayjs(order.eligibleDate).format('MMM D, YYYY')}`,
+      status: order.payoutStatus === 'paid' ? 'Deposited' : 'Scheduled',
+      amount: `$${(order.payoutAmount || 0).toFixed(2)} CAD`,
+    }));
+
+    setPayouts(formatted);
+  };
+
+  fetchPayouts();
+}, []);
+
   return user ? (
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-gray-200 pb-4">
@@ -331,55 +353,43 @@ useEffect(() => {
 
       {/* Content */}
       <div className="mt-6">
-        {activeTab === "payouts" && (
-          <div className="p-4">
-            <table className="w-full border-collapse bg-white">
-              <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-                <tr>
-                  <th className="p-3">Payout Date</th>
-                  <th className="p-3">Transaction Dates</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3 text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  {
-                    payoutDate: "Jun 3, 2025",
-                    transactionDates: "May 29 – Jun 2, 2025",
-                    status: "Scheduled",
-                    amount: "$7,418.70 CAD",
-                  },
-                  {
-                    payoutDate: "Jun 2, 2025",
-                    transactionDates: "May 28 – May 30, 2025",
-                    status: "Deposited",
-                    amount: "$8,674.72 CAD",
-                  },
-                ].map((item, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
-                    <td className="p-3">{item.payoutDate}</td>
-                    <td className="p-3">{item.transactionDates}</td>
-                    <td className="p-3">
-                      <span
-                        className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                          item.status === "Scheduled"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="p-3 text-right font-medium">
-                      {item.amount}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      {activeTab === "payouts" && (
+  <div className="p-4">
+    <table className="w-full border-collapse bg-white">
+      <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+        <tr>
+          <th className="p-3">Payout Date</th>
+          <th className="p-3">Transaction Dates</th>
+          <th className="p-3">Status</th>
+          <th className="p-3 text-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {payouts.map((item, index) => (
+          <tr key={index} className="border-b hover:bg-gray-50">
+            <td className="p-3">{item.payoutDate}</td>
+            <td className="p-3">{item.transactionDates}</td>
+            <td className="p-3">
+              <span
+                className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                  item.status === "Scheduled"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {item.status}
+              </span>
+            </td>
+            <td className="p-3 text-right font-medium">
+              {item.amount}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
 
         {activeTab === "To be paid" && (
           <div className="p-4">

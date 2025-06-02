@@ -38,6 +38,8 @@ import { NotificationProvider } from "./context api/NotificationContext";
 import Notification from "./pages/Notification";
 import OrdersDetails from "./Subcription/ordersDetails";
 import FullItem from "./pages/FullItem";
+import MerchantSubPage from "./Subcription/MerchantSubPage";
+import Finance from "./pages/Finance";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -140,6 +142,10 @@ const App = () => {
             element={<ProtectedForms element={<Promotion />} />}
           />
           <Route
+            path="/finance"
+            element={<ProtectedForms element={<Finance />} />}
+          />
+          <Route
             path="/order/:orderId"
             element={<ProtectedForms element={<OrdersDetails />} />}
           />
@@ -176,6 +182,10 @@ const App = () => {
           <Route
             path="/edit-account"
             element={<PrivateRoute element={<AccountPage />} />}
+          />
+           <Route
+            path="/merchant_order_details"
+            element={<PrivateRoute element={<MerchantSubPage />} />}
           />
           <Route
             path="/manage-user"

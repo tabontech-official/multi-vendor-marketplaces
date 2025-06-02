@@ -234,7 +234,7 @@ const SubscriptionHistory = () => {
                       </th>
 
                       <th scope="col" className="p-3">
-                        Product Name
+                        {isAdmin ? "Merchant Name" : "Product Name"}
                       </th>
                       <th scope="col" className="p-3">
                         Item
@@ -255,65 +255,83 @@ const SubscriptionHistory = () => {
                       ? subscriptions.map((subscription, index) => {
                           const orderId = subscription.serialNo;
 
-                          const selectedMerchantId =
-                            selectedMerchants[orderId] ||
-                            (Array.isArray(subscription.merchants) &&
-                              subscription.merchants[0]?.id) ||
-                            null;
+                          return subscription.merchants.map(
+                            (merchant, mIndex) => {
+                              const merchantId = merchant.id;
+                              const merchantItems =
+                                subscription.lineItemsByMerchant?.[
+                                  merchantId
+                                ] || [];
+                              const customer = merchantItems[0]?.customer?.[0];
+                              const orderDate = customer?.created_at;
+                              const shopifyOrderId = merchantItems[0]?.orderId;
 
-                          const merchantItems =
-                            subscription.lineItemsByMerchant?.[
-                              selectedMerchantId
-                            ] || [];
+                              const totalQuantity = merchantItems.reduce(
+                                (sum, item) => sum + (item.quantity || 0),
+                                0
+                              );
 
-                          const selectedMerchant = subscription.merchants.find(
-                            (m) => m.id === selectedMerchantId
-                          );
-                          const customer = merchantItems[0]?.customer?.[0];
+                              const totalPrice = merchantItems.reduce(
+                                (sum, item) => {
+                                  const price = parseFloat(item.price || 0);
+                                  const qty = parseInt(item.quantity || 0);
+                                  return sum + price * qty;
+                                },
+                                0
+                              );
 
-                          const orderDate = customer?.created_at;
+                              return (
+                                <tr
+                                  key={`${orderId}-${merchantId}`}
+                                  className={`border-b ${
+                                    (index + mIndex) % 2 === 0
+                                      ? "bg-white"
+                                      : "bg-gray-100"
+                                  } w-full`}
+                                >
+                                  <td
+                                    className="p-3 cursor-pointer text-blue-600 hover:underline"
+                                    onClick={() => {
+                                      console.log(
+                                        "Navigating to merchant_order_details with:",
+                                        {
+                                          merchantId,
+                                          shopifyOrderId,
+                                          serialNo: orderId,
+                                        }
+                                      );
 
-                          const totalQuantity = merchantItems.reduce(
-                            (sum, item) => sum + (item.quantity || 0),
-                            0
-                          );
+                                      navigate("/merchant_order_details", {
+                                        state: {
+                                          merchantId,
+                                          shopifyOrderId,
+                                          serialNo: orderId,
+                                        },
+                                      });
+                                    }}
+                                  >
+                                    #{orderId}
+                                  </td>
 
-                          const totalPrice = merchantItems.reduce(
-                            (sum, item) => {
-                              const price = parseFloat(item.price || 0);
-                              const qty = parseInt(item.quantity || 0);
-                              return sum + price * qty;
-                            },
-                            0
-                          );
-
-                          return (
-                            <tr
-                              key={orderId}
-                              className={`border-b ${
-                                index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                              } w-full`}
-                            >
-                              <td className="p-3">#{orderId}</td>
-                              <td className="p-3">
-                                {orderDate ? formatDate(orderDate) : "N/A"}
-                              </td>
-                              <td className="p-3 text-sm">
-                                {selectedMerchant?.info?.name || "N/A"}
-                              </td>
-                              <td className="p-3">
-                                {totalQuantity} items
-                              </td>
-                              <td className="p-3">
-                                {selectedMerchant?.info?.dispatchAddress ||
-                                  "N/A"}
-                              </td>
-                              <td className="p-3">
-                                {selectedMerchant?.info?.dispatchCountry ||
-                                  "N/A"}
-                              </td>
-                              <td className="p-3">${totalPrice.toFixed(2)}</td>
-                            </tr>
+                                  <td className="p-3">
+                                    {orderDate ? formatDate(orderDate) : "N/A"}
+                                  </td>
+                                  <td className="p-3 text-sm">
+                                    {merchant.info?.name || "N/A"}
+                                  </td>
+                                  <td className="p-3">{totalQuantity} items</td>
+                                  <td className="p-3">
+                                    {merchant.info?.dispatchAddress || "N/A"}
+                                  </td>
+                                  <td className="p-3">
+                                    {merchant.info?.dispatchCountry || "N/A"}
+                                  </td>
+                                  <td className="p-3">
+                                    ${totalPrice.toFixed(2)}
+                                  </td>
+                                </tr>
+                              );
+                            }
                           );
                         })
                       : // === MERCHANT VIEW ===
@@ -336,7 +354,15 @@ const SubscriptionHistory = () => {
                               </td>
                               <td
                                 className="p-3 cursor-pointer hover:underline"
-                                onClick={() =>
+                                onClick={() => {
+                                  console.log("Navigating with data:", {
+                                    order: subscription,
+                                    productName: firstItem.name,
+                                    sku: firstItem.sku,
+                                    index: 101 + index,
+                                    serialNumber: subscription.orderId,
+                                  });
+
                                   navigate(`/order/${subscription.orderId}`, {
                                     state: {
                                       order: subscription,
@@ -345,8 +371,8 @@ const SubscriptionHistory = () => {
                                       index: 101 + index,
                                       serialNumber: subscription.orderId,
                                     },
-                                  })
-                                }
+                                  });
+                                }}
                               >
                                 {firstItem.name}
                                 <br />
@@ -388,73 +414,7 @@ const SubscriptionHistory = () => {
         </div>
       </div>
 
-      {/* Dialog for buying credits */}
-      <Dialog
-        open={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        className="fixed inset-0 z-10 overflow-y-auto"
-      >
-        <div className="flex items-center justify-center min-h-screen px-4">
-          <div
-            ref={dialogRef}
-            className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg border border-black relative"
-          >
-            <button
-              onClick={() => setIsDialogOpen(false)}
-              className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-            >
-              <FaTimes size={20} />
-            </button>
-
-            <h2 className="text-2xl font-bold mb-1">Buy Credits</h2>
-            <span className="text-base">${Price}.00/credit</span>
-
-            <div className="flex items-center justify-between mb-4 mt-2">
-              <label htmlFor="quantity" className="font-medium">
-                Quantity:
-              </label>
-              <div className="flex items-center">
-                <button
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-1 px-4 rounded-l transition duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
-                >
-                  -
-                </button>
-                <input
-                  id="quantity"
-                  type="number"
-                  value={quantity}
-                  onChange={(e) =>
-                    setQuantity(Math.max(1, parseInt(e.target.value) || 1))
-                  }
-                  className="border border-gray-300 rounded text-center w-16 py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm
-                  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  min="1"
-                />
-                <button
-                  onClick={() => setQuantity((q) => q + 1)}
-                  className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-1 px-4 rounded-r transition duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <span className="text-lg font-bold">
-                Price:${dynamicPrice}.00
-              </span>
-            </div>
-
-            <button
-              onClick={handleBuyNow}
-              className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded flex justify-center items-center"
-            >
-              Buy Now <FaShoppingBasket className="ml-2" />
-            </button>
-          </div>
-        </div>
-      </Dialog>
+      
     </div>
   );
 };

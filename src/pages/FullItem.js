@@ -3,24 +3,31 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const FullItem = () => {
   const location = useLocation();
-const { order: rawOrder, fullOrder,fulfillable_quantity, sku, index,orderId,  selectedMerchantId, // ⬅️ from navigation state
- } = location.state || {};
+  const {
+    order: rawOrder,
+    fullOrder,
+    fulfillable_quantity,
+    sku,
+    index,
+    orderId,
+    merchantId,
+  } = location.state || {};
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");
   const [carrier, setCarrier] = useState("");
-const navigate=useNavigate()
-const order = {
-  ...rawOrder,
-  lineItems: rawOrder?.lineItems || rawOrder?.line_items || [],
-};
+  const navigate = useNavigate();
+  const order = {
+    ...rawOrder,
+    lineItems: rawOrder?.lineItems || rawOrder?.line_items || [],
+  };
 
   // const handleFulfill = async () => {
   //   setLoading(true);
   //   setMessage("");
 
   //   const itemsToFulfill = fullOrder.lineItems
-  //     .filter((item) => item.fulfillment_status === null) 
+  //     .filter((item) => item.fulfillment_status === null)
   //     .map((item) => {
   //       const qty = quantities[item.id];
   //       if (qty > 0) {
@@ -78,81 +85,81 @@ const order = {
   //   setLoading(false);
   // };
 
-const handleFulfill = async () => {
-  setLoading(true);
-  setMessage("");
+  const handleFulfill = async () => {
+    setLoading(true);
+    setMessage("");
 
-  // ✅ Use merchant/staff lineItems OR fallback to admin-specific structure
-  const lineItems =
-    fullOrder?.lineItems ||
-    fullOrder?.lineItemsByMerchant?.[selectedMerchantId] ||
-    [];
+    const lineItems =
+      fullOrder?.lineItems ||
+      fullOrder?.lineItemsByMerchant?.[merchantId] ||
+      [];
 
-  const itemsToFulfill = lineItems
-    .filter((item) => item.fulfillment_status === null || item.fulfillment_status === "partial")
-    .map((item) => {
-      const qty = quantities[item.id];
-      if (qty > 0) {
-        return {
-          lineItemId: item.id,
-          quantity: qty,
-        };
+    const itemsToFulfill = lineItems
+      .filter(
+        (item) =>
+          item.fulfillment_status === null ||
+          item.fulfillment_status === "partial"
+      )
+      .map((item) => {
+        const qty = quantities[item.id];
+        if (qty > 0) {
+          return {
+            lineItemId: item.id,
+            quantity: qty,
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    if (itemsToFulfill.length === 0) {
+      setMessage("No valid unfulfilled items selected.");
+      setLoading(false);
+      return;
+    }
+
+    const payload = {
+      orderId: orderId,
+      trackingInfo: {
+        number: trackingNumber,
+        company: carrier,
+        url:
+          carrier && trackingNumber
+            ? `https://track.${carrier.toLowerCase()}.com/${trackingNumber}`
+            : null,
+      },
+      itemsToFulfill,
+    };
+
+    try {
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/order/fullFillOrder",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMessage("Items fulfilled and inventory updated!");
+        // navigate(`/order/${fullOrder.orderId}`);
+      } else {
+        setMessage(`Error: ${result.error || "Unknown error"}`);
       }
-      return null;
-    })
-    .filter(Boolean);
+    } catch (error) {
+      console.error("Fulfillment error:", error);
+      setMessage("Server error. Please try again.");
+    }
 
-  if (itemsToFulfill.length === 0) {
-    setMessage("No valid unfulfilled items selected.");
     setLoading(false);
-    return;
-  }
-
-  const payload = {
-    orderId: orderId,
-    trackingInfo: {
-      number: trackingNumber,
-      company: carrier,
-      url:
-        carrier && trackingNumber
-          ? `https://track.${carrier.toLowerCase()}.com/${trackingNumber}`
-          : null,
-    },
-    itemsToFulfill,
   };
 
-  try {
-    const response = await fetch(
-      "https://multi-vendor-marketplace.vercel.app/order/fullFillOrder",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }
-    );
-
-    const result = await response.json();
-
-    if (response.ok) {
-      setMessage("Items fulfilled and inventory updated!");
-      // navigate(`/order/${fullOrder.orderId}`);
-    } else {
-      setMessage(`Error: ${result.error || "Unknown error"}`);
-    }
-  } catch (error) {
-    console.error("Fulfillment error:", error);
-    setMessage("Server error. Please try again.");
-  }
-
-  setLoading(false);
-};
-
-
   const [quantities, setQuantities] = useState({});
-const allLineItems =
-  fullOrder?.lineItems ||
-  fullOrder?.lineItemsByMerchant?.[selectedMerchantId] ||
-  []
+  const allLineItems =
+    fullOrder?.lineItems || fullOrder?.lineItemsByMerchant?.[merchantId] || [];
   // useEffect(() => {
   //   if (fullOrder?.lineItems) {
   //     const initialQuantities = fullOrder.lineItems.reduce((acc, item) => {
@@ -164,19 +171,18 @@ const allLineItems =
   // }, [fullOrder]);
 
   useEffect(() => {
-  if (allLineItems?.length) {
-    const initialQuantities = allLineItems.reduce((acc, item) => {
-      acc[item.id] = item?.quantity;
-      return acc;
-    }, {});
-    setQuantities(initialQuantities);
-  }
-}, [fullOrder, selectedMerchantId]);
+    if (allLineItems?.length) {
+      const initialQuantities = allLineItems.reduce((acc, item) => {
+        acc[item.id] = item?.quantity;
+        return acc;
+      }, {});
+      setQuantities(initialQuantities);
+    }
+  }, [fullOrder, merchantId]);
 
   const handleQuantityChange = (lineItemId, qty) => {
     setQuantities((prev) => ({ ...prev, [lineItemId]: qty }));
   };
-
 
   return (
     <div className="p-6 min-h-screen">
@@ -202,50 +208,63 @@ const allLineItems =
               <div className="flex items-center gap-4 mt-3">
                 <div>
                   {allLineItems
-  ?.filter((item) => item.fulfillment_status === null || item.fulfillment_status === "partial")
-  .map((item, index) => {
-    const productName = item.name?.split(" - ")[0];
-    const variantOptions = item.variant_title?.split(" / ") || [];
+                    ?.filter(
+                      (item) =>
+                        item.fulfillment_status === null ||
+                        item.fulfillment_status === "partial"
+                    )
+                    .map((item, index) => {
+                      const productName = item.name?.split(" - ")[0];
+                      const variantOptions =
+                        item.variant_title?.split(" / ") || [];
 
-    return (
-      <div key={index} className="flex items-center gap-4 mt-3">
-        <img
-          src={item.image?.src}
-          alt={item.image?.alt || "Variant Image"}
-          className="w-16 h-16 rounded object-cover border"
-        />
-        <div className="flex-1">
-          <div className="font-medium text-sm flex items-center justify-between gap-2">
-            {productName}
-            <input
-              type="number"
-              min="0"
-              max={item.fulfillable_quantity || 0}
-              value={quantities[item.id] || 0}
-              className="ml-2 w-16 text-sm border rounded px-2 py-1"
-              onChange={(e) =>
-                handleQuantityChange(item.id, parseInt(e.target.value))
-              }
-            />
-            of {item.fulfillable_quantity}
-          </div>
+                      return (
+                        <div
+                          key={index}
+                          className="flex items-center gap-4 mt-3"
+                        >
+                          <img
+                            src={item.image?.src}
+                            alt={item.image?.alt || "Variant Image"}
+                            className="w-16 h-16 rounded object-cover border"
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium text-sm flex items-center justify-between gap-2">
+                              {productName}
+                              <input
+                                type="number"
+                                min="0"
+                                max={item.fulfillable_quantity || 0}
+                                value={quantities[item.id] || 0}
+                                className="ml-2 w-16 text-sm border rounded px-2 py-1"
+                                onChange={(e) =>
+                                  handleQuantityChange(
+                                    item.id,
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                              />
+                              of {item.fulfillable_quantity}
+                            </div>
 
-          <div className="text-xs text-gray-500 space-x-1 mt-1 flex flex-wrap gap-1">
-            {variantOptions.map((option, i) => (
-              <span key={i} className="bg-gray-200 px-2 py-0.5 rounded">
-                {option}
-              </span>
-            ))}
-          </div>
+                            <div className="text-xs text-gray-500 space-x-1 mt-1 flex flex-wrap gap-1">
+                              {variantOptions.map((option, i) => (
+                                <span
+                                  key={i}
+                                  className="bg-gray-200 px-2 py-0.5 rounded"
+                                >
+                                  {option}
+                                </span>
+                              ))}
+                            </div>
 
-          <div className="text-xs text-gray-500 mt-1">
-            SKU: {item.sku}
-          </div>
-        </div>
-      </div>
-    );
-  })}
-
+                            <div className="text-xs text-gray-500 mt-1">
+                              SKU: {item.sku}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
             </div>
@@ -282,64 +301,85 @@ const allLineItems =
           </div>
         </div>
 
-     <div className="space-y-4">
-  {/* Shipping Address */}
-  <div className="border border-gray-200 shadow rounded-lg p-4 space-y-2 text-sm">
-    <div className="font-medium">Shipping address</div>
+        <div className="space-y-4">
+          {/* Shipping Address */}
+          <div className="border border-gray-200 shadow rounded-lg p-4 space-y-2 text-sm">
+            <div className="font-medium">Shipping address</div>
 
-    {/* Name */}
-    <div>
-      {(fullOrder?.customer?.first_name || fullOrder?.customersByMerchant?.[selectedMerchantId]?.first_name || "")}{" "}
-      {(fullOrder?.customer?.last_name || fullOrder?.customersByMerchant?.[selectedMerchantId]?.last_name || "")}
-    </div>
+            {/* Name */}
+            <div>
+              {fullOrder?.customer?.first_name ||
+                fullOrder?.customersByMerchant?.[merchantId]?.first_name ||
+                ""}{" "}
+              {fullOrder?.customer?.last_name ||
+                fullOrder?.customersByMerchant?.[merchantId]?.last_name ||
+                ""}
+            </div>
 
-    {/* Address Line 1 */}
-    <div>
-      {(fullOrder?.customer?.default_address?.address1 || fullOrder?.customersByMerchant?.[selectedMerchantId]?.default_address?.address1 || "—")}
-    </div>
+            {/* Address Line 1 */}
+            <div>
+              {fullOrder?.customer?.default_address?.address1 ||
+                fullOrder?.customersByMerchant?.[merchantId]?.default_address
+                  ?.address1 ||
+                "—"}
+            </div>
 
-    {/* City, Province, Code */}
-    <div>
-      {(fullOrder?.customer?.default_address?.city || fullOrder?.customersByMerchant?.[selectedMerchantId]?.default_address?.city || "")}{" "}
-      {(fullOrder?.customer?.default_address?.province || fullOrder?.customersByMerchant?.[selectedMerchantId]?.default_address?.province || "")}{" "}
-      {(fullOrder?.customer?.default_address?.province_code || fullOrder?.customersByMerchant?.[selectedMerchantId]?.default_address?.province_code || "")}
-    </div>
+            {/* City, Province, Code */}
+            <div>
+              {fullOrder?.customer?.default_address?.city ||
+                fullOrder?.customersByMerchant?.[merchantId]?.default_address
+                  ?.city ||
+                ""}{" "}
+              {fullOrder?.customer?.default_address?.province ||
+                fullOrder?.customersByMerchant?.[merchantId]?.default_address
+                  ?.province ||
+                ""}{" "}
+              {fullOrder?.customer?.default_address?.province_code ||
+                fullOrder?.customersByMerchant?.[merchantId]?.default_address
+                  ?.province_code ||
+                ""}
+            </div>
 
-    {/* Country */}
-    <div>
-      {(fullOrder?.customer?.default_address?.country_name || fullOrder?.customersByMerchant?.[selectedMerchantId]?.default_address?.country_name || "")}
-    </div>
+            {/* Country */}
+            <div>
+              {fullOrder?.customer?.default_address?.country_name ||
+                fullOrder?.customersByMerchant?.[merchantId]?.default_address
+                  ?.country_name ||
+                ""}
+            </div>
 
-    <div className="text-xs text-gray-500">
-      The customer selected <strong>Standard</strong> at checkout
-    </div>
-  </div>
+            <div className="text-xs text-gray-500">
+              The customer selected <strong>Standard</strong> at checkout
+            </div>
+          </div>
 
-  {/* Summary */}
-  <div className="border border-gray-200 shadow rounded-lg p-4 space-y-2 text-sm">
-    <div className="font-medium">Summary</div>
-    <div>Fulfilling from Shop location</div>
+          {/* Summary */}
+          <div className="border border-gray-200 shadow rounded-lg p-4 space-y-2 text-sm">
+            <div className="font-medium">Summary</div>
+            <div>Fulfilling from Shop location</div>
 
-    <div>
-      {order?.lineItems?.[0]?.quantity || 0} of {order?.lineItems?.[0]?.quantity || 0}
-    </div>
+            <div>
+              {order?.lineItems?.[0]?.quantity || 0} of{" "}
+              {order?.lineItems?.[0]?.quantity || 0}
+            </div>
 
-    <button
-      onClick={handleFulfill}
-      disabled={loading}
-      className={`w-full mt-4 py-2 rounded transition ${
-        loading ? "bg-gray-400" : "bg-black hover:bg-gray-900"
-      } text-white`}
-    >
-      {loading ? "Fulfilling..." : "Fulfill item"}
-    </button>
+            <button
+              onClick={handleFulfill}
+              disabled={loading}
+              className={`w-full mt-4 py-2 rounded transition ${
+                loading ? "bg-gray-400" : "bg-black hover:bg-gray-900"
+              } text-white`}
+            >
+              {loading ? "Fulfilling..." : "Fulfill item"}
+            </button>
 
-    {message && (
-      <div className="text-sm mt-2 text-center text-gray-700">{message}</div>
-    )}
-  </div>
-</div>
-
+            {message && (
+              <div className="text-sm mt-2 text-center text-gray-700">
+                {message}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

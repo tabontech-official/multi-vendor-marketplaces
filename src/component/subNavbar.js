@@ -5,6 +5,7 @@ import { BsGraphUp } from "react-icons/bs";
 import { IoSettingsOutline } from "react-icons/io5";
 import { MdDashboard } from "react-icons/md";
 import { jwtDecode } from "jwt-decode";
+import { CiBank } from "react-icons/ci";
 const SubNavbar = () => {
   // State for tracking dropdown visibility
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -111,6 +112,11 @@ const SubNavbar = () => {
       name: "OnBoardUser",
       icon: <MdDashboard className="text-green-600" />,
       path: "/on-board-users",
+    },
+     {
+      name: "Finance",
+      icon: <CiBank className="text-purple-600" />,
+      path: "/finance",
     },
   ];
 

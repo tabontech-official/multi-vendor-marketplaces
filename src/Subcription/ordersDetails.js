@@ -6,16 +6,16 @@ import { jwtDecode } from "jwt-decode";
 
 const OrdersDetails = () => {
   const location = useLocation();
+  const { order, productName, sku, index, merchantId } = location.state || {};
+
   const navigate = useNavigate();
   const { orderId } = useParams();
   const [orderData, setOrderData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
 
-  const { order, productName, sku, index, selectedMerchantId } =
-    location.state || {};
   const lineItems =
-    order?.lineItems || order?.lineItemsByMerchant?.[selectedMerchantId] || [];
+    order?.lineItems || order?.lineItemsByMerchant?.[merchantId] || [];
   useEffect(() => {
     const fetchOrderData = async () => {
       const token = localStorage.getItem("usertoken");
@@ -39,7 +39,7 @@ const OrdersDetails = () => {
         isTokenValid && (role === "Master Admin" || role === "Dev Admin");
 
       const userIdFromStorage = localStorage.getItem("userid");
-      const merchantIdFromParams = selectedMerchantId;
+      const merchantIdFromParams = merchantId;
       const finalUserId = isAdminFlag
         ? merchantIdFromParams
         : userIdFromStorage;
@@ -58,14 +58,14 @@ const OrdersDetails = () => {
         setOrderData(response.data?.data);
         setIsLoading(false);
       } catch (err) {
-        console.error("❌ Error fetching order:", err);
+        console.error(" Error fetching order:", err);
         setFetchError("Failed to load order");
         setIsLoading(false);
       }
     };
 
     fetchOrderData();
-  }, [orderId, selectedMerchantId]);
+  }, [orderId, merchantId]);
 
   const totalPrice = Array.isArray(lineItems)
     ? lineItems
@@ -77,9 +77,7 @@ const OrdersDetails = () => {
         .toFixed(2)
     : "0.00";
 
-  const customerCreatedAt =
-    order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]?.customer?.[0]
-      ?.created_at;
+  const customerCreatedAt = order?.createdAt;
 
   const formattedDate = customerCreatedAt
     ? new Date(customerCreatedAt).toLocaleDateString("en-US", {
@@ -309,11 +307,11 @@ const OrdersDetails = () => {
                   <div className="flex space-x-2 justify-end">
                     <button
                       onClick={() => {
-                        const merchantId =
-                          selectedMerchantId || order?.merchantId || ""; 
+                        const resolvedMerchantId =
+                          location.state?.merchantId || order?.merchantId || "";
 
                         console.log("📦 fullOrder:", order);
-                        console.log("🏪 selectedMerchantId:", merchantId);
+                        console.log("🏪 merchantId:", resolvedMerchantId);
 
                         navigate(`/order/${orderId}/fulfillment_orders`, {
                           state: {
@@ -325,7 +323,6 @@ const OrdersDetails = () => {
                               orderData.line_items.length > 0
                                 ? orderData.line_items[0]?.sku
                                 : "",
-
                             fulfillable_quantity:
                               Array.isArray(orderData?.fulfillments) &&
                               orderData.fulfillments.length > 0 &&
@@ -336,9 +333,8 @@ const OrdersDetails = () => {
                                 ? orderData.fulfillments[0].line_items[0]
                                     ?.fulfillable_quantity
                                 : 0,
-
-                            orderId: orderId,
-                            selectedMerchantId: merchantId,
+                            orderId,
+                            merchantId: resolvedMerchantId,
                             index: 1,
                           },
                         });
@@ -512,14 +508,8 @@ const OrdersDetails = () => {
               href="#"
               className="text-blue-600 hover:underline block font-semibold"
             >
-              {
-                order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
-                  ?.customer?.[0].first_name
-              }{" "}
-              {
-                order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
-                  ?.customer?.[0].last_name
-              }
+              {order?.customer.default_address.first_name}{" "}
+              {order?.customer.default_address.last_name}
             </a>
             <p className="text-gray-600 text-sm mb-2 ">No orders</p>
 
@@ -530,10 +520,7 @@ const OrdersDetails = () => {
               href="mailto:medspatrader23@gmail.com"
               className="text-blue-600 hover:underline text-sm"
             >
-              {
-                order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
-                  ?.customer?.[0].email
-              }{" "}
+              {order?.customer.email}{" "}
             </a>
             <p className="text-gray-600 text-sm">No phone number</p>
 
@@ -546,29 +533,12 @@ const OrdersDetails = () => {
             <address className="text-gray-900 not-italic text-sm leading-snug space-y-1">
               <p>
                 {" "}
-                {
-                  order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
-                    ?.customer?.[0].first_name
-                }{" "}
-                {
-                  order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
-                    ?.customer?.[0].last_name
-                }
+                {order?.customer.default_address.first_name}{" "}
+                {order?.customer.default_address.first_name}
               </p>
-              <p>
-                {
-                  order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
-                    ?.customer?.[0].default_address.address1
-                }{" "}
-              </p>
+              <p>{order?.customer.default_address.address1} </p>
               {/* <p>isb VIC 3000</p> */}
-              <p>
-                {" "}
-                {
-                  order?.lineItemsByMerchant?.[selectedMerchantId]?.[0]
-                    ?.customer?.[0].default_address.country
-                }{" "}
-              </p>
+              <p> {order?.customer.default_address.country} </p>
               <a
                 href="https://maps.google.com"
                 target="_blank"

@@ -40,6 +40,7 @@ import OrdersDetails from "./Subcription/ordersDetails";
 import FullItem from "./pages/FullItem";
 import MerchantSubPage from "./Subcription/MerchantSubPage";
 import Finance from "./pages/Finance";
+import PayoutDetails from "./pages/PayoutDetails";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -140,6 +141,10 @@ const App = () => {
           <Route
             path="/promotions"
             element={<ProtectedForms element={<Promotion />} />}
+          />
+          <Route
+            path="/payout-details"
+            element={<ProtectedForms element={<PayoutDetails />} />}
           />
           <Route
             path="/finance"

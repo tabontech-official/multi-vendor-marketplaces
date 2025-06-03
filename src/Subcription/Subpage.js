@@ -245,7 +245,9 @@ const SubscriptionHistory = () => {
                       <th scope="col" className="p-3">
                         Country
                       </th> */}
-                      <th scope="col" className="p-3">Status</th>
+                      <th scope="col" className="p-3">
+                        Status
+                      </th>
                       <th scope="col" className="p-3">
                         Total Price
                       </th>
@@ -362,16 +364,22 @@ const SubscriptionHistory = () => {
                                     {merchant.info?.dispatchCountry || "N/A"}
                                   </td> */}
                                   <td className="p-3">
-  <span
-    className={`px-2 py-1 rounded text-xs font-medium ${
-      fulfillment_status === "fulfilled"
-        ? "bg-green-200 text-green-800"
-        : "bg-yellow-200 text-yellow-800"
-    }`}
-  >
-    {fulfillment_status === "fulfilled" ? "Fulfilled" : "Unfilled"}
-  </span>
-</td>
+                                    <span
+                                      className={`px-2 py-1 rounded text-xs font-medium ${
+                                        fulfillment_status === "fulfilled"
+                                          ? "bg-green-200 text-green-800"
+                                          : fulfillment_status === "cancelled"
+                                          ? "bg-red-200 text-red-800"
+                                          : "bg-yellow-200 text-yellow-800"
+                                      }`}
+                                    >
+                                      {fulfillment_status === "fulfilled"
+                                        ? "Fulfilled"
+                                        : fulfillment_status === "cancelled"
+                                        ? "Cancelled"
+                                        : "Unfulfilled"}
+                                    </span>
+                                  </td>
 
                                   <td className="p-3">
                                     ${totalPrice.toFixed(2)}
@@ -435,14 +443,31 @@ const SubscriptionHistory = () => {
                                     : "items"}
                                 </div>
                               </td>
-                              <td className="p-3">
+                              {/* <td className="p-3">
                                 {address
                                   ? `${address.address1}, ${address.city}, ${address.province}`
                                   : "N/A"}
                               </td>
                               <td className="p-3">
                                 {address?.country || "N/A"}
-                              </td>
+                              </td> */}
+                              <td className="p-3">
+                                    <span
+                                      className={`px-2 py-1 rounded text-xs font-medium ${
+                                        subscription?.lineItems[0]?.fulfillment_status === "fulfilled"
+                                          ? "bg-green-200 text-green-800"
+                                          : subscription?.lineItems[0]?.fulfillment_status === "cancelled"
+                                          ? "bg-red-200 text-red-800"
+                                          : "bg-yellow-200 text-yellow-800"
+                                      }`}
+                                    >
+                                      {subscription?.lineItems[0]?.fulfillment_status === "fulfilled"
+                                        ? "Fulfilled"
+                                        : subscription?.lineItems[0]?.fulfillment_status === "cancelled"
+                                        ? "Cancelled"
+                                        : "Unfulfilled"}
+                                    </span>
+                                  </td>
                               <td className="p-3">
                                 $
                                 {(

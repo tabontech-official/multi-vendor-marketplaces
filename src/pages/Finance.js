@@ -22,11 +22,17 @@ const Finance = () => {
   const [paypalPopup, setPaypalPopup] = useState(false);
   const [paypalAccountInput, setPaypalAccountInput] = useState("");
   const [paypalLoading, setPaypalLoading] = useState(false);
+const [graceDays, setGraceDays] = useState(0);
+const [payoutType, setPayoutType] = useState("daily");
 
   const [activeTab, setActiveTab] = useState("payouts");
 
-  const [firstPayoutDate, setFirstPayoutDate] = useState("");
-  const [secondPayoutDate, setSecondPayoutDate] = useState("");
+const [graceTime, setGraceTime] = useState(0); // Renamed from graceDays
+const [payoutFrequency, setPayoutFrequency] = useState("daily"); // Renamed from payoutType
+const [weeklyDay, setWeeklyDay] = useState("Monday");
+const [firstPayoutDate, setFirstPayoutDate] = useState("");
+const [secondPayoutDate, setSecondPayoutDate] = useState("");
+
 
   const handleSavePayoutDates = async () => {
     if (!firstPayoutDate || !secondPayoutDate) {
@@ -61,6 +67,38 @@ const Finance = () => {
       alert("❌ Error while saving payout dates.");
     }
   };
+
+// const handleSavePayoutDates = async () => {
+//   const payload = {
+//     graceTime, // renamed from graceDays
+//     payoutFrequency, // renamed from payoutType
+//     firstDate: firstPayoutDate,
+//     secondDate: payoutFrequency === "twice" ? secondPayoutDate : null,
+//     weeklyDay: payoutFrequency === "weekly" ? weeklyDay : null,
+//   };
+
+//   try {
+//     const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify(payload),
+//     });
+
+//     const result = await res.json();
+
+//     if (!res.ok) {
+//       console.error("❌ Save failed:", result);
+//       alert(result.message || "Failed to save payout config.");
+//       return;
+//     }
+
+//     alert(result.message || "Saved");
+//   } catch (err) {
+//     console.error("❌ Network error:", err);
+//     alert("Error saving payout configuration.");
+//   }
+// };
+
 
   useEffect(() => {
     const fetchPayoutDates = async () => {
@@ -379,6 +417,87 @@ const Finance = () => {
             </div>
           </div>
         )}
+        {/* {activeTab === "Timelines" && (
+<div className="p-4">
+    <h2 className="text-lg font-semibold mb-4 text-gray-700">Finance Timelines</h2>
+
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-gray-700">Grace Period (in days)</label>
+      <input
+        type="number"
+        className="border px-3 py-2 rounded-md text-sm w-40"
+  value={graceTime}
+ onChange={(e) => setGraceTime(Number(e.target.value))}
+/>      
+    </div>
+
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-gray-700">Payout Frequency</label>
+    <select
+  value={payoutFrequency}
+  onChange={(e) => setPayoutFrequency(e.target.value)}
+  className="border px-3 py-2 rounded-md text-sm w-60"
+>
+        
+      >
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="once">Once a Month</option>
+        <option value="twice">Twice a Month</option>
+      </select>
+    </div>
+
+    {payoutType === "weekly" && (
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700">Day of the Week</label>
+        <select
+          value={weeklyDay}
+          onChange={(e) => setWeeklyDay(e.target.value)}
+          className="border px-3 py-2 rounded-md text-sm w-60"
+        >
+          {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
+            <option key={day} value={day}>{day}</option>
+          ))}
+        </select>
+      </div>
+    )}
+
+    {(payoutType === "daily" || payoutType === "once" || payoutType === "twice") && (
+      <div className="flex flex-col sm:flex-row gap-6 mb-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Payout Date 1</label>
+          <input
+            type="date"
+            value={firstPayoutDate}
+            onChange={(e) => setFirstPayoutDate(e.target.value)}
+            className="border px-3 py-2 rounded-md text-sm"
+          />
+        </div>
+        {payoutType === "twice" && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Payout Date 2</label>
+            <input
+              type="date"
+              value={secondPayoutDate}
+              onChange={(e) => setSecondPayoutDate(e.target.value)}
+              className="border px-3 py-2 rounded-md text-sm"
+            />
+          </div>
+        )}
+      </div>
+    )}
+
+    <div className="flex justify-end">
+      <button
+        onClick={handleSavePayoutDates}
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
+      >
+        Save Payout Dates
+      </button>
+    </div>
+  </div>
+)} */}
+
       </div>
 
       {toast.show && (

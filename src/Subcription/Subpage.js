@@ -239,12 +239,13 @@ const SubscriptionHistory = () => {
                       <th scope="col" className="p-3">
                         Item
                       </th>
-                      <th scope="col" className="p-3">
+                      {/* <th scope="col" className="p-3">
                         Address
                       </th>
                       <th scope="col" className="p-3">
                         Country
-                      </th>
+                      </th> */}
+                      <th scope="col" className="p-3">Status</th>
                       <th scope="col" className="p-3">
                         Total Price
                       </th>
@@ -262,10 +263,14 @@ const SubscriptionHistory = () => {
                                 subscription.lineItemsByMerchant?.[
                                   merchantId
                                 ] || [];
+
+                              if (!merchantItems.length) return null;
+
                               const customer = merchantItems[0]?.customer?.[0];
                               const orderDate = customer?.created_at;
-                              const shopifyOrderId = merchantItems[0]?.orderId;
-
+                              const shopifyOrderId = merchantItems[0]?.orderId; // Shopify orderId from backend
+                              const fulfillment_status =
+                                merchantItems[0]?.fulfillment_status;
                               const totalQuantity = merchantItems.reduce(
                                 (sum, item) => sum + (item.quantity || 0),
                                 0
@@ -292,22 +297,52 @@ const SubscriptionHistory = () => {
                                   <td
                                     className="p-3 cursor-pointer text-blue-600 hover:underline"
                                     onClick={() => {
-                                      console.log(
-                                        "Navigating to merchant_order_details with:",
-                                        {
-                                          merchantId,
-                                          shopifyOrderId,
-                                          serialNo: orderId,
-                                        }
-                                      );
+                                      if (shopifyOrderId) {
+                                        console.log(
+                                          "🔍 Admin clicked order number:"
+                                        );
+                                        console.log(
+                                          "➡️ Navigating to:",
+                                          `/order/${shopifyOrderId}`
+                                        );
+                                        console.log(
+                                          "🧾 Data being passed in state:",
+                                          {
+                                            merchantId,
+                                            shopifyOrderId,
+                                            serialNo: orderId,
+                                            order: subscription,
+                                          }
+                                        );
+                                        console.log(
+                                          "📦 lineItemsByMerchant:",
+                                          subscription.lineItemsByMerchant
+                                        );
+                                        console.log(
+                                          "📦 Current merchant's items:",
+                                          subscription.lineItemsByMerchant?.[
+                                            merchantId
+                                          ]
+                                        );
 
-                                      navigate("/merchant_order_details", {
-                                        state: {
-                                          merchantId,
-                                          shopifyOrderId,
-                                          serialNo: orderId,
-                                        },
-                                      });
+                                        navigate(`/order/${shopifyOrderId}`, {
+                                          state: {
+                                            merchantId,
+                                            shopifyOrderId,
+                                            serialNo: orderId,
+                                            order: subscription,
+                                          },
+                                        });
+                                      } else {
+                                        console.warn(
+                                          "⚠️ No orderId found for this merchant:",
+                                          merchantId
+                                        );
+                                        console.log(
+                                          "🚫 Full merchantItems:",
+                                          merchantItems
+                                        );
+                                      }
                                     }}
                                   >
                                     #{orderId}
@@ -320,12 +355,24 @@ const SubscriptionHistory = () => {
                                     {merchant.info?.name || "N/A"}
                                   </td>
                                   <td className="p-3">{totalQuantity} items</td>
-                                  <td className="p-3">
+                                  {/* <td className="p-3">
                                     {merchant.info?.dispatchAddress || "N/A"}
                                   </td>
                                   <td className="p-3">
                                     {merchant.info?.dispatchCountry || "N/A"}
-                                  </td>
+                                  </td> */}
+                                  <td className="p-3">
+  <span
+    className={`px-2 py-1 rounded text-xs font-medium ${
+      fulfillment_status === "fulfilled"
+        ? "bg-green-200 text-green-800"
+        : "bg-yellow-200 text-yellow-800"
+    }`}
+  >
+    {fulfillment_status === "fulfilled" ? "Fulfilled" : "Unfilled"}
+  </span>
+</td>
+
                                   <td className="p-3">
                                     ${totalPrice.toFixed(2)}
                                   </td>
@@ -413,8 +460,6 @@ const SubscriptionHistory = () => {
           </div>
         </div>
       </div>
-
-      
     </div>
   );
 };

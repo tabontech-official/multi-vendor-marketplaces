@@ -23,7 +23,7 @@ const Finance = () => {
   const [paypalAccountInput, setPaypalAccountInput] = useState("");
   const [paypalLoading, setPaypalLoading] = useState(false);
 
-  const [activeTab, setActiveTab] = useState("price");
+  const [activeTab, setActiveTab] = useState("payouts");
 
   const [firstPayoutDate, setFirstPayoutDate] = useState("");
   const [secondPayoutDate, setSecondPayoutDate] = useState("");
@@ -65,7 +65,9 @@ const Finance = () => {
   useEffect(() => {
     const fetchPayoutDates = async () => {
       try {
-        const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates");
+        const res = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates"
+        );
         const data = await res.json();
 
         if (data.firstDate) setFirstPayoutDate(data.firstDate.slice(0, 10)); // convert ISO to yyyy-mm-dd
@@ -139,10 +141,13 @@ const Finance = () => {
 
     setPaypalLoading(true);
     try {
-      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
-        merchantId: userId,
-        payPal: paypalAccountInput,
-      });
+      const res = await axios.post(
+        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
+        {
+          merchantId: userId,
+          payPal: paypalAccountInput,
+        }
+      );
 
       if (res.status === 200) {
         setPaypalPopup(false);
@@ -160,7 +165,9 @@ const Finance = () => {
 
   useEffect(() => {
     const fetchPayouts = async () => {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayout");
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/order/getPayout"
+      );
       const data = await res.json();
 
       const payoutsData = data.payouts || [];
@@ -175,10 +182,8 @@ const Finance = () => {
       <div className="flex flex-col md:flex-row md:justify-between items-start border-gray-200 pb-4">
         <div className="flex-1">
           <h1 className="text-2xl font-semibold mb-1">Finance</h1>
-          <p className="text-gray-600">
-            Here are your total Collection in Inventory.
-          </p>
-          <div className="w-2/4 max-sm:w-full mt-2">
+
+          {/* <div className="w-2/4 max-sm:w-full mt-2">
             <input
               type="text"
               placeholder="Search..."
@@ -186,35 +191,31 @@ const Finance = () => {
               onChange={(e) => setSearchVal(e.target.value)}
               className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
+          </div> */}
         </div>
       </div>
-      <div className="flex space-x-4 mt-6 border-b pb-2">
-        {(userRole === "Dev Admin" || userRole === "Master Admin") && (
-          <>
-            <button
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-                activeTab === "payouts"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-blue-600"
-              }`}
-              onClick={() => setActiveTab("payouts")}
-            >
-              Payouts
-            </button>
+      <div className="flex space-x-4 mt-6 border-b">
+        <button
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+            activeTab === "payouts"
+              ? "border-blue-600 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-blue-600"
+          }`}
+          onClick={() => setActiveTab("payouts")}
+        >
+          Payouts
+        </button>
 
-            <button
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-                activeTab === "Timelines"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-blue-600"
-              }`}
-              onClick={() => setActiveTab("Timelines")}
-            >
-              Timelines
-            </button>
-          </>
-        )}
+        <button
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+            activeTab === "Timelines"
+              ? "border-blue-600 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-blue-600"
+          }`}
+          onClick={() => setActiveTab("Timelines")}
+        >
+          Timelines
+        </button>
 
         <button
           className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
@@ -228,7 +229,6 @@ const Finance = () => {
         </button>
       </div>
 
-      {/* Content */}
       <div className="mt-6">
         {activeTab === "payouts" && payouts.length > 0 && (
           <div className="p-4">
@@ -281,66 +281,58 @@ const Finance = () => {
                   <th className="p-3">Payout Date</th>
                   <th className="p-3">Payout Status</th>
                   <th className="p-3">Order</th>
-                  <th className="p-3">Type</th>
-                  <th className="p-3">Payment Method</th>
                   <th className="p-3 text-right">Amount</th>
                   <th className="p-3 text-right">Fee</th>
                   <th className="p-3 text-right">Net</th>
                 </tr>
               </thead>
               <tbody>
-                {[
-                  {
-                    date: "Jun 2, 2025",
-                    payoutDate: "Jun 5, 2025",
-                    status: "Pending",
-                    order: "#4916",
-                    type: "Charge",
-                    method: "visa",
-                    amount: "$399.01",
-                    fee: "-$10.67",
-                    net: "$388.34 CAD",
-                  },
-                  {
-                    date: "Jun 2, 2025",
-                    payoutDate: "Jun 5, 2025",
-                    status: "Pending",
-                    order: "#4915",
-                    type: "Charge",
-                    method: "mastercard",
-                    amount: "$409.50",
-                    fee: "-$10.95",
-                    net: "$398.55 CAD",
-                  },
-                ].map((item, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
-                    <td className="p-3">{item.date}</td>
-                    <td className="p-3">{item.payoutDate}</td>
-                    <td className="p-3">
-                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
-                        {item.status}
-                      </span>
+                {payouts.length > 0 ? (
+                  payouts.flatMap((payout, i) =>
+                    payout.orders.map((order, index) => {
+                      const fee = (order.amount * 0.027).toFixed(2);
+                      const net = (order.amount - fee).toFixed(2);
+                      const formattedDate = new Date(
+                        order.createdAt
+                      ).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      });
+
+                      return (
+                        <tr
+                          key={`${i}-${index}`}
+                          className="border-b hover:bg-gray-50"
+                        >
+                          <td className="p-3">{formattedDate}</td>
+                          <td className="p-3">{payout.payoutDate}</td>
+                          <td className="p-3">
+                            <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                              {payout.status}
+                            </span>
+                          </td>
+                          <td className="p-3 text-blue-600 hover:underline cursor-pointer">
+                            #{order.shopifyOrderNo}
+                          </td>
+                          <td className="p-3 text-right">
+                            ${order.amount.toFixed(2)}
+                          </td>
+                          <td className="p-3 text-right">-${fee}</td>
+                          <td className="p-3 text-right font-medium">
+                            ${net} CAD
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="p-4 text-center text-gray-500">
+                      No payouts found.
                     </td>
-                    <td className="p-3 text-blue-600 hover:underline cursor-pointer">
-                      {item.order}
-                    </td>
-                    <td className="p-3">{item.type}</td>
-                    <td className="p-3">
-                      <span
-                        className={`inline-block text-xs px-2 py-1 rounded font-medium ${
-                          item.method === "visa"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-orange-100 text-orange-700"
-                        }`}
-                      >
-                        {item.method === "visa" ? "Visa" : "Mastercard"}
-                      </span>
-                    </td>
-                    <td className="p-3 text-right">{item.amount}</td>
-                    <td className="p-3 text-right">{item.fee}</td>
-                    <td className="p-3 text-right font-medium">{item.net}</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

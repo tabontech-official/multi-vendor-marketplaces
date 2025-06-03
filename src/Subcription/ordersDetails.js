@@ -13,9 +13,10 @@ const OrdersDetails = () => {
   const [orderData, setOrderData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
+  const [lineItems, setLineItems] = useState([]);
 
-  const lineItems =
-    order?.lineItems || order?.lineItemsByMerchant?.[merchantId] || [];
+  // const lineItems =
+  //   order?.lineItems || order?.lineItemsByMerchant?.[merchantId] || [];
   useEffect(() => {
     const fetchOrderData = async () => {
       const token = localStorage.getItem("usertoken");
@@ -77,15 +78,61 @@ const OrdersDetails = () => {
         .toFixed(2)
     : "0.00";
 
-  const customerCreatedAt = order?.createdAt;
+  let customerCreatedAt = null;
 
-  const formattedDate = customerCreatedAt
-    ? new Date(customerCreatedAt).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "N/A";
+if (order?.createdAt) {
+  // Merchant side
+  customerCreatedAt = order.createdAt;
+} else if (
+  order?.lineItemsByMerchant &&
+  merchantId &&
+  Array.isArray(order.lineItemsByMerchant[merchantId]) &&
+  order.lineItemsByMerchant[merchantId][0]?.customer?.[0]?.created_at
+) {
+  // Admin side
+  customerCreatedAt =
+    order.lineItemsByMerchant[merchantId][0].customer[0].created_at;
+}
+// 🧠 Resolve customer data dynamically
+let customer = null;
+
+if (order?.customer?.default_address) {
+  // Merchant
+  customer = order.customer;
+} else if (
+  order?.lineItemsByMerchant?.[merchantId]?.[0]?.customer?.[0]
+) {
+  // Admin
+  customer = order.lineItemsByMerchant[merchantId][0].customer[0];
+}
+// ✅ Format date
+const formattedDate = customerCreatedAt
+  ? new Date(customerCreatedAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  : "N/A";
+
+ useEffect(() => {
+    if (!order) return;
+
+    if (order.lineItemsByMerchant && merchantId) {
+      const merchantItems = order.lineItemsByMerchant[merchantId];
+      if (Array.isArray(merchantItems)) {
+        setLineItems(merchantItems);
+      }
+    } else if (Array.isArray(order.lineItems)) {
+      setLineItems(order.lineItems);
+    } else {
+      console.warn("No line items found.");
+    }
+  }, [order, merchantId]);
+
+  // 🔍 Debug logging
+  console.log("🛒 Resolved Line Items:", lineItems);
+  console.log("👤 Merchant ID:", merchantId);
+  console.log("📦 Full Order:", order);
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
@@ -104,122 +151,8 @@ const OrdersDetails = () => {
               </span>
             </div>
           </div>
-          {/* {orderData?.line_items?.some(
-            (item) =>
-              item.fulfillment_status === null ||
-              item.fulfillment_status === "partial"
-          ) && (
-            <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
-              <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
-                <span>
-                  Unfulfilled (
-                  {
-                    orderData.line_items.filter(
-                      (item) =>
-                        item.fulfillment_status === null ||
-                        item.fulfillment_status === "partial"
-                    ).length
-                  }
-                  )
-                </span>
-              </div>
-
-              <div className="border border-gray-200 rounded-lg p-4 space-y-4">
-                <div className="text-sm space-y-2">
-                  <div>
-                    <p className="text-gray-600 font-semibold">Location</p>
-                    <p className="text-gray-900">Shop location</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600 font-semibold">
-                      Delivery method
-                    </p>
-                    <p className="text-gray-900">
-                      {orderData.shipping_lines[0]?.title || "Standard"}
-                    </p>
-                  </div>
-                </div>
-
-                <hr className="border-gray-200" />
-
-                <div className="divide-y border rounded mb-4">
-                  {orderData.line_items
-                    .filter(
-                      (item) =>
-                        item.fulfillment_status === null ||
-                        item.fulfillment_status === "partial"
-                    )
-                    .map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-3"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-                            <span className="text-gray-400 text-xs font-semibold">
-                              No Image
-                            </span>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-800">
-                              {item.name}
-                            </p>
-                            {item.variant_title && (
-                              <span className="inline-block text-[10px] px-2 py-1 bg-gray-200 text-gray-600 rounded mt-1">
-                                {item.variant_title}
-                              </span>
-                            )}
-                            <p className="text-xs text-gray-500 mt-1">
-                              SKU: {item.sku || "N/A"}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="text-right">
-                          <p className="text-sm text-gray-800 font-medium">
-                            ${parseFloat(item.price).toFixed(2)} ×{" "}
-                            {item.fulfillable_quantity || 0}
-                          </p>
-                          <p className="text-sm font-semibold text-gray-900">
-                            $
-                            {(
-                              parseFloat(item.price) *
-                              (item.fulfillable_quantity || 0)
-                            ).toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-
-                <div className="flex space-x-2 justify-end">
-                  <button
-                    onClick={() => {
-                      console.log("Navigating with orderData:", orderData);
-
-                      navigate(`/order/${orderData?.id}/fulfillment_orders`, {
-                        state: {
-                          order: orderData,
-                          fullOrder: order,
-                          productName: orderData?.name,
-                          sku: orderData?.line_items?.[0]?.sku || "",
-                          index: 1,
-                        },
-                      });
-                    }}
-                    className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
-                  >
-                    Fulfill item
-                  </button>
-
-                  <button className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition">
-                    Create shipping label
-                  </button>
-                </div>
-              </div>
-            </div>
-          )} */}
-          {Array.isArray(lineItems) &&
+      
+          {/* {Array.isArray(lineItems) &&
             lineItems.some((i) => i.fulfillment_status === null) && (
               <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
                 <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
@@ -350,7 +283,121 @@ const OrdersDetails = () => {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
+{Array.isArray(lineItems) &&
+  lineItems.some((i) => i.fulfillment_status === null) && (
+    <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
+      {/* Header */}
+      <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
+        <span>
+          Unfulfilled (
+          {lineItems.filter((i) => i.fulfillment_status === null).length})
+        </span>
+      </div>
+
+      {/* Card */}
+      <div className="border border-gray-200 rounded-lg p-4 space-y-4">
+        <div className="text-sm space-y-2">
+          <div>
+            <p className="text-gray-600 font-semibold">Location</p>
+            <p className="text-gray-900">Shop location</p>
+          </div>
+          <div>
+            <p className="text-gray-600 font-semibold">Delivery method</p>
+            <p className="text-gray-900">Standard</p>
+          </div>
+        </div>
+
+        <hr className="border-gray-200" />
+
+        <div className="divide-y border rounded mb-4">
+          {lineItems
+            .filter((item) => item.fulfillment_status === null)
+            .map((item, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-3"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+                    {item.image?.src ? (
+                      <img
+                        src={item.image.src}
+                        alt={item.image.alt || "Product image"}
+                        className="w-full h-full object-contain rounded"
+                      />
+                    ) : (
+                      <span className="text-gray-400 text-xs font-semibold">
+                        No Image
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">
+                      {item.name}
+                    </p>
+                    {item.variant_title && (
+                      <span className="inline-block text-[10px] px-2 py-1 bg-gray-200 text-gray-600 rounded mt-1">
+                        {item.variant_title}
+                      </span>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      SKU: {item.sku || "N/A"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <p className="text-sm text-gray-800 font-medium">
+                    ${parseFloat(item.price).toFixed(2)} ×{" "}
+                    {item.quantity - (item.fulfilled_quantity || 0)}
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    $
+                    {(
+                      parseFloat(item.price) *
+                      (item.quantity - (item.fulfilled_quantity || 0))
+                    ).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            ))}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex space-x-2 justify-end">
+          <button
+            onClick={() => {
+              console.log("Fulfillment triggered");
+              console.log("Fulfillment order",order);
+
+              navigate(`/order/${orderId}/fulfillment_orders`, {
+                state: {
+                  order,
+                  orderId,
+                  merchantId,
+                  productName: lineItems[0]?.name || "",
+                  sku: lineItems[0]?.sku || "",
+                  fulfillable_quantity:
+                    lineItems[0]?.fulfillable_quantity || 0,
+                  index: 1,
+                },
+              });
+            }}
+            className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
+          >
+            Fulfill item
+          </button>
+
+          <button className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition">
+            Create shipping label
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
+
 
           {/* fullfill box */}
 
@@ -482,79 +529,76 @@ const OrdersDetails = () => {
           </div>
         </div>
 
-        <div className="col-span-4 space-y-4">
-          <div className="bg-white p-4 border border-gray-300 rounded-xl">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="font-semibold text-gray-900">Notes</h3>
-              <button
-                aria-label="Edit notes"
-                className="text-gray-400 hover:text-gray-700"
-              >
-                <MdEdit />
-              </button>
-            </div>
-            <p className="text-gray-600 text-sm">No notes from customer</p>
-          </div>
+       <div className="col-span-4 space-y-4">
+  <div className="bg-white p-4 border border-gray-300 rounded-xl">
+    <div className="flex justify-between items-center mb-2">
+      <h3 className="font-semibold text-gray-900">Notes</h3>
+      <button
+        aria-label="Edit notes"
+        className="text-gray-400 hover:text-gray-700"
+      >
+        <MdEdit />
+      </button>
+    </div>
+    <p className="text-gray-600 text-sm">No notes from customer</p>
+  </div>
 
-          <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
-            <h3 className="font-semibold text-gray-900">Customer</h3>
-            <button
-              aria-label="Close"
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
-            >
-              ×
-            </button>
-            <a
-              href="#"
-              className="text-blue-600 hover:underline block font-semibold"
-            >
-              {order?.customer.default_address.first_name}{" "}
-              {order?.customer.default_address.last_name}
-            </a>
-            <p className="text-gray-600 text-sm mb-2 ">No orders</p>
+  <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2 relative">
+    <h3 className="font-semibold text-gray-900">Customer</h3>
+    <button
+      aria-label="Close"
+      className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
+    >
+      ×
+    </button>
 
-            <h3 className="font-semibold text-gray-900 ">
-              Contact information
-            </h3>
-            <a
-              href="mailto:medspatrader23@gmail.com"
-              className="text-blue-600 hover:underline text-sm"
-            >
-              {order?.customer.email}{" "}
-            </a>
-            <p className="text-gray-600 text-sm">No phone number</p>
+    <a
+      href="#"
+      className="text-blue-600 hover:underline block font-semibold"
+    >
+      {customer?.first_name || "N/A"} {customer?.last_name || ""}
+    </a>
 
-            <h3 className="font-semibold text-gray-900 mt-4 mb-2">
-              Shipping address
-            </h3>
-            {/* <div className="bg-orange-100 p-2 rounded mb-2 cursor-pointer text-orange-700 text-sm font-semibold">
-              <span>⚠️ Review address issues</span>
-            </div> */}
-            <address className="text-gray-900 not-italic text-sm leading-snug space-y-1">
-              <p>
-                {" "}
-                {order?.customer.default_address.first_name}{" "}
-                {order?.customer.default_address.first_name}
-              </p>
-              <p>{order?.customer.default_address.address1} </p>
-              {/* <p>isb VIC 3000</p> */}
-              <p> {order?.customer.default_address.country} </p>
-              <a
-                href="https://maps.google.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                View map
-              </a>
-            </address>
+    <p className="text-gray-600 text-sm mb-2">No orders</p>
 
-            <h3 className="font-semibold text-gray-900 mt-4 mb-2">
-              Billing address
-            </h3>
-            <p className="text-gray-600 text-sm">Same as shipping address</p>
-          </div>
-        </div>
+    <h3 className="font-semibold text-gray-900">Contact information</h3>
+    <a
+      href={`mailto:${customer?.email || ""}`}
+      className="text-blue-600 hover:underline text-sm"
+    >
+      {customer?.email || "N/A"}
+    </a>
+    <p className="text-gray-600 text-sm">
+      {customer?.phone || "No phone number"}
+    </p>
+
+    <h3 className="font-semibold text-gray-900 mt-4 mb-2">
+      Shipping address
+    </h3>
+
+    <address className="text-gray-900 not-italic text-sm leading-snug space-y-1">
+      <p>
+        {customer?.first_name || ""} {customer?.last_name || ""}
+      </p>
+      <p>{customer?.address1 || customer?.default_address?.address1}</p>
+      <p>{customer?.country  || customer?.default_address?.country || "N/A"}</p>
+      <a
+        href="https://maps.google.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 hover:underline"
+      >
+        View map
+      </a>
+    </address>
+
+    <h3 className="font-semibold text-gray-900 mt-4 mb-2">
+      Billing address
+    </h3>
+    <p className="text-gray-600 text-sm">Same as shipping address</p>
+  </div>
+</div>
+
       </div>
     </div>
   );

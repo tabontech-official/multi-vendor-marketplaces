@@ -26,8 +26,17 @@ const FullItem = () => {
   //   setLoading(true);
   //   setMessage("");
 
-  //   const itemsToFulfill = fullOrder.lineItems
-  //     .filter((item) => item.fulfillment_status === null)
+  //   const lineItems =
+  //     fullOrder?.lineItems ||
+  //     fullOrder?.lineItemsByMerchant?.[merchantId] ||
+  //     [];
+
+  //   const itemsToFulfill = lineItems
+  //     .filter(
+  //       (item) =>
+  //         item.fulfillment_status === null ||
+  //         item.fulfillment_status === "partial"
+  //     )
   //     .map((item) => {
   //       const qty = quantities[item.id];
   //       if (qty > 0) {
@@ -38,10 +47,10 @@ const FullItem = () => {
   //       }
   //       return null;
   //     })
-  //     .filter(Boolean)
+  //     .filter(Boolean);
 
   //   if (itemsToFulfill.length === 0) {
-  //     setMessage(" No valid unfulfilled items selected.");
+  //     setMessage("No valid unfulfilled items selected.");
   //     setLoading(false);
   //     return;
   //   }
@@ -72,14 +81,14 @@ const FullItem = () => {
   //     const result = await response.json();
 
   //     if (response.ok) {
-  //       setMessage(" Items fulfilled and inventory updated!");
-  //       // navigate(`/order/${fullOrder.orderId}`)
+  //       setMessage("Items fulfilled and inventory updated!");
+  //       // navigate(`/order/${fullOrder.orderId}`);
   //     } else {
-  //       setMessage(` Error: ${result.error || "Unknown error"}`);
+  //       setMessage(`Error: ${result.error || "Unknown error"}`);
   //     }
   //   } catch (error) {
   //     console.error("Fulfillment error:", error);
-  //     setMessage(" Server error. Please try again.");
+  //     setMessage("Server error. Please try again.");
   //   }
 
   //   setLoading(false);
@@ -89,10 +98,24 @@ const FullItem = () => {
     setLoading(true);
     setMessage("");
 
-    const lineItems =
-      fullOrder?.lineItems ||
-      fullOrder?.lineItemsByMerchant?.[merchantId] ||
-      [];
+    let lineItems = [];
+
+    if (Array.isArray(rawOrder?.lineItems)) {
+      lineItems = rawOrder.lineItems;
+      console.log("✅ Fulfill: Merchant lineItems used");
+    } else if (
+      fullOrder?.lineItemsByMerchant &&
+      typeof merchantId === "string" &&
+      Array.isArray(fullOrder.lineItemsByMerchant[merchantId])
+    ) {
+      lineItems = fullOrder.lineItemsByMerchant[merchantId];
+    } else if (
+      rawOrder?.lineItemsByMerchant &&
+      Object.keys(rawOrder.lineItemsByMerchant).length > 0
+    ) {
+      const fallbackKey = Object.keys(rawOrder.lineItemsByMerchant)[0];
+      lineItems = rawOrder.lineItemsByMerchant[fallbackKey];
+    }
 
     const itemsToFulfill = lineItems
       .filter(
@@ -145,12 +168,10 @@ const FullItem = () => {
 
       if (response.ok) {
         setMessage("Items fulfilled and inventory updated!");
-        // navigate(`/order/${fullOrder.orderId}`);
       } else {
         setMessage(`Error: ${result.error || "Unknown error"}`);
       }
     } catch (error) {
-      console.error("Fulfillment error:", error);
       setMessage("Server error. Please try again.");
     }
 
@@ -158,36 +179,54 @@ const FullItem = () => {
   };
 
   const [quantities, setQuantities] = useState({});
-  const allLineItems =
-    fullOrder?.lineItems || fullOrder?.lineItemsByMerchant?.[merchantId] || [];
-  // useEffect(() => {
-  //   if (fullOrder?.lineItems) {
-  //     const initialQuantities = fullOrder.lineItems.reduce((acc, item) => {
-  //       acc[item.id] = item?.quantity;
-  //       return acc;
-  //     }, {});
-  //     setQuantities(initialQuantities);
-  //   }
-  // }, [fullOrder]);
+  let allLineItems = [];
+
+  if (Array.isArray(rawOrder?.lineItems) && rawOrder.lineItems.length > 0) {
+    allLineItems = rawOrder.lineItems;
+  } else if (
+    fullOrder?.lineItemsByMerchant &&
+    typeof merchantId === "string" &&
+    Array.isArray(fullOrder.lineItemsByMerchant[merchantId])
+  ) {
+    allLineItems = fullOrder.lineItemsByMerchant[merchantId];
+  } else if (rawOrder?.lineItemsByMerchant) {
+    const fallbackKey = Object.keys(rawOrder.lineItemsByMerchant)[0];
+    allLineItems = rawOrder.lineItemsByMerchant[fallbackKey] || [];
+  }
 
   useEffect(() => {
-    if (allLineItems?.length) {
+    if (allLineItems.length > 0) {
       const initialQuantities = allLineItems.reduce((acc, item) => {
-        acc[item.id] = item?.quantity;
+        acc[item.id] = item.quantity || 0;
         return acc;
       }, {});
       setQuantities(initialQuantities);
     }
-  }, [fullOrder, merchantId]);
+  }, [allLineItems]);
 
   const handleQuantityChange = (lineItemId, qty) => {
     setQuantities((prev) => ({ ...prev, [lineItemId]: qty }));
   };
 
+const displaySerialNo =
+  rawOrder?.serialNumber || rawOrder?.serialNo || "N/A";
+
+const merchantCustomer = rawOrder?.customer;
+console.log(merchantCustomer)
+
+const adminCustomer =
+  fullOrder?.customersByMerchant?.[merchantId] ||
+  fullOrder?.lineItemsByMerchant?.[merchantId]?.[0]?.customer?.[0] ||
+  rawOrder?.lineItemsByMerchant?.[merchantId]?.[0]?.customer?.[0] ||
+  null;
+
+const customer = merchantCustomer || adminCustomer || {};
+const address = customer?.default_address || {};
+
   return (
     <div className="p-6 min-h-screen">
       <div className="text-sm text-gray-500 mb-2">
-        #{fullOrder.serialNumber} &rsaquo;{" "}
+        #{displaySerialNo} &rsaquo;
         <span className="text-gray-900 font-semibold">Fulfill item</span>
       </div>
 
@@ -202,7 +241,7 @@ const FullItem = () => {
             </div>
             <div className="border rounded-lg p-2">
               <div className="text-sm font-semibold border-b-1">
-                {order.customer?.first_name} {order.customer?.last_name}
+                {customer.first_name || ""} {customer.last_name || ""}
               </div>
 
               <div className="flex items-center gap-4 mt-3">
@@ -295,65 +334,31 @@ const FullItem = () => {
                 <option>Others</option>
               </select>
             </div>
-            {/* <button className="text-blue-600 text-sm mt-2 hover:underline">
-              + Add another tracking number
-            </button> */}
           </div>
         </div>
 
         <div className="space-y-4">
-          {/* Shipping Address */}
           <div className="border border-gray-200 shadow rounded-lg p-4 space-y-2 text-sm">
             <div className="font-medium">Shipping address</div>
 
-            {/* Name */}
             <div>
-              {fullOrder?.customer?.first_name ||
-                fullOrder?.customersByMerchant?.[merchantId]?.first_name ||
-                ""}{" "}
-              {fullOrder?.customer?.last_name ||
-                fullOrder?.customersByMerchant?.[merchantId]?.last_name ||
-                ""}
+              {customer.first_name || ""} {customer.last_name || ""}
             </div>
 
-            {/* Address Line 1 */}
+            <div>{address.address1 || "—"}</div>
+
             <div>
-              {fullOrder?.customer?.default_address?.address1 ||
-                fullOrder?.customersByMerchant?.[merchantId]?.default_address
-                  ?.address1 ||
-                "—"}
+              {address.city || ""} {address.province || ""}{" "}
+              {address.province_code || ""}
             </div>
 
-            {/* City, Province, Code */}
-            <div>
-              {fullOrder?.customer?.default_address?.city ||
-                fullOrder?.customersByMerchant?.[merchantId]?.default_address
-                  ?.city ||
-                ""}{" "}
-              {fullOrder?.customer?.default_address?.province ||
-                fullOrder?.customersByMerchant?.[merchantId]?.default_address
-                  ?.province ||
-                ""}{" "}
-              {fullOrder?.customer?.default_address?.province_code ||
-                fullOrder?.customersByMerchant?.[merchantId]?.default_address
-                  ?.province_code ||
-                ""}
-            </div>
-
-            {/* Country */}
-            <div>
-              {fullOrder?.customer?.default_address?.country_name ||
-                fullOrder?.customersByMerchant?.[merchantId]?.default_address
-                  ?.country_name ||
-                ""}
-            </div>
+            <div>{address.country_name || ""}</div>
 
             <div className="text-xs text-gray-500">
               The customer selected <strong>Standard</strong> at checkout
             </div>
           </div>
 
-          {/* Summary */}
           <div className="border border-gray-200 shadow rounded-lg p-4 space-y-2 text-sm">
             <div className="font-medium">Summary</div>
             <div>Fulfilling from Shop location</div>

@@ -41,6 +41,8 @@ import FullItem from "./pages/FullItem";
 import MerchantSubPage from "./Subcription/MerchantSubPage";
 import Finance from "./pages/Finance";
 import PayoutDetails from "./pages/PayoutDetails";
+import ManageRequests from "./pages/ManageRequests";
+import UserRequest from "./pages/UserRequest";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -99,6 +101,14 @@ const App = () => {
           <Route
             path="/manage-product"
             element={<PrivateRoute element={<Dashboard />} />}
+          />
+           <Route
+            path="/manage-requests"
+            element={<PrivateRoute element={<ManageRequests />} />}
+          />
+           <Route
+            path="/user-requests/:id"
+            element={<PrivateRoute element={<UserRequest />} />}
           />
            <Route
             path="/order/:orderId/fulfillment_orders"

@@ -17,13 +17,35 @@ const OrdersDetails = () => {
   const [lineItems, setLineItems] = useState([]);
   const [showCancelPopup, setShowCancelPopup] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [showRequestPopup, setShowRequestPopup] = useState(false);
+  const [showSubmitted, setShowSubmitted] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
+
+  const [requestMessage, setRequestMessage] = useState("");
+
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
   // const lineItems =
   //   order?.lineItems || order?.lineItemsByMerchant?.[merchantId] || [];
+  const [role, setRole] = useState(null); // Merchant / Admin
+  const [showCancelButton, setShowCancelButton] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("usertoken");
+
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        const userRole = decoded?.payLoad?.role;
+        setRole(userRole); // useState for role
+      } catch (err) {
+        console.error("Failed to decode token", err);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const fetchOrderData = async () => {
       const token = localStorage.getItem("usertoken");
@@ -169,15 +191,18 @@ const OrdersDetails = () => {
         }),
       });
 
-      await fetch(`https://multi-vendor-marketplace.vercel.app/order/updatetrackingShopify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fulfillmentId: selectedFulfillment.id,
-          tracking_number: trackingNumber,
-          tracking_company: shippingCarrier,
-        }),
-      });
+      await fetch(
+        `https://multi-vendor-marketplace.vercel.app/order/updatetrackingShopify`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fulfillmentId: selectedFulfillment.id,
+            tracking_number: trackingNumber,
+            tracking_company: shippingCarrier,
+          }),
+        }
+      );
 
       setShowTrackingModal(false);
     } catch (err) {
@@ -234,7 +259,6 @@ const OrdersDetails = () => {
 
       if (!response.ok) {
         console.error(" Cancel Failed:", result);
-        // alert("Failed to cancel the order. Check console for details.");
         showToast("error", "Failed to cancel the order.");
 
         return;
@@ -247,6 +271,41 @@ const OrdersDetails = () => {
       showToast("error", "An error occurred while canceling the order.");
     }
   };
+
+  const [lineItemCount, setLineItemCount] = useState(0);
+  useEffect(() => {
+    const token = localStorage.getItem("usertoken");
+    if (!token) return;
+
+    try {
+      const decoded = jwtDecode(token);
+      setRole(decoded?.payLoad?.role);
+    } catch (err) {
+      console.error("JWT decode failed:", err);
+    }
+
+    const fetchLineItemCount = async () => {
+      try {
+        const res = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/order/lineItemCount/${orderId}`
+        );
+        const data = await res.json();
+
+        setLineItemCount(data.lineItemCount);
+
+        // ✅ Compare with resolved frontend lineItems length
+        if (data.lineItemCount === lineItems.length) {
+          setShowCancelButton(true);
+        } else {
+          setShowCancelButton(false);
+        }
+      } catch (error) {
+        console.error("Error fetching line item count:", error);
+      }
+    };
+
+    if (orderId && lineItems.length) fetchLineItemCount();
+  }, [orderId, lineItems]);
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
@@ -716,13 +775,35 @@ const OrdersDetails = () => {
             )} */}
           {Array.isArray(lineItems) &&
             lineItems.some((i) => i.fulfillment_status === null) && (
-              <button
-                className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
-                onClick={() => setShowCancelPopup(true)}
-              >
-                Cancel Order
-              </button>
+              <>
+                {showCancelButton ? (
+                  <button
+                    className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
+                    onClick={() => setShowCancelPopup(true)}
+                  >
+                    Cancel Order
+                  </button>
+                ) : role === "Merchant" ? (
+                  <div className="text-sm text-gray-300-600 font-medium">
+                    {/* Please{" "}
+                    <span
+                      className="underline text-blue-600 cursor-pointer hover:text-blue-800"
+                      onClick={() => setShowRequestPopup(true)}
+                    >
+                      Submit request
+                    </span>{" "}
+                    for cancelling this order. */}
+                    <button
+                      className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
+                      onClick={() => setShowRequestPopup(true)}
+                    >
+                      Cancel Order
+                    </button>
+                  </div>
+                ) : null}
+              </>
             )}
+
           <div className="bg-white p-4 border border-gray-300 rounded-xl">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold text-gray-900">Notes</h3>
@@ -887,7 +968,7 @@ const OrdersDetails = () => {
                   className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700"
                   onClick={async () => {
                     setCancelLoading(true);
-                    await handleCancelOrder(); // trigger your API
+                    await handleCancelOrder();
                     setCancelLoading(false);
                     setShowCancelPopup(false);
                   }}
@@ -897,6 +978,113 @@ const OrdersDetails = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {showRequestPopup && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 p-6 relative">
+            <button
+              className="absolute top-3 right-3 text-gray-400 hover:text-black transition"
+              onClick={() => setShowRequestPopup(false)}
+            >
+              ✕
+            </button>
+
+            <div className="text-center">
+              <div className="text-4xl mb-2 text-blue-500">📩</div>
+              <h2 className="text-xl font-bold mb-2 text-gray-800">
+                Submit Request
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Write your reason for requesting cancellation:
+              </p>
+
+              <textarea
+                rows={4}
+                className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                placeholder="Enter your request message..."
+                value={requestMessage}
+                onChange={(e) => setRequestMessage(e.target.value)}
+              ></textarea>
+
+              <div className="flex justify-center space-x-4 mt-6">
+                <button
+                  onClick={async () => {
+                    if (!requestMessage.trim()) {
+                      alert("Please enter a request message.");
+                      return;
+                    }
+
+                    const userId = localStorage.getItem("userid");
+                    const email = localStorage.getItem("email");
+
+                    try {
+                      const response = await fetch(
+                        `https://multi-vendor-marketplace.vercel.app/auth/addRequestForOrderCancellation/${userId}`,
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            request: requestMessage,
+                            orderNo: orderData?.name,
+                            orderId: String(orderData?.id),
+                            email,
+                            lineItemIds: lineItems.map((i) => i.id),
+                          }),
+                        }
+                      );
+
+                      const result = await response.json();
+
+                      if (response.ok) {
+                        setShowSubmitted(true);
+                        setShowRequestPopup(false);
+
+                        setTimeout(() => {
+                          setShowSubmitted(false); 
+                        }, 1000); 
+                      }
+                    } catch (err) {
+                      console.error("Error submitting request:", err);
+                      alert("Something went wrong. Try again.");
+                    }
+                  }}
+                  className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
+                >
+                  Submit
+                </button>
+                <button
+                  onClick={() => setShowRequestPopup(false)}
+                  className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSubmitted && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 p-6 text-center relative">
+            <button
+              className="absolute top-3 right-3 text-gray-400 hover:text-black transition"
+              onClick={() => setShowSubmitted(false)}
+            >
+              ✕
+            </button>
+
+            <div className="text-4xl text-green-500 mb-2">✅</div>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
+              Request Submitted
+            </h2>
+            <p className="text-gray-600">
+              Your cancellation request has been sent to the Master Admin.
+            </p>
           </div>
         </div>
       )}

@@ -25,6 +25,7 @@ const SubscriptionHistory = () => {
   const dialogRef = useRef(null);
   const [selectedMerchants, setSelectedMerchants] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
+const [isLoading, setIsLoading] = useState(true);
 
   // const fetchSubscriptions = async () => {
   //   const userId = localStorage.getItem("userid");
@@ -59,6 +60,7 @@ const SubscriptionHistory = () => {
   const fetchSubscriptions = async () => {
     const userId = localStorage.getItem("userid");
     const token = localStorage.getItem("usertoken");
+    setIsLoading(true); // start loader
 
     if (!userId || !token) {
       console.error("User ID or token not found in localStorage.");
@@ -94,7 +96,9 @@ const SubscriptionHistory = () => {
       }
     } catch (error) {
       console.error("Error decoding token or fetching subscriptions:", error);
-    }
+    }finally {
+    setIsLoading(false); 
+  }
   };
 
   useEffect(() => {
@@ -216,7 +220,7 @@ const SubscriptionHistory = () => {
           </div>
 
           <div className="w-full  max-sm:w-auto  max-sm:flex items-center">
-            {loading ? (
+            {isLoading  ? (
               <div className="flex justify-center items-center py-10">
                 <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
                 loading...

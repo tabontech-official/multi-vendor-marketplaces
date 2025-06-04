@@ -40,32 +40,32 @@ const SubNavbar = () => {
 
   useEffect(() => {
     const userId = localStorage.getItem("userid");
-  
+
     if (!userId) {
       console.error("No userId found in localStorage");
       return;
     }
-  
-    const fetchUserModules = async () => {  
+
+    const fetchUserModules = async () => {
       try {
-        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules/${userId}`);
-  
+        const response = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules/${userId}`
+        );
+
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
         }
-  
+
         const data = await response.json();
-  
+
         setAllowedModules(data.modules || []);
       } catch (error) {
         console.error("Error fetching user modules:", error);
       }
     };
-  
+
     fetchUserModules();
   }, []);
-  
-  
 
   const modulesList = [
     {
@@ -87,7 +87,10 @@ const SubNavbar = () => {
       name: "Orders",
       icon: <FaTags className="text-blue-600" />,
       path: "#",
-      subModules: [{ name: "ManageOrders", path: "/Order_Details" }],
+      subModules: [
+        { name: "ManageOrders", path: "/Order_Details" },
+        { name: "Manage Requests", path: "/manage-requests" },
+      ],
     },
     {
       name: "Promotions",
@@ -113,51 +116,51 @@ const SubNavbar = () => {
       icon: <MdDashboard className="text-green-600" />,
       path: "/on-board-users",
     },
-     {
+    {
       name: "Finance",
       icon: <CiBank className="text-purple-600" />,
       path: "/finance",
     },
   ];
 
-
-
   return (
     <div className="flex items-center bg-white border border-gray-300 px-4 py-2 shadow-sm relative">
-       <ul className="flex space-x-6 text-sm text-gray-700">
-      {modulesList.map((module) => {
-        if (!allowedModules.includes(module.name)) return null;
+      <ul className="flex space-x-6 text-sm text-gray-700">
+        {modulesList.map((module) => {
+          if (!allowedModules.includes(module.name)) return null;
 
-        return (
-          <li
-            key={module.name}
-            className="relative flex items-center space-x-1 cursor-pointer hover:text-gray-900"
-            onMouseEnter={() => handleMouseEnter(module.name)}
-            onMouseLeave={handleMouseLeave}
-          >
-            {module.icon}
-            <Link to={module.path}>{module.name}</Link>
+          return (
+            <li
+              key={module.name}
+              className="relative flex items-center space-x-1 cursor-pointer hover:text-gray-900"
+              onMouseEnter={() => handleMouseEnter(module.name)}
+              onMouseLeave={handleMouseLeave}
+            >
+              {module.icon}
+              <Link to={module.path}>{module.name}</Link>
 
-            {/* Submodules dropdown */}
-            {module.subModules && openDropdown === module.name && (
-              <div className="absolute top-full left-0 bg-gray-600 text-white py-2 px-4 w-48 shadow-lg">
-                {module.subModules
-                  .filter((subModule) => allowedModules.includes(subModule.name))
-                  .map((subModule) => (
-                    <Link
-                      key={subModule.name}
-                      to={subModule.path}
-                      className="block hover:bg-gray-700 px-2 py-1"
-                    >
-                      {subModule.name}
-                    </Link>
-                  ))}
-              </div>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+              {/* Submodules dropdown */}
+              {module.subModules && openDropdown === module.name && (
+                <div className="absolute top-full left-0 bg-gray-600 text-white py-2 px-4 w-48 shadow-lg">
+                  {module.subModules
+                    .filter((subModule) =>
+                      allowedModules.includes(subModule.name)
+                    )
+                    .map((subModule) => (
+                      <Link
+                        key={subModule.name}
+                        to={subModule.path}
+                        className="block hover:bg-gray-700 px-2 py-1"
+                      >
+                        {subModule.name}
+                      </Link>
+                    ))}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 };

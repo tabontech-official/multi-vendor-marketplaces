@@ -77,11 +77,14 @@ const Finance = () => {
     };
 
     try {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const result = await res.json();
 
@@ -98,26 +101,26 @@ const Finance = () => {
     }
   };
 
- useEffect(() => {
-  const fetchPayoutDates = async () => {
-    try {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates");
-      const data = await res.json();
+  useEffect(() => {
+    const fetchPayoutDates = async () => {
+      try {
+        const res = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates"
+        );
+        const data = await res.json();
 
-      if (data.firstDate) setFirstPayoutDate(data.firstDate.slice(0, 10)); 
-      if (data.secondDate) setSecondPayoutDate(data.secondDate.slice(0, 10));
-      if (data.payoutFrequency) setPayoutFrequency(data.payoutFrequency);
-      if (data.graceTime) setGraceTime(data.graceTime);
-      if (data.weeklyDay) setWeeklyDay(data.weeklyDay);
+        if (data.firstDate) setFirstPayoutDate(data.firstDate.slice(0, 10));
+        if (data.secondDate) setSecondPayoutDate(data.secondDate.slice(0, 10));
+        if (data.payoutFrequency) setPayoutFrequency(data.payoutFrequency);
+        if (data.graceTime) setGraceTime(data.graceTime);
+        if (data.weeklyDay) setWeeklyDay(data.weeklyDay);
+      } catch (err) {
+        console.error("Error fetching payout dates:", err);
+      }
+    };
 
-    } catch (err) {
-      console.error("Error fetching payout dates:", err);
-    }
-  };
-
-  fetchPayoutDates();
-}, []);
-
+    fetchPayoutDates();
+  }, []);
 
   const isAdmin = () => {
     const token = localStorage.getItem("usertoken");
@@ -180,10 +183,13 @@ const Finance = () => {
 
     setPaypalLoading(true);
     try {
-      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
-        merchantId: userId,
-        payPal: paypalAccountInput,
-      });
+      const res = await axios.post(
+        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
+        {
+          merchantId: userId,
+          payPal: paypalAccountInput,
+        }
+      );
 
       if (res.status === 200) {
         setPaypalPopup(false);
@@ -201,7 +207,9 @@ const Finance = () => {
 
   useEffect(() => {
     const fetchPayouts = async () => {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayout");
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/order/getPayout"
+      );
       const data = await res.json();
 
       const payoutsData = data.payouts || [];
@@ -305,7 +313,7 @@ const Finance = () => {
             </table>
           </div>
         )}
-
+        {/* 
         {activeTab === "To be paid" && (
           <div className="p-4">
             <table className="w-full border-collapse bg-white">
@@ -354,7 +362,7 @@ const Finance = () => {
                           </td>
                           <td className="p-3 text-right">-${fee}</td>
                           <td className="p-3 text-right font-medium">
-                            ${net} CAD
+                            ${net} AUD
                           </td>
                         </tr>
                       );
@@ -363,6 +371,74 @@ const Finance = () => {
                 ) : (
                   <tr>
                     <td colSpan={7} className="p-4 text-center text-gray-500">
+                      No payouts found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )} */}
+
+        {activeTab === "To be paid" && (
+          <div className="p-4">
+            <table className="w-full border-collapse bg-white">
+              <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                <tr>
+                  <th className="p-3">Payout Date</th>
+                  <th className="p-3">Payout Status</th>
+                  <th className="p-3 text-right">Amount</th>
+                  <th className="p-3 text-right">Fee</th>
+                  <th className="p-3 text-right">Net</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payouts.length > 0 ? (
+                  payouts.map((item, index) => (
+                    <tr key={index} className="border-b hover:bg-gray-50">
+                      <td
+                      className="p-3 text-blue-600 cursor-pointer hover:underline"
+                      onClick={() =>
+                        navigate(
+                          `/payout-details?payoutDate=${encodeURIComponent(
+                            item.payoutDate
+                          )}&status=${item.status}`
+                        )
+                      }
+                    >
+                      {item.payoutDate}
+                    </td>
+                      <td className="p-3">
+                        <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right">
+                        $
+                        {item.orders
+                          .reduce((sum, o) => sum + o.amount, 0)
+                          .toFixed(2)}
+                      </td>
+                      <td className="p-3 text-right text-red-600">
+                        -$
+                        {(
+                          item.orders.reduce((sum, o) => sum + o.amount, 0) *
+                          0.1
+                        ).toFixed(2)}
+                      </td>
+                      <td className="p-3 text-right text-green-700 font-semibold">
+                        $
+                        {(
+                          item.orders.reduce((sum, o) => sum + o.amount, 0) *
+                          0.9
+                        ).toFixed(2)}{" "}
+                        AUD
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="p-4 text-center text-gray-500">
                       No payouts found.
                     </td>
                   </tr>

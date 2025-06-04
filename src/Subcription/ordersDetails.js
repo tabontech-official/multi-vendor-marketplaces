@@ -149,13 +149,9 @@ const OrdersDetails = () => {
   }, [selectedFulfillment]);
 
   const handleSaveTracking = async () => {
-    if (!trackingNumber || !shippingCarrier || !selectedFulfillment?.id) {
-      alert("Tracking number and carrier are required.");
-      return;
-    }
+   
 
     try {
-      // 🔁 Shopify Fulfillment Update API
       await fetch(`/api/shopify/update-fulfillment-tracking`, {
         method: "POST",
         headers: {
@@ -180,67 +176,16 @@ const OrdersDetails = () => {
 
       setShowTrackingModal(false);
     } catch (err) {
-      console.error("Tracking update failed:", err);
       alert("Failed to update tracking.");
     }
   };
 
-  // const handleCancelOrder = async () => {
-  //   const confirmed = window.confirm(
-  //     "Are you sure you want to cancel this order?"
-  //   );
-  //   if (!confirmed) return;
 
-  //   try {
-  //     const lineItems = order?.lineItemsByMerchant?.[merchantId] || [];
-  //     const lineItemIds = lineItems.map((item) => item.id);
-
-  //     console.log("📝 Cancel Request Triggered");
-  //     console.log("🛍 Order ID:", orderId);
-  //     console.log("👤 Merchant ID:", merchantId);
-  //     console.log("🧾 Line Items:", lineItems);
-  //     console.log("🆔 Line Item IDs to cancel:", lineItemIds);
-
-  //     if (!orderId || !merchantId || lineItemIds.length === 0) {
-  //       alert("Missing order details or line items to cancel.");
-  //       return;
-  //     }
-
-  //     const response = await fetch(
-  //       "https://multi-vendor-marketplace.vercel.app/order/cancelShopifyOrder",
-  //       {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({
-  //           orderId,
-  //           reason: "customer",
-  //           lineItemIds,
-  //         }),
-  //       }
-  //     );
-
-  //     const result = await response.json();
-  //     console.log("🧾 Cancel Response:", result);
-
-  //     if (!response.ok) {
-  //       console.error("❌ Cancel Failed:", result);
-  //       alert("Failed to cancel the order. Check console for details.");
-  //       return;
-  //     }
-
-  //     alert("✅ Order cancelled successfully.");
-  //     // Optionally refresh data here
-  //     // window.location.reload();
-  //   } catch (error) {
-  //     console.error("❌ Cancel Error:", error);
-  //     alert("An error occurred while canceling the order.");
-  //   }
-  // };
+  
   const handleCancelOrder = async () => {
     const token = localStorage.getItem("usertoken");
 
     if (!token || typeof token !== "string") {
-      console.error(" No valid token found in localStorage");
       return;
     }
 
@@ -248,7 +193,6 @@ const OrdersDetails = () => {
     try {
       decoded = jwtDecode(token);
     } catch (error) {
-      console.error(" Failed to decode token:", error);
       return;
     }
     const role = decoded?.payLoad?.role;
@@ -260,23 +204,18 @@ const OrdersDetails = () => {
     try {
       let lineItemIds = [];
 
-      // 🔐 Role-based check
       if (role === "Merchant") {
         const lineItems = order?.lineItems || [];
         lineItemIds = lineItems.map((item) => item.id);
 
-        console.log("👤 Role: Merchant");
-        console.log("🧾 Line Items:", lineItems);
       } else {
         const lineItems = order?.lineItemsByMerchant?.[merchantId] || [];
         lineItemIds = lineItems.map((item) => item.id);
 
-        console.log("👤 Role: Admin");
-        console.log("🧾 Line Items (by Merchant):", lineItems);
+    
       }
 
-      console.log("🛍 Order ID:", orderId);
-      console.log("🆔 Line Item IDs to cancel:", lineItemIds);
+     
 
       if (!orderId || lineItemIds.length === 0) {
         alert("Missing order details or line items to cancel.");
@@ -300,20 +239,21 @@ const OrdersDetails = () => {
       console.log("🧾 Cancel Response:", result);
 
       if (!response.ok) {
-        console.error("❌ Cancel Failed:", result);
+        console.error(" Cancel Failed:", result);
         alert("Failed to cancel the order. Check console for details.");
         return;
       }
 
-      alert("✅ Order cancelled successfully.");
-      // Optional: Refresh UI
+      alert(" Order cancelled successfully.");
       // window.location.reload();
     } catch (error) {
-      console.error("❌ Cancel Error:", error);
+      console.error(" Cancel Error:", error);
       alert("An error occurred while canceling the order.");
     }
   };
 
+
+  
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
       <div className="w-full max-w-6xl grid grid-cols-12 gap-6">

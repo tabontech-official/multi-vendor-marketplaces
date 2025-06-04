@@ -270,7 +270,7 @@ const SubscriptionHistory = () => {
 
                               const customer = merchantItems[0]?.customer?.[0];
                               const orderDate = customer?.created_at;
-                              const shopifyOrderId = merchantItems[0]?.orderId; // Shopify orderId from backend
+                              const shopifyOrderId = merchantItems[0]?.orderId; 
                               const fulfillment_status =
                                 merchantItems[0]?.fulfillment_status;
                               const totalQuantity = merchantItems.reduce(
@@ -300,33 +300,6 @@ const SubscriptionHistory = () => {
                                     className="p-3 cursor-pointer text-blue-600 hover:underline"
                                     onClick={() => {
                                       if (shopifyOrderId) {
-                                        console.log(
-                                          "🔍 Admin clicked order number:"
-                                        );
-                                        console.log(
-                                          "➡️ Navigating to:",
-                                          `/order/${shopifyOrderId}`
-                                        );
-                                        console.log(
-                                          "🧾 Data being passed in state:",
-                                          {
-                                            merchantId,
-                                            shopifyOrderId,
-                                            serialNo: orderId,
-                                            order: subscription,
-                                          }
-                                        );
-                                        console.log(
-                                          "📦 lineItemsByMerchant:",
-                                          subscription.lineItemsByMerchant
-                                        );
-                                        console.log(
-                                          "📦 Current merchant's items:",
-                                          subscription.lineItemsByMerchant?.[
-                                            merchantId
-                                          ]
-                                        );
-
                                         navigate(`/order/${shopifyOrderId}`, {
                                           state: {
                                             merchantId,
@@ -336,14 +309,6 @@ const SubscriptionHistory = () => {
                                           },
                                         });
                                       } else {
-                                        console.warn(
-                                          "⚠️ No orderId found for this merchant:",
-                                          merchantId
-                                        );
-                                        console.log(
-                                          "🚫 Full merchantItems:",
-                                          merchantItems
-                                        );
                                       }
                                     }}
                                   >
@@ -389,7 +354,7 @@ const SubscriptionHistory = () => {
                             }
                           );
                         })
-                      : // === MERCHANT VIEW ===
+                      : 
                         subscriptions.map((subscription, index) => {
                           const address =
                             subscription.customer?.default_address;
@@ -452,22 +417,26 @@ const SubscriptionHistory = () => {
                                 {address?.country || "N/A"}
                               </td> */}
                               <td className="p-3">
-                                    <span
-                                      className={`px-2 py-1 rounded text-xs font-medium ${
-                                        subscription?.lineItems[0]?.fulfillment_status === "fulfilled"
-                                          ? "bg-green-200 text-green-800"
-                                          : subscription?.lineItems[0]?.fulfillment_status === "cancelled"
-                                          ? "bg-red-200 text-red-800"
-                                          : "bg-yellow-200 text-yellow-800"
-                                      }`}
-                                    >
-                                      {subscription?.lineItems[0]?.fulfillment_status === "fulfilled"
-                                        ? "Fulfilled"
-                                        : subscription?.lineItems[0]?.fulfillment_status === "cancelled"
-                                        ? "Cancelled"
-                                        : "Unfulfilled"}
-                                    </span>
-                                  </td>
+                                <span
+                                  className={`px-2 py-1 rounded text-xs font-medium ${
+                                    subscription?.lineItems[0]
+                                      ?.fulfillment_status === "fulfilled"
+                                      ? "bg-green-200 text-green-800"
+                                      : subscription?.lineItems[0]
+                                          ?.fulfillment_status === "cancelled"
+                                      ? "bg-red-200 text-red-800"
+                                      : "bg-yellow-200 text-yellow-800"
+                                  }`}
+                                >
+                                  {subscription?.lineItems[0]
+                                    ?.fulfillment_status === "fulfilled"
+                                    ? "Fulfilled"
+                                    : subscription?.lineItems[0]
+                                        ?.fulfillment_status === "cancelled"
+                                    ? "Cancelled"
+                                    : "Unfulfilled"}
+                                </span>
+                              </td>
                               <td className="p-3">
                                 $
                                 {(

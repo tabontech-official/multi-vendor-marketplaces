@@ -22,101 +22,102 @@ const Finance = () => {
   const [paypalPopup, setPaypalPopup] = useState(false);
   const [paypalAccountInput, setPaypalAccountInput] = useState("");
   const [paypalLoading, setPaypalLoading] = useState(false);
-const [graceDays, setGraceDays] = useState(0);
-const [payoutType, setPayoutType] = useState("daily");
+  const [graceDays, setGraceDays] = useState(0);
+  const [payoutType, setPayoutType] = useState("daily");
 
   const [activeTab, setActiveTab] = useState("payouts");
 
-const [graceTime, setGraceTime] = useState(0); // Renamed from graceDays
-const [payoutFrequency, setPayoutFrequency] = useState("daily"); // Renamed from payoutType
-const [weeklyDay, setWeeklyDay] = useState("Monday");
-const [firstPayoutDate, setFirstPayoutDate] = useState("");
-const [secondPayoutDate, setSecondPayoutDate] = useState("");
+  const [graceTime, setGraceTime] = useState(0); // Renamed from graceDays
+  const [payoutFrequency, setPayoutFrequency] = useState("daily"); // Renamed from payoutType
+  const [weeklyDay, setWeeklyDay] = useState("Monday");
+  const [firstPayoutDate, setFirstPayoutDate] = useState("");
+  const [secondPayoutDate, setSecondPayoutDate] = useState("");
 
+  // const handleSavePayoutDates = async () => {
+  //   if (!firstPayoutDate || !secondPayoutDate) {
+  //     alert("Please select both payout dates.");
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch(
+  //       "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           firstDate: firstPayoutDate,
+  //           secondDate: secondPayoutDate,
+  //         }),
+  //       }
+  //     );
+
+  //     const data = await response.json();
+
+  //     if (response.ok) {
+  //       alert("✅ Payout dates saved successfully.");
+  //     } else {
+  //       alert(`❌ Failed to save: ${data.message}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error saving payout dates:", error);
+  //     alert("❌ Error while saving payout dates.");
+  //   }
+  // };
 
   const handleSavePayoutDates = async () => {
-    if (!firstPayoutDate || !secondPayoutDate) {
-      alert("Please select both payout dates.");
-      return;
-    }
+    const payload = {
+      graceTime, // renamed from graceDays
+      payoutFrequency, // renamed from payoutType
+      firstDate: firstPayoutDate,
+      secondDate: payoutFrequency === "twice" ? secondPayoutDate : null,
+      weeklyDay: payoutFrequency === "weekly" ? weeklyDay : null,
+    };
 
     try {
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            firstDate: firstPayoutDate,
-            secondDate: secondPayoutDate,
-          }),
-        }
-      );
+      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-      const data = await response.json();
+      const result = await res.json();
 
-      if (response.ok) {
-        alert("✅ Payout dates saved successfully.");
-      } else {
-        alert(`❌ Failed to save: ${data.message}`);
+      if (!res.ok) {
+        console.error("❌ Save failed:", result);
+        alert(result.message || "Failed to save payout config.");
+        return;
       }
-    } catch (error) {
-      console.error("Error saving payout dates:", error);
-      alert("❌ Error while saving payout dates.");
+
+      alert(result.message || "Saved");
+    } catch (err) {
+      console.error("❌ Network error:", err);
+      alert("Error saving payout configuration.");
     }
   };
 
-// const handleSavePayoutDates = async () => {
-//   const payload = {
-//     graceTime, // renamed from graceDays
-//     payoutFrequency, // renamed from payoutType
-//     firstDate: firstPayoutDate,
-//     secondDate: payoutFrequency === "twice" ? secondPayoutDate : null,
-//     weeklyDay: payoutFrequency === "weekly" ? weeklyDay : null,
-//   };
+ useEffect(() => {
+  const fetchPayoutDates = async () => {
+    try {
+      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates");
+      const data = await res.json();
 
-//   try {
-//     const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify(payload),
-//     });
+      if (data.firstDate) setFirstPayoutDate(data.firstDate.slice(0, 10)); 
+      if (data.secondDate) setSecondPayoutDate(data.secondDate.slice(0, 10));
+      if (data.payoutFrequency) setPayoutFrequency(data.payoutFrequency);
+      if (data.graceTime) setGraceTime(data.graceTime);
+      if (data.weeklyDay) setWeeklyDay(data.weeklyDay);
 
-//     const result = await res.json();
+    } catch (err) {
+      console.error("Error fetching payout dates:", err);
+    }
+  };
 
-//     if (!res.ok) {
-//       console.error("❌ Save failed:", result);
-//       alert(result.message || "Failed to save payout config.");
-//       return;
-//     }
+  fetchPayoutDates();
+}, []);
 
-//     alert(result.message || "Saved");
-//   } catch (err) {
-//     console.error("❌ Network error:", err);
-//     alert("Error saving payout configuration.");
-//   }
-// };
-
-
-  useEffect(() => {
-    const fetchPayoutDates = async () => {
-      try {
-        const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates"
-        );
-        const data = await res.json();
-
-        if (data.firstDate) setFirstPayoutDate(data.firstDate.slice(0, 10)); // convert ISO to yyyy-mm-dd
-        if (data.secondDate) setSecondPayoutDate(data.secondDate.slice(0, 10));
-      } catch (err) {
-        console.error("Error fetching payout dates:", err);
-      }
-    };
-
-    fetchPayoutDates();
-  }, []);
 
   const isAdmin = () => {
     const token = localStorage.getItem("usertoken");
@@ -179,13 +180,10 @@ const [secondPayoutDate, setSecondPayoutDate] = useState("");
 
     setPaypalLoading(true);
     try {
-      const res = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
-        {
-          merchantId: userId,
-          payPal: paypalAccountInput,
-        }
-      );
+      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
+        merchantId: userId,
+        payPal: paypalAccountInput,
+      });
 
       if (res.status === 200) {
         setPaypalPopup(false);
@@ -203,9 +201,7 @@ const [secondPayoutDate, setSecondPayoutDate] = useState("");
 
   useEffect(() => {
     const fetchPayouts = async () => {
-      const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/getPayout"
-      );
+      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayout");
       const data = await res.json();
 
       const payoutsData = data.payouts || [];
@@ -328,7 +324,7 @@ const [secondPayoutDate, setSecondPayoutDate] = useState("");
                 {payouts.length > 0 ? (
                   payouts.flatMap((payout, i) =>
                     payout.orders.map((order, index) => {
-                      const fee = (order.amount * 0.027).toFixed(2);
+                      const fee = (order.amount * 0.1).toFixed(2);
                       const net = (order.amount - fee).toFixed(2);
                       const formattedDate = new Date(
                         order.createdAt
@@ -376,7 +372,7 @@ const [secondPayoutDate, setSecondPayoutDate] = useState("");
           </div>
         )}
 
-        {activeTab === "Timelines" && (
+        {/* {activeTab === "Timelines" && (
           <div className="p-4">
             <h2 className="text-lg font-semibold mb-4 text-gray-700">
               Finance Timelines
@@ -416,88 +412,111 @@ const [secondPayoutDate, setSecondPayoutDate] = useState("");
               </button>
             </div>
           </div>
-        )}
-        {/* {activeTab === "Timelines" && (
-<div className="p-4">
-    <h2 className="text-lg font-semibold mb-4 text-gray-700">Finance Timelines</h2>
+        )}*/}
+        {activeTab === "Timelines" && (
+          <div className="p-4">
+            <h2 className="text-lg font-semibold mb-4 text-gray-700">
+              Finance Timelines
+            </h2>
 
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700">Grace Period (in days)</label>
-      <input
-        type="number"
-        className="border px-3 py-2 rounded-md text-sm w-40"
-  value={graceTime}
- onChange={(e) => setGraceTime(Number(e.target.value))}
-/>      
-    </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Grace Period (in days)
+              </label>
+              <input
+                type="number"
+                className="border px-3 py-2 rounded-md text-sm w-40"
+                value={graceTime}
+                onChange={(e) => setGraceTime(Number(e.target.value))}
+              />
+            </div>
 
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700">Payout Frequency</label>
-    <select
-  value={payoutFrequency}
-  onChange={(e) => setPayoutFrequency(e.target.value)}
-  className="border px-3 py-2 rounded-md text-sm w-60"
->
-        
-      >
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-        <option value="once">Once a Month</option>
-        <option value="twice">Twice a Month</option>
-      </select>
-    </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Payout Frequency
+              </label>
+              <select
+                value={payoutFrequency}
+                onChange={(e) => setPayoutFrequency(e.target.value)}
+                className="border px-3 py-2 rounded-md text-sm w-60"
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="once">Once a Month</option>
+                <option value="twice">Twice a Month</option>
+              </select>
+            </div>
 
-    {payoutType === "weekly" && (
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Day of the Week</label>
-        <select
-          value={weeklyDay}
-          onChange={(e) => setWeeklyDay(e.target.value)}
-          className="border px-3 py-2 rounded-md text-sm w-60"
-        >
-          {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
-            <option key={day} value={day}>{day}</option>
-          ))}
-        </select>
-      </div>
-    )}
+            {/* Weekly Day Selection */}
+            {payoutFrequency === "weekly" && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Day of the Week
+                </label>
+                <select
+                  value={weeklyDay}
+                  onChange={(e) => setWeeklyDay(e.target.value)}
+                  className="border px-3 py-2 rounded-md text-sm w-60"
+                >
+                  {[
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                    "Sunday",
+                  ].map((day) => (
+                    <option key={day} value={day}>
+                      {day}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
-    {(payoutType === "daily" || payoutType === "once" || payoutType === "twice") && (
-      <div className="flex flex-col sm:flex-row gap-6 mb-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Payout Date 1</label>
-          <input
-            type="date"
-            value={firstPayoutDate}
-            onChange={(e) => setFirstPayoutDate(e.target.value)}
-            className="border px-3 py-2 rounded-md text-sm"
-          />
-        </div>
-        {payoutType === "twice" && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Payout Date 2</label>
-            <input
-              type="date"
-              value={secondPayoutDate}
-              onChange={(e) => setSecondPayoutDate(e.target.value)}
-              className="border px-3 py-2 rounded-md text-sm"
-            />
+            {/* Payout Date Inputs */}
+            {["daily", "once", "twice"].includes(payoutFrequency) && (
+              <div className="flex flex-col sm:flex-row gap-6 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Payout Date 1
+                  </label>
+                  <input
+                    type="date"
+                    value={firstPayoutDate}
+                    onChange={(e) => setFirstPayoutDate(e.target.value)}
+                    className="border px-3 py-2 rounded-md text-sm"
+                  />
+                </div>
+
+                {payoutFrequency === "twice" && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Payout Date 2
+                    </label>
+                    <input
+                      type="date"
+                      value={secondPayoutDate}
+                      onChange={(e) => setSecondPayoutDate(e.target.value)}
+                      className="border px-3 py-2 rounded-md text-sm"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Save Button */}
+            <div className="flex justify-end">
+              <button
+                onClick={handleSavePayoutDates}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
+              >
+                Save Payout Dates
+              </button>
+            </div>
           </div>
         )}
-      </div>
-    )}
-
-    <div className="flex justify-end">
-      <button
-        onClick={handleSavePayoutDates}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
-      >
-        Save Payout Dates
-      </button>
-    </div>
-  </div>
-)} */}
-
       </div>
 
       {toast.show && (

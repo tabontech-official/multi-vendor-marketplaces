@@ -16,32 +16,39 @@ const PayoutDetails = () => {
     net: 0,
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
-            payoutDate
-          )}&status=${status}`
-        );
-        const json = await res.json();
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const res = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+          payoutDate
+        )}&status=${status}`
+      );
+      const json = await res.json();
 
-        const fetchedOrders = (json.payouts && json.payouts[0] && json.payouts[0].orders) || [];
+      const fetchedOrders = (json.payouts && json.payouts[0] && json.payouts[0].orders) || [];
 
-        const charges = fetchedOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
-        const fees = 0;
-        const refunds = 0;
-        const net = charges - fees;
+      fetchedOrders.forEach((o) => {
+        o.fee = Number((o.amount * 0.10).toFixed(2)); // 10% fee
+        o.net = Number((o.amount - o.fee).toFixed(2)); // Net after fee
+      });
 
-        setOrders(fetchedOrders);
-        setSummary({ charges, refunds, fees, net });
-      } catch (err) {
-        console.error('Error fetching payout orders:', err);
-      }
-    };
+      const charges = fetchedOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+      const fees = fetchedOrders.reduce((sum, o) => sum + (o.fee || 0), 0);
+      const refunds = 0;
+      const net = charges - fees;
 
-    if (payoutDate && status) fetchData();
-  }, [payoutDate, status]);
+      setOrders(fetchedOrders);
+      setSummary({ charges, refunds, fees, net });
+    } catch (err) {
+      console.error('Error fetching payout orders:', err);
+    }
+  };
+
+  if (payoutDate && status) fetchData();
+}, [payoutDate, status]);
+
+
 
   return (
     <div className="p-6 bg-[#f6f6f7] min-h-screen">
@@ -82,8 +89,8 @@ const PayoutDetails = () => {
                   <td className="p-3">{dayjs(item.createdAt).format('MMM D, YYYY')}</td>
                   <td className="p-3 text-blue-600 underline cursor-pointer">#{item.shopifyOrderNo}</td>
                   <td className="p-3">${item.amount.toFixed(2)}</td>
-                  <td className="p-3">$0.00</td>
-                  <td className="p-3">${item.amount.toFixed(2)} CAD</td>
+                  <td className="p-3">${item.fee.toFixed(2)}</td>
+                  <td className="p-3">${item.net.toFixed(2)} CAD</td>
                 </tr>
               ))
             ) : (

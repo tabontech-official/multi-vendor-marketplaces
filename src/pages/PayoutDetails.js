@@ -30,8 +30,8 @@ const PayoutDetails = () => {
           (json.payouts && json.payouts[0] && json.payouts[0].orders) || [];
 
         fetchedOrders.forEach((o) => {
-          o.fee = Number((o.amount * 0.1).toFixed(2)); // 10% fee
-          o.net = Number((o.amount - o.fee).toFixed(2)); // Net after fee
+          o.fee = Number((o.amount * 0.1).toFixed(2));
+          o.net = Number((o.amount - o.fee).toFixed(2));
         });
 
         const charges = fetchedOrders.reduce(
@@ -39,7 +39,10 @@ const PayoutDetails = () => {
           0
         );
         const fees = fetchedOrders.reduce((sum, o) => sum + (o.fee || 0), 0);
-        const refunds = 0;
+        const refunds = fetchedOrders.reduce(
+          (sum, o) => sum + (o.refund || 0),
+          0
+        );
         const net = charges - fees;
 
         setOrders(fetchedOrders);
@@ -52,11 +55,11 @@ const PayoutDetails = () => {
     if (payoutDate && status) fetchData();
   }, [payoutDate, status]);
 
-const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [reference, setReference] = useState("");
 
-const openReferencePopup = () => setOpen(true);
-const closeReferencePopup = () => setOpen(false);
+  const openReferencePopup = () => setOpen(true);
+  const closeReferencePopup = () => setOpen(false);
   const handleSave = () => {
     console.log("📌 Reference saved:", reference);
     setReference(""); // clear input
@@ -65,8 +68,10 @@ const closeReferencePopup = () => setOpen(false);
   return (
     <div className="p-6 bg-[#f6f6f7] min-h-screen">
       <div className="flex justify-end mb-2">
-        <button className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"         onClick={openReferencePopup}
->
+        <button
+          className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
+          onClick={openReferencePopup}
+        >
           Add reference
         </button>
       </div>
@@ -106,7 +111,7 @@ const closeReferencePopup = () => setOpen(false);
               <th className="p-3">Net</th>
             </tr>
           </thead>
-          <tbody>
+          {/* <tbody>
             {orders.length > 0 ? (
               orders.map((item, i) => (
                 <tr key={i} className="border-b hover:bg-gray-50">
@@ -128,10 +133,36 @@ const closeReferencePopup = () => setOpen(false);
                 </td>
               </tr>
             )}
-          </tbody>
+          </tbody> */}
+        <tbody>
+  {orders.length > 0 ? (
+    orders
+      .filter((item) => item.net !== 0) // Skip net = 0 orders
+      .map((item, i) => (
+        <tr key={i} className="border-b hover:bg-gray-50">
+          <td className="p-3">
+            {dayjs(item.createdAt).format("MMM D, YYYY")}
+          </td>
+          <td className="p-3 text-blue-600 underline cursor-pointer">
+            #{item.shopifyOrderNo}
+          </td>
+          <td className="p-3">${item.amount.toFixed(2)}</td>
+          <td className="p-3">${item.fee.toFixed(2)}</td>
+          <td className="p-3">${item.net.toFixed(2)} AUD</td>
+        </tr>
+      ))
+  ) : (
+    <tr>
+      <td colSpan="5" className="p-4 text-center text-gray-500">
+        No orders found for this payout.
+      </td>
+    </tr>
+  )}
+</tbody>
+
         </table>
       </div>
-       {open && (
+      {open && (
         <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <div className="flex justify-between items-center mb-4">

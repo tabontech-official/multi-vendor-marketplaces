@@ -368,7 +368,7 @@ const SubscriptionHistory = () => {
                                 index % 2 === 0 ? "bg-white" : "bg-gray-100"
                               } w-full`}
                             >
-                              <td className="p-3">#{subscription.orderId}</td>
+                              <td className="p-3">#{subscription.serialNumber}</td>
                               <td className="p-3">
                                 {formatDate(subscription.createdAt)}
                               </td>

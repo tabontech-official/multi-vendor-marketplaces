@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { BsThreeDots } from "react-icons/bs";
+import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 
 const OrdersDetails = () => {
   const location = useLocation();
@@ -14,7 +15,13 @@ const OrdersDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
   const [lineItems, setLineItems] = useState([]);
-
+  const [showCancelPopup, setShowCancelPopup] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+  };
   // const lineItems =
   //   order?.lineItems || order?.lineItemsByMerchant?.[merchantId] || [];
   useEffect(() => {
@@ -149,8 +156,6 @@ const OrdersDetails = () => {
   }, [selectedFulfillment]);
 
   const handleSaveTracking = async () => {
-   
-
     try {
       await fetch(`/api/shopify/update-fulfillment-tracking`, {
         method: "POST",
@@ -180,8 +185,6 @@ const OrdersDetails = () => {
     }
   };
 
-
-  
   const handleCancelOrder = async () => {
     const token = localStorage.getItem("usertoken");
 
@@ -196,10 +199,6 @@ const OrdersDetails = () => {
       return;
     }
     const role = decoded?.payLoad?.role;
-    const confirmed = window.confirm(
-      "Are you sure you want to cancel this order?"
-    );
-    if (!confirmed) return;
 
     try {
       let lineItemIds = [];
@@ -207,15 +206,10 @@ const OrdersDetails = () => {
       if (role === "Merchant") {
         const lineItems = order?.lineItems || [];
         lineItemIds = lineItems.map((item) => item.id);
-
       } else {
         const lineItems = order?.lineItemsByMerchant?.[merchantId] || [];
         lineItemIds = lineItems.map((item) => item.id);
-
-    
       }
-
-     
 
       if (!orderId || lineItemIds.length === 0) {
         alert("Missing order details or line items to cancel.");
@@ -240,20 +234,20 @@ const OrdersDetails = () => {
 
       if (!response.ok) {
         console.error(" Cancel Failed:", result);
-        alert("Failed to cancel the order. Check console for details.");
+        // alert("Failed to cancel the order. Check console for details.");
+        showToast("error", "Failed to cancel the order.");
+
         return;
       }
 
-      alert(" Order cancelled successfully.");
+      showToast("success", "Order cancelled successfully.");
       // window.location.reload();
     } catch (error) {
       console.error(" Cancel Error:", error);
-      alert("An error occurred while canceling the order.");
+      showToast("error", "An error occurred while canceling the order.");
     }
   };
 
-
-  
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
       <div className="w-full max-w-6xl grid grid-cols-12 gap-6">
@@ -271,7 +265,20 @@ const OrdersDetails = () => {
               </span>
             </div>
           </div>
-
+          {toast.show && (
+            <div
+              className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+                toast.type === "success" ? "bg-green-500" : "bg-red-500"
+              } text-white`}
+            >
+              {toast.type === "success" ? (
+                <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+              ) : (
+                <HiOutlineXCircle className="w-6 h-6 mr-2" />
+              )}
+              <span>{toast.message}</span>
+            </div>
+          )}
           {/* {Array.isArray(lineItems) &&
             lineItems.some((i) => i.fulfillment_status === null) && (
               <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
@@ -698,11 +705,20 @@ const OrdersDetails = () => {
         </div>
 
         <div className="col-span-4 space-y-4">
-          {Array.isArray(lineItems) &&
+          {/* {Array.isArray(lineItems) &&
             lineItems.some((i) => i.fulfillment_status === null) && (
               <button
                 className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
                 onClick={handleCancelOrder}
+              >
+                Cancel Order
+              </button>
+            )} */}
+          {Array.isArray(lineItems) &&
+            lineItems.some((i) => i.fulfillment_status === null) && (
+              <button
+                className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
+                onClick={() => setShowCancelPopup(true)}
               >
                 Cancel Order
               </button>
@@ -840,6 +856,47 @@ const OrdersDetails = () => {
             >
               ✕
             </button>
+          </div>
+        </div>
+      )}
+      {showCancelPopup && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+            <button
+              className="absolute top-3 right-3 text-gray-400 hover:text-black"
+              onClick={() => setShowCancelPopup(false)}
+            >
+              ✕
+            </button>
+            <div className="text-center">
+              <div className="text-4xl mb-2 text-red-500">⚠️</div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-1">
+                Confirm Cancellation
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Are you sure you want to cancel this order?
+              </p>
+              <div className="flex justify-center gap-3">
+                <button
+                  className="px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 text-gray-800"
+                  onClick={() => setShowCancelPopup(false)}
+                >
+                  No, Go Back
+                </button>
+                <button
+                  className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700"
+                  onClick={async () => {
+                    setCancelLoading(true);
+                    await handleCancelOrder(); // trigger your API
+                    setCancelLoading(false);
+                    setShowCancelPopup(false);
+                  }}
+                  disabled={cancelLoading}
+                >
+                  {cancelLoading ? "Cancelling..." : "Yes, Cancel"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

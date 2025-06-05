@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import { HiOutlineRefresh } from "react-icons/hi";
+import { jwtDecode } from "jwt-decode";
 
 const PayoutDetails = () => {
   const location = useLocation();
@@ -9,6 +10,7 @@ const PayoutDetails = () => {
   const payoutDate = query.get("payoutDate");
   const status = query.get("status");
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState("");
 
   const [orders, setOrders] = useState([]);
   const [summary, setSummary] = useState({
@@ -68,7 +70,7 @@ const PayoutDetails = () => {
   const openReferencePopup = () => setOpen(true);
   const closeReferencePopup = () => setOpen(false);
   const handleSave = async () => {
-    const orderIds = orders.map((o) => o.orderId); // 👈 use `orderId` from response
+    const orderIds = orders.map((o) => o.orderId);
 
     try {
       const res = await fetch(
@@ -99,16 +101,27 @@ const PayoutDetails = () => {
     }
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem("usertoken");
+    if (token) {
+      const decoded = jwtDecode(token);
+      const role = decoded?.payLoad?.role || "";
+      setUserRole(role);
+    }
+  }, []);
   return (
     <div className="p-6 bg-[#f6f6f7] min-h-screen">
       <div className="flex justify-end mb-2">
-        <button
-          className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
-          onClick={openReferencePopup}
-        >
-          Add reference
-        </button>
+        {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+          <button
+            className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
+            onClick={openReferencePopup}
+          >
+            Add reference
+          </button>
+        )}
       </div>
+
       <div className="bg-white shadow rounded-lg p-5 mb-6 flex flex-col md:flex-row justify-between gap-6">
         <div className="flex-1">
           <h1 className="text-2xl font-bold mb-1">

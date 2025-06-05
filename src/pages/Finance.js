@@ -18,7 +18,6 @@ const Finance = () => {
   const { addNotification } = useNotification();
   const { userData } = UseFetchUserData();
   const [loading, setLoading] = useState(true);
-
   const [userRole, setUserRole] = useState("");
   const [payouts, setPayouts] = useState([]);
   const { user } = useAuthContext();
@@ -30,11 +29,9 @@ const Finance = () => {
   const [paypalLoading, setPaypalLoading] = useState(false);
   const [graceDays, setGraceDays] = useState(0);
   const [payoutType, setPayoutType] = useState("daily");
-
   const [activeTab, setActiveTab] = useState("payouts");
-
-  const [graceTime, setGraceTime] = useState(0); // Renamed from graceDays
-  const [payoutFrequency, setPayoutFrequency] = useState("daily"); // Renamed from payoutType
+  const [graceTime, setGraceTime] = useState(0); 
+  const [payoutFrequency, setPayoutFrequency] = useState("daily");
   const [weeklyDay, setWeeklyDay] = useState("Monday");
   const [firstPayoutDate, setFirstPayoutDate] = useState("");
   const [secondPayoutDate, setSecondPayoutDate] = useState("");
@@ -225,7 +222,7 @@ const Finance = () => {
       } catch (error) {
         console.error("Failed to fetch payouts:", error);
       } finally {
-        setLoading(false); // ✅ Always stop loading
+        setLoading(false); 
       }
     };
 
@@ -249,7 +246,7 @@ const Finance = () => {
           </div> */}
         </div>
       </div>
-      <div className="flex space-x-4 mt-6 border-b">
+      {/* <div className="flex space-x-4 mt-6 border-b">
         <button
           className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
             activeTab === "payouts"
@@ -274,13 +271,49 @@ const Finance = () => {
 
         <button
           className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-            activeTab === "To be paid"
+            activeTab === "Due "
               ? "border-blue-600 text-blue-600"
               : "border-transparent text-gray-500 hover:text-blue-600"
           }`}
-          onClick={() => setActiveTab("To be paid")}
+          onClick={() => setActiveTab("Due ")}
         >
-          To be Paid
+          Due 
+        </button>
+      </div> */}
+      <div className="flex space-x-4 mt-6 border-b">
+        <button
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+            activeTab === "payouts"
+              ? "border-blue-600 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-blue-600"
+          }`}
+          onClick={() => setActiveTab("payouts")}
+        >
+          Payouts
+        </button>
+
+        {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+          <button
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+              activeTab === "Timelines"
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-blue-600"
+            }`}
+            onClick={() => setActiveTab("Timelines")}
+          >
+            Timelines
+          </button>
+        )}
+
+        <button
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+            activeTab === "Due "
+              ? "border-blue-600 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-blue-600"
+          }`}
+          onClick={() => setActiveTab("Due ")}
+        >
+          Due 
         </button>
       </div>
 
@@ -339,7 +372,7 @@ const Finance = () => {
         )}
 
         {/* 
-        {activeTab === "To be paid" && (
+        {activeTab === "Due " && (
           <div className="p-4">
             <table className="w-full border-collapse bg-white">
               <thead className="bg-gray-100 text-left text-gray-600 text-sm">
@@ -404,7 +437,7 @@ const Finance = () => {
             </table>
           </div>
         )} */}
-        {activeTab === "To be paid" && (
+        {activeTab === "Due " && (
           <div className="p-4">
             {loading ? (
               <div className="flex justify-center items-center py-10">

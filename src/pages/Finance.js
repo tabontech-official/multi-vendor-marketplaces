@@ -80,14 +80,11 @@ const Finance = () => {
     };
 
     try {
-      const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       const result = await res.json();
 
@@ -107,9 +104,7 @@ const Finance = () => {
   useEffect(() => {
     const fetchPayoutDates = async () => {
       try {
-        const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates"
-        );
+        const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates");
         const data = await res.json();
 
         if (data.firstDate) setFirstPayoutDate(data.firstDate.slice(0, 10));
@@ -186,13 +181,10 @@ const Finance = () => {
 
     setPaypalLoading(true);
     try {
-      const res = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
-        {
-          merchantId: userId,
-          payPal: paypalAccountInput,
-        }
-      );
+      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
+        merchantId: userId,
+        payPal: paypalAccountInput,
+      });
 
       if (res.status === 200) {
         setPaypalPopup(false);
@@ -212,9 +204,7 @@ const Finance = () => {
     const fetchPayouts = async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/order/getPayout"
-        );
+        const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayout");
         const data = await res.json();
 
         const payoutsData = data.payouts || [];
@@ -330,47 +320,96 @@ const Finance = () => {
                 <thead className="bg-gray-100 text-left text-gray-600 text-sm">
                   <tr>
                     <th className="p-3">Payout Date</th>
+                    {(userRole === "Master Admin" ||
+                      userRole === "Dev Admin") && (
+                      <th className="p-3">Merchant Info</th>
+                    )}
                     <th className="p-3">Transaction Dates</th>
                     <th className="p-3">Status</th>
                     <th className="p-3 text-right">Amount</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {payouts.map((item, index) => (
-                    <tr key={index} className="border-b hover:bg-gray-50">
-                      <td
-                        className="p-3 text-blue-600 cursor-pointer hover:underline"
-                        onClick={() =>
-                          navigate(
-                            `/payout-details?payoutDate=${encodeURIComponent(
-                              item.payoutDate
-                            )}&status=${item.status}`
-                          )
-                        }
-                      >
-                        {item.payoutDate}
-                      </td>
-                      <td className="p-3">{item.transactionDates}</td>
-                      <td className="p-3">
-                        <span
-                          className={`inline-block px-2 py-1 text-xs font-medium rounded 
-                          ${
-                            item.status === "Pending"
-                              ? "bg-blue-100 text-blue-700"
-                              : item.status === "Deposited"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-600"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
 
-                      <td className="p-3 text-right font-medium">
-                        {item.amount}
-                      </td>
-                    </tr>
-                  ))}
+                <tbody>
+                  {userRole === "Master Admin" || userRole === "Dev Admin"
+                    ? payouts.flatMap((payout, index) =>
+                        payout.orders.flatMap((order, oIndex) =>
+                          order.lineItems.map((line, liIndex) => (
+                            <tr
+                              key={`${index}-${oIndex}-${liIndex}`}
+                              className="border-b hover:bg-gray-50"
+                            >
+                              <td
+                                className="p-3 text-blue-600 cursor-pointer hover:underline"
+                                onClick={() =>
+                                  navigate(
+                                    `/payout-details?payoutDate=${payout.payoutDate}&status=${payout.status}&merchantId=${line.merchantId}`
+                                  )
+                                }
+                              >
+                                {payout.payoutDate}
+                              </td>
+
+                              <td className="p-3 text-sm text-gray-600">
+                                <div>{line.merchantName || "N/A"}</div>
+                                <div className="text-xs text-gray-400">
+                                  {line.merchantEmail || "N/A"}
+                                </div>
+                              </td>
+                              <td className="p-3">{payout.transactionDates}</td>
+                              <td className="p-3">
+                                <span
+                                  className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                                    payout.status === "Pending"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : payout.status === "Deposited"
+                                      ? "bg-green-100 text-green-700"
+                                      : "bg-gray-100 text-gray-600"
+                                  }`}
+                                >
+                                  {payout.status}
+                                </span>
+                              </td>
+                              <td className="p-3 text-right font-medium">
+                                {line.price} AUD
+                              </td>
+                            </tr>
+                          ))
+                        )
+                      )
+                    : payouts.map((item, index) => (
+                        <tr key={index} className="border-b hover:bg-gray-50">
+                          <td
+                            className="p-3 text-blue-600 cursor-pointer hover:underline"
+                            onClick={() =>
+                              navigate(
+                                `/payout-details?payoutDate=${encodeURIComponent(
+                                  item.payoutDate
+                                )}&status=${item.status}`
+                              )
+                            }
+                          >
+                            {item.payoutDate}
+                          </td>
+                          <td className="p-3">{item.transactionDates}</td>
+                          <td className="p-3">
+                            <span
+                              className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                                item.status === "Pending"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : item.status === "Deposited"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-gray-100 text-gray-600"
+                              }`}
+                            >
+                              {item.status}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right font-medium">
+                            {item.amount}
+                          </td>
+                        </tr>
+                      ))}
                 </tbody>
               </table>
             ) : (

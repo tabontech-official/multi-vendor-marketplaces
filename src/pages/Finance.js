@@ -30,7 +30,7 @@ const Finance = () => {
   const [graceDays, setGraceDays] = useState(0);
   const [payoutType, setPayoutType] = useState("daily");
   const [activeTab, setActiveTab] = useState("payouts");
-  const [graceTime, setGraceTime] = useState(0); 
+  const [graceTime, setGraceTime] = useState(0);
   const [payoutFrequency, setPayoutFrequency] = useState("daily");
   const [weeklyDay, setWeeklyDay] = useState("Monday");
   const [firstPayoutDate, setFirstPayoutDate] = useState("");
@@ -222,7 +222,7 @@ const Finance = () => {
       } catch (error) {
         console.error("Failed to fetch payouts:", error);
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
@@ -313,7 +313,7 @@ const Finance = () => {
           }`}
           onClick={() => setActiveTab("Due ")}
         >
-          Due 
+          Due
         </button>
       </div>
 
@@ -352,10 +352,20 @@ const Finance = () => {
                       </td>
                       <td className="p-3">{item.transactionDates}</td>
                       <td className="p-3">
-                        <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-800">
+                        <span
+                          className={`inline-block px-2 py-1 text-xs font-medium rounded 
+                          ${
+                            item.status === "Pending"
+                              ? "bg-blue-100 text-blue-700"
+                              : item.status === "Deposited"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-600"
+                          }`}
+                        >
                           {item.status}
                         </span>
                       </td>
+
                       <td className="p-3 text-right font-medium">
                         {item.amount}
                       </td>
@@ -472,10 +482,20 @@ const Finance = () => {
                           {item.payoutDate}
                         </td>
                         <td className="p-3">
-                          <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                          <span
+                            className={`inline-block px-2 py-1 text-xs font-medium rounded 
+                            ${
+                              item.status === "Pending"
+                                ? "bg-blue-100 text-blue-700"
+                                : item.status === "Deposited"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
+                          >
                             {item.status}
                           </span>
                         </td>
+
                         <td className="p-3 text-right">
                           $
                           {item.orders

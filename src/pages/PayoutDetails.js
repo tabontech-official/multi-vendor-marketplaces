@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import dayjs from "dayjs";
+import { HiOutlineRefresh } from "react-icons/hi";
 
 const PayoutDetails = () => {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const payoutDate = query.get("payoutDate");
   const status = query.get("status");
+  const [loading, setLoading] = useState(true);
 
   const [orders, setOrders] = useState([]);
   const [summary, setSummary] = useState({
@@ -18,6 +20,8 @@ const PayoutDetails = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+
       try {
         const res = await fetch(
           `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
@@ -44,11 +48,14 @@ const PayoutDetails = () => {
           0
         );
         const net = charges - fees;
+        const referenceNo = fetchedOrders[0]?.referenceNo || "";
 
         setOrders(fetchedOrders);
-        setSummary({ charges, refunds, fees, net });
+        setSummary({ charges, refunds, fees, net, referenceNo });
       } catch (err) {
         console.error("Error fetching payout orders:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -60,11 +67,38 @@ const PayoutDetails = () => {
 
   const openReferencePopup = () => setOpen(true);
   const closeReferencePopup = () => setOpen(false);
-  const handleSave = () => {
-    console.log("📌 Reference saved:", reference);
-    setReference(""); // clear input
-    closeReferencePopup();
+  const handleSave = async () => {
+    const orderIds = orders.map((o) => o.orderId); // 👈 use `orderId` from response
+
+    try {
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderIds,
+            referenceNo: reference,
+          }),
+        }
+      );
+
+      const result = await res.json();
+
+      if (res.ok) {
+        alert("Reference number added successfully!");
+        closeReferencePopup();
+      } else {
+        alert(result.message || "Something went wrong.");
+      }
+    } catch (err) {
+      console.error("Failed to update reference numbers:", err);
+      alert("Error occurred while updating reference numbers.");
+    }
   };
+
   return (
     <div className="p-6 bg-[#f6f6f7] min-h-screen">
       <div className="flex justify-end mb-2">
@@ -86,7 +120,7 @@ const PayoutDetails = () => {
               <strong>Bank account:</strong> PayPal
             </p>
             <p>
-              <strong>Bank reference:</strong> Not available
+              <strong>Bank reference:</strong> {summary.referenceNo}
             </p>
           </div>
         </div>
@@ -134,68 +168,89 @@ const PayoutDetails = () => {
               </tr>
             )}
           </tbody> */}
-        <tbody>
-  {orders.length > 0 ? (
-    orders
-      .filter((item) => item.net !== 0) // Skip net = 0 orders
-      .map((item, i) => (
-        <tr key={i} className="border-b hover:bg-gray-50">
-          <td className="p-3">
-            {dayjs(item.createdAt).format("MMM D, YYYY")}
-          </td>
-          <td className="p-3 text-blue-600 underline cursor-pointer">
-            #{item.shopifyOrderNo}
-          </td>
-          <td className="p-3">${item.amount.toFixed(2)}</td>
-          <td className="p-3">${item.fee.toFixed(2)}</td>
-          <td className="p-3">${item.net.toFixed(2)} AUD</td>
-        </tr>
-      ))
-  ) : (
-    <tr>
-      <td colSpan="5" className="p-4 text-center text-gray-500">
-        No orders found for this payout.
-      </td>
-    </tr>
-  )}
-</tbody>
-
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="5" className="py-10 text-center text-gray-500">
+                  <div className="inline-flex items-center gap-2 justify-center">
+                    <HiOutlineRefresh className="animate-spin text-xl" />
+                    Loading...
+                  </div>
+                </td>
+              </tr>
+            ) : orders.length > 0 ? (
+              orders
+                .filter((item) => item.net !== 0) // Skip net = 0 orders
+                .map((item, i) => (
+                  <tr key={i} className="border-b hover:bg-gray-50">
+                    <td className="p-3">
+                      {dayjs(item.createdAt).format("MMM D, YYYY")}
+                    </td>
+                    <td className="p-3 text-blue-600 underline cursor-pointer">
+                      #{item.shopifyOrderNo}
+                    </td>
+                    <td className="p-3">${item.amount.toFixed(2)}</td>
+                    <td className="p-3">${item.fee.toFixed(2)}</td>
+                    <td className="p-3">${item.net.toFixed(2)} AUD</td>
+                  </tr>
+                ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="p-4 text-center text-gray-500">
+                  No orders found for this payout.
+                </td>
+              </tr>
+            )}
+          </tbody>
         </table>
       </div>
       {open && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Add Reference</h2>
-              <button
-                onClick={closeReferencePopup}
-                className="text-gray-500 hover:text-red-600 text-xl"
-              >
-                &times;
-              </button>
-            </div>
+        <div
+          className="fixed inset-0 bg-gradient-to-br from-black/80 to-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50"
+          onClick={closeReferencePopup}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-fadeInUp p-8 relative border border-gray-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeReferencePopup}
+              className="absolute top-3 right-3 text-gray-400 hover:text-black transition"
+            >
+              ✕
+            </button>
 
-            <input
-              type="text"
-              placeholder="Enter reference..."
-              className="w-full border border-gray-300 rounded px-3 py-2 mb-4"
-              value={reference}
-              onChange={(e) => setReference(e.target.value)}
-            />
+            <div className="text-center">
+              <div className="text-3xl mb-3 text-blue-600">🏷️</div>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                Add Reference
+              </h2>
+              <p className="text-sm text-gray-500 mb-6">
+                Enter the bank reference number for this payout group.
+              </p>
 
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={closeReferencePopup}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-              >
-                Save
-              </button>
+              <input
+                type="text"
+                placeholder="e.g. 12345678"
+                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition mb-6"
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+              />
+
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={closeReferencePopup}
+                  className="px-5 py-2 rounded-full bg-gray-200 hover:bg-gray-300 text-sm transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="px-6 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 text-sm transition"
+                >
+                  Save
+                </button>
+              </div>
             </div>
           </div>
         </div>

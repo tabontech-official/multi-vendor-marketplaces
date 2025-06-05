@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
+import {
+  HiOutlineCheckCircle,
+  HiOutlineRefresh,
+  HiOutlineXCircle,
+} from "react-icons/hi";
 import { CiCreditCard1 } from "react-icons/ci";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
@@ -12,7 +16,9 @@ import { useNavigate, useNavigation } from "react-router-dom";
 dayjs.extend(minMax);
 const Finance = () => {
   const { addNotification } = useNotification();
-  const { userData, loading } = UseFetchUserData();
+  const { userData } = UseFetchUserData();
+  const [loading, setLoading] = useState(true);
+
   const [userRole, setUserRole] = useState("");
   const [payouts, setPayouts] = useState([]);
   const { user } = useAuthContext();
@@ -69,8 +75,8 @@ const Finance = () => {
 
   const handleSavePayoutDates = async () => {
     const payload = {
-      graceTime, // renamed from graceDays
-      payoutFrequency, // renamed from payoutType
+      graceTime,
+      payoutFrequency,
       firstDate: firstPayoutDate,
       secondDate: payoutFrequency === "twice" ? secondPayoutDate : null,
       weeklyDay: payoutFrequency === "weekly" ? weeklyDay : null,
@@ -96,7 +102,7 @@ const Finance = () => {
 
       alert(result.message || "Saved");
     } catch (err) {
-      console.error("❌ Network error:", err);
+      console.error(" Network error:", err);
       alert("Error saving payout configuration.");
     }
   };
@@ -207,13 +213,20 @@ const Finance = () => {
 
   useEffect(() => {
     const fetchPayouts = async () => {
-      const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/getPayout"
-      );
-      const data = await res.json();
+      setLoading(true);
+      try {
+        const res = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/order/getPayout"
+        );
+        const data = await res.json();
 
-      const payoutsData = data.payouts || [];
-      setPayouts(payoutsData);
+        const payoutsData = data.payouts || [];
+        setPayouts(payoutsData);
+      } catch (error) {
+        console.error("Failed to fetch payouts:", error);
+      } finally {
+        setLoading(false); // ✅ Always stop loading
+      }
     };
 
     fetchPayouts();
@@ -272,47 +285,59 @@ const Finance = () => {
       </div>
 
       <div className="mt-6">
-        {activeTab === "payouts" && payouts.length > 0 && (
+        {activeTab === "payouts" && (
           <div className="p-4">
-            <table className="w-full border-collapse bg-white">
-              <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-                <tr>
-                  <th className="p-3">Payout Date</th>
-                  <th className="p-3">Transaction Dates</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3 text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payouts.map((item, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
-                    <td
-                      className="p-3 text-blue-600 cursor-pointer hover:underline"
-                      onClick={() =>
-                        navigate(
-                          `/payout-details?payoutDate=${encodeURIComponent(
-                            item.payoutDate
-                          )}&status=${item.status}`
-                        )
-                      }
-                    >
-                      {item.payoutDate}
-                    </td>
-                    <td className="p-3">{item.transactionDates}</td>
-                    <td className="p-3">
-                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-800">
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="p-3 text-right font-medium">
-                      {item.amount}
-                    </td>
+            {loading ? (
+              <div className="flex justify-center items-center py-10">
+                <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
+                loading...
+              </div>
+            ) : payouts.length > 0 ? (
+              <table className="w-full border-collapse bg-white">
+                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                  <tr>
+                    <th className="p-3">Payout Date</th>
+                    <th className="p-3">Transaction Dates</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3 text-right">Amount</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {payouts.map((item, index) => (
+                    <tr key={index} className="border-b hover:bg-gray-50">
+                      <td
+                        className="p-3 text-blue-600 cursor-pointer hover:underline"
+                        onClick={() =>
+                          navigate(
+                            `/payout-details?payoutDate=${encodeURIComponent(
+                              item.payoutDate
+                            )}&status=${item.status}`
+                          )
+                        }
+                      >
+                        {item.payoutDate}
+                      </td>
+                      <td className="p-3">{item.transactionDates}</td>
+                      <td className="p-3">
+                        <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-800">
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right font-medium">
+                        {item.amount}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-10 text-gray-500">
+                No payouts found.
+              </div>
+            )}
           </div>
         )}
+
         {/* 
         {activeTab === "To be paid" && (
           <div className="p-4">
@@ -379,72 +404,78 @@ const Finance = () => {
             </table>
           </div>
         )} */}
-
         {activeTab === "To be paid" && (
           <div className="p-4">
-            <table className="w-full border-collapse bg-white">
-              <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-                <tr>
-                  <th className="p-3">Payout Date</th>
-                  <th className="p-3">Payout Status</th>
-                  <th className="p-3 text-right">Amount</th>
-                  <th className="p-3 text-right">Fee</th>
-                  <th className="p-3 text-right">Net</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payouts.length > 0 ? (
-                  payouts.map((item, index) => (
-                    <tr key={index} className="border-b hover:bg-gray-50">
-                      <td
-                      className="p-3 text-blue-600 cursor-pointer hover:underline"
-                      onClick={() =>
-                        navigate(
-                          `/payout-details?payoutDate=${encodeURIComponent(
-                            item.payoutDate
-                          )}&status=${item.status}`
-                        )
-                      }
-                    >
-                      {item.payoutDate}
-                    </td>
-                      <td className="p-3">
-                        <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
-                          {item.status}
-                        </span>
-                      </td>
-                      <td className="p-3 text-right">
-                        $
-                        {item.orders
-                          .reduce((sum, o) => sum + o.amount, 0)
-                          .toFixed(2)}
-                      </td>
-                      <td className="p-3 text-right text-red-600">
-                        -$
-                        {(
-                          item.orders.reduce((sum, o) => sum + o.amount, 0) *
-                          0.1
-                        ).toFixed(2)}
-                      </td>
-                      <td className="p-3 text-right text-green-700 font-semibold">
-                        $
-                        {(
-                          item.orders.reduce((sum, o) => sum + o.amount, 0) *
-                          0.9
-                        ).toFixed(2)}{" "}
-                        AUD
+            {loading ? (
+              <div className="flex justify-center items-center py-10">
+                <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
+                loading...
+              </div>
+            ) : (
+              <table className="w-full border-collapse bg-white">
+                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                  <tr>
+                    <th className="p-3">Payout Date</th>
+                    <th className="p-3">Payout Status</th>
+                    <th className="p-3 text-right">Amount</th>
+                    <th className="p-3 text-right">Fee</th>
+                    <th className="p-3 text-right">Net</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payouts.length > 0 ? (
+                    payouts.map((item, index) => (
+                      <tr key={index} className="border-b hover:bg-gray-50">
+                        <td
+                          className="p-3 text-blue-600 cursor-pointer hover:underline"
+                          onClick={() =>
+                            navigate(
+                              `/payout-details?payoutDate=${encodeURIComponent(
+                                item.payoutDate
+                              )}&status=${item.status}`
+                            )
+                          }
+                        >
+                          {item.payoutDate}
+                        </td>
+                        <td className="p-3">
+                          <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                            {item.status}
+                          </span>
+                        </td>
+                        <td className="p-3 text-right">
+                          $
+                          {item.orders
+                            .reduce((sum, o) => sum + o.amount, 0)
+                            .toFixed(2)}
+                        </td>
+                        <td className="p-3 text-right text-red-600">
+                          -$
+                          {(
+                            item.orders.reduce((sum, o) => sum + o.amount, 0) *
+                            0.1
+                          ).toFixed(2)}
+                        </td>
+                        <td className="p-3 text-right text-green-700 font-semibold">
+                          $
+                          {(
+                            item.orders.reduce((sum, o) => sum + o.amount, 0) *
+                            0.9
+                          ).toFixed(2)}{" "}
+                          AUD
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="p-4 text-center text-gray-500">
+                        No payouts found.
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="p-4 text-center text-gray-500">
-                      No payouts found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
 

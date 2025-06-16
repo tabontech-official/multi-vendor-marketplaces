@@ -9,6 +9,8 @@ const PayoutDetails = () => {
   const query = new URLSearchParams(location.search);
   const payoutDate = query.get("payoutDate");
   const status = query.get("status");
+  const merchantId = query.get("merchantId");
+
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState("");
 
@@ -28,7 +30,7 @@ const PayoutDetails = () => {
         const res = await fetch(
           `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
             payoutDate
-          )}&status=${status}`
+          )}&status=${status}&userId=${merchantId}`
         );
         const json = await res.json();
 
@@ -182,47 +184,46 @@ const PayoutDetails = () => {
             )}
           </tbody> */}
           <tbody>
-  {loading ? (
-    <tr>
-      <td colSpan="5" className="py-10 text-center text-gray-500">
-        <div className="inline-flex items-center gap-2 justify-center">
-          <HiOutlineRefresh className="animate-spin text-xl" />
-          Loading...
-        </div>
-      </td>
-    </tr>
-  ) : orders.length > 0 ? (
-    orders.flatMap((order, i) =>
-      (order.products || []).map((product, j) => (
-        <tr
-          key={`${i}-${j}`}
-          className={`border-b hover:bg-gray-50 ${
-            product.cancelled ? "line-through text-gray-400" : ""
-          }`}
-        >
-          <td className="p-3">
-            {dayjs(order.createdAt).format("MMM D, YYYY")}
-          </td>
-          <td className="p-3 text-blue-600 underline cursor-pointer">
-            #{order.shopifyOrderNo}
-          </td>
-          <td className="p-3">${product.total.toFixed(2)}</td>
-          <td className="p-3">${(product.total * 0.1).toFixed(2)}</td>
-          <td className="p-3">
-            ${((product.total * 0.9)).toFixed(2)} AUD
-          </td>
-        </tr>
-      ))
-    )
-  ) : (
-    <tr>
-      <td colSpan="5" className="p-4 text-center text-gray-500">
-        No orders found for this payout.
-      </td>
-    </tr>
-  )}
-</tbody>
-
+            {loading ? (
+              <tr>
+                <td colSpan="5" className="py-10 text-center text-gray-500">
+                  <div className="inline-flex items-center gap-2 justify-center">
+                    <HiOutlineRefresh className="animate-spin text-xl" />
+                    Loading...
+                  </div>
+                </td>
+              </tr>
+            ) : orders.length > 0 ? (
+              orders.flatMap((order, i) =>
+                (order.products || []).map((product, j) => (
+                  <tr
+                    key={`${i}-${j}`}
+                    className={`border-b hover:bg-gray-50 ${
+                      product.cancelled ? "line-through text-gray-400" : ""
+                    }`}
+                  >
+                    <td className="p-3">
+                      {dayjs(order.createdAt).format("MMM D, YYYY")}
+                    </td>
+                    <td className="p-3 text-blue-600 underline cursor-pointer">
+                      #{order.shopifyOrderNo}
+                    </td>
+                    <td className="p-3">${product.total.toFixed(2)}</td>
+                    <td className="p-3">${(product.total * 0.1).toFixed(2)}</td>
+                    <td className="p-3">
+                      ${(product.total * 0.9).toFixed(2)} AUD
+                    </td>
+                  </tr>
+                ))
+              )
+            ) : (
+              <tr>
+                <td colSpan="5" className="p-4 text-center text-gray-500">
+                  No orders found for this payout.
+                </td>
+              </tr>
+            )}
+          </tbody>
         </table>
       </div>
       {open && (

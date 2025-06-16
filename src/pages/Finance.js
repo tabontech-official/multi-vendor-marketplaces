@@ -202,11 +202,32 @@ const Finance = () => {
 
   useEffect(() => {
     const fetchPayouts = async () => {
+      if (!userRole) return;
+
       setLoading(true);
       try {
-        const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayout");
-        const data = await res.json();
+        let url = "";
 
+        if (userRole === "Merchant") {
+          const userId = localStorage.getItem("userid");
+
+          if (!userId) {
+            console.error("User ID not found in localStorage");
+            setLoading(false);
+            return;
+          }
+
+          url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=${userId}`;
+        } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
+          url = "https://multi-vendor-marketplace.vercel.app/order/getPayout";
+        } else {
+          console.warn("Unhandled role:", userRole);
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch(url);
+        const data = await res.json();
         const payoutsData = data.payouts || [];
         setPayouts(payoutsData);
       } catch (error) {
@@ -217,7 +238,7 @@ const Finance = () => {
     };
 
     fetchPayouts();
-  }, []);
+  }, [userRole]);
 
   return user ? (
     <main className="w-full p-4 md:p-8">
@@ -327,6 +348,13 @@ const Finance = () => {
                     <th className="p-3">Transaction Dates</th>
                     <th className="p-3">Status</th>
                     <th className="p-3 text-right">Amount</th>
+                    {(userRole === "Master Admin" ||
+                      userRole === "Dev Admin") && (
+                      <>
+                        <th className="p-3 text-right">Qty</th>
+                        <th className="p-3 text-right">Net</th>
+                      </>
+                    )}
                   </tr>
                 </thead>
 
@@ -358,7 +386,7 @@ const Finance = () => {
                               </td>
                               <td className="p-3">{payout.transactionDates}</td>
                               <td className="p-3">
-                                <span
+                                {/* <span
                                   className={`inline-block px-2 py-1 text-xs font-medium rounded ${
                                     payout.status === "Pending"
                                       ? "bg-blue-100 text-blue-700"
@@ -368,48 +396,77 @@ const Finance = () => {
                                   }`}
                                 >
                                   {payout.status}
-                                </span>
+                                </span> */}
+                                {line.fulfillment_status === "cancelled" ? (
+                                  <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700">
+                                    Refund
+                                  </span>
+                                ) : (
+                                  <span
+                                    className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                                      payout.status === "Pending"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : payout.status === "Deposited"
+                                        ? "bg-green-100 text-green-700"
+                                        : "bg-gray-100 text-gray-600"
+                                    }`}
+                                  >
+                                    {payout.status}
+                                  </span>
+                                )}
                               </td>
                               <td className="p-3 text-right font-medium">
                                 {line.price} AUD
+                              </td>
+                              <td className="p-3 text-right ">
+                                {line.current_quantity}
+                              </td>
+                              <td className="p-3 text-right font-medium">
+                                {order.amount} AUD
                               </td>
                             </tr>
                           ))
                         )
                       )
-                    : payouts.map((item, index) => (
-                        <tr key={index} className="border-b hover:bg-gray-50">
-                          <td
-                            className="p-3 text-blue-600 cursor-pointer hover:underline"
-                            onClick={() =>
-                              navigate(
-                                `/payout-details?payoutDate=${encodeURIComponent(
-                                  item.payoutDate
-                                )}&status=${item.status}`
-                              )
-                            }
-                          >
-                            {item.payoutDate}
-                          </td>
-                          <td className="p-3">{item.transactionDates}</td>
-                          <td className="p-3">
-                            <span
-                              className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                                item.status === "Pending"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : item.status === "Deposited"
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-gray-100 text-gray-600"
-                              }`}
+                    : payouts.map((item, index) => {
+                        const merchantId = localStorage.getItem("userid");
+
+                        return (
+                          <tr key={index} className="border-b hover:bg-gray-50">
+                            <td
+                              className="p-3 text-blue-600 cursor-pointer hover:underline"
+                              onClick={() =>
+                                navigate(
+                                  `/payout-details?payoutDate=${encodeURIComponent(
+                                    item.payoutDate
+                                  )}&status=${
+                                    item.status
+                                  }&merchantId=${merchantId}`
+                                )
+                              }
                             >
-                              {item.status}
-                            </span>
-                          </td>
-                          <td className="p-3 text-right font-medium">
-                            {item.amount}
-                          </td>
-                        </tr>
-                      ))}
+                              {item.payoutDate}
+                            </td>
+                            <td className="p-3">{item.transactionDates}</td>
+                            <td className="p-3">
+                              <span
+                                className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                                  item.status === "Pending"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : item.status === "Deposited"
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-gray-100 text-gray-600"
+                                }`}
+                              >
+                                {item.status}
+                              </span>
+                            </td>
+                            <td className="p-3 text-right font-medium">
+                              {item.amount}
+                            </td>
+                          </tr>
+                        );
+                      })}
                 </tbody>
               </table>
             ) : (
@@ -493,11 +550,15 @@ const Finance = () => {
                 <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
                 loading...
               </div>
-            ) : (
+            ) : payouts.length > 0 ? (
               <table className="w-full border-collapse bg-white">
                 <thead className="bg-gray-100 text-left text-gray-600 text-sm">
                   <tr>
                     <th className="p-3">Payout Date</th>
+                    {(userRole === "Master Admin" ||
+                      userRole === "Dev Admin") && (
+                      <th className="p-3">Merchant Info</th>
+                    )}
                     <th className="p-3">Payout Status</th>
                     <th className="p-3 text-right">Amount</th>
                     <th className="p-3 text-right">Fee</th>
@@ -505,68 +566,154 @@ const Finance = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {payouts.length > 0 ? (
-                    payouts.map((item, index) => (
-                      <tr key={index} className="border-b hover:bg-gray-50">
-                        <td
-                          className="p-3 text-blue-600 cursor-pointer hover:underline"
-                          onClick={() =>
-                            navigate(
-                              `/payout-details?payoutDate=${encodeURIComponent(
-                                item.payoutDate
-                              )}&status=${item.status}`
-                            )
-                          }
-                        >
-                          {item.payoutDate}
-                        </td>
-                        <td className="p-3">
-                          <span
-                            className={`inline-block px-2 py-1 text-xs font-medium rounded 
-                            ${
-                              item.status === "Pending"
-                                ? "bg-blue-100 text-blue-700"
-                                : item.status === "Deposited"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-600"
-                            }`}
-                          >
-                            {item.status}
-                          </span>
-                        </td>
+                  {userRole === "Master Admin" || userRole === "Dev Admin"
+                    ? payouts
+                        .filter(
+                          (payout) => payout.status.toLowerCase() === "pending"
+                        )
+                        .flatMap((payout, index) =>
+                          payout.orders.flatMap((order, oIndex) =>
+                            order.lineItems.map((line, liIndex) => {
+                              const price = Number(line.price) || 0;
+                              const qty = Number(
+                                line.quantity || line.current_quantity || 1
+                              );
+                              const total = price * qty;
+                              const isRefund =
+                                line.fulfillment_status === "cancelled";
+                              const fee = isRefund ? total * 0.1 : total * 0.1;
+                              const net = isRefund ? total - fee : total - fee;
 
-                        <td className="p-3 text-right">
-                          $
-                          {item.orders
-                            .reduce((sum, o) => sum + o.amount, 0)
-                            .toFixed(2)}
-                        </td>
-                        <td className="p-3 text-right text-red-600">
-                          -$
-                          {(
-                            item.orders.reduce((sum, o) => sum + o.amount, 0) *
-                            0.1
-                          ).toFixed(2)}
-                        </td>
-                        <td className="p-3 text-right text-green-700 font-semibold">
-                          $
-                          {(
-                            item.orders.reduce((sum, o) => sum + o.amount, 0) *
-                            0.9
-                          ).toFixed(2)}{" "}
-                          AUD
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="p-4 text-center text-gray-500">
-                        No payouts found.
-                      </td>
-                    </tr>
-                  )}
+                              return (
+                                <tr
+                                  key={`${index}-${oIndex}-${liIndex}`}
+                                  className="border-b hover:bg-gray-50"
+                                >
+                                  <td
+                                    className="p-3 text-blue-600 cursor-pointer hover:underline"
+                                    onClick={() =>
+                                      navigate(
+                                        `/payout-details?payoutDate=${payout.payoutDate}&status=${payout.status}&merchantId=${line.merchantId}`
+                                      )
+                                    }
+                                  >
+                                    {payout.payoutDate}
+                                  </td>
+
+                                  <td className="p-3 text-sm text-gray-600">
+                                    <div>{line.merchantName || "N/A"}</div>
+                                    <div className="text-xs text-gray-400">
+                                      {line.merchantEmail || "N/A"}
+                                    </div>
+                                  </td>
+
+                                  <td className="p-3">
+                                    {isRefund ? (
+                                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700">
+                                        Refund
+                                      </span>
+                                    ) : (
+                                      <span
+                                        className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                                          payout.status === "Pending"
+                                            ? "bg-blue-100 text-blue-700"
+                                            : payout.status === "Deposited"
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-gray-100 text-gray-600"
+                                        }`}
+                                      >
+                                        {payout.status}
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  <td className="p-3 text-right">
+                                    ${total.toFixed(2)}
+                                  </td>
+                                  <td className="p-3 text-right text-red-600">
+                                    -${fee.toFixed(2)}
+                                  </td>
+                                  <td className="p-3 text-right text-green-700 font-semibold">
+                                    ${net.toFixed(2)} AUD
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )
+                        )
+                    : payouts
+                        .filter(
+                          (item) => item.status.toLowerCase() === "pending"
+                        )
+                        .map((item, index) => {
+                          const lineItems = item.orders.flatMap(
+                            (order) => order.lineItems || []
+                          );
+                          const totalAmount = lineItems.reduce((sum, line) => {
+                            if (line.fulfillment_status === "cancelled")
+                              return sum;
+                            return (
+                              sum +
+                              (Number(line.price) || 0) *
+                                Number(
+                                  line.quantity || line.current_quantity || 1
+                                )
+                            );
+                          }, 0);
+                          const fee = totalAmount * 0.1;
+                          const net = totalAmount - fee;
+                          const merchantId = localStorage.getItem("userid");
+
+                          return (
+                            <tr
+                              key={index}
+                              className="border-b hover:bg-gray-50"
+                            >
+                              <td
+                                className="p-3 text-blue-600 cursor-pointer hover:underline"
+                                onClick={() =>
+                                  navigate(
+                                    `/payout-details?payoutDate=${encodeURIComponent(
+                                      item.payoutDate
+                                    )}&status=${
+                                      item.status
+                                    }&merchantId=${merchantId}`
+                                  )
+                                }
+                              >
+                                {item.payoutDate}
+                              </td>
+                              <td className="p-3">
+                                <span
+                                  className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                                    item.status === "Pending"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : item.status === "Deposited"
+                                      ? "bg-green-100 text-green-700"
+                                      : "bg-gray-100 text-gray-600"
+                                  }`}
+                                >
+                                  {item.status}
+                                </span>
+                              </td>
+                              <td className="p-3 text-right">
+                                ${totalAmount.toFixed(2)}
+                              </td>
+                              <td className="p-3 text-right text-red-600">
+                                -${fee.toFixed(2)}
+                              </td>
+                              <td className="p-3 text-right text-green-700 font-semibold">
+                                ${net.toFixed(2)} AUD
+                              </td>
+                            </tr>
+                          );
+                        })}
                 </tbody>
               </table>
+            ) : (
+              <div className="text-center py-10 text-gray-500">
+                No payouts found.
+              </div>
             )}
           </div>
         )}

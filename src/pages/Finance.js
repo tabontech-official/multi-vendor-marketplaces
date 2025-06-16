@@ -35,6 +35,7 @@ const Finance = () => {
   const [weeklyDay, setWeeklyDay] = useState("Monday");
   const [firstPayoutDate, setFirstPayoutDate] = useState("");
   const [secondPayoutDate, setSecondPayoutDate] = useState("");
+const [allPayouts, setAllPayouts] = useState([]); // store unfiltered data
 
   // const handleSavePayoutDates = async () => {
   //   if (!firstPayoutDate || !secondPayoutDate) {
@@ -70,6 +71,7 @@ const Finance = () => {
   //   }
   // };
 
+
   const handleSavePayoutDates = async () => {
     const payload = {
       graceTime,
@@ -89,7 +91,7 @@ const Finance = () => {
       const result = await res.json();
 
       if (!res.ok) {
-        console.error("❌ Save failed:", result);
+        console.error(" Save failed:", result);
         alert(result.message || "Failed to save payout config.");
         return;
       }
@@ -239,6 +241,10 @@ const Finance = () => {
 
     fetchPayouts();
   }, [userRole]);
+
+
+
+
 
   return user ? (
     <main className="w-full p-4 md:p-8">
@@ -422,7 +428,7 @@ const Finance = () => {
                                 {line.current_quantity}
                               </td>
                               <td className="p-3 text-right font-medium">
-                                {order.amount} AUD
+                                {line.price * line.current_quantity} AUD
                               </td>
                             </tr>
                           ))

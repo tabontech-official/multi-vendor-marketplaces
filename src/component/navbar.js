@@ -66,7 +66,7 @@ const Navbar = () => {
       const userid = localStorage.getItem("userid");
       if (userid) {
         await fetch(
-          `http://localhost:5000/auth/logout/${userid}`,
+          `https://multi-vendor-marketplace.vercel.app/auth/logout/${userid}`,
           {
             method: "POST",
           }
@@ -131,30 +131,29 @@ const Navbar = () => {
           } md:block z-10 transition-transform duration-500 ease-in-out`}
         >
           <ul className="flex flex-col md:flex-row md:space-x-8 space-y-4 items-center md:space-y-0">
-          
-{isLoggedIn && (
-               <li className="relative" ref={notificationRef}>
-              <button
-                onClick={handleToggle}
-                ref={buttonRef}
-                className="text-white hover:bg-blue-800 p-2 rounded-full transition relative"
-              >
-                <FaBell size={20} />
-                <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
+            {isLoggedIn && (
+              <li className="relative" ref={notificationRef}>
+                <button
+                  onClick={handleToggle}
+                  ref={buttonRef}
+                  className="text-white hover:bg-blue-800 p-2 rounded-full transition relative"
+                >
+                  <FaBell size={20} />
+                  <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
 
-              {isNotificationOpen && (
-                <div className="absolute right-0 mt-2 w-96 bg-white rounded-md shadow-xl z-20">
-                  <div className="p-4 border-b font-semibold text-gray-800">
-                    <div className="flex justify-between items-center">
-                      <span>Changelog</span>
+                {isNotificationOpen && (
+                  <div className="absolute right-0 mt-2 w-96 bg-white rounded-md shadow-xl z-20">
+                    <div className="p-4 border-b font-semibold text-gray-800">
+                      <div className="flex justify-between items-center">
+                        <span>Changelog</span>
                         <a
-                        href="/notifications"
-                        className="text-blue-600 text-sm hover:underline"
-                      >
-                        Show more
-                      </a>
-                      {/* <svg
+                          href="/notifications"
+                          className="text-blue-600 text-sm hover:underline"
+                        >
+                          Show more
+                        </a>
+                        {/* <svg
                         className="w-4 h-4 text-gray-400"
                         fill="none"
                         stroke="currentColor"
@@ -167,32 +166,32 @@ const Navbar = () => {
                           d="M3 10h18M3 6h18M3 14h18"
                         />
                       </svg> */}
+                      </div>
                     </div>
-                  </div>
 
-                  <ul className="max-h-96 overflow-y-auto text-sm text-gray-700 p-4 space-y-4">
-                    {notifications.slice(0, 10).map((note) => (
-                      <li
-                        key={note.id || note._id}
-                        className="flex items-start space-x-3"
-                      >
-                        <div className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
-                        <div>
-                          <p className="text-xs text-gray-500">
-                            {note.date ||
-                              new Date(note.createdAt).toLocaleDateString(
-                                "en-GB"
-                              )}{" "}
-                            •{" "}
-                            <span className="capitalize">
-                              {`${note.firstName} ${note.lastName}`}
-                            </span>
-                          </p>
-                          <p className="text-sm">{note.message}</p>
-                        </div>
-                      </li>
-                    ))}
-                    {/* <div className="border-t px-4 py-2">
+                    <ul className="max-h-96 overflow-y-auto text-sm text-gray-700 p-4 space-y-4">
+                      {notifications.slice(0, 10).map((note) => (
+                        <li
+                          key={note.id || note._id}
+                          className="flex items-start space-x-3"
+                        >
+                          <div className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
+                          <div>
+                            <p className="text-xs text-gray-500">
+                              {note.date ||
+                                new Date(note.createdAt).toLocaleDateString(
+                                  "en-GB"
+                                )}{" "}
+                              •{" "}
+                              <span className="capitalize">
+                                {`${note.firstName} ${note.lastName}`}
+                              </span>
+                            </p>
+                            <p className="text-sm">{note.message}</p>
+                          </div>
+                        </li>
+                      ))}
+                      {/* <div className="border-t px-4 py-2">
                       <a
                         href="/notifications"
                         className="text-blue-600 text-sm hover:underline"
@@ -200,8 +199,8 @@ const Navbar = () => {
                         Show more
                       </a>
                     </div> */}
-                  </ul>
-                  {/* 
+                    </ul>
+                    {/* 
                   {notifications.length > 10 && (
                     <div className="border-t px-4 py-2 text-center">
                       <a
@@ -212,9 +211,9 @@ const Navbar = () => {
                       </a>
                     </div>
                   )} */}
-                </div>
-              )}
-            </li>
+                  </div>
+                )}
+              </li>
             )}
             {isLoggedIn && role === "Dev Admin" && (
               <li>
@@ -226,7 +225,7 @@ const Navbar = () => {
                 </Link>
               </li>
             )}
- 
+
             {isLoggedIn && (
               <li className="relative" ref={dropdownRef}>
                 <button

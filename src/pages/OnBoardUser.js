@@ -311,6 +311,10 @@ const OnBoard = () => {
       name: "OnBoardUser",
       subModules: [],
     },
+    {
+      name: "Finance",
+      subModules: [],
+    },
   ];
 
   const handleModuleSelection = (moduleName) => {

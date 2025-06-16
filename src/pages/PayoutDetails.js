@@ -72,8 +72,7 @@ const PayoutDetails = () => {
   const openReferencePopup = () => setOpen(true);
   const closeReferencePopup = () => setOpen(false);
   const handleSave = async () => {
-    const orderIds = orders.map((o) => o.orderId);
-
+    const UserId = merchantId;
     try {
       const res = await fetch(
         "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
@@ -83,7 +82,7 @@ const PayoutDetails = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            orderIds,
+            UserId,
             referenceNo: reference,
           }),
         }

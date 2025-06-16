@@ -7,11 +7,9 @@ import { MdDashboard } from "react-icons/md";
 import { jwtDecode } from "jwt-decode";
 import { CiBank } from "react-icons/ci";
 const SubNavbar = () => {
-  // State for tracking dropdown visibility
   const [openDropdown, setOpenDropdown] = useState(null);
   const [role, setRole] = useState(null);
 
-  // Function to handle dropdown hover
   const handleMouseEnter = (menu) => {
     setOpenDropdown(menu);
   };
@@ -139,7 +137,6 @@ const SubNavbar = () => {
               {module.icon}
               <Link to={module.path}>{module.name}</Link>
 
-              {/* Submodules dropdown */}
               {module.subModules && openDropdown === module.name && (
                 <div className="absolute top-full left-0 bg-gray-600 text-white py-2 px-4 w-48 shadow-lg">
                   {module.subModules

@@ -43,6 +43,7 @@ import Finance from "./pages/Finance";
 import PayoutDetails from "./pages/PayoutDetails";
 import ManageRequests from "./pages/ManageRequests";
 import UserRequest from "./pages/UserRequest";
+import MerchantPayoutDetails from "./pages/MerchantPayoutDetails";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -155,6 +156,10 @@ const App = () => {
           <Route
             path="/payout-details"
             element={<ProtectedForms element={<PayoutDetails />} />}
+          />
+           <Route
+            path="/merchant-payout-details"
+            element={<ProtectedForms element={<MerchantPayoutDetails />} />}
           />
           <Route
             path="/finance"

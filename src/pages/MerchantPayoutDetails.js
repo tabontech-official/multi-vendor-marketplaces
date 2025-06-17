@@ -6,7 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import { FaEdit, FaCheck, FaTimes } from "react-icons/fa";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 import axios from "axios";
-const PayoutDetails = () => {
+const MerchantPayoutDetails = () => {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const payoutDate = query.get("payoutDate");
@@ -49,10 +49,13 @@ const PayoutDetails = () => {
 
     setPaypalLoading(true);
     try {
-      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
-        merchantId: userId,
-        payPal: account,
-      });
+      const res = await axios.post(
+        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
+        {
+          merchantId: userId,
+          payPal: account,
+        }
+      );
 
       if (res.status === 200) {
         setBankAccount(account);
@@ -73,60 +76,12 @@ const PayoutDetails = () => {
 
   const saveReferenceNo = async () => {
     setIsLoading(true);
-
-    try {
-      // Collect all unique userIds from orders
-      const userIdsSet = new Set();
-
-      orders.forEach((order) => {
-        order.products?.forEach((product) => {
-          if (product.userId) {
-            userIdsSet.add(product.userId);
-          }
-        });
-      });
-
-      const UserIds = Array.from(userIdsSet);
-
-      if (UserIds.length === 0) {
-        alert("No user IDs found to update.");
-        setIsLoading(false);
-        return;
-      }
-
-      // Send reference number update to backend
-      const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            UserIds,
-            referenceNo: tempReferenceNo,
-          }),
-        }
-      );
-
-      const result = await res.json();
-
-      if (res.ok) {
-        setReferenceNo(tempReferenceNo);
-        setIsEditingRef(false);
-        alert("Reference number added successfully!");
-        closeReferencePopup();
-      } else {
-        alert(result.message || "Something went wrong.");
-      }
-    } catch (err) {
-      console.error("Failed to update reference numbers:", err);
-      alert("Error occurred while updating reference numbers.");
-    } finally {
+    setTimeout(() => {
+      setReferenceNo(tempReferenceNo);
+      setIsEditingRef(false);
       setIsLoading(false);
-    }
+    }, 500);
   };
-
   const cancelBankEdit = () => {
     setTempBankAccount(bankAccount);
     setIsEditingBank(false);
@@ -138,77 +93,16 @@ const PayoutDetails = () => {
   };
   const [orders, setOrders] = useState([]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setLoading(true);
-
-  //     try {
-  //       const res = await fetch(
-  //         `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
-  //           payoutDate
-  //         )}&status=${status}&userId=${merchantId}`
-  //       );
-  //       const json = await res.json();
-
-  //       const fetchedOrders =
-  //         (json.payouts && json.payouts[0] && json.payouts[0].orders) || [];
-
-  //       fetchedOrders.forEach((o) => {
-  //         o.fee = Number((o.amount * 0.1).toFixed(2));
-  //         o.net = Number((o.amount - o.fee).toFixed(2));
-  //       });
-
-  //       const charges = fetchedOrders.reduce(
-  //         (sum, o) => sum + (o.amount || 0),
-  //         0
-  //       );
-  //       const fees = fetchedOrders.reduce((sum, o) => sum + (o.fee || 0), 0);
-  //       const refunds = fetchedOrders.reduce(
-  //         (sum, o) => sum + (o.refund || 0),
-  //         0
-  //       );
-  //       const net = charges - fees;
-  //       const referenceNo = fetchedOrders[0]?.referenceNo || "";
-
-  //       setOrders(fetchedOrders);
-  //       setSummary({ charges, refunds, fees, net, referenceNo });
-  //     } catch (err) {
-  //       console.error("Error fetching payout orders:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   if (payoutDate && status) fetchData();
-  // }, [payoutDate, status]);
-
   useEffect(() => {
     const fetchData = async () => {
-      if (!userRole) return; // Wait until userRole is available
-
       setLoading(true);
 
       try {
-        let res;
-
-        if (userRole === "Merchant") {
-          res = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
-              payoutDate
-            )}&status=${status}&userId=${merchantId}`
-          );
-        } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
-          res = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(
-              payoutDate
-            )}&status=${status}`
-          );
-        } else {
-          console.warn("Unauthorized user role:", userRole);
-          setLoading(false);
-          return;
-        }
-
+        const res = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+            payoutDate
+          )}&status=${status}&userId=${merchantId}`
+        );
         const json = await res.json();
 
         const fetchedOrders =
@@ -233,8 +127,6 @@ const PayoutDetails = () => {
 
         setOrders(fetchedOrders);
         setSummary({ charges, refunds, fees, net, referenceNo });
-        setReferenceNo(referenceNo);
-        setTempReferenceNo(referenceNo);
       } catch (err) {
         console.error("Error fetching payout orders:", err);
       } finally {
@@ -242,8 +134,8 @@ const PayoutDetails = () => {
       }
     };
 
-    if (payoutDate && status && userRole) fetchData();
-  }, [payoutDate, status, userRole, merchantId]);
+    if (payoutDate && status) fetchData();
+  }, [payoutDate, status]);
 
   const [open, setOpen] = useState(false);
   const [reference, setReference] = useState("");
@@ -251,24 +143,8 @@ const PayoutDetails = () => {
   const openReferencePopup = () => setOpen(true);
   const closeReferencePopup = () => setOpen(false);
   const handleSave = async () => {
+    const UserId = merchantId;
     try {
-      const userIdsSet = new Set();
-
-      orders.forEach((order) => {
-        order.products?.forEach((product) => {
-          if (product.userId) {
-            userIdsSet.add(product.userId);
-          }
-        });
-      });
-
-      const UserIds = Array.from(userIdsSet);
-
-      if (UserIds.length === 0) {
-        alert("No user IDs found to update.");
-        return;
-      }
-
       const res = await fetch(
         "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
         {
@@ -277,7 +153,7 @@ const PayoutDetails = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            UserIds,
+            UserId,
             referenceNo: reference,
           }),
         }
@@ -323,16 +199,6 @@ const PayoutDetails = () => {
           <h1 className="text-2xl font-bold mb-1">
             ${summary.net.toFixed(2)} AUD
           </h1>
-          {userRole === "Merchant" && (
-            <div className="text-sm text-gray-600 space-y-1">
-              <p>
-                <strong>Bank account:</strong> PayPal
-              </p>
-              <p>
-                <strong>Bank reference:</strong> {summary.referenceNo}
-              </p>
-            </div>
-          )}
           {/* <p className="text-gray-500 mb-4">Shopify Payments</p> */}
           {/* <div className="text-sm text-gray-600 space-y-1">
             <p>
@@ -342,143 +208,141 @@ const PayoutDetails = () => {
               <strong>Bank reference:</strong> {summary.referenceNo}
             </p>
           </div> */}
-          {(userRole === "Dev Admin" || userRole === "Master Admin") && (
-            <div className="text-sm text-gray-600 space-y-4">
-              <div className="flex items-center">
-                <strong className="w-40">Bank account:</strong>
-                <div className="relative w-64 flex items-center">
-                  <input
-                    type="text"
-                    value={tempBankAccount}
-                    readOnly={!isEditingBank || isLoading}
-                    onChange={(e) => setTempBankAccount(e.target.value)}
-                    className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
-                      isEditingBank && !isLoading ? "bg-white" : "bg-gray-100"
-                    } text-black pr-12`}
-                  />
+          <div className="text-sm text-gray-600 space-y-4">
+            <div className="flex items-center">
+              <strong className="w-40">Bank account:</strong>
+              <div className="relative w-64 flex items-center">
+                <input
+                  type="text"
+                  value={tempBankAccount}
+                  readOnly={!isEditingBank || isLoading}
+                  onChange={(e) => setTempBankAccount(e.target.value)}
+                  className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
+                    isEditingBank && !isLoading ? "bg-white" : "bg-gray-100"
+                  } text-black pr-12`}
+                />
 
-                  <div className="absolute right-2 flex gap-1 items-center">
-                    {!isEditingBank ? (
-                      <FaEdit
-                        className="text-gray-400 cursor-pointer"
-                        onClick={() => !isLoading && setIsEditingBank(true)}
-                      />
-                    ) : (
-                      <>
-                        <button
-                          className="text-green-600 text-sm flex items-center justify-center"
-                          disabled={isLoading}
-                          onClick={saveBankAccount}
-                        >
-                          {isLoading ? (
-                            <svg
-                              className="animate-spin h-4 w-4 text-green-600"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                              />
-                            </svg>
-                          ) : (
-                            "✔"
-                          )}
-                        </button>
-                        <button
-                          className="text-red-600 text-sm"
-                          disabled={isLoading}
-                          onClick={() => {
-                            setTempBankAccount(bankAccount);
-                            setIsEditingBank(false);
-                          }}
-                        >
-                          ✖
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <strong className="w-40">Bank reference:</strong>
-                <div className="relative w-64 flex items-center">
-                  <input
-                    type="text"
-                    value={isEditingRef ? tempReferenceNo : referenceNo}
-                    readOnly={!isEditingRef || isLoading}
-                    onChange={(e) => setTempReferenceNo(e.target.value)}
-                    className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
-                      isEditingRef && !isLoading ? "bg-white" : "bg-gray-100"
-                    } text-black pr-12`}
-                  />
-
-                  <div className="absolute right-2 flex gap-1 items-center">
-                    {!isEditingRef ? (
-                      <FaEdit
-                        className="text-gray-400 cursor-pointer"
-                        onClick={() => !isLoading && setIsEditingRef(true)}
-                      />
-                    ) : (
-                      <>
-                        <button
-                          className="text-green-600 text-sm flex items-center justify-center"
-                          disabled={isLoading}
-                          onClick={saveReferenceNo}
-                        >
-                          {isLoading ? (
-                            <svg
-                              className="animate-spin h-4 w-4 text-green-600"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                              />
-                            </svg>
-                          ) : (
-                            "✔"
-                          )}
-                        </button>
-                        <button
-                          className="text-red-600 text-sm"
-                          disabled={isLoading}
-                          onClick={() => {
-                            setTempReferenceNo(referenceNo);
-                            setIsEditingRef(false);
-                          }}
-                        >
-                          ✖
-                        </button>
-                      </>
-                    )}
-                  </div>
+                <div className="absolute right-2 flex gap-1 items-center">
+                  {!isEditingBank ? (
+                    <FaEdit
+                      className="text-gray-400 cursor-pointer"
+                      onClick={() => !isLoading && setIsEditingBank(true)}
+                    />
+                  ) : (
+                    <>
+                      <button
+                        className="text-green-600 text-sm flex items-center justify-center"
+                        disabled={isLoading}
+                        onClick={saveBankAccount}
+                      >
+                        {isLoading ? (
+                          <svg
+                            className="animate-spin h-4 w-4 text-green-600"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                            />
+                          </svg>
+                        ) : (
+                          "✔"
+                        )}
+                      </button>
+                      <button
+                        className="text-red-600 text-sm"
+                        disabled={isLoading}
+                        onClick={() => {
+                          setTempBankAccount(bankAccount);
+                          setIsEditingBank(false);
+                        }}
+                      >
+                        ✖
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
-          )}
+
+            <div className="flex items-center">
+              <strong className="w-40">Bank reference:</strong>
+              <div className="relative w-64 flex items-center">
+                <input
+                  type="text"
+                  value={summary.referenceNo}
+                  readOnly={!isEditingRef || isLoading}
+                  onChange={(e) => setTempReferenceNo(e.target.value)}
+                  className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
+                    isEditingRef && !isLoading ? "bg-white" : "bg-gray-100"
+                  } text-black pr-12`}
+                />
+
+                <div className="absolute right-2 flex gap-1 items-center">
+                  {!isEditingRef ? (
+                    <FaEdit
+                      className="text-gray-400 cursor-pointer"
+                      onClick={() => !isLoading && setIsEditingRef(true)}
+                    />
+                  ) : (
+                    <>
+                      <button
+                        className="text-green-600 text-sm flex items-center justify-center"
+                        disabled={isLoading}
+                        onClick={saveReferenceNo}
+                      >
+                        {isLoading ? (
+                          <svg
+                            className="animate-spin h-4 w-4 text-green-600"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                            />
+                          </svg>
+                        ) : (
+                          "✔"
+                        )}
+                      </button>
+                      <button
+                        className="text-red-600 text-sm"
+                        disabled={isLoading}
+                        onClick={() => {
+                          setTempReferenceNo(referenceNo);
+                          setIsEditingRef(false);
+                        }}
+                      >
+                        ✖
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="w-full md:w-[240px] border-l md:pl-6 mt-6 md:mt-0">
           <h2 className="text-sm font-semibold mb-2">Summary</h2>
@@ -486,10 +350,7 @@ const PayoutDetails = () => {
             <p>Charges: ${summary.charges.toFixed(2)}</p>
             <p>Refunds: ${summary.refunds.toFixed(2)}</p>
             <p>Fees: ${summary.fees.toFixed(2)}</p>
-            {/* <p>
-              Net charges: $
-              {summary.charges.toFixed(2) - summary.fees.toFixed(2)}
-            </p> */}
+            <p>Net charges: ${summary.charges.toFixed(2) - summary.fees.toFixed(2)}</p>
           </div>
         </div>
       </div>
@@ -640,4 +501,4 @@ const PayoutDetails = () => {
   );
 };
 
-export default PayoutDetails;
+export default MerchantPayoutDetails;

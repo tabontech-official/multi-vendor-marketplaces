@@ -15,7 +15,6 @@ const OnBoard = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenPopup, setIsOpenPopup] = useState(false);
-
   const [selectedModules, setSelectedModules] = useState([]);
   const [userRole, setUserRole] = useState(null);
   const [users, setUsers] = useState([]);
@@ -35,7 +34,6 @@ const OnBoard = () => {
   const [role, setRole] = useState("");
   const [selectAll, setSelectAll] = useState(false);
 
-  
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedModules([]);
@@ -57,7 +55,6 @@ const OnBoard = () => {
     }
     setSelectAll(!selectAll);
   };
-
 
   useEffect(() => {
     if (role === "Merchant" || role === "Merchant Staff") {
@@ -555,7 +552,10 @@ const OnBoard = () => {
                   ["Address", userDetails?.address],
                   ["Role", userDetails?.role],
                   ["ZIP Code", userDetails?.zip || userDetails?.dispatchzip],
-                  ["Country", userDetails?.country || userDetails?.dispatchCountry],
+                  [
+                    "Country",
+                    userDetails?.country || userDetails?.dispatchCountry,
+                  ],
                   ["State", userDetails?.state || userDetails?.dispatchCountry],
                   ["City", userDetails?.city || userDetails?.dispatchCity],
                   ["Dispatch Address", userDetails?.address],

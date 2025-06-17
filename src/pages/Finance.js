@@ -35,7 +35,7 @@ const Finance = () => {
   const [weeklyDay, setWeeklyDay] = useState("Monday");
   const [firstPayoutDate, setFirstPayoutDate] = useState("");
   const [secondPayoutDate, setSecondPayoutDate] = useState("");
-const [allPayouts, setAllPayouts] = useState([]); // store unfiltered data
+  const [allPayouts, setAllPayouts] = useState([]);
 
   // const handleSavePayoutDates = async () => {
   //   if (!firstPayoutDate || !secondPayoutDate) {
@@ -71,7 +71,6 @@ const [allPayouts, setAllPayouts] = useState([]); // store unfiltered data
   //   }
   // };
 
-
   const handleSavePayoutDates = async () => {
     const payload = {
       graceTime,
@@ -82,11 +81,14 @@ const [allPayouts, setAllPayouts] = useState([]); // store unfiltered data
     };
 
     try {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const result = await res.json();
 
@@ -106,7 +108,9 @@ const [allPayouts, setAllPayouts] = useState([]); // store unfiltered data
   useEffect(() => {
     const fetchPayoutDates = async () => {
       try {
-        const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates");
+        const res = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates"
+        );
         const data = await res.json();
 
         if (data.firstDate) setFirstPayoutDate(data.firstDate.slice(0, 10));
@@ -183,10 +187,13 @@ const [allPayouts, setAllPayouts] = useState([]); // store unfiltered data
 
     setPaypalLoading(true);
     try {
-      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
-        merchantId: userId,
-        payPal: paypalAccountInput,
-      });
+      const res = await axios.post(
+        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
+        {
+          merchantId: userId,
+          payPal: paypalAccountInput,
+        }
+      );
 
       if (res.status === 200) {
         setPaypalPopup(false);
@@ -241,10 +248,6 @@ const [allPayouts, setAllPayouts] = useState([]); // store unfiltered data
 
     fetchPayouts();
   }, [userRole]);
-
-
-
-
 
   return user ? (
     <main className="w-full p-4 md:p-8">
@@ -373,7 +376,7 @@ const [allPayouts, setAllPayouts] = useState([]); // store unfiltered data
                               key={`${index}-${oIndex}-${liIndex}`}
                               className="border-b hover:bg-gray-50"
                             >
-                              <td
+                              {/* <td
                                 className="p-3 text-blue-600 cursor-pointer hover:underline"
                                 onClick={() =>
                                   navigate(
@@ -382,9 +385,32 @@ const [allPayouts, setAllPayouts] = useState([]); // store unfiltered data
                                 }
                               >
                                 {payout.payoutDate}
+                              </td> */}
+                              <td
+                                className="p-3 text-blue-600 cursor-pointer hover:underline"
+                                onClick={() => {
+                                  const isMerchant = userRole === "Merchant";
+                                  const query = new URLSearchParams({
+                                    payoutDate: payout.payoutDate,
+                                    status: payout.status,
+                                  });
+
+                                  if (isMerchant) {
+                                    query.append("merchantId", line.merchantId);
+                                  }
+
+                                  navigate(
+                                    `/payout-details?${query.toString()}`
+                                  );
+                                }}
+                              >
+                                {payout.payoutDate}
                               </td>
 
-                              <td className="p-3 text-sm text-gray-600">
+                              <td
+                                className="p-3 text-sm text-gray-600 "
+                              
+                              >
                                 <div>{line.merchantName || "N/A"}</div>
                                 <div className="text-xs text-gray-400">
                                   {line.merchantEmail || "N/A"}
@@ -597,11 +623,21 @@ const [allPayouts, setAllPayouts] = useState([]); // store unfiltered data
                                 >
                                   <td
                                     className="p-3 text-blue-600 cursor-pointer hover:underline"
-                                    onClick={() =>
-                                      navigate(
-                                        `/payout-details?payoutDate=${payout.payoutDate}&status=${payout.status}&merchantId=${line.merchantId}`
-                                      )
-                                    }
+                                   onClick={() => {
+                                  const isMerchant = userRole === "Merchant";
+                                  const query = new URLSearchParams({
+                                    payoutDate: payout.payoutDate,
+                                    status: payout.status,
+                                  });
+
+                                  if (isMerchant) {
+                                    query.append("merchantId", line.merchantId);
+                                  }
+
+                                  navigate(
+                                    `/payout-details?${query.toString()}`
+                                  );
+                                }}
                                   >
                                     {payout.payoutDate}
                                   </td>

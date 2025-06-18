@@ -23,7 +23,7 @@ const ManageRequests = () => {
   const [groupedData, setGroupedData] = useState([]);
 
 useEffect(() => {
-  fetch("http://localhost:5000/order/getCancellationRequests")
+  fetch("https://multi-vendor-marketplace.vercel.app/order/getCancellationRequests")
     .then((res) => res.json())
     .then((data) => {
       if (data.success) {

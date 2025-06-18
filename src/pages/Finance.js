@@ -36,71 +36,71 @@ const Finance = () => {
   const [firstPayoutDate, setFirstPayoutDate] = useState("");
   const [secondPayoutDate, setSecondPayoutDate] = useState("");
   const [allPayouts, setAllPayouts] = useState([]);
+  const [filteredPayouts, setFilteredPayouts] = useState([]);
 
+  
   // const handleSavePayoutDates = async () => {
-  //   if (!firstPayoutDate || !secondPayoutDate) {
-  //     alert("Please select both payout dates.");
-  //     return;
-  //   }
+  //   const payload = {
+  //     graceTime,
+  //     payoutFrequency,
+  //     firstDate: firstPayoutDate,
+  //     secondDate: payoutFrequency === "twice" ? secondPayoutDate : null,
+  //     weeklyDay: payoutFrequency === "weekly" ? weeklyDay : null,
+  //   };
 
   //   try {
-  //     const response = await fetch(
-  //       "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           firstDate: firstPayoutDate,
-  //           secondDate: secondPayoutDate,
-  //         }),
-  //       }
-  //     );
+  //     const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(payload),
+  //     });
 
-  //     const data = await response.json();
+  //     const result = await res.json();
 
-  //     if (response.ok) {
-  //       alert("✅ Payout dates saved successfully.");
-  //     } else {
-  //       alert(`❌ Failed to save: ${data.message}`);
+  //     if (!res.ok) {
+  //       console.error(" Save failed:", result);
+  //       alert(result.message || "Failed to save payout config.");
+  //       return;
   //     }
-  //   } catch (error) {
-  //     console.error("Error saving payout dates:", error);
-  //     alert("❌ Error while saving payout dates.");
+
+  //     alert(result.message || "Saved");
+  //   } catch (err) {
+  //     console.error(" Network error:", err);
+  //     alert("Error saving payout configuration.");
   //   }
   // };
 
-  const handleSavePayoutDates = async () => {
-    const payload = {
-      graceTime,
-      payoutFrequency,
-      firstDate: firstPayoutDate,
-      secondDate: payoutFrequency === "twice" ? secondPayoutDate : null,
-      weeklyDay: payoutFrequency === "weekly" ? weeklyDay : null,
-    };
-
-    try {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        console.error(" Save failed:", result);
-        alert(result.message || "Failed to save payout config.");
-        return;
-      }
-
-      alert(result.message || "Saved");
-    } catch (err) {
-      console.error(" Network error:", err);
-      alert("Error saving payout configuration.");
-    }
+const handleSavePayoutDates = async () => {
+  const payload = {
+    graceTime,
+    payoutFrequency,
+    firstDate: payoutFrequency !== "weekly" ? Number(firstPayoutDate) : null,
+    secondDate: payoutFrequency === "twice" ? Number(secondPayoutDate) : null,
+    weeklyDay: payoutFrequency === "weekly" ? weeklyDay : null,
   };
+
+  try {
+    const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      console.error("Save failed:", result);
+      alert(result.message || "Failed to save payout config.");
+      return;
+    }
+
+    alert(result.message || "Saved successfully.");
+  } catch (err) {
+    console.error(" Network error:", err);
+    alert("Error saving payout configuration.");
+  }
+};
+
 
   useEffect(() => {
     const fetchPayoutDates = async () => {
@@ -244,92 +244,130 @@ const Finance = () => {
     fetchPayouts();
   }, [userRole]);
 
+  const handleSearch = () => {
+    if (!searchVal.trim()) {
+      setFilteredPayouts(payouts);
+      return;
+    }
+
+    const searchTerm = searchVal.trim().toLowerCase();
+    const regex = new RegExp(searchTerm, "i");
+
+    const filtered = payouts
+      .map((payout) => {
+        const payoutDateRaw = payout.payoutDate || "";
+        const payoutDateFormatted = new Date(payoutDateRaw).toLocaleDateString(
+          "en-US",
+          {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }
+        );
+
+        const filteredOrders = payout.orders
+          ?.map((order) => {
+            const matchingLineItems = order.lineItems?.filter((line) => {
+              const nameMatch = regex.test(
+                (line.merchantName || "").toLowerCase()
+              );
+              const emailMatch = regex.test(
+                (line.merchantEmail || "").toLowerCase()
+              );
+              const refundMatch =
+                regex.test("refund") &&
+                line.fulfillment_status?.toLowerCase() === "cancelled";
+              const statusMatch =
+                regex.test((payout.status || "").toLowerCase()) &&
+                line.fulfillment_status?.toLowerCase() !== "cancelled";
+              const payoutDateMatch =
+                regex.test(payoutDateRaw.toLowerCase()) ||
+                regex.test(payoutDateFormatted.toLowerCase());
+
+              return (
+                nameMatch ||
+                emailMatch ||
+                refundMatch ||
+                statusMatch ||
+                payoutDateMatch
+              );
+            });
+
+            return matchingLineItems?.length
+              ? { ...order, lineItems: matchingLineItems }
+              : null;
+          })
+          .filter(Boolean);
+
+        return filteredOrders.length
+          ? { ...payout, orders: filteredOrders }
+          : null;
+      })
+      .filter(Boolean);
+
+    setFilteredPayouts(filtered);
+  };
+
+  useEffect(() => {
+    handleSearch();
+  }, [searchVal, payouts]);
+
   return user ? (
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-gray-200 pb-4">
         <div className="flex-1">
           <h1 className="text-2xl font-semibold mb-1">Finance</h1>
-
-          {/* <div className="w-2/4 max-sm:w-full mt-2">
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchVal}
-              onChange={(e) => setSearchVal(e.target.value)}
-              className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div> */}
+          <p className="text-gray-600">Here you can see finance.</p>
         </div>
       </div>
-      {/* <div className="flex space-x-4 mt-6 border-b">
-        <button
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-            activeTab === "payouts"
-              ? "border-blue-600 text-blue-600"
-              : "border-transparent text-gray-500 hover:text-blue-600"
-          }`}
-          onClick={() => setActiveTab("payouts")}
-        >
-          Payouts
-        </button>
 
-        <button
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-            activeTab === "Timelines"
-              ? "border-blue-600 text-blue-600"
-              : "border-transparent text-gray-500 hover:text-blue-600"
-          }`}
-          onClick={() => setActiveTab("Timelines")}
-        >
-          Timelines
-        </button>
-
-        <button
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-            activeTab === "Due "
-              ? "border-blue-600 text-blue-600"
-              : "border-transparent text-gray-500 hover:text-blue-600"
-          }`}
-          onClick={() => setActiveTab("Due ")}
-        >
-          Due 
-        </button>
-      </div> */}
-      <div className="flex space-x-4 mt-6 border-b">
-        <button
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-            activeTab === "payouts"
-              ? "border-blue-600 text-blue-600"
-              : "border-transparent text-gray-500 hover:text-blue-600"
-          }`}
-          onClick={() => setActiveTab("payouts")}
-        >
-          Payouts
-        </button>
-
-        {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 border-b pb-2 gap-4">
+        <div className="flex space-x-4">
           <button
             className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-              activeTab === "Timelines"
+              activeTab === "payouts"
                 ? "border-blue-600 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-blue-600"
             }`}
-            onClick={() => setActiveTab("Timelines")}
+            onClick={() => setActiveTab("payouts")}
           >
-            Timelines
+            Payouts
           </button>
-        )}
 
-        <button
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-            activeTab === "Due "
-              ? "border-blue-600 text-blue-600"
-              : "border-transparent text-gray-500 hover:text-blue-600"
-          }`}
-          onClick={() => setActiveTab("Due ")}
-        >
-          Due
-        </button>
+          {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+            <button
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+                activeTab === "Timelines"
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-blue-600"
+              }`}
+              onClick={() => setActiveTab("Timelines")}
+            >
+              Timelines
+            </button>
+          )}
+
+          <button
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+              activeTab === "Due "
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-blue-600"
+            }`}
+            onClick={() => setActiveTab("Due ")}
+          >
+            Due
+          </button>
+        </div>
+
+        <div className="w-full md:w-1/3">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchVal}
+            onChange={(e) => setSearchVal(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+        </div>
       </div>
 
       <div className="mt-6">
@@ -340,7 +378,7 @@ const Finance = () => {
                 <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
                 loading...
               </div>
-            ) : payouts.length > 0 ? (
+            ) : filteredPayouts.length > 0 ? (
               <table className="w-full border-collapse bg-white">
                 <thead className="bg-gray-100 text-left text-gray-600 text-sm">
                   <tr>
@@ -364,7 +402,7 @@ const Finance = () => {
 
                 <tbody>
                   {userRole === "Master Admin" || userRole === "Dev Admin"
-                    ? payouts.flatMap((payout, index) =>
+                    ? filteredPayouts.flatMap((payout, index) =>
                         payout.orders.flatMap((order, oIndex) =>
                           order.lineItems.map((line, liIndex) => (
                             <tr
@@ -410,17 +448,6 @@ const Finance = () => {
                               </td>
                               <td className="p-3">{payout.transactionDates}</td>
                               <td className="p-3">
-                                {/* <span
-                                  className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                                    payout.status === "Pending"
-                                      ? "bg-blue-100 text-blue-700"
-                                      : payout.status === "Deposited"
-                                      ? "bg-green-100 text-green-700"
-                                      : "bg-gray-100 text-gray-600"
-                                  }`}
-                                >
-                                  {payout.status}
-                                </span> */}
                                 {line.fulfillment_status === "cancelled" ? (
                                   <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700">
                                     Refund
@@ -452,7 +479,7 @@ const Finance = () => {
                           ))
                         )
                       )
-                    : payouts.map((item, index) => {
+                    : filteredPayouts.map((item, index) => {
                         const merchantId = localStorage.getItem("userid");
 
                         return (
@@ -513,72 +540,6 @@ const Finance = () => {
           </div>
         )}
 
-        {/* 
-        {activeTab === "Due " && (
-          <div className="p-4">
-            <table className="w-full border-collapse bg-white">
-              <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-                <tr>
-                  <th className="p-3">Date</th>
-                  <th className="p-3">Payout Date</th>
-                  <th className="p-3">Payout Status</th>
-                  <th className="p-3">Order</th>
-                  <th className="p-3 text-right">Amount</th>
-                  <th className="p-3 text-right">Fee</th>
-                  <th className="p-3 text-right">Net</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payouts.length > 0 ? (
-                  payouts.flatMap((payout, i) =>
-                    payout.orders.map((order, index) => {
-                      const fee = (order.amount * 0.1).toFixed(2);
-                      const net = (order.amount - fee).toFixed(2);
-                      const formattedDate = new Date(
-                        order.createdAt
-                      ).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      });
-
-                      return (
-                        <tr
-                          key={`${i}-${index}`}
-                          className="border-b hover:bg-gray-50"
-                        >
-                          <td className="p-3">{formattedDate}</td>
-                          <td className="p-3">{payout.payoutDate}</td>
-                          <td className="p-3">
-                            <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
-                              {payout.status}
-                            </span>
-                          </td>
-                          <td className="p-3 text-blue-600 hover:underline cursor-pointer">
-                            #{order.shopifyOrderNo}
-                          </td>
-                          <td className="p-3 text-right">
-                            ${order.amount.toFixed(2)}
-                          </td>
-                          <td className="p-3 text-right">-${fee}</td>
-                          <td className="p-3 text-right font-medium">
-                            ${net} AUD
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="p-4 text-center text-gray-500">
-                      No payouts found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )} */}
         {activeTab === "Due " && (
           <div className="p-4">
             {loading ? (
@@ -586,7 +547,7 @@ const Finance = () => {
                 <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
                 loading...
               </div>
-            ) : payouts.length > 0 ? (
+            ) : filteredPayouts.length > 0 ? (
               <table className="w-full border-collapse bg-white">
                 <thead className="bg-gray-100 text-left text-gray-600 text-sm">
                   <tr>
@@ -603,7 +564,7 @@ const Finance = () => {
                 </thead>
                 <tbody>
                   {userRole === "Master Admin" || userRole === "Dev Admin"
-                    ? payouts
+                    ? filteredPayouts
                         .filter(
                           (payout) => payout.status.toLowerCase() === "pending"
                         )
@@ -768,47 +729,6 @@ const Finance = () => {
           </div>
         )}
 
-        {/* {activeTab === "Timelines" && (
-          <div className="p-4">
-            <h2 className="text-lg font-semibold mb-4 text-gray-700">
-              Finance Timelines
-            </h2>
-
-            <div className="flex flex-col sm:flex-row gap-6 mb-6">
-              <div>
-                <label className="block text-sm text-gray-600 font-medium mb-1">
-                  Payout Date 1
-                </label>
-                <input
-                  type="date"
-                  className="border px-3 py-2 rounded-md text-sm"
-                  value={firstPayoutDate}
-                  onChange={(e) => setFirstPayoutDate(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 font-medium mb-1">
-                  Payout Date 2
-                </label>
-                <input
-                  type="date"
-                  className="border px-3 py-2 rounded-md text-sm"
-                  value={secondPayoutDate}
-                  onChange={(e) => setSecondPayoutDate(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                onClick={handleSavePayoutDates}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
-              >
-                Save Payout Dates
-              </button>
-            </div>
-          </div>
-        )}*/}
         {activeTab === "Timelines" && (
           <div className="p-4">
             <h2 className="text-lg font-semibold mb-4 text-gray-700">
@@ -821,7 +741,7 @@ const Finance = () => {
               </label>
               <input
                 type="number"
-                className="border px-3 py-2 rounded-md text-sm w-40"
+                className="border px-3 py-2 rounded-md text-sm w-40 no-spinner"
                 value={graceTime}
                 onChange={(e) => setGraceTime(Number(e.target.value))}
               />
@@ -879,10 +799,10 @@ const Finance = () => {
                     Payout Date 1
                   </label>
                   <input
-                    type="date"
+                    type="number"
                     value={firstPayoutDate}
                     onChange={(e) => setFirstPayoutDate(e.target.value)}
-                    className="border px-3 py-2 rounded-md text-sm"
+                    className="border px-3 py-2 rounded-md text-sm no-spinner"
                   />
                 </div>
 
@@ -892,10 +812,10 @@ const Finance = () => {
                       Payout Date 2
                     </label>
                     <input
-                      type="date"
+                      type="number"
                       value={secondPayoutDate}
                       onChange={(e) => setSecondPayoutDate(e.target.value)}
-                      className="border px-3 py-2 rounded-md text-sm"
+                      className="border px-3 py-2 rounded-md text-sm no-spinner"
                     />
                   </div>
                 )}

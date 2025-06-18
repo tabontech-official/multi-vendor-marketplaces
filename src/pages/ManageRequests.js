@@ -10,8 +10,33 @@ import { jwtDecode } from "jwt-decode";
 
 const ManageRequests = () => {
   const { userData, loading, error, variantId } = UseFetchUserData();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+  const [groupedData, setGroupedData] = useState([]);
 
+  useEffect(() => {
+    const regex = new RegExp(searchTerm.trim(), "i");
 
+    const filtered = groupedData
+      .map((user) => {
+        const fullName = `${user.firstName || ""} ${
+          user.lastName || ""
+        }`.trim();
+        const matchedRequests = user.requests.filter(
+          (req) =>
+            regex.test(req.orderNo) ||
+            regex.test(user.email) ||
+            regex.test(fullName)
+        );
+
+        return matchedRequests.length > 0
+          ? { ...user, requests: matchedRequests }
+          : null;
+      })
+      .filter(Boolean);
+
+    setFilteredData(filtered);
+  }, [searchTerm, groupedData]);
 
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -19,27 +44,26 @@ const ManageRequests = () => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-
-  const [groupedData, setGroupedData] = useState([]);
-
-useEffect(() => {
-  fetch("https://multi-vendor-marketplace.vercel.app/order/getCancellationRequests")
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.success) {
-        setGroupedData(data.data);
-      }
-      setIsLoading(false);
-    })
-    .catch((err) => {
-      console.error("API error:", err);
-      setIsLoading(false);
-    });
-}, []);
-const totalRequests = groupedData.reduce(
-  (sum, user) => sum + (user.requestCount || 0),
-  0
-);
+  useEffect(() => {
+    fetch(
+      "https://multi-vendor-marketplace.vercel.app/order/getCancellationRequests"
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setGroupedData(data.data);
+        }
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("API error:", err);
+        setIsLoading(false);
+      });
+  }, []);
+  const totalRequests = groupedData.reduce(
+    (sum, user) => sum + (user.requestCount || 0),
+    0
+  );
   return (
     <div
       className={`flex flex-col bg-gray-50 px-3 py-6 ${
@@ -60,6 +84,15 @@ const totalRequests = groupedData.reduce(
                 </span>
               </div>
             </div>
+          </div>
+          <div className="mb-4">
+            <input
+              type="text"
+              // placeholder="Search by Order No, Name, or Email"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full md:w-1/2 px-4 py-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
           </div>
 
           <div className="w-full  max-sm:w-auto  max-sm:flex items-center">
@@ -101,7 +134,7 @@ const totalRequests = groupedData.reduce(
                     </tr>
                   </thead>
                   <tbody>
-                    {groupedData.map((user, userIndex) =>
+                    {filteredData.map((user, userIndex) =>
                       user.requests.map((req, reqIndex) => (
                         <tr
                           key={`${req._id}-${req.orderId}`}

@@ -55,6 +55,7 @@ const AccountPage = () => {
     sellerGst: "",
     gstRegistered: "",
   });
+  
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const handleImageChange = (e) => {

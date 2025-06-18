@@ -103,23 +103,23 @@ const handleSavePayoutDates = async () => {
 
 
   useEffect(() => {
-    const fetchPayoutDates = async () => {
-      try {
-        const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates");
-        const data = await res.json();
+  const fetchPayoutDates = async () => {
+    try {
+      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates");
+      const data = await res.json();
 
-        if (data.firstDate) setFirstPayoutDate(data.firstDate.slice(0, 10));
-        if (data.secondDate) setSecondPayoutDate(data.secondDate.slice(0, 10));
-        if (data.payoutFrequency) setPayoutFrequency(data.payoutFrequency);
-        if (data.graceTime) setGraceTime(data.graceTime);
-        if (data.weeklyDay) setWeeklyDay(data.weeklyDay);
-      } catch (err) {
-        console.error("Error fetching payout dates:", err);
-      }
-    };
+      if (data.firstDate) setFirstPayoutDate(new Date(data.firstDate).getDate());
+      if (data.secondDate) setSecondPayoutDate(new Date(data.secondDate).getDate());
+      if (data.payoutFrequency) setPayoutFrequency(data.payoutFrequency);
+      if (data.graceTime !== undefined) setGraceTime(data.graceTime);
+      if (data.weeklyDay) setWeeklyDay(data.weeklyDay);
+    } catch (err) {
+      console.error("Error fetching payout dates:", err);
+    }
+  };
 
-    fetchPayoutDates();
-  }, []);
+  fetchPayoutDates();
+}, []);
 
   const isAdmin = () => {
     const token = localStorage.getItem("usertoken");

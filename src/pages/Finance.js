@@ -485,8 +485,20 @@ const Finance = () => {
                                 {item.status}
                               </span>
                             </td>
-                            <td className="p-3 text-right font-medium">
+                            {/* <td className="p-3 text-right font-medium">
                               {item.amount}
+                            </td> */}
+                            <td className="p-3 text-right font-medium">
+                              {item.amount
+                                ? `$${(
+                                    parseFloat(
+                                      String(item.amount).replace(
+                                        /[^0-9.]/g,
+                                        ""
+                                      )
+                                    ) * 0.9
+                                  ).toFixed(2)}`
+                                : "$0.00"}
                             </td>
                           </tr>
                         );

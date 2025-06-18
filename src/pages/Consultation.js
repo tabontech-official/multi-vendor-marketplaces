@@ -59,7 +59,7 @@ const EcommerceConsultation = () => {
           </h1>
           <p className="text-gray-600">
             {" "}
-            Get expert guidance on improving your Shopify store, increasing
+            Get expert guidance on improving your  store, increasing
             sales, or scaling your brand.
           </p>
           <div className="w-2/4 max-sm:w-full mt-2"></div>
@@ -73,13 +73,13 @@ const EcommerceConsultation = () => {
           </h2>
           <ul className="space-y-5 text-gray-600 text-sm">
             <li className="flex items-start gap-4">
-              <FaShopify className="text-cyan-600 text-xl mt-1" />
-              <div>
+              {/* <FaShopify className="text-cyan-600 text-xl mt-1" /> */}
+              {/* <div>
                 <p className="font-medium">Shopify Store Audit</p>
                 <p className="text-xs">
                   Full UX + performance review of your Shopify store
                 </p>
-              </div>
+              </div> */}
             </li>
             <li className="flex items-start gap-4">
               <FaRocket className="text-cyan-600 text-xl mt-1" />
@@ -99,7 +99,7 @@ const EcommerceConsultation = () => {
                 </p>
               </div>
             </li>
-            <li className="flex items-start gap-4">
+            {/* <li className="flex items-start gap-4">
               <FaCogs className="text-cyan-600 text-xl mt-1" />
               <div>
                 <p className="font-medium">App & Theme Suggestions</p>
@@ -107,7 +107,7 @@ const EcommerceConsultation = () => {
                   Tools, themes & apps best suited for your store's growth
                 </p>
               </div>
-            </li>
+            </li> */}
             <li className="flex items-start gap-4">
               <FaChartLine className="text-cyan-600 text-xl mt-1" />
               <div>

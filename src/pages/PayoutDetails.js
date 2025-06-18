@@ -348,7 +348,7 @@ const PayoutDetails = () => {
           {userRole === "Merchant" && (
             <div className="text-sm text-gray-600 space-y-1">
               <p>
-                <strong>Bank account:</strong> PayPal
+                <strong>Bank account:</strong> {summary.paypalAccount}
               </p>
               <p>
                 <strong>Bank reference:</strong> {summary.referenceNo}

@@ -70,7 +70,7 @@ const FullItem = () => {
 
   //   try {
   //     const response = await fetch(
-  //       "https://multi-vendor-marketplace.vercel.app/order/fullFillOrder",
+  //       "http://localhost:5000/order/fullFillOrder",
   //       {
   //         method: "POST",
   //         headers: { "Content-Type": "application/json" },
@@ -156,7 +156,7 @@ const FullItem = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/fullFillOrder",
+        "http://localhost:5000/order/fullFillOrder",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

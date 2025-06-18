@@ -45,7 +45,7 @@ const Finance = () => {
 
   //   try {
   //     const response = await fetch(
-  //       "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
+  //       "http://localhost:5000/order/addPayOutDates",
   //       {
   //         method: "POST",
   //         headers: {
@@ -81,14 +81,11 @@ const Finance = () => {
     };
 
     try {
-      const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch("http://localhost:5000/order/addPayOutDates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       const result = await res.json();
 
@@ -108,9 +105,7 @@ const Finance = () => {
   useEffect(() => {
     const fetchPayoutDates = async () => {
       try {
-        const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates"
-        );
+        const res = await fetch("http://localhost:5000/order/getPayoutsDates");
         const data = await res.json();
 
         if (data.firstDate) setFirstPayoutDate(data.firstDate.slice(0, 10));
@@ -160,7 +155,7 @@ const Finance = () => {
 
       try {
         const res = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/auth/user/${userId}`
+          `http://localhost:5000/auth/user/${userId}`
         );
         const user = res.data;
         const role = user?.role;
@@ -188,7 +183,7 @@ const Finance = () => {
     setPaypalLoading(true);
     try {
       const res = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
+        "http://localhost:5000/order/addPaypalAccountNo",
         {
           merchantId: userId,
           payPal: paypalAccountInput,
@@ -226,9 +221,9 @@ const Finance = () => {
             return;
           }
 
-          url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=${userId}`;
+          url = `http://localhost:5000/order/getPayoutByUserId?userId=${userId}`;
         } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
-          url = "https://multi-vendor-marketplace.vercel.app/order/getPayout";
+          url = "http://localhost:5000/order/getPayout";
         } else {
           console.warn("Unhandled role:", userRole);
           setLoading(false);
@@ -407,10 +402,7 @@ const Finance = () => {
                                 {payout.payoutDate}
                               </td>
 
-                              <td
-                                className="p-3 text-sm text-gray-600 "
-                              
-                              >
+                              <td className="p-3 text-sm text-gray-600 ">
                                 <div>{line.merchantName || "N/A"}</div>
                                 <div className="text-xs text-gray-400">
                                   {line.merchantEmail || "N/A"}
@@ -623,21 +615,25 @@ const Finance = () => {
                                 >
                                   <td
                                     className="p-3 text-blue-600 cursor-pointer hover:underline"
-                                   onClick={() => {
-                                  const isMerchant = userRole === "Merchant";
-                                  const query = new URLSearchParams({
-                                    payoutDate: payout.payoutDate,
-                                    status: payout.status,
-                                  });
+                                    onClick={() => {
+                                      const isMerchant =
+                                        userRole === "Merchant";
+                                      const query = new URLSearchParams({
+                                        payoutDate: payout.payoutDate,
+                                        status: payout.status,
+                                      });
 
-                                  if (isMerchant) {
-                                    query.append("merchantId", line.merchantId);
-                                  }
+                                      if (isMerchant) {
+                                        query.append(
+                                          "merchantId",
+                                          line.merchantId
+                                        );
+                                      }
 
-                                  navigate(
-                                    `/payout-details?${query.toString()}`
-                                  );
-                                }}
+                                      navigate(
+                                        `/payout-details?${query.toString()}`
+                                      );
+                                    }}
                                   >
                                     {payout.payoutDate}
                                   </td>

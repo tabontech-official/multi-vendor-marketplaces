@@ -37,7 +37,7 @@ const [isLoading, setIsLoading] = useState(true);
 
   //   try {
   //     const res = await fetch(
-  //       `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`,
+  //       `http://localhost:5000/order/order/${userId}`,
   //       {
   //         method: "GET",
   //       }
@@ -78,8 +78,8 @@ const [isLoading, setIsLoading] = useState(true);
       setIsAdmin(isAdminFlag);
 
       const url = isAdminFlag
-        ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrderForMerchants`
-        : `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`;
+        ? `http://localhost:5000/order/getAllOrderForMerchants`
+        : `http://localhost:5000/order/order/${userId}`;
 
       const res = await fetch(url, {
         method: "GET",
@@ -127,7 +127,7 @@ const [isLoading, setIsLoading] = useState(true);
 
       try {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
+          `http://localhost:5000/product/getProduct/${id}`,
           { method: "GET" }
         );
         if (response.ok) {

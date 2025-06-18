@@ -22,7 +22,7 @@ const PayoutDetails = () => {
   const [userRole, setUserRole] = useState("");
   const [isEditingBank, setIsEditingBank] = useState(false);
   const [isEditingRef, setIsEditingRef] = useState(false);
-  const [bankAccount, setBankAccount] = useState("PayPal");
+  const [bankAccount, setBankAccount] = useState(summary.paypalAccount || "");
   const [referenceNo, setReferenceNo] = useState(summary.referenceNo || "");
   const [paypalLoading, setPaypalLoading] = useState(false);
   const [paypalPopup, setPaypalPopup] = useState(false);
@@ -38,19 +38,39 @@ const PayoutDetails = () => {
 
   const saveBankAccount = async () => {
     setIsLoading(true);
+    setPaypalLoading(true);
 
-    const userId = merchantId;
     const account = tempBankAccount.trim();
 
     if (!account) {
       setIsLoading(false);
+      setPaypalLoading(false);
       return alert("Please enter your PayPal account.");
     }
 
-    setPaypalLoading(true);
     try {
-      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
-        merchantId: userId,
+      // Collect unique user IDs from orders
+      const userIdsSet = new Set();
+
+      orders.forEach((order) => {
+        order.products?.forEach((product) => {
+          if (product.userId) {
+            userIdsSet.add(product.userId);
+          }
+        });
+      });
+
+      const merchantIds = Array.from(userIdsSet);
+
+      if (merchantIds.length === 0) {
+        setIsLoading(false);
+        setPaypalLoading(false);
+        return alert("No merchants found to update.");
+      }
+
+      // Send PayPal update request
+      const res = await axios.post("http://localhost:5000/order/addPaypal", {
+        merchantIds,
         payPal: account,
       });
 
@@ -58,7 +78,7 @@ const PayoutDetails = () => {
         setBankAccount(account);
         setIsEditingBank(false);
         setPaypalPopup(false);
-        showToast("success", "PayPal account saved successfully!");
+        showToast("success", "PayPal account saved for all merchants!");
       } else {
         showToast("error", "Failed to save PayPal account.");
       }
@@ -66,8 +86,8 @@ const PayoutDetails = () => {
       console.error("Error saving PayPal:", error);
       showToast("error", "Something went wrong while saving PayPal account.");
     } finally {
-      setPaypalLoading(false);
       setIsLoading(false);
+      setPaypalLoading(false);
     }
   };
 
@@ -96,7 +116,7 @@ const PayoutDetails = () => {
 
       // Send reference number update to backend
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
+        "http://localhost:5000/order/addReferenceNumber",
         {
           method: "POST",
           headers: {
@@ -144,7 +164,7 @@ const PayoutDetails = () => {
 
   //     try {
   //       const res = await fetch(
-  //         `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+  //         `http://localhost:5000/order/getPayoutOrders?payoutDate=${encodeURIComponent(
   //           payoutDate
   //         )}&status=${status}&userId=${merchantId}`
   //       );
@@ -184,7 +204,7 @@ const PayoutDetails = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!userRole) return; // Wait until userRole is available
+      if (!userRole) return; 
 
       setLoading(true);
 
@@ -193,13 +213,13 @@ const PayoutDetails = () => {
 
         if (userRole === "Merchant") {
           res = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+            `http://localhost:5000/order/getPayoutOrders?payoutDate=${encodeURIComponent(
               payoutDate
             )}&status=${status}&userId=${merchantId}`
           );
         } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
           res = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(
+            `http://localhost:5000/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(
               payoutDate
             )}&status=${status}`
           );
@@ -230,11 +250,13 @@ const PayoutDetails = () => {
         );
         const net = charges - fees;
         const referenceNo = fetchedOrders[0]?.referenceNo || "";
+        const paypalAccount = fetchedOrders[0]?.paypalAccount || "";
 
         setOrders(fetchedOrders);
-        setSummary({ charges, refunds, fees, net, referenceNo });
+        setSummary({ charges, refunds, fees, net, referenceNo, paypalAccount });
         setReferenceNo(referenceNo);
         setTempReferenceNo(referenceNo);
+        setTempBankAccount(paypalAccount);
       } catch (err) {
         console.error("Error fetching payout orders:", err);
       } finally {
@@ -270,7 +292,7 @@ const PayoutDetails = () => {
       }
 
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
+        "http://localhost:5000/order/addReferenceNumber",
         {
           method: "POST",
           headers: {

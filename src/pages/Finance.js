@@ -89,14 +89,14 @@ const Finance = () => {
 
       if (!res.ok) {
         console.error("Save failed:", result);
-        alert(result.message || "Failed to save payout config.");
+        showToast("error", "Failed to save payout config..");
         return;
       }
 
-      alert(result.message || "Saved successfully.");
+        showToast("success", "saved successfully!");
     } catch (err) {
       console.error(" Network error:", err);
-      alert("Error saving payout configuration.");
+        showToast("error", "Error saving payout configuration..");
     }
   };
 

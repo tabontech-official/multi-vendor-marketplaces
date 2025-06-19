@@ -105,14 +105,16 @@ const PayoutDetails = () => {
       if (merchantIds.length === 0) {
         setIsLoading(false);
         setPaypalLoading(false);
-        return alert("No merchants found to update.");
       }
 
       // Send PayPal update request
-      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
-        merchantIds,
-        payPal: account,
-      });
+      const res = await axios.post(
+        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
+        {
+          merchantIds,
+          payPal: account,
+        }
+      );
 
       if (res.status === 200) {
         setBankAccount(account);
@@ -149,7 +151,7 @@ const PayoutDetails = () => {
       const UserIds = Array.from(userIdsSet);
 
       if (UserIds.length === 0) {
-        alert("No user IDs found to update.");
+        showToast("error", "No user IDs found to update.");
         setIsLoading(false);
         return;
       }
@@ -174,14 +176,14 @@ const PayoutDetails = () => {
       if (res.ok) {
         setReferenceNo(tempReferenceNo);
         setIsEditingRef(false);
-        alert("Reference number added successfully!");
+        showToast("success", "Reference number added successfully!");
         closeReferencePopup();
       } else {
         alert(result.message || "Something went wrong.");
       }
     } catch (err) {
       console.error("Failed to update reference numbers:", err);
-      alert("Error occurred while updating reference numbers.");
+      showToast("error", "Error occurred while updating reference numbers.");
     } finally {
       setIsLoading(false);
     }
@@ -287,7 +289,7 @@ const PayoutDetails = () => {
       const UserIds = Array.from(userIdsSet);
 
       if (UserIds.length === 0) {
-        alert("No user IDs found to update.");
+        showToast("error", "No user IDs found to update.");
         return;
       }
 
@@ -308,10 +310,10 @@ const PayoutDetails = () => {
       const result = await res.json();
 
       if (res.ok) {
-        alert("Reference number added successfully!");
+        showToast("success", "Reference number added successfully!");
         closeReferencePopup();
       } else {
-        alert(result.message || "Something went wrong.");
+        showToast("error", "Something went wrong.");
       }
     } catch (err) {
       console.error("Failed to update reference numbers:", err);

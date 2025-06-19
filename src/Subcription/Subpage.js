@@ -299,7 +299,7 @@ useEffect(() => {
                   </thead>
                   <tbody>
                     {isAdmin
-                      ? filteredSubscriptions.map((subscription, index) => {
+                      ? subscriptions.map((subscription, index) => {
                           const orderId = subscription.serialNo;
 
                           return subscription.merchants.map(
@@ -398,7 +398,7 @@ useEffect(() => {
                             }
                           );
                         })
-                      : filteredSubscriptions.map((subscription, index) => {
+                      : subscriptions.map((subscription, index) => {
                           const address =
                             subscription.customer?.default_address;
                           const firstItem = subscription.lineItems?.[0];

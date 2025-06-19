@@ -38,7 +38,6 @@ const Finance = () => {
   const [allPayouts, setAllPayouts] = useState([]);
   const [filteredPayouts, setFilteredPayouts] = useState([]);
 
-  
   // const handleSavePayoutDates = async () => {
   //   const payload = {
   //     graceTime,
@@ -70,56 +69,57 @@ const Finance = () => {
   //   }
   // };
 
-const handleSavePayoutDates = async () => {
-  const payload = {
-    graceTime,
-    payoutFrequency,
-    firstDate: payoutFrequency !== "weekly" ? Number(firstPayoutDate) : null,
-    secondDate: payoutFrequency === "twice" ? Number(secondPayoutDate) : null,
-    weeklyDay: payoutFrequency === "weekly" ? weeklyDay : null,
-  };
+  const handleSavePayoutDates = async () => {
+    const payload = {
+      graceTime,
+      payoutFrequency,
+      firstDate: payoutFrequency !== "weekly" ? Number(firstPayoutDate) : null,
+      secondDate: payoutFrequency === "twice" ? Number(secondPayoutDate) : null,
+      weeklyDay: payoutFrequency === "weekly" ? weeklyDay : null,
+    };
 
-  try {
-    const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    const result = await res.json();
+      const result = await res.json();
 
-    if (!res.ok) {
-      console.error("Save failed:", result);
-      alert(result.message || "Failed to save payout config.");
-      return;
+      if (!res.ok) {
+        console.error("Save failed:", result);
+        alert(result.message || "Failed to save payout config.");
+        return;
+      }
+
+      alert(result.message || "Saved successfully.");
+    } catch (err) {
+      console.error(" Network error:", err);
+      alert("Error saving payout configuration.");
     }
-
-    alert(result.message || "Saved successfully.");
-  } catch (err) {
-    console.error(" Network error:", err);
-    alert("Error saving payout configuration.");
-  }
-};
-
+  };
 
   useEffect(() => {
-  const fetchPayoutDates = async () => {
-    try {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates");
-      const data = await res.json();
+    const fetchPayoutDates = async () => {
+      try {
+        const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates");
+        const data = await res.json();
 
-      if (data.firstDate) setFirstPayoutDate(new Date(data.firstDate).getDate());
-      if (data.secondDate) setSecondPayoutDate(new Date(data.secondDate).getDate());
-      if (data.payoutFrequency) setPayoutFrequency(data.payoutFrequency);
-      if (data.graceTime !== undefined) setGraceTime(data.graceTime);
-      if (data.weeklyDay) setWeeklyDay(data.weeklyDay);
-    } catch (err) {
-      console.error("Error fetching payout dates:", err);
-    }
-  };
+        if (data.firstDate)
+          setFirstPayoutDate(new Date(data.firstDate).getDate());
+        if (data.secondDate)
+          setSecondPayoutDate(new Date(data.secondDate).getDate());
+        if (data.payoutFrequency) setPayoutFrequency(data.payoutFrequency);
+        if (data.graceTime !== undefined) setGraceTime(data.graceTime);
+        if (data.weeklyDay) setWeeklyDay(data.weeklyDay);
+      } catch (err) {
+        console.error("Error fetching payout dates:", err);
+      }
+    };
 
-  fetchPayoutDates();
-}, []);
+    fetchPayoutDates();
+  }, []);
 
   const isAdmin = () => {
     const token = localStorage.getItem("usertoken");
@@ -353,7 +353,7 @@ const handleSavePayoutDates = async () => {
                 ? "border-blue-600 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-blue-600"
             }`}
-            onClick={() => setActiveTab("Due ")}
+            onClick={() => setActiveTab("Due")}
           >
             Due
           </button>
@@ -390,98 +390,120 @@ const handleSavePayoutDates = async () => {
                     <th className="p-3">Transaction Dates</th>
                     <th className="p-3">Status</th>
                     <th className="p-3 text-right">Amount</th>
-                    {(userRole === "Master Admin" ||
-                      userRole === "Dev Admin") && (
-                      <>
-                        <th className="p-3 text-right">Qty</th>
-                        <th className="p-3 text-right">Net</th>
-                      </>
-                    )}
                   </tr>
                 </thead>
 
                 <tbody>
                   {userRole === "Master Admin" || userRole === "Dev Admin"
-                    ? filteredPayouts.flatMap((payout, index) =>
-                        payout.orders.flatMap((order, oIndex) =>
-                          order.lineItems.map((line, liIndex) => (
-                            <tr
-                              key={`${index}-${oIndex}-${liIndex}`}
-                              className="border-b hover:bg-gray-50"
-                            >
-                              {/* <td
-                                className="p-3 text-blue-600 cursor-pointer hover:underline"
-                                onClick={() =>
-                                  navigate(
-                                    `/payout-details?payoutDate=${payout.payoutDate}&status=${payout.status}&merchantId=${line.merchantId}`
-                                  )
-                                }
-                              >
-                                {payout.payoutDate}
-                              </td> */}
-                              <td
-                                className="p-3 text-blue-600 cursor-pointer hover:underline"
-                                onClick={() => {
-                                  const isMerchant = userRole === "Merchant";
-                                  const query = new URLSearchParams({
-                                    payoutDate: payout.payoutDate,
-                                    status: payout.status,
-                                  });
-
-                                  if (isMerchant) {
-                                    query.append("merchantId", line.merchantId);
-                                  }
-
-                                  navigate(
-                                    `/payout-details?${query.toString()}`
-                                  );
-                                }}
-                              >
-                                {payout.payoutDate}
-                              </td>
-
-                              <td className="p-3 text-sm text-gray-600 ">
-                                <div>{line.merchantName || "N/A"}</div>
-                                <div className="text-xs text-gray-400">
-                                  {line.merchantEmail || "N/A"}
-                                </div>
-                              </td>
-                              <td className="p-3">{payout.transactionDates}</td>
-                              <td className="p-3">
-                                {line.fulfillment_status === "cancelled" ? (
-                                  <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700">
-                                    Refund
-                                  </span>
-                                ) : (
-                                  <span
-                                    className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                                      payout.status === "Pending"
-                                        ? "bg-blue-100 text-blue-700"
-                                        : payout.status === "Deposited"
-                                        ? "bg-green-100 text-green-700"
-                                        : "bg-gray-100 text-gray-600"
-                                    }`}
-                                  >
-                                    {payout.status}
-                                  </span>
-                                )}
-                              </td>
-                              <td className="p-3 text-right font-medium">
-                                {line.price} AUD
-                              </td>
-                              <td className="p-3 text-right ">
-                                {line.current_quantity}
-                              </td>
-                              <td className="p-3 text-right font-medium">
-                                {line.price * line.current_quantity} AUD
-                              </td>
-                            </tr>
-                          ))
+                    ? filteredPayouts
+                        .filter(
+                          (payout) => payout.status.toLowerCase() === "pending"
                         )
-                      )
+                        .flatMap((payout, index) => {
+                          // Group orders by merchantId and payout date
+                          const merchantGroups = payout.orders.reduce(
+                            (acc, order) => {
+                              order.lineItems.forEach((line) => {
+                                const {
+                                  merchantId,
+                                  price,
+                                  current_quantity,
+                                  fulfillment_status,
+                                } = line;
+                                const key = `${merchantId}-${payout.payoutDate}`;
+
+                                // Group line items by merchantId and payout date
+                                if (!acc[key]) {
+                                  acc[key] = {
+                                    merchantId,
+                                    merchantName: line.merchantName || "N/A",
+                                    merchantEmail: line.merchantEmail || "N/A",
+                                    totalAmount: 0,
+                                    totalQuantity: 0,
+                                    lineItems: [],
+                                  };
+                                }
+
+                                const total =
+                                  parseFloat(price) * current_quantity;
+                                acc[key].totalAmount += total;
+                                acc[key].totalQuantity += current_quantity;
+                                acc[key].lineItems.push(line);
+
+                                // If fulfillment status is cancelled, subtract from totalAmount
+                                if (fulfillment_status === "cancelled") {
+                                  acc[key].totalAmount -= total; // Subtract the cancelled product amount
+                                }
+                              });
+                              return acc;
+                            },
+                            {}
+                          );
+
+                          return Object.values(merchantGroups).map(
+                            (merchantGroup, mIndex) => {
+                              const fee = merchantGroup.totalAmount * 0.1;
+                              const net = merchantGroup.totalAmount - fee;
+
+                              return (
+                                <tr
+                                  key={`${index}-${mIndex}`}
+                                  className="border-b hover:bg-gray-50"
+                                >
+                                  <td
+                                    className="p-3 text-blue-600 cursor-pointer hover:underline"
+                                    onClick={() => {
+                                      const query = new URLSearchParams({
+                                        payoutDate: payout.payoutDate,
+                                        status: payout.status,
+                                      });
+                                      query.append(
+                                        "merchantId",
+                                        merchantGroup.merchantId
+                                      );
+                                      navigate(
+                                        `/payout-details?${query.toString()}`
+                                      );
+                                    }}
+                                  >
+                                    {payout.payoutDate}
+                                  </td>
+
+                                  {/* Merchant Info */}
+                                  {(userRole === "Master Admin" ||
+                                    userRole === "Dev Admin") && (
+                                    <td className="p-3 text-sm text-gray-600">
+                                      <div>{merchantGroup.merchantName}</div>
+                                      <div className="text-xs text-gray-400">
+                                        {merchantGroup.merchantEmail}
+                                      </div>
+                                    </td>
+                                  )}
+
+                                  <td className="p-3">
+                                    {payout.transactionDates}
+                                  </td>
+                                  <td className="p-3">
+                                    {payout.status === "Pending" ? (
+                                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                                        Pending
+                                      </span>
+                                    ) : (
+                                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700">
+                                        Deposited
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="p-3 text-right font-medium">
+                                    {merchantGroup.totalAmount.toFixed(2)} AUD
+                                  </td>
+                                </tr>
+                              );
+                            }
+                          );
+                        })
                     : filteredPayouts.map((item, index) => {
                         const merchantId = localStorage.getItem("userid");
-
                         return (
                           <tr key={index} className="border-b hover:bg-gray-50">
                             <td
@@ -512,9 +534,6 @@ const handleSavePayoutDates = async () => {
                                 {item.status}
                               </span>
                             </td>
-                            {/* <td className="p-3 text-right font-medium">
-                              {item.amount}
-                            </td> */}
                             <td className="p-3 text-right font-medium">
                               {item.amount
                                 ? `$${(
@@ -540,7 +559,227 @@ const handleSavePayoutDates = async () => {
           </div>
         )}
 
-        {activeTab === "Due " && (
+        {/* {activeTab === "payouts" && (
+          <div className="p-4">
+            {loading ? (
+              <div className="flex justify-center items-center py-10">
+                <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
+                loading...
+              </div>
+            ) : filteredPayouts.length > 0 ? (
+              <table className="w-full border-collapse bg-white">
+                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                  <tr>
+                    <th className="p-3">Payout Date</th>
+                    {(userRole === "Master Admin" ||
+                      userRole === "Dev Admin") && (
+                      <th className="p-3">Merchant Info</th>
+                    )}
+                    <th className="p-3">Transaction Dates</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3 text-right">Amount</th>
+                    {(userRole === "Master Admin" ||
+                      userRole === "Dev Admin") && (
+                      <>
+                        <th className="p-3 text-right">Qty</th>
+                        <th className="p-3 text-right">Net</th>
+                      </>
+                    )}
+                  </tr>
+                </thead>
+
+                <tbody>
+  {userRole === "Master Admin" || userRole === "Dev Admin"
+    ? filteredPayouts.flatMap((payout, index) =>
+        payout.orders.flatMap((order, oIndex) =>
+          order.lineItems.flatMap((line, liIndex) => {
+            const rows = [];
+
+            const isPartial =
+              line.payoutStatus === "partial" && line.nextScheduledPayoutDate;
+
+            const merchantInfo = (
+              <>
+                <div>{line.merchantName || "N/A"}</div>
+                <div className="text-xs text-gray-400">{line.merchantEmail || "N/A"}</div>
+              </>
+            );
+
+            const transactionDates = payout.transactionDates;
+
+            const merchantId = localStorage.getItem("userid");
+
+            if (line.newPaidQty && line.newPaidQty > 0) {
+              rows.push(
+                <tr key={`current-${index}-${oIndex}-${liIndex}`} className="border-b hover:bg-gray-50">
+                  <td
+                    className="p-3 text-blue-600 cursor-pointer hover:underline"
+                    onClick={() => {
+                      const query = new URLSearchParams({
+                        payoutDate: payout.payoutDate,
+                        status: payout.status,
+                      });
+                      if (userRole === "Merchant") {
+                        query.append("merchantId", line.merchantId || merchantId);
+                      }
+                      navigate(`/payout-details?${query.toString()}`);
+                    }}
+                  >
+                    {payout.payoutDate}
+                  </td>
+                  <td className="p-3 text-sm text-gray-600">{merchantInfo}</td>
+                  <td className="p-3">{transactionDates}</td>
+                  <td className="p-3">
+                    {line.fulfillment_status === "cancelled" ? (
+                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700">
+                        Refund
+                      </span>
+                    ) : (
+                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                        {payout.status}
+                      </span>
+                    )}
+                  </td>
+                  <td className="p-3 text-right font-medium">{line.price} AUD</td>
+                  <td className="p-3 text-right font-medium">{line.newPaidQty}</td>
+                  <td className="p-3 text-right font-medium">
+                    {(line.payoutAmount || (line.newPaidQty * line.price)).toFixed(2)} AUD
+                  </td>
+                </tr>
+              );
+            }
+
+            if (isPartial) {
+              rows.push(
+                <tr key={`future-${index}-${oIndex}-${liIndex}`} className="border-b hover:bg-gray-50">
+                  <td
+                    className="p-3 text-blue-600 cursor-pointer hover:underline"
+                    onClick={() => {
+                      const query = new URLSearchParams({
+                        payoutDate: line.nextScheduledPayoutDate,
+                        status: "Partial",
+                      });
+                      if (userRole === "Merchant") {
+                        query.append("merchantId", line.merchantId || merchantId);
+                      }
+                      navigate(`/payout-details?${query.toString()}`);
+                    }}
+                  >
+                    {dayjs(line.nextScheduledPayoutDate).format("MMM D, YYYY")}
+                  </td>
+                  <td className="p-3 text-sm text-gray-600">{merchantInfo}</td>
+                  <td className="p-3">{transactionDates}</td>
+                  <td className="p-3">
+                    <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-700">
+                      Partial
+                    </span>
+                  </td>
+                  <td className="p-3 text-right font-medium">{line.price} AUD</td>
+                  <td className="p-3 text-right font-medium">{line.remainingQty}</td>
+                  <td className="p-3 text-right font-medium">
+                    {(line.remainingQty * line.price).toFixed(2)} AUD
+                  </td>
+                </tr>
+              );
+            }
+
+            // ✅ Row 3: Regular full payout (not partial and not newPaidQty)
+            if (!isPartial && !(line.newPaidQty > 0)) {
+              rows.push(
+                <tr key={`regular-${index}-${oIndex}-${liIndex}`} className="border-b hover:bg-gray-50">
+                  <td
+                    className="p-3 text-blue-600 cursor-pointer hover:underline"
+                    onClick={() => {
+                      const query = new URLSearchParams({
+                        payoutDate: payout.payoutDate,
+                        status: payout.status,
+                      });
+                      if (userRole === "Merchant") {
+                        query.append("merchantId", line.merchantId || merchantId);
+                      }
+                      navigate(`/payout-details?${query.toString()}`);
+                    }}
+                  >
+                    {payout.payoutDate}
+                  </td>
+                  <td className="p-3 text-sm text-gray-600">{merchantInfo}</td>
+                  <td className="p-3">{transactionDates}</td>
+                  <td className="p-3">
+                    <span
+                      className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                        payout.status === "Pending"
+                          ? "bg-blue-100 text-blue-700"
+                          : payout.status === "Deposited"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {payout.status}
+                    </span>
+                  </td>
+                  <td className="p-3 text-right font-medium">{line.price} AUD</td>
+                  <td className="p-3 text-right font-medium">{line.current_quantity}</td>
+                  <td className="p-3 text-right font-medium">
+                    {(line.payoutAmount || (line.price * line.current_quantity)).toFixed(2)} AUD
+                  </td>
+                </tr>
+              );
+            }
+
+            return rows;
+          })
+        )
+      )
+    : filteredPayouts.map((item, index) => {
+        const merchantId = localStorage.getItem("userid");
+        return (
+          <tr key={index} className="border-b hover:bg-gray-50">
+            <td
+              className="p-3 text-blue-600 cursor-pointer hover:underline"
+              onClick={() =>
+                navigate(
+                  `/payout-details?payoutDate=${encodeURIComponent(item.payoutDate)}&status=${
+                    item.status
+                  }&merchantId=${merchantId}`
+                )
+              }
+            >
+              {item.payoutDate}
+            </td>
+            <td className="p-3">{item.transactionDates}</td>
+            <td className="p-3">
+              <span
+                className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                  item.status === "Pending"
+                    ? "bg-blue-100 text-blue-700"
+                    : item.status === "Deposited"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {item.status}
+              </span>
+            </td>
+            <td className="p-3 text-right font-medium">
+              {item.amount
+                ? `$${(parseFloat(String(item.amount).replace(/[^0-9.]/g, "")) * 0.9).toFixed(2)}`
+                : "$0.00"}
+            </td>
+          </tr>
+        );
+      })}
+</tbody>
+
+              </table>
+            ) : (
+              <div className="text-center py-10 text-gray-500">
+                No payouts found.
+              </div>
+            )}
+          </div>
+        )} */}
+
+        {/* {activeTab === "Due " && (
           <div className="p-4">
             {loading ? (
               <div className="flex justify-center items-center py-10">
@@ -712,6 +951,203 @@ const handleSavePayoutDates = async () => {
                               </td>
                               <td className="p-3 text-right text-red-600">
                                 -${fee.toFixed(2)}
+                              </td>
+                              <td className="p-3 text-right text-green-700 font-semibold">
+                                ${net.toFixed(2)} AUD
+                              </td>
+                            </tr>
+                          );
+                        })}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-10 text-gray-500">
+                No payouts found.
+              </div>
+            )}
+          </div>
+        )} */}
+        {activeTab === "Due" && (
+          <div className="p-4">
+            {loading ? (
+              <div className="flex justify-center items-center py-10">
+                <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
+                loading...
+              </div>
+            ) : filteredPayouts.length > 0 ? (
+              <table className="w-full border-collapse bg-white">
+                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                  <tr>
+                    <th className="p-3">Payout Date</th>
+                    {(userRole === "Master Admin" ||
+                      userRole === "Dev Admin") && (
+                      <th className="p-3">Merchant Info</th>
+                    )}
+                    <th className="p-3">Payout Status</th>
+                    <th className="p-3 text-right">Amount</th>
+                    <th className="p-3 text-right">Fee</th>
+                    <th className="p-3 text-right">Net</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {userRole === "Master Admin" || userRole === "Dev Admin"
+                    ? filteredPayouts
+                        .filter(
+                          (payout) => payout.status.toLowerCase() === "pending"
+                        )
+                        .flatMap((payout, index) => {
+                          // Check filteredPayouts after filter
+                          console.log("Filtered payout:", payout);
+
+                          // Group orders by merchantId
+                          const groupedLineItems = payout.orders.reduce(
+                            (acc, order) => {
+                              order.lineItems.forEach((line) => {
+                                const { merchantId, price, current_quantity } =
+                                  line;
+                                const key = merchantId; // Group by merchantId
+
+                                if (!acc[key]) {
+                                  acc[key] = {
+                                    merchantId,
+                                    merchantName: line.merchantName || "N/A",
+                                    merchantEmail: line.merchantEmail || "N/A",
+                                    totalAmount: 0,
+                                    totalQuantity: 0,
+                                    lineItems: [],
+                                  };
+                                }
+
+                                const total = price * current_quantity;
+                                acc[key].totalAmount += total;
+                                acc[key].totalQuantity += current_quantity;
+                                acc[key].lineItems.push(line);
+                              });
+                              return acc;
+                            },
+                            {}
+                          );
+
+                          // Log grouped data
+                          console.log("Grouped line items:", groupedLineItems);
+
+                          return Object.values(groupedLineItems).map(
+                            (merchantGroup, mIndex) => {
+                              const fee = merchantGroup.totalAmount * 0.1;
+                              const net = merchantGroup.totalAmount - fee;
+
+                              return (
+                                <tr
+                                  key={`${index}-${mIndex}`}
+                                  className="border-b hover:bg-gray-50"
+                                >
+                                  <td
+                                    className="p-3 text-blue-600 cursor-pointer hover:underline"
+                                    onClick={() => {
+                                      const query = new URLSearchParams({
+                                        payoutDate: payout.payoutDate,
+                                        status: payout.status,
+                                      });
+                                      query.append(
+                                        "merchantId",
+                                        merchantGroup.merchantId
+                                      );
+                                      navigate(
+                                        `/payout-details?${query.toString()}`
+                                      );
+                                    }}
+                                  >
+                                    {payout.payoutDate}
+                                  </td>
+
+                                  {(userRole === "Master Admin" ||
+                                    userRole === "Dev Admin") && (
+                                    <td className="p-3 text-sm text-gray-600">
+                                      <div>{merchantGroup.merchantName}</div>
+                                      <div className="text-xs text-gray-400">
+                                        {merchantGroup.merchantEmail}
+                                      </div>
+                                    </td>
+                                  )}
+
+                                  <td className="p-3">
+                                    <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                                      Pending
+                                    </span>
+                                  </td>
+
+                                  <td className="p-3 text-right font-medium">
+                                    {merchantGroup.totalAmount.toFixed(2)} AUD
+                                  </td>
+                                  <td className="p-3 text-right text-red-600">
+                                    -{fee.toFixed(2)}
+                                  </td>
+                                  <td className="p-3 text-right text-green-700 font-semibold">
+                                    {net.toFixed(2)} AUD
+                                  </td>
+                                </tr>
+                              );
+                            }
+                          );
+                        })
+                    : filteredPayouts
+                        .filter(
+                          (item) => item.status.toLowerCase() === "pending"
+                        )
+                        .map((item, index) => {
+                          const lineItems = item.orders.flatMap(
+                            (order) => order.lineItems || []
+                          );
+                          const totalAmount = lineItems.reduce((sum, line) => {
+                            return (
+                              sum +
+                              (Number(line.price) || 0) *
+                                Number(
+                                  line.quantity || line.current_quantity || 1
+                                )
+                            );
+                          }, 0);
+                          const fee = totalAmount * 0.1;
+                          const net = totalAmount - fee;
+                          const merchantId = localStorage.getItem("userid");
+
+                          return (
+                            <tr
+                              key={index}
+                              className="border-b hover:bg-gray-50"
+                            >
+                              <td
+                                className="p-3 text-blue-600 cursor-pointer hover:underline"
+                                onClick={() =>
+                                  navigate(
+                                    `/payout-details?payoutDate=${encodeURIComponent(
+                                      item.payoutDate
+                                    )}&status=${
+                                      item.status
+                                    }&merchantId=${merchantId}`
+                                  )
+                                }
+                              >
+                                {item.payoutDate}
+                              </td>
+                              <td className="p-3">
+                                <span
+                                  className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                                    item.status === "Pending"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : item.status === "Deposited"
+                                      ? "bg-green-100 text-green-700"
+                                      : "bg-gray-100 text-gray-600"
+                                  }`}
+                                >
+                                  {item.status}
+                                </span>
+                              </td>
+                              <td className="p-3 text-right">
+                                ${totalAmount.toFixed(2)}
+                              </td>
+                              <td className="p-3 text-right text-red-600">
+                                -{fee.toFixed(2)}
                               </td>
                               <td className="p-3 text-right text-green-700 font-semibold">
                                 ${net.toFixed(2)} AUD

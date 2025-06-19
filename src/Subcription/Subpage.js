@@ -25,7 +25,7 @@ const SubscriptionHistory = () => {
   const dialogRef = useRef(null);
   const [selectedMerchants, setSelectedMerchants] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
-const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   // const fetchSubscriptions = async () => {
   //   const userId = localStorage.getItem("userid");
@@ -96,9 +96,9 @@ const [isLoading, setIsLoading] = useState(true);
       }
     } catch (error) {
       console.error("Error decoding token or fetching subscriptions:", error);
-    }finally {
-    setIsLoading(false); 
-  }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -198,6 +198,42 @@ const [isLoading, setIsLoading] = useState(true);
       );
     }
   }, []);
+  const [searchVal, setSearchVal] = useState("");
+  const [filteredSubscriptions, setFilteredSubscriptions] = useState([]);
+
+const handleSearch = () => {
+  let filtered =
+    searchVal === "" // If no search value, show all subscriptions
+      ? subscriptions // Use subscriptions directly if no search term
+      : subscriptions.filter((subscription) => {
+          const regex = new RegExp(searchVal, "gi"); // Case insensitive regex
+
+          // Search by Order Number (shopifyOrderNo or serialNo)
+          const orderMatch =
+            subscription.shopifyOrderNo
+              ?.toString()
+              .match(regex) || subscription.serialNo?.toString().match(regex);
+
+          // Search by Merchant Name (only matching the merchant info in each subscription)
+          const merchantMatch = subscription.merchants?.some((merchant) =>
+            merchant.info?.name.toLowerCase().match(regex) // Match merchant name
+          );
+
+          // Search by Fulfillment Status (checking all line items' fulfillment status)
+          const statusMatch = subscription.lineItems?.some((item) =>
+            item.fulfillment_status?.toLowerCase().match(regex) // Match fulfillment status
+          );
+
+          return orderMatch || merchantMatch || statusMatch; // Return the subscription if any match is found
+        });
+
+  setFilteredSubscriptions(filtered); // Update the state with filtered results
+};
+
+
+useEffect(() => {
+  handleSearch(); // Trigger search when search value changes
+}, [searchVal]); // Only rerun search when searchVal changes
 
   return (
     <div
@@ -211,16 +247,20 @@ const [isLoading, setIsLoading] = useState(true);
 
           <div className="flex justify-between mb-6">
             <div className="flex flex-row flex-wrap items-center">
-              <div className="bg-blue-100 p-2 mr-3 rounded-lg shadow-md max-sm:mb-2">
-                <span className="font-bold text-green-600">
-                  Total Orders: {totalListings}
-                </span>
+              <div className="w-96 max-sm:w-full mt-2">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchVal}
+                  onChange={(e) => setSearchVal(e.target.value)} // Update search value
+                  className="w-full md:w-3/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
             </div>
           </div>
 
           <div className="w-full  max-sm:w-auto  max-sm:flex items-center">
-            {isLoading  ? (
+            {isLoading ? (
               <div className="flex justify-center items-center py-10">
                 <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
                 loading...
@@ -259,7 +299,7 @@ const [isLoading, setIsLoading] = useState(true);
                   </thead>
                   <tbody>
                     {isAdmin
-                      ? subscriptions.map((subscription, index) => {
+                      ? filteredSubscriptions.map((subscription, index) => {
                           const orderId = subscription.serialNo;
 
                           return subscription.merchants.map(
@@ -274,7 +314,7 @@ const [isLoading, setIsLoading] = useState(true);
 
                               const customer = merchantItems[0]?.customer?.[0];
                               const orderDate = customer?.created_at;
-                              const shopifyOrderId = merchantItems[0]?.orderId; 
+                              const shopifyOrderId = merchantItems[0]?.orderId;
                               const fulfillment_status =
                                 merchantItems[0]?.fulfillment_status;
                               const totalQuantity = merchantItems.reduce(
@@ -358,8 +398,7 @@ const [isLoading, setIsLoading] = useState(true);
                             }
                           );
                         })
-                      : 
-                        subscriptions.map((subscription, index) => {
+                      : filteredSubscriptions.map((subscription, index) => {
                           const address =
                             subscription.customer?.default_address;
                           const firstItem = subscription.lineItems?.[0];
@@ -372,12 +411,8 @@ const [isLoading, setIsLoading] = useState(true);
                                 index % 2 === 0 ? "bg-white" : "bg-gray-100"
                               } w-full`}
                             >
-                              <td className="p-3">#{subscription.serialNumber}</td>
-                              <td className="p-3">
-                                {formatDate(subscription.createdAt)}
-                              </td>
                               <td
-                                className="p-3 cursor-pointer hover:underline"
+                                className="p-3 text-blue-600 hover:underline cursor-pointer"
                                 onClick={() => {
                                   console.log("Navigating with data:", {
                                     order: subscription,
@@ -397,6 +432,33 @@ const [isLoading, setIsLoading] = useState(true);
                                     },
                                   });
                                 }}
+                              >
+                                #{subscription.shopifyOrderNo}
+                              </td>
+                              <td className="p-3">
+                                {formatDate(subscription.createdAt)}
+                              </td>
+                              <td
+                                className="p-3"
+                                // onClick={() => {
+                                //   console.log("Navigating with data:", {
+                                //     order: subscription,
+                                //     productName: firstItem.name,
+                                //     sku: firstItem.sku,
+                                //     index: 101 + index,
+                                //     serialNumber: subscription.orderId,
+                                //   });
+
+                                //   navigate(`/order/${subscription.orderId}`, {
+                                //     state: {
+                                //       order: subscription,
+                                //       productName: firstItem.name,
+                                //       sku: firstItem.sku,
+                                //       index: 101 + index,
+                                //       serialNumber: subscription.orderId,
+                                //     },
+                                //   });
+                                // }}
                               >
                                 {firstItem.name}
                                 <br />

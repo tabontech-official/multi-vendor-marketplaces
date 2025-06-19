@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
@@ -30,11 +30,51 @@ const PayoutDetails = () => {
   const [tempReferenceNo, setTempReferenceNo] = useState(referenceNo);
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  const [subscriptions, setSubscriptions] = useState([]);
+  const navigate = useNavigate();
 
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
+  const fetchSubscriptions = async () => {
+    const userId = merchantId;
+    const token = localStorage.getItem("usertoken");
+    setIsLoading(true);
+
+    if (!userId) {
+      console.error("User ID not found.");
+      return;
+    }
+
+    try {
+      const url = `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`;
+
+      const res = await fetch(url, {
+        method: "GET",
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+
+        // Check if it's an array, otherwise, just use the object directly
+        const subscription =
+          json.data && json.data[0] ? json.data[0] : json.data; // Use the first object or the object itself
+
+        setSubscriptions(subscription); // Set as the subscription object instead of array
+      } else {
+        console.error("Failed to fetch subscriptions:", res.status);
+      }
+    } catch (error) {
+      console.error("Error decoding token or fetching subscriptions:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubscriptions();
+  }, []);
 
   const saveBankAccount = async () => {
     setIsLoading(true);
@@ -158,53 +198,9 @@ const PayoutDetails = () => {
   };
   const [orders, setOrders] = useState([]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setLoading(true);
-
-  //     try {
-  //       const res = await fetch(
-  //         `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
-  //           payoutDate
-  //         )}&status=${status}&userId=${merchantId}`
-  //       );
-  //       const json = await res.json();
-
-  //       const fetchedOrders =
-  //         (json.payouts && json.payouts[0] && json.payouts[0].orders) || [];
-
-  //       fetchedOrders.forEach((o) => {
-  //         o.fee = Number((o.amount * 0.1).toFixed(2));
-  //         o.net = Number((o.amount - o.fee).toFixed(2));
-  //       });
-
-  //       const charges = fetchedOrders.reduce(
-  //         (sum, o) => sum + (o.amount || 0),
-  //         0
-  //       );
-  //       const fees = fetchedOrders.reduce((sum, o) => sum + (o.fee || 0), 0);
-  //       const refunds = fetchedOrders.reduce(
-  //         (sum, o) => sum + (o.refund || 0),
-  //         0
-  //       );
-  //       const net = charges - fees;
-  //       const referenceNo = fetchedOrders[0]?.referenceNo || "";
-
-  //       setOrders(fetchedOrders);
-  //       setSummary({ charges, refunds, fees, net, referenceNo });
-  //     } catch (err) {
-  //       console.error("Error fetching payout orders:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   if (payoutDate && status) fetchData();
-  // }, [payoutDate, status]);
-
   useEffect(() => {
     const fetchData = async () => {
-      if (!userRole) return; 
+      if (!userRole) return;
 
       setLoading(true);
 
@@ -218,10 +214,14 @@ const PayoutDetails = () => {
             )}&status=${status}&userId=${merchantId}`
           );
         } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
+          // res = await fetch(
+          //   `https://multi-vendor-marketplace.vercel.app/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(
+          //     payoutDate
+          //   )}&status=${status}`
           res = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(
+            `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
               payoutDate
-            )}&status=${status}`
+            )}&status=${status}&userId=${merchantId}`
           );
         } else {
           console.warn("Unauthorized user role:", userRole);
@@ -522,7 +522,8 @@ const PayoutDetails = () => {
             <tr>
               <th className="p-3">Date</th>
               <th className="p-3">Order No</th>
-              <th className="p-3">Amount</th>
+              <th className="p-3">Status</th>
+
               <th className="p-3">Fee</th>
               <th className="p-3">Net</th>
             </tr>
@@ -550,6 +551,112 @@ const PayoutDetails = () => {
               </tr>
             )}
           </tbody> */}
+
+          {/* <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="5" className="py-10 text-center text-gray-500">
+                  <div className="inline-flex items-center gap-2 justify-center">
+                    <HiOutlineRefresh className="animate-spin text-xl" />
+                    Loading...
+                  </div>
+                </td>
+              </tr>
+            ) : orders.length > 0 ? (
+              Object.values(
+                orders.reduce((acc, order) => {
+                  if (!acc[order.shopifyOrderNo]) {
+                    acc[order.shopifyOrderNo] = { ...order, total: 0 };
+                  }
+                  order.products.forEach((product) => {
+                    acc[order.shopifyOrderNo].total += product.total;
+                  });
+                  return acc;
+                }, {})
+              ).map((order, i) => (
+                <tr
+                  key={i}
+                  className={`border-b hover:bg-gray-50 ${
+                    order.products.some((product) => product.cancelled)
+                      ? "line-through text-gray-400"
+                      : ""
+                  }`}
+                >
+                  <td className="p-3">
+                    {dayjs(order.createdAt).format("MMM D, YYYY")}
+                  </td>
+
+                  <td
+                    className="p-3 text-blue-600 hover:underline cursor-pointer"
+                    onClick={() => {
+                      console.log("Navigating with state:", {
+                        merchantId,
+                        shopifyOrderId: order.orderId,
+                        serialNo: order.orderId,
+                        order: subscriptions,
+                      });
+
+                      navigate(`/order/${order.orderId}`, {
+                        state: {
+                          merchantId,
+                          shopifyOrderId: order.orderId,
+                          serialNo: order.orderId,
+                          order: subscriptions,
+                        },
+                      });
+                    }}
+                  >
+                    #{order.shopifyOrderNo}
+                  </td>
+                  <td className="p-3">
+                    {order?.products?.map((product, index) => {
+                      let fulfillmentStatus = product.fulfillment_status;
+
+                      if (fulfillmentStatus === "cancelled") {
+                        fulfillmentStatus = "Refunded";
+                      }
+
+                      const uniqueStatuses = new Set();
+
+                      if (!uniqueStatuses.has(fulfillmentStatus)) {
+                        uniqueStatuses.add(fulfillmentStatus);
+                      }
+
+                      let bgColorClass = "";
+
+                      if (fulfillmentStatus === "Unfullfilled") {
+                        bgColorClass = "bg-yellow-100 text-yellow-700";
+                      } else if (fulfillmentStatus === "Refunded") {
+                        bgColorClass = "bg-red-100 text-red-700";
+                      } else if (fulfillmentStatus === "Deposited") {
+                        bgColorClass = "bg-green-100 text-green-700";
+                      } else {
+                        bgColorClass = "bg-gray-100 text-gray-600";
+                      }
+
+                      return (
+                        <div
+                          key={index}
+                          className={`inline-block px-2 py-1 text-xs font-medium rounded ${bgColorClass}`}
+                        >
+                          {fulfillmentStatus}
+                        </div>
+                      );
+                    })}
+                  </td>
+                  <td className="p-3">${(order.total * 0.1).toFixed(2)}</td>
+                  <td className="p-3">${(order.total * 0.9).toFixed(2)} AUD</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="p-4 text-center text-gray-500">
+                  No orders found for this payout.
+                </td>
+              </tr>
+            )}
+          
+        </tbody> */}
           <tbody>
             {loading ? (
               <tr>
@@ -561,28 +668,93 @@ const PayoutDetails = () => {
                 </td>
               </tr>
             ) : orders.length > 0 ? (
-              orders.flatMap((order, i) =>
-                (order.products || []).map((product, j) => (
-                  <tr
-                    key={`${i}-${j}`}
-                    className={`border-b hover:bg-gray-50 ${
-                      product.cancelled ? "line-through text-gray-400" : ""
-                    }`}
+              Object.values(
+                orders.reduce((acc, order) => {
+                  if (!acc[order.shopifyOrderNo]) {
+                    acc[order.shopifyOrderNo] = { ...order, total: 0 };
+                  }
+                  order.products.forEach((product) => {
+                    acc[order.shopifyOrderNo].total += product.total;
+                  });
+                  return acc;
+                }, {})
+              ).map((order, i) => (
+                <tr
+                  key={i}
+                  className={`border-b hover:bg-gray-50 ${
+                    order.products.some((product) => product.cancelled)
+                      ? "line-through text-gray-400"
+                      : ""
+                  }`}
+                >
+                  <td className="p-3">
+                    {dayjs(order.createdAt).format("MMM D, YYYY")}
+                  </td>
+
+                  <td
+                    className="p-3 text-blue-600 hover:underline cursor-pointer"
+                    onClick={() => {
+                      console.log("Navigating with state:", {
+                        merchantId,
+                        shopifyOrderId: order.orderId,
+                        serialNo: order.orderId,
+                        order: subscriptions,
+                      });
+
+                      navigate(`/order/${order.orderId}`, {
+                        state: {
+                          merchantId,
+                          shopifyOrderId: order.orderId,
+                          serialNo: order.orderId,
+                          order: subscriptions,
+                        },
+                      });
+                    }}
                   >
-                    <td className="p-3">
-                      {dayjs(order.createdAt).format("MMM D, YYYY")}
-                    </td>
-                    <td className="p-3 text-blue-600 underline cursor-pointer">
-                      #{order.shopifyOrderNo}
-                    </td>
-                    <td className="p-3">${product.total.toFixed(2)}</td>
-                    <td className="p-3">${(product.total * 0.1).toFixed(2)}</td>
-                    <td className="p-3">
-                      ${(product.total * 0.9).toFixed(2)} AUD
-                    </td>
-                  </tr>
-                ))
-              )
+                    #{order.shopifyOrderNo}
+                  </td>
+
+                  <td className="p-3">
+                    {(() => {
+                      const uniqueStatuses = new Set();
+                      order.products.forEach((product) => {
+                        let fulfillmentStatus = product.fulfillment_status;
+
+                        if (fulfillmentStatus === "cancelled") {
+                          fulfillmentStatus = "Refunded";
+                        }
+
+                        uniqueStatuses.add(fulfillmentStatus);
+                      });
+
+                      return [...uniqueStatuses].map((status, idx) => {
+                        let bgColorClass = "";
+                        if (status === "Unfullfilled") {
+                          bgColorClass = "bg-yellow-100 text-yellow-700";
+                        } else if (status === "Refunded") {
+                          bgColorClass = "bg-red-100 text-red-700";
+                        } else if (status === "Deposited") {
+                          bgColorClass = "bg-green-100 text-green-700";
+                        } else {
+                          bgColorClass = "bg-gray-100 text-gray-600";
+                        }
+
+                        return (
+                          <div
+                            key={idx}
+                            className={`inline-block px-2 py-1 text-xs font-medium rounded ${bgColorClass}`}
+                          >
+                            {status}
+                          </div>
+                        );
+                      });
+                    })()}
+                  </td>
+
+                  <td className="p-3">${(order.total * 0.1).toFixed(2)}</td>
+                  <td className="p-3">${(order.total * 0.9).toFixed(2)} AUD</td>
+                </tr>
+              ))
             ) : (
               <tr>
                 <td colSpan="5" className="p-4 text-center text-gray-500">

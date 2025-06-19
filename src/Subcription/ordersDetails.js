@@ -293,7 +293,6 @@ const OrdersDetails = () => {
 
         setLineItemCount(data.lineItemCount);
 
-        // ✅ Compare with resolved frontend lineItems length
         if (data.lineItemCount === lineItems.length) {
           setShowCancelButton(true);
         } else {

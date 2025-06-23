@@ -7,9 +7,12 @@ import UseFetchUserData from "../component/fetchUser";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { RxCross1 } from "react-icons/rx";
+import { useNotification } from "../context api/NotificationContext";
 
 const SubscriptionHistory = () => {
   const { userData, loading, error, variantId } = UseFetchUserData();
+  const { addNotification } = useNotification();
 
   const [subscriptions, setSubscriptions] = useState([]);
   const [totalListings, setTotalListings] = useState(0);
@@ -20,12 +23,19 @@ const SubscriptionHistory = () => {
   const [quantity, setQuantity] = useState(1);
   const pricePerCredit = 10;
   const dynamicPrice = quantity * Price;
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const dialogRef = useRef(null);
   const [selectedMerchants, setSelectedMerchants] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isExportOpen, setIsexportOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportAs, setExportAs] = useState("csv"); // not used yet but can be extended
+  const [exportOption, setExportOption] = useState("all"); // default to 'all'
+
+  const togglePopup = () => setIsexportOpen(!isOpen);
 
   // const fetchSubscriptions = async () => {
   //   const userId = localStorage.getItem("userid");
@@ -91,6 +101,7 @@ const SubscriptionHistory = () => {
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
         setSubscriptions(sortedSubscriptions);
+        setFilteredSubscriptions(sortedSubscriptions);
       } else {
         console.error("Failed to fetch subscriptions:", res.status);
       }
@@ -115,6 +126,50 @@ const SubscriptionHistory = () => {
     );
     console.log(buyCreditUrl);
     window.open(buyCreditUrl, "_blank");
+  };
+
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+
+      const userId = localStorage.getItem("userid");
+      if (!userId) {
+        alert("User ID not found in localStorage");
+        return;
+      }
+
+      const queryParams = new URLSearchParams({
+        userId,
+        type: exportOption, // "all" or "current"
+        ...(exportOption === "current" && { limit: 10 }), // ✅ limit added, ❌ page removed
+      });
+
+      const exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
+
+      const response = await fetch(exportUrl);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Export failed");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `orders-${exportOption}-${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      addNotification("Orders exported successfully", "Orders");
+      setIsexportOpen(false);
+    } catch (error) {
+      alert("Export failed: " + error.message);
+      console.error("Export error:", error);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   useEffect(() => {
@@ -201,39 +256,94 @@ const SubscriptionHistory = () => {
   const [searchVal, setSearchVal] = useState("");
   const [filteredSubscriptions, setFilteredSubscriptions] = useState([]);
 
-const handleSearch = () => {
-  let filtered =
-    searchVal === "" // If no search value, show all subscriptions
-      ? subscriptions // Use subscriptions directly if no search term
-      : subscriptions.filter((subscription) => {
-          const regex = new RegExp(searchVal, "gi"); // Case insensitive regex
+  const handleSearch = () => {
+    const value = searchVal.trim();
+    if (!value) {
+      setFilteredSubscriptions(subscriptions);
+      return;
+    }
 
-          // Search by Order Number (shopifyOrderNo or serialNo)
-          const orderMatch =
-            subscription.shopifyOrderNo
-              ?.toString()
-              .match(regex) || subscription.serialNo?.toString().match(regex);
+    let regexSafe;
+    try {
+      regexSafe = new RegExp(value);
+    } catch (e) {
+      console.error("Invalid regex input:", e);
+      return;
+    }
 
-          // Search by Merchant Name (only matching the merchant info in each subscription)
-          const merchantMatch = subscription.merchants?.some((merchant) =>
-            merchant.info?.name.toLowerCase().match(regex) // Match merchant name
+    const filtered = subscriptions.filter((subscription) => {
+      const orderMatch =
+        regexSafe.test(subscription.shopifyOrderNo?.toString()) ||
+        regexSafe.test(subscription.serialNo?.toString());
+
+      const merchantMatch = subscription.merchants?.some((merchant) =>
+        regexSafe.test(merchant.info?.name || "")
+      );
+
+      const merchantEmailMatch = subscription.merchants?.some((merchant) =>
+        regexSafe.test(merchant.info?.email || "")
+      );
+
+      const statusMatch = Object.values(
+        subscription.lineItemsByMerchant || {}
+      ).some((items) =>
+        items.some((item) => {
+          const status = item.fulfillment_status;
+
+          if (value === "unfulfilled") return status === null;
+          if (value === "fulfilled") return status === "fulfilled";
+          if (value === "cancelled") return status === "cancelled";
+
+          return regexSafe.test(status || "unfulfilled");
+        })
+      );
+
+      const dateMatchFromLineItems = Object.values(
+        subscription.lineItemsByMerchant || {}
+      ).some((items) =>
+        items.some((item) => {
+          const date = item?.customer?.[0]?.created_at;
+          const formattedDate =
+            date &&
+            new Date(date).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            });
+          return (
+            formattedDate &&
+            formattedDate.toLowerCase().includes(value.toLowerCase())
           );
+        })
+      );
 
-          // Search by Fulfillment Status (checking all line items' fulfillment status)
-          const statusMatch = subscription.lineItems?.some((item) =>
-            item.fulfillment_status?.toLowerCase().match(regex) // Match fulfillment status
-          );
-
-          return orderMatch || merchantMatch || statusMatch; // Return the subscription if any match is found
+      const dateMatchUserSide = (() => {
+        if (!subscription.createdAt) return false;
+        const formattedDate = new Date(
+          subscription.createdAt
+        ).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
         });
+        return formattedDate.toLowerCase().includes(value.toLowerCase());
+      })();
+      return (
+        orderMatch ||
+        merchantMatch ||
+        merchantEmailMatch ||
+        statusMatch ||
+        dateMatchFromLineItems ||
+        dateMatchUserSide
+      );
+    });
 
-  setFilteredSubscriptions(filtered); // Update the state with filtered results
-};
+    setFilteredSubscriptions(filtered);
+  };
 
-
-useEffect(() => {
-  handleSearch(); // Trigger search when search value changes
-}, [searchVal]); // Only rerun search when searchVal changes
+  useEffect(() => {
+    handleSearch();
+  }, [searchVal]);
 
   return (
     <div
@@ -245,17 +355,24 @@ useEffect(() => {
         <div className="pt-4 min-w-full px-3 bg-white shadow-lg rounded-lg">
           <h2 className="text-center text-2xl font-bold mb-8">Order History</h2>
 
-          <div className="flex justify-between mb-6">
-            <div className="flex flex-row flex-wrap items-center">
-              <div className="w-96 max-sm:w-full mt-2">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchVal}
-                  onChange={(e) => setSearchVal(e.target.value)} // Update search value
-                  className="w-full md:w-3/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+          <div className="flex justify-between items-center flex-wrap mb-6">
+            <div className="w-full md:w-auto mt-2 max-sm:w-full">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchVal}
+                onChange={(e) => setSearchVal(e.target.value)}
+                className="w-full md:w-96 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="mt-2">
+              <button
+                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+                onClick={togglePopup}
+              >
+                Export
+              </button>
             </div>
           </div>
 
@@ -277,9 +394,12 @@ useEffect(() => {
                         Date Purchased
                       </th>
 
-                      <th scope="col" className="p-3">
-                        {isAdmin ? "Merchant Name" : "Product Name"}
-                      </th>
+                      {isAdmin && (
+                        <th scope="col" className="p-3">
+                          Merchant Name
+                        </th>
+                      )}
+
                       <th scope="col" className="p-3">
                         Item
                       </th>
@@ -299,7 +419,7 @@ useEffect(() => {
                   </thead>
                   <tbody>
                     {isAdmin
-                      ? subscriptions.map((subscription, index) => {
+                      ? filteredSubscriptions.map((subscription, index) => {
                           const orderId = subscription.serialNo;
 
                           return subscription.merchants.map(
@@ -398,7 +518,7 @@ useEffect(() => {
                             }
                           );
                         })
-                      : subscriptions.map((subscription, index) => {
+                      : filteredSubscriptions.map((subscription, index) => {
                           const address =
                             subscription.customer?.default_address;
                           const firstItem = subscription.lineItems?.[0];
@@ -438,7 +558,7 @@ useEffect(() => {
                               <td className="p-3">
                                 {formatDate(subscription.createdAt)}
                               </td>
-                              <td
+                              {/* <td
                                 className="p-3"
                                 // onClick={() => {
                                 //   console.log("Navigating with data:", {
@@ -465,7 +585,7 @@ useEffect(() => {
                                 <span className="text-xs text-gray-500">
                                   SKU: {firstItem.sku || "N/A"}
                                 </span>
-                              </td>
+                              </td> */}
                               <td className="p-3">
                                 <div className="text-xs text-blue-500 mt-1">
                                   {subscription.lineItems.length}{" "}
@@ -518,6 +638,133 @@ useEffect(() => {
               </div>
             )}
           </div>
+          {isExportOpen && (
+            <div
+              onClick={() => setIsexportOpen(false)}
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn"
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative transform scale-95 animate-zoomIn transition-all duration-300"
+              >
+                <div className="flex justify-between border-b border-gray-200">
+                  <h2 className="text-md text-gray-600 font-semibold mb-2">
+                    Export products
+                  </h2>
+                  <RxCross1
+                    onClick={() => setIsexportOpen(false)}
+                    className="hover:text-red-500 cursor-pointer"
+                  />
+                </div>
+
+                <p className="text-sm mb-3 mt-3">
+                  This CSV file can export all order information.
+                  <a href="#" className="text-blue-600 underline">
+                    CSV file for orders
+                  </a>
+                  .
+                </p>
+
+                <div className="mb-4">
+                  <label className="text-md text-gray-600 font-semibold block mb-2">
+                    Export
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="exportOption"
+                        value="current"
+                        checked={exportOption === "current"}
+                        onChange={() => setExportOption("current")}
+                      />
+                      Top 10
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="exportOption"
+                        value="all"
+                        checked={exportOption === "all"}
+                        onChange={() => setExportOption("all")}
+                      />
+                      All orders
+                    </label>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <label className="text-md text-gray-600 font-semibold block mb-2">
+                    Export as
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="exportAs"
+                      value="csv"
+                      checked={exportAs === "csv"}
+                      onChange={() => setExportAs("csv")}
+                    />
+                    CSV for Excel, Numbers, or other spreadsheet programs
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="exportAs"
+                      value="plain"
+                      checked={exportAs === "plain"}
+                      onChange={() => setExportAs("plain")}
+                    />
+                    Plain CSV file
+                  </label>
+                </div>
+
+                <div className="flex justify-end gap-2 border-t border-gray-300">
+                  <button
+                    onClick={() => setIsexportOpen(false)}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded mt-2"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleExport}
+                    disabled={isExporting}
+                    className={`px-4 py-2 rounded mt-2 flex items-center gap-2 ${
+                      isExporting ? "bg-gray-500" : "bg-gray-800"
+                    } text-white`}
+                  >
+                    {isExporting ? (
+                      <>
+                        <svg
+                          className="animate-spin h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                          />
+                        </svg>
+                        Exporting...
+                      </>
+                    ) : (
+                      "Export orders"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

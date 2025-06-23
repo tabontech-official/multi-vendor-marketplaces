@@ -108,13 +108,10 @@ const PayoutDetails = () => {
       }
 
       // Send PayPal update request
-      const res = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
-        {
-          merchantIds,
-          payPal: account,
-        }
-      );
+      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
+        merchantIds,
+        payPal: account,
+      });
 
       if (res.status === 200) {
         setBankAccount(account);
@@ -525,6 +522,7 @@ const PayoutDetails = () => {
               <th className="p-3">Date</th>
               <th className="p-3">Order No</th>
               <th className="p-3">Status</th>
+              <th className="p-3">Amount</th>
 
               <th className="p-3">Fee</th>
               <th className="p-3">Net</th>
@@ -737,6 +735,8 @@ const PayoutDetails = () => {
                           bgColorClass = "bg-red-100 text-red-700";
                         } else if (status === "Deposited") {
                           bgColorClass = "bg-green-100 text-green-700";
+                        } else if (status === "fulfilled") {
+                          bgColorClass = "bg-green-100 text-green-700";
                         } else {
                           bgColorClass = "bg-gray-100 text-gray-600";
                         }
@@ -752,6 +752,7 @@ const PayoutDetails = () => {
                       });
                     })()}
                   </td>
+                  <td className="p-3">${order.total.toFixed(2)}</td>
 
                   <td className="p-3">${(order.total * 0.1).toFixed(2)}</td>
                   <td className="p-3">${(order.total * 0.9).toFixed(2)} AUD</td>

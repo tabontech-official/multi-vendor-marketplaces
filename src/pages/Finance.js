@@ -93,10 +93,10 @@ const Finance = () => {
         return;
       }
 
-        showToast("success", "saved successfully!");
+      showToast("success", "saved successfully!");
     } catch (err) {
       console.error(" Network error:", err);
-        showToast("error", "Error saving payout configuration..");
+      showToast("error", "Error saving payout configuration..");
     }
   };
 
@@ -167,7 +167,7 @@ const Finance = () => {
         }
       } catch (error) {
         console.error("PayPal check failed:", error);
-        setPaypalPopup(true); // fallback
+        setPaypalPopup(true);
       }
     };
 
@@ -349,7 +349,7 @@ const Finance = () => {
 
           <button
             className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-              activeTab === "Due "
+              activeTab === "Due"
                 ? "border-blue-600 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-blue-600"
             }`}
@@ -389,6 +389,9 @@ const Finance = () => {
                     )}
                     <th className="p-3">Transaction Dates</th>
                     <th className="p-3">Status</th>
+                    <th className="p-3">Fulfilled items</th>
+                    <th className="p-3">Unfulfilled items</th>
+
                     <th className="p-3 text-right">Amount</th>
                   </tr>
                 </thead>
@@ -400,41 +403,37 @@ const Finance = () => {
                           (payout) => payout.status.toLowerCase() === "pending"
                         )
                         .flatMap((payout, index) => {
-                          // Group orders by merchantId and payout date
                           const merchantGroups = payout.orders.reduce(
                             (acc, order) => {
+                              const key = `${order.merchantId}-${payout.payoutDate}`;
+
+                              if (!acc[key]) {
+                                acc[key] = {
+                                  merchantId: order.merchantId,
+                                  merchantName: order.merchantName || "N/A",
+                                  merchantEmail: order.merchantEmail || "N/A",
+                                  fulfilledCount: order.fulfilledCount || 0,
+                                  unfulfilledCount: order.unfulfilledCount || 0,
+                                  totalAmount: 0,
+                                  totalQuantity: 0,
+                                  lineItems: [],
+                                };
+                              }
+
                               order.lineItems.forEach((line) => {
-                                const {
-                                  merchantId,
-                                  price,
-                                  current_quantity,
-                                  fulfillment_status,
-                                } = line;
-                                const key = `${merchantId}-${payout.payoutDate}`;
-
-                                // Group line items by merchantId and payout date
-                                if (!acc[key]) {
-                                  acc[key] = {
-                                    merchantId,
-                                    merchantName: line.merchantName || "N/A",
-                                    merchantEmail: line.merchantEmail || "N/A",
-                                    totalAmount: 0,
-                                    totalQuantity: 0,
-                                    lineItems: [],
-                                  };
-                                }
-
                                 const total =
-                                  parseFloat(price) * current_quantity;
+                                  parseFloat(line.price) *
+                                  (line.current_quantity || 0);
                                 acc[key].totalAmount += total;
-                                acc[key].totalQuantity += current_quantity;
+                                acc[key].totalQuantity +=
+                                  line.current_quantity || 0;
                                 acc[key].lineItems.push(line);
 
-                                // If fulfillment status is cancelled, subtract from totalAmount
-                                if (fulfillment_status === "cancelled") {
-                                  acc[key].totalAmount -= total; // Subtract the cancelled product amount
+                                if (line.fulfillment_status === "cancelled") {
+                                  acc[key].totalAmount -= total;
                                 }
                               });
+
                               return acc;
                             },
                             {}
@@ -469,7 +468,6 @@ const Finance = () => {
                                     {payout.payoutDate}
                                   </td>
 
-                                  {/* Merchant Info */}
                                   {(userRole === "Master Admin" ||
                                     userRole === "Dev Admin") && (
                                     <td className="p-3 text-sm text-gray-600">
@@ -494,6 +492,13 @@ const Finance = () => {
                                       </span>
                                     )}
                                   </td>
+                                  <td className="p-3">
+                                    {merchantGroup.fulfilledCount}
+                                  </td>
+                                  <td className="p-3">
+                                    {merchantGroup.unfulfilledCount}
+                                  </td>
+
                                   <td className="p-3 text-right font-medium">
                                     {merchantGroup.totalAmount.toFixed(2)} AUD
                                   </td>
@@ -504,6 +509,7 @@ const Finance = () => {
                         })
                     : filteredPayouts.map((item, index) => {
                         const merchantId = localStorage.getItem("userid");
+
                         return (
                           <tr key={index} className="border-b hover:bg-gray-50">
                             <td
@@ -534,6 +540,9 @@ const Finance = () => {
                                 {item.status}
                               </span>
                             </td>
+                            <td className="p-3">{item.totalFulfilled}</td>
+                            <td className="p-3">{item.totalUnfulfilled}</td>
+
                             <td className="p-3 text-right font-medium">
                               {item.amount
                                 ? `$${(
@@ -996,16 +1005,14 @@ const Finance = () => {
                           (payout) => payout.status.toLowerCase() === "pending"
                         )
                         .flatMap((payout, index) => {
-                          // Check filteredPayouts after filter
                           console.log("Filtered payout:", payout);
 
-                          // Group orders by merchantId
                           const groupedLineItems = payout.orders.reduce(
                             (acc, order) => {
                               order.lineItems.forEach((line) => {
                                 const { merchantId, price, current_quantity } =
                                   line;
-                                const key = merchantId; // Group by merchantId
+                                const key = merchantId;
 
                                 if (!acc[key]) {
                                   acc[key] = {
@@ -1028,7 +1035,6 @@ const Finance = () => {
                             {}
                           );
 
-                          // Log grouped data
                           console.log("Grouped line items:", groupedLineItems);
 
                           return Object.values(groupedLineItems).map(
@@ -1199,7 +1205,6 @@ const Finance = () => {
               </select>
             </div>
 
-            {/* Weekly Day Selection */}
             {payoutFrequency === "weekly" && (
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">
@@ -1227,7 +1232,6 @@ const Finance = () => {
               </div>
             )}
 
-            {/* Payout Date Inputs */}
             {["daily", "once", "twice"].includes(payoutFrequency) && (
               <div className="flex flex-col sm:flex-row gap-6 mb-6">
                 <div>
@@ -1258,7 +1262,6 @@ const Finance = () => {
               </div>
             )}
 
-            {/* Save Button */}
             <div className="flex justify-end">
               <button
                 onClick={handleSavePayoutDates}

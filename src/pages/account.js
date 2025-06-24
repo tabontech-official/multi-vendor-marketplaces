@@ -66,7 +66,7 @@ const AccountPage = () => {
 
       try {
         const res = await fetch(
-          `http://localhost:5000/auth/getCollcetion/${userId}`
+          `https://multi-vendor-marketplace.vercel.app/auth/getCollcetion/${userId}`
         );
         const data = await res.json();
         if (res.ok) {
@@ -103,7 +103,7 @@ useEffect(() => {
     if (!userId) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/auth/getBrandAssets/${userId}`);
+      const res = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/getBrandAssets/${userId}`);
       const json = await res.json();
 
       if (res.ok && json.data) {
@@ -146,7 +146,7 @@ useEffect(() => {
       }
 
       const response = await axios.post(
-        "http://localhost:5000/auth/addBrandAsset",
+        "https://multi-vendor-marketplace.vercel.app/auth/addBrandAsset",
         formData,
         {
           headers: {
@@ -178,7 +178,7 @@ useEffect(() => {
       }
 
       try {
-        const response = await fetch(`http://localhost:5000/auth/user/${id}`, {
+        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
           method: "GET",
         });
 
@@ -270,7 +270,7 @@ useEffect(() => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/auth/editProfile/${userId}`,
+        `https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`,
         {
           method: "PUT",
           body: form,
@@ -329,7 +329,7 @@ useEffect(() => {
 
   const updateAllProductsStatus = async (status) => {
     try {
-      const response = await fetch("http://localhost:5000/product/holiday", {
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/product/holiday", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -377,7 +377,7 @@ useEffect(() => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/auth/createUserTagsModule",
+        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {

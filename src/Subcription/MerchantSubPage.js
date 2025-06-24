@@ -31,7 +31,7 @@ const MerchantSubPage = () => {
 
 const fetchSubscriptions = async () => {
   try {
-    const res = await fetch(`http://localhost:5000/order/order/${merchantId}`, {
+    const res = await fetch(`https://multi-vendor-marketplace.vercel.app/order/order/${merchantId}`, {
       method: "GET",
     });
 
@@ -78,7 +78,7 @@ useEffect(() => {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/product/getProduct/${id}`,
+          `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
           { method: "GET" }
         );
         if (response.ok) {

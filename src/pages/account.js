@@ -36,7 +36,11 @@ const AccountPage = () => {
   const [selectedModules, setSelectedModules] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [sellerName, setSellerName] = useState("");
+  const [sellerNameInput, setSellerNameInput] = useState("");
+  const [collectionId, setCollectionId] = useState("");
 
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -55,20 +59,77 @@ const AccountPage = () => {
     sellerGst: "",
     gstRegistered: "",
   });
-  
+  useEffect(() => {
+    const fetchBrandAssetData = async () => {
+      const userId = localStorage.getItem("userid");
+      if (!userId) return;
+
+      try {
+        const res = await fetch(
+          `http://localhost:5000/auth/getCollcetion/${userId}`
+        );
+        const data = await res.json();
+        if (res.ok) {
+          setSellerName(data.sellerName);
+          setSellerNameInput(data.sellerName);
+          setCollectionId(data.shopifyCollectionId);
+          setDescription(data.description);
+          setImagePreview(data.image);
+        } else {
+          console.error("Error fetching brand asset:", data.error);
+        }
+      } catch (err) {
+        console.error("API error:", err);
+      }
+    };
+
+    fetchBrandAssetData();
+  }, []);
+
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    setImagePreview(URL.createObjectURL(file));
+    setImageFile(file);
+  }
+};
+
+
+useEffect(() => {
+  const fetchBrandAssetData = async () => {
+    const userId = localStorage.getItem("userid");
+    if (!userId) return;
+
+    try {
+      const res = await fetch(`http://localhost:5000/auth/getBrandAssets/${userId}`);
+      const json = await res.json();
+
+      if (res.ok && json.data) {
+        const { sellerName, description, images } = json.data;
+        setSellerName(sellerName || "");
+        setDescription(description || "");
+        setImagePreview(images || ""); // Cloudinary image URL
+        setCollectionId(json.data.shopifyCollectionId || "");
+      } else {
+        console.error("Failed to fetch brand asset:", json.error);
+      }
+    } catch (error) {
+      console.error("API error:", error);
     }
   };
 
+  fetchBrandAssetData();
+}, []);
+
+
+
+
   const handleSubmit2 = async () => {
-    if (!imageFile || !description) {
-      setMessage("Image and description are required");
+    const userId = localStorage.getItem("userid");
+    if (!userId || !collectionId || !description) {
+      setMessage("User ID, Collection ID, and Description are required");
       return;
     }
 
@@ -77,11 +138,15 @@ const AccountPage = () => {
       setMessage("");
 
       const formData = new FormData();
+      formData.append("userId", userId);
+      formData.append("collectionId", collectionId);
       formData.append("description", description);
-      formData.append("images", imageFile);
+      if (imageFile) {
+        formData.append("images", imageFile);
+      }
 
       const response = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/auth/addBrandAsset",
+        "http://localhost:5000/auth/addBrandAsset",
         formData,
         {
           headers: {
@@ -90,11 +155,11 @@ const AccountPage = () => {
         }
       );
 
-      setMessage(" Collection created successfully!");
+      setMessage("Collection updated successfully!");
       console.log("Response:", response.data);
     } catch (error) {
-      console.error(" Error:", error.response?.data || error.message);
-      setMessage(" Failed to create collection");
+      console.error("Error:", error.response?.data || error.message);
+      setMessage("Failed to update collection");
     } finally {
       setLoading(false);
     }
@@ -113,12 +178,9 @@ const AccountPage = () => {
       }
 
       try {
-        const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
-          {
-            method: "GET",
-          }
-        );
+        const response = await fetch(`http://localhost:5000/auth/user/${id}`, {
+          method: "GET",
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -208,7 +270,7 @@ const AccountPage = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`,
+        `http://localhost:5000/auth/editProfile/${userId}`,
         {
           method: "PUT",
           body: form,
@@ -267,16 +329,13 @@ const AccountPage = () => {
 
   const updateAllProductsStatus = async (status) => {
     try {
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/holiday",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status }),
-        }
-      );
+      const response = await fetch("http://localhost:5000/product/holiday", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      });
 
       const data = await response.json();
       if (response.ok) {
@@ -318,7 +377,7 @@ const AccountPage = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+        "http://localhost:5000/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {
@@ -378,22 +437,21 @@ const AccountPage = () => {
           </div>
 
           <nav className="mt-6 space-y-4">
-           {userRole === "Merchant" && (
-             <NavLink
-              to="/manage-user"
-              className={({ isActive }) =>
-                `w-full flex items-center space-x-3 ${
-                  isActive ? "text-yellow-400" : "text-blue-300"
-                } hover:text-yellow-400`
-              }
-            >
-              <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
-                <MdManageAccounts />
-              </span>
-              <span className="text-sm">Manage User</span>
-            </NavLink>
-
-           )}
+            {userRole === "Merchant" && (
+              <NavLink
+                to="/manage-user"
+                className={({ isActive }) =>
+                  `w-full flex items-center space-x-3 ${
+                    isActive ? "text-yellow-400" : "text-blue-300"
+                  } hover:text-yellow-400`
+                }
+              >
+                <span className="w-6 h-6 bg-blue-700 flex items-center justify-center rounded-md">
+                  <MdManageAccounts />
+                </span>
+                <span className="text-sm">Manage User</span>
+              </NavLink>
+            )}
             <NavLink
               to="/edit-account"
               className={({ isActive }) =>
@@ -838,11 +896,11 @@ const AccountPage = () => {
             </div>
           )}
 
-          {activeTab === "brandassets" && (
+          {/* {activeTab === "brandassets" && (
             <div className=" p-6 rounded-lg text-blue-900">
               <div className="flex justify-between">
                 <h2 className="text-xl font-semibold text-blue-900">
-                  About Your Brand
+                  Seller Name
                 </h2>
               </div>
 
@@ -908,6 +966,104 @@ const AccountPage = () => {
                 </button>
               </div>
 
+              {message && (
+                <p className="mt-4 text-center text-blue-700 font-medium">
+                  {message}
+                </p>
+              )}
+            </div>
+          )} */}
+          {activeTab === "brandassets" && (
+            <div className="p-6 rounded-lg text-blue-900">
+              <div className="flex flex-col gap-4 mb-6">
+                {/* Seller Name + Link + Button in one row */}
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-semibold text-blue-900">
+                      Seller Name
+                    </h2>
+                    <a
+                      href={`https://www.aydiactive.com/collections/${sellerName}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-3 text-blue-800 underline hover:text-blue-900"
+                    >
+                      https://www.aydiactive.com/collections/{sellerName}
+                    </a>
+                  </div>
+
+                  <button
+                    className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700"
+                    onClick={handleSubmit2}
+                    disabled={loading}
+                  >
+                    {loading ? "Updating..." : "Update Collection"}
+                  </button>
+                </div>
+
+                {/* Optional: Show Shopify Collection ID */}
+                {/* {collectionId && (
+    <div className="text-sm text-blue-600">
+      Shopify Collection ID: <strong>{collectionId}</strong>
+    </div>
+  )} */}
+              </div>
+
+              {/* Upload Box */}
+              <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300 text-center">
+                <p className="text-blue-500">
+                  Maximum size for a file is 5MB, format: .jpg, .jpeg
+                </p>
+                <p className="text-blue-600">
+                  Recommended image size: 1180×290px
+                </p>
+                <div className="mt-4 h-32 border-2 border-dashed border-blue-500 flex justify-center items-center relative">
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="object-cover h-full w-full"
+                    />
+                  ) : (
+                    <span className="text-blue-500 z-10">
+                      Upload Cover Photo
+                    </span>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={handleImageChange}
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="mt-6">
+                <label className="block text-blue-700 mb-1">Description</label>
+                <textarea
+                  className="w-full p-2 bg-blue-200 text-blue-900 border border-blue-400 rounded-md"
+                  placeholder="Minimum 160 and maximum 900 characters"
+                  rows="4"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+
+              {/* Info Box */}
+              <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300">
+                <h3 className="text-lg font-semibold text-blue-900">Photo</h3>
+                <ul className="text-blue-600 text-sm mt-2 space-y-1">
+                  <li>✔ Your photo will be posted:</li>
+                  <li>- On the business page</li>
+                  <li>- On the ad page (if you have an ad package)</li>
+                  <li>- In job search results (if using premium ads)</li>
+                </ul>
+              </div>
+
+              {/* Submit Button */}
+
+              {/* Message */}
               {message && (
                 <p className="mt-4 text-center text-blue-700 font-medium">
                   {message}

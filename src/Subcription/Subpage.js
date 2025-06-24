@@ -47,7 +47,7 @@ const SubscriptionHistory = () => {
 
   //   try {
   //     const res = await fetch(
-  //       `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`,
+  //       `http://localhost:5000/order/order/${userId}`,
   //       {
   //         method: "GET",
   //       }
@@ -88,8 +88,8 @@ const SubscriptionHistory = () => {
       setIsAdmin(isAdminFlag);
 
       const url = isAdminFlag
-        ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrderForMerchants`
-        : `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`;
+        ? `http://localhost:5000/order/getAllOrderForMerchants`
+        : `http://localhost:5000/order/order/${userId}`;
 
       const res = await fetch(url, {
         method: "GET",
@@ -144,7 +144,7 @@ const SubscriptionHistory = () => {
   //       ...(exportOption === "current" && { limit: 10 }), // ✅ limit added, ❌ page removed
   //     });
 
-  //     const exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
+  //     const exportUrl = `http://localhost:5000/order/exportAllOrder?${queryParams.toString()}`;
 
   //     const response = await fetch(exportUrl);
   //     if (!response.ok) {
@@ -172,67 +172,67 @@ const SubscriptionHistory = () => {
   //   }
   // };
 
-const handleExport = async () => {
-  try {
-    setIsExporting(true);
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
 
-    const userId = localStorage.getItem("userid");
-    const token = localStorage.getItem("usertoken");
+      const userId = localStorage.getItem("userid");
+      const token = localStorage.getItem("usertoken");
 
-    if (!userId || !token) {
-      alert("User ID or token not found in localStorage");
-      return;
+      if (!userId || !token) {
+        alert("User ID or token not found in localStorage");
+        return;
+      }
+
+      const decoded = jwtDecode(token);
+      const role = decoded?.payLoad?.role;
+      const isTokenValid = decoded?.exp * 1000 > Date.now();
+
+      const isAdmin =
+        isTokenValid && (role === "Master Admin" || role === "Dev Admin");
+
+      let exportUrl;
+
+      if (isAdmin) {
+        const queryParams = new URLSearchParams({
+          type: exportOption,
+          ...(exportOption === "current" && { limit: 10 }),
+        });
+        exportUrl = `http://localhost:5000/order/exportAllOrder?${queryParams.toString()}`;
+      } else {
+        const queryParams = new URLSearchParams({
+          userId,
+          type: exportOption,
+          ...(exportOption === "current" && { limit: 10 }),
+        });
+        exportUrl = `http://localhost:5000/order/exportOrderByUserId?${queryParams.toString()}`;
+      }
+
+      const response = await fetch(exportUrl);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Export failed");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `orders-${exportOption}-${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      addNotification("Orders exported successfully", "Orders");
+      setIsexportOpen(false);
+    } catch (error) {
+      alert("Export failed: " + error.message);
+      console.error("Export error:", error);
+    } finally {
+      setIsExporting(false);
     }
-
-    const decoded = jwtDecode(token);
-    const role = decoded?.payLoad?.role;
-    const isTokenValid = decoded?.exp * 1000 > Date.now();
-
-    const isAdmin = isTokenValid && (role === "Master Admin" || role === "Dev Admin");
-
-    let exportUrl;
-
-    if (isAdmin) {
-      const queryParams = new URLSearchParams({
-        type: exportOption, 
-        ...(exportOption === "current" && { limit: 10 }),
-      });
-      exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
-    } else {
-      const queryParams = new URLSearchParams({
-        userId,
-        type: exportOption,
-        ...(exportOption === "current" && { limit: 10 }),
-      });
-      exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
-    }
-
-    const response = await fetch(exportUrl);
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Export failed");
-    }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `orders-${exportOption}-${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-
-    addNotification("Orders exported successfully", "Orders");
-    setIsexportOpen(false);
-  } catch (error) {
-    alert("Export failed: " + error.message);
-    console.error("Export error:", error);
-  } finally {
-    setIsExporting(false);
-  }
-};
-
+  };
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -244,7 +244,7 @@ const handleExport = async () => {
 
       try {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
+          `http://localhost:5000/product/getProduct/${id}`,
           { method: "GET" }
         );
         if (response.ok) {
@@ -315,6 +315,7 @@ const handleExport = async () => {
       );
     }
   }, []);
+  
   const [searchVal, setSearchVal] = useState("");
   const [filteredSubscriptions, setFilteredSubscriptions] = useState([]);
 

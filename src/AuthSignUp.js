@@ -11,6 +11,8 @@ const AuthSignUp = () => {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [sellerName, setSellerName] = useState("");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -20,7 +22,6 @@ const AuthSignUp = () => {
   const [phoneNumber, setNumber] = useState("");
   const [country, setCountry] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [success, setSuccess] = useState("");
   const [agreedToPolicies, setAgreedToPolicies] = useState(false);
   const handleSignup = async (e) => {
@@ -55,24 +56,22 @@ const AuthSignUp = () => {
     }
 
     try {
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/signUp",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            firstName,
-            lastName,
-            email,
-            password,
-            zip,
-            country,
-            state,
-            phoneNumber,
-            city,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:5000/auth/signUp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          sellerName,
+          password,
+          zip,
+          country,
+          state,
+          phoneNumber,
+          city,
+        }),
+      });
 
       const json = await response.json();
 
@@ -134,6 +133,16 @@ const AuthSignUp = () => {
                 placeholder="Last Name*"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <input
+                type="text"
+                className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
+                placeholder="Seller Name*"
+                value={sellerName}
+                onChange={(e) => setSellerName(e.target.value)}
                 required
               />
             </div>

@@ -347,7 +347,7 @@ const PayoutDetails = () => {
           {userRole === "Merchant" && (
             <div className="text-sm text-gray-600 space-y-1">
               <p>
-                <strong>Bank account:</strong> {summary.paypalAccount}
+                <strong>Account info:</strong> {summary.paypalAccount}
               </p>
               <p>
                 <strong>Bank reference:</strong> {summary.referenceNo}
@@ -366,7 +366,7 @@ const PayoutDetails = () => {
           {(userRole === "Dev Admin" || userRole === "Master Admin") && (
             <div className="text-sm text-gray-600 space-y-4">
               <div className="flex items-center">
-                <strong className="w-40">Bank account:</strong>
+                <strong className="w-40">Account info:</strong>
                 <div className="relative w-64 flex items-center">
                   <input
                     type="text"
@@ -714,7 +714,7 @@ const PayoutDetails = () => {
                     #{order.shopifyOrderNo}
                   </td>
 
-                  <td className="p-3">
+                  {/* <td className="p-3">
                     {(() => {
                       const uniqueStatuses = new Set();
                       order.products.forEach((product) => {
@@ -751,6 +751,48 @@ const PayoutDetails = () => {
                         );
                       });
                     })()}
+                  </td> */}
+                  <td className="p-3">
+                   {(() => {
+  const products = order.products || [];
+
+  const hasUnfulfilled = products.some(
+    (p) =>
+      (p.fulfillment_status?.toLowerCase() === "unfulfilled" ||
+        p.fulfillment_status?.toLowerCase() === "unfullfilled") &&
+      !p.cancelled
+  );
+
+  const allFulfilled = products.every(
+    (p) =>
+      p.fulfillment_status?.toLowerCase() === "fulfilled" && !p.cancelled
+  );
+
+  const hasRefunded = products.some(
+    (p) => p.fulfillment_status === "cancelled"
+  );
+
+  let displayStatus = "Unknown";
+  let bgColorClass = "bg-gray-100 text-gray-600";
+
+  if (hasUnfulfilled) {
+    displayStatus = "Unfulfilled";
+    bgColorClass = "bg-yellow-100 text-yellow-700";
+  } else if (allFulfilled) {
+    displayStatus = "Fulfilled";
+    bgColorClass = "bg-green-100 text-green-700";
+  } else if (hasRefunded) {
+    displayStatus = "Refunded";
+    bgColorClass = "bg-red-100 text-red-700";
+  }
+
+  return (
+    <div className={`inline-block px-2 py-1 text-xs font-medium rounded ${bgColorClass}`}>
+      {displayStatus}
+    </div>
+  );
+})()}
+
                   </td>
                   <td className="p-3">${order.total.toFixed(2)}</td>
 

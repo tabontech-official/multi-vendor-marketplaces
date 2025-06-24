@@ -15,6 +15,8 @@ const FullItem = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");
+  const [customCarrier, setCustomCarrier] = useState("");
+
   const [carrier, setCarrier] = useState("");
   const navigate = useNavigate();
   const order = {
@@ -102,7 +104,7 @@ const FullItem = () => {
 
     if (Array.isArray(rawOrder?.lineItems)) {
       lineItems = rawOrder.lineItems;
-      console.log("✅ Fulfill: Merchant lineItems used");
+      console.log("Fulfill: Merchant lineItems used");
     } else if (
       fullOrder?.lineItemsByMerchant &&
       typeof merchantId === "string" &&
@@ -208,20 +210,19 @@ const FullItem = () => {
     setQuantities((prev) => ({ ...prev, [lineItemId]: qty }));
   };
 
-const displaySerialNo =
-  rawOrder?.serialNumber || rawOrder?.serialNo || "N/A";
+  const displaySerialNo = rawOrder?.serialNumber || rawOrder?.serialNo || "N/A";
 
-const merchantCustomer = rawOrder?.customer;
-console.log(merchantCustomer)
+  const merchantCustomer = rawOrder?.customer;
+  console.log(merchantCustomer);
 
-const adminCustomer =
-  fullOrder?.customersByMerchant?.[merchantId] ||
-  fullOrder?.lineItemsByMerchant?.[merchantId]?.[0]?.customer?.[0] ||
-  rawOrder?.lineItemsByMerchant?.[merchantId]?.[0]?.customer?.[0] ||
-  null;
+  const adminCustomer =
+    fullOrder?.customersByMerchant?.[merchantId] ||
+    fullOrder?.lineItemsByMerchant?.[merchantId]?.[0]?.customer?.[0] ||
+    rawOrder?.lineItemsByMerchant?.[merchantId]?.[0]?.customer?.[0] ||
+    null;
 
-const customer = merchantCustomer || adminCustomer || {};
-const address = customer?.default_address || {};
+  const customer = merchantCustomer || adminCustomer || {};
+  const address = customer?.default_address || {};
 
   return (
     <div className="p-6 min-h-screen">
@@ -309,7 +310,7 @@ const address = customer?.default_address || {};
             </div>
           </div>
 
-          <div className="bg-white border border-gray-200 rounded-lg shadow p-4 space-y-4">
+          {/* <div className="bg-white border border-gray-200 rounded-lg shadow p-4 space-y-4">
             <div className="text-sm font-medium">Tracking information</div>
             <div className="bg-blue-50 p-3 text-xs text-blue-800 rounded border border-blue-200">
               <strong>Add tracking</strong> to improve customer satisfaction.
@@ -334,6 +335,49 @@ const address = customer?.default_address || {};
                 <option>Others</option>
               </select>
             </div>
+          </div> */}
+          <div className="bg-white border border-gray-200 rounded-lg shadow p-4 space-y-4">
+            <div className="text-sm font-medium">Tracking information</div>
+
+            <div className="bg-blue-50 p-3 text-xs text-blue-800 rounded border border-blue-200">
+              <strong>Add tracking</strong> to improve customer satisfaction.
+              Orders with tracking let customers receive delivery updates and
+              reduce support requests.
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder="Tracking number"
+                className="border px-3 py-2 rounded w-full text-sm"
+                value={trackingNumber}
+                onChange={(e) => setTrackingNumber(e.target.value)}
+              />
+
+              <select
+                onChange={(e) => setCarrier(e.target.value)}
+                className="border px-3 py-2 rounded w-full text-sm"
+                value={carrier}
+              >
+                <option value="">Shipping carrier</option>
+                <option value="FedEx">FedEx</option>
+                <option value="DHL">DHL</option>
+                <option value="Others">Others</option>
+              </select>
+            </div>
+
+            {/* Show input when carrier is "Others" */}
+            {carrier === "Others" && (
+              <div>
+                <input
+                  type="text"
+                  placeholder="Enter other carrier name"
+                  className="border px-3 py-2 rounded w-full text-sm mt-2"
+                  value={customCarrier}
+                  onChange={(e) => setCustomCarrier(e.target.value)}
+                />
+              </div>
+            )}
           </div>
         </div>
 

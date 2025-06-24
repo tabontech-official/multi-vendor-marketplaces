@@ -476,7 +476,6 @@ const OrdersDetails = () => {
                 i.fulfillment_status === "cancelled"
             ) && (
               <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
-                {/* Header */}
                 <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
                   <span>
                     Unfulfilled (
@@ -488,7 +487,6 @@ const OrdersDetails = () => {
                   </span>
                 </div>
 
-                {/* Card */}
                 <div className="border border-gray-200 rounded-lg p-4 space-y-4">
                   <div className="text-sm space-y-2">
                     <div>
@@ -564,7 +562,6 @@ const OrdersDetails = () => {
                       ))}
                   </div>
 
-                  {/* Action Buttons */}
                   {!lineItems.some(
                     (i) => i.fulfillment_status === "cancelled"
                   ) && (

@@ -108,10 +108,13 @@ const PayoutDetails = () => {
       }
 
       // Send PayPal update request
-      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
-        merchantIds,
-        payPal: account,
-      });
+      const res = await axios.post(
+        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
+        {
+          merchantIds,
+          payPal: account,
+        }
+      );
 
       if (res.status === 200) {
         setBankAccount(account);
@@ -753,46 +756,50 @@ const PayoutDetails = () => {
                     })()}
                   </td> */}
                   <td className="p-3">
-                   {(() => {
-  const products = order.products || [];
+                    {(() => {
+                      const products = order.products || [];
 
-  const hasUnfulfilled = products.some(
-    (p) =>
-      (p.fulfillment_status?.toLowerCase() === "unfulfilled" ||
-        p.fulfillment_status?.toLowerCase() === "unfullfilled") &&
-      !p.cancelled
-  );
+                      const hasUnfulfilled = products.some(
+                        (p) =>
+                          (p.fulfillment_status?.toLowerCase() ===
+                            "unfulfilled" ||
+                            p.fulfillment_status?.toLowerCase() ===
+                              "unfullfilled") &&
+                          !p.cancelled
+                      );
 
-  const allFulfilled = products.every(
-    (p) =>
-      p.fulfillment_status?.toLowerCase() === "fulfilled" && !p.cancelled
-  );
+                      const allFulfilled = products.every(
+                        (p) =>
+                          p.fulfillment_status?.toLowerCase() === "fulfilled" &&
+                          !p.cancelled
+                      );
 
-  const hasRefunded = products.some(
-    (p) => p.fulfillment_status === "cancelled"
-  );
+                      const hasRefunded = products.some(
+                        (p) => p.fulfillment_status === "cancelled"
+                      );
 
-  let displayStatus = "Unknown";
-  let bgColorClass = "bg-gray-100 text-gray-600";
+                      let displayStatus = "Unknown";
+                      let bgColorClass = "bg-gray-100 text-gray-600";
 
-  if (hasUnfulfilled) {
-    displayStatus = "Unfulfilled";
-    bgColorClass = "bg-yellow-100 text-yellow-700";
-  } else if (allFulfilled) {
-    displayStatus = "Fulfilled";
-    bgColorClass = "bg-green-100 text-green-700";
-  } else if (hasRefunded) {
-    displayStatus = "Refunded";
-    bgColorClass = "bg-red-100 text-red-700";
-  }
+                      if (hasUnfulfilled) {
+                        displayStatus = "Unfulfilled";
+                        bgColorClass = "bg-yellow-100 text-yellow-700";
+                      } else if (allFulfilled) {
+                        displayStatus = "Fulfilled";
+                        bgColorClass = "bg-green-100 text-green-700";
+                      } else if (hasRefunded) {
+                        displayStatus = "Refunded";
+                        bgColorClass = "bg-red-100 text-red-700";
+                      }
 
-  return (
-    <div className={`inline-block px-2 py-1 text-xs font-medium rounded ${bgColorClass}`}>
-      {displayStatus}
-    </div>
-  );
-})()}
-
+                      return (
+                        <div
+                          className={`inline-block px-2 py-1 text-xs font-medium rounded ${bgColorClass}`}
+                        >
+                          {displayStatus}
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td className="p-3">${order.total.toFixed(2)}</td>
 

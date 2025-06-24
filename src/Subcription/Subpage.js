@@ -128,49 +128,111 @@ const SubscriptionHistory = () => {
     window.open(buyCreditUrl, "_blank");
   };
 
-  const handleExport = async () => {
-    try {
-      setIsExporting(true);
+  // const handleExport = async () => {
+  //   try {
+  //     setIsExporting(true);
 
-      const userId = localStorage.getItem("userid");
-      if (!userId) {
-        alert("User ID not found in localStorage");
-        return;
-      }
+  //     const userId = localStorage.getItem("userid");
+  //     if (!userId) {
+  //       alert("User ID not found in localStorage");
+  //       return;
+  //     }
 
+  //     const queryParams = new URLSearchParams({
+  //       userId,
+  //       type: exportOption, // "all" or "current"
+  //       ...(exportOption === "current" && { limit: 10 }), // ✅ limit added, ❌ page removed
+  //     });
+
+  //     const exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
+
+  //     const response = await fetch(exportUrl);
+  //     if (!response.ok) {
+  //       const error = await response.json();
+  //       throw new Error(error.message || "Export failed");
+  //     }
+
+  //     const blob = await response.blob();
+  //     const url = window.URL.createObjectURL(blob);
+  //     const link = document.createElement("a");
+  //     link.href = url;
+  //     link.setAttribute("download", `orders-${exportOption}-${Date.now()}.csv`);
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     link.remove();
+  //     window.URL.revokeObjectURL(url);
+
+  //     addNotification("Orders exported successfully", "Orders");
+  //     setIsexportOpen(false);
+  //   } catch (error) {
+  //     alert("Export failed: " + error.message);
+  //     console.error("Export error:", error);
+  //   } finally {
+  //     setIsExporting(false);
+  //   }
+  // };
+
+const handleExport = async () => {
+  try {
+    setIsExporting(true);
+
+    const userId = localStorage.getItem("userid");
+    const token = localStorage.getItem("usertoken");
+
+    if (!userId || !token) {
+      alert("User ID or token not found in localStorage");
+      return;
+    }
+
+    const decoded = jwtDecode(token);
+    const role = decoded?.payLoad?.role;
+    const isTokenValid = decoded?.exp * 1000 > Date.now();
+
+    const isAdmin = isTokenValid && (role === "Master Admin" || role === "Dev Admin");
+
+    let exportUrl;
+
+    if (isAdmin) {
+      const queryParams = new URLSearchParams({
+        type: exportOption, 
+        ...(exportOption === "current" && { limit: 10 }),
+      });
+      exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
+    } else {
       const queryParams = new URLSearchParams({
         userId,
-        type: exportOption, // "all" or "current"
-        ...(exportOption === "current" && { limit: 10 }), // ✅ limit added, ❌ page removed
+        type: exportOption,
+        ...(exportOption === "current" && { limit: 10 }),
       });
-
-      const exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
-
-      const response = await fetch(exportUrl);
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Export failed");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `orders-${exportOption}-${Date.now()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      addNotification("Orders exported successfully", "Orders");
-      setIsexportOpen(false);
-    } catch (error) {
-      alert("Export failed: " + error.message);
-      console.error("Export error:", error);
-    } finally {
-      setIsExporting(false);
+      exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
     }
-  };
+
+    const response = await fetch(exportUrl);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Export failed");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `orders-${exportOption}-${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+    addNotification("Orders exported successfully", "Orders");
+    setIsexportOpen(false);
+  } catch (error) {
+    alert("Export failed: " + error.message);
+    console.error("Export error:", error);
+  } finally {
+    setIsExporting(false);
+  }
+};
+
 
   useEffect(() => {
     const fetchProductData = async () => {

@@ -37,7 +37,9 @@ const Finance = () => {
   const [secondPayoutDate, setSecondPayoutDate] = useState("");
   const [allPayouts, setAllPayouts] = useState([]);
   const [filteredPayouts, setFilteredPayouts] = useState([]);
-
+const [page, setPage] = useState(1);
+const [limit] = useState(10); // fixed page size
+const [totalPages, setTotalPages] = useState(1);
   // const handleSavePayoutDates = async () => {
   //   const payload = {
   //     graceTime,
@@ -79,11 +81,14 @@ const Finance = () => {
     };
 
     try {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const result = await res.json();
 
@@ -103,7 +108,9 @@ const Finance = () => {
   useEffect(() => {
     const fetchPayoutDates = async () => {
       try {
-        const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates");
+        const res = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates"
+        );
         const data = await res.json();
 
         if (data.firstDate)
@@ -204,45 +211,89 @@ const Finance = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchPayouts = async () => {
-      if (!userRole) return;
+  // useEffect(() => {
+  //   const fetchPayouts = async () => {
+  //     if (!userRole) return;
 
-      setLoading(true);
-      try {
-        let url = "";
+  //     setLoading(true);
+  //     try {
+  //       let url = "";
 
-        if (userRole === "Merchant") {
-          const userId = localStorage.getItem("userid");
+  //       if (userRole === "Merchant") {
+  //         const userId = localStorage.getItem("userid");
 
-          if (!userId) {
-            console.error("User ID not found in localStorage");
-            setLoading(false);
-            return;
-          }
+  //         if (!userId) {
+  //           console.error("User ID not found in localStorage");
+  //           setLoading(false);
+  //           return;
+  //         }
 
-          url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=${userId}`;
-        } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
-          url = "https://multi-vendor-marketplace.vercel.app/order/getPayout";
-        } else {
-          console.warn("Unhandled role:", userRole);
-          setLoading(false);
+  //         url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=${userId}`;
+  //       } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
+  //         url = "https://multi-vendor-marketplace.vercel.app/order/getPayout";
+  //       } else {
+  //         console.warn("Unhandled role:", userRole);
+  //         setLoading(false);
+  //         return;
+  //       }
+
+  //       const res = await fetch(url);
+  //       const data = await res.json();
+  //       const payoutsData = data.payouts || [];
+  //       setPayouts(payoutsData);
+  //     } catch (error) {
+  //       console.error("Failed to fetch payouts:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchPayouts();
+  // }, [userRole]);
+
+useEffect(() => {
+  const fetchPayouts = async () => {
+    if (!userRole) return;
+
+    setLoading(true);
+
+    try {
+      let url = "";
+      const userId = localStorage.getItem("userid");
+
+      if (userRole === "Merchant") {
+        if (!userId) {
+          console.error("User ID not found in localStorage");
           return;
         }
-
-        const res = await fetch(url);
-        const data = await res.json();
-        const payoutsData = data.payouts || [];
-        setPayouts(payoutsData);
-      } catch (error) {
-        console.error("Failed to fetch payouts:", error);
-      } finally {
-        setLoading(false);
+        url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=${userId}&limit=${limit}&page=${page}`;
+      } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
+        url = `https://multi-vendor-marketplace.vercel.app/order/getPayout?limit=${limit}&page=${page}`;
+      } else {
+        console.warn("Unhandled role:", userRole);
+        return;
       }
-    };
 
-    fetchPayouts();
-  }, [userRole]);
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.payouts) {
+        setPayouts(data.payouts);
+        setTotalPages(Math.ceil(data.totalCount / limit));
+      } else {
+        setPayouts([]);
+        setTotalPages(1);
+      }
+    } catch (error) {
+      console.error("Failed to fetch payouts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchPayouts();
+}, [userRole, page]);
+
 
   const handleSearch = () => {
     if (!searchVal.trim()) {

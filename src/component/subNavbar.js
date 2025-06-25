@@ -79,6 +79,7 @@ const SubNavbar = () => {
         { name: "Manage Product", path: "/manage-product" },
         { name: "Add Product", path: "/add-product" },
         { name: "Inventory", path: "/inventory" },
+        { name: "Manage Categories", path: "/manage-categories" },
       ],
     },
     {

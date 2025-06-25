@@ -44,6 +44,7 @@ import PayoutDetails from "./pages/PayoutDetails";
 import ManageRequests from "./pages/ManageRequests";
 import UserRequest from "./pages/UserRequest";
 import MerchantPayoutDetails from "./pages/MerchantPayoutDetails";
+import CreateCategory from "./pages/Category";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -106,6 +107,10 @@ const App = () => {
            <Route
             path="/manage-requests"
             element={<PrivateRoute element={<ManageRequests />} />}
+          />
+           <Route
+            path="/manage-categories"
+            element={<PrivateRoute element={<CreateCategory />} />}
           />
            <Route
             path="/user-requests/:id"

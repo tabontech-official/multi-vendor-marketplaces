@@ -45,6 +45,8 @@ import ManageRequests from "./pages/ManageRequests";
 import UserRequest from "./pages/UserRequest";
 import MerchantPayoutDetails from "./pages/MerchantPayoutDetails";
 import CreateCategory from "./pages/Category";
+import ManageCategory from "./pages/ManageCategory";
+import Collection from "./pages/collection";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -109,8 +111,16 @@ const App = () => {
             element={<PrivateRoute element={<ManageRequests />} />}
           />
            <Route
-            path="/manage-categories"
+            path="/create-categories"
             element={<PrivateRoute element={<CreateCategory />} />}
+          />
+            <Route
+            path="/manage-categories"
+            element={<PrivateRoute element={<ManageCategory />} />}
+          />
+          <Route
+            path="/collection/:id"
+            element={<PrivateRoute element={<Collection />} />}
           />
            <Route
             path="/user-requests/:id"

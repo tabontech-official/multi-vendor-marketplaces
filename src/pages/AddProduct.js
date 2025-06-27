@@ -82,11 +82,16 @@ const CategorySelector = () => {
   );
   const [seoPrice, setSeoPrice] = useState(product?.variants?.[0]?.price || "");
   const [handle, setHandle] = useState(product?.handle || "");
-
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [variantQuantities, setVariantQuantities] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredCategories, setFilteredCategories] = useState([]); // Filtered categories based on search query
+
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
   );
@@ -98,12 +103,101 @@ const CategorySelector = () => {
     setDescription(JSON.stringify(rawContent));
   };
 
+  //  const filteredCategories = categories.filter((category) =>
+  //     category.title.toLowerCase().includes(searchQuery.toLowerCase())
+  //   );
+
   const toggleChildOptions = (parentIndex) => {
     setExpandedParents((prev) =>
       prev.includes(parentIndex)
         ? prev.filter((index) => index !== parentIndex)
         : [...prev, parentIndex]
     );
+  };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/category/getCategory"
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setCategories(data);
+          setFilteredCategories(data);
+        } else {
+          console.error(data.message);
+        }
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    // Filter categories based on the search query (case insensitive)
+    const filtered = categories.filter((category) =>
+      category.title.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredCategories(filtered);
+  };
+
+  // Handle category selection
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category.catNo); // Store selected category's catNo
+    setSearchQuery(category.title); // Display selected category's title in the input field
+    setFilteredCategories([]); // Optionally, clear the dropdown after selection
+  };
+
+  const handleCategoryChange = (e) => {
+    const selectedCategoryValue = e.target.value;
+    const selectedCategory = categories.find(
+      (category) => category.catNo === selectedCategoryValue
+    );
+
+    console.log("Selected Category:", selectedCategory);
+
+    if (selectedCategory) {
+      if (!keywordsList.includes(selectedCategory.title)) {
+        console.log("Adding title to keywords list:", selectedCategory.title);
+        setKeywordsList([...keywordsList, selectedCategory.title]);
+      }
+
+      let categoryData = [selectedCategory.catNo];
+      if (selectedCategory.level === "level2") {
+        const parentCategory = categories.find(
+          (category) => category.catNo === selectedCategory.parentCatNo
+        );
+        if (parentCategory) {
+          categoryData.push(parentCategory.catNo);
+        }
+      } else if (selectedCategory.level === "level3") {
+        const parentCategory = categories.find(
+          (category) => category.catNo === selectedCategory.parentCatNo
+        );
+        if (parentCategory) {
+          categoryData.push(parentCategory.catNo);
+
+          const grandparentCategory = categories.find(
+            (category) => category.catNo === parentCategory.parentCatNo
+          );
+          if (grandparentCategory) {
+            categoryData.push(grandparentCategory.catNo);
+          }
+        }
+      }
+
+      console.log("Adding catNo(s) to selectedCategories:", categoryData);
+      setSelectedCategories((prevCategories) => [
+        ...prevCategories,
+        ...categoryData,
+      ]);
+    }
   };
 
   const navigate = useNavigate();
@@ -468,9 +562,17 @@ const CategorySelector = () => {
         })) || [];
       setSelectedImages(imageURLs);
 
+      // const tagsArray = Array.isArray(product.tags)
+      //   ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
+      //   : [];
+      // setKeywordsList(tagsArray);
       const tagsArray = Array.isArray(product.tags)
-        ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
+        ? product.tags
+            .flatMap((tag) => tag.split(",").map((t) => t.trim())) // Split by commas and trim
+            .filter((tag) => !tag.startsWith("cat_")) // Remove any `catNo` (e.g., cat_1, cat_2)
         : [];
+
+      // Update the keywords list for display
       setKeywordsList(tagsArray);
       setVendor(product.vendor);
       setProductType(product.product_type);
@@ -543,22 +645,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setSelectedImages((prev) => {
             const updated = [...prev];
@@ -695,8 +794,14 @@ const CategorySelector = () => {
         });
       });
     };
+    const combinedKeywords = [...selectedCategories, ...keywordsList].join(
+      ", "
+    );
+
     const payload = {
-      keyWord: keywordsList.join(", "),
+      // keyWord: keywordsList.join(", "),
+      keyWord: combinedKeywords, // Send combined catNo (category IDs) and manual keywords
+
       title,
       description: modifiedContent,
       productType: productType,
@@ -2054,6 +2159,19 @@ const CategorySelector = () => {
               Product organization
             </label>
             <div className="mt-2 space-y-2">
+              <label className="block text-sm text-gray-600 ">Category</label>
+              <select
+                value={selectedCategory}
+                onChange={handleCategoryChange}
+                className="w-full border border-gray-300 p-2 rounded-xl"
+              >
+                <option value="">Select a category</option>
+                {categories.map((category) => (
+                  <option key={category.catNo} value={category.catNo}>
+                    {category.title}
+                  </option>
+                ))}
+              </select>
               <label
                 htmlFor="productType"
                 className="block text-gray-600 text-sm"
@@ -2091,6 +2209,28 @@ const CategorySelector = () => {
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
               <div className="flex flex-wrap gap-2 mt-2">
+                {/* {keywordsList.filter((word) => word.trim() !== "").length >
+                  0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {keywordsList
+                      .filter((word) => word.trim() !== "")
+                      .map((word, index) => (
+                        <span
+                          key={index}
+                          className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
+                        >
+                          {word}
+                          <button
+                            type="button"
+                            className="ml-2 text-red-500"
+                            onClick={() => removeKeyword(index)}
+                          >
+                            &times;
+                          </button>
+                        </span>
+                      ))}
+                  </div>
+                )} */}
                 {keywordsList.filter((word) => word.trim() !== "").length >
                   0 && (
                   <div className="flex flex-wrap gap-2 mt-2">

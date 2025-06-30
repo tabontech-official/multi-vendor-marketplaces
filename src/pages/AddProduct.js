@@ -119,7 +119,7 @@ const CategorySelector = () => {
     const fetchCategories = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/category/getCategory"
+          "https://multi-vendor-marketplace.vercel.app/category/getCategory"
         );
         const data = await response.json();
         if (response.ok) {
@@ -388,7 +388,7 @@ const CategorySelector = () => {
   //     const productId = product?.id || "null";
 
   //     fetch(
-  //       `http://localhost:5000/product/getImageGallery/${userId}/${productId}`
+  //       `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`
   //     )
   //       .then((res) => res.json())
   //       .then((data) => {
@@ -407,7 +407,7 @@ const CategorySelector = () => {
 
     if (isPopupVisible && userId) {
       fetch(
-        `http://localhost:5000/product/getImageGallery/${userId}/${productId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`,
         {
           method: "GET",
           headers: {
@@ -645,7 +645,7 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("http://localhost:5000/product/addImageGallery", {
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -831,8 +831,8 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? ` http://localhost:5000/product/updateProducts/${product._id}`
-        : "  http://localhost:5000/product/addEquipment";
+        ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
+        : "  https://multi-vendor-marketplace.vercel.app/product/addEquipment";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -881,7 +881,7 @@ const CategorySelector = () => {
       );
 
       const imageSaveResponse = await fetch(
-        ` http://localhost:5000/product/updateImages/${data.product.id}`,
+        ` https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
         {
           method: "PUT",
           headers: {

@@ -136,60 +136,151 @@ const CategorySelector = () => {
     fetchCategories();
   }, []);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dropdownWidth, setDropdownWidth] = useState(0);
+  const inputRef = useRef(null);
+  const [highlightIndex, setHighlightIndex] = useState(-1);
+  const [highestLevelSelected, setHighestLevelSelected] = useState(null); // level1, level2, level3
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setFilteredCategories([]);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside); // ✅ Changed from mousedown to click
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      setDropdownWidth(inputRef.current.offsetWidth);
+    }
+  }, [searchTerm]);
+
+  const buildCategoryPath = (category) => {
+    let path = category.title;
+    if (category.level === "level2") {
+      const parent = categories.find((c) => c.catNo === category.parentCatNo);
+      if (parent) path = `${parent.title} > ${category.title}`;
+    }
+    if (category.level === "level3") {
+      const parent = categories.find((c) => c.catNo === category.parentCatNo);
+      const grandparent = parent
+        ? categories.find((c) => c.catNo === parent.parentCatNo)
+        : null;
+      if (parent && grandparent) {
+        path = `${grandparent.title} > ${parent.title} > ${category.title}`;
+      }
+    }
+    return path;
+  };
+
   const handleSearchChange = (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
+    const value = e.target.value;
+    setSearchTerm(value);
+    setHighlightIndex(-1);
 
-    // Filter categories based on the search query (case insensitive)
-    const filtered = categories.filter((category) =>
-      category.title.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredCategories(filtered);
+    if (value.trim() === "") {
+      setFilteredCategories([]);
+    } else {
+      const filtered = categories.filter((category) => {
+        const path = buildCategoryPath(category).toLowerCase();
+        const matchesSearch = path.includes(value.toLowerCase());
+
+        if (!highestLevelSelected) {
+          return matchesSearch; // ✅ No previous selection, show all levels
+        }
+
+        if (highestLevelSelected === "level1") {
+          return matchesSearch; // ✅ Level 1 selected → all levels allowed
+        }
+
+        if (highestLevelSelected === "level2") {
+          if (category.level === "level1") return false; // ❌ Block Level 1
+          return matchesSearch; // ✅ Allow level 2 and 3
+        }
+
+        if (highestLevelSelected === "level3") {
+          if (category.level === "level1" || category.level === "level2")
+            return false; // ❌ Block Level 1 and 2
+          return matchesSearch; // ✅ Only Level 3 allowed
+        }
+
+        return matchesSearch;
+      });
+
+      setFilteredCategories(filtered);
+    }
   };
 
-  // Handle category selection
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category.catNo); // Store selected category's catNo
-    setSearchQuery(category.title); // Display selected category's title in the input field
-    setFilteredCategories([]); // Optionally, clear the dropdown after selection
+  const handleKeyDown = (e) => {
+    if (filteredCategories.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      setHighlightIndex((prev) =>
+        prev < filteredCategories.length - 1 ? prev + 1 : 0
+      );
+    } else if (e.key === "ArrowUp") {
+      setHighlightIndex((prev) =>
+        prev > 0 ? prev - 1 : filteredCategories.length - 1
+      );
+    } else if (e.key === "Enter" && highlightIndex >= 0) {
+      e.preventDefault();
+      handleCategorySelect(filteredCategories[highlightIndex]);
+    }
   };
 
-  const handleCategoryChange = (e) => {
-    const selectedCategoryValue = e.target.value;
-    const selectedCategory = categories.find(
-      (category) => category.catNo === selectedCategoryValue
-    );
-
+  const handleCategorySelect = (selectedCategory) => {
     console.log("Selected Category:", selectedCategory);
+    if (selectedCategories.includes(selectedCategory.catNo)) {
+      console.log("Already selected!");
+      return;
+    }
 
+    // ✅ Set Highest Level Lock
+    if (!highestLevelSelected) {
+      setHighestLevelSelected(selectedCategory.level);
+    } else {
+      if (
+        highestLevelSelected === "level2" &&
+        selectedCategory.level === "level1"
+      ) {
+        console.log("Cannot select Level 1 after Level 2!");
+        return;
+      }
+      if (
+        highestLevelSelected === "level3" &&
+        (selectedCategory.level === "level1" ||
+          selectedCategory.level === "level2")
+      ) {
+        console.log("Cannot select Level 1 or 2 after Level 3!");
+        return;
+      }
+    }
     if (selectedCategory) {
       if (!keywordsList.includes(selectedCategory.title)) {
         console.log("Adding title to keywords list:", selectedCategory.title);
         setKeywordsList([...keywordsList, selectedCategory.title]);
       }
 
-      let categoryData = [selectedCategory.catNo];
-      if (selectedCategory.level === "level2") {
-        const parentCategory = categories.find(
-          (category) => category.catNo === selectedCategory.parentCatNo
-        );
-        if (parentCategory) {
-          categoryData.push(parentCategory.catNo);
-        }
-      } else if (selectedCategory.level === "level3") {
-        const parentCategory = categories.find(
-          (category) => category.catNo === selectedCategory.parentCatNo
-        );
-        if (parentCategory) {
-          categoryData.push(parentCategory.catNo);
+      let categoryData = [];
 
-          const grandparentCategory = categories.find(
-            (category) => category.catNo === parentCategory.parentCatNo
-          );
-          if (grandparentCategory) {
-            categoryData.push(grandparentCategory.catNo);
-          }
-        }
+      // ✅ Level based restriction
+      if (selectedCategory.level === "level1") {
+        categoryData.push(selectedCategory.catNo);
+      } else if (selectedCategory.level === "level2") {
+        categoryData.push(selectedCategory.catNo);
+      } else if (selectedCategory.level === "level3") {
+        categoryData.push(selectedCategory.catNo);
       }
 
       console.log("Adding catNo(s) to selectedCategories:", categoryData);
@@ -198,7 +289,56 @@ const CategorySelector = () => {
         ...categoryData,
       ]);
     }
+
+    setSearchTerm("");
+    setFilteredCategories([]);
   };
+
+  // const handleCategoryChange = (e) => {
+  //   const selectedCategoryValue = e.target.value;
+  //   const selectedCategory = categories.find(
+  //     (category) => category.catNo === selectedCategoryValue
+  //   );
+
+  //   console.log("Selected Category:", selectedCategory);
+
+  //   if (selectedCategory) {
+  //     if (!keywordsList.includes(selectedCategory.title)) {
+  //       console.log("Adding title to keywords list:", selectedCategory.title);
+  //       setKeywordsList([...keywordsList, selectedCategory.title]);
+  //     }
+
+  //     let categoryData = [selectedCategory.catNo];
+  //     if (selectedCategory.level === "level2") {
+  //       const parentCategory = categories.find(
+  //         (category) => category.catNo === selectedCategory.parentCatNo
+  //       );
+  //       if (parentCategory) {
+  //         categoryData.push(parentCategory.catNo);
+  //       }
+  //     } else if (selectedCategory.level === "level3") {
+  //       const parentCategory = categories.find(
+  //         (category) => category.catNo === selectedCategory.parentCatNo
+  //       );
+  //       if (parentCategory) {
+  //         categoryData.push(parentCategory.catNo);
+
+  //         const grandparentCategory = categories.find(
+  //           (category) => category.catNo === parentCategory.parentCatNo
+  //         );
+  //         if (grandparentCategory) {
+  //           categoryData.push(grandparentCategory.catNo);
+  //         }
+  //       }
+  //     }
+
+  //     console.log("Adding catNo(s) to selectedCategories:", categoryData);
+  //     setSelectedCategories((prevCategories) => [
+  //       ...prevCategories,
+  //       ...categoryData,
+  //     ]);
+  //   }
+  // };
 
   const navigate = useNavigate();
 
@@ -220,10 +360,31 @@ const CategorySelector = () => {
       }
     }
   };
+  // const removeKeyword = (index) => {
+  //   const newList = [...keywordsList];
+  //   newList.splice(index, 1);
+  //   setKeywordsList(newList);
+  // };
+
   const removeKeyword = (index) => {
-    const newList = [...keywordsList];
-    newList.splice(index, 1);
-    setKeywordsList(newList);
+    const removedTitle = keywordsList[index];
+
+    // ✅ Remove keyword from keywordsList
+    const newKeywords = [...keywordsList];
+    newKeywords.splice(index, 1);
+    setKeywordsList(newKeywords);
+
+    // ✅ Find matching category catNo by title
+    const categoryToRemove = categories.find(
+      (cat) => cat.title === removedTitle
+    );
+
+    if (categoryToRemove) {
+      const newSelectedCategories = selectedCategories.filter(
+        (catNo) => catNo !== categoryToRemove.catNo
+      );
+      setSelectedCategories(newSelectedCategories);
+    }
   };
 
   // const handleImageChange = (event) => {
@@ -645,19 +806,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setSelectedImages((prev) => {
             const updated = [...prev];
@@ -2159,19 +2323,65 @@ const CategorySelector = () => {
               Product organization
             </label>
             <div className="mt-2 space-y-2">
-              <label className="block text-sm text-gray-600 ">Category</label>
-              <select
-                value={selectedCategory}
-                onChange={handleCategoryChange}
-                className="w-full border border-gray-300 p-2 rounded-xl"
-              >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category.catNo} value={category.catNo}>
-                    {category.title}
-                  </option>
-                ))}
-              </select>
+              <div ref={containerRef} className="relative w-full">
+                <label className="block text-sm text-gray-600 mb-1">
+                  Category
+                </label>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Search category..."
+                  className="w-full border border-gray-300 p-2 rounded-xl"
+                />
+
+                {searchTerm.trim() !== "" && filteredCategories.length > 0 && (
+                  <ul
+                    className="absolute z-10 bg-white border border-gray-300 rounded-xl mt-1 max-h-60 overflow-y-auto shadow-lg"
+                    style={{ width: `${dropdownWidth}px` }}
+                  >
+                    {filteredCategories.map((category, index) => (
+                      <li
+                        key={category.catNo}
+                        onClick={() => handleCategorySelect(category)}
+                        className={`p-2 cursor-pointer hover:bg-gray-100 ${
+                          index === highlightIndex ? "bg-gray-200" : ""
+                        }`}
+                      >
+                        {buildCategoryPath(category)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {selectedCategories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {selectedCategories.map((catNo, index) => {
+                      const category = categories.find(
+                        (cat) => cat.catNo === catNo
+                      );
+                      if (!category) return null;
+
+                      return (
+                        <span
+                          key={index}
+                          className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
+                        >
+                          {category.title}
+                          <button
+                            type="button"
+                            className="ml-2 text-red-500"
+                            onClick={() => removeKeyword(index)}
+                          >
+                            &times;
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
               <label
                 htmlFor="productType"
                 className="block text-gray-600 text-sm"
@@ -2209,28 +2419,6 @@ const CategorySelector = () => {
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
               <div className="flex flex-wrap gap-2 mt-2">
-                {/* {keywordsList.filter((word) => word.trim() !== "").length >
-                  0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {keywordsList
-                      .filter((word) => word.trim() !== "")
-                      .map((word, index) => (
-                        <span
-                          key={index}
-                          className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
-                        >
-                          {word}
-                          <button
-                            type="button"
-                            className="ml-2 text-red-500"
-                            onClick={() => removeKeyword(index)}
-                          >
-                            &times;
-                          </button>
-                        </span>
-                      ))}
-                  </div>
-                )} */}
                 {keywordsList.filter((word) => word.trim() !== "").length >
                   0 && (
                   <div className="flex flex-wrap gap-2 mt-2">

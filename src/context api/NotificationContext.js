@@ -43,7 +43,7 @@ export const NotificationProvider = ({ children }) => {
         ...prev.slice(0, 2),
       ]);
 
-      await axios.post("https://multi-vendor-marketplace.vercel.app/notifications/addNotofication", {
+      await axios.post("http://localhost:5000/notifications/addNotofication", {
         userId,
         message,
         source,
@@ -57,7 +57,7 @@ export const NotificationProvider = ({ children }) => {
       const userId = localStorage.getItem("userid");
       if (!userId) return;
 
-      const res = await axios.get(`https://multi-vendor-marketplace.vercel.app/notifications/getNotificationByUserId/${userId}`);
+      const res = await axios.get(`http://localhost:5000/notifications/getNotificationByUserId/${userId}`);
       setNotifications(res.data);
     } catch (err) {
       console.error("Failed to fetch notifications:", err);

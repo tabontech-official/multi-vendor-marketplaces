@@ -11,7 +11,7 @@ const ManageCategory = () => {
     const fetchCategories = async () => {
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/category/getCategory"
+          "http://localhost:5000/category/getCategory"
         );
         const data = await response.json();
 
@@ -32,7 +32,31 @@ const ManageCategory = () => {
   const handleButtonClick = () => {
     navigate("/create-categories");
   };
+  const handleExport = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/category/getCsvForCategories",
+        {
+          method: "GET",
+        }
+      );
 
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "categories_export.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } else {
+        console.error("Failed to export categories");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
   return (
     <div className="p-4">
       <div className="flex justify-between items-center p-4 border-b">
@@ -42,7 +66,10 @@ const ManageCategory = () => {
         </div>
 
         <div className="flex space-x-2">
-          <button className="bg-green-400 text-white px-4 py-1 border rounded-md hover:bg-green-500">
+          <button
+            onClick={handleExport}
+            className="bg-green-400 text-white px-4 py-1 border rounded-md hover:bg-green-500"
+          >
             Export
           </button>
           <button
@@ -56,59 +83,67 @@ const ManageCategory = () => {
 
       {error && <div className="text-red-500">{error}</div>}
 
-    <table className="w-full border-collapse bg-white border rounded-2xl">
-  <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-    <tr>
-      <th scope="col" className="p-3">Select</th>
-      <th scope="col" className="p-3">Title</th> {/* New heading for Level 1 Title */}
-      <th scope="col" className="p-3">Hierarchy</th>
-    </tr>
-  </thead>
-  <tbody>
-    {categories
-      .filter((category) => category.level === 'level1') // Filter only Level 1 categories
-      .map((level1Category, index) => {
-        // Find all Level 2 categories related to the current Level 1 category
-        const level2Categories = categories.filter(
-          (category) => category.level === 'level2' && category.parentCatNo === level1Category.catNo
-        );
-
-        return (
-          <tr
-            key={index}
-            className={`border-b ${index % 2 === 0 ? "bg-white" : "bg-gray-100"}`}
-          >
-            <td className="p-3">
-              <input type="checkbox" />
-            </td>
-            <td className="p-3 text-sm">
-              {/* Level 1 Title */}
-              <p className="text-md font-semibold">{level1Category.title}</p> {/* Level 1 title */}
-            </td>
-            <td className="p-3 text-sm">
-              {/* Level 1 > Level 2 > Level 3 Hierarchy */}
-              <span>{level1Category.title}</span> {/* Level 1 */}
-              {/* Level 2 Categories under Level 1 */}
-              {level2Categories.map((level2, idx) => (
-                <span key={idx}>
-                  → {level2.title}
-
-                  {/* Level 3 Categories under Level 2 */}
-                  {categories
-                    .filter((category) => category.level === 'level3' && category.parentCatNo === level2.catNo)
-                    .map((level3, idx3) => (
-                      <span key={idx3}> → {level3.title}</span>
-                    ))}
-                </span>
-              ))}
-            </td>
+      <table className="w-full border-collapse bg-white border rounded-2xl">
+        <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+          <tr>
+            <th scope="col" className="p-3">
+              Select
+            </th>
+            <th scope="col" className="p-3">
+              Title
+            </th>
+            <th scope="col" className="p-3">
+              Hierarchy
+            </th>
           </tr>
-        );
-      })}
-  </tbody>
-</table>
+        </thead>
+        <tbody>
+          {categories
+            .filter((category) => category.level === "level1")
+            .map((level1Category, index) => {
+              const level2Categories = categories.filter(
+                (category) =>
+                  category.level === "level2" &&
+                  category.parentCatNo === level1Category.catNo
+              );
 
-
+              return (
+                <tr
+                  key={index}
+                  className={`border-b ${
+                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                  }`}
+                >
+                  <td className="p-3">
+                    <input type="checkbox" />
+                  </td>
+                  <td className="p-3 text-sm">
+                    <p className="text-md font-semibold">
+                      {level1Category.title}
+                    </p>
+                  </td>
+                  <td className="p-3 text-sm">
+                    <span>{level1Category.title}</span>
+                    {level2Categories.map((level2, idx) => (
+                      <span key={idx}>
+                        → {level2.title}
+                        {categories
+                          .filter(
+                            (category) =>
+                              category.level === "level3" &&
+                              category.parentCatNo === level2.catNo
+                          )
+                          .map((level3, idx3) => (
+                            <span key={idx3}> → {level3.title}</span>
+                          ))}
+                      </span>
+                    ))}
+                  </td>
+                </tr>
+              );
+            })}
+        </tbody>
+      </table>
     </div>
   );
 };

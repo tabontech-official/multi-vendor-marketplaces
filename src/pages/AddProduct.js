@@ -141,6 +141,13 @@ const CategorySelector = () => {
   const inputRef = useRef(null);
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const [highestLevelSelected, setHighestLevelSelected] = useState(null); // level1, level2, level3
+  const [selectedVisibleCategories, setSelectedVisibleCategories] = useState(
+    []
+  );
+  const [finalCategoryPayload, setFinalCategoryPayload] = useState([]);
+const [selectedExportTitle, setSelectedExportTitle] = useState("");
+
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -239,59 +246,107 @@ const CategorySelector = () => {
     }
   };
 
-  const handleCategorySelect = (selectedCategory) => {
-    console.log("Selected Category:", selectedCategory);
-    if (selectedCategories.includes(selectedCategory.catNo)) {
-      console.log("Already selected!");
-      return;
+  // const handleCategorySelect = (selectedCategory) => {
+  //   console.log("Selected Category:", selectedCategory);
+
+  //   let categoryData = [selectedCategory.catNo];
+
+  //   if (selectedCategory.level === "level2") {
+  //     const parentCategory = categories.find(
+  //       (category) => category.catNo === selectedCategory.parentCatNo
+  //     );
+  //     if (parentCategory) {
+  //       categoryData.push(parentCategory.catNo);
+  //     }
+  //   } else if (selectedCategory.level === "level3") {
+  //     const parentCategory = categories.find(
+  //       (category) => category.catNo === selectedCategory.parentCatNo
+  //     );
+  //     if (parentCategory) {
+  //       categoryData.push(parentCategory.catNo);
+
+  //       const grandparentCategory = categories.find(
+  //         (category) => category.catNo === parentCategory.parentCatNo
+  //       );
+  //       if (grandparentCategory) {
+  //         categoryData.push(grandparentCategory.catNo);
+  //       }
+  //     }
+  //   }
+
+  //   // ✅ Add backend catNos (avoid duplicates)
+  //   const uniqueCatNos = categoryData.filter(
+  //     (catNo) => !selectedCategories.includes(catNo)
+  //   );
+  //   if (uniqueCatNos.length > 0) {
+  //     setSelectedCategories((prev) => [...prev, ...uniqueCatNos]);
+  //   }
+
+  //   // ✅ Add visible category (only selected category shown in UI)
+  //   setSelectedVisibleCategories((prev) => [...prev, selectedCategory.catNo]);
+
+  //   setSearchTerm("");
+  //   setFilteredCategories([]);
+  // };
+
+const handleCategorySelect = (selectedCategory) => {
+  let categoryData = [];
+  let payloadData = [];
+  let exportTitle = "";
+
+  const pushCategory = (cat) => {
+    if (cat && !selectedCategories.includes(cat.catNo)) {
+      categoryData.push(cat.catNo);
+      payloadData.push({
+        catNo: cat.catNo,
+        title: buildCategoryPath(cat),  // Full UI path for backend
+      });
     }
+  };
 
-    // ✅ Set Highest Level Lock
-    if (!highestLevelSelected) {
-      setHighestLevelSelected(selectedCategory.level);
-    } else {
-      if (
-        highestLevelSelected === "level2" &&
-        selectedCategory.level === "level1"
-      ) {
-        console.log("Cannot select Level 1 after Level 2!");
-        return;
-      }
-      if (
-        highestLevelSelected === "level3" &&
-        (selectedCategory.level === "level1" ||
-          selectedCategory.level === "level2")
-      ) {
-        console.log("Cannot select Level 1 or 2 after Level 3!");
-        return;
-      }
+  if (selectedCategory.level === "level1") {
+    pushCategory(selectedCategory);
+    exportTitle = selectedCategory.title;
+  }
+
+  if (selectedCategory.level === "level2") {
+    const parent = categories.find((c) => c.catNo === selectedCategory.parentCatNo);
+    pushCategory(parent);
+    pushCategory(selectedCategory);
+
+    exportTitle = `${selectedCategory.title} > ${selectedCategory.title}`;
+  }
+
+  if (selectedCategory.level === "level3") {
+    const parent = categories.find((c) => c.catNo === selectedCategory.parentCatNo);
+    const grandparent = parent ? categories.find((c) => c.catNo === parent.parentCatNo) : null;
+
+    pushCategory(grandparent);
+    pushCategory(parent);
+    pushCategory(selectedCategory);
+
+    if (grandparent && parent) {
+      exportTitle = `${grandparent.title} > ${parent.title} > ${selectedCategory.title}`;
     }
-    if (selectedCategory) {
-      if (!keywordsList.includes(selectedCategory.title)) {
-        console.log("Adding title to keywords list:", selectedCategory.title);
-        setKeywordsList([...keywordsList, selectedCategory.title]);
-      }
+  }
 
-      let categoryData = [];
+  setSelectedCategories((prev) => [...prev, ...categoryData]);
+  setSelectedVisibleCategories((prev) => [...prev, selectedCategory.catNo]);
+  setFinalCategoryPayload((prev) => [...prev, ...payloadData]);
+  setSearchTerm("");
+  setFilteredCategories([]);
 
-      // ✅ Level based restriction
-      if (selectedCategory.level === "level1") {
-        categoryData.push(selectedCategory.catNo);
-      } else if (selectedCategory.level === "level2") {
-        categoryData.push(selectedCategory.catNo);
-      } else if (selectedCategory.level === "level3") {
-        categoryData.push(selectedCategory.catNo);
-      }
+  // ✅ Set exportTitle in a state if you want
+  setSelectedExportTitle(exportTitle);  // <-- Optional: Save export title for later
+};
 
-      console.log("Adding catNo(s) to selectedCategories:", categoryData);
-      setSelectedCategories((prevCategories) => [
-        ...prevCategories,
-        ...categoryData,
-      ]);
-    }
-
-    setSearchTerm("");
-    setFilteredCategories([]);
+  const removeCategory = (catNoToRemove) => {
+    setSelectedVisibleCategories((prev) =>
+      prev.filter((catNo) => catNo !== catNoToRemove)
+    );
+    setSelectedCategories((prev) =>
+      prev.filter((catNo) => catNo !== catNoToRemove)
+    );
   };
 
   // const handleCategoryChange = (e) => {
@@ -595,183 +650,201 @@ const CategorySelector = () => {
       .trim()}`;
   };
 
-  useEffect(() => {
-    if (product) {
-      const normalizeString = (str) => String(str).replace(/['"]/g, "").trim();
+    useEffect(() => {
+      if (product) {
+        const normalizeString = (str) => String(str).replace(/['"]/g, "").trim();
 
-      const allVariants = product.variants;
+        const allVariants = product.variants;
 
-      const groupedVariants = allVariants.reduce((acc, variant) => {
-        const leftOption = variant.option1;
-        const rightOption = variant.option2;
+        const groupedVariants = allVariants.reduce((acc, variant) => {
+          const leftOption = variant.option1;
+          const rightOption = variant.option2;
 
-        if (!acc[leftOption]) {
-          acc[leftOption] = {
-            parent: {
+          if (!acc[leftOption]) {
+            acc[leftOption] = {
+              parent: {
+                ...variant,
+                option1: leftOption,
+                option2: null,
+                option3: null,
+                isParent: true,
+              },
+              children: [],
+            };
+          }
+
+          if (rightOption) {
+            acc[leftOption].children.push({
               ...variant,
               option1: leftOption,
-              option2: null,
+              option2: rightOption,
               option3: null,
-              isParent: true,
-            },
-            children: [],
-          };
-        }
+              isParent: false,
+            });
+          }
 
-        if (rightOption) {
-          acc[leftOption].children.push({
-            ...variant,
-            option1: leftOption,
-            option2: rightOption,
-            option3: null,
-            isParent: false,
+          return acc;
+        }, {});
+
+        const formattedVariants = Object.keys(groupedVariants).map(
+          (key, index) => ({
+            ...groupedVariants[key].parent,
+            group: `parent-${index}`,
+            subVariants: groupedVariants[key].children,
+          })
+        );
+
+        const hydratedVariantImages = {};
+
+        formattedVariants.forEach((variantGroup) => {
+          const children = variantGroup.subVariants;
+
+          children.forEach((childVariant) => {
+            const titleKey = normalizeString(childVariant.title || "");
+
+            const imageId = childVariant.image_id;
+
+            const matched = product.variantImages?.find(
+              (img) => String(img.id) === String(imageId)
+            );
+
+            if (matched?.src) {
+              hydratedVariantImages[titleKey] = {
+                preview: matched.src,
+                loading: false,
+              };
+            }
           });
-        }
-
-        return acc;
-      }, {});
-
-      const formattedVariants = Object.keys(groupedVariants).map(
-        (key, index) => ({
-          ...groupedVariants[key].parent,
-          group: `parent-${index}`,
-          subVariants: groupedVariants[key].children,
-        })
-      );
-
-      const hydratedVariantImages = {};
-
-      formattedVariants.forEach((variantGroup) => {
-        const children = variantGroup.subVariants;
-
-        children.forEach((childVariant) => {
-          const titleKey = normalizeString(childVariant.title || "");
-
-          const imageId = childVariant.image_id;
-
-          const matched = product.variantImages?.find(
-            (img) => String(img.id) === String(imageId)
-          );
-
-          if (matched?.src) {
-            hydratedVariantImages[titleKey] = {
-              preview: matched.src,
-              loading: false,
-            };
-          }
-        });
-      });
-
-      console.log(
-        "Hydrated Images from formattedVariants (title based):",
-        hydratedVariantImages
-      );
-
-      if (Object.keys(hydratedVariantImages).length > 0) {
-        setVariantImages(hydratedVariantImages);
-      } else {
-        // Fallback if no images found
-        const fallbackVariantImages = {};
-
-        product?.variants?.forEach((variant) => {
-          const titleKey = normalizeString(variant.title || "");
-
-          const matchedImage = product?.variantImages?.find(
-            (img) => String(img.id) === String(variant.image_id)
-          );
-
-          if (matchedImage?.src) {
-            fallbackVariantImages[titleKey] = {
-              preview: matchedImage.src,
-              loading: false,
-            };
-          }
         });
 
         console.log(
-          "Fallback Images from product.variants (title based):",
-          fallbackVariantImages
+          "Hydrated Images from formattedVariants (title based):",
+          hydratedVariantImages
         );
 
-        if (Object.keys(fallbackVariantImages).length > 0) {
-          setVariantImages(fallbackVariantImages);
+        if (Object.keys(hydratedVariantImages).length > 0) {
+          setVariantImages(hydratedVariantImages);
         } else {
-          console.log("No images found from either method");
-        }
-      }
+          // Fallback if no images found
+          const fallbackVariantImages = {};
 
-      setIsEditing(true);
-      setTitle(product.title || "");
-      setPrice(product.variants[0]?.price || "");
-      setCompareAtPrice(product.variants[0]?.compare_at_price || "");
-      setTrackQuantity(product.inventory?.track_quantity || false);
-      setQuantity(product.inventory?.quantity || 0);
-      setContinueSelling(product.inventory?.continue_selling || false);
-      setHasSKU(product.inventory?.has_sku || false);
-      setSKU(product.inventory?.sku || "");
-      setBarcode(product.inventory?.barcode || "");
-      setTrackShipping(product.shipping?.track_shipping || false);
-      setWeight(product.shipping?.weight || "");
-      setUnit(product.shipping?.weight_unit || "kg");
-      setStatus(product.status || "publish");
-      setUserId(product.userId || "");
+          product?.variants?.forEach((variant) => {
+            const titleKey = normalizeString(variant.title || "");
 
-      const imageURLs =
-        product.images?.map((img) => ({
-          cloudUrl: img.src,
-          loading: false,
-        })) || [];
-      setSelectedImages(imageURLs);
+            const matchedImage = product?.variantImages?.find(
+              (img) => String(img.id) === String(variant.image_id)
+            );
 
-      // const tagsArray = Array.isArray(product.tags)
-      //   ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
-      //   : [];
-      // setKeywordsList(tagsArray);
-      const tagsArray = Array.isArray(product.tags)
-        ? product.tags
-            .flatMap((tag) => tag.split(",").map((t) => t.trim())) // Split by commas and trim
-            .filter((tag) => !tag.startsWith("cat_")) // Remove any `catNo` (e.g., cat_1, cat_2)
-        : [];
+            if (matchedImage?.src) {
+              fallbackVariantImages[titleKey] = {
+                preview: matchedImage.src,
+                loading: false,
+              };
+            }
+          });
 
-      // Update the keywords list for display
-      setKeywordsList(tagsArray);
-      setVendor(product.vendor);
-      setProductType(product.product_type);
-
-      setOptions(
-        product.options?.map((option) => ({
-          id: option.id || "No ID",
-          name: option.name || "Unnamed Option",
-          values: option.values || [],
-        })) || []
-      );
-
-      setVariants(formattedVariants);
-      setVariantPrices(product.variants.map((v) => v.price || ""));
-      setVariantQuantities(
-        product.variants.map((v) => v.inventory_quantity || 0)
-      );
-      setVariantSku(product.variants.map((v) => v.sku || ""));
-      setImages(product.images || []);
-
-      const rawDescription = product.body_html || "";
-      try {
-        const parsedContent = JSON.parse(rawDescription);
-        const contentState = convertFromRaw(parsedContent);
-        setEditorState(EditorState.createWithContent(contentState));
-      } catch (error) {
-        const contentBlock = htmlToDraft(rawDescription);
-        if (contentBlock) {
-          const contentState = ContentState.createFromBlockArray(
-            contentBlock.contentBlocks
+          console.log(
+            "Fallback Images from product.variants (title based):",
+            fallbackVariantImages
           );
+
+          if (Object.keys(fallbackVariantImages).length > 0) {
+            setVariantImages(fallbackVariantImages);
+          } else {
+            console.log("No images found from either method");
+          }
+        }
+
+        setIsEditing(true);
+        setTitle(product.title || "");
+        setPrice(product.variants[0]?.price || "");
+        setCompareAtPrice(product.variants[0]?.compare_at_price || "");
+        setTrackQuantity(product.inventory?.track_quantity || false);
+        setQuantity(product.inventory?.quantity || 0);
+        setContinueSelling(product.inventory?.continue_selling || false);
+        setHasSKU(product.inventory?.has_sku || false);
+        setSKU(product.inventory?.sku || "");
+        setBarcode(product.inventory?.barcode || "");
+        setTrackShipping(product.shipping?.track_shipping || false);
+        setWeight(product.shipping?.weight || "");
+        setUnit(product.shipping?.weight_unit || "kg");
+        setStatus(product.status || "publish");
+        setUserId(product.userId || "");
+
+        const imageURLs =
+          product.images?.map((img) => ({
+            cloudUrl: img.src,
+            loading: false,
+          })) || [];
+        setSelectedImages(imageURLs);
+
+        // const tagsArray = Array.isArray(product.tags)
+        //   ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
+        //   : [];
+        // setKeywordsList(tagsArray);
+        const tagsArray = Array.isArray(product.tags)
+          ? product.tags
+              .flatMap((tag) => tag.split(",").map((t) => t.trim())) // Split by commas and trim
+              .filter((tag) => !tag.startsWith("cat_")) // Remove any `catNo` (e.g., cat_1, cat_2)
+          : [];
+const allTags = Array.isArray(product.tags)
+  ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
+  : [];
+
+const visibleCategoryTitles = allTags.map((tag) => {
+  if (tag.startsWith("cat_")) {
+    const catNo = tag.replace("cat_", "");
+    const category = categories.find((c) => c.catNo.toString() === catNo);
+    return category ? buildCategoryPath(category) : null;
+  } else if (tag.includes(">")) {
+    return tag.trim();
+  }
+  return null;
+}).filter(Boolean);
+console.log(visibleCategoryTitles)
+setSelectedVisibleCategories(visibleCategoryTitles);
+
+
+
+        // Update the keywords list for display
+        setKeywordsList(tagsArray);
+        setVendor(product.vendor);
+        setProductType(product.product_type);
+
+        setOptions(
+          product.options?.map((option) => ({
+            id: option.id || "No ID",
+            name: option.name || "Unnamed Option",
+            values: option.values || [],
+          })) || []
+        );
+
+        setVariants(formattedVariants);
+        setVariantPrices(product.variants.map((v) => v.price || ""));
+        setVariantQuantities(
+          product.variants.map((v) => v.inventory_quantity || 0)
+        );
+        setVariantSku(product.variants.map((v) => v.sku || ""));
+        setImages(product.images || []);
+
+        const rawDescription = product.body_html || "";
+        try {
+          const parsedContent = JSON.parse(rawDescription);
+          const contentState = convertFromRaw(parsedContent);
           setEditorState(EditorState.createWithContent(contentState));
-        } else {
-          setEditorState(EditorState.createEmpty());
+        } catch (error) {
+          const contentBlock = htmlToDraft(rawDescription);
+          if (contentBlock) {
+            const contentState = ContentState.createFromBlockArray(
+              contentBlock.contentBlocks
+            );
+            setEditorState(EditorState.createWithContent(contentState));
+          } else {
+            setEditorState(EditorState.createEmpty());
+          }
         }
       }
-    }
-  }, [product]);
+    }, [product]);
 
   const handleImageChange = async (event) => {
     const apiKey = localStorage.getItem("apiKey");
@@ -806,22 +879,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setSelectedImages((prev) => {
             const updated = [...prev];
@@ -958,10 +1028,16 @@ const CategorySelector = () => {
         });
       });
     };
-    const combinedKeywords = [...selectedCategories, ...keywordsList].join(
-      ", "
-    );
+    // const combinedKeywords = [...selectedCategories, ...keywordsList].join(
+    //   ", "
+    // );
+const categoryIds = finalCategoryPayload.map(item => item.catNo.toString());
 
+const combinedKeywords = [
+  selectedExportTitle,   // ✅ Single export title from state
+  ...categoryIds,
+  ...keywordsList
+].join(", ");
     const payload = {
       // keyWord: keywordsList.join(", "),
       keyWord: combinedKeywords, // Send combined catNo (category IDs) and manual keywords
@@ -2355,9 +2431,9 @@ const CategorySelector = () => {
                     ))}
                   </ul>
                 )}
-                {selectedCategories.length > 0 && (
+                {selectedVisibleCategories.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {selectedCategories.map((catNo, index) => {
+                    {selectedVisibleCategories.map((catNo, index) => {
                       const category = categories.find(
                         (cat) => cat.catNo === catNo
                       );
@@ -2368,11 +2444,11 @@ const CategorySelector = () => {
                           key={index}
                           className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
                         >
-                          {category.title}
+                          {buildCategoryPath(category)}
                           <button
                             type="button"
                             className="ml-2 text-red-500"
-                            onClick={() => removeKeyword(index)}
+                            onClick={() => removeCategory(catNo)}
                           >
                             &times;
                           </button>

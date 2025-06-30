@@ -218,6 +218,7 @@ const ManageCategory = () => {
             })}
         </tbody>
       </table> */}
+      
       <table className="w-full border-collapse bg-white border rounded-2xl">
         <thead className="bg-gray-100 text-left text-gray-600 text-sm">
           <tr>

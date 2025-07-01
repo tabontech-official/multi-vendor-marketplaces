@@ -130,45 +130,6 @@ const Dashboard = () => {
     }
   };
 
-  // const handleUploadAndPreview = async () => {
-  //   if (!selectedFile) return;
-  //   setIsUploading(true);
-  //   setUploadStarted(true);
-
-  //   setTimeout(async () => {
-  //     try {
-  //       const userId = localStorage.getItem("userid");
-  //       const formData = new FormData();
-  //       formData.append("file", selectedFile);
-  //       formData.append("userId", userId);
-
-  //       const response = await fetch(
-  //         " https://multi-vendor-marketplace.vercel.app/product/upload-csv-body",
-  //         {
-  //           method: "POST",
-  //           body: formData,
-  //         }
-  //       );
-
-  //       const result = await response.json();
-  //       showToast("success", "products imported successfully!");
-  //       addNotification("products imported successfully!");
-
-  //       closePopup();
-  //       window.location.reload();
-  //     } catch (error) {
-  //       showToast(
-  //         "Failed",
-  //         error.message || "Error occurred while importing file."
-  //       );
-  //     } finally {
-  //       setIsUploading(false);
-  //       setUploadStarted(false);
-  //       setSelectedFile(null);
-  //     }
-  //   }, 2000);
-  // };
-
   const handleUploadAndPreview = async () => {
     if (!selectedFile) return;
 
@@ -194,7 +155,7 @@ const Dashboard = () => {
         );
 
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/upload-csv-body/${userId}`, 
+          `https://multi-vendor-marketplace.vercel.app/product/upload-csv-body/${userId}`,
           {
             method: "POST",
             body: formData,
@@ -417,17 +378,7 @@ const Dashboard = () => {
     }
   };
 
-  // const handleSearch = () => {
-  //   let filtered =
-  //     searchVal === ""
-  //       ? products
-  //       : products.filter(
-  //           (product) =>
-  //             product.title.includes(searchVal) ||
-  //             product.product_type.includes(searchVal)
-  //         );
-  //   setFilteredProducts(filtered);
-  // };
+
   const handleSearch = () => {
     let filtered =
       searchVal === ""
@@ -458,52 +409,7 @@ const Dashboard = () => {
     fetchProductData();
   }, []);
 
-  // useEffect(() => {
-  //   const fetchProductData2 = async () => {
-  //     const id = localStorage.getItem("userid");
-
-  //     try {
-  //       const response = await fetch(
-  //         admin
-  //           ? ` https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-  //           : ` https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`,
-  //         { method: "GET" }
-  //       );
-
-  //       if (response.ok) {
-  //         const data = await response.json();
-  //         console.log("Second Product render", data);
-
-  //         const sortedProducts = data.products.sort(
-  //           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  //         );
-
-  //         setProducts((prev) => [
-  //           ...prev,
-  //           ...sortedProducts.filter(
-  //             (newProduct) =>
-  //               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-  //           ),
-  //         ]);
-
-  //         setFilteredProducts((prev) => [
-  //           ...prev,
-  //           ...sortedProducts.filter(
-  //             (newProduct) =>
-  //               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-  //           ),
-  //         ]);
-
-  //         setHasMore(page < data.totalPages);
-  //         console.log(hasMore);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching products:", error);
-  //     }
-  //   };
-  //   fetchProductData2();
-  // }, [page]);
-
+ 
   useEffect(() => {
     const fetchProductData2 = async () => {
       const id = localStorage.getItem("userid");
@@ -576,49 +482,6 @@ const Dashboard = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  // const handleExport = async () => {
-  //   try {
-  //     setIsExporting(true);
-  //     const userId = localStorage.getItem("userid");
-  //     if (!userId) {
-  //       alert("User ID not found in localStorage");
-  //       return;
-  //     }
-
-  //     const queryParams = new URLSearchParams({
-  //       userId,
-  //       type: exportOption,
-  //       ...(exportOption === "current" && { page, limit: 10 }),
-  //     });
-
-  //     const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvEportFile/?${queryParams.toString()}`;
-  //     const response = await fetch(exportUrl);
-
-  //     if (!response.ok) {
-  //       const error = await response.json();
-  //       throw new Error(error.message || "Export failed");
-  //     }
-  //     addNotification("products export succesfully", "Manage product");
-
-  //     const blob = await response.blob();
-  //     const url = window.URL.createObjectURL(blob);
-  //     const link = document.createElement("a");
-  //     link.href = url;
-  //     link.setAttribute(
-  //       "download",
-  //       `products-${exportOption}-${Date.now()}.csv`
-  //     );
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     link.remove();
-  //     window.URL.revokeObjectURL(url);
-  //     setIsexportOpen(false);
-  //   } catch (error) {
-  //     alert("Export failed: " + error.message);
-  //   } finally {
-  //     setIsExporting(false);
-  //   }
-  // };
 
   const handleExport = async () => {
     try {
@@ -768,77 +631,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
-        <div className="flex flex-col md:flex-row md:items-center w-full md:ml-auto md:space-x-4">
-          <div className="flex items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchVal}
-              onChange={(e) => setSearchVal(e.target.value)}
-              className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-      </div> */}
-      {/* <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
-        <div className="flex gap-4 items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
-          <button
-            onClick={openPopup}
-            className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-          >
-            <CiImport className="w-5 h-5" />
-            Import
-          </button>
-
-          <button
-            onClick={togglePopup}
-            className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-          >
-            <FaFileImport className="w-5 h-5" />
-            Export
-          </button>
-        </div>
-      </div>
-      {selectedProducts.length > 0 && (
-        <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
-          <div className="flex gap-2 items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
-            {filteredProducts.some(
-              (product) =>
-                selectedProducts.includes(product._id) &&
-                product.status === "draft"
-            ) && (
-              <button
-                onClick={handlePublishSelected}
-                className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              >
-                Publish
-              </button>
-            )}
-
-            {filteredProducts.some(
-              (product) =>
-                selectedProducts.includes(product._id) &&
-                product.status === "active"
-            ) && (
-              <button
-                onClick={handleUnpublishSelected}
-                className="bg-red-500 hover:bg-red-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              >
-                Unpublish
-              </button>
-            )}
-
-            <button
-              onClick={onDeleteSelected}
-              className="bg-red-500 hover:bg-red-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      )} */}
-
+  
       {Loading ? (
         <div className="flex justify-center items-center py-10">
           <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
@@ -867,7 +660,6 @@ const Dashboard = () => {
                     <th className="p-3">Vendor</th>
 
                     {admin && <th className="p-3">PUBLISHER</th>}
-                    {/* <th className="p-3">PUBLISHER</th> */}
 
                     <th className="p-3">Edit</th>
                   </tr>
@@ -930,7 +722,6 @@ const Dashboard = () => {
                       <td className="p-3"> {product.vendor}</td>
 
                       {admin && `#${product.shopifyId}`}
-                      {/* <td className="p-3"> {product.email} </td> */}
                       <td className="p-3">
                         <button
                           className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"

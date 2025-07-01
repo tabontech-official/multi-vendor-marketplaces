@@ -90,7 +90,7 @@ const CategorySelector = () => {
   const [galleryImages, setGalleryImages] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredCategories, setFilteredCategories] = useState([]); // Filtered categories based on search query
+  const [filteredCategories, setFilteredCategories] = useState([]);
 
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
@@ -102,10 +102,6 @@ const CategorySelector = () => {
     const rawContent = convertToRaw(newEditorState.getCurrentContent());
     setDescription(JSON.stringify(rawContent));
   };
-
-  //  const filteredCategories = categories.filter((category) =>
-  //     category.title.toLowerCase().includes(searchQuery.toLowerCase())
-  //   );
 
   const toggleChildOptions = (parentIndex) => {
     setExpandedParents((prev) =>
@@ -140,13 +136,12 @@ const CategorySelector = () => {
   const [dropdownWidth, setDropdownWidth] = useState(0);
   const inputRef = useRef(null);
   const [highlightIndex, setHighlightIndex] = useState(-1);
-  const [highestLevelSelected, setHighestLevelSelected] = useState(null); // level1, level2, level3
+  const [highestLevelSelected, setHighestLevelSelected] = useState(null);
   const [selectedVisibleCategories, setSelectedVisibleCategories] = useState(
     []
   );
   const [finalCategoryPayload, setFinalCategoryPayload] = useState([]);
-const [selectedExportTitle, setSelectedExportTitle] = useState("");
-
+  const [selectedExportTitle, setSelectedExportTitle] = useState("");
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -158,7 +153,7 @@ const [selectedExportTitle, setSelectedExportTitle] = useState("");
       }
     };
 
-    document.addEventListener("click", handleClickOutside); // ✅ Changed from mousedown to click
+    document.addEventListener("click", handleClickOutside);
 
     return () => {
       document.removeEventListener("click", handleClickOutside);
@@ -204,22 +199,22 @@ const [selectedExportTitle, setSelectedExportTitle] = useState("");
         const matchesSearch = path.includes(value.toLowerCase());
 
         if (!highestLevelSelected) {
-          return matchesSearch; // ✅ No previous selection, show all levels
+          return matchesSearch;
         }
 
         if (highestLevelSelected === "level1") {
-          return matchesSearch; // ✅ Level 1 selected → all levels allowed
+          return matchesSearch;
         }
 
         if (highestLevelSelected === "level2") {
-          if (category.level === "level1") return false; // ❌ Block Level 1
-          return matchesSearch; // ✅ Allow level 2 and 3
+          if (category.level === "level1") return false;
+          return matchesSearch;
         }
 
         if (highestLevelSelected === "level3") {
           if (category.level === "level1" || category.level === "level2")
-            return false; // ❌ Block Level 1 and 2
-          return matchesSearch; // ✅ Only Level 3 allowed
+            return false;
+          return matchesSearch;
         }
 
         return matchesSearch;
@@ -246,99 +241,61 @@ const [selectedExportTitle, setSelectedExportTitle] = useState("");
     }
   };
 
-  // const handleCategorySelect = (selectedCategory) => {
-  //   console.log("Selected Category:", selectedCategory);
+  const handleCategorySelect = (selectedCategory) => {
+    let categoryData = [];
+    let payloadData = [];
+    let exportTitle = "";
 
-  //   let categoryData = [selectedCategory.catNo];
+    const pushCategory = (cat) => {
+      if (cat && !selectedCategories.includes(cat.catNo)) {
+        categoryData.push(cat.catNo);
+        payloadData.push({
+          catNo: cat.catNo,
+          title: buildCategoryPath(cat),
+        });
+      }
+    };
 
-  //   if (selectedCategory.level === "level2") {
-  //     const parentCategory = categories.find(
-  //       (category) => category.catNo === selectedCategory.parentCatNo
-  //     );
-  //     if (parentCategory) {
-  //       categoryData.push(parentCategory.catNo);
-  //     }
-  //   } else if (selectedCategory.level === "level3") {
-  //     const parentCategory = categories.find(
-  //       (category) => category.catNo === selectedCategory.parentCatNo
-  //     );
-  //     if (parentCategory) {
-  //       categoryData.push(parentCategory.catNo);
-
-  //       const grandparentCategory = categories.find(
-  //         (category) => category.catNo === parentCategory.parentCatNo
-  //       );
-  //       if (grandparentCategory) {
-  //         categoryData.push(grandparentCategory.catNo);
-  //       }
-  //     }
-  //   }
-
-  //   // ✅ Add backend catNos (avoid duplicates)
-  //   const uniqueCatNos = categoryData.filter(
-  //     (catNo) => !selectedCategories.includes(catNo)
-  //   );
-  //   if (uniqueCatNos.length > 0) {
-  //     setSelectedCategories((prev) => [...prev, ...uniqueCatNos]);
-  //   }
-
-  //   // ✅ Add visible category (only selected category shown in UI)
-  //   setSelectedVisibleCategories((prev) => [...prev, selectedCategory.catNo]);
-
-  //   setSearchTerm("");
-  //   setFilteredCategories([]);
-  // };
-
-const handleCategorySelect = (selectedCategory) => {
-  let categoryData = [];
-  let payloadData = [];
-  let exportTitle = "";
-
-  const pushCategory = (cat) => {
-    if (cat && !selectedCategories.includes(cat.catNo)) {
-      categoryData.push(cat.catNo);
-      payloadData.push({
-        catNo: cat.catNo,
-        title: buildCategoryPath(cat),  // Full UI path for backend
-      });
+    if (selectedCategory.level === "level1") {
+      pushCategory(selectedCategory);
+      exportTitle = selectedCategory.title;
     }
+
+    if (selectedCategory.level === "level2") {
+      const parent = categories.find(
+        (c) => c.catNo === selectedCategory.parentCatNo
+      );
+      pushCategory(parent);
+      pushCategory(selectedCategory);
+
+      exportTitle = `${selectedCategory.title} > ${selectedCategory.title}`;
+    }
+
+    if (selectedCategory.level === "level3") {
+      const parent = categories.find(
+        (c) => c.catNo === selectedCategory.parentCatNo
+      );
+      const grandparent = parent
+        ? categories.find((c) => c.catNo === parent.parentCatNo)
+        : null;
+
+      pushCategory(grandparent);
+      pushCategory(parent);
+      pushCategory(selectedCategory);
+
+      if (grandparent && parent) {
+        exportTitle = `${grandparent.title} > ${parent.title} > ${selectedCategory.title}`;
+      }
+    }
+
+    setSelectedCategories((prev) => [...prev, ...categoryData]);
+    setSelectedVisibleCategories((prev) => [...prev, selectedCategory.catNo]);
+    setFinalCategoryPayload((prev) => [...prev, ...payloadData]);
+    setSearchTerm("");
+    setFilteredCategories([]);
+
+    setSelectedExportTitle(exportTitle);
   };
-
-  if (selectedCategory.level === "level1") {
-    pushCategory(selectedCategory);
-    exportTitle = selectedCategory.title;
-  }
-
-  if (selectedCategory.level === "level2") {
-    const parent = categories.find((c) => c.catNo === selectedCategory.parentCatNo);
-    pushCategory(parent);
-    pushCategory(selectedCategory);
-
-    exportTitle = `${selectedCategory.title} > ${selectedCategory.title}`;
-  }
-
-  if (selectedCategory.level === "level3") {
-    const parent = categories.find((c) => c.catNo === selectedCategory.parentCatNo);
-    const grandparent = parent ? categories.find((c) => c.catNo === parent.parentCatNo) : null;
-
-    pushCategory(grandparent);
-    pushCategory(parent);
-    pushCategory(selectedCategory);
-
-    if (grandparent && parent) {
-      exportTitle = `${grandparent.title} > ${parent.title} > ${selectedCategory.title}`;
-    }
-  }
-
-  setSelectedCategories((prev) => [...prev, ...categoryData]);
-  setSelectedVisibleCategories((prev) => [...prev, selectedCategory.catNo]);
-  setFinalCategoryPayload((prev) => [...prev, ...payloadData]);
-  setSearchTerm("");
-  setFilteredCategories([]);
-
-  // ✅ Set exportTitle in a state if you want
-  setSelectedExportTitle(exportTitle);  // <-- Optional: Save export title for later
-};
 
   const removeCategory = (catNoToRemove) => {
     setSelectedVisibleCategories((prev) =>
@@ -348,52 +305,6 @@ const handleCategorySelect = (selectedCategory) => {
       prev.filter((catNo) => catNo !== catNoToRemove)
     );
   };
-
-  // const handleCategoryChange = (e) => {
-  //   const selectedCategoryValue = e.target.value;
-  //   const selectedCategory = categories.find(
-  //     (category) => category.catNo === selectedCategoryValue
-  //   );
-
-  //   console.log("Selected Category:", selectedCategory);
-
-  //   if (selectedCategory) {
-  //     if (!keywordsList.includes(selectedCategory.title)) {
-  //       console.log("Adding title to keywords list:", selectedCategory.title);
-  //       setKeywordsList([...keywordsList, selectedCategory.title]);
-  //     }
-
-  //     let categoryData = [selectedCategory.catNo];
-  //     if (selectedCategory.level === "level2") {
-  //       const parentCategory = categories.find(
-  //         (category) => category.catNo === selectedCategory.parentCatNo
-  //       );
-  //       if (parentCategory) {
-  //         categoryData.push(parentCategory.catNo);
-  //       }
-  //     } else if (selectedCategory.level === "level3") {
-  //       const parentCategory = categories.find(
-  //         (category) => category.catNo === selectedCategory.parentCatNo
-  //       );
-  //       if (parentCategory) {
-  //         categoryData.push(parentCategory.catNo);
-
-  //         const grandparentCategory = categories.find(
-  //           (category) => category.catNo === parentCategory.parentCatNo
-  //         );
-  //         if (grandparentCategory) {
-  //           categoryData.push(grandparentCategory.catNo);
-  //         }
-  //       }
-  //     }
-
-  //     console.log("Adding catNo(s) to selectedCategories:", categoryData);
-  //     setSelectedCategories((prevCategories) => [
-  //       ...prevCategories,
-  //       ...categoryData,
-  //     ]);
-  //   }
-  // };
 
   const navigate = useNavigate();
 
@@ -415,21 +326,14 @@ const handleCategorySelect = (selectedCategory) => {
       }
     }
   };
-  // const removeKeyword = (index) => {
-  //   const newList = [...keywordsList];
-  //   newList.splice(index, 1);
-  //   setKeywordsList(newList);
-  // };
 
   const removeKeyword = (index) => {
     const removedTitle = keywordsList[index];
 
-    // ✅ Remove keyword from keywordsList
     const newKeywords = [...keywordsList];
     newKeywords.splice(index, 1);
     setKeywordsList(newKeywords);
 
-    // ✅ Find matching category catNo by title
     const categoryToRemove = categories.find(
       (cat) => cat.title === removedTitle
     );
@@ -441,14 +345,6 @@ const handleCategorySelect = (selectedCategory) => {
       setSelectedCategories(newSelectedCategories);
     }
   };
-
-  // const handleImageChange = (event) => {
-  //   const files = Array.from(event.target.files);
-  //   const imagePreviews = files.map((file) => URL.createObjectURL(file));
-  //   setSelectedImages((prevImages) => [...prevImages, ...imagePreviews]);
-
-  //   setImages(files);
-  // };
 
   const toggleImageSelection = (index) => {
     setCheckedImages((prev) => ({
@@ -597,23 +493,37 @@ const handleCategorySelect = (selectedCategory) => {
     );
   }, [variants]);
 
-  // useEffect(() => {
-  //   const userId = localStorage.getItem("userid");
+  useEffect(() => {
+    if (!product || !categories || categories.length === 0) return;
 
-  //   if (isPopupVisible && userId) {
-  //     const productId = product?.id || "null";
+    const categoryTitlesFromDB = product.categories || [];
 
-  //     fetch(
-  //       `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`
-  //     )
-  //       .then((res) => res.json())
-  //       .then((data) => {
-  //         const allImages = data.flatMap((item) => item.images);
-  //         setGalleryImages(allImages);
-  //       })
-  //       .catch((err) => console.error("Failed to fetch images:", err));
-  //   }
-  // }, [isPopupVisible, product]);
+    const visibleCategoryIds = categoryTitlesFromDB
+      .map((title) => {
+        const match = categories.find(
+          (cat) =>
+            buildCategoryPath(cat).trim().toLowerCase() ===
+            title.trim().toLowerCase()
+        );
+        return match ? match.catNo : null;
+      })
+      .filter(Boolean);
+
+    setSelectedVisibleCategories(visibleCategoryIds);
+
+    const allTags = Array.isArray(product.tags)
+      ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
+      : [];
+
+    const tagsArray = allTags.filter((tag) => {
+      if (tag.startsWith("cat_")) return false;
+      return !categoryTitlesFromDB.some(
+        (title) => title.trim().toLowerCase() === tag.trim().toLowerCase()
+      );
+    });
+
+    setKeywordsList(tagsArray);
+  }, [product, categories]);
 
   useEffect(() => {
     const userId = localStorage.getItem("userid");
@@ -650,201 +560,177 @@ const handleCategorySelect = (selectedCategory) => {
       .trim()}`;
   };
 
-    useEffect(() => {
-      if (product) {
-        const normalizeString = (str) => String(str).replace(/['"]/g, "").trim();
+  useEffect(() => {
+    if (product) {
+      const normalizeString = (str) => String(str).replace(/['"]/g, "").trim();
 
-        const allVariants = product.variants;
+      const allVariants = product.variants;
 
-        const groupedVariants = allVariants.reduce((acc, variant) => {
-          const leftOption = variant.option1;
-          const rightOption = variant.option2;
+      const groupedVariants = allVariants.reduce((acc, variant) => {
+        const leftOption = variant.option1;
+        const rightOption = variant.option2;
 
-          if (!acc[leftOption]) {
-            acc[leftOption] = {
-              parent: {
-                ...variant,
-                option1: leftOption,
-                option2: null,
-                option3: null,
-                isParent: true,
-              },
-              children: [],
-            };
-          }
-
-          if (rightOption) {
-            acc[leftOption].children.push({
+        if (!acc[leftOption]) {
+          acc[leftOption] = {
+            parent: {
               ...variant,
               option1: leftOption,
-              option2: rightOption,
+              option2: null,
               option3: null,
-              isParent: false,
-            });
-          }
+              isParent: true,
+            },
+            children: [],
+          };
+        }
 
-          return acc;
-        }, {});
-
-        const formattedVariants = Object.keys(groupedVariants).map(
-          (key, index) => ({
-            ...groupedVariants[key].parent,
-            group: `parent-${index}`,
-            subVariants: groupedVariants[key].children,
-          })
-        );
-
-        const hydratedVariantImages = {};
-
-        formattedVariants.forEach((variantGroup) => {
-          const children = variantGroup.subVariants;
-
-          children.forEach((childVariant) => {
-            const titleKey = normalizeString(childVariant.title || "");
-
-            const imageId = childVariant.image_id;
-
-            const matched = product.variantImages?.find(
-              (img) => String(img.id) === String(imageId)
-            );
-
-            if (matched?.src) {
-              hydratedVariantImages[titleKey] = {
-                preview: matched.src,
-                loading: false,
-              };
-            }
+        if (rightOption) {
+          acc[leftOption].children.push({
+            ...variant,
+            option1: leftOption,
+            option2: rightOption,
+            option3: null,
+            isParent: false,
           });
+        }
+
+        return acc;
+      }, {});
+
+      const formattedVariants = Object.keys(groupedVariants).map(
+        (key, index) => ({
+          ...groupedVariants[key].parent,
+          group: `parent-${index}`,
+          subVariants: groupedVariants[key].children,
+        })
+      );
+
+      const hydratedVariantImages = {};
+
+      formattedVariants.forEach((variantGroup) => {
+        const children = variantGroup.subVariants;
+
+        children.forEach((childVariant) => {
+          const titleKey = normalizeString(childVariant.title || "");
+
+          const imageId = childVariant.image_id;
+
+          const matched = product.variantImages?.find(
+            (img) => String(img.id) === String(imageId)
+          );
+
+          if (matched?.src) {
+            hydratedVariantImages[titleKey] = {
+              preview: matched.src,
+              loading: false,
+            };
+          }
+        });
+      });
+
+      console.log(
+        "Hydrated Images from formattedVariants (title based):",
+        hydratedVariantImages
+      );
+
+      if (Object.keys(hydratedVariantImages).length > 0) {
+        setVariantImages(hydratedVariantImages);
+      } else {
+        const fallbackVariantImages = {};
+
+        product?.variants?.forEach((variant) => {
+          const titleKey = normalizeString(variant.title || "");
+
+          const matchedImage = product?.variantImages?.find(
+            (img) => String(img.id) === String(variant.image_id)
+          );
+
+          if (matchedImage?.src) {
+            fallbackVariantImages[titleKey] = {
+              preview: matchedImage.src,
+              loading: false,
+            };
+          }
         });
 
         console.log(
-          "Hydrated Images from formattedVariants (title based):",
-          hydratedVariantImages
+          "Fallback Images from product.variants (title based):",
+          fallbackVariantImages
         );
 
-        if (Object.keys(hydratedVariantImages).length > 0) {
-          setVariantImages(hydratedVariantImages);
+        if (Object.keys(fallbackVariantImages).length > 0) {
+          setVariantImages(fallbackVariantImages);
         } else {
-          // Fallback if no images found
-          const fallbackVariantImages = {};
-
-          product?.variants?.forEach((variant) => {
-            const titleKey = normalizeString(variant.title || "");
-
-            const matchedImage = product?.variantImages?.find(
-              (img) => String(img.id) === String(variant.image_id)
-            );
-
-            if (matchedImage?.src) {
-              fallbackVariantImages[titleKey] = {
-                preview: matchedImage.src,
-                loading: false,
-              };
-            }
-          });
-
-          console.log(
-            "Fallback Images from product.variants (title based):",
-            fallbackVariantImages
-          );
-
-          if (Object.keys(fallbackVariantImages).length > 0) {
-            setVariantImages(fallbackVariantImages);
-          } else {
-            console.log("No images found from either method");
-          }
-        }
-
-        setIsEditing(true);
-        setTitle(product.title || "");
-        setPrice(product.variants[0]?.price || "");
-        setCompareAtPrice(product.variants[0]?.compare_at_price || "");
-        setTrackQuantity(product.inventory?.track_quantity || false);
-        setQuantity(product.inventory?.quantity || 0);
-        setContinueSelling(product.inventory?.continue_selling || false);
-        setHasSKU(product.inventory?.has_sku || false);
-        setSKU(product.inventory?.sku || "");
-        setBarcode(product.inventory?.barcode || "");
-        setTrackShipping(product.shipping?.track_shipping || false);
-        setWeight(product.shipping?.weight || "");
-        setUnit(product.shipping?.weight_unit || "kg");
-        setStatus(product.status || "publish");
-        setUserId(product.userId || "");
-
-        const imageURLs =
-          product.images?.map((img) => ({
-            cloudUrl: img.src,
-            loading: false,
-          })) || [];
-        setSelectedImages(imageURLs);
-
-        // const tagsArray = Array.isArray(product.tags)
-        //   ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
-        //   : [];
-        // setKeywordsList(tagsArray);
-        const tagsArray = Array.isArray(product.tags)
-          ? product.tags
-              .flatMap((tag) => tag.split(",").map((t) => t.trim())) // Split by commas and trim
-              .filter((tag) => !tag.startsWith("cat_")) // Remove any `catNo` (e.g., cat_1, cat_2)
-          : [];
-const allTags = Array.isArray(product.tags)
-  ? product.tags.flatMap((tag) => tag.split(",").map((t) => t.trim()))
-  : [];
-
-const visibleCategoryTitles = allTags.map((tag) => {
-  if (tag.startsWith("cat_")) {
-    const catNo = tag.replace("cat_", "");
-    const category = categories.find((c) => c.catNo.toString() === catNo);
-    return category ? buildCategoryPath(category) : null;
-  } else if (tag.includes(">")) {
-    return tag.trim();
-  }
-  return null;
-}).filter(Boolean);
-console.log(visibleCategoryTitles)
-setSelectedVisibleCategories(visibleCategoryTitles);
-
-
-
-        // Update the keywords list for display
-        setKeywordsList(tagsArray);
-        setVendor(product.vendor);
-        setProductType(product.product_type);
-
-        setOptions(
-          product.options?.map((option) => ({
-            id: option.id || "No ID",
-            name: option.name || "Unnamed Option",
-            values: option.values || [],
-          })) || []
-        );
-
-        setVariants(formattedVariants);
-        setVariantPrices(product.variants.map((v) => v.price || ""));
-        setVariantQuantities(
-          product.variants.map((v) => v.inventory_quantity || 0)
-        );
-        setVariantSku(product.variants.map((v) => v.sku || ""));
-        setImages(product.images || []);
-
-        const rawDescription = product.body_html || "";
-        try {
-          const parsedContent = JSON.parse(rawDescription);
-          const contentState = convertFromRaw(parsedContent);
-          setEditorState(EditorState.createWithContent(contentState));
-        } catch (error) {
-          const contentBlock = htmlToDraft(rawDescription);
-          if (contentBlock) {
-            const contentState = ContentState.createFromBlockArray(
-              contentBlock.contentBlocks
-            );
-            setEditorState(EditorState.createWithContent(contentState));
-          } else {
-            setEditorState(EditorState.createEmpty());
-          }
+          console.log("No images found from either method");
         }
       }
-    }, [product]);
+
+      setIsEditing(true);
+      setTitle(product.title || "");
+      setPrice(product.variants[0]?.price || "");
+      setCompareAtPrice(product.variants[0]?.compare_at_price || "");
+      setTrackQuantity(product.inventory?.track_quantity || false);
+      setQuantity(product.inventory?.quantity || 0);
+      setContinueSelling(product.inventory?.continue_selling || false);
+      setHasSKU(product.inventory?.has_sku || false);
+      setSKU(product.inventory?.sku || "");
+      setBarcode(product.inventory?.barcode || "");
+      setTrackShipping(product.shipping?.track_shipping || false);
+      setWeight(product.shipping?.weight || "");
+      setUnit(product.shipping?.weight_unit || "kg");
+      setStatus(product.status || "publish");
+      setUserId(product.userId || "");
+
+      const imageURLs =
+        product.images?.map((img) => ({
+          cloudUrl: img.src,
+          loading: false,
+        })) || [];
+      setSelectedImages(imageURLs);
+
+      const tagsArray = Array.isArray(product.tags)
+        ? product.tags
+            .flatMap((tag) => tag.split(",").map((t) => t.trim()))
+            .filter((tag) => !tag.startsWith("cat_"))
+        : [];
+
+      setKeywordsList(tagsArray);
+      setVendor(product.vendor);
+      setProductType(product.product_type);
+
+      setOptions(
+        product.options?.map((option) => ({
+          id: option.id || "No ID",
+          name: option.name || "Unnamed Option",
+          values: option.values || [],
+        })) || []
+      );
+
+      setVariants(formattedVariants);
+      setVariantPrices(product.variants.map((v) => v.price || ""));
+      setVariantQuantities(
+        product.variants.map((v) => v.inventory_quantity || 0)
+      );
+      setVariantSku(product.variants.map((v) => v.sku || ""));
+      setImages(product.images || []);
+
+      const rawDescription = product.body_html || "";
+      try {
+        const parsedContent = JSON.parse(rawDescription);
+        const contentState = convertFromRaw(parsedContent);
+        setEditorState(EditorState.createWithContent(contentState));
+      } catch (error) {
+        const contentBlock = htmlToDraft(rawDescription);
+        if (contentBlock) {
+          const contentState = ContentState.createFromBlockArray(
+            contentBlock.contentBlocks
+          );
+          setEditorState(EditorState.createWithContent(contentState));
+        } else {
+          setEditorState(EditorState.createEmpty());
+        }
+      }
+    }
+  }, [product]);
 
   const handleImageChange = async (event) => {
     const apiKey = localStorage.getItem("apiKey");
@@ -942,7 +828,6 @@ setSelectedVisibleCategories(visibleCategoryTitles);
       type: "JPG",
       src: "https://cdn.shopify.com/s/files/1/0730/5553/5360/files/wnxzfpn2njdvpmlmel1o.png?v=1745405853",
     },
-    // Add more file objects as needed
   ];
   const handleRemoveVariantImages = (parentIndex, child) => {
     setVariantImages((prev) => {
@@ -994,16 +879,7 @@ setSelectedVisibleCategories(visibleCategoryTitles);
         });
       });
     };
-    // const prepareVarianQuantities = () => {
-    //   return combinations.flatMap((combination, index) => {
-    //     return combination.children.map((child) => {
-    //       const key = `${index}-${child}`;
-    //       return variantQuantities[key] !== undefined
-    //         ? variantQuantities[key]
-    //         : null;
-    //     });
-    //   });
-    // };
+
     const defaultQuantity = parseFloat(quantity) || 0;
 
     const prepareVarianQuantities = () => {
@@ -1028,19 +904,19 @@ setSelectedVisibleCategories(visibleCategoryTitles);
         });
       });
     };
-    // const combinedKeywords = [...selectedCategories, ...keywordsList].join(
-    //   ", "
-    // );
-const categoryIds = finalCategoryPayload.map(item => item.catNo.toString());
 
-const combinedKeywords = [
-  selectedExportTitle,   // ✅ Single export title from state
-  ...categoryIds,
-  ...keywordsList
-].join(", ");
+    const categoryIds = finalCategoryPayload.map((item) =>
+      item.catNo.toString()
+    );
+
+    const combinedKeywords = [
+      selectedExportTitle,
+      ...categoryIds,
+      ...keywordsList,
+    ].join(", ");
     const payload = {
       // keyWord: keywordsList.join(", "),
-      keyWord: combinedKeywords, // Send combined catNo (category IDs) and manual keywords
+      keyWord: combinedKeywords,
 
       title,
       description: modifiedContent,
@@ -1065,6 +941,7 @@ const combinedKeywords = [
       variantCompareAtPrices: prepareVariantCompareAtPrices(),
       variantQuantites: prepareVarianQuantities(),
       variantSku: prepareVariansku(),
+      categories: selectedExportTitle,
     };
 
     console.log("Payload being sent:", payload);
@@ -1074,7 +951,7 @@ const combinedKeywords = [
         ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
         : "  https://multi-vendor-marketplace.vercel.app/product/addEquipment";
 
-      const method = isEditing ? "PUT" : "POST";
+      const method = isEditing ? "PATCH" : "POST";
 
       const response = await fetch(url, {
         method,
@@ -1588,448 +1465,6 @@ const combinedKeywords = [
                             )}
                           </button>
                         </div>
-
-                        {/* {expandedParents.includes(index) && (
-                          <div className="mt-2">
-                            <ul className="space-y-2">
-                              {combinations[index]?.children?.map(
-                                (child, childIndex) => {
-                                  const key = `${index}-${child}`;
-                                  const image = variantImages[key];
-                                  const variantPrice = variantPrices[key] || "";
-                                  const quantities =
-                                    variantQuantities[key] || "";
-                                  const variantSKU = variantSku[key] || "";
-                                  const compareAtPrices =
-                                    variantCompareAtPrices[key] || "";
-                                  const parentValue =
-                                    combinations[index]?.parent;
-                                  const normalizeString = (str) =>
-                                    str.trim().toLowerCase();
-
-                                  const combinationString = `${parentValue} / ${child}`;
-
-                                  const normalizedCombination =
-                                    normalizeString(combinationString);
-
-                                  const matchingVariant =
-                                    product?.variants?.find((variant) => {
-                                      const normalizedVariantTitle =
-                                        normalizeString(variant.title);
-
-                                      return (
-                                        normalizedVariantTitle ===
-                                        normalizedCombination
-                                      );
-                                    });
-                                  const price = matchingVariant?.price;
-                                  const compareAtPrice =
-                                    matchingVariant?.compare_at_price;
-                                  const sku = matchingVariant?.sku;
-                                  const quantity =
-                                    matchingVariant?.inventory_quantity;
-                                  const variantId = matchingVariant?.id;
-
-                                  const image_id = matchingVariant?.image_id;
-                                  const matchedImage = product?.images?.find(
-                                    (image) => {
-                                      return (
-                                        String(image?.id) === String(image_id)
-                                      );
-                                    }
-                                  );
-
-                                  return (
-                                    <li
-                                      key={childIndex}
-                                      className="grid grid-cols-7 items-center gap-20"
-                                    >
-                                      <div className="w-12 relative">
-                                        <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
-                                          {image?.preview ? (
-                                            <img
-                                              src={
-                                                variantImages[
-                                                  `${index}-${child}`
-                                                ]?.preview ||
-                                                image?.preview ||
-                                                ""
-                                              }
-                                              alt={`Variant ${child}`}
-                                              className="w-full h-full object-cover"
-                                            />
-                                          ) : (
-                                            <span className="text-3xl text-gray-400">
-                                              +
-                                            </span>
-                                          )}
-                                          <input
-                                            // type="file"
-                                            // accept="image/*"
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onClick={() => {
-                                              setCurrentVariant({
-                                                index,
-                                                child,
-                                              });
-                                              setIsPopupVisible(true);
-                                            }}
-
-                                            // onChange={(e) =>
-                                            //   handleVariantImageUpload(
-                                            //     e,
-                                            //     index,
-                                            //     child
-                                            //   )
-                                            // }
-                                          />
-                                          {image?.preview && (
-                                            <button
-                                              onClick={() =>
-                                                handleRemoveVariantImages(
-                                                  index,
-                                                  child
-                                                )
-                                              }
-                                              className="absolute top-0 right-0 text-white bg-red-600 rounded-full px-2 py-1 text-xs"
-                                              style={{
-                                                transform:
-                                                  "translate(25%, -25%)",
-                                              }}
-                                            >
-                                              X
-                                            </button>
-                                          )}
-                                        </label>
-                                      </div>
-
-                                      <span
-                                        className="font-medium text-sm  text-gray-700  cursor-pointer"
-                                        onClick={() => {
-                                          navigate(
-                                            `/product/${product.id}/variants/${variantId}`,
-                                            {
-                                              state: {
-                                                productId: product.id,
-                                                variantId: variantId,
-                                              },
-                                            }
-                                          );
-                                        }}
-                                      >
-                                        {child}
-                                      </span>
-
-                                      <div className="relative w-20">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <input
-                                          type="number"
-                                          value={
-                                            variantPrice !== ""
-                                              ? variantPrice
-                                              : price
-                                          }
-                                          placeholder="Price"
-                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
-                                          onChange={(e) =>
-                                            handlePriceChange(
-                                              index,
-                                              child,
-                                              e.target.value
-                                            )
-                                          }
-                                        />
-                                      </div>
-
-                                      <div className="relative w-20 ">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <input
-                                          type="number"
-                                          value={
-                                            compareAtPrices !== ""
-                                              ? compareAtPrices
-                                              : compareAtPrice
-                                          }
-                                          placeholder="Compare-at"
-                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm no-spinner"
-                                          onChange={(e) =>
-                                            handleVariantComparePriceChange(
-                                              index,
-                                              child,
-                                              e.target.value
-                                            )
-                                          }
-                                        />
-                                      </div>
-
-                                      <input
-                                        type="text"
-                                        // value={variantSKU}
-                                        value={
-                                          variantSKU !== "" ? variantSKU : sku
-                                        }
-                                        placeholder="SKU"
-                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm"
-                                        onChange={(e) =>
-                                          handleVariantSkuChange(
-                                            index,
-                                            child,
-                                            e.target.value
-                                          )
-                                        }
-                                      />
-
-                                      <input
-                                        type="number"
-                                        // value={quantity}
-                                        value={
-                                          quantities !== ""
-                                            ? quantities
-                                            : quantity
-                                        }
-                                        placeholder="QTY"
-                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm no-spinner"
-                                        onChange={(e) =>
-                                          handleQuantityChange(
-                                            index,
-                                            child,
-                                            e.target.value
-                                          )
-                                        }
-                                      />
-
-                                      <button
-                                        onClick={() =>
-                                          handleDeleteCombination(
-                                            index,
-                                            childIndex
-                                          )
-                                        }
-                                        className="text-red-600"
-                                      >
-                                        <FaTrash />
-                                      </button>
-                                    </li>
-                                  );
-                                }
-                              )}
-                            </ul>
-                          </div>
-                        )} */}
-                        {/* {expandedParents.includes(index) && (
-                          <div className="mt-2">
-                            <ul className="space-y-2">
-                              {combinations[index]?.children?.map(
-                                (child, childIndex) => {
-                                  const parentValue =
-                                    combinations[index]?.parent;
-                                  const combinationString = `${parentValue} / ${child}`;
-
-                                  const image =
-                                    variantImages[combinationString];
-                                  const variantPrice =
-                                    variantPrices[combinationString] || "";
-                                  const quantities =
-                                    variantQuantities[combinationString] || "";
-                                  const variantSKU =
-                                    variantSku[combinationString] || "";
-                                  const compareAtPrices =
-                                    variantCompareAtPrices[combinationString] ||
-                                    "";
-
-                                  const matchingVariant =
-                                    product?.variants?.find(
-                                      (variant) =>
-                                        variant.title === combinationString
-                                    );
-
-                                  const price = matchingVariant?.price;
-                                  const compareAtPrice =
-                                    matchingVariant?.compare_at_price;
-                                  const sku = matchingVariant?.sku;
-                                  const quantity =
-                                    matchingVariant?.inventory_quantity;
-                                  const variantId = matchingVariant?.id;
-
-                                  return (
-                                    <li
-                                      key={childIndex}
-                                      className="grid grid-cols-7 items-center gap-20"
-                                    >
-                                      <div className="w-12 relative">
-                                        <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
-                                          {image?.preview ? (
-                                            <img
-                                              src={
-                                                variantImages[
-                                                  `${index}-${child}`
-                                                ]?.preview ||
-                                                image?.preview ||
-                                                ""
-                                              }
-                                              alt={`Variant ${child}`}
-                                              className="w-full h-full object-cover"
-                                            />
-                                          ) : (
-                                            <span className="text-3xl text-gray-400">
-                                              +
-                                            </span>
-                                          )}
-                                          <input
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onClick={() => {
-                                              setCurrentVariant({
-                                                index,
-                                                child,
-                                              });
-                                              setIsPopupVisible(true);
-                                            }}
-                                          />
-                                          {image?.preview && (
-                                            <button
-                                              onClick={() =>
-                                                handleRemoveVariantImages(
-                                                  index,
-                                                  child
-                                                )
-                                              }
-                                              className="absolute top-0 right-0 text-white bg-red-600 rounded-full px-2 py-1 text-xs"
-                                              style={{
-                                                transform:
-                                                  "translate(25%, -25%)",
-                                              }}
-                                            >
-                                              X
-                                            </button>
-                                          )}
-                                        </label>
-                                      </div>
-
-                                      <span
-                                        className="font-medium text-sm  text-gray-700  cursor-pointer hover:underline"
-                                        onClick={() => {
-                                          navigate(
-                                            `/product/${product.id}/variants/${variantId}`,
-                                            {
-                                              state: {
-                                                productId: product.id,
-                                                variantId: variantId,
-                                              },
-                                            }
-                                          );
-                                        }}
-                                      >
-                                        {child}
-                                      </span>
-
-                                      <div className="relative w-20">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <input
-                                          type="number"
-                                          value={
-                                            variantPrice !== ""
-                                              ? variantPrice
-                                              : price
-                                          }
-                                          readOnly
-                                          placeholder="Price"
-                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm bg-gray-400 bg-opacity-60 backdrop-blur-sm no-spinner"
-                                          onChange={(e) =>
-                                            handlePriceChange(
-                                              index,
-                                              child,
-                                              e.target.value
-                                            )
-                                          }
-                                        />
-                                      </div>
-
-                                      <div className="relative w-20 ">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <input
-                                          type="number"
-                                          value={
-                                            compareAtPrices !== ""
-                                              ? compareAtPrices
-                                              : compareAtPrice
-                                          }
-                                          readOnly
-                                          placeholder="Compare-at"
-                                          className="w-full p-1 pl-6 border border-gray-300 rounded-md text-sm bg-gray-400 bg-opacity-60 backdrop-blur-sm no-spinner "
-                                          onChange={(e) =>
-                                            handleVariantComparePriceChange(
-                                              index,
-                                              child,
-                                              e.target.value
-                                            )
-                                          }
-                                        />
-                                      </div>
-
-                                      <input
-                                        type="text"
-                                        // value={variantSKU}
-                                        value={
-                                          variantSKU !== "" ? variantSKU : sku
-                                        }
-                                        placeholder="SKU"
-                                        readOnly
-                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm bg-gray-400 bg-opacity-60 backdrop-blur-sm no-spinner"
-                                        onChange={(e) =>
-                                          handleVariantSkuChange(
-                                            index,
-                                            child,
-                                            e.target.value
-                                          )
-                                        }
-                                      />
-
-                                      <input
-                                        type="number"
-                                        // value={quantity}
-                                        value={
-                                          quantities !== ""
-                                            ? quantities
-                                            : quantity
-                                        }
-                                        placeholder="QTY"
-                                        readOnly
-                                        className="w-20 p-1 border border-gray-300 rounded-md text-sm bg-gray-400 bg-opacity-60 backdrop-blur-sm no-spinner"
-                                        onChange={(e) =>
-                                          handleQuantityChange(
-                                            index,
-                                            child,
-                                            e.target.value
-                                          )
-                                        }
-                                      />
-
-                                      <button
-                                        onClick={() =>
-                                          handleDeleteCombination(
-                                            index,
-                                            childIndex
-                                          )
-                                        }
-                                        className="text-red-600"
-                                      >
-                                        <FaTrash />
-                                      </button>
-                                    </li>
-                                  );
-                                }
-                              )}
-                            </ul>
-                          </div>
-                        )} */}
                         {expandedParents.includes(index) && (
                           <div className="mt-2">
                             <ul className="space-y-2">
@@ -2521,86 +1956,7 @@ const combinedKeywords = [
             </div>
           </div>
         </div>
-        {/* {isPopupVisible && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
-            <div className="bg-white w-[60%] max-w-5xl rounded-lg shadow-lg p-6 relative">
-              <div className="flex justify-between items-center pb-4 border-b">
-                <h2 className="text-lg font-medium">Select image</h2>
-                <button
-                  onClick={() => setIsPopupVisible(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <RxCross1 />
-                </button>
-              </div>
 
-              <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-2">
-                <button
-                  type="file"
-                  accept="images/"
-                  className="bg-blue-500 text-white px-3 py-1 rounded-md"
-                >
-                  Add images
-                </button>
-              </div>
-
-              <div className="grid grid-cols-4 gap-4 mt-6">
-                {galleryImages.map((file) => (
-                  <div
-                    key={file.id}
-                    className={`border rounded p-2 relative ${
-                      selectedFiles.includes(file.id)
-                        ? "border-blue-500"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <img
-                      src={file.src}
-                      alt={file.name}
-                      className="w-full h-24 object-cover rounded"
-                    />
-                    <input
-                      type="checkbox"
-                      className="absolute top-2 left-2"
-                      checked={
-                        currentVariant &&
-                        variantImages[
-                          `${currentVariant.index}-${currentVariant.child}`
-                        ]?.preview === file.src
-                      }
-                      onChange={() => {
-                        if (currentVariant) {
-                          const key = `${currentVariant.index}-${currentVariant.child}`;
-                          setVariantImages((prev) => ({
-                            ...prev,
-                            [key]: { preview: file.src },
-                          }));
-                          setIsPopupVisible(false);
-                        }
-                      }}
-                    />{" "}
-                    <p className="text-sm text-center mt-2">{file.name}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex justify-end mt-6 border-t ">
-                <button
-                  onClick={() => setIsPopupVisible(false)}
-                  className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => console.log(selectedFiles)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          </div>
-        )} */}
         {isPopupVisible && (
           <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
             <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">

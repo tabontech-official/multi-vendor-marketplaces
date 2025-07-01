@@ -96,7 +96,7 @@ const ManageCategory = () => {
               className="bg-red-500 text-white px-4 py-1 border rounded-md"
               onClick={handleDeleteCategories}
             >
-              Delete Selected
+              Delete Collection
             </button>
           )}
 

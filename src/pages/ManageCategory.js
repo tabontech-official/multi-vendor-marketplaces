@@ -66,11 +66,14 @@ const ManageCategory = () => {
     }
 
     try {
-      await axios.delete("https://multi-vendor-marketplace.vercel.app/category/deleteCollection", {
-        data: {
-          categoryIds: selectedCategoryIds,
-        },
-      });
+      await axios.delete(
+        "https://multi-vendor-marketplace.vercel.app/category/deleteCollection",
+        {
+          data: {
+            categoryIds: selectedCategoryIds,
+          },
+        }
+      );
 
       alert("Selected categories deleted successfully!");
     } catch (error) {
@@ -218,7 +221,7 @@ const ManageCategory = () => {
             })}
         </tbody>
       </table> */}
-      
+
       <table className="w-full border-collapse bg-white border rounded-2xl">
         <thead className="bg-gray-100 text-left text-gray-600 text-sm">
           <tr>
@@ -239,7 +242,7 @@ const ManageCategory = () => {
             </th>
           </tr>
         </thead>
-        <tbody>
+        {/* <tbody>
           {categories
             .filter((category) => category.level === "level1")
             .map((level1, index1) => {
@@ -341,6 +344,117 @@ const ManageCategory = () => {
                     <td className="p-3 text-sm">Level 3</td>
                     <td className="p-3 text-sm">{level3.title}</td>
                     <td className="p-3 text-sm">{`${level1.title} > ${level2.title} > ${level3.title}`}</td>
+                  </tr>
+                ));
+
+                return [level2Row, ...level3Rows];
+              });
+
+              return [level1Row, ...level2Rows];
+            })}
+        </tbody> */}
+        <tbody>
+          {categories
+            .filter((category) => category.level === "level1")
+            .map((level1, index1) => {
+              const level2s = categories.filter(
+                (c) => c.level === "level2" && c.parentCatNo === level1.catNo
+              );
+
+              const level1Row = (
+                <tr
+                  key={`l1-${index1}`}
+                  className={`border-b ${
+                    index1 % 2 === 0 ? "bg-white" : "bg-gray-100"
+                  }`}
+                >
+                  <td className="p-1 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategoryIds.includes(level1._id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedCategoryIds((prev) => [
+                            ...prev,
+                            level1._id,
+                          ]);
+                        } else {
+                          setSelectedCategoryIds((prev) =>
+                            prev.filter((id) => id !== level1._id)
+                          );
+                        }
+                      }}
+                    />
+                  </td>
+                  <td className="p-1 text-sm">{level1.catNo}</td>
+                  <td className="p-1 text-sm">Level 1</td>
+                  <td className="p-1 text-sm">{level1.title}</td>
+                  <td className="p-1 text-sm">{level1.title}</td>
+                </tr>
+              );
+
+              const level2Rows = level2s.flatMap((level2, index2) => {
+                const level3s = categories.filter(
+                  (c) => c.level === "level3" && c.parentCatNo === level2.catNo
+                );
+
+                const level2Row = (
+                  <tr
+                    key={`l2-${index1}-${index2}`}
+                    className="border-b bg-gray-50"
+                  >
+                    <td className="p-1 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategoryIds.includes(level2._id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedCategoryIds((prev) => [
+                              ...prev,
+                              level2._id,
+                            ]);
+                          } else {
+                            setSelectedCategoryIds((prev) =>
+                              prev.filter((id) => id !== level2._id)
+                            );
+                          }
+                        }}
+                      />
+                    </td>
+                    <td className="p-1 text-sm">{level2.catNo}</td>
+                    <td className="p-1 text-sm">Level 2</td>
+                    <td className="p-1 text-sm">{level2.title}</td>
+                    <td className="p-1 text-sm">{`${level1.title} > ${level2.title}`}</td>
+                  </tr>
+                );
+
+                const level3Rows = level3s.map((level3, index3) => (
+                  <tr
+                    key={`l3-${index1}-${index2}-${index3}`}
+                    className="border-b bg-gray-100"
+                  >
+                    <td className="p-1 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategoryIds.includes(level3._id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedCategoryIds((prev) => [
+                              ...prev,
+                              level3._id,
+                            ]);
+                          } else {
+                            setSelectedCategoryIds((prev) =>
+                              prev.filter((id) => id !== level3._id)
+                            );
+                          }
+                        }}
+                      />
+                    </td>
+                    <td className="p-1 text-sm">{level3.catNo}</td>
+                    <td className="p-1 text-sm">Level 3</td>
+                    <td className="p-1 text-sm">{level3.title}</td>
+                    <td className="p-1 text-sm">{`${level1.title} > ${level2.title} > ${level3.title}`}</td>
                   </tr>
                 ));
 

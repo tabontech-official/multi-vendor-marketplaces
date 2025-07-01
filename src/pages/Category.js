@@ -35,7 +35,7 @@
 //     const fetchCategories = async () => {
 //       try {
 //         const response = await fetch(
-//           "http://localhost:5000/category/getCategory"
+//           "https://multi-vendor-marketplace.vercel.app/category/getCategory"
 //         );
 //         const data = await response.json();
 
@@ -150,7 +150,7 @@
 
 //     try {
 //       const response = await fetch(
-//         "http://localhost:5000/category/createCategory",
+//         "https://multi-vendor-marketplace.vercel.app/category/createCategory",
 //         {
 //           method: "POST",
 //           headers: {
@@ -456,7 +456,7 @@ const CreateCategory = () => {
     const fetchCategories = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/category/getCategory"
+          "https://multi-vendor-marketplace.vercel.app/category/getCategory"
         );
         const data = await response.json();
 
@@ -532,7 +532,7 @@ const CreateCategory = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/category/createCategory",
+        "https://multi-vendor-marketplace.vercel.app/category/createCategory",
         {
           method: "POST",
           headers: {

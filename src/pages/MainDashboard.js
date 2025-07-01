@@ -39,7 +39,7 @@ const MainDashboard = () => {
   useEffect(() => {
     // Fetch sales contribution data from the backend API
     axios
-      .get("http://localhost:5000/order/getSalesContribution") // Assuming this API is already created
+      .get("https://multi-vendor-marketplace.vercel.app/order/getSalesContribution") // Assuming this API is already created
       .then((response) => {
         const data = response.data;
 
@@ -122,7 +122,7 @@ const MainDashboard = () => {
     }
 
     axios
-      .get(`http://localhost:5000/product/getProductForCharts/${userId}`) 
+      .get(`https://multi-vendor-marketplace.vercel.app/product/getProductForCharts/${userId}`) 
       .then((response) => {
         const data = response.data;
 
@@ -219,7 +219,7 @@ const MainDashboard = () => {
 
     // Fetch announcement data for the user
     axios
-      .get(`http://localhost:5000/promo/getAnnouncementsForUser/${userId}`)
+      .get(`https://multi-vendor-marketplace.vercel.app/promo/getAnnouncementsForUser/${userId}`)
       .then((response) => {
         const data = response.data;
         setAnnouncementsData(data); // Set the data for chart

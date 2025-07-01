@@ -24,7 +24,7 @@ const Variants = () => {
   //     const token=localStorage.getItem('usertoken')
   //     try {
   //       const response = await axios.get(
-  //         `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`
+  //         `http://localhost:5000/product/getSingleProductForVariants/${productId}`
   //       );
   //       setProduct(response.data);
   //       setLoading(false);
@@ -43,7 +43,7 @@ const Variants = () => {
       const apiSecretKey = localStorage.getItem("apiSecretKey");
       try {
         const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`,
+          `http://localhost:5000/product/getSingleProductForVariants/${productId}`,
           {
             headers: {
               "x-api-key": apiKey,
@@ -77,7 +77,7 @@ const Variants = () => {
       const apiSecretKey = localStorage.getItem("apiSecretKey");
       try {
         const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/product/getSingleVariant/${productId}/variants/${variantId}`,
+          `http://localhost:5000/product/getSingleVariant/${productId}/variants/${variantId}`,
           {
             headers: {
               "x-api-key": apiKey,
@@ -110,7 +110,7 @@ const Variants = () => {
   //     setIsLoading(true);
 
   //     const response = await axios.put(
-  //       `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
+  //       `http://localhost:5000/product/updateVariant/${productId}/${variantId}`,
   //       {
   //         variant: updatedVariant,
   //       }
@@ -130,7 +130,7 @@ const Variants = () => {
       setIsLoading(true);
 
       const response = await axios.put(
-        `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
+        `http://localhost:5000/product/updateVariant/${productId}/${variantId}`,
         {
           variant: updatedVariant,
         },

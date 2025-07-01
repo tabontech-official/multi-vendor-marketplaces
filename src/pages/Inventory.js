@@ -136,11 +136,11 @@ const Inventory = () => {
       const id = localStorage.getItem("userid");
       const response = await fetch(
         // admin
-        //   ? `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
-        //   : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
+        //   ? `http://localhost:5000/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
+        //   : `http://localhost:5000/product/getAllData/?page=${page}&limit=${limit}`,
         admin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`,
+          ? `http://localhost:5000/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
+          : `http://localhost:5000/product/getAllVariants/${id}/?page=${page}&limit=${limit}`,
         {
           method: "GET",
           headers: {
@@ -263,7 +263,7 @@ const Inventory = () => {
     try {
       const updatePromises = selectedProducts.map(async (variantId) => {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/${endpoint}/${variantId}`,
+          `http://localhost:5000/product/${endpoint}/${variantId}`,
           {
             method: "PUT",
             headers: {
@@ -326,7 +326,7 @@ const Inventory = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/${variantId}`,
+        `http://localhost:5000/product/updateInventoryPrice/${variantId}`,
         {
           method: "PUT",
           headers: {
@@ -378,7 +378,7 @@ const Inventory = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/${variantId}`,
+        `http://localhost:5000/product/updateInventoryQuantity/${variantId}`,
         {
           method: "PUT",
           headers: {
@@ -433,7 +433,7 @@ const Inventory = () => {
       );
 
       fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
+        "http://localhost:5000/product/upload-csv-for-inventory",
         {
           method: "POST",
           body: formData,
@@ -479,7 +479,7 @@ const Inventory = () => {
         return;
       }
 
-      let exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/`;
+      let exportUrl = `http://localhost:5000/product/csvInventoryEportFile/`;
 
       const queryParams = new URLSearchParams({ userId });
 

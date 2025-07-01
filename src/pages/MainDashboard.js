@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Chart from "react-apexcharts";
 import CredentialCheckModal from "../component/credentialModal";
+import axios from "axios";
 
 const MainDashboard = () => {
   const pendingOrdersOptions = {
@@ -32,55 +33,120 @@ const MainDashboard = () => {
   };
   const ratingSeries = [{ name: "Percentage/Score", data: [5.0, 0, 100] }];
 
+ const [salesContributionSeries, setSalesContributionSeries] = useState([]);
+  const [salesContributionCategories, setSalesContributionCategories] = useState([]);
+
+  useEffect(() => {
+    // Fetch sales contribution data from the backend API
+    axios
+      .get("http://localhost:5000/order/getSalesContribution") // Assuming this API is already created
+      .then((response) => {
+        const data = response.data;
+
+        // Dynamically create the categories (product names)
+        const categories = data.map((item) => item.productName);
+
+        // Get only the first 2 products
+        const firstTwoProducts = [...new Set(categories)].slice(0, 2); // Take first two unique products
+
+        // Dynamically create the series data for each product
+        const seriesData = [];
+        
+        firstTwoProducts.forEach((productName) => {
+          const productData = data.filter((item) => item.productName === productName);
+          const salesData = productData.map((item) => item.totalSales);
+          
+          seriesData.push({
+            name: productName,
+            data: salesData,
+          });
+        });
+
+        // Update state with the first two products' categories and series data
+        setSalesContributionCategories(firstTwoProducts);
+        setSalesContributionSeries(seriesData);
+      })
+      .catch((error) => {
+        console.error("Error fetching sales data: ", error);
+      });
+  }, []);
+
   const salesContributionOptions = {
     title: { text: "Sales Contribution" },
 
     chart: {
-      type: "line",
+      type: "bar", // Bar chart
       toolbar: { show: false },
     },
     stroke: {
       curve: "smooth",
       width: 3,
     },
-    colors: ["#007bff", "#28a745"],
+    colors: ["#007bff", "#28a745"], // Customize colors for the products
     xaxis: {
-      categories: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+      categories: salesContributionCategories, // Categories (product names)
     },
     yaxis: {
       min: 0,
-      max: 70,
+      max: Math.max(...salesContributionSeries.flatMap((series) => series.data)) + 10, // Set max dynamically
     },
     grid: {
       show: true,
     },
   };
 
-  const salesContributionSeries = [
-    {
-      name: "Product A",
-      data: [30, 25, 10, 15, 35, 40, 50, 45, 30, 60, 30, 20, 30, 25],
-    },
-    {
-      name: "Product B",
-      data: [25, 30, 20, 30, 40, 35, 45, 50, 40, 30, 50, 45, 35, 30],
-    },
-  ];
+  // const salesContributionSeries = [
+  //   {
+  //     name: "Product A",
+  //     data: [30, 25, 10, 15, 35, 40, 50, 45, 30, 60, 30, 20, 30, 25],
+  //   },
+  //   {
+  //     name: "Product B",
+  //     data: [25, 30, 20, 30, 40, 35, 45, 50, 40, 30, 50, 45, 35, 30],
+  //   },
+  // ];
+
+  const [productCreationSeries, setProductCreationSeries] = useState([
+    { name: "Count", data: [] },
+  ]);
+  const [categories, setCategories] = useState([
+    "Active", "Inactive", "Missing Images",
+  ]);
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userid"); 
+
+    if (!userId) {
+      console.error("User ID not found in localStorage.");
+      return;
+    }
+
+    axios
+      .get(`http://localhost:5000/product/getProductForCharts/${userId}`) 
+      .then((response) => {
+        const data = response.data;
+
+        const counts = data.map((item) => item.count);
+
+        setProductCreationSeries([
+          { name: "Count", data: counts },
+        ]);
+      })
+      .catch((error) => {
+        console.error("Error fetching product data: ", error);
+      });
+  }, []); 
 
   const productCreationOptions = {
     chart: { type: "bar" },
     xaxis: {
-      categories: [
-        "Rejected (poor quality)",
-        "Rejected (image missing)",
-        "Approved",
-        "Pending",
-      ],
+      categories: categories, 
     },
     title: { text: "New Product Creation in Last 14 Days" },
+    grid: { show: true },
+    legend: { show: true, position: "bottom" },
+    colors: ["#007bff"], // Color for the bars
   };
-  const productCreationSeries = [{ name: "Count", data: [12, 38, 470, 0] }];
-
 
 
     const options = {
@@ -141,7 +207,29 @@ const MainDashboard = () => {
     ];
 
 
-    const announcementsOption = {
+    const [announcementsData, setAnnouncementsData] = useState([]);
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userid");  // Get userId from localStorage
+
+    if (!userId) {
+      console.error("User ID not found in localStorage.");
+      return;
+    }
+
+    // Fetch announcement data for the user
+    axios
+      .get(`http://localhost:5000/promo/getAnnouncementsForUser/${userId}`)
+      .then((response) => {
+        const data = response.data;
+        setAnnouncementsData(data); // Set the data for chart
+      })
+      .catch((error) => {
+        console.error("Error fetching announcements data:", error);
+      });
+  }, []);
+
+  const announcementsOption = {
       chart: {
         type: "bar",
         height: 350
@@ -172,12 +260,13 @@ const MainDashboard = () => {
       }
     };
   
-    const annoucementSeries = [
-      {
-        name: "Announcements",
-        data: [5, 8, 4, 10, 6, 12, 8, 5, 9, 6, 7, 4] 
-      }
-    ];
+
+  const annoucementSeries = [
+    {
+      name: "Announcements",
+      data: announcementsData.length ? announcementsData : new Array(12).fill(0), // Fill with 0 if no data
+    },
+  ];
 
   return (
     <main className="w-full p-4 md:p-8">

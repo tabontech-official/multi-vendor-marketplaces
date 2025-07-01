@@ -115,7 +115,7 @@ const CategorySelector = () => {
     const fetchCategories = async () => {
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/category/getCategory"
+          "http://localhost:5000/category/getCategory"
         );
         const data = await response.json();
         if (response.ok) {
@@ -533,7 +533,7 @@ const CategorySelector = () => {
 
     if (isPopupVisible && userId) {
       fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`,
+        `http://localhost:5000/product/getImageGallery/${userId}/${productId}`,
         {
           method: "GET",
           headers: {
@@ -765,7 +765,7 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+          await fetch("http://localhost:5000/product/addImageGallery", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -948,8 +948,8 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
-        : "  https://multi-vendor-marketplace.vercel.app/product/addEquipment";
+        ? ` http://localhost:5000/product/updateProducts/${product._id}`
+        : "  http://localhost:5000/product/addEquipment";
 
       const method = isEditing ? "PATCH" : "POST";
 
@@ -998,7 +998,7 @@ const CategorySelector = () => {
       );
 
       const imageSaveResponse = await fetch(
-        ` https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
+        ` http://localhost:5000/product/updateImages/${data.product.id}`,
         {
           method: "PUT",
           headers: {

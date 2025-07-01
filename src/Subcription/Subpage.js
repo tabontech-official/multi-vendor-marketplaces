@@ -47,7 +47,7 @@ const SubscriptionHistory = () => {
 
   //   try {
   //     const res = await fetch(
-  //       `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`,
+  //       `http://localhost:5000/order/order/${userId}`,
   //       {
   //         method: "GET",
   //       }
@@ -88,8 +88,8 @@ const SubscriptionHistory = () => {
       setIsAdmin(isAdminFlag);
 
       const url = isAdminFlag
-        ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrderForMerchants`
-        : `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`;
+        ? `http://localhost:5000/order/getAllOrderForMerchants`
+        : `http://localhost:5000/order/order/${userId}`;
 
       const res = await fetch(url, {
         method: "GET",
@@ -144,7 +144,7 @@ const SubscriptionHistory = () => {
   //       ...(exportOption === "current" && { limit: 10 }), // ✅ limit added, ❌ page removed
   //     });
 
-  //     const exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
+  //     const exportUrl = `http://localhost:5000/order/exportAllOrder?${queryParams.toString()}`;
 
   //     const response = await fetch(exportUrl);
   //     if (!response.ok) {
@@ -198,14 +198,14 @@ const SubscriptionHistory = () => {
           type: exportOption,
           ...(exportOption === "current" && { limit: 10 }),
         });
-        exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
+        exportUrl = `http://localhost:5000/order/exportAllOrder?${queryParams.toString()}`;
       } else {
         const queryParams = new URLSearchParams({
           userId,
           type: exportOption,
           ...(exportOption === "current" && { limit: 10 }),
         });
-        exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
+        exportUrl = `http://localhost:5000/order/exportOrderByUserId?${queryParams.toString()}`;
       }
 
       const response = await fetch(exportUrl);
@@ -244,7 +244,7 @@ const SubscriptionHistory = () => {
 
       try {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
+          `http://localhost:5000/product/getProduct/${id}`,
           { method: "GET" }
         );
         if (response.ok) {

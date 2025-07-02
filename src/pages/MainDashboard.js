@@ -13,6 +13,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { jwtDecode } from "jwt-decode";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const MainDashboard = () => {
@@ -76,29 +77,44 @@ const MainDashboard = () => {
     },
   };
 
-  useEffect(() => {
+   useEffect(() => {
     const getProductCount = async () => {
       try {
         const apiKey = localStorage.getItem("apiKey");
-        const apiSecretKey = localStorage.getItem("apiSecretKey");
+                const token = localStorage.getItem("usertoken");
 
-        const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/product/getProductCount",
-          {
+        const apiSecretKey = localStorage.getItem("apiSecretKey");
+          let decodedRole = null;
+        if (token) {
+          const decoded = jwtDecode(token);
+          decodedRole = decoded.payLoad.role;
+        }
+
+        let apiUrl = "";
+
+        if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
+          apiUrl = "https://multi-vendor-marketplace.vercel.app/product/getProductCount"; 
+        } else if (decodedRole === "Merchant") {
+          const userId = localStorage.getItem("userid");  
+          apiUrl = `https://multi-vendor-marketplace.vercel.app/product/getProductCountForUser/${userId}`;
+        }
+
+        if (apiUrl) {
+          const response = await fetch(apiUrl, {
             method: "GET",
             headers: {
               "x-api-key": apiKey,
               "x-api-secret": apiSecretKey,
               "Content-Type": "application/json",
             },
-          }
-        );
+          });
 
-        const data = await response.json();
-        if (response.ok) {
-          setProductCount(data.count);
-        } else {
-          console.error("Failed to fetch count:", data.message);
+          const data = await response.json();
+          if (response.ok) {
+            setProductCount(data.count);
+          } else {
+            console.error("Failed to fetch count:", data.message);
+          }
         }
       } catch (error) {
         console.error("Error fetching product count:", error);
@@ -106,16 +122,50 @@ const MainDashboard = () => {
     };
 
     getProductCount();
-  }, []);
+  }, []); 
+
+  // useEffect(() => {
+  //   const fetchSummary = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         "https://multi-vendor-marketplace.vercel.app/order/recurringFinance"
+  //       );
+  //       const data = await response.json();
+  //       setSummary(data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch finance summary:", error);
+  //     }
+  //   };
+
+  //   fetchSummary();
+  // }, []);
 
   useEffect(() => {
     const fetchSummary = async () => {
       try {
-        const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/order/recurringFinance"
-        );
-        const data = await response.json();
-        setSummary(data);
+        const token = localStorage.getItem("usertoken");
+        const userRole = localStorage.getItem("userRole"); 
+
+        let decodedRole = null;
+        if (token) {
+          const decoded = jwtDecode(token);
+          decodedRole = decoded.payLoad.role;
+        }
+
+        let apiUrl = "";
+
+        if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
+          apiUrl = "https://multi-vendor-marketplace.vercel.app/order/recurringFinance";
+        } else if (decodedRole === "Merchant") {
+          const userId = localStorage.getItem("userid"); 
+          apiUrl = `https://multi-vendor-marketplace.vercel.app/order/getFinanceSummaryForUser/${userId}`; 
+        }
+
+        if (apiUrl) {
+          const response = await fetch(apiUrl);
+          const data = await response.json();
+          setSummary(data);
+        }
       } catch (error) {
         console.error("Failed to fetch finance summary:", error);
       }
@@ -181,7 +231,7 @@ const MainDashboard = () => {
             </div>
             <p className="text-sm text-gray-600">Orders</p>
           </div>
-          <h2 className="text-2xl font-semibold mt-2">{summary.totalOrdersInDb}</h2>
+          <h2 className="text-2xl font-semibold mt-2">{summary.totalOrdersInDb || "0"}</h2>
           <div className="border-t-2 border-gray-300 pt-2 mt-2">
             <p className="text-xs text-green-500 flex items-center gap-1">
               <FaArrowTrendDown className="text-sm" />
@@ -237,9 +287,9 @@ const MainDashboard = () => {
               <h3 className="text-2xl font-semibold text-cyan-600">
                 ${summary.totalIncome}
               </h3>
-              <p className="text-xs text-green-500">
+              {/* <p className="text-xs text-green-500">
                 ▲ {summary.incomeGrowth}% vs ${summary.lastYearIncome} last year
-              </p>
+              </p> */}
             </div>
 
             {/* <div className="w-1/2 pl-4">

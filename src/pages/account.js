@@ -14,6 +14,7 @@ import { FaArrowRight } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import { MdManageAccounts } from "react-icons/md";
 import axios from "axios";
+import { CiCalendarDate } from "react-icons/ci";
 const AccountPage = () => {
   const navigate = useNavigate();
   const [selectedModule, setSelectedModule] = useState("Manage User");
@@ -176,12 +177,9 @@ const AccountPage = () => {
       }
 
       try {
-        const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
-          {
-            method: "GET",
-          }
-        );
+        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
+          method: "GET",
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -330,16 +328,13 @@ const AccountPage = () => {
 
   const updateAllProductsStatus = async (status) => {
     try {
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/holiday",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status }),
-        }
-      );
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/product/holiday", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      });
 
       const data = await response.json();
       if (response.ok) {
@@ -415,7 +410,7 @@ const AccountPage = () => {
 
   return (
     <div className="flex bg-blue-50 min-h-screen text-blue-900">
-      <aside className="w-52 mt-2 mb-2 ml-4 rounded-r-2xl bg-blue-900 p-6 flex flex-col justify-between min-h-screen">
+      {/* <aside className="w-52 mt-2 mb-2 ml-4 rounded-r-2xl bg-blue-900 p-6 flex flex-col justify-between min-h-screen">
         <div>
           <div className="flex flex-col items-center border-b-2">
             <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">
@@ -488,7 +483,76 @@ const AccountPage = () => {
         <button className="w-full py-2 bg-yellow-500 text-black font-semibold rounded-md hover:bg-yellow-600">
           Promote
         </button>
-      </aside>
+      </aside> */}
+      <aside className="w-56 mt-3 mb-3 ml-4 rounded-2xl bg-blue-900 p-5 flex flex-col justify-between min-h-screen shadow-lg">
+  {/* Top: Profile */}
+  <div>
+    <div className="flex flex-col items-center border-b border-blue-700 pb-4">
+      <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center shadow-md">
+        <FaUser className="text-yellow-400 w-8 h-8" />
+      </div>
+
+      <h2 className="text-lg font-semibold text-white mt-3">Business Account</h2>
+
+      <div className="flex items-center mt-1 space-x-1">
+        <span className="text-yellow-400 font-semibold text-sm">6.0</span>
+        <div className="flex space-x-0.5">
+          {[...Array(5)].map((_, index) => (
+            <span key={index} className="text-yellow-400 text-sm">★</span>
+          ))}
+        </div>
+      </div>
+
+      <p className="text-green-400 text-xs mt-1">Profile is 75% complete</p>
+    </div>
+
+    {/* Navigation Links */}
+    <nav className="mt-6 space-y-3">
+      {userRole === "Merchant" && (
+        <NavLink
+          to="/manage-user"
+          className={({ isActive }) =>
+            `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+              isActive ? "bg-yellow-400 text-blue-900" : "text-blue-200 hover:bg-blue-800"
+            }`
+          }
+        >
+          <MdManageAccounts className="mr-2 text-lg" />
+          <span className="text-sm font-medium">Manage User</span>
+        </NavLink>
+      )}
+      <NavLink
+        to="/edit-account"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+            isActive ? "bg-yellow-400 text-blue-900" : "text-blue-200 hover:bg-blue-800"
+          }`
+        }
+      >
+        <IoSettings className="mr-2 text-lg" />
+        <span className="text-sm font-medium">Settings</span>
+      </NavLink>
+
+      <NavLink
+        to="/api-credentials"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+            isActive ? "bg-yellow-400 text-blue-900" : "text-blue-200 hover:bg-blue-800"
+          }`
+        }
+      >
+        <IoSettings className="mr-2 text-lg" />
+        <span className="text-sm font-medium">API Credentials</span>
+      </NavLink>
+    </nav>
+  </div>
+
+  {/* Bottom: Promote Button */}
+  <button className="w-full mt-6 py-2 bg-yellow-400 text-blue-900 font-semibold rounded-md hover:bg-yellow-500 transition-all duration-150">
+    🚀 Promote
+  </button>
+</aside>
+
       {isOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
@@ -594,7 +658,7 @@ const AccountPage = () => {
         </div>
       )}
 
-      <main className="flex-1 p-6">
+      <div className="flex-1 p-6 bg-white">
         <Link to={"/"}>
           <button className="flex items-center text-blue-700 hover:text-blue-500 mb-4">
             <FaArrowLeft className="mr-2" /> Back
@@ -641,261 +705,213 @@ const AccountPage = () => {
           </button>
         </div>
 
-        <div className="mt-6 p-6 bg-blue-200 rounded-lg">
+        <div className="mt-6 p-6 bg-white rounded-lg">
           {activeTab === "contactDetails" && (
-            <div>
-              <div className="bg-blue-200 p-6 rounded-lg mt-6">
-                <h2 className="text-lg font-semibold text-blue-800">
-                  Edit Profile
-                </h2>
+            <div className="bg-white p-6 rounded-xl shadow-xl mt-6">
+              <h2 className="text-2xl font-bold text-blue-800 mb-6">
+                Edit Profile
+              </h2>
 
-                {/* <div className="flex items-center space-x-4 mt-4">
-                  <p className="text-sm text-blue-700">Account Status</p>
-                  <div className="flex space-x-4">
-                    <button
-                      className={`px-4 py-2 rounded-lg ${
-                        formData.accountStatus === "Private"
-                          ? "bg-blue-700 text-white"
-                          : "bg-blue-500 text-blue-100"
-                      }`}
-                      onClick={() =>
-                        setFormData({ ...formData, accountStatus: "Private" })
-                      }
-                    >
-                      Private
-                    </button>
-                    <button
-                      className={`px-4 py-2 rounded-lg ${
-                        formData.accountStatus === "Business"
-                          ? "bg-yellow-500 text-black"
-                          : "bg-blue-500 text-blue-100"
-                      }`}
-                      onClick={() =>
-                        setFormData({ ...formData, accountStatus: "Business" })
-                      }
-                    >
-                      Business
-                    </button>
-                  </div>
-                </div> */}
-
-                {/* Form Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="firstName"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      First Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="firstName"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2 bg-gray-300  focus:outline-none focus:ring-2 focus:ring-indigo-400 text-gray-800 border border-blue-300 rounded-md"
-                    />
-                  </div>
-
-                  {/* Last Name */}
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="lastName"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Last Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="lastName"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
-                    />
-                  </div>
-
-                  {/* Email */}
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
-                    />
-                  </div>
-
-                  {/* Phone */}
-                  {/* <div className="flex flex-col">
-                    <label
-                      htmlFor="phoneNumber"
-                      className="text-sm font-medium text-blue-800"
-                    >
-                      Phone *
-                    </label>
-                    <input
-                      type="text"
-                      id="phoneNumber"
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
-                    />
-                  </div> */}
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="address"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Address *
-                    </label>
-                    <input
-                      type="text"
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
-                    />
-                  </div>
-                  {/* Seller GST */}
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="sellerGst"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Seller GST *
-                    </label>
-                    <input
-                      type="text"
-                      id="sellerGst"
-                      name="sellerGst"
-                      value={formData.sellerGst}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
-                    />
-                  </div>
-
-                  {/* GST Registered */}
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="gstRegistered"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      GST Registered *
-                    </label>
-                    <input
-                      type="text"
-                      id="gstRegistered"
-                      name="gstRegistered"
-                      value={formData.gstRegistered}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
-                    />
-                  </div>
-
-                  {/* Dispatch Address */}
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="dispatchAddress"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Dispatch Address *
-                    </label>
-                    <input
-                      type="text"
-                      id="dispatchAddress"
-                      name="dispatchAddress"
-                      value={formData.dispatchAddress}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
-                    />
-                  </div>
-
-                  {/* Dispatch City */}
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="dispatchCity"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Dispatch City *
-                    </label>
-                    <input
-                      type="text"
-                      id="dispatchCity"
-                      name="dispatchCity"
-                      value={formData.dispatchCity}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
-                    />
-                  </div>
-
-                  {/* Dispatch Country */}
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="dispatchCountry"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Dispatch Country *
-                    </label>
-                    <input
-                      type="text"
-                      id="dispatchCountry"
-                      name="dispatchCountry"
-                      value={formData.dispatchCountry}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
-                    />
-                  </div>
-
-                  {/* Dispatch Zip */}
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="dispatchzip"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Dispatch Zip *
-                    </label>
-                    <input
-                      type="number"
-                      id="dispatchzip"
-                      name="dispatchzip"
-                      value={formData.dispatchzip}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-300 text-gray-800 border border-blue-300 rounded-md"
-                    />
-                  </div>
-                </div>
-
-                {/* Save Button */}
-                <div className="flex justify-end mt-6">
-                  <button
-                    onClick={handleSubmit}
-                    className="px-6 py-2 bg-yellow-500 text-black font-semibold rounded-md hover:bg-yellow-600"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* First Name */}
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="firstName"
+                    className="text-sm font-medium text-gray-700"
                   >
-                    Save
-                  </button>
+                    First Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                  />
                 </div>
+
+                {/* Last Name */}
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="lastName"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Last Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="email"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                  />
+                </div>
+
+                {/* Address */}
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="address"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Address *
+                  </label>
+                  <input
+                    type="text"
+                    id="address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                  />
+                </div>
+
+                {/* Seller GST */}
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="sellerGst"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Seller GST *
+                  </label>
+                  <input
+                    type="text"
+                    id="sellerGst"
+                    name="sellerGst"
+                    value={formData.sellerGst}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                  />
+                </div>
+
+                {/* GST Registered */}
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="gstRegistered"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    GST Registered *
+                  </label>
+                  <input
+                    type="text"
+                    id="gstRegistered"
+                    name="gstRegistered"
+                    value={formData.gstRegistered}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                  />
+                </div>
+
+                {/* Dispatch Address */}
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="dispatchAddress"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Dispatch Address *
+                  </label>
+                  <input
+                    type="text"
+                    id="dispatchAddress"
+                    name="dispatchAddress"
+                    value={formData.dispatchAddress}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                  />
+                </div>
+
+                {/* Dispatch City */}
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="dispatchCity"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Dispatch City *
+                  </label>
+                  <input
+                    type="text"
+                    id="dispatchCity"
+                    name="dispatchCity"
+                    value={formData.dispatchCity}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                  />
+                </div>
+
+                {/* Dispatch Country */}
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="dispatchCountry"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Dispatch Country *
+                  </label>
+                  <input
+                    type="text"
+                    id="dispatchCountry"
+                    name="dispatchCountry"
+                    value={formData.dispatchCountry}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                  />
+                </div>
+
+                {/* Dispatch Zip */}
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="dispatchzip"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Dispatch Zip *
+                  </label>
+                  <input
+                    type="number"
+                    id="dispatchzip"
+                    name="dispatchzip"
+                    value={formData.dispatchzip}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                  />
+                </div>
+              </div>
+
+              {/* Save Button */}
+              <div className="flex justify-end mt-8">
+                <button
+                  onClick={handleSubmit}
+                  className="px-6 py-2 bg-blue-700 text-white font-medium rounded-md hover:bg-blue-800 transition"
+                >
+                  Save
+                </button>
               </div>
             </div>
           )}
@@ -978,58 +994,50 @@ const AccountPage = () => {
             </div>
           )} */}
           {activeTab === "brandassets" && (
-            <div className="p-6 rounded-lg text-blue-900">
-              <div className="flex flex-col gap-4 mb-6">
-                {/* Seller Name + Link + Button in one row */}
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-semibold text-blue-900">
-                      Seller Name
-                    </h2>
-                    <a
-                      href={`https://www.aydiactive.com/collections/${sellerName}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-3 text-blue-800 underline hover:text-blue-900"
-                    >
-                      https://www.aydiactive.com/collections/{sellerName}
-                    </a>
-                  </div>
-
-                  <button
-                    className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700"
-                    onClick={handleSubmit2}
-                    disabled={loading}
+            <div className="p-6 bg-gradient-to-br from-blue-50 via-white to-blue-100 rounded-xl shadow-md space-y-8 text-blue-900">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-blue-900 mb-1">
+                    Your Collection
+                  </h2>
+                  <a
+                    href={`https://www.aydiactive.com/collections/${sellerName}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-700 hover:underline hover:text-blue-900"
                   >
-                    {loading ? "Updating..." : "Update Collection"}
-                  </button>
+                    🔗 https://www.aydiactive.com/collections/{sellerName}
+                  </a>
                 </div>
 
-                {/* Optional: Show Shopify Collection ID */}
-                {/* {collectionId && (
-    <div className="text-sm text-blue-600">
-      Shopify Collection ID: <strong>{collectionId}</strong>
-    </div>
-  )} */}
+                <button
+                  className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-2 rounded-lg text-sm shadow hover:scale-105 transition-transform duration-200 disabled:opacity-60"
+                  onClick={handleSubmit2}
+                  disabled={loading}
+                >
+                  {loading ? "Updating..." : "Update Collection"}
+                </button>
               </div>
 
-              {/* Upload Box */}
-              <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300 text-center">
-                <p className="text-blue-500">
-                  Maximum size for a file is 5MB, format: .jpg, .jpeg
+              <div className="rounded-lg border border-blue-200 bg-white shadow-inner p-6">
+                <p className="text-sm text-blue-600 mb-2">
+                  Upload a banner image for your collection (Max 5MB, .jpg/.jpeg
+                  only)
                 </p>
-                <p className="text-blue-600">
-                  Recommended image size: 1180×290px
+                <p className="text-sm text-blue-500 mb-4">
+                  Recommended: 1180×290px
                 </p>
-                <div className="mt-4 h-32 border-2 border-dashed border-blue-500 flex justify-center items-center relative">
+
+                <div className="relative h-40 border-2 border-dashed border-gray-300 rounded-md  flex justify-center items-center overflow-hidden">
                   {imagePreview ? (
                     <img
                       src={imagePreview}
-                      alt="Preview"
-                      className="object-cover h-full w-full"
+                      alt="Cover Preview"
+                      className="object-cover w-full h-full"
                     />
                   ) : (
-                    <span className="text-blue-500 z-10">
+                    <span className="text-blue-400 font-medium">
+                      {" "}
                       Upload Cover Photo
                     </span>
                   )}
@@ -1042,153 +1050,63 @@ const AccountPage = () => {
                 </div>
               </div>
 
-              {/* Description */}
-              <div className="mt-6">
-                <label className="block text-blue-700 mb-1">Description</label>
+              {/* Description Box */}
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-blue-800">
+                  Description{" "}
+                  <span className="text-gray-500">(160–900 characters)</span>
+                </label>
                 <textarea
-                  className="w-full p-2 bg-blue-200 text-blue-900 border border-blue-400 rounded-md"
-                  placeholder="Minimum 160 and maximum 900 characters"
+                  className="w-full border border-gray-300 text-blue-900 rounded-md p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
                   rows="4"
+                  placeholder="Describe your collection..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
 
-              {/* Info Box */}
-              <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300">
-                <h3 className="text-lg font-semibold text-blue-900">Photo</h3>
-                <ul className="text-blue-600 text-sm mt-2 space-y-1">
-                  <li>✔ Your photo will be posted:</li>
-                  <li>- On the business page</li>
-                  <li>- On the ad page (if you have an ad package)</li>
-                  <li>- In job search results (if using premium ads)</li>
+              {/* Where Photo Appears */}
+              <div className="bg-white p-5 border border-blue-200 rounded-lg">
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                  Where your photo appears
+                </h3>
+                <ul className="list-disc text-sm text-blue-700 space-y-1 pl-5">
+                  <li>On the business profile page</li>
+                  <li>In your collection ads (if applicable)</li>
+                  <li>On premium job search results</li>
                 </ul>
               </div>
 
-              {/* Submit Button */}
-
-              {/* Message */}
+              {/* Status Message */}
               {message && (
-                <p className="mt-4 text-center text-blue-700 font-medium">
+                <p className="text-center text-sm font-medium text-green-600">
                   {message}
                 </p>
               )}
             </div>
           )}
 
-          {/* {activeTab === "profileReviews" && (
-            <div className="p-6 rounded-lg text-blue-900">
-              <div className="flex justify-between">
-                <h2 className="text-xl font-semibold text-blue-900">
-                  Profile Reviews
-                </h2>
-                <p className="text-green-600 text-sm mt-1">
-                  Profile is 75% complete
-                </p>
-              </div> */}
-
-          {/* Overall Rating */}
-          {/* <div className="mt-4 bg-blue-200 p-4 rounded-lg border border-blue-300">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-blue-600 text-white px-4 py-2 text-2xl font-bold rounded-md">
-                    4.7
-                  </div>
-                  <div className="flex space-x-1">
-                    {[...Array(5)].map((_, index) => (
-                      <span key={index} className="text-yellow-400 text-xl">
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                  <p className="text-blue-700 text-sm">(50 Reviews)</p>
-                </div> */}
-
-          {/* Star Rating Distribution */}
-          {/* <div className="mt-4 space-y-2">
-                  {[5, 4, 3, 2, 1].map((stars, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <span className="text-blue-700">{stars} ★</span>
-                      <div className="w-48 h-2 bg-blue-300 rounded-full">
-                        <div
-                          className={`h-2 bg-yellow-400 rounded-full`}
-                          style={{ width: `${stars * 20}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-blue-700">
-                        {[24, 5, 1, 0, 0][index]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div> */}
-
-          {/* Featured Reviews */}
-          {/* <h3 className="text-lg font-semibold text-blue-900 mt-6">
-                Featured Reviews
-              </h3> */}
-
-          {/* {[1, 2].map((review, index) => (
-                <div
-                  key={index}
-                  className="mt-4 bg-blue-200 p-4 rounded-lg border border-blue-300"
-                >
-                  <div className="flex justify-between">
-                    <p className="text-sm text-blue-700">Jan 20, 2024</p>
-                    <button className="text-blue-600 text-sm hover:text-blue-800">
-                      Report this review
-                    </button>
-                  </div>
-
-                  <div className="flex items-center space-x-2 mt-2">
-                    <div className="w-10 h-10 bg-blue-400 text-white flex items-center justify-center rounded-full">
-                      AK
-                    </div>
-                    <p className="text-blue-900 font-semibold">Alex K.</p>
-                  </div>
-
-                  <div className="flex space-x-1 mt-2">
-                    {[...Array(4)].map((_, index) => (
-                      <span key={index} className="text-yellow-400 text-lg">
-                        ★
-                      </span>
-                    ))}
-                    <span className="text-gray-400 text-lg">★</span>
-                  </div>
-
-                  <p className="text-blue-700 mt-2">
-                    {index === 0
-                      ? "Working at Sam AI has been an incredible journey. The technology we're building is truly cutting-edge."
-                      : "The Galaxy M315 is the latest in Samsung's phone lineup. It has minor upgrades but remains consistent."}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )} */}
-
           {activeTab === "holiday" && (
-            <div className=" p-6 rounded-lg text-blue-900">
-              {/* Header */}
-              <h2 className="text-xl font-semibold text-blue-900">
-                Holiday Settings
+            <div className="bg-white rounded-xl p-6 shadow-lg">
+              <h2 className="text-2xl font-bold text-blue-800 tracking-wide">
+                Holiday Mode Settings 🎉
               </h2>
-              <p className="text-blue-700 mt-2">
-                During the holiday period, your products will be offline, but
-                you can still process outstanding orders or view your account
-                statement.
-                <br />
-                The holiday period includes the Start and End dates.
+              <p className="text-sm text-blue-600 mt-2 leading-relaxed">
+                While holiday mode is on, all your products will be hidden, but
+                you can still access and fulfill existing orders. <br />
+                Note: Your start and end dates are **inclusive**.
               </p>
-              <div className="flex gap-3">
-                {/* Active Button */}
+
+              <div className="flex gap-4 mt-5">
                 <button
                   onClick={() => {
                     setActiveButton("active");
                     updateAllProductsStatus("active");
                   }}
-                  className={`py-1 px-3 rounded-xl ${
+                  className={`py-2 px-4 rounded-full shadow-sm transition-all duration-200 text-sm font-medium ${
                     activeButton === "active"
-                      ? "bg-green-500 text-white"
-                      : "bg-indigo-600 text-black"
+                      ? "bg-green-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-green-100"
                   }`}
                 >
                   Active
@@ -1199,46 +1117,49 @@ const AccountPage = () => {
                     setActiveButton("inactive");
                     updateAllProductsStatus("draft");
                   }}
-                  className={`py-1 px-3 rounded-xl ${
+                  className={`py-2 px-4 rounded-full shadow-sm transition-all duration-200 text-sm font-medium ${
                     activeButton === "inactive"
                       ? "bg-red-500 text-white"
-                      : "bg-indigo-600 text-black"
+                      : "bg-gray-200 text-gray-700 hover:bg-red-100"
                   }`}
                 >
                   Inactive
                 </button>
               </div>
-              <div className="mt-4 bg-blue-200 p-4 rounded-lg border border-blue-300">
-                <div className="flex items-center space-x-4">
-                  <label className="text-blue-900 font-medium w-24">
+
+              <div className="mt-6 bg-white border border-blue-200 rounded-lg shadow-sm p-5">
+                <div className="flex items-center gap-4 mb-4">
+                  <label className="w-28 flex items-center text-sm font-semibold text-blue-900">
+                    <CiCalendarDate className="mr-1 text-lg" />
                     Start Date
                   </label>
                   <input
                     type="date"
-                    className="w-full p-2 bg-blue-50 text-blue-900 border border-blue-400 rounded-md"
+                    className="flex-1 p-2 border border-blue-300 rounded-md text-sm text-blue-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
 
-                <div className="flex items-center space-x-4 mt-4">
-                  <label className="text-blue-900 font-medium w-24">
+                <div className="flex items-center gap-4">
+                  <label className="w-28 flex items-center text-sm font-semibold text-blue-900">
+                    <CiCalendarDate className="mr-1 text-lg" />
                     End Date
                   </label>
                   <input
                     type="date"
-                    className="w-full p-2 bg-blue-50 text-blue-900 border border-blue-400 rounded-md"
+                    className="flex-1 p-2 border border-blue-300 rounded-md text-sm text-blue-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
               </div>
 
               <div className="flex justify-end mt-6">
-                <button className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">
-                  Save
+                <button className="px-6 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md text-sm font-semibold shadow transition">
+                  Save Changes
                 </button>
               </div>
             </div>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 };

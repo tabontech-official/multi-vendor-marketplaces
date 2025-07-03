@@ -448,7 +448,7 @@ const SubscriptionHistory = () => {
             ) : (
               <div className="max-sm:overflow-auto border rounded-lg">
                 <table className="w-full border-collapse bg-white">
-                  <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                  <thead className="bg-gray-100 text-left text-gray-600 text-xs">
                     <tr>
                       <th scope="col" className="p-3">
                         #

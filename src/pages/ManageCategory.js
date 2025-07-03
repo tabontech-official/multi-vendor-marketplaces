@@ -229,7 +229,7 @@ const ManageCategory = () => {
               Select
             </th>
             <th scope="col" className="p-3">
-              Cat No
+              Id
             </th>
             <th scope="col" className="p-3">
               Level

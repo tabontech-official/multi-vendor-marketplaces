@@ -166,6 +166,9 @@ const MainDashboard = () => {
   }, []);
 
   const [viewCount, setViewCount] = useState(0);
+    const [perDayCount, setPerDayCount] = useState(0);
+    const [perHourCount, setHourCount] = useState(0);
+
   const userId = localStorage.getItem("userid");
 
   useEffect(() => {
@@ -177,6 +180,8 @@ const MainDashboard = () => {
         if (response.ok) {
           const data = await response.json();
           setViewCount(data.totalViews);
+          setPerDayCount(data.weeklyViews)
+          setHourCount(data.monthlyViews)
         } else {
           console.error("Failed to fetch user view count");
         }
@@ -372,7 +377,6 @@ const MainDashboard = () => {
           </div>
         </div> */}
         <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
-          {/* Icon + Heading */}
           <div className="flex items-center gap-3 mb-3">
             <div className="bg-gray-300 text-black px-3 py-3 rounded-full">
               <MdPreview />
@@ -380,22 +384,21 @@ const MainDashboard = () => {
             <p className="text-sm text-gray-600 font-medium">Visitor</p>
           </div>
 
-          {/* Stats Header Row */}
           <div className="flex justify-between text-xs text-gray-700 font-medium text-center mb-1">
             <div className="w-1/3">Total</div>
             <div className="w-[1px] bg-gray-300 mx-1" />
-            <div className="w-1/3">Per Hour</div>
+            <div className="w-1/3">Weekly</div>
             <div className="w-[1px] bg-gray-300 mx-1" />
-            <div className="w-1/3">Per Day</div>
+            <div className="w-1/3">Monthly</div>
           </div>
 
           {/* Stats Values Row */}
           <div className="flex justify-between text-center text-base font-semibold">
             <div className="w-1/3">{viewCount || 0}</div>
             <div className="w-[1px] bg-gray-200 mx-1" />
-            <div className="w-1/3 text-green-600">{0}</div>
+            <div className="w-1/3 text-green-600">{perHourCount||0}</div>
             <div className="w-[1px] bg-gray-200 mx-1" />
-            <div className="w-1/3 text-blue-600">{0}</div>
+            <div className="w-1/3 text-blue-600">{perDayCount||0}</div>
           </div>
           <div className="border-t-2 border-gray-300 pt-2 mt-3">
             <p className="text-xs text-red-500 flex items-center gap-1">

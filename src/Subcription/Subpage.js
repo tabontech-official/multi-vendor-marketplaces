@@ -9,10 +9,13 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { RxCross1 } from "react-icons/rx";
 import { useNotification } from "../context api/NotificationContext";
+import { CiImport } from "react-icons/ci";
+import { FaFileImport } from "react-icons/fa6";
 
 const SubscriptionHistory = () => {
   const { userData, loading, error, variantId } = UseFetchUserData();
   const { addNotification } = useNotification();
+const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all)
 
   const [subscriptions, setSubscriptions] = useState([]);
   const [totalListings, setTotalListings] = useState(0);
@@ -128,23 +131,42 @@ const SubscriptionHistory = () => {
     window.open(buyCreditUrl, "_blank");
   };
 
+
   // const handleExport = async () => {
   //   try {
   //     setIsExporting(true);
 
   //     const userId = localStorage.getItem("userid");
-  //     if (!userId) {
-  //       alert("User ID not found in localStorage");
+  //     const token = localStorage.getItem("usertoken");
+
+  //     if (!userId || !token) {
+  //       alert("User ID or token not found in localStorage");
   //       return;
   //     }
 
-  //     const queryParams = new URLSearchParams({
-  //       userId,
-  //       type: exportOption, // "all" or "current"
-  //       ...(exportOption === "current" && { limit: 10 }), // ✅ limit added, ❌ page removed
-  //     });
+  //     const decoded = jwtDecode(token);
+  //     const role = decoded?.payLoad?.role;
+  //     const isTokenValid = decoded?.exp * 1000 > Date.now();
 
-  //     const exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
+  //     const isAdmin =
+  //       isTokenValid && (role === "Master Admin" || role === "Dev Admin");
+
+  //     let exportUrl;
+
+  //     if (isAdmin) {
+  //       const queryParams = new URLSearchParams({
+  //         type: exportOption,
+  //         ...(exportOption === "current" && { limit: 10 }),
+  //       });
+  //       exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
+  //     } else {
+  //       const queryParams = new URLSearchParams({
+  //         userId,
+  //         type: exportOption,
+  //         ...(exportOption === "current" && { limit: 10 }),
+  //       });
+  //       exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
+  //     }
 
   //     const response = await fetch(exportUrl);
   //     if (!response.ok) {
@@ -172,67 +194,64 @@ const SubscriptionHistory = () => {
   //   }
   // };
 
-  const handleExport = async () => {
-    try {
-      setIsExporting(true);
+const handleExport = async () => {
+  try {
+    setIsExporting(true);
 
-      const userId = localStorage.getItem("userid");
-      const token = localStorage.getItem("usertoken");
+    const userId = localStorage.getItem("userid");
+    const token = localStorage.getItem("usertoken");
 
-      if (!userId || !token) {
-        alert("User ID or token not found in localStorage");
-        return;
-      }
-
-      const decoded = jwtDecode(token);
-      const role = decoded?.payLoad?.role;
-      const isTokenValid = decoded?.exp * 1000 > Date.now();
-
-      const isAdmin =
-        isTokenValid && (role === "Master Admin" || role === "Dev Admin");
-
-      let exportUrl;
-
-      if (isAdmin) {
-        const queryParams = new URLSearchParams({
-          type: exportOption,
-          ...(exportOption === "current" && { limit: 10 }),
-        });
-        exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
-      } else {
-        const queryParams = new URLSearchParams({
-          userId,
-          type: exportOption,
-          ...(exportOption === "current" && { limit: 10 }),
-        });
-        exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
-      }
-
-      const response = await fetch(exportUrl);
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Export failed");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `orders-${exportOption}-${Date.now()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      addNotification("Orders exported successfully", "Orders");
-      setIsexportOpen(false);
-    } catch (error) {
-      alert("Export failed: " + error.message);
-      console.error("Export error:", error);
-    } finally {
-      setIsExporting(false);
+    if (!userId || !token) {
+      alert("User ID or token not found in localStorage");
+      return;
     }
-  };
+
+    const decoded = jwtDecode(token);
+    const role = decoded?.payLoad?.role;
+    const isTokenValid = decoded?.exp * 1000 > Date.now();
+
+    const isAdmin =
+      isTokenValid && (role === "Master Admin" || role === "Dev Admin");
+
+    let exportUrl;
+
+    const queryParams = new URLSearchParams({
+      type: exportOption,
+      ...(exportOption === "current" && { limit: 10 }),
+      ...(exportStatus && { status: exportStatus }),
+      ...(isAdmin ? {} : { userId }),
+    });
+
+    exportUrl = isAdmin
+      ? `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`
+      : `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
+
+    const response = await fetch(exportUrl);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Export failed");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `orders-${exportOption}-${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+    addNotification("Orders exported successfully", "Orders");
+    setIsexportOpen(false);
+  } catch (error) {
+    alert("Export failed: " + error.message);
+    console.error("Export error:", error);
+  } finally {
+    setIsExporting(false);
+  }
+};
+
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -415,10 +434,42 @@ const SubscriptionHistory = () => {
       }`}
     >
       <div className="flex">
-        <div className="pt-4 min-w-full px-3 bg-white shadow-lg rounded-lg">
-          <h1 className="text-center text-2xl font-semibold mb-8">Order History</h1>
+        <div className="pt-4 min-w-full px-3 bg-white  rounded-lg">
+           <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
+                  <div className="flex-1">
+                    <h1 className="text-2xl font-semibold mb-1">Manage orders</h1>
+                    <p className="text-gray-600">Here you can manage orders.</p>
+                    <div className="w-2/4 max-sm:w-full mt-2">
+                      <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchVal}
+                        onChange={(e) => setSearchVal(e.target.value)}
+                        className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
+                    <div className="flex flex-col gap-4 items-center w-full justify-end">
+                      <div className="flex gap-4 items-center justify-end w-full">
+                       
+          
+                        <button  onClick={togglePopup}
+                          className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+                        >
+                          <FaFileImport className="w-5 h-5" />
+                          Export
+                        </button>
+                      </div>
+          
+                     
+                    </div>
+                  </div>
+          
+                 
+                </div>
 
-          <div className="flex justify-between items-center flex-wrap mb-6">
+          {/* <div className="flex justify-between items-center flex-wrap mb-6">
             <div className="w-full md:w-auto mt-2 max-sm:w-full">
               <input
                 type="text"
@@ -437,9 +488,9 @@ const SubscriptionHistory = () => {
                 Export
               </button>
             </div>
-          </div>
+          </div> */}
 
-          <div className="w-full  max-sm:w-auto  max-sm:flex items-center">
+          <div className="w-full  max-sm:w-auto  max-sm:flex items-center mt-2">
             {isLoading ? (
               <div className="flex justify-center items-center py-10">
                 <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
@@ -756,31 +807,54 @@ const SubscriptionHistory = () => {
                   </div>
                 </div>
 
-                <div className="mb-6">
-                  <label className="text-md text-gray-600 font-semibold block mb-2">
-                    Export as
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="exportAs"
-                      value="csv"
-                      checked={exportAs === "csv"}
-                      onChange={() => setExportAs("csv")}
-                    />
-                    CSV for Excel, Numbers, or other spreadsheet programs
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="exportAs"
-                      value="plain"
-                      checked={exportAs === "plain"}
-                      onChange={() => setExportAs("plain")}
-                    />
-                    Plain CSV file
-                  </label>
-                </div>
+             <div className="mb-6">
+  <label className="text-md text-gray-600 font-semibold block mb-2">
+    Filter by Fulfillment Status
+  </label>
+  <div className="space-y-2">
+    <label className="flex items-center gap-2">
+      <input
+        type="radio"
+        name="statusFilter"
+        value=""
+        checked={exportStatus === ""}
+        onChange={() => setExportStatus("")}
+      />
+      All
+    </label>
+    <label className="flex items-center gap-2">
+      <input
+        type="radio"
+        name="statusFilter"
+        value="fulfilled"
+        checked={exportStatus === "fulfilled"}
+        onChange={() => setExportStatus("fulfilled")}
+      />
+      Fulfilled
+    </label>
+    <label className="flex items-center gap-2">
+      <input
+        type="radio"
+        name="statusFilter"
+        value="unfulfilled"
+        checked={exportStatus === "unfulfilled"}
+        onChange={() => setExportStatus("unfulfilled")}
+      />
+      Unfulfilled
+    </label>
+    <label className="flex items-center gap-2">
+      <input
+        type="radio"
+        name="statusFilter"
+        value="cancelled"
+        checked={exportStatus === "cancelled"}
+        onChange={() => setExportStatus("cancelled")}
+      />
+      Cancelled
+    </label>
+  </div>
+</div>
+
 
                 <div className="flex justify-end gap-2 border-t border-gray-300">
                   <button

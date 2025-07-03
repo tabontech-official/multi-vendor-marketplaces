@@ -416,7 +416,7 @@ const SubscriptionHistory = () => {
     >
       <div className="flex">
         <div className="pt-4 min-w-full px-3 bg-white shadow-lg rounded-lg">
-          <h2 className="text-center text-2xl font-bold mb-8">Order History</h2>
+          <h1 className="text-center text-2xl font-semibold mb-8">Order History</h1>
 
           <div className="flex justify-between items-center flex-wrap mb-6">
             <div className="w-full md:w-auto mt-2 max-sm:w-full">

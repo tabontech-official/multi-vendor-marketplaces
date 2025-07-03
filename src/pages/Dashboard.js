@@ -542,7 +542,7 @@ const Dashboard = () => {
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold mb-1">Manage Products</h1>
+          <h1 className="text-2xl font-semibold mb-1">Manage products</h1>
           <p className="text-gray-600">Here you can manage products.</p>
           <div className="w-2/4 max-sm:w-full mt-2">
             <input

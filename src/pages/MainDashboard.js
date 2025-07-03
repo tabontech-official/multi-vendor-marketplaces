@@ -26,6 +26,9 @@ const MainDashboard = () => {
     lastYearSpend: 0,
   });
   const [productCount, setProductCount] = useState(0);
+  const [productActiveCount, setActiveProductCount] = useState(0);
+    const [productInActiveCount, setInActiveProductCount] = useState(0);
+
 
   const data = {
     labels: ["Dec 22", "Jan 23", "Feb 23", "Mar 23", "Apr 23"],
@@ -112,7 +115,9 @@ const MainDashboard = () => {
 
           const data = await response.json();
           if (response.ok) {
-            setProductCount(data.count);
+            setProductCount(data.total);
+            setActiveProductCount(data.active)
+            setInActiveProductCount(data.inactive)
           } else {
             console.error("Failed to fetch count:", data.message);
           }
@@ -195,7 +200,7 @@ const MainDashboard = () => {
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0"></div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-        <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
+        {/* <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="bg-cyan-500 text-white px-4 py-2 rounded-full">
               $
@@ -209,9 +214,46 @@ const MainDashboard = () => {
               29% vs $303.3K last year
             </p>
           </div>
+        </div> */}
+        <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
+          {/* Icon + Heading */}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="bg-cyan-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
+              $
+            </div>
+            <p className="text-sm text-gray-600 font-medium">Net Profit</p>
+          </div>
+
+          {/* Stats Header Row */}
+          <div className="flex justify-between text-xs text-gray-700 font-medium text-center mb-1">
+            <div className="w-1/3">Total</div>
+            <div className="w-[1px] bg-gray-300 mx-1" />
+            <div className="w-1/3">Paid</div>
+            <div className="w-[1px] bg-gray-300 mx-1" />
+            <div className="w-1/3">Unpaid</div>
+          </div>
+
+          {/* Stats Values Row */}
+          <div className="flex justify-between text-center text-base font-semibold">
+            <div className="w-1/3 text-gray-800">${summary.netProfit || 0}</div>
+            <div className="w-[1px] bg-gray-200 mx-1" />
+            <div className="w-1/3 text-green-600">
+              ${summary.paidIncome || 0}
+            </div>
+            <div className="w-[1px] bg-gray-200 mx-1" />
+            <div className="w-1/3 text-red-500">
+              ${summary.unpaidIncome || 0}
+            </div>
+          </div>
+          <div className="border-t border-gray-300 pt-2 mt-3">
+            <p className="text-xs text-red-500 flex items-center gap-1">
+              <FaArrowTrendDown className="text-sm" />
+              29% vs $303.3K last year
+            </p>
+          </div>
         </div>
 
-        <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
+        {/* <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="bg-gray-300 text-white px-3 py-3 rounded-full">
               <RiStore3Line className="text-black" />
@@ -227,9 +269,46 @@ const MainDashboard = () => {
               29% vs $303.3K last year
             </p>
           </div>
+        </div> */}
+        <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
+          {/* Icon + Heading */}
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-300">
+              <RiStore3Line className="text-black text-lg" />
+            </div>
+            <p className="text-sm text-gray-700 font-medium">Orders</p>
+          </div>
+
+          {/* Stats Header Row */}
+          <div className="flex justify-between text-xs text-gray-700 font-medium text-center mb-1">
+            <div className="w-1/3">Orders</div>
+            <div className="w-[1px] bg-gray-300 mx-1" /> {/* Separator */}
+            <div className="w-1/3">Fulfilled</div>
+            <div className="w-[1px] bg-gray-300 mx-1" /> {/* Separator */}
+            <div className="w-1/3">Unfulfilled</div>
+          </div>
+
+          {/* Stats Values Row */}
+          <div className="flex justify-between text-center text-base font-semibold">
+            <div className="w-1/3">{summary.totalOrdersInDb || 0}</div>
+            <div className="w-[1px] bg-gray-200 mx-1" />
+            <div className="w-1/3 text-green-600">
+              {summary.fulfilledOrders || 0}
+            </div>
+            <div className="w-[1px] bg-gray-200 mx-1" />
+            <div className="w-1/3 text-red-500">
+              {summary.unfulfilledOrders || 0}
+            </div>
+          </div>
+          <div className="border-t border-gray-300 pt-2 mt-3">
+            <p className="text-xs text-green-500 flex items-center gap-1">
+              <FaArrowTrendDown className="text-sm" />
+              29% vs $303.3K last year
+            </p>
+          </div>
         </div>
 
-        <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
+        {/* <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="bg-gray-300 text-black px-3 py-3 rounded-full">
               <MdOutlineProductionQuantityLimits />
@@ -243,9 +322,42 @@ const MainDashboard = () => {
               41% vs 320,583 last year
             </p>
           </div>
+        </div> */}
+        <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
+          {/* Icon + Heading */}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="bg-gray-300 text-black px-3 py-3 rounded-full">
+              <MdOutlineProductionQuantityLimits />
+            </div>
+            <p className="text-sm text-gray-600 font-medium">Product</p>
+          </div>
+
+          {/* Stats Header Row */}
+          <div className="flex justify-between text-xs text-gray-700 font-medium text-center mb-1">
+            <div className="w-1/3">Total</div>
+            <div className="w-[1px] bg-gray-300 mx-1" />
+            <div className="w-1/3">Active</div>
+            <div className="w-[1px] bg-gray-300 mx-1" />
+            <div className="w-1/3">Inactive</div>
+          </div>
+
+          {/* Stats Values Row */}
+          <div className="flex justify-between text-center text-base font-semibold">
+            <div className="w-1/3">{productCount || 0}</div>
+            <div className="w-[1px] bg-gray-200 mx-1" />
+            <div className="w-1/3 text-green-600">{productActiveCount ||0}</div>
+            <div className="w-[1px] bg-gray-200 mx-1" />
+            <div className="w-1/3 text-red-500">{productInActiveCount||0}</div>
+          </div>
+          <div className="border-t border-gray-300 pt-2 mt-2">
+            <p className="text-xs text-green-500 flex items-center gap-1">
+              <FaArrowTrendUp />
+              41% vs 320,583 last year
+            </p>
+          </div>
         </div>
 
-        <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
+        {/* <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="bg-gray-300 text-black px-3 py-3 rounded-full">
               <MdPreview />
@@ -254,6 +366,38 @@ const MainDashboard = () => {
           </div>
           <h2 className="text-2xl font-semibold mt-2">{viewCount}</h2>
           <div className="border-t-2 border-gray-300 pt-2 mt-2">
+            <p className="text-xs text-red-500 flex items-center gap-1">
+              <FaArrowTrendDown className="text-sm" />▼ 17% vs 3.3M last year
+            </p>
+          </div>
+        </div> */}
+        <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
+          {/* Icon + Heading */}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="bg-gray-300 text-black px-3 py-3 rounded-full">
+              <MdPreview />
+            </div>
+            <p className="text-sm text-gray-600 font-medium">Visitor</p>
+          </div>
+
+          {/* Stats Header Row */}
+          <div className="flex justify-between text-xs text-gray-700 font-medium text-center mb-1">
+            <div className="w-1/3">Total</div>
+            <div className="w-[1px] bg-gray-300 mx-1" />
+            <div className="w-1/3">Per Hour</div>
+            <div className="w-[1px] bg-gray-300 mx-1" />
+            <div className="w-1/3">Per Day</div>
+          </div>
+
+          {/* Stats Values Row */}
+          <div className="flex justify-between text-center text-base font-semibold">
+            <div className="w-1/3">{viewCount || 0}</div>
+            <div className="w-[1px] bg-gray-200 mx-1" />
+            <div className="w-1/3 text-green-600">{0}</div>
+            <div className="w-[1px] bg-gray-200 mx-1" />
+            <div className="w-1/3 text-blue-600">{0}</div>
+          </div>
+          <div className="border-t-2 border-gray-300 pt-2 mt-3">
             <p className="text-xs text-red-500 flex items-center gap-1">
               <FaArrowTrendDown className="text-sm" />▼ 17% vs 3.3M last year
             </p>

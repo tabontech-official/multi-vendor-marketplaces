@@ -519,7 +519,7 @@ const PayoutDetails = () => {
       </div>
 
       <div className="bg-white shadow rounded overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
+        <table className="w-full border-collapse text-xs">
           <thead className="bg-gray-100 text-gray-600 text-left">
             <tr>
               <th className="p-3">Date</th>

@@ -431,7 +431,7 @@ useEffect(() => {
               </div>
             ) : filteredPayouts.length > 0 ? (
               <table className="w-full border-collapse bg-white">
-                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                <thead className="bg-gray-100 text-left text-gray-600 text-xs">
                   <tr>
                     <th className="p-3">Payout Date</th>
                     {(userRole === "Master Admin" ||
@@ -1036,7 +1036,7 @@ useEffect(() => {
               </div>
             ) : filteredPayouts.length > 0 ? (
               <table className="w-full border-collapse bg-white">
-                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+                <thead className="bg-gray-100 text-left text-gray-600 text-xs">
                   <tr>
                     <th className="p-3">Payout Date</th>
                     {(userRole === "Master Admin" ||

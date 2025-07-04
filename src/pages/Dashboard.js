@@ -62,6 +62,7 @@ const Dashboard = () => {
   const [isExportOpen, setIsexportOpen] = useState(false);
   const [exportOption, setExportOption] = useState("current");
   const [isExporting, setIsExporting] = useState(false);
+  const [selectAll, setSelectAll] = useState(false);
 
   const [exportAs, setExportAs] = useState("csv");
   const handleCSVUpload = (e) => {
@@ -135,6 +136,7 @@ const Dashboard = () => {
 
     setIsUploading(true);
     setUploadStarted(true);
+    showToast("success", " Upload triggered. Processing in background...");
 
     closePopup();
 
@@ -378,7 +380,6 @@ const Dashboard = () => {
     }
   };
 
-
   const handleSearch = () => {
     let filtered =
       searchVal === ""
@@ -409,7 +410,6 @@ const Dashboard = () => {
     fetchProductData();
   }, []);
 
- 
   useEffect(() => {
     const fetchProductData2 = async () => {
       const id = localStorage.getItem("userid");
@@ -482,7 +482,6 @@ const Dashboard = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-
   const handleExport = async () => {
     try {
       setIsExporting(true);
@@ -537,6 +536,21 @@ const Dashboard = () => {
       setIsExporting(false);
     }
   };
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedProducts([]);
+    } else {
+      const allProductIds = filteredProducts.map((p) => p._id);
+      setSelectedProducts(allProductIds);
+    }
+    setSelectAll(!selectAll);
+  };
+  useEffect(() => {
+    const allSelected =
+      filteredProducts.length > 0 &&
+      filteredProducts.every((p) => selectedProducts.includes(p._id));
+    setSelectAll(allSelected);
+  }, [selectedProducts, filteredProducts]);
 
   return user ? (
     <main className="w-full p-4 md:p-8">
@@ -631,7 +645,6 @@ const Dashboard = () => {
         )}
       </div>
 
-  
       {Loading ? (
         <div className="flex justify-center items-center py-10">
           <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
@@ -648,7 +661,15 @@ const Dashboard = () => {
               <table className="w-full border-collapse bg-white">
                 <thead className="bg-gray-100 text-left text-gray-600 text-xs">
                   <tr>
-                    <th className="p-3">Action</th>
+                    {/* <th className="p-3">Action</th> */}
+                    <th className="p-3">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 cursor-pointer"
+                        checked={selectAll}
+                        onChange={() => handleSelectAll()}
+                      />
+                    </th>
                     <th className="p-3">Status</th>
                     <th className="p-3">Image</th>
                     <th className="p-3">Listing_name</th>

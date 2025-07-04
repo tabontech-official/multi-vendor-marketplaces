@@ -13,6 +13,8 @@ const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [role, setRole] = useState(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false);
+
   const notificationRef = useRef(null);
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -100,6 +102,9 @@ const Navbar = () => {
   const handleToggle = async () => {
     await fetchNotifications();
     setIsNotificationOpen(!isNotificationOpen);
+      if (!isNotificationOpen) {
+    setHasUnseenNotifications(false); 
+  }
   };
   return (
     <nav className=" bg-gradient-to-r from-blue-600  to-[#18262f] flex items-center px-4 h-[8vh] relative shadow-lg">
@@ -133,15 +138,24 @@ const Navbar = () => {
           <ul className="flex flex-col md:flex-row md:space-x-8 space-y-4 items-center md:space-y-0">
             {isLoggedIn && (
               <li className="relative" ref={notificationRef}>
-                <button
+                {/* <button
                   onClick={handleToggle}
                   ref={buttonRef}
                   className="text-white hover:bg-blue-800 p-2 rounded-full transition relative"
                 >
                   <FaBell size={20} />
                   <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
+                </button> */}
+                <button
+                  onClick={handleToggle}
+                  ref={buttonRef}
+                  className="text-white hover:bg-blue-800 p-2 rounded-full transition relative"
+                >
+                  <FaBell size={20} />
+                  {hasUnseenNotifications && (
+                    <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
+                  )}
                 </button>
-
                 {isNotificationOpen && (
                   <div className="absolute right-0 mt-2 w-96 bg-white rounded-md shadow-xl z-20">
                     <div className="p-4 border-b font-semibold text-gray-800">

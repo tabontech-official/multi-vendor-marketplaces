@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
 import { useAuthContext } from "../Hooks/useAuthContext";
 import { jwtDecode } from "jwt-decode";
 import { FaBell } from "react-icons/fa";
 import { useNotification } from "../context api/NotificationContext";
+import { BsMegaphoneFill } from "react-icons/bs";
 
 const Navbar = () => {
-  const { notifications, fetchNotifications } = useNotification();
+const { notifications, fetchNotifications, hasUnseenNotifications, markAllAsSeen } = useNotification();
   const { user, dispatch } = useAuthContext();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [role, setRole] = useState(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false);
 
   const notificationRef = useRef(null);
   const buttonRef = useRef(null);
@@ -99,13 +99,15 @@ const Navbar = () => {
   }, []);
 
   const isLoggedIn = Boolean(localStorage.getItem("usertoken"));
-  const handleToggle = async () => {
-    await fetchNotifications();
-    setIsNotificationOpen(!isNotificationOpen);
-      if (!isNotificationOpen) {
-    setHasUnseenNotifications(false); 
+const handleToggle = async () => {
+  await fetchNotifications(); 
+  setIsNotificationOpen(!isNotificationOpen); 
+  if (!isNotificationOpen) {
+    await markAllAsSeen(); 
   }
-  };
+};
+
+
   return (
     <nav className=" bg-gradient-to-r from-blue-600  to-[#18262f] flex items-center px-4 h-[8vh] relative shadow-lg">
       <div className="flex-shrink-0">
@@ -136,99 +138,78 @@ const Navbar = () => {
           } md:block z-10 transition-transform duration-500 ease-in-out`}
         >
           <ul className="flex flex-col md:flex-row md:space-x-8 space-y-4 items-center md:space-y-0">
-            {isLoggedIn && (
-              <li className="relative" ref={notificationRef}>
-                {/* <button
-                  onClick={handleToggle}
-                  ref={buttonRef}
-                  className="text-white hover:bg-blue-800 p-2 rounded-full transition relative"
-                >
-                  <FaBell size={20} />
-                  <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
-                </button> */}
-                <button
-                  onClick={handleToggle}
-                  ref={buttonRef}
-                  className="text-white hover:bg-blue-800 p-2 rounded-full transition relative"
-                >
-                  <FaBell size={20} />
-                  {hasUnseenNotifications && (
-                    <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
-                  )}
-                </button>
-                {isNotificationOpen && (
-                  <div className="absolute right-0 mt-2 w-96 bg-white rounded-md shadow-xl z-20">
-                    <div className="p-4 border-b font-semibold text-gray-800">
-                      <div className="flex justify-between items-center">
-                        <span>Changelog</span>
-                        <a
-                          href="/notifications"
-                          className="text-blue-600 text-sm hover:underline"
-                        >
-                          Show more
-                        </a>
-                        {/* <svg
-                        className="w-4 h-4 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 10h18M3 6h18M3 14h18"
-                        />
-                      </svg> */}
-                      </div>
-                    </div>
+           
 
-                    <ul className="max-h-96 overflow-y-auto text-sm text-gray-700 p-4 space-y-4">
-                      {notifications.slice(0, 10).map((note) => (
-                        <li
-                          key={note.id || note._id}
-                          className="flex items-start space-x-3"
-                        >
-                          <div className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
-                          <div>
-                            <p className="text-xs text-gray-500">
-                              {note.date ||
-                                new Date(note.createdAt).toLocaleDateString(
-                                  "en-GB"
-                                )}{" "}
-                              •{" "}
-                              <span className="capitalize">
-                                {`${note.firstName} ${note.lastName}`}
-                              </span>
-                            </p>
-                            <p className="text-sm">{note.message}</p>
-                          </div>
-                        </li>
-                      ))}
-                      {/* <div className="border-t px-4 py-2">
-                      <a
-                        href="/notifications"
-                        className="text-blue-600 text-sm hover:underline"
-                      >
-                        Show more
-                      </a>
-                    </div> */}
-                    </ul>
-                    {/* 
-                  {notifications.length > 10 && (
-                    <div className="border-t px-4 py-2 text-center">
-                      <a
-                        href="/notifications"
-                        className="text-blue-600 text-sm hover:underline"
-                      >
-                        Show more
-                      </a>
-                    </div>
-                  )} */}
-                  </div>
-                )}
-              </li>
-            )}
+{isLoggedIn && (
+  <li className="relative" ref={notificationRef}>
+    <button
+      onClick={handleToggle}
+      ref={buttonRef}
+      className="relative text-white hover:bg-blue-800 p-2 rounded-full transition"
+    >
+      <FaBell size={20} />
+      {hasUnseenNotifications && (
+        <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+      )}
+    </button>
+
+    {isNotificationOpen && (
+      <div className="absolute right-0 mt-3 w-96 bg-white rounded-lg shadow-lg border z-30 overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 text-gray-800 font-semibold">
+          <div className="flex items-center gap-2">
+            <BsMegaphoneFill className="text-blue-600" />
+            <span>Latest Updates</span>
+          </div>
+          <a
+            href="/notifications"
+            className="text-blue-600 text-sm hover:underline"
+          >
+            Show all
+          </a>
+        </div>
+
+        {/* List */}
+        <ul className="max-h-96 overflow-y-auto text-sm text-gray-700 divide-y">
+         {notifications
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5)
+    .map((note) => (
+      <li
+        key={note._id || note.id}
+        className="px-4 py-3 hover:bg-gray-50 transition"
+      >
+        <div className="flex gap-3 items-start">
+          <div className="pt-1">
+            <FaUserCircle className="text-blue-500" size={20} />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs text-gray-500">
+              {new Date(note.createdAt).toLocaleDateString("en-GB")} •{" "}
+              <span className="capitalize">
+                {note.firstName || "User"} {note.lastName || ""}
+              </span>
+            </p>
+            <p className="text-sm mt-0.5">{note.message || "No message."}</p>
+          </div>
+        </div>
+      </li>
+    ))}
+        </ul>
+
+        {/* Footer */}
+        <div className="border-t px-4 py-3 text-center bg-gray-50">
+          <a
+            href="/notifications"
+            className="text-blue-600 text-sm font-medium hover:underline"
+          >
+            View full history →
+          </a>
+        </div>
+      </div>
+    )}
+  </li>
+)}
             {isLoggedIn && role === "Dev Admin" && (
               <li>
                 <Link

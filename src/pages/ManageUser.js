@@ -386,7 +386,7 @@ useEffect(() => {
                 <th className="p-3">Added on</th>
                 <th className="p-3">Groups</th>
                 <th className="p-3">Roles</th>
-                <th className="p-3">Actions</th>
+                {/* <th className="p-3">Actions</th> */}
               </tr>
             </thead>
             <tbody>
@@ -420,11 +420,11 @@ useEffect(() => {
                   <td className="p-3">{user.addedOn}</td>
                   <td className="p-3">{user.groups}</td>
                   <td className="p-3">{user.roles}</td>
-                  <td className="p-3">
+                  {/* <td className="p-3">
                     <button className="text-gray-500 hover:text-blue-500">
                       ⋮
                     </button>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>

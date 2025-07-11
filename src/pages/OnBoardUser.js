@@ -315,7 +315,7 @@ const OnBoard = () => {
     },
     {
       name: "Reports",
-      subModules: ["Catalog Performance", "eCommerence Consultion"],
+      subModules: ["eCommerence Consultion"],
     },
     {
       name: "OnBoardUser",

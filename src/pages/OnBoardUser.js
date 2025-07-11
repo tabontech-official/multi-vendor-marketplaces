@@ -490,9 +490,11 @@ const OnBoard = () => {
 
         <div className="overflow-x-auto border rounded-lg mt-5">
           <table className="w-full table-fixed border-collapse bg-white">
-            <thead className="bg-gray-100 text-left text-gray-600 text-xs">
+            <thead className="bg-gray-100 text-left text-gray-600 text-sm">
               <tr>
                 <th className="p-3">Name</th>
+                <th className="p-3">Email</th>
+
                 <th className="p-3">Status</th>
                 <th className="p-3">Added on</th>
                 <th className="p-3">Customer_Id</th>
@@ -517,12 +519,14 @@ const OnBoard = () => {
                               (merchant?.name?.split(" ")[1]?.[0] || "")}
                           </div>
                           <div>
-                            <p className="font-semibold">{merchant?.name}</p>
-                            <p className="text-xs text-gray-500">
-                              {merchant?.email}
-                            </p>
+                            <p className="text-xs text-gray-700">{merchant?.name}</p>
                           </div>
                         </div>
+                      </td>
+                      <td>
+                        <p className="text-xs font-[10px] text-gray-500">
+                          {merchant?.email}
+                        </p>
                       </td>
                       <td className="p-3">{merchant?.status}</td>
                       <td className="p-3">{merchant?.addedOn}</td>
@@ -599,9 +603,11 @@ const OnBoard = () => {
                         </div>
                         <div>
                           <p className="font-semibold">{user.name}</p>
-                          <p className="text-xs text-gray-500">{user.email}</p>
                         </div>
                       </div>
+                    </td>
+                    <td>
+                      <p className="text-xs text-gray-500">{user.email}</p>
                     </td>
                     <td className="p-3">{user.status}</td>
                     <td className="p-3">{user.addedOn}</td>

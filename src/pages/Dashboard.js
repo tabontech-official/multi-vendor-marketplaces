@@ -17,18 +17,18 @@ const Dashboard = () => {
   let admin;
   const { addNotification } = useNotification();
 
-  const isAdmin = () => {
-    const token = localStorage.getItem("usertoken");
-    if (token) {
-      const decoded = jwtDecode(token);
-      if (decoded.payLoad.isAdmin && decoded.exp * 1000 > Date.now()) {
-        return true;
-      }
-    }
-    return false;
-  };
+  // const isAdmin = () => {
+  //   const token = localStorage.getItem("usertoken");
+  //   if (token) {
+  //     const decoded = jwtDecode(token);
+  //     if (decoded.payLoad.isAdmin && decoded.exp * 1000 > Date.now()) {
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // };
 
-  admin = isAdmin();
+  // admin = isAdmin();
 
   const limit = 20;
 
@@ -83,15 +83,32 @@ const Dashboard = () => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("usertoken");
+    if (!token) return;
+
+    try {
+      const decoded = jwtDecode(token);
+      if (decoded?.payLoad?.role) {
+        setUserRole(decoded.payLoad.role); // store role in state
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  }, []);
 
   const fetchProductData = async () => {
     setLoading(true);
     const id = localStorage.getItem("userid");
-    const token = localStorage.getItem("usertoken");
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
+
     try {
-      const url = admin
+      const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
+
+      const url = isAdmin
         ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
         : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`;
 
@@ -112,6 +129,7 @@ const Dashboard = () => {
         );
 
         setProducts(sortedProducts);
+
         setFilteredProducts((prev) => [
           ...prev,
           ...sortedProducts.filter(
@@ -407,16 +425,21 @@ const Dashboard = () => {
   }, [searchVal]);
 
   useEffect(() => {
-    fetchProductData();
-  }, []);
+    if (userRole) {
+      fetchProductData();
+    }
+  }, [userRole, page]);
 
   useEffect(() => {
     const fetchProductData2 = async () => {
       const id = localStorage.getItem("userid");
       const apiKey = localStorage.getItem("apiKey");
       const apiSecretKey = localStorage.getItem("apiSecretKey");
+
       try {
-        const url = admin
+        const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
+
+        const url = isAdmin
           ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
           : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`;
 
@@ -454,7 +477,7 @@ const Dashboard = () => {
           ]);
 
           setHasMore(page < data.totalPages);
-          console.log(hasMore);
+          console.log("Has more:", page < data.totalPages);
         } else {
           console.error("Unauthorized or error status:", response.status);
         }
@@ -463,8 +486,10 @@ const Dashboard = () => {
       }
     };
 
-    fetchProductData2();
-  }, [page]);
+    if (userRole) {
+      fetchProductData2(); // Trigger only after role is known
+    }
+  }, [page, userRole]);
 
   const handleScroll = async () => {
     if (
@@ -673,6 +698,10 @@ const Dashboard = () => {
                     <th className="p-3">Status</th>
                     <th className="p-3">Image</th>
                     <th className="p-3">Listing_name</th>
+                    {(userRole === "Dev Admin" ||
+                      userRole === "Master Admin") && (
+                      <th className="p-3">Publisher</th>
+                    )}
                     <th className="p-3">Sku</th>
                     <th className="p-3">Price</th>
                     <th className="p-3">Compare_at_price</th>
@@ -727,6 +756,12 @@ const Dashboard = () => {
                         {product.title !== "Job Listing"
                           ? product.title
                           : "Job Search Listing"}
+                      </td>
+                      <td>
+                        {(userRole === "Dev Admin" ||
+                          userRole === "Master Admin") && (
+                          <td>{product?.username}</td>
+                        )}{" "}
                       </td>
                       <td className="p-3"> {product.variants[0].sku}</td>
                       <td className="p-3"> ${product.variants[0].price} </td>

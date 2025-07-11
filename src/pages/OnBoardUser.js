@@ -141,7 +141,10 @@ const OnBoard = () => {
           const merchantGroups = Object.values(merchantMap).filter(
             (group) => group.merchant !== null
           );
-
+          setUsers({
+            type: "dev",
+            merchantGroups,
+          });
           setFilteredUsers({
             type: "dev",
             merchantGroups,
@@ -158,6 +161,11 @@ const OnBoard = () => {
             staff: group.staff.map(formatUser),
           }));
 
+          setUsers({
+            type: "master",
+            supportStaff,
+            merchantGroups,
+          });
           setFilteredUsers({
             type: "master",
             supportStaff,
@@ -290,7 +298,12 @@ const OnBoard = () => {
     { name: "Dashboard", subModules: [] },
     {
       name: "Products",
-      subModules: ["Manage Product", "Add Product", "Inventory","Manage Categories"],
+      subModules: [
+        "Manage Product",
+        "Add Product",
+        "Inventory",
+        "Manage Categories",
+      ],
     },
     {
       name: "Orders",
@@ -323,29 +336,58 @@ const OnBoard = () => {
   };
 
   const handleSearch = () => {
-    let filtered =
-      searchVal === ""
-        ? users
-        : users.filter((user) => {
-            const emailMatch = user.email
-              ?.toLowerCase()
-              .includes(searchVal.toLowerCase());
-            const nameMatch = user.name
-              ?.toLowerCase()
-              .includes(searchVal.toLowerCase());
-            const idMatch = user.id
-              ?.toLowerCase()
-              .includes(searchVal.toLowerCase());
+    const searchTerm = searchVal.toLowerCase();
 
-            return emailMatch || nameMatch || idMatch;
-          });
+    const filteredMerchantGroups = users.merchantGroups
+      ?.map((group) => {
+        const merchant = group.merchant;
+        const staff = group.staff || [];
 
-    setFilteredUsers(filtered);
+        const merchantMatch =
+          merchant?.email?.toLowerCase().includes(searchTerm) ||
+          merchant?.name?.toLowerCase().includes(searchTerm) ||
+          merchant?.id?.toLowerCase().includes(searchTerm);
+
+        const matchedStaff = staff.filter((user) =>
+          [user.email, user.name, user.id].some((field) =>
+            field?.toLowerCase().includes(searchTerm)
+          )
+        );
+
+        if (merchantMatch || matchedStaff.length > 0) {
+          return {
+            merchant,
+            staff: matchedStaff,
+          };
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+
+    const filteredSupportStaff =
+      users.supportStaff?.filter((user) =>
+        [user.email, user.name, user.id].some((field) =>
+          field?.toLowerCase().includes(searchTerm)
+        )
+      ) || [];
+
+    setFilteredUsers({
+      merchantGroups: filteredMerchantGroups,
+      supportStaff: filteredSupportStaff,
+      type: users.type,
+    });
+
+    console.log("🔍 Searching for:", searchTerm);
+    console.log("📦 Filtered merchant groups:", filteredMerchantGroups);
+    console.log("👨‍💼 Filtered support staff:", filteredSupportStaff);
   };
 
   useEffect(() => {
-    handleSearch();
-  }, [searchVal]);
+    if (users && Object.keys(users).length > 0) {
+      handleSearch();
+    }
+  }, [searchVal, users]);
 
   useEffect(() => {
     if (
@@ -364,7 +406,58 @@ const OnBoard = () => {
   return (
     <div className="flex">
       <div className="flex-1 p-6">
-        {toast.show && (
+        <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
+          <div className="flex-1">
+            <h1 className="text-2xl font-semibold mb-1">Manage user</h1>
+            <p className="text-gray-600">Here you can manage users.</p>
+            <div className="w-2/4 max-sm:w-full mt-2">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchVal}
+                onChange={(e) => setSearchVal(e.target.value)}
+                className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
+            <div className="flex flex-col gap-4 items-center w-full justify-end">
+              <div className="flex gap-4 items-center justify-end w-full">
+                <button
+                  onClick={togglePopupForAddinOrganizations}
+                  className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+                >
+                  <HiPlus className="w-5 h-5" />
+                  New
+                </button>
+
+                {/* <button
+                        onClick={togglePopup}
+                        className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+                      >
+                        <FaFileImport className="w-5 h-5" />
+                        Export
+                      </button> */}
+              </div>
+            </div>
+          </div>
+
+          {toast.show && (
+            <div
+              className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+                toast.type === "success" ? "bg-green-500" : "bg-red-500"
+              } text-white`}
+            >
+              {toast.type === "success" ? (
+                <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+              ) : (
+                <HiOutlineXCircle className="w-6 h-6 mr-2" />
+              )}
+              <span>{toast.message}</span>
+            </div>
+          )}
+        </div>
+        {/* {toast.show && (
           <div
             className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
               toast.type === "success" ? "bg-green-500" : "bg-red-500"
@@ -377,8 +470,8 @@ const OnBoard = () => {
             )}
             <span>{toast.message}</span>
           </div>
-        )}
-        <div className="flex justify-between items-center mb-4">
+        )} */}
+        {/* <div className="flex justify-between items-center mb-4">
           <input
             type="text"
             placeholder="Search..."
@@ -393,11 +486,11 @@ const OnBoard = () => {
             <HiPlus className="w-5 h-5" />
             New
           </button>
-        </div>
+        </div> */}
 
-        <div className="overflow-x-auto border rounded-lg">
+        <div className="overflow-x-auto border rounded-lg mt-5">
           <table className="w-full table-fixed border-collapse bg-white">
-            <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+            <thead className="bg-gray-100 text-left text-gray-600 text-xs">
               <tr>
                 <th className="p-3">Name</th>
                 <th className="p-3">Status</th>
@@ -444,7 +537,12 @@ const OnBoard = () => {
                         </button>
                       </td>
                       <td className="p-3 text-right">
-                        {merchant?.role === "Merchant" && (
+                        {/* {merchant?.role === "Merchant" && (
+                          <button onClick={() => toggleMerchant(merchant?.id)}>
+                            {isExpanded ? <IoIosArrowUp /> : <IoIosArrowDown />}
+                          </button>
+                        )} */}
+                        {merchant?.role === "Merchant" && staff.length > 0 && (
                           <button onClick={() => toggleMerchant(merchant?.id)}>
                             {isExpanded ? <IoIosArrowUp /> : <IoIosArrowDown />}
                           </button>

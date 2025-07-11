@@ -428,48 +428,47 @@ const CategorySelector = () => {
   //   return combinations;
   // };
 
-const generateVariants = () => {
-  if (!options || options.length === 0) return [];
+  const generateVariants = () => {
+    if (!options || options.length === 0) return [];
 
-  if (options.length === 1) {
-    // Only one option like Size
-    return [
-      {
-        parent: options[0].name,
-        children: options[0].values,
-      },
-    ];
-  }
-
-  const parentOption = options[0];
-  const childOptions = options.slice(1);
-
-  let combinations = [];
-
-  parentOption.values.forEach((parentValue) => {
-    let childCombinations = [];
-
-    if (childOptions.length === 1) {
-      childOptions[0].values.forEach((val) => {
-        childCombinations.push(`${val}`);
-      });
-    } else if (childOptions.length === 2) {
-      childOptions[0].values.forEach((val1) => {
-        childOptions[1].values.forEach((val2) => {
-          childCombinations.push(`${val1} / ${val2}`);
-        });
-      });
+    if (options.length === 1) {
+      // Only one option like Size
+      return [
+        {
+          parent: options[0].name,
+          children: options[0].values,
+        },
+      ];
     }
 
-    combinations.push({
-      parent: parentValue,
-      children: childCombinations,
+    const parentOption = options[0];
+    const childOptions = options.slice(1);
+
+    let combinations = [];
+
+    parentOption.values.forEach((parentValue) => {
+      let childCombinations = [];
+
+      if (childOptions.length === 1) {
+        childOptions[0].values.forEach((val) => {
+          childCombinations.push(`${val}`);
+        });
+      } else if (childOptions.length === 2) {
+        childOptions[0].values.forEach((val1) => {
+          childOptions[1].values.forEach((val2) => {
+            childCombinations.push(`${val1} / ${val2}`);
+          });
+        });
+      }
+
+      combinations.push({
+        parent: parentValue,
+        children: childCombinations,
+      });
     });
-  });
 
-  return combinations;
-};
-
+    return combinations;
+  };
 
   const [combinations, setCombinations] = useState(generateVariants());
   useEffect(() => {
@@ -647,27 +646,49 @@ const generateVariants = () => {
         })
       );
 
+      // const hydratedVariantImages = {};
+
+      // formattedVariants.forEach((variantGroup) => {
+      //   const children = variantGroup.subVariants;
+
+      //   children.forEach((childVariant) => {
+      //     const titleKey = normalizeString(childVariant.title || "");
+
+      //     const imageId = childVariant.image_id;
+
+      //     const matched =
+      //       product.variantImages?.find(
+      //         (img) => String(img.id) === String(imageId)
+      //       ) ||
+      //       product.images?.find((img) => String(img.id) === String(imageId));
+
+      //     if (matched?.src) {
+      //       hydratedVariantImages[titleKey] = {
+      //         preview: matched.src,
+      //         loading: false,
+      //       };
+      //     }
+      //   });
+      // });
       const hydratedVariantImages = {};
 
-      formattedVariants.forEach((variantGroup) => {
-        const children = variantGroup.subVariants;
+      product.variants.forEach((variant) => {
+        const titleKey = normalizeString(variant.title || "");
 
-        children.forEach((childVariant) => {
-          const titleKey = normalizeString(childVariant.title || "");
+        const imageId = variant.image_id;
 
-          const imageId = childVariant.image_id;
-
-          const matched = product.variantImages?.find(
+        const matched =
+          product.variantImages?.find(
             (img) => String(img.id) === String(imageId)
-          );
+          ) ||
+          product.images?.find((img) => String(img.id) === String(imageId));
 
-          if (matched?.src) {
-            hydratedVariantImages[titleKey] = {
-              preview: matched.src,
-              loading: false,
-            };
-          }
-        });
+        if (matched?.src) {
+          hydratedVariantImages[titleKey] = {
+            preview: matched.src,
+            loading: false,
+          };
+        }
       });
 
       console.log(
@@ -839,6 +860,7 @@ const generateVariants = () => {
       }
     }
   };
+  const normalizeString = (str) => String(str).replace(/['"]/g, "").trim();
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -1643,106 +1665,139 @@ const generateVariants = () => {
                           </div>
                         )} */}
                         {expandedParents.includes(index) && (
-  <div className="mt-2">
-    <ul className="space-y-2">
-      {Array.isArray(combinations[index]?.children) &&
-      combinations[index].children.length > 0 ? (
-        combinations[index].children.map((child, childIndex) => {
-          const parentValue = combinations[index]?.parent;
-          const combinationString = `${parentValue} / ${child}`;
-          const image = variantImages[combinationString];
+                          <div className="mt-2">
+                            <ul className="space-y-2">
+                              {combinations[index]?.children?.map(
+                                (child, childIndex) => {
+                                  const parentValue =
+                                    combinations[index]?.parent;
 
-          const matchingVariant = product?.variants?.find(
-            (variant) => variant.title === combinationString
-          );
+                                  const combinationString =
+                                    options.length === 1
+                                      ? child
+                                      : `${parentValue} / ${child}`;
+                                  const normalizedKey = combinationString
+                                    .replace(/['"]/g, "")
+                                    .trim();
 
-          const variantId = matchingVariant?.id;
+                                  const image = variantImages[normalizedKey];
+                                  const matchingVariant =
+                                    product?.variants?.find(
+                                      (variant) =>
+                                        normalizeString(variant.title) ===
+                                        normalizedKey
+                                    );
 
-          return (
-            <li
-              key={childIndex}
-              className="grid grid-cols-7 items-center gap-20"
-            >
-              <div className="w-12 relative">
-                <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
-                  {image?.preview ? (
-                    <img
-                      src={
-                        variantImages[`${index}-${child}`]?.preview ||
-                        image?.preview ||
-                        ""
-                      }
-                      alt={`Variant ${child}`}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-3xl text-gray-400">+</span>
-                  )}
-                  <input
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                    onClick={() => {
-                      setCurrentVariant({ index, child });
-                      setIsPopupVisible(true);
-                    }}
-                  />
-                  {image?.preview && (
-                    <button
-                      onClick={() =>
-                        handleRemoveVariantImages(index, child)
-                      }
-                      className="absolute top-0 right-0 text-white bg-red-600 rounded-full px-2 py-1 text-xs"
-                      style={{
-                        transform: "translate(25%, -25%)",
-                      }}
-                    >
-                      X
-                    </button>
-                  )}
-                </label>
-              </div>
+                                  const variantId = matchingVariant?.id;
 
-              <span
-                className="font-medium text-sm text-gray-700 cursor-pointer hover:underline whitespace-nowrap"
-                onClick={() => {
-                  navigate(`/product/${product.id}/variants/${variantId}`, {
-                    state: { productId: product.id, variantId },
-                  });
-                }}
-              >
-                {child}
-              </span>
+                                  return (
+                                    <li
+                                      key={childIndex}
+                                      className="grid grid-cols-7 items-center gap-20"
+                                    >
+                                      <div className="w-12 relative">
+                                        <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
+                                          {image?.preview ? (
+                                            <img
+                                              src={image.preview}
+                                              alt={`Variant ${child}`}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          ) : (
+                                            <span className="text-3xl text-gray-400">
+                                              +
+                                            </span>
+                                          )}
+                                          <input
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onClick={() => {
+                                              setCurrentVariant({
+                                                index,
+                                                child,
+                                              });
+                                              setIsPopupVisible(true);
+                                            }}
+                                          />
+                                          {image?.preview && (
+                                            <button
+                                              onClick={() =>
+                                                handleRemoveVariantImages(
+                                                  index,
+                                                  child
+                                                )
+                                              }
+                                              className="absolute top-0 right-0 text-white bg-red-600 rounded-full px-2 py-1 text-xs"
+                                              style={{
+                                                transform:
+                                                  "translate(25%, -25%)",
+                                              }}
+                                            >
+                                              X
+                                            </button>
+                                          )}
+                                        </label>
+                                      </div>
 
-              <div className="relative w-20">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">$</span>
-                <span className="w-20 p-1 pl-6 text-sm">{price || "N/A"}</span>
-              </div>
+                                      <span
+                                        className="text-sm font-medium text-blue-500 underline hover:text-blue-800 transition cursor-pointer whitespace-nowrap"
+                                        onClick={() => {
+                                          navigate(
+                                            `/product/${product.id}/variants/${variantId}`,
+                                            {
+                                              state: {
+                                                productId: product.id,
+                                                variantId: variantId,
+                                              },
+                                            }
+                                          );
+                                        }}
+                                      >
+                                        {child}
+                                      </span>
 
-              <div className="relative w-20">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">$</span>
-                <span className="w-20 p-1 pl-6 text-sm">{compareAtPrice || "N/A"}</span>
-              </div>
+                                      <div className="relative w-20">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                          $
+                                        </span>
+                                        <span className="w-20 p-1 pl-6   text-sm ">
+                                          {price || "N/A"}
+                                        </span>
+                                      </div>
 
-              <span className="w-20 p-1 text-sm">{sku || "N/A"}</span>
-              <span className="w-20 p-1 text-sm">{quantity}</span>
+                                      <div className="relative w-20 ">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                          $
+                                        </span>
+                                        <span className="w-20 p-1 pl-6   text-sm r">
+                                          {compareAtPrice || "N/A"}
+                                        </span>
+                                      </div>
 
-              <button
-                onClick={() => handleDeleteCombination(index, childIndex)}
-                className="text-red-600"
-              >
-                <FaTrash />
-              </button>
-            </li>
-          );
-        })
-      ) : (
-        <li className="text-gray-500 italic px-4 py-2">
-          No child variants available.
-        </li>
-      )}
-    </ul>
-  </div>
-)}
+                                      <span className="w-20 p-1  text-sm r">
+                                        {sku || "N/A"}
+                                      </span>
+                                      <span className="w-20 p-1  text-sm r">
+                                        {quantity}
+                                      </span>
 
+                                      <button
+                                        onClick={() =>
+                                          handleDeleteCombination(
+                                            index,
+                                            childIndex
+                                          )
+                                        }
+                                        className="text-red-600"
+                                      >
+                                        <FaTrash />
+                                      </button>
+                                    </li>
+                                  );
+                                }
+                              )}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     ))
                   ) : (
@@ -2101,7 +2156,7 @@ const generateVariants = () => {
           </div>
         </div>
 
-        {isPopupVisible && (
+        {/* {isPopupVisible && (
           <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
             <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">
               <div className="sticky top-0 bg-white z-10 pb-4 border-b flex justify-between items-center">
@@ -2197,6 +2252,115 @@ const generateVariants = () => {
                 </button>
                 <button
                   onClick={() => console.log(selectedFiles)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        )} */}
+        {isPopupVisible && (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+            <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">
+              <div className="sticky top-0 bg-white z-10 pb-4 border-b flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Select Image
+                </h2>
+                <button
+                  onClick={() => setIsPopupVisible(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <RxCross1 />
+                </button>
+              </div>
+
+              <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageChange}
+                  className="hidden"
+                  id="fileUpload"
+                />
+                <label
+                  htmlFor="fileUpload"
+                  className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
+                >
+                  Add images
+                </label>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
+                {galleryImages.map((file) => {
+                  const parentValue =
+                    combinations[currentVariant?.index]?.parent;
+                  const combinationKey =
+                    options.length === 1
+                      ? currentVariant?.child
+                      : `${parentValue} / ${currentVariant?.child}`;
+                  const normalizedKey = combinationKey
+                    .replace(/['"]/g, "")
+                    .trim();
+
+                  return (
+                    <div
+                      key={file.id || file.src}
+                      className={`border rounded p-2 relative ${
+                        variantImages[normalizedKey]?.preview === file.src
+                          ? "border-blue-500"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      <div
+                        onClick={() => {
+                          if (currentVariant) {
+                            setVariantImages((prev) => ({
+                              ...prev,
+                              [normalizedKey]: {
+                                preview: file.src,
+                                loading: false,
+                              },
+                            }));
+                            setIsPopupVisible(false);
+                          }
+                        }}
+                        className="cursor-pointer hover:opacity-80 transition"
+                      >
+                        <img
+                          src={file.src}
+                          alt={file.name || "Image"}
+                          className="w-full h-24 object-cover rounded"
+                        />
+                      </div>
+
+                      <input
+                        type="checkbox"
+                        className="absolute top-2 left-2 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        checked={
+                          variantImages[normalizedKey]?.preview === file.src
+                        }
+                        readOnly
+                      />
+
+                      <p className="text-sm text-center mt-2 truncate">
+                        {file.name || "Image"}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex justify-end mt-6 border-t pt-4">
+                <button
+                  onClick={() => setIsPopupVisible(false)}
+                  className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => console.log(variantImages)}
                   className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
                 >
                   Done

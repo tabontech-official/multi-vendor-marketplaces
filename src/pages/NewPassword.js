@@ -105,7 +105,7 @@ const NewPassword = () => {
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Email
+                New password
               </label>
               <input
                 type="password"

@@ -154,7 +154,7 @@ const Dashboard = () => {
 
     setIsUploading(true);
     setUploadStarted(true);
-    showToast("success", " Upload triggered. Processing in background...");
+  showToast("success", `Uploading "${selectedFile.name}". Processing in background...`);
 
     closePopup();
 
@@ -169,10 +169,10 @@ const Dashboard = () => {
         const formData = new FormData();
         formData.append("file", selectedFile);
         // formData.append("userId", userId);
-        addNotification(
-          "Product CSV upload triggered. Processing in background.",
-          "Manage product"
-        );
+       addNotification(
+        `Product CSV upload triggered for "${selectedFile.name}".`,
+        "Manage product"
+      );
 
         const response = await fetch(
           `https://multi-vendor-marketplace.vercel.app/product/upload-csv-body/${userId}`,
@@ -184,8 +184,8 @@ const Dashboard = () => {
 
         const result = await response.json();
 
-        showToast("success", "Products imported successfully!");
-        addNotification("Products imported successfully!");
+      showToast("success", `File "${selectedFile.name}" imported successfully!`);
+      addNotification(`File "${selectedFile.name}" imported successfully!`);
       } catch (error) {
         showToast(
           "error",

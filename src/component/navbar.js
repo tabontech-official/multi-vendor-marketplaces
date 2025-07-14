@@ -8,7 +8,12 @@ import { useNotification } from "../context api/NotificationContext";
 import { BsMegaphoneFill } from "react-icons/bs";
 
 const Navbar = () => {
-const { notifications, fetchNotifications, hasUnseenNotifications, markAllAsSeen } = useNotification();
+  const {
+    notifications,
+    fetchNotifications,
+    hasUnseenNotifications,
+    markAllAsSeen,
+  } = useNotification();
   const { user, dispatch } = useAuthContext();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -67,12 +72,9 @@ const { notifications, fetchNotifications, hasUnseenNotifications, markAllAsSeen
     try {
       const userid = localStorage.getItem("userid");
       if (userid) {
-        await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/logout/${userid}`,
-          {
-            method: "POST",
-          }
-        );
+        await fetch(`https://multi-vendor-marketplace.vercel.app/auth/logout/${userid}`, {
+          method: "POST",
+        });
         dispatch({ type: "LOGOUT" });
         localStorage.clear();
         navigate("/login");
@@ -99,14 +101,13 @@ const { notifications, fetchNotifications, hasUnseenNotifications, markAllAsSeen
   }, []);
 
   const isLoggedIn = Boolean(localStorage.getItem("usertoken"));
-const handleToggle = async () => {
-  await fetchNotifications(); 
-  setIsNotificationOpen(!isNotificationOpen); 
-  if (!isNotificationOpen) {
-    await markAllAsSeen(); 
-  }
-};
-
+  const handleToggle = async () => {
+    await fetchNotifications();
+    setIsNotificationOpen(!isNotificationOpen);
+    if (!isNotificationOpen) {
+      await markAllAsSeen();
+    }
+  };
 
   return (
     <nav className=" bg-gradient-to-r from-blue-600  to-[#18262f] flex items-center px-4 h-[8vh] relative shadow-lg">
@@ -138,78 +139,87 @@ const handleToggle = async () => {
           } md:block z-10 transition-transform duration-500 ease-in-out`}
         >
           <ul className="flex flex-col md:flex-row md:space-x-8 space-y-4 items-center md:space-y-0">
-           
+            {isLoggedIn && (
+              <li className="relative" ref={notificationRef}>
+                <button
+                  onClick={handleToggle}
+                  ref={buttonRef}
+                  className="relative text-white hover:bg-blue-800 p-2 rounded-full transition"
+                >
+                  <FaBell size={20} />
+                  {hasUnseenNotifications && (
+                    <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                  )}
+                </button>
 
-{isLoggedIn && (
-  <li className="relative" ref={notificationRef}>
-    <button
-      onClick={handleToggle}
-      ref={buttonRef}
-      className="relative text-white hover:bg-blue-800 p-2 rounded-full transition"
-    >
-      <FaBell size={20} />
-      {hasUnseenNotifications && (
-        <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-      )}
-    </button>
+                {isNotificationOpen && (
+                  <div className="absolute right-0 mt-3 w-96 bg-white rounded-lg shadow-lg border z-30 overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 text-gray-800 font-semibold">
+                      <div className="flex items-center gap-2">
+                        <BsMegaphoneFill className="text-blue-600" />
+                        <span>Latest Updates</span>
+                      </div>
+                      <a
+                        href="/notifications"
+                        className="text-blue-600 text-sm hover:underline"
+                      >
+                        Show all
+                      </a>
+                    </div>
 
-    {isNotificationOpen && (
-      <div className="absolute right-0 mt-3 w-96 bg-white rounded-lg shadow-lg border z-30 overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 text-gray-800 font-semibold">
-          <div className="flex items-center gap-2">
-            <BsMegaphoneFill className="text-blue-600" />
-            <span>Latest Updates</span>
-          </div>
-          <a
-            href="/notifications"
-            className="text-blue-600 text-sm hover:underline"
-          >
-            Show all
-          </a>
-        </div>
+                    <ul className="max-h-96 overflow-y-auto text-sm text-gray-700 divide-y">
+                      {notifications
+                        .sort(
+                          (a, b) =>
+                            new Date(b.createdAt) - new Date(a.createdAt)
+                        )
+                        .slice(0, 5)
+                        .map((note) => {
+                          return (
+                            <li
+                              key={note._id || note.id}
+                              className="px-4 py-3 hover:bg-gray-50 transition"
+                            >
+                              <div className="flex gap-3 items-start">
+                                <div className="pt-1">
+                                  <FaUserCircle
+                                    className="text-blue-500"
+                                    size={20}
+                                  />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-xs text-gray-500">
+                                    {new Date(
+                                      note.createdAt
+                                    ).toLocaleDateString("en-GB")}{" "}
+                                    •{" "}
+                                    <span className="capitalize">
+                                      {note.firstName || "User"}{" "}
+                                      {note.lastName || ""}
+                                    </span>
+                                  </p>
+                                  <p className="text-sm mt-0.5">
+                                    {note.message || "No message."}
+                                  </p>
+                                </div>
+                              </div>
+                            </li>
+                          );
+                        })}
+                    </ul>
 
-        {/* List */}
-        <ul className="max-h-96 overflow-y-auto text-sm text-gray-700 divide-y">
-         {notifications
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 5)
-    .map((note) => (
-      <li
-        key={note._id || note.id}
-        className="px-4 py-3 hover:bg-gray-50 transition"
-      >
-        <div className="flex gap-3 items-start">
-          <div className="pt-1">
-            <FaUserCircle className="text-blue-500" size={20} />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs text-gray-500">
-              {new Date(note.createdAt).toLocaleDateString("en-GB")} •{" "}
-              <span className="capitalize">
-                {note.firstName || "User"} {note.lastName || ""}
-              </span>
-            </p>
-            <p className="text-sm mt-0.5">{note.message || "No message."}</p>
-          </div>
-        </div>
-      </li>
-    ))}
-        </ul>
-
-        {/* Footer */}
-        <div className="border-t px-4 py-3 text-center bg-gray-50">
-          <a
-            href="/notifications"
-            className="text-blue-600 text-sm font-medium hover:underline"
-          >
-            View full history →
-          </a>
-        </div>
-      </div>
-    )}
-  </li>
-)}
+                    <div className="border-t px-4 py-3 text-center bg-gray-50">
+                      <a
+                        href="/notifications"
+                        className="text-blue-600 text-sm font-medium hover:underline"
+                      >
+                        View full history →
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </li>
+            )}
             {isLoggedIn && role === "Dev Admin" && (
               <li>
                 <Link

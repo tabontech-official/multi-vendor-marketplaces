@@ -684,7 +684,7 @@ const CategorySelector = () => {
           product.images?.find((img) => String(img.id) === String(imageId));
 
         if (matched?.src) {
-              console.log(`✅ Found image for "${titleKey}":`, matched.src);
+              console.log(` Found image for "${titleKey}":`, matched.src);
 
           hydratedVariantImages[titleKey] = {
             preview: matched.src,
@@ -1720,7 +1720,7 @@ const CategorySelector = () => {
                                               setIsPopupVisible(true);
                                             }}
                                           />
-                                          {image?.preview && (
+                                          {/* {image?.preview && (
                                             <button
                                               onClick={() =>
                                                 handleRemoveVariantImages(
@@ -1736,7 +1736,7 @@ const CategorySelector = () => {
                                             >
                                               X
                                             </button>
-                                          )}
+                                          )} */}
                                         </label>
                                       </div>
 

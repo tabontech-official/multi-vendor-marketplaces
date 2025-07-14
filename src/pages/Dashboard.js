@@ -757,12 +757,10 @@ const Dashboard = () => {
                           ? product.title
                           : "Job Search Listing"}
                       </td>
-                      <td>
                         {(userRole === "Dev Admin" ||
                           userRole === "Master Admin") && (
                           <td>{product?.username}</td>
                         )}{" "}
-                      </td>
                       <td className="p-3"> {product.variants[0].sku}</td>
                       <td className="p-3"> ${product.variants[0].price} </td>
                       <td className="p-3">

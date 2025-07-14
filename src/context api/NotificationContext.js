@@ -57,13 +57,11 @@ export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false);
 
-  // 👁 Check for unseen notifications
   useEffect(() => {
     const anyUnseen = notifications.some((n) => !n.seen);
     setHasUnseenNotifications(anyUnseen);
   }, [notifications]);
 
-  // ✅ Fetch notifications from DB
   const fetchNotifications = async () => {
     const userId = localStorage.getItem("userid");
     if (!userId) return;
@@ -72,6 +70,7 @@ export const NotificationProvider = ({ children }) => {
         `https://multi-vendor-marketplace.vercel.app/notifications/getNotificationByUserId/${userId}`
       );
       setNotifications(res.data || []);
+      console.log(res.data)
     } catch (err) {
       console.error("Failed to fetch notifications:", err);
     }
@@ -101,7 +100,6 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
-  // ✅ Mark all as seen
   const markAllAsSeen = async () => {
     const userId = localStorage.getItem("userid");
     if (!userId) return;

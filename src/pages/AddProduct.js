@@ -2107,9 +2107,9 @@ const CategorySelector = () => {
                   onKeyDown={handleKeyDown}
                   onFocus={() => {
                     setIsFocused(true);
-                    setFilteredCategories(categories); // show all categories
+                    setFilteredCategories(categories);
                   }}
-                  onBlur={() => setTimeout(() => setIsFocused(false), 200)} // delay to allow click
+                  onBlur={() => setTimeout(() => setIsFocused(false), 200)} 
                   placeholder="Search category..."
                   className="w-full border border-gray-300 p-2 rounded-xl"
                 />

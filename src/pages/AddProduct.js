@@ -305,6 +305,7 @@ const CategorySelector = () => {
       prev.filter((catNo) => catNo !== catNoToRemove)
     );
   };
+  const [isFocused, setIsFocused] = useState(false);
 
   const navigate = useNavigate();
 
@@ -684,7 +685,7 @@ const CategorySelector = () => {
           product.images?.find((img) => String(img.id) === String(imageId));
 
         if (matched?.src) {
-              console.log(` Found image for "${titleKey}":`, matched.src);
+          console.log(` Found image for "${titleKey}":`, matched.src);
 
           hydratedVariantImages[titleKey] = {
             preview: matched.src,
@@ -2035,7 +2036,7 @@ const CategorySelector = () => {
               Product organization
             </label>
             <div className="mt-2 space-y-2">
-              <div ref={containerRef} className="relative w-full">
+              {/* <div ref={containerRef} className="relative w-full">
                 <label className="block text-sm text-gray-600 mb-1">
                   Category
                 </label>
@@ -2050,6 +2051,70 @@ const CategorySelector = () => {
                 />
 
                 {searchTerm.trim() !== "" && filteredCategories.length > 0 && (
+                  <ul
+                    className="absolute z-10 bg-white border border-gray-300 rounded-xl mt-1 max-h-60 overflow-y-auto shadow-lg"
+                    style={{ width: `${dropdownWidth}px` }}
+                  >
+                    {filteredCategories.map((category, index) => (
+                      <li
+                        key={category.catNo}
+                        onClick={() => handleCategorySelect(category)}
+                        className={`p-2 cursor-pointer hover:bg-gray-100 ${
+                          index === highlightIndex ? "bg-gray-200" : ""
+                        }`}
+                      >
+                        {buildCategoryPath(category)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {selectedVisibleCategories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {selectedVisibleCategories.map((catNo, index) => {
+                      const category = categories.find(
+                        (cat) => cat.catNo === catNo
+                      );
+                      if (!category) return null;
+
+                      return (
+                        <span
+                          key={index}
+                          className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
+                        >
+                          {buildCategoryPath(category)}
+                          <button
+                            type="button"
+                            className="ml-2 text-red-500"
+                            onClick={() => removeCategory(catNo)}
+                          >
+                            &times;
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+              </div> */}
+              <div ref={containerRef} className="relative w-full">
+                <label className="block text-sm text-gray-600 mb-1">
+                  Category
+                </label>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => {
+                    setIsFocused(true);
+                    setFilteredCategories(categories); // show all categories
+                  }}
+                  onBlur={() => setTimeout(() => setIsFocused(false), 200)} // delay to allow click
+                  placeholder="Search category..."
+                  className="w-full border border-gray-300 p-2 rounded-xl"
+                />
+
+                {isFocused && filteredCategories.length > 0 && (
                   <ul
                     className="absolute z-10 bg-white border border-gray-300 rounded-xl mt-1 max-h-60 overflow-y-auto shadow-lg"
                     style={{ width: `${dropdownWidth}px` }}

@@ -12,7 +12,7 @@ const ManageCategory = () => {
     const fetchCategories = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/category/getCategory"
+          "https://multi-vendor-marketplace.vercel.app/category/getCategory"
         );
         const data = await response.json();
 
@@ -36,7 +36,7 @@ const ManageCategory = () => {
   const handleExport = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/category/getCsvForCategories",
+        "https://multi-vendor-marketplace.vercel.app/category/getCsvForCategories",
         {
           method: "GET",
         }
@@ -67,7 +67,7 @@ const ManageCategory = () => {
 
     try {
       await axios.delete(
-        "http://localhost:5000/category/deleteCollection",
+        "https://multi-vendor-marketplace.vercel.app/category/deleteCollection",
         {
           data: {
             categoryIds: selectedCategoryIds,

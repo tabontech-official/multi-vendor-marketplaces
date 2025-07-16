@@ -15,7 +15,7 @@ const Collection = () => {
     const fetchCategoryData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/category/category/${id}`
+          `https://multi-vendor-marketplace.vercel.app/category/category/${id}`
         );
         const data = await response.json();
 

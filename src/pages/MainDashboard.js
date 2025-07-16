@@ -97,10 +97,10 @@ const MainDashboard = () => {
 
         if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
           apiUrl =
-            "https://multi-vendor-marketplace.vercel.app/product/getProductCount";
+            "http://localhost:5000/product/getProductCount";
         } else if (decodedRole === "Merchant") {
           const userId = localStorage.getItem("userid");
-          apiUrl = `https://multi-vendor-marketplace.vercel.app/product/getProductCountForUser/${userId}`;
+          apiUrl = `http://localhost:5000/product/getProductForCharts/${userId}`;
         }
 
         if (apiUrl) {
@@ -114,10 +114,16 @@ const MainDashboard = () => {
           });
 
           const data = await response.json();
-          if (response.ok) {
-            setProductCount(data.total);
-            setActiveProductCount(data.active)
-            setInActiveProductCount(data.inactive)
+        if (response.ok) {
+          // merchant structure: array of objects like { status, count }
+          const dataMap = {};
+          data.forEach(item => {
+            dataMap[item.status.toLowerCase()] = item.count;
+          });
+
+          setProductCount(dataMap.total || 0);
+          setActiveProductCount(dataMap.active || 0);
+          setInActiveProductCount(dataMap.inactive || 0);
           } else {
             console.error("Failed to fetch count:", data.message);
           }
@@ -146,10 +152,10 @@ const MainDashboard = () => {
 
         if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
           apiUrl =
-            "https://multi-vendor-marketplace.vercel.app/order/recurringFinance";
+            "http://localhost:5000/order/recurringFinance";
         } else if (decodedRole === "Merchant") {
           const userId = localStorage.getItem("userid");
-          apiUrl = `https://multi-vendor-marketplace.vercel.app/order/getFinanceSummaryForUser/${userId}`;
+          apiUrl = `http://localhost:5000/order/getFinanceSummaryForUser/${userId}`;
         }
 
         if (apiUrl) {
@@ -175,7 +181,7 @@ const MainDashboard = () => {
     const fetchUserViewCount = async () => {
       try {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/trackingViews/${userId}`
+          `http://localhost:5000/product/trackingViews/${userId}`
         );
         if (response.ok) {
           const data = await response.json();

@@ -50,7 +50,7 @@ const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all
 
   //   try {
   //     const res = await fetch(
-  //       `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`,
+  //       `http://localhost:5000/order/order/${userId}`,
   //       {
   //         method: "GET",
   //       }
@@ -91,8 +91,8 @@ const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all
       setIsAdmin(isAdminFlag);
 
       const url = isAdminFlag
-        ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrderForMerchants`
-        : `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`;
+        ? `http://localhost:5000/order/getAllOrderForMerchants`
+        : `http://localhost:5000/order/order/${userId}`;
 
       const res = await fetch(url, {
         method: "GET",
@@ -158,14 +158,14 @@ const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all
   //         type: exportOption,
   //         ...(exportOption === "current" && { limit: 10 }),
   //       });
-  //       exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
+  //       exportUrl = `http://localhost:5000/order/exportAllOrder?${queryParams.toString()}`;
   //     } else {
   //       const queryParams = new URLSearchParams({
   //         userId,
   //         type: exportOption,
   //         ...(exportOption === "current" && { limit: 10 }),
   //       });
-  //       exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
+  //       exportUrl = `http://localhost:5000/order/exportOrderByUserId?${queryParams.toString()}`;
   //     }
 
   //     const response = await fetch(exportUrl);
@@ -223,8 +223,8 @@ const handleExport = async () => {
     });
 
     exportUrl = isAdmin
-      ? `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`
-      : `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
+      ? `http://localhost:5000/order/exportAllOrder?${queryParams.toString()}`
+      : `http://localhost:5000/order/exportOrderByUserId?${queryParams.toString()}`;
 
     const response = await fetch(exportUrl);
     if (!response.ok) {
@@ -263,7 +263,7 @@ const handleExport = async () => {
 
       try {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
+          `http://localhost:5000/product/getProduct/${id}`,
           { method: "GET" }
         );
         if (response.ok) {

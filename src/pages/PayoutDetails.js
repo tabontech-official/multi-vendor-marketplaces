@@ -48,7 +48,7 @@ const PayoutDetails = () => {
     }
 
     try {
-      const url = `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`;
+      const url = `http://localhost:5000/order/order/${userId}`;
 
       const res = await fetch(url, {
         method: "GET",
@@ -109,7 +109,7 @@ const PayoutDetails = () => {
 
       // Send PayPal update request
       const res = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
+        "http://localhost:5000/order/addPaypal",
         {
           merchantIds,
           payPal: account,
@@ -158,7 +158,7 @@ const PayoutDetails = () => {
 
       // Send reference number update to backend
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
+        "http://localhost:5000/order/addReferenceNumber",
         {
           method: "POST",
           headers: {
@@ -211,17 +211,17 @@ const PayoutDetails = () => {
 
         if (userRole === "Merchant") {
           res = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+            `http://localhost:5000/order/getPayoutOrders?payoutDate=${encodeURIComponent(
               payoutDate
             )}&status=${status}&userId=${merchantId}`
           );
         } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
           // res = await fetch(
-          //   `https://multi-vendor-marketplace.vercel.app/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(
+          //   `http://localhost:5000/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(
           //     payoutDate
           //   )}&status=${status}`
           res = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+            `http://localhost:5000/order/getPayoutOrders?payoutDate=${encodeURIComponent(
               payoutDate
             )}&status=${status}&userId=${merchantId}`
           );
@@ -294,7 +294,7 @@ const PayoutDetails = () => {
       }
 
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
+        "http://localhost:5000/order/addReferenceNumber",
         {
           method: "POST",
           headers: {

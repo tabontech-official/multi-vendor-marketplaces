@@ -65,9 +65,9 @@ const apiSidebarData = [
       "getPendingPayout",
       "getPayout",
       "getPayoutByQuery",
-      "getPayoutByUserId",
-      "getPayoutForAllOrders",
-      "getFinanceSummaryForUser",
+      // "getPayoutByUserId",
+      // "getPayoutForAllOrders",
+      // "getFinanceSummaryForUser",
     ],
   },
 ];

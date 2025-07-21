@@ -15,7 +15,7 @@ export default function ApiDocsPage() {
       {/* Main content */}
       <main className="flex-1 p-5 md:p-10 overflow-y-auto">
         <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
-          Endpoint: <span className="text-purple-600">{selected}</span>
+         <span className="text-purple-600">{selected}</span>
         </h1>
 
         {selected === "createProduct" ? (
@@ -26,7 +26,7 @@ export default function ApiDocsPage() {
               <div className="mb-4">
                 <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
                 <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                  https://multi-vendor-marketplace.vercel.app/product/addEquipment
+                POST  /product/addEquipment
                 </code>
               </div>
 
@@ -204,6 +204,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">POST</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/addEquipment`}
+        </pre>
+      </div>
               {/* Request Body */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -288,12 +297,12 @@ export default function ApiDocsPage() {
                 <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
                   PATCH /product/updateProducts/:productId
                 </code>
-                <p className="mt-1 text-xs text-gray-500">
+                {/* <p className="mt-1 text-xs text-gray-500">
                   e.g.{" "}
                   <code className="text-gray-700">
                     /product/updateProducts/687b28f5f49468ad34534cc8
                   </code>
-                </p>
+                </p> */}
               </div>
 
               {/* Access Permissions */}
@@ -454,6 +463,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN: Example Payload & Response */}
             <div className="space-y-6">
+               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">PATCH</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app//product/updateProducts/687b....`}
+        </pre>
+      </div>
               {/* Request Body Example */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -544,12 +562,12 @@ export default function ApiDocsPage() {
                 <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
                   GET /product/getProduct/:userId?page=1&amp;limit=10
                 </code>
-                <p className="mt-1 text-xs text-gray-500">
+                {/* <p className="mt-1 text-xs text-gray-500">
                   e.g.{" "}
                   <code className="text-gray-700">
                     /product/getProduct/687b28f5f49468ad34534cc8?page=1&amp;limit=10
                   </code>
-                </p>
+                </p> */}
               </div>
 
               <div className="text-red-500 flex items-center text-sm mb-4">
@@ -615,6 +633,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/getProduct/687b...?page=1&limit=10`}
+        </pre>
+      </div>
               {/* Response Example */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -671,12 +698,12 @@ export default function ApiDocsPage() {
                 <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
                   GET /product/getAllData?page=1&amp;limit=10
                 </code>
-                <p className="mt-1 text-xs text-gray-500">
+                {/* <p className="mt-1 text-xs text-gray-500">
                   e.g.{" "}
                   <code className="text-gray-700">
                     /product/getAllData?page=2&amp;limit=20
                   </code>
-                </p>
+                </p> */}
               </div>
 
               {/* Authentication */}
@@ -725,6 +752,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/getAllData?page=1&limit=10`}
+        </pre>
+      </div>
               {/* Response Example */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -781,12 +817,12 @@ export default function ApiDocsPage() {
                 <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
                   PUT /product/publishedProduct/:productId
                 </code>
-                <p className="mt-1 text-xs text-gray-500">
+                {/* <p className="mt-1 text-xs text-gray-500">
                   e.g.{" "}
                   <code className="text-gray-700">
                     /product/publishedProduct/687b28f5f49468ad34534cc8
                   </code>
-                </p>
+                </p> */}
               </div>
 
               {/* Auth */}
@@ -835,6 +871,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">PUT</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/publishedProduct/64acbe...`}
+        </pre>
+      </div>
               {/* Response Example */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -933,6 +978,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+                  <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">PUT</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/unpublished/64acbe...`}
+        </pre>
+      </div>
               {/* Response Example */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -979,12 +1033,12 @@ export default function ApiDocsPage() {
                 <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
                   PUT /product/updateImages/:id
                 </code>
-                <p className="mt-1 text-xs text-gray-500">
+                {/* <p className="mt-1 text-xs text-gray-500">
                   e.g.{" "}
                   <code className="text-gray-700">
                     /product/updateImages/687b28f5f49468ad34534cc8
                   </code>
-                </p>
+                </p> */}
               </div>
 
               {/* Auth */}
@@ -1053,6 +1107,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+                    <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">PUT</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/updateImages/98755`}
+        </pre>
+      </div>
               {/* Response Example */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -1119,12 +1182,12 @@ export default function ApiDocsPage() {
                 <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
                   DELETE /product/deleteProduct/:id
                 </code>
-                <p className="mt-1 text-xs text-gray-500">
+                {/* <p className="mt-1 text-xs text-gray-500">
                   e.g.{" "}
                   <code className="text-gray-700">
                     /product/delete/687b28f5f49468ad34534cc8
                   </code>
-                </p>
+                </p> */}
               </div>
 
               {/* Auth */}
@@ -1168,6 +1231,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">DELETE</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/delete/687b...`}
+        </pre>
+      </div>
               {/* Response Example */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -1196,12 +1268,12 @@ export default function ApiDocsPage() {
                 <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
                   POST /product/addImageGallery
                 </code>
-                <p className="mt-1 text-xs text-gray-500">
+                {/* <p className="mt-1 text-xs text-gray-500">
                   e.g.{" "}
                   <code className="text-gray-700">
                     /product/addImageGallery
                   </code>
-                </p>
+                </p> */}
               </div>
 
               {/* Auth */}
@@ -1253,6 +1325,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">POST</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/addImageGallery`}
+        </pre>
+      </div>
               {/* Request Example */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -1364,6 +1445,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/65b1.../65b431....`}
+        </pre>
+      </div>
               {/* Example Response */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -1471,6 +1561,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">POST</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/upload-csv-body/64acbe...`}
+        </pre>
+      </div>
               {/* Example Response */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -1562,6 +1661,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/getSingleVariant/987645/variants/34643809`}
+        </pre>
+      </div>
               {/* Example Response */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -1718,6 +1826,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">PUT</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/upload-csv-body/64acbe...`}
+        </pre>
+      </div>
               {/* Request Body */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -1871,6 +1988,15 @@ export default function ApiDocsPage() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
+               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">PUT</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/87856567`}
+        </pre>
+      </div>
               {/* Request Body */}
               <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
                 <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -2002,6 +2128,15 @@ export default function ApiDocsPage() {
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">PUT</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/5678653889`}
+        </pre>
+      </div>
       {/* Request Body */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -2116,6 +2251,15 @@ export default function ApiDocsPage() {
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">POST</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/product/bulkUpload/inventory`}
+        </pre>
+      </div>
       {/* Sample CSV */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -2228,6 +2372,15 @@ SKU-GREEN-S,5,,,archived`}</pre>
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">POST</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/category/createCategory`}
+        </pre>
+      </div>
       {/* Request Example */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -2323,6 +2476,15 @@ SKU-GREEN-S,5,,,archived`}</pre>
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/category/getCategory`}
+        </pre>
+      </div>
       {/* Success Response */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -2407,6 +2569,15 @@ SKU-GREEN-S,5,,,archived`}</pre>
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/category/category/64acb...`}
+        </pre>
+      </div>
       {/* Success Response */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -2478,6 +2649,15 @@ SKU-GREEN-S,5,,,archived`}</pre>
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">DELETE</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/category/deleteCollection`}
+        </pre>
+      </div>
       {/* Success Response */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -2546,6 +2726,15 @@ SKU-GREEN-S,5,,,archived`}</pre>
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/order/order/64acbe...`}
+        </pre>
+      </div>
       {/* Success Response */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -2631,6 +2820,15 @@ SKU-GREEN-S,5,,,archived`}</pre>
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/getOrderByOrderId/1234567890`}
+        </pre>
+      </div>
       {/* Success Response */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -2703,6 +2901,15 @@ SKU-GREEN-S,5,,,archived`}</pre>
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/order/getAllOrderForMerchants`}
+        </pre>
+      </div>
       {/* Success Response */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -2810,6 +3017,15 @@ SKU-GREEN-S,5,,,archived`}</pre>
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/order/getCancellationRequests`}
+        </pre>
+      </div>
       {/* Success Response */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -2900,6 +3116,15 @@ SKU-GREEN-S,5,,,archived`}</pre>
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">POST</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/order/cancelShopifyOrder`}
+        </pre>
+      </div>
       {/* Success Response */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -2974,6 +3199,15 @@ SKU-GREEN-S,5,,,archived`}</pre>
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel./order/exportOrders`}
+        </pre>
+      </div>
       {/* Success Response */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -3020,7 +3254,7 @@ Each CSV row includes:
       <div className="mb-4">
         <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
         <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-          https://multi-vendor-marketplace.vercel.app/order/addPayOutDates
+          POST  /order/addPayOutDates
         </code>
       </div>
 
@@ -3104,6 +3338,15 @@ Each CSV row includes:
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">POST</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/order/addPayOutDates`}
+        </pre>
+      </div>
       {/* Request Body */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -3151,7 +3394,7 @@ Each CSV row includes:
       <div className="mb-4">
         <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
         <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-          https://multi-vendor-marketplace.vercel.app/orders/addReferenceNumber
+          POST  /orders/addReferenceNumber
         </code>
       </div>
 
@@ -3223,6 +3466,15 @@ Each CSV row includes:
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">POST</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/orders/addReferenceNumber`}
+        </pre>
+      </div>
       {/* Request Body */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
@@ -3271,7 +3523,7 @@ Each CSV row includes:
       <div className="mb-4">
         <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
         <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-          https://multi-vendor-marketplace.vercel.app/orders/getPayout
+          GET  /orders/getPayout
         </code>
       </div>
 
@@ -3377,7 +3629,7 @@ Each CSV row includes:
       <div className="mb-4">
         <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
         <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-          https://multi-vendor-marketplace.vercel.app/orders/getPayoutOrders
+          GET  /orders/getPayoutOrders
         </code>
       </div>
 
@@ -3486,6 +3738,248 @@ Each CSV row includes:
 )}
 
 
+{selected === "getAllPayoutByQuery" ? (
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    {/* LEFT COLUMN */}
+    <div className="bg-white rounded-md shadow-md p-6">
+      {/* Endpoint Title */}
+      <div className="mb-4">
+        <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
+        <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
+          GET  /order/getPayoutForAllOrders
+        </code>
+      </div>
+
+      {/* Access Permissions */}
+      <div className="text-red-500 flex items-center text-sm mb-4">
+        <FaLock className="mr-2" />
+        Requires{" "}
+        <code className="bg-gray-100 px-1 rounded text-xs mx-1">
+          access-token
+        </code>{" "}
+        and{" "}
+        <code className="bg-gray-100 px-1 rounded text-xs">
+          secret-key
+        </code>{" "}
+        in headers to access this endpoint.
+      </div>
+
+      {/* Instruction */}
+      <p className="text-gray-700 text-sm mb-4">
+        This <strong>GET</strong> endpoint retrieves all orders across merchants, grouped by payout date and status. It calculates payout totals, refund amounts, and includes merchant PayPal and reference data.
+      </p>
+
+      {/* Headers */}
+      <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
+      <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
+        <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code>: API token</li>
+        <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code>: API secret</li>
+      </ul>
+
+      {/* Query Params */}
+      <h4 className="font-semibold text-sm text-gray-800 mb-2">Query Parameters (optional):</h4>
+      <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
+        <li><strong>payoutDate</strong> – Format: <code>Jul 21, 2025</code> – Filters payouts for a specific date</li>
+        <li><strong>status</strong> – <code>pending</code> or <code>deposited</code></li>
+      </ul>
+
+      {/* Note */}
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 text-sm text-blue-800 rounded-md mt-6">
+        <strong>Note:</strong> This endpoint automatically calculates payout and refund per merchant per order.
+      </div>
+    </div>
+
+    {/* RIGHT COLUMN */}
+    <div className="space-y-6">
+      {/* Request Example */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/order/getPayoutForAllOrders?payoutDate=Jul 21, 2025&status=pending`}
+        </pre>
+      </div>
+
+      {/* Sample Response */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Response</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">JSON</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">
+{`{
+  "message": "Payouts calculated",
+  "totalAmount": 1285.00,
+  "payouts": [
+    {
+      "payoutDate": "Jul 21, 2025",
+      "transactionDates": "Jul 18 – Jul 21, 2025",
+      "status": "Pending",
+      "amount": "$1200.00 AUD",
+      "totalRefundAmount": "$85.00 AUD",
+      "orders": [
+        {
+          "orderId": "789ABC",
+          "shopifyOrderNo": "GE1234",
+          "amount": 100.00,
+          "refund": 15.00,
+          "status": "pending",
+          "createdAt": "2025-07-19T10:00:00.000Z",
+          "referenceNo": "REF-2025-XYZ",
+          "paypalAccount": "vendor@example.com",
+          "products": [
+            {
+              "title": "Wireless Headphones",
+              "variantTitle": "Black",
+              "price": 50.00,
+              "quantity": 2,
+              "total": 100.00,
+              "fulfillment_status": "fulfilled",
+              "cancelled": false,
+              "userId": "64abc...",
+              "referenceNo": "REF-2025-XYZ",
+              "paypalAccount": "vendor@example.com"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}`}
+        </pre>
+      </div>
+    </div>
+  </div>
+) : (
+  <></>
+)}
+
+
+{selected === "getPayoutByUserId" ? (
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    {/* LEFT COLUMN */}
+    <div className="bg-white rounded-md shadow-md p-6">
+      {/* Endpoint Title */}
+      <div className="mb-4">
+        <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
+        <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
+        GET  /order/getPayoutByUserId
+        </code>
+      </div>
+
+      {/* Access Permissions */}
+      <div className="text-red-500 flex items-center text-sm mb-4">
+        <FaLock className="mr-2" />
+        Requires{" "}
+        <code className="bg-gray-100 px-1 rounded text-xs mx-1">
+          access-token
+        </code>{" "}
+        and{" "}
+        <code className="bg-gray-100 px-1 rounded text-xs">
+          secret-key
+        </code>{" "}
+        in headers to access this endpoint.
+      </div>
+
+      {/* Instruction */}
+      <p className="text-gray-700 text-sm mb-4">
+        This <strong>GET</strong> endpoint retrieves **payouts for a single merchant** (filtered by <code>userId</code>), grouped by payout date and status.
+      </p>
+
+      {/* Headers */}
+      <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
+      <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
+        <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code>: API token</li>
+        <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code>: API secret</li>
+      </ul>
+
+      {/* Query Params */}
+      <h4 className="font-semibold text-sm text-gray-800 mb-2">Query Parameters:</h4>
+      <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
+        <li><strong>userId</strong> – (string, required) The ID of the merchant whose payouts you want to fetch</li>
+      </ul>
+
+      {/* Note */}
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 text-sm text-blue-800 rounded-md mt-6">
+        <strong>Note:</strong> Orders without any line item matching the given user will be excluded from the response.
+      </div>
+    </div>
+
+    {/* RIGHT COLUMN */}
+    <div className="space-y-6">
+      {/* Request Example */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/orders/getPayoutByUserId?userId=64acbe...`}
+        </pre>
+      </div>
+
+      {/* Sample Response */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Response</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">JSON</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">
+{`{
+  "message": "Payouts calculated",
+  "totalAmount": 450.00,
+  "totalRefundAmount": 25.00,
+  "payouts": [
+    {
+      "payoutDate": "Jul 21, 2025",
+      "transactionDates": "Jul 19 – Jul 21, 2025",
+      "status": "Pending",
+      "amount": "$450.00 AUD",
+      "totalRefundAmount": "$25.00 AUD",
+      "totalFulfilled": 4,
+      "totalUnfulfilled": 1,
+      "orders": [
+        {
+          "orderId": "123456",
+          "shopifyOrderId": "456789",
+          "shopifyOrderNo": "GE1023",
+          "amount": 100.00,
+          "refund": 10.00,
+          "status": "pending",
+          "createdAt": "2025-07-19T10:00:00.000Z",
+          "fulfillmentSummary": {
+            "fulfilled": 2,
+            "unfulfilled": 1
+          },
+          "lineItems": [
+            {
+              "title": "Cool T-Shirt",
+              "variant_title": "Red / L",
+              "price": 25,
+              "quantity": 2,
+              "merchantId": "64acbe...",
+              "merchantName": "John Doe",
+              "merchantEmail": "john@example.com",
+              "fulfillment_status": "fulfilled",
+              "isCancelled": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}`}
+        </pre>
+      </div>
+    </div>
+  </div>
+) : (
+  <></>
+)}
+
+
 
 
 
@@ -3525,6 +4019,15 @@ Each CSV row includes:
 
     {/* RIGHT COLUMN */}
     <div className="space-y-6">
+       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+{`https://multi-vendor-marketplace.vercel.app/order/getPendingOrder`}
+        </pre>
+      </div>
       {/* Success Response */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">

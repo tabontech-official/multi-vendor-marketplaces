@@ -64,10 +64,10 @@ const apiSidebarData = [
       "addReferenceNumber",
       "getPendingPayout",
       "getPayout",
+      "getPayoutByUserId",
       "getPayoutByQuery",
-      // "getPayoutByUserId",
-      // "getPayoutForAllOrders",
-      // "getFinanceSummaryForUser",
+      "getAllPayoutByQuery",
+   
     ],
   },
 ];

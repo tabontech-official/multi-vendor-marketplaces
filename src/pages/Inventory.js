@@ -419,6 +419,8 @@ const Inventory = () => {
 
     try {
       const userId = localStorage.getItem("userid");
+       const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
       if (!userId) {
         alert("User ID not found");
         return;
@@ -437,6 +439,10 @@ const Inventory = () => {
         {
           method: "POST",
           body: formData,
+             headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+          },
         }
       )
         .then((res) => res.json())

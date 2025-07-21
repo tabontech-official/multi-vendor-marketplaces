@@ -8,11 +8,9 @@ const AuthSignUp = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { dispatch, user } = useAuthContext();
-
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [sellerName, setSellerName] = useState("");
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

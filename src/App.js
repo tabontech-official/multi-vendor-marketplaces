@@ -47,6 +47,7 @@ import MerchantPayoutDetails from "./pages/MerchantPayoutDetails";
 import CreateCategory from "./pages/Category";
 import ManageCategory from "./pages/ManageCategory";
 import Collection from "./pages/collection";
+import ApiDocsPage from "./Documentation/dev";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -114,6 +115,8 @@ const App = () => {
             path="/create-categories"
             element={<PrivateRoute element={<CreateCategory />} />}
           />
+                  <Route path="/api-docs" element={<ApiDocsPage />} />
+
             <Route
             path="/manage-categories"
             element={<PrivateRoute element={<ManageCategory />} />}

@@ -6,6 +6,8 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { MdDashboard } from "react-icons/md";
 import { jwtDecode } from "jwt-decode";
 import { CiBank } from "react-icons/ci";
+import { SlDocs } from "react-icons/sl";
+
 const SubNavbar = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [role, setRole] = useState(null);
@@ -119,6 +121,11 @@ const SubNavbar = () => {
       name: "Finance",
       icon: <CiBank className="text-purple-600" />,
       path: "/finance",
+    },
+     {
+      name: "Documentation",
+      icon: <SlDocs className="text-green-600" />,
+      path: "/api-docs",
     },
   ];
 

@@ -110,7 +110,7 @@ const Dashboard = () => {
 
       const url = isAdmin
         ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-        : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`;
+        : `https://multi-vendor-marketplace.vercel.app/producthttps://multi-vendor-marketplace.vercel.app${id}/?page=${page}&limit=${limit}`;
 
       const response = await fetch(url, {
         method: "GET",
@@ -161,6 +161,8 @@ const Dashboard = () => {
     setTimeout(async () => {
       try {
         const userId = localStorage.getItem("userid");
+         const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
         if (!userId) {
           showToast("error", "User ID not found.");
           return;
@@ -179,6 +181,10 @@ const Dashboard = () => {
           {
             method: "POST",
             body: formData,
+            headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+        },
           }
         );
 
@@ -441,7 +447,7 @@ const Dashboard = () => {
 
         const url = isAdmin
           ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}/?page=${page}&limit=${limit}`;
+          : `https://multi-vendor-marketplace.vercel.app/producthttps://multi-vendor-marketplace.vercel.app${id}/?page=${page}&limit=${limit}`;
 
         const response = await fetch(url, {
           method: "GET",

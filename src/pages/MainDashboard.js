@@ -115,7 +115,6 @@ const MainDashboard = () => {
 
           const data = await response.json();
         if (response.ok) {
-          // merchant structure: array of objects like { status, count }
           const dataMap = {};
           data.forEach(item => {
             dataMap[item.status.toLowerCase()] = item.count;

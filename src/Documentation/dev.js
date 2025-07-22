@@ -4332,20 +4332,14 @@ export default function ApiDocsPage() {
                 </div>
 
                 {/* Description */}
-                <p className="text-gray-700 text-sm mb-4">
-                  Retrieves paginated products created by a specific user. You
-                  must pass{" "}
-                  <code className="bg-gray-100 px-1 rounded text-xs">
-                    userId
-                  </code>{" "}
-                  as a path parameter and optional{" "}
-                  <code className="bg-gray-100 px-1 rounded text-xs">page</code>{" "}
-                  and{" "}
-                  <code className="bg-gray-100 px-1 rounded text-xs">
-                    limit
-                  </code>{" "}
-                  query parameters.
-                </p>
+               <p className="text-gray-700 text-sm mb-4">
+  Retrieves products created by a specific user. Pass the{" "}
+  <code className="bg-gray-100 px-1 rounded text-xs">userId</code>{" "}
+  (you can get this at the time of{" "}
+  <span className="font-semibold text-purple-600">signIn</span>) as a path
+  parameter.
+</p>
+
 
                 {/* Query Params */}
                 <h4 className="font-semibold text-sm text-gray-800 mb-2">

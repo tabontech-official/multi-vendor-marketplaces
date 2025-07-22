@@ -93,39 +93,109 @@ const MerchantPayoutDetails = () => {
   };
   const [orders, setOrders] = useState([]);
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setLoading(true);
+
+  //     try {
+  //       const res = await fetch(
+  //         `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+  //           payoutDate
+  //         )}&status=${status}&userId=${merchantId}`
+  //       );
+  //       const json = await res.json();
+
+  //       const fetchedOrders =
+  //         (json.payouts && json.payouts[0] && json.payouts[0].orders) || [];
+
+  //       fetchedOrders.forEach((o) => {
+  //         o.fee = Number((o.amount * 0.1).toFixed(2));
+  //         o.net = Number((o.amount - o.fee).toFixed(2));
+  //       });
+
+  //       const charges = fetchedOrders.reduce(
+  //         (sum, o) => sum + (o.amount || 0),
+  //         0
+  //       );
+  //       const fees = fetchedOrders.reduce((sum, o) => sum + (o.fee || 0), 0);
+  //       const refunds = fetchedOrders.reduce(
+  //         (sum, o) => sum + (o.refund || 0),
+  //         0
+  //       );
+  //       const net = charges - fees;
+  //       const referenceNo = fetchedOrders[0]?.referenceNo || "";
+
+  //       setOrders(fetchedOrders);
+  //       setSummary({ charges, refunds, fees, net, referenceNo });
+  //     } catch (err) {
+  //       console.error("Error fetching payout orders:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   if (payoutDate && status) fetchData();
+  // }, [payoutDate, status]);
+
   useEffect(() => {
     const fetchData = async () => {
+      if (!payoutDate || !status || !merchantId) return;
+
       setLoading(true);
+
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+      if (!apiKey || !apiSecretKey) {
+        console.error("Missing API credentials");
+        setLoading(false);
+        return;
+      }
 
       try {
         const res = await fetch(
           `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
             payoutDate
-          )}&status=${status}&userId=${merchantId}`
+          )}&status=${status}&userId=${merchantId}`,
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+          }
         );
+
+        if (!res.ok) {
+          console.error("Failed to fetch payout orders:", res.status);
+          setLoading(false);
+          return;
+        }
+
         const json = await res.json();
 
-        const fetchedOrders =
-          (json.payouts && json.payouts[0] && json.payouts[0].orders) || [];
+        const fetchedOrders = json?.payouts?.[0]?.orders || [];
 
-        fetchedOrders.forEach((o) => {
-          o.fee = Number((o.amount * 0.1).toFixed(2));
-          o.net = Number((o.amount - o.fee).toFixed(2));
+        const enrichedOrders = fetchedOrders.map((o) => {
+          const fee = Number((o.amount * 0.1).toFixed(2));
+          const net = Number((o.amount - fee).toFixed(2));
+          return { ...o, fee, net };
         });
 
-        const charges = fetchedOrders.reduce(
+        const charges = enrichedOrders.reduce(
           (sum, o) => sum + (o.amount || 0),
           0
         );
-        const fees = fetchedOrders.reduce((sum, o) => sum + (o.fee || 0), 0);
-        const refunds = fetchedOrders.reduce(
+        const fees = enrichedOrders.reduce((sum, o) => sum + (o.fee || 0), 0);
+        const refunds = enrichedOrders.reduce(
           (sum, o) => sum + (o.refund || 0),
           0
         );
         const net = charges - fees;
-        const referenceNo = fetchedOrders[0]?.referenceNo || "";
+        const referenceNo = enrichedOrders[0]?.referenceNo || "";
 
-        setOrders(fetchedOrders);
+        setOrders(enrichedOrders);
         setSummary({ charges, refunds, fees, net, referenceNo });
       } catch (err) {
         console.error("Error fetching payout orders:", err);
@@ -134,8 +204,8 @@ const MerchantPayoutDetails = () => {
       }
     };
 
-    if (payoutDate && status) fetchData();
-  }, [payoutDate, status]);
+    fetchData();
+  }, [payoutDate, status, merchantId]);
 
   const [open, setOpen] = useState(false);
   const [reference, setReference] = useState("");
@@ -144,12 +214,17 @@ const MerchantPayoutDetails = () => {
   const closeReferencePopup = () => setOpen(false);
   const handleSave = async () => {
     const UserId = merchantId;
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     try {
       const res = await fetch(
         "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
         {
           method: "POST",
+
           headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -350,7 +425,10 @@ const MerchantPayoutDetails = () => {
             <p>Charges: ${summary.charges.toFixed(2)}</p>
             <p>Refunds: ${summary.refunds.toFixed(2)}</p>
             <p>Fees: ${summary.fees.toFixed(2)}</p>
-            <p>Net charges: ${summary.charges.toFixed(2) - summary.fees.toFixed(2)}</p>
+            <p>
+              Net charges: $
+              {summary.charges.toFixed(2) - summary.fees.toFixed(2)}
+            </p>
           </div>
         </div>
       </div>

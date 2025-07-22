@@ -30,9 +30,16 @@ const MerchantSubPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
 
 const fetchSubscriptions = async () => {
+   const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
   try {
     const res = await fetch(`https://multi-vendor-marketplace.vercel.app/order/order/${merchantId}`, {
       method: "GET",
+       headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
     });
 
     if (res.ok) {
@@ -71,6 +78,8 @@ useEffect(() => {
   useEffect(() => {
     const fetchProductData = async () => {
       const id = localStorage.getItem("userid");
+       const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
       if (!id) {
         console.error("User ID not found in localStorage.");
         return;
@@ -79,7 +88,13 @@ useEffect(() => {
       try {
         const response = await fetch(
           `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
-          { method: "GET" }
+          { method: "GET",
+             headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+           }
         );
         if (response.ok) {
           const data = await response.json();

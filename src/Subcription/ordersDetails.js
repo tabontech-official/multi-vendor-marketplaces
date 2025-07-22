@@ -212,7 +212,8 @@ const OrdersDetails = () => {
 
   const handleCancelOrder = async () => {
     const token = localStorage.getItem("usertoken");
-
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     if (!token || typeof token !== "string") {
       return;
     }
@@ -245,7 +246,11 @@ const OrdersDetails = () => {
         "https://multi-vendor-marketplace.vercel.app/order/cancelShopifyOrder",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             orderId,
             reason: "customer",
@@ -1040,8 +1045,8 @@ const OrdersDetails = () => {
                         setShowRequestPopup(false);
 
                         setTimeout(() => {
-                          setShowSubmitted(false); 
-                        }, 1000); 
+                          setShowSubmitted(false);
+                        }, 1000);
                       }
                     } catch (err) {
                       console.error("Error submitting request:", err);

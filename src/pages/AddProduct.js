@@ -112,25 +112,44 @@ const CategorySelector = () => {
   };
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/category/getCategory"
-        );
-        const data = await response.json();
-        if (response.ok) {
-          setCategories(data);
-          setFilteredCategories(data);
-        } else {
-          console.error(data.message);
-        }
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      }
-    };
+  const fetchCategories = async () => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-    fetchCategories();
-  }, []);
+    if (!apiKey || !apiSecretKey) {
+      console.error("API credentials missing.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/category/getCategory",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setCategories(data);
+        setFilteredCategories(data);
+      } else {
+        console.error("Server error:", data.message);
+      }
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    }
+  };
+
+  fetchCategories();
+}, []);
+
 
   const [searchTerm, setSearchTerm] = useState("");
   const [dropdownWidth, setDropdownWidth] = useState(0);

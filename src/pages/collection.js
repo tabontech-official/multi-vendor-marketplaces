@@ -12,28 +12,40 @@ const Collection = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchCategoryData = async () => {
-      try {
-        const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/category/category/${id}`
-        );
-        const data = await response.json();
+  const fetchCategoryData = async () => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-        if (response.ok) {
-          setCategory(data);
-          setTitle(data?.title || "");
-          setDescription(data?.description || "");
-        } else {
-          setError(data.message || "Error fetching category data");
+    try {
+      const response = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/category/category/${id}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
         }
-      } catch (err) {
-        console.error("Error fetching category data:", err);
-        setError("An error occurred while fetching category data.");
-      }
-    };
+      );
 
-    fetchCategoryData();
-  }, [id]);
+      const data = await response.json();
+
+      if (response.ok) {
+        setCategory(data);
+        setTitle(data?.title || "");
+        setDescription(data?.description || "");
+      } else {
+        setError(data.message || "Error fetching category data");
+      }
+    } catch (err) {
+      console.error("Error fetching category data:", err);
+      setError("An error occurred while fetching category data.");
+    }
+  };
+
+  fetchCategoryData();
+}, [id]);
 
   const handleConditionChange = (index, key, value) => {
     const updated = [...conditions];

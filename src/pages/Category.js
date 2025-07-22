@@ -452,12 +452,24 @@ const CreateCategory = () => {
 
   const baseUrl = "https://www.aydiactive.com/collections/";
 
-  useEffect(() => {
+   useEffect(() => {
     const fetchCategories = async () => {
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/category/getCategory"
+          "https://multi-vendor-marketplace.vercel.app/category/getCategory",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+          }
         );
+
         const data = await response.json();
 
         if (response.ok) {
@@ -466,7 +478,7 @@ const CreateCategory = () => {
             data.filter((category) => category.level === "level1")
           );
         } else {
-          setError(data.message);
+          setError(data.message || "Failed to fetch categories.");
         }
       } catch (err) {
         console.error("Error fetching categories:", err);
@@ -504,6 +516,8 @@ const CreateCategory = () => {
     console.log("Handle is valid, submitting form...");
 
     const userId = localStorage.getItem("userid");
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
 
     const categoriesToSubmit = [];
 
@@ -536,6 +550,8 @@ const CreateCategory = () => {
         {
           method: "POST",
           headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({

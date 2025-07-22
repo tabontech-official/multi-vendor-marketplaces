@@ -37,9 +37,9 @@ const Finance = () => {
   const [secondPayoutDate, setSecondPayoutDate] = useState("");
   const [allPayouts, setAllPayouts] = useState([]);
   const [filteredPayouts, setFilteredPayouts] = useState([]);
-const [page, setPage] = useState(1);
-const [limit] = useState(10); // fixed page size
-const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10); // fixed page size
+  const [totalPages, setTotalPages] = useState(1);
   // const handleSavePayoutDates = async () => {
   //   const payload = {
   //     graceTime,
@@ -72,6 +72,8 @@ const [totalPages, setTotalPages] = useState(1);
   // };
 
   const handleSavePayoutDates = async () => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     const payload = {
       graceTime,
       payoutFrequency,
@@ -85,7 +87,11 @@ const [totalPages, setTotalPages] = useState(1);
         "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(payload),
         }
       );
@@ -105,28 +111,54 @@ const [totalPages, setTotalPages] = useState(1);
     }
   };
 
-  useEffect(() => {
-    const fetchPayoutDates = async () => {
-      try {
-        const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates"
-        );
-        const data = await res.json();
+ useEffect(() => {
+  const fetchPayoutDates = async () => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-        if (data.firstDate)
-          setFirstPayoutDate(new Date(data.firstDate).getDate());
-        if (data.secondDate)
-          setSecondPayoutDate(new Date(data.secondDate).getDate());
-        if (data.payoutFrequency) setPayoutFrequency(data.payoutFrequency);
-        if (data.graceTime !== undefined) setGraceTime(data.graceTime);
-        if (data.weeklyDay) setWeeklyDay(data.weeklyDay);
-      } catch (err) {
-        console.error("Error fetching payout dates:", err);
+    if (!apiKey || !apiSecretKey) {
+      console.error("Missing API credentials");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!res.ok) {
+        console.error("Failed to fetch payout config:", res.statusText);
+        return;
       }
-    };
 
-    fetchPayoutDates();
-  }, []);
+      const data = await res.json();
+
+      if (data.firstDate)
+        setFirstPayoutDate(new Date(data.firstDate).getDate());
+      if (data.secondDate)
+        setSecondPayoutDate(new Date(data.secondDate).getDate());
+      if (data.payoutFrequency)
+        setPayoutFrequency(data.payoutFrequency);
+      if (data.graceTime !== undefined)
+        setGraceTime(data.graceTime);
+      if (data.weeklyDay)
+        setWeeklyDay(data.weeklyDay);
+    } catch (err) {
+      console.error("Error fetching payout dates:", err);
+    }
+  };
+
+  fetchPayoutDates();
+}, []);
+
 
   const isAdmin = () => {
     const token = localStorage.getItem("usertoken");
@@ -250,7 +282,6 @@ const [totalPages, setTotalPages] = useState(1);
 
   //   fetchPayouts();
   // }, [userRole]);
-
 useEffect(() => {
   const fetchPayouts = async () => {
     if (!userRole) return;
@@ -258,8 +289,16 @@ useEffect(() => {
     setLoading(true);
 
     try {
-      let url = "";
       const userId = localStorage.getItem("userid");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+      if (!apiKey || !apiSecretKey) {
+        console.error("Missing API credentials");
+        return;
+      }
+
+      let url = "";
 
       if (userRole === "Merchant") {
         if (!userId) {
@@ -274,10 +313,18 @@ useEffect(() => {
         return;
       }
 
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+           "Content-Type": "application/json",
+        },
+      });
+
       const data = await res.json();
 
-      if (data.payouts) {
+      if (data?.payouts?.length) {
         setPayouts(data.payouts);
         setTotalPages(Math.ceil(data.totalCount / limit));
       } else {
@@ -286,6 +333,7 @@ useEffect(() => {
       }
     } catch (error) {
       console.error("Failed to fetch payouts:", error);
+      setPayouts([]);
     } finally {
       setLoading(false);
     }

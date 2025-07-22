@@ -8,27 +8,40 @@ const ManageCategory = () => {
   const [error, setError] = useState("");
   const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/category/getCategory"
-        );
-        const data = await response.json();
+useEffect(() => {
+  const fetchCategories = async () => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-        if (response.ok) {
-          setCategories(data);
-        } else {
-          setError(data.message);
+    try {
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/category/getCategory",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
         }
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-        setError("An error occurred while fetching categories");
-      }
-    };
+      );
 
-    fetchCategories();
-  }, []);
+      const data = await response.json();
+
+      if (response.ok) {
+        setCategories(data);
+      } else {
+        setError(data.message || "Failed to fetch categories.");
+      }
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+      setError("An error occurred while fetching categories");
+    }
+  };
+
+  fetchCategories();
+}, []);
+
 
   const handleButtonClick = () => {
     navigate("/create-categories");
@@ -59,28 +72,37 @@ const ManageCategory = () => {
     }
   };
 
-  const handleDeleteCategories = async () => {
-    if (selectedCategoryIds.length === 0) {
-      alert("Please select at least one category to delete.");
-      return;
-    }
+ const handleDeleteCategories = async () => {
+  if (selectedCategoryIds.length === 0) {
+    alert("Please select at least one category to delete.");
+    return;
+  }
 
-    try {
-      await axios.delete(
-        "https://multi-vendor-marketplace.vercel.app/category/deleteCollection",
-        {
-          data: {
-            categoryIds: selectedCategoryIds,
-          },
-        }
-      );
+  const apiKey = localStorage.getItem("apiKey");
+  const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-      alert("Selected categories deleted successfully!");
-    } catch (error) {
-      console.error("Delete Error:", error);
-      alert("Error deleting categories.");
-    }
-  };
+  try {
+    await axios.delete(
+      "https://multi-vendor-marketplace.vercel.app/category/deleteCollection",
+      {
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+        data: {
+          categoryIds: selectedCategoryIds,
+        },
+      }
+    );
+
+    alert("Selected categories deleted successfully!");
+  } catch (error) {
+    console.error("Delete Error:", error);
+    alert("Error deleting categories.");
+  }
+};
+
 
   return (
     <div className="p-4">

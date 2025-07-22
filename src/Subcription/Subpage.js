@@ -73,6 +73,8 @@ const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all
   const fetchSubscriptions = async () => {
     const userId = localStorage.getItem("userid");
     const token = localStorage.getItem("usertoken");
+     const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     setIsLoading(true); // start loader
 
     if (!userId || !token) {
@@ -96,6 +98,11 @@ const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all
 
       const res = await fetch(url, {
         method: "GET",
+         headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
       });
 
       if (res.ok) {
@@ -200,20 +207,19 @@ const handleExport = async () => {
 
     const userId = localStorage.getItem("userid");
     const token = localStorage.getItem("usertoken");
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-    if (!userId || !token) {
-      alert("User ID or token not found in localStorage");
+    if (!userId || !token || !apiKey || !apiSecretKey) {
+      alert("Missing credentials or token");
       return;
     }
 
     const decoded = jwtDecode(token);
     const role = decoded?.payLoad?.role;
     const isTokenValid = decoded?.exp * 1000 > Date.now();
-
     const isAdmin =
       isTokenValid && (role === "Master Admin" || role === "Dev Admin");
-
-    let exportUrl;
 
     const queryParams = new URLSearchParams({
       type: exportOption,
@@ -222,11 +228,18 @@ const handleExport = async () => {
       ...(isAdmin ? {} : { userId }),
     });
 
-    exportUrl = isAdmin
+    const exportUrl = isAdmin
       ? `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`
       : `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
 
-    const response = await fetch(exportUrl);
+    const response = await fetch(exportUrl, {
+      method: "GET",
+      headers: {
+        "x-api-key": apiKey,
+        "x-api-secret": apiSecretKey,
+      },
+    });
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || "Export failed");
@@ -253,9 +266,12 @@ const handleExport = async () => {
 };
 
 
+
   useEffect(() => {
     const fetchProductData = async () => {
       const id = localStorage.getItem("userid");
+       const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
       if (!id) {
         console.error("User ID not found in localStorage.");
         return;
@@ -264,7 +280,13 @@ const handleExport = async () => {
       try {
         const response = await fetch(
           `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
-          { method: "GET" }
+          { method: "GET" ,
+             headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+          }
         );
         if (response.ok) {
           const data = await response.json();

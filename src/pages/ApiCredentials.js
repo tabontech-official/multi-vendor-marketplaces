@@ -174,7 +174,7 @@ const ApiCredentials = () => {
               Use these credentials to authenticate your app securely.
             </p>
             <a
-              href="https://shopify.dev/docs/api/usage/authentication/rotate"
+              href="https://multi-vendor-marketplaces.vercel.app/docs"
               target="_blank"
               rel="noreferrer"
               className="text-sm text-blue-600 hover:underline mt-1 inline-block"

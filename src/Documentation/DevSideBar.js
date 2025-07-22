@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import { FaChevronDown, FaChevronRight } from "react-icons/fa";
 import { BiGitBranch } from "react-icons/bi";
 
-const formatEndpointName = (str) => {
-  return str
-    .replace(/[_-]/g, " ") // handle snake_case or kebab-case
-    .replace(/\b\w/g, (l) => l.toUpperCase()) // capitalize first letters
-    .replace(/\s+/g, "") // remove all spaces
+const formatEndpointName = (str) =>
+  str
+    .replace(/[_-]/g, " ")
+    .replace(/\b\w/g, (l) => l.toUpperCase())
+    .replace(/\s+/g, " ")
     .trim();
-};
 
 const apiSidebarData = [
   {
@@ -67,7 +66,6 @@ const apiSidebarData = [
       "getPayoutByUserId",
       "getPayoutByQuery",
       "getAllPayoutByQuery",
-   
     ],
   },
 ];
@@ -89,46 +87,64 @@ export default function ApiSidebar({ onSelect }) {
   };
 
   return (
-    <aside className="w-72 bg-gradient-to-b from-white to-gray-50 border-r text-sm font-medium h-screen overflow-y-auto px-4 py-5 shadow-sm">
-      <div className="mb-5">
-        <h2 className="text-base font-bold text-gray-900">
-          MULTI-VENDOR-ENDPOINTS
-        </h2>
-        <div className="text-xs text-gray-500">
-          {/* 2025-07 <span className="text-green-600 font-semibold">latest</span> */}
-        </div>
+    <aside className="w-72 h-screen border-r border-gray-200 bg-white px-4 py-6 overflow-y-auto">
+      <div className="mb-6">
+        <h1 className="text-sm font-bold text-gray-900 tracking-wide uppercase mb-1">
+          API Endpoints
+        </h1>
+        <p className="text-xs text-gray-500">Multi-Vendor Marketplace</p>
       </div>
 
-      {apiSidebarData.map((group, i) => (
-        <div key={i} className="mb-4">
-          <button
-            onClick={() => toggleGroup(group.title)}
-            className="w-full flex justify-between items-center text-left font-semibold text-gray-700 hover:text-purple-700 transition"
-          >
-            <span>{group.title}</span>
-            {openGroups[group.title] ? <FaChevronDown /> : <FaChevronRight />}
-          </button>
+      <nav className="space-y-4">
+        {apiSidebarData.map((group, index) => (
+          <div key={index}>
+            <button
+              onClick={() => toggleGroup(group.title)}
+              className="flex justify-between items-center w-full text-sm text-gray-700 font-semibold px-2 py-2 rounded hover:bg-gray-100 transition"
+            >
+              <span>{group.title}</span>
+              {openGroups[group.title] ? (
+                <FaChevronDown className="text-xs" />
+              ) : (
+                <FaChevronRight className="text-xs" />
+              )}
+            </button>
 
-          {openGroups[group.title] && (
-            <ul className="pl-4 mt-2 space-y-1">
-              {group.endpoints.map((route, j) => (
-                <li
-                  key={j}
-                  className={`cursor-pointer px-3 py-1.5 rounded-md transition-all flex items-center gap-2 ${
-                    active === route
-                      ? "bg-purple-100 text-purple-700 font-semibold"
-                      : "text-gray-600 hover:bg-purple-50 hover:text-purple-700"
-                  }`}
-                  onClick={() => handleSelect(route)}
-                >
-                  <BiGitBranch className="text-sm" />
-                  <span>{formatEndpointName(route)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      ))}
+            {openGroups[group.title] && (
+              <ul className="pl-2 mt-2 space-y-1">
+                {group.endpoints.map((endpoint, idx) => (
+                  <li
+                    key={idx}
+                    onClick={() => handleSelect(endpoint)}
+                    className={`cursor-pointer flex items-center gap-2 text-sm px-3 py-2 rounded-md transition ${
+                      active === endpoint
+                        ? "bg-purple-100 text-purple-700 font-semibold"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <BiGitBranch className="text-base" />
+                    <span>{formatEndpointName(endpoint)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
+      </nav>
+
+      {/* Scrollbar style */}
+      <style jsx>{`
+        aside::-webkit-scrollbar {
+          width: 6px;
+        }
+        aside::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.1);
+          border-radius: 4px;
+        }
+        aside::-webkit-scrollbar-track {
+          background: transparent;
+        }
+      `}</style>
     </aside>
   );
 }

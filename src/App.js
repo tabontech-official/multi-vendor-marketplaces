@@ -48,6 +48,8 @@ import CreateCategory from "./pages/Category";
 import ManageCategory from "./pages/ManageCategory";
 import Collection from "./pages/collection";
 import ApiDocsPage from "./Documentation/dev";
+import ApiMainPage from "./Documentation/Main";
+import ApiDocs from "./Documentation/ApiDocs";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -98,144 +100,148 @@ const App = () => {
   const { user } = useAuthContext();
   return (
     <NotificationProvider>
-
-    <Router>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<PrivateRoute element={<MainDashboard />} />} />
-          <Route
-            path="/manage-product"
-            element={<PrivateRoute element={<Dashboard />} />}
-          />
-           <Route
-            path="/manage-requests"
-            element={<PrivateRoute element={<ManageRequests />} />}
-          />
-           <Route
-            path="/create-categories"
-            element={<PrivateRoute element={<CreateCategory />} />}
-          />
-                  <Route path="/api-docs" element={<ApiDocsPage />} />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route
+              index
+              element={<PrivateRoute element={<MainDashboard />} />}
+            />
+            <Route
+              path="/manage-product"
+              element={<PrivateRoute element={<Dashboard />} />}
+            />
+            <Route
+              path="/manage-requests"
+              element={<PrivateRoute element={<ManageRequests />} />}
+            />
+            <Route path="/docs" element={<ApiMainPage />} />
+            <Route path="/api-docs" element={<ApiDocs />} />
+            <Route path="/api-reference" element={<ApiDocsPage />} />
 
             <Route
-            path="/manage-categories"
-            element={<PrivateRoute element={<ManageCategory />} />}
-          />
-          <Route
-            path="/collection/:id"
-            element={<PrivateRoute element={<Collection />} />}
-          />
-           <Route
-            path="/user-requests/:id"
-            element={<PrivateRoute element={<UserRequest />} />}
-          />
-           <Route
-            path="/order/:orderId/fulfillment_orders"
-            element={<PrivateRoute element={<FullItem />} />}
-          />
-          <Route
-            path="/inventory"
-            element={<PrivateRoute element={<Inventory />} />}
-          />
-          <Route
-            path="/api-credentials"
-            element={<PrivateRoute element={<ApiCredentials />} />}
-          />
-          <Route
-            path="/Login"
-            element={!user ? <Auth /> : <Navigate to="/dashboard" />}
-          />
-          <Route
-            path="/signup"
-            element={!user ? <AuthSignUp /> : <Navigate to="/dashboard" />}
-          />
-          <Route path="/ForgotPassword" element={<ForgotPassword />} />
-          <Route path="/Reset" element={<ResetPassword />} />
-          <Route path="/New" element={<NewPassword />} />
+              path="/create-categories"
+              element={<PrivateRoute element={<CreateCategory />} />}
+            />
 
-          <Route path="/Policy" element={<PrivacyPolicy />} />
-          <Route
-            path="/admin"
-            element={
-              loading ? (
-                <p>Loading...</p>
-              ) : isAdmin() ? (
-                <AdminDashboard />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
-          />
+            <Route
+              path="/manage-categories"
+              element={<PrivateRoute element={<ManageCategory />} />}
+            />
+            <Route
+              path="/collection/:id"
+              element={<PrivateRoute element={<Collection />} />}
+            />
+            <Route
+              path="/user-requests/:id"
+              element={<PrivateRoute element={<UserRequest />} />}
+            />
+            <Route
+              path="/order/:orderId/fulfillment_orders"
+              element={<PrivateRoute element={<FullItem />} />}
+            />
+            <Route
+              path="/inventory"
+              element={<PrivateRoute element={<Inventory />} />}
+            />
+            <Route
+              path="/api-credentials"
+              element={<PrivateRoute element={<ApiCredentials />} />}
+            />
+            <Route
+              path="/Login"
+              element={!user ? <Auth /> : <Navigate to="/dashboard" />}
+            />
+            <Route
+              path="/signup"
+              element={!user ? <AuthSignUp /> : <Navigate to="/dashboard" />}
+            />
+            <Route path="/ForgotPassword" element={<ForgotPassword />} />
+            <Route path="/Reset" element={<ResetPassword />} />
+            <Route path="/New" element={<NewPassword />} />
 
-          <Route
-            path="/promotions"
-            element={<ProtectedForms element={<Promotion />} />}
-          />
-          <Route
-            path="/payout-details"
-            element={<ProtectedForms element={<PayoutDetails />} />}
-          />
-           <Route
-            path="/merchant-payout-details"
-            element={<ProtectedForms element={<MerchantPayoutDetails />} />}
-          />
-          <Route
-            path="/finance"
-            element={<ProtectedForms element={<Finance />} />}
-          />
-          <Route
-            path="/order/:orderId"
-            element={<ProtectedForms element={<OrdersDetails />} />}
-          />
-           <Route
-            path="/notifications"
-            element={<ProtectedForms element={<Notification />} />}
-          />
-          <Route
-            path="/on-board-users"
-            element={<ProtectedForms element={<OnBoard />} />}
-          />
-          <Route
-            // path="/variants"
-            path="/product/:productId/variants/:variantId"
-            element={<ProtectedForms element={<Variants />} />}
-          />
-          <Route
-            path="/Order_Details"
-            element={<ProtectedForms element={<SubscriptionHistory />} />}
-          />
-          <Route
-            path="/catalog-performance"
-            element={<ProtectedForms element={<CatalogPerformance />} />}
-          />
-          <Route
-            path="/consultation"
-            element={<ProtectedForms element={<EcommerceConsultation />} />}
-          />
-          <Route
-            path="/add-product"
-            element={<PrivateRoute element={<CategorySelector />} />}
-          />
+            <Route path="/Policy" element={<PrivacyPolicy />} />
+            <Route
+              path="/admin"
+              element={
+                loading ? (
+                  <p>Loading...</p>
+                ) : isAdmin() ? (
+                  <AdminDashboard />
+                ) : (
+                  <Navigate to="/" />
+                )
+              }
+            />
 
-          <Route
-            path="/edit-account"
-            element={<PrivateRoute element={<AccountPage />} />}
-          />
-           <Route
-            path="/merchant_order_details"
-            element={<PrivateRoute element={<MerchantSubPage />} />}
-          />
-          <Route
-            path="/manage-user"
-            element={<PrivateRoute element={<ManageUser />} />}
-          />
+            <Route
+              path="/promotions"
+              element={<ProtectedForms element={<Promotion />} />}
+            />
+            <Route
+              path="/payout-details"
+              element={<ProtectedForms element={<PayoutDetails />} />}
+            />
+            <Route
+              path="/merchant-payout-details"
+              element={<ProtectedForms element={<MerchantPayoutDetails />} />}
+            />
+            <Route
+              path="/finance"
+              element={<ProtectedForms element={<Finance />} />}
+            />
+            <Route
+              path="/order/:orderId"
+              element={<ProtectedForms element={<OrdersDetails />} />}
+            />
+            <Route
+              path="/notifications"
+              element={<ProtectedForms element={<Notification />} />}
+            />
+            <Route
+              path="/on-board-users"
+              element={<ProtectedForms element={<OnBoard />} />}
+            />
+            <Route
+              // path="/variants"
+              path="/product/:productId/variants/:variantId"
+              element={<ProtectedForms element={<Variants />} />}
+            />
+            <Route
+              path="/Order_Details"
+              element={<ProtectedForms element={<SubscriptionHistory />} />}
+            />
+            <Route
+              path="/catalog-performance"
+              element={<ProtectedForms element={<CatalogPerformance />} />}
+            />
+            <Route
+              path="/consultation"
+              element={<ProtectedForms element={<EcommerceConsultation />} />}
+            />
+            <Route
+              path="/add-product"
+              element={<PrivateRoute element={<CategorySelector />} />}
+            />
 
-          <Route path="*" element={<Navigate to="/" />} />
-        </Route>
-      </Routes>
-    </Router>
+            <Route
+              path="/edit-account"
+              element={<PrivateRoute element={<AccountPage />} />}
+            />
+            <Route
+              path="/merchant_order_details"
+              element={<PrivateRoute element={<MerchantSubPage />} />}
+            />
+            <Route
+              path="/manage-user"
+              element={<PrivateRoute element={<ManageUser />} />}
+            />
+
+            <Route path="*" element={<Navigate to="/" />} />
+          </Route>
+        </Routes>
+      </Router>
     </NotificationProvider>
-
   );
 };
 

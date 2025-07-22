@@ -4069,6 +4069,269 @@ export default function ApiDocsPage() {
             <span className="text-purple-600">{selected}</span>
           </h1>
 
+ {selected === "getAllProduct" ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              {/* LEFT COLUMN */}
+              <div className="bg-white rounded-md shadow-md p-6">
+                {/* Endpoint Info */}
+                <div className="mb-4">
+                  <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
+                  <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
+                    GET /product/getAllProducts
+                  </code>
+                  {/* <p className="mt-1 text-xs text-gray-500">
+                  e.g.{" "}
+                  <code className="text-gray-700">
+                    /product/getAllData?page=2&amp;limit=20
+                  </code>
+                </p> */}
+                </div>
+
+                {/* Authentication */}
+                <div className="text-red-500 flex items-center text-sm mb-4">
+                  <FaLock className="mr-2" />
+                  Requires{" "}
+                  <code className="bg-gray-100 px-1 rounded text-xs mx-1">
+                    access-token
+                  </code>{" "}
+                  and{" "}
+                  <code className="bg-gray-100 px-1 rounded text-xs">
+                    secret-key
+                  </code>{" "}
+                  headers
+                </div>
+
+                {/* Description */}
+                <p className="text-gray-700 text-sm mb-4">
+                  Retrieves paginated products across all users. Returns product
+                  details including user info.
+                </p>
+
+                {/* Query Params */}
+                <h4 className="font-semibold text-sm text-gray-800 mb-2">
+                  Query Parameters:
+                </h4>
+                <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
+                  <li>
+                    <strong>page</strong>{" "}
+                    <span className="text-gray-500">(number, optional)</span> –
+                    Default is 1
+                  </li>
+                  <li>
+                    <strong>limit</strong>{" "}
+                    <span className="text-gray-500">(number, optional)</span> –
+                    Default is 10
+                  </li>
+                </ul>
+
+                {/* Note */}
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 text-sm text-blue-800 rounded-md mt-6">
+                  <strong>Note:</strong> Returns <code>400</code> if no products
+                  are found and <code>500</code> on aggregation error.
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN */}
+              <div className="space-y-6">
+                <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+                  <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+                    <span>Request Example</span>
+                    <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+                      GET
+                    </span>
+                  </div>
+                  <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+                    {`https://multi-vendor-marketplace.vercel.app/product/getAllProducts`}
+                  </pre>
+                </div>
+                {/* Response Example */}
+                <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
+                  <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+                    <span>Response</span>
+                    <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+                      JSON
+                    </span>
+                  </div>
+                  <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`{
+  "products": [
+    {
+      "_id": "64b1f2a1234abcd",
+      "title": "Cool Socks",
+      "vendor": "MyBrand",
+      "product_type": "Accessories",
+      "status": "active",
+      "tags": ["cotton", "socks"],
+      "options": [
+        { "name": "Color", "values": ["Black", "White"] },
+        { "name": "Size", "values": ["M", "L"] }
+      ],
+      "variants": [
+        {
+          "option1": "Black",
+          "option2": "M",
+          "price": "12.99",
+          "sku": "CSK-BL-M"
+        }
+      ],
+      "categories": ["Footwear", "Men"],
+      "userId": "abc123",
+      "email": "user@example.com",
+      "username": "John Doe"
+    }
+  ],
+  "currentPage": 1,
+  "totalPages": 5,
+  "totalProducts": 45
+}`}</pre>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <></>
+          )}
+
+{selected === "getProductByUserId" ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              {/* LEFT COLUMN */}
+              <div className="bg-white rounded-md shadow-md p-6">
+                {/* Endpoint Info */}
+                <div className="mb-4">
+                  <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
+                  <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
+                    GET /product/getProduct/:userId
+                  </code>
+                  {/* <p className="mt-1 text-xs text-gray-500">
+                  e.g.{" "}
+                  <code className="text-gray-700">
+                    /product/getProduct/687b28f5f49468ad34534cc8?page=1&amp;limit=10
+                  </code>
+                </p> */}
+                </div>
+
+                <div className="text-red-500 flex items-center text-sm mb-4">
+                  <FaLock className="mr-2" />
+                  Requires{" "}
+                  <code className="bg-gray-100 px-1 rounded text-xs mx-1">
+                    access-token
+                  </code>{" "}
+                  and{" "}
+                  <code className="bg-gray-100 px-1 rounded text-xs">
+                    secret-key
+                  </code>{" "}
+                  headers
+                </div>
+
+                {/* Description */}
+                <p className="text-gray-700 text-sm mb-4">
+                  Retrieves paginated products created by a specific user. You
+                  must pass{" "}
+                  <code className="bg-gray-100 px-1 rounded text-xs">
+                    userId
+                  </code>{" "}
+                  as a path parameter and optional{" "}
+                  <code className="bg-gray-100 px-1 rounded text-xs">page</code>{" "}
+                  and{" "}
+                  <code className="bg-gray-100 px-1 rounded text-xs">
+                    limit
+                  </code>{" "}
+                  query parameters.
+                </p>
+
+                {/* Query Params */}
+                <h4 className="font-semibold text-sm text-gray-800 mb-2">
+                  Query Parameters:
+                </h4>
+                <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
+                  <li>
+                    <strong>page</strong>{" "}
+                    <span className="text-gray-500">(number, optional)</span> –
+                    Default is 1
+                  </li>
+                  <li>
+                    <strong>limit</strong>{" "}
+                    <span className="text-gray-500">(number, optional)</span> –
+                    Default is 10
+                  </li>
+                </ul>
+
+                {/* Path Param */}
+                <h4 className="font-semibold text-sm text-gray-800 mb-2">
+                  Path Param:
+                </h4>
+                <ul className="text-sm text-gray-700 space-y-2 mb-6">
+                  <li>
+                    <strong>userId</strong>{" "}
+                    <span className="text-gray-500">(string, required)</span> –
+                    The user ID whose products you want to fetch
+                  </li>
+                </ul>
+
+                {/* Note */}
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 text-sm text-blue-800 rounded-md mt-6">
+                  <strong>Note:</strong> If no products are found for this user,
+                  a <code>404</code> response will be returned.
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN */}
+              <div className="space-y-6">
+                <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+                  <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+                    <span>Request Example</span>
+                    <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+                      GET
+                    </span>
+                  </div>
+                  <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+                    {`https://multi-vendor-marketplace.vercel.app/product/getProduct/687b...`}
+                  </pre>
+                </div>
+                {/* Response Example */}
+                <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
+                  <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+                    <span>Response</span>
+                    <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+                      JSON
+                    </span>
+                  </div>
+                  <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`{
+  "products": [
+    {
+      "_id": "64b1f2a1234abcd",
+      "title": "Cool Socks",
+      "vendor": "MyBrand",
+      "product_type": "Accessories",
+      "status": "active",
+      "tags": ["cotton", "socks", "user_abc123"],
+      "options": [
+        { "name": "Color", "values": ["Black", "White"] },
+        { "name": "Size", "values": ["M", "L"] }
+      ],
+      "variants": [
+        {
+          "option1": "Black",
+          "option2": "M",
+          "price": "12.99",
+          "sku": "CSK-BL-M"
+        }
+      ],
+      "categories": ["Footwear", "Men"],
+      "userId": "abc123",
+      "email": "user@example.com",
+      "username": "John Doe"
+    }
+  ],
+  "currentPage": 1,
+  "totalPages": 3,
+  "totalProducts": 25
+}`}</pre>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <></>
+          )}
+
           {selected === "createProduct" ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
               {/* LEFT COLUMN */}
@@ -4609,268 +4872,9 @@ export default function ApiDocsPage() {
             <></>
           )}
 
-          {selected === "getProductByUserId" ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              {/* LEFT COLUMN */}
-              <div className="bg-white rounded-md shadow-md p-6">
-                {/* Endpoint Info */}
-                <div className="mb-4">
-                  <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
-                  <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                    GET /product/getProduct/:userId?page=1&amp;limit=10
-                  </code>
-                  {/* <p className="mt-1 text-xs text-gray-500">
-                  e.g.{" "}
-                  <code className="text-gray-700">
-                    /product/getProduct/687b28f5f49468ad34534cc8?page=1&amp;limit=10
-                  </code>
-                </p> */}
-                </div>
+          
 
-                <div className="text-red-500 flex items-center text-sm mb-4">
-                  <FaLock className="mr-2" />
-                  Requires{" "}
-                  <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
-                  </code>{" "}
-                  and{" "}
-                  <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
-                  </code>{" "}
-                  headers
-                </div>
-
-                {/* Description */}
-                <p className="text-gray-700 text-sm mb-4">
-                  Retrieves paginated products created by a specific user. You
-                  must pass{" "}
-                  <code className="bg-gray-100 px-1 rounded text-xs">
-                    userId
-                  </code>{" "}
-                  as a path parameter and optional{" "}
-                  <code className="bg-gray-100 px-1 rounded text-xs">page</code>{" "}
-                  and{" "}
-                  <code className="bg-gray-100 px-1 rounded text-xs">
-                    limit
-                  </code>{" "}
-                  query parameters.
-                </p>
-
-                {/* Query Params */}
-                <h4 className="font-semibold text-sm text-gray-800 mb-2">
-                  Query Parameters:
-                </h4>
-                <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-                  <li>
-                    <strong>page</strong>{" "}
-                    <span className="text-gray-500">(number, optional)</span> –
-                    Default is 1
-                  </li>
-                  <li>
-                    <strong>limit</strong>{" "}
-                    <span className="text-gray-500">(number, optional)</span> –
-                    Default is 10
-                  </li>
-                </ul>
-
-                {/* Path Param */}
-                <h4 className="font-semibold text-sm text-gray-800 mb-2">
-                  Path Param:
-                </h4>
-                <ul className="text-sm text-gray-700 space-y-2 mb-6">
-                  <li>
-                    <strong>userId</strong>{" "}
-                    <span className="text-gray-500">(string, required)</span> –
-                    The user ID whose products you want to fetch
-                  </li>
-                </ul>
-
-                {/* Note */}
-                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 text-sm text-blue-800 rounded-md mt-6">
-                  <strong>Note:</strong> If no products are found for this user,
-                  a <code>404</code> response will be returned.
-                </div>
-              </div>
-
-              {/* RIGHT COLUMN */}
-              <div className="space-y-6">
-                <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
-                  <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
-                    <span>Request Example</span>
-                    <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
-                      GET
-                    </span>
-                  </div>
-                  <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/getProduct/687b...?page=1&limit=10`}
-                  </pre>
-                </div>
-                {/* Response Example */}
-                <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
-                  <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
-                    <span>Response</span>
-                    <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
-                      JSON
-                    </span>
-                  </div>
-                  <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`{
-  "products": [
-    {
-      "_id": "64b1f2a1234abcd",
-      "title": "Cool Socks",
-      "vendor": "MyBrand",
-      "product_type": "Accessories",
-      "status": "active",
-      "tags": ["cotton", "socks", "user_abc123"],
-      "options": [
-        { "name": "Color", "values": ["Black", "White"] },
-        { "name": "Size", "values": ["M", "L"] }
-      ],
-      "variants": [
-        {
-          "option1": "Black",
-          "option2": "M",
-          "price": "12.99",
-          "sku": "CSK-BL-M"
-        }
-      ],
-      "categories": ["Footwear", "Men"],
-      "userId": "abc123",
-      "email": "user@example.com",
-      "username": "John Doe"
-    }
-  ],
-  "currentPage": 1,
-  "totalPages": 3,
-  "totalProducts": 25
-}`}</pre>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <></>
-          )}
-
-          {selected === "getAllProduct" ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              {/* LEFT COLUMN */}
-              <div className="bg-white rounded-md shadow-md p-6">
-                {/* Endpoint Info */}
-                <div className="mb-4">
-                  <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
-                  <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                    GET /product/getAllProducts?page=1&amp;limit=10
-                  </code>
-                  {/* <p className="mt-1 text-xs text-gray-500">
-                  e.g.{" "}
-                  <code className="text-gray-700">
-                    /product/getAllData?page=2&amp;limit=20
-                  </code>
-                </p> */}
-                </div>
-
-                {/* Authentication */}
-                <div className="text-red-500 flex items-center text-sm mb-4">
-                  <FaLock className="mr-2" />
-                  Requires{" "}
-                  <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
-                  </code>{" "}
-                  and{" "}
-                  <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
-                  </code>{" "}
-                  headers
-                </div>
-
-                {/* Description */}
-                <p className="text-gray-700 text-sm mb-4">
-                  Retrieves paginated products across all users. Returns product
-                  details including user info.
-                </p>
-
-                {/* Query Params */}
-                <h4 className="font-semibold text-sm text-gray-800 mb-2">
-                  Query Parameters:
-                </h4>
-                <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-                  <li>
-                    <strong>page</strong>{" "}
-                    <span className="text-gray-500">(number, optional)</span> –
-                    Default is 1
-                  </li>
-                  <li>
-                    <strong>limit</strong>{" "}
-                    <span className="text-gray-500">(number, optional)</span> –
-                    Default is 10
-                  </li>
-                </ul>
-
-                {/* Note */}
-                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 text-sm text-blue-800 rounded-md mt-6">
-                  <strong>Note:</strong> Returns <code>400</code> if no products
-                  are found and <code>500</code> on aggregation error.
-                </div>
-              </div>
-
-              {/* RIGHT COLUMN */}
-              <div className="space-y-6">
-                <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
-                  <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
-                    <span>Request Example</span>
-                    <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
-                      GET
-                    </span>
-                  </div>
-                  <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/getAllProducts?page=1&limit=10`}
-                  </pre>
-                </div>
-                {/* Response Example */}
-                <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
-                  <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
-                    <span>Response</span>
-                    <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
-                      JSON
-                    </span>
-                  </div>
-                  <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`{
-  "products": [
-    {
-      "_id": "64b1f2a1234abcd",
-      "title": "Cool Socks",
-      "vendor": "MyBrand",
-      "product_type": "Accessories",
-      "status": "active",
-      "tags": ["cotton", "socks"],
-      "options": [
-        { "name": "Color", "values": ["Black", "White"] },
-        { "name": "Size", "values": ["M", "L"] }
-      ],
-      "variants": [
-        {
-          "option1": "Black",
-          "option2": "M",
-          "price": "12.99",
-          "sku": "CSK-BL-M"
-        }
-      ],
-      "categories": ["Footwear", "Men"],
-      "userId": "abc123",
-      "email": "user@example.com",
-      "username": "John Doe"
-    }
-  ],
-  "currentPage": 1,
-  "totalPages": 5,
-  "totalProducts": 45
-}`}</pre>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <></>
-          )}
+         
 
           {selected === "publishedProduct" ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">

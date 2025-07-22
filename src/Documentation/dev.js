@@ -35,11 +35,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 in headers to access this endpoint.
 //               </div>
@@ -57,13 +57,13 @@
 //               <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
 //                 <li>
 //                   <code className="bg-gray-100 px-1 rounded text-xs">
-//                     access-token
+//                     x-api-key
 //                   </code>
 //                   : (string) API access token
 //                 </li>
 //                 <li>
 //                   <code className="bg-gray-100 px-1 rounded text-xs">
-//                     secret-key
+//                     x-api-secret
 //                   </code>
 //                   : (string) API secret key
 //                 </li>
@@ -310,11 +310,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 headers
 //               </div>
@@ -332,13 +332,13 @@
 //               <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
 //                 <li>
 //                   <code className="bg-gray-100 px-1 rounded text-xs">
-//                     access-token
+//                     x-api-key
 //                   </code>
 //                   : (string)
 //                 </li>
 //                 <li>
 //                   <code className="bg-gray-100 px-1 rounded text-xs">
-//                     secret-key
+//                     x-api-secret
 //                   </code>
 //                   : (string)
 //                 </li>
@@ -574,11 +574,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 headers
 //               </div>
@@ -711,11 +711,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 headers
 //               </div>
@@ -830,11 +830,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 headers
 //               </div>
@@ -940,11 +940,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 headers
 //               </div>
@@ -1046,11 +1046,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 headers
 //               </div>
@@ -1195,11 +1195,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 headers
 //               </div>
@@ -1281,11 +1281,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 headers
 //               </div>
@@ -1402,11 +1402,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 headers
 //               </div>
@@ -1507,11 +1507,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 headers
 //               </div>
@@ -1616,11 +1616,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 headers
 //               </div>
@@ -1723,11 +1723,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 in headers
 //               </div>
@@ -1745,13 +1745,13 @@
 //               <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
 //                 <li>
 //                   <code className="bg-gray-100 px-1 rounded text-xs">
-//                     access-token
+//                     x-api-key
 //                   </code>
 //                   : (string) API access token
 //                 </li>
 //                 <li>
 //                   <code className="bg-gray-100 px-1 rounded text-xs">
-//                     secret-key
+//                     x-api-secret
 //                   </code>
 //                   : (string) API secret key
 //                 </li>
@@ -1909,11 +1909,11 @@
 //                 <FaLock className="mr-2" />
 //                 Requires{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//                   access-token
+//                   x-api-key
 //                 </code>{" "}
 //                 and{" "}
 //                 <code className="bg-gray-100 px-1 rounded text-xs">
-//                   secret-key
+//                   x-api-secret
 //                 </code>{" "}
 //                 in headers
 //               </div>
@@ -1932,13 +1932,13 @@
 //               <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
 //                 <li>
 //                   <code className="bg-gray-100 px-1 rounded text-xs">
-//                     access-token
+//                     x-api-key
 //                   </code>{" "}
 //                   – API Access Token
 //                 </li>
 //                 <li>
 //                   <code className="bg-gray-100 px-1 rounded text-xs">
-//                     secret-key
+//                     x-api-secret
 //                   </code>{" "}
 //                   – API Secret Key
 //                 </li>
@@ -2057,11 +2057,11 @@
 //         <FaLock className="mr-2" />
 //         Requires{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//           access-token
+//           x-api-key
 //         </code>{" "}
 //         and{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs">
-//           secret-key
+//           x-api-secret
 //         </code>{" "}
 //         in headers
 //       </div>
@@ -2080,12 +2080,12 @@
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
 //         <li>
 //           <code className="bg-gray-100 px-1 rounded text-xs">
-//             access-token
+//             x-api-key
 //           </code>{" "}
 //           – API Access Token
 //         </li>
 //         <li>
-//           <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> –
+//           <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> –
 //           API Secret Key
 //         </li>
 //         <li>
@@ -2201,9 +2201,9 @@
 //       <div className="text-red-500 flex items-center text-sm mb-4">
 //         <FaLock className="mr-2" />
 //         Requires{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">access-token</code>{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">x-api-key</code>{" "}
 //         and{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code>{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code>{" "}
 //         in headers
 //       </div>
 
@@ -2218,8 +2218,8 @@
 //       {/* Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code> – API Access Token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> – API Secret Key</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code> – API Access Token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> – API Secret Key</li>
 //         <li><code className="bg-gray-100 px-1 rounded text-xs">Content-Type</code> – multipart/form-data</li>
 //       </ul>
 
@@ -2336,8 +2336,8 @@
 //       <div className="text-red-500 flex items-center text-sm mb-4">
 //         <FaLock className="mr-2" />
 //         Requires{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">access-token</code> and{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> in headers
+//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">x-api-key</code> and{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> in headers
 //       </div>
 
 //       {/* Description */}
@@ -2348,8 +2348,8 @@
 //       {/* Required Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code> – API token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> – API secret</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code> – API token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> – API secret</li>
 //         <li><code className="bg-gray-100 px-1 rounded text-xs">Content-Type</code> – <code>application/json</code></li>
 //       </ul>
 
@@ -2451,8 +2451,8 @@
 //       <div className="text-red-500 flex items-center text-sm mb-4">
 //         <FaLock className="mr-2" />
 //         Requires{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">access-token</code> and{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> in headers
+//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">x-api-key</code> and{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> in headers
 //       </div>
 
 //       {/* Description */}
@@ -2465,8 +2465,8 @@
 //       {/* Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code> – API token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> – API secret</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code> – API token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> – API secret</li>
 //       </ul>
 //     </div>
 
@@ -2537,8 +2537,8 @@
 //       <div className="text-red-500 flex items-center text-sm mb-4">
 //         <FaLock className="mr-2" />
 //         Requires{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">access-token</code> and{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> in headers
+//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">x-api-key</code> and{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> in headers
 //       </div>
 
 //       {/* Description */}
@@ -2558,8 +2558,8 @@
 //       {/* Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code> – API token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> – API secret</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code> – API token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> – API secret</li>
 //       </ul>
 //     </div>
 
@@ -2620,8 +2620,8 @@
 //       <div className="text-red-500 flex items-center text-sm mb-4">
 //         <FaLock className="mr-2" />
 //         Requires{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">access-token</code> and{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> in headers
+//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">x-api-key</code> and{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> in headers
 //       </div>
 
 //       {/* Description */}
@@ -2638,8 +2638,8 @@
 //       {/* Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code> – API token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> – API secret</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code> – API token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> – API secret</li>
 //       </ul>
 //     </div>
 
@@ -2696,8 +2696,8 @@
 //       <div className="text-red-500 flex items-center text-sm mb-4">
 //         <FaLock className="mr-2" />
 //         Requires{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">access-token</code> and{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> in headers
+//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">x-api-key</code> and{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> in headers
 //       </div>
 
 //       {/* Description */}
@@ -2714,8 +2714,8 @@
 //       {/* Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code> – API token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> – API secret</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code> – API token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> – API secret</li>
 //       </ul>
 //     </div>
 
@@ -2790,8 +2790,8 @@
 //       <div className="text-red-500 flex items-center text-sm mb-4">
 //         <FaLock className="mr-2" />
 //         Requires{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">access-token</code> and{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> in headers
+//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">x-api-key</code> and{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> in headers
 //       </div>
 
 //       {/* Description */}
@@ -2808,8 +2808,8 @@
 //       {/* Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code> – API token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> – API secret</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code> – API token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> – API secret</li>
 //       </ul>
 //     </div>
 
@@ -2876,8 +2876,8 @@
 //       <div className="text-red-500 flex items-center text-sm mb-4">
 //         <FaLock className="mr-2" />
 //         Requires{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">access-token</code> and{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> in headers
+//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">x-api-key</code> and{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> in headers
 //       </div>
 
 //       {/* Description */}
@@ -2888,8 +2888,8 @@
 //       {/* Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code> – API token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> – API secret</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code> – API token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> – API secret</li>
 //       </ul>
 //     </div>
 
@@ -2991,8 +2991,8 @@
 //       <div className="text-red-500 flex items-center text-sm mb-4">
 //         <FaLock className="mr-2" />
 //         Requires{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">access-token</code> and{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> in headers
+//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">x-api-key</code> and{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> in headers
 //       </div>
 
 //       {/* Description */}
@@ -3003,8 +3003,8 @@
 //       {/* Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code> – API token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> – API secret</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code> – API token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> – API secret</li>
 //       </ul>
 //     </div>
 
@@ -3088,8 +3088,8 @@
 //       <div className="text-red-500 flex items-center text-sm mb-4">
 //         <FaLock className="mr-2" />
 //         Requires{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">access-token</code> and{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> in headers
+//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">x-api-key</code> and{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> in headers
 //       </div>
 
 //       {/* Description */}
@@ -3165,8 +3165,8 @@
 //       <div className="text-red-500 flex items-center text-sm mb-4">
 //         <FaLock className="mr-2" />
 //         Requires{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">access-token</code> and{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> in headers
+//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">x-api-key</code> and{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> in headers
 //       </div>
 
 //       {/* Description */}
@@ -3253,11 +3253,11 @@
 //         <FaLock className="mr-2" />
 //         Requires{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//           access-token
+//           x-api-key
 //         </code>{" "}
 //         and{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs">
-//           secret-key
+//           x-api-secret
 //         </code>{" "}
 //         in headers to access this endpoint.
 //       </div>
@@ -3275,13 +3275,13 @@
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
 //         <li>
 //           <code className="bg-gray-100 px-1 rounded text-xs">
-//             access-token
+//             x-api-key
 //           </code>
 //           : (string) API access token
 //         </li>
 //         <li>
 //           <code className="bg-gray-100 px-1 rounded text-xs">
-//             secret-key
+//             x-api-secret
 //           </code>
 //           : (string) API secret key
 //         </li>
@@ -3392,11 +3392,11 @@
 //         <FaLock className="mr-2" />
 //         Requires{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//           access-token
+//           x-api-key
 //         </code>{" "}
 //         and{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs">
-//           secret-key
+//           x-api-secret
 //         </code>{" "}
 //         in headers to access this endpoint.
 //       </div>
@@ -3414,13 +3414,13 @@
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
 //         <li>
 //           <code className="bg-gray-100 px-1 rounded text-xs">
-//             access-token
+//             x-api-key
 //           </code>
 //           : (string) API access token
 //         </li>
 //         <li>
 //           <code className="bg-gray-100 px-1 rounded text-xs">
-//             secret-key
+//             x-api-secret
 //           </code>
 //           : (string) API secret key
 //         </li>
@@ -3521,11 +3521,11 @@
 //         <FaLock className="mr-2" />
 //         Requires{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//           access-token
+//           x-api-key
 //         </code>{" "}
 //         and{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs">
-//           secret-key
+//           x-api-secret
 //         </code>{" "}
 //         in headers to access this endpoint.
 //       </div>
@@ -3538,8 +3538,8 @@
 //       {/* Headers Required */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code>: (string) API access token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code>: (string) API secret key</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code>: (string) API access token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code>: (string) API secret key</li>
 //       </ul>
 
 //       {/* Query Params */}
@@ -3626,11 +3626,11 @@
 //         <FaLock className="mr-2" />
 //         Requires{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//           access-token
+//           x-api-key
 //         </code>{" "}
 //         and{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs">
-//           secret-key
+//           x-api-secret
 //         </code>{" "}
 //         in headers to access this endpoint.
 //       </div>
@@ -3643,8 +3643,8 @@
 //       {/* Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code>: API token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code>: API secret</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code>: API token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code>: API secret</li>
 //       </ul>
 
 //       {/* Query Params */}
@@ -3742,11 +3742,11 @@
 //         <FaLock className="mr-2" />
 //         Requires{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//           access-token
+//           x-api-key
 //         </code>{" "}
 //         and{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs">
-//           secret-key
+//           x-api-secret
 //         </code>{" "}
 //         in headers to access this endpoint.
 //       </div>
@@ -3759,8 +3759,8 @@
 //       {/* Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code>: API token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code>: API secret</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code>: API token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code>: API secret</li>
 //       </ul>
 
 //       {/* Query Params */}
@@ -3860,11 +3860,11 @@
 //         <FaLock className="mr-2" />
 //         Requires{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-//           access-token
+//           x-api-key
 //         </code>{" "}
 //         and{" "}
 //         <code className="bg-gray-100 px-1 rounded text-xs">
-//           secret-key
+//           x-api-secret
 //         </code>{" "}
 //         in headers to access this endpoint.
 //       </div>
@@ -3877,8 +3877,8 @@
 //       {/* Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code>: API token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code>: API secret</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code>: API token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code>: API secret</li>
 //       </ul>
 
 //       {/* Query Params */}
@@ -3981,8 +3981,8 @@
 //       <div className="text-red-500 flex items-center text-sm mb-4">
 //         <FaLock className="mr-2" />
 //         Requires{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">access-token</code> and{" "}
-//         <code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> in headers
+//         <code className="bg-gray-100 px-1 rounded text-xs mx-1">x-api-key</code> and{" "}
+//         <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> in headers
 //       </div>
 
 //       {/* Description */}
@@ -3993,8 +3993,8 @@
 //       {/* Headers */}
 //       <h4 className="font-semibold text-sm text-gray-800 mb-2">Required Headers:</h4>
 //       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">access-token</code> – API token</li>
-//         <li><code className="bg-gray-100 px-1 rounded text-xs">secret-key</code> – API secret</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code> – API token</li>
+//         <li><code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code> – API secret</li>
 //       </ul>
 //     </div>
 
@@ -4202,11 +4202,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   headers
                 </div>
@@ -4322,11 +4322,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   headers
                 </div>
@@ -4453,11 +4453,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers to access this endpoint.
                 </div>
@@ -4475,13 +4475,13 @@ export default function ApiDocsPage() {
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>
                     : (string) API access token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>
                     : (string) API secret key
                   </li>
@@ -4732,11 +4732,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   headers
                 </div>
@@ -4754,13 +4754,13 @@ export default function ApiDocsPage() {
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>
                     : (string)
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>
                     : (string)
                   </li>
@@ -5003,11 +5003,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   headers
                 </div>
@@ -5119,11 +5119,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   headers
                 </div>
@@ -5229,11 +5229,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   headers
                 </div>
@@ -5380,11 +5380,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   headers
                 </div>
@@ -5468,11 +5468,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   headers
                 </div>
@@ -5591,11 +5591,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   headers
                 </div>
@@ -5698,11 +5698,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   headers
                 </div>
@@ -5809,11 +5809,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   headers
                 </div>
@@ -5918,11 +5918,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -5940,13 +5940,13 @@ export default function ApiDocsPage() {
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>
                     : (string) API access token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>
                     : (string) API secret key
                   </li>
@@ -6107,11 +6107,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -6130,13 +6130,13 @@ export default function ApiDocsPage() {
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>{" "}
                     – API Access Token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>{" "}
                     – API Secret Key
                   </li>
@@ -6257,11 +6257,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -6280,13 +6280,13 @@ export default function ApiDocsPage() {
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>{" "}
                     – API Access Token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>{" "}
                     – API Secret Key
                   </li>
@@ -6409,11 +6409,11 @@ export default function ApiDocsPage() {
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -6434,13 +6434,13 @@ export default function ApiDocsPage() {
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>{" "}
                     – API Access Token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>{" "}
                     – API Secret Key
                   </li>
@@ -6599,11 +6599,11 @@ SKU-GREEN-S,5,,,archived`}</pre>
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -6624,13 +6624,13 @@ SKU-GREEN-S,5,,,archived`}</pre>
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>{" "}
                     – API token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>{" "}
                     – API secret
                   </li>
@@ -6770,11 +6770,11 @@ SKU-GREEN-S,5,,,archived`}</pre>
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -6793,13 +6793,13 @@ SKU-GREEN-S,5,,,archived`}</pre>
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>{" "}
                     – API token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>{" "}
                     – API secret
                   </li>
@@ -6880,11 +6880,11 @@ SKU-GREEN-S,5,,,archived`}</pre>
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -6917,13 +6917,13 @@ SKU-GREEN-S,5,,,archived`}</pre>
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>{" "}
                     – API token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>{" "}
                     – API secret
                   </li>
@@ -6994,11 +6994,11 @@ SKU-GREEN-S,5,,,archived`}</pre>
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -7030,13 +7030,13 @@ SKU-GREEN-S,5,,,archived`}</pre>
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>{" "}
                     – API token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>{" "}
                     – API secret
                   </li>
@@ -7103,11 +7103,11 @@ SKU-GREEN-S,5,,,archived`}</pre>
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -7139,13 +7139,13 @@ SKU-GREEN-S,5,,,archived`}</pre>
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>{" "}
                     – API token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>{" "}
                     – API secret
                   </li>
@@ -7230,11 +7230,11 @@ SKU-GREEN-S,5,,,archived`}</pre>
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -7264,13 +7264,13 @@ SKU-GREEN-S,5,,,archived`}</pre>
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>{" "}
                     – API token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>{" "}
                     – API secret
                   </li>
@@ -7347,11 +7347,11 @@ SKU-GREEN-S,5,,,archived`}</pre>
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -7371,13 +7371,13 @@ SKU-GREEN-S,5,,,archived`}</pre>
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>{" "}
                     – API token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>{" "}
                     – API secret
                   </li>
@@ -7489,11 +7489,11 @@ SKU-GREEN-S,5,,,archived`}</pre>
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -7514,13 +7514,13 @@ SKU-GREEN-S,5,,,archived`}</pre>
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>{" "}
                     – API token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>{" "}
                     – API secret
                   </li>
@@ -7614,11 +7614,11 @@ SKU-GREEN-S,5,,,archived`}</pre>
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -7726,11 +7726,11 @@ SKU-GREEN-S,5,,,archived`}</pre>
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -7838,11 +7838,11 @@ Each CSV row includes:
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers to access this endpoint.
                 </div>
@@ -7860,13 +7860,13 @@ Each CSV row includes:
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>
                     : (string) API access token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>
                     : (string) API secret key
                   </li>
@@ -7988,11 +7988,11 @@ Each CSV row includes:
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers to access this endpoint.
                 </div>
@@ -8010,13 +8010,13 @@ Each CSV row includes:
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>
                     : (string) API access token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>
                     : (string) API secret key
                   </li>
@@ -8122,11 +8122,11 @@ Each CSV row includes:
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers to access this endpoint.
                 </div>
@@ -8145,13 +8145,13 @@ Each CSV row includes:
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>
                     : (string) API access token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>
                     : (string) API secret key
                   </li>
@@ -8256,11 +8256,11 @@ Each CSV row includes:
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers to access this endpoint.
                 </div>
@@ -8278,13 +8278,13 @@ Each CSV row includes:
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>
                     : API token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>
                     : API secret
                   </li>
@@ -8401,11 +8401,11 @@ Each CSV row includes:
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers to access this endpoint.
                 </div>
@@ -8425,13 +8425,13 @@ Each CSV row includes:
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>
                     : API token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>
                     : API secret
                   </li>
@@ -8548,11 +8548,11 @@ Each CSV row includes:
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers to access this endpoint.
                 </div>
@@ -8571,13 +8571,13 @@ Each CSV row includes:
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>
                     : API token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>
                     : API secret
                   </li>
@@ -8694,11 +8694,11 @@ Each CSV row includes:
                   <FaLock className="mr-2" />
                   Requires{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    access-token
+                    x-api-key
                   </code>{" "}
                   and{" "}
                   <code className="bg-gray-100 px-1 rounded text-xs">
-                    secret-key
+                    x-api-secret
                   </code>{" "}
                   in headers
                 </div>
@@ -8718,13 +8718,13 @@ Each CSV row includes:
                 <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      access-token
+                      x-api-key
                     </code>{" "}
                     – API token
                   </li>
                   <li>
                     <code className="bg-gray-100 px-1 rounded text-xs">
-                      secret-key
+                      x-api-secret
                     </code>{" "}
                     – API secret
                   </li>

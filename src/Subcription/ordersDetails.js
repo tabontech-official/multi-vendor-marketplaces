@@ -243,7 +243,7 @@ const OrdersDetails = () => {
       }
 
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/cancelShopifyOrder",
+        "https://multi-vendor-marketplace.vercel.app/order/cancelOrder",
         {
           method: "POST",
           headers: {

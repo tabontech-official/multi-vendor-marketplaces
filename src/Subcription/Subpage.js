@@ -93,7 +93,7 @@ const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all
       setIsAdmin(isAdminFlag);
 
       const url = isAdminFlag
-        ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrderForMerchants`
+        ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrder`
         : `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`;
 
       const res = await fetch(url, {

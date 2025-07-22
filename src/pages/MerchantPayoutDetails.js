@@ -154,7 +154,7 @@ const MerchantPayoutDetails = () => {
 
       try {
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+          `https://multi-vendor-marketplace.vercel.app/order/getPayoutByQuery?payoutDate=${encodeURIComponent(
             payoutDate
           )}&status=${status}&userId=${merchantId}`,
           {

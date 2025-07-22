@@ -83,7 +83,7 @@ useEffect(() => {
 
   try {
     await axios.delete(
-      "https://multi-vendor-marketplace.vercel.app/category/deleteCollection",
+      "https://multi-vendor-marketplace.vercel.app/category/deleteCategory",
       {
         headers: {
           "x-api-key": apiKey,

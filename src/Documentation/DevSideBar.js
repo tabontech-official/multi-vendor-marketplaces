@@ -25,8 +25,8 @@ const apiSidebarData = [
       "addImageGallery",
       "getImageGallery",
       "productBulkUpload",
-      "getSingleVariant",
-      "updateSingleVariant",
+      "getVariant",
+      "updateVariant",
     ],
   },
   {

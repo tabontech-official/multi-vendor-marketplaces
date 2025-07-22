@@ -77,7 +77,7 @@ const Variants = () => {
       const apiSecretKey = localStorage.getItem("apiSecretKey");
       try {
         const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/product/getSingleVariant/${productId}/variants/${variantId}`,
+          `https://multi-vendor-marketplace.vercel.app/product/getVariant/${productId}/variants/${variantId}`,
           {
             headers: {
               "x-api-key": apiKey,

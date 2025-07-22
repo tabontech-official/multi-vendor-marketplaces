@@ -109,8 +109,8 @@ const Dashboard = () => {
       const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
 
       const url = isAdmin
-        ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-        : `https://multi-vendor-marketplace.vercel.app/producthttps://multi-vendor-marketplace.vercel.app${id}/?page=${page}&limit=${limit}`;
+        ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
+          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
 
       const response = await fetch(url, {
         method: "GET",
@@ -177,7 +177,7 @@ const Dashboard = () => {
       );
 
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/upload-csv-body/${userId}`,
+          `https://multi-vendor-marketplace.vercel.app/product/upload-product-csv/${userId}`,
           {
             method: "POST",
             body: formData,
@@ -446,8 +446,8 @@ const Dashboard = () => {
         const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
 
         const url = isAdmin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app/producthttps://multi-vendor-marketplace.vercel.app${id}/?page=${page}&limit=${limit}`;
+          ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
+          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
 
         const response = await fetch(url, {
           method: "GET",

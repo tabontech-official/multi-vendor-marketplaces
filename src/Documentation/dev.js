@@ -26,7 +26,7 @@ export default function ApiDocsPage() {
               <div className="mb-4">
                 <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
                 <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                POST  /product/addEquipment
+                POST  /product/createProduct
                 </code>
               </div>
 
@@ -210,7 +210,7 @@ export default function ApiDocsPage() {
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">POST</span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-{`https://multi-vendor-marketplace.vercel.app/product/addEquipment`}
+{`https://multi-vendor-marketplace.vercel.app/product/createProduct`}
         </pre>
       </div>
               {/* Request Body */}
@@ -696,7 +696,7 @@ export default function ApiDocsPage() {
               <div className="mb-4">
                 <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
                 <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                  GET /product/getAllData?page=1&amp;limit=10
+                  GET /product/getAllProducts?page=1&amp;limit=10
                 </code>
                 {/* <p className="mt-1 text-xs text-gray-500">
                   e.g.{" "}
@@ -758,7 +758,7 @@ export default function ApiDocsPage() {
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-{`https://multi-vendor-marketplace.vercel.app/product/getAllData?page=1&limit=10`}
+{`https://multi-vendor-marketplace.vercel.app/product/getAllProducts?page=1&limit=10`}
         </pre>
       </div>
               {/* Response Example */}
@@ -1494,7 +1494,7 @@ export default function ApiDocsPage() {
               <div className="mb-4">
                 <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
                 <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                  POST /product/upload-csv-body/:userId
+                  POST /product/upload-product-csv/:userId
                 </code>
                 <p className="mt-1 text-xs text-gray-500">
                   Upload CSV to bulk add or update Shopify products with
@@ -1567,7 +1567,7 @@ export default function ApiDocsPage() {
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">POST</span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-{`https://multi-vendor-marketplace.vercel.app/product/upload-csv-body/64acbe...`}
+{`https://multi-vendor-marketplace.vercel.app/product/upload-product-csv/64acbe...`}
         </pre>
       </div>
               {/* Example Response */}
@@ -1595,7 +1595,7 @@ export default function ApiDocsPage() {
           <></>
         )}
 
-        {selected === "getSingleVariant" ? (
+        {selected === "getVariant" ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {/* LEFT COLUMN */}
             <div className="bg-white rounded-md shadow-md p-6">
@@ -1603,7 +1603,7 @@ export default function ApiDocsPage() {
               <div className="mb-4">
                 <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
                 <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                  GET /product/getSingleVariant/:productId/variants/:variantId
+                  GET /product/getVariant/:productId/variants/:variantId
                 </code>
                 <p className="mt-1 text-xs text-gray-500">
                   Returns a specific variant's full information from the listing
@@ -1667,7 +1667,7 @@ export default function ApiDocsPage() {
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-{`https://multi-vendor-marketplace.vercel.app/product/getSingleVariant/987645/variants/34643809`}
+{`https://multi-vendor-marketplace.vercel.app/product/getVariant/987645/variants/34643809`}
         </pre>
       </div>
               {/* Example Response */}
@@ -1706,7 +1706,7 @@ export default function ApiDocsPage() {
           <></>
         )}
 
-        {selected === "updateSingleVariant" ? (
+        {selected === "updateVariant" ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {/* LEFT COLUMN */}
             <div className="bg-white rounded-md shadow-md p-6">
@@ -1832,7 +1832,7 @@ export default function ApiDocsPage() {
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">PUT</span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-{`https://multi-vendor-marketplace.vercel.app/product/upload-csv-body/64acbe...`}
+{`https://multi-vendor-marketplace.vercel.app/product/upload-product-csv/64acbe...`}
         </pre>
       </div>
               {/* Request Body */}
@@ -2195,7 +2195,7 @@ export default function ApiDocsPage() {
       <div className="mb-4">
         <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
         <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-          POST /product/bulkUpload/inventory
+          POST /product/upload-csv-for-inventory
         </code>
       </div>
 
@@ -2257,7 +2257,7 @@ export default function ApiDocsPage() {
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">POST</span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-{`https://multi-vendor-marketplace.vercel.app/product/bulkUpload/inventory`}
+{`https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory`}
         </pre>
       </div>
       {/* Sample CSV */}
@@ -2616,7 +2616,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
       <div className="mb-4">
         <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
         <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-          DELETE /category/deleteCollection
+          DELETE /category/deleteCategory
         </code>
       </div>
 
@@ -2655,7 +2655,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">DELETE</span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-{`https://multi-vendor-marketplace.vercel.app/category/deleteCollection`}
+{`https://multi-vendor-marketplace.vercel.app/category/deleteCategory`}
         </pre>
       </div>
       {/* Success Response */}
@@ -2874,7 +2874,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
       <div className="mb-4">
         <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
         <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-          GET /order/getAllOrderForMerchants
+          GET /order/getAllOrder
         </code>
       </div>
 
@@ -2907,7 +2907,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-{`https://multi-vendor-marketplace.vercel.app/order/getAllOrderForMerchants`}
+{`https://multi-vendor-marketplace.vercel.app/order/getAllOrder`}
         </pre>
       </div>
       {/* Success Response */}
@@ -3088,7 +3088,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
       <div className="mb-4">
         <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
         <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-          POST /order/cancelShopifyOrder
+          POST /order/cancelOrder
         </code>
       </div>
 
@@ -3122,7 +3122,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">POST</span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-{`https://multi-vendor-marketplace.vercel.app/order/cancelShopifyOrder`}
+{`https://multi-vendor-marketplace.vercel.app/order/cancelOrder`}
         </pre>
       </div>
       {/* Success Response */}
@@ -3629,7 +3629,7 @@ Each CSV row includes:
       <div className="mb-4">
         <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
         <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-          GET  /orders/getPayoutOrders
+          GET  /orders/getPayoutByQuery
         </code>
       </div>
 
@@ -3682,7 +3682,7 @@ Each CSV row includes:
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-{`https://multi-vendor-marketplace.vercel.app/orders/getPayoutOrders?userId=64abf1a12b9...&status=pending`}
+{`https://multi-vendor-marketplace.vercel.app/orders/getPayoutByQuery?userId=64abf1a12b9...&status=pending`}
         </pre>
       </div>
 
@@ -3746,7 +3746,7 @@ Each CSV row includes:
       <div className="mb-4">
         <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
         <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-          GET  /order/getPayoutForAllOrders
+          GET  /order/getAllPayouts
         </code>
       </div>
 
@@ -3798,7 +3798,7 @@ Each CSV row includes:
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">GET</span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-{`https://multi-vendor-marketplace.vercel.app/order/getPayoutForAllOrders?payoutDate=Jul 21, 2025&status=pending`}
+{`https://multi-vendor-marketplace.vercel.app/order/getAllPayouts?payoutDate=Jul 21, 2025&status=pending`}
         </pre>
       </div>
 

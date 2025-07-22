@@ -298,9 +298,9 @@ useEffect(() => {
     try {
       let url = "";
       if (userRole === "Merchant") {
-        url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(payoutDate)}&status=${status}&userId=${merchantId}`;
+        url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByQuery?payoutDate=${encodeURIComponent(payoutDate)}&status=${status}&userId=${merchantId}`;
       } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
-        url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(payoutDate)}&status=${status}`;
+        url = `https://multi-vendor-marketplace.vercel.app/order/getAllPayouts?payoutDate=${encodeURIComponent(payoutDate)}&status=${status}`;
       } else {
         console.warn("Unauthorized user role:", userRole);
         setLoading(false);

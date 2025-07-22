@@ -4069,6 +4069,116 @@ export default function ApiDocsPage() {
             <span className="text-purple-600">{selected}</span>
           </h1>
 
+
+
+{selected === "SignIn" ? (
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    {/* LEFT COLUMN */}
+    <div className="bg-white rounded-md shadow-md p-6">
+      {/* Endpoint Info */}
+      <div className="mb-4">
+        <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
+        <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
+          POST /auth/signIn
+        </code>
+      </div>
+
+      {/* Auth Info */}
+      <div className="text-red-500 flex items-center text-sm mb-4">
+        <FaLock className="mr-2" />
+        No API keys required. This endpoint is used to authenticate users.
+      </div>
+
+      {/* Description */}
+      <p className="text-gray-700 text-sm mb-4">
+        Authenticates a user via email and password. Returns JWT token, user
+        role, and auto-generated API credentials (if not already created).
+      </p>
+
+      {/* Body Params */}
+      <h4 className="font-semibold text-sm text-gray-800 mb-2">
+        Required Body Parameters:
+      </h4>
+      <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
+        <li>
+          <strong>email</strong>{" "}
+          <span className="text-gray-500">(string, required)</span> – User’s
+          email
+        </li>
+        <li>
+          <strong>password</strong>{" "}
+          <span className="text-gray-500">(string, required)</span> – User’s
+          password
+        </li>
+      </ul>
+
+      {/* Note */}
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 text-sm text-blue-800 rounded-md mt-6">
+        <strong>Note:</strong> Returns <code>401</code> on invalid password,{" "}
+        <code>404</code> if user not found, and <code>400</code> if validation
+        fails.
+      </div>
+    </div>
+
+    {/* RIGHT COLUMN */}
+    <div className="space-y-6">
+      {/* Request Example */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+            POST
+          </span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+          {`https://multi-vendor-marketplace.vercel.app/auth/signIn`}
+        </pre>
+      </div>
+
+      {/* Request Body */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Body</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+            JSON
+          </span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">{`{
+  "email": "user@example.com",
+  "password": "your-password"
+}`}</pre>
+      </div>
+
+      {/* Response Example */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Response</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+            JSON
+          </span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-white whitespace-pre-wrap">{`{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "role": "Vendor",
+  "user": {
+    "_id": "64b123abc456",
+    "email": "user@example.com",
+    "role": "Vendor",
+    "createdAt": "2023-07-01T00:00:00Z"
+  },
+  "apiKey": "abc-xyz-key",
+  "apiSecretKey": "abc-xyz-secret",
+  "userId": "64b123abc456"
+}`}</pre>
+      </div>
+    </div>
+  </div>
+) : null}
+
+
+
+
+
  {selected === "getAllProduct" ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
               {/* LEFT COLUMN */}

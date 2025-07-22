@@ -11,6 +11,12 @@ const formatEndpointName = (str) =>
 
 const apiSidebarData = [
   {
+    title: "Auth",
+    endpoints: [
+      "SignIn",
+    ],
+  },
+  {
     title: "Product",
     endpoints: [
       "createProduct",

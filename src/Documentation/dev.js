@@ -4426,7 +4426,7 @@ Each CSV row includes:
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/orders/getPayout?page=1&limit=5`}
+                    {`https://multi-vendor-marketplace.vercel.app/order/getPayout?page=1&limit=5`}
                   </pre>
                 </div>
 

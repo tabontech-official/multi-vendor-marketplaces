@@ -3035,21 +3035,13 @@ SKU-GREEN-S,5,,,archived`}</pre>
   "title": "Women's Accessories",
   "description": "All women's category-based auto collection",
   "handle": "womens-accessories",
+  "userId": "67d2b1be821a3d8288sac",
   "categories": [
     {
-      "title": "Scarves",
-      "description": "Silk and wool scarves",
-      "level": "level1"
-    },
-    {
-      "title": "Printed Scarves",
-      "description": "Colorful prints",
-      "level": "level2"
-    },
-    {
-      "title": "Floral Scarves",
-      "description": "Floral patterns",
-      "level": "level3"
+      "title": "Women's Accessories",
+       "description": "All women's category-based auto collection",
+      "level": "level1",
+      "parentCatNo": ""
     }
   ]
 }`}</pre>

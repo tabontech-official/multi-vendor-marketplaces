@@ -5424,7 +5424,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/delete/687b...`}
+                    {`https://multi-vendor-marketplace.vercel.app/product/deleteProduct/687b...`}
                   </pre>
                 </div>
                 {/* Response Example */}

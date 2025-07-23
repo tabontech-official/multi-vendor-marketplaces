@@ -4229,7 +4229,7 @@ Each CSV row includes:
                 <div className="mb-4">
                   <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
                   <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                    POST /orders/addReferenceNumber
+                    POST /order/addReferenceNumber
                   </code>
                 </div>
 
@@ -4306,7 +4306,7 @@ Each CSV row includes:
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/orders/addReferenceNumber`}
+                    {`https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
@@ -4354,7 +4354,7 @@ Each CSV row includes:
                 <div className="mb-4">
                   <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
                   <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                    GET /orders/getPayout
+                    GET /order/getPayout
                   </code>
                 </div>
 
@@ -4479,7 +4479,7 @@ Each CSV row includes:
                 <div className="mb-4">
                   <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
                   <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                    GET /orders/getPayoutByQuery
+                    GET /order/getPayoutByQuery
                   </code>
                 </div>
 
@@ -4553,7 +4553,7 @@ Each CSV row includes:
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/orders/getPayoutByQuery?userId=64abf1a12b9...&status=pending`}
+                    {`https://multi-vendor-marketplace.vercel.app/order/getPayoutByQuery?userId=64abf1a12b9...&status=pending`}
                   </pre>
                 </div>
 
@@ -4821,7 +4821,7 @@ Each CSV row includes:
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/orders/getPayoutByUserId?userId=64acbe...`}
+                    {`https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=64acbe...`}
                   </pre>
                 </div>
 

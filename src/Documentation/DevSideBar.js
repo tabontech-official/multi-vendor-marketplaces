@@ -45,7 +45,7 @@ const apiSidebarData = [
     endpoints: [
       "createCategory",
       "getCategory",
-      "getCategoryById",
+      // "getCategoryById",
       "deleteCategories",
     ],
   },

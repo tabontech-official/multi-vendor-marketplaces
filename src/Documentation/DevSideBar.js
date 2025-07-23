@@ -53,7 +53,7 @@ const apiSidebarData = [
     title: "Order",
     endpoints: [
       "getOrderByUserId",
-      "getOrderByOrderId",
+      // "getOrderByOrderId",
       "getAllOrders",
       "getCancellationRequests",
       "cancelOrder",

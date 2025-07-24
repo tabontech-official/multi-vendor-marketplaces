@@ -61,6 +61,14 @@ const apiSidebarData = [
     ],
   },
   {
+    title: "Promotion",
+    endpoints: [
+      "getPromotion",
+      "CreatePromotion",
+      "deletePromotion",
+    ],
+  },
+  {
     title: "Finance",
     endpoints: [
       "addPayouts",

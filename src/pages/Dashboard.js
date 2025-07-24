@@ -676,129 +676,121 @@ const Dashboard = () => {
         )}
       </div>
 
-      {Loading ? (
-        <div className="flex justify-center items-center py-10">
-          <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
-          loading...
-        </div>
-      ) : (
-        <div className="p-4">
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-10 text-gray-500">
-              <h2>No products available.</h2>
-            </div>
-          ) : (
-            <div className=" max-sm:overflow-auto border rounded-lg">
-              <table className="w-full border-collapse bg-white">
-                <thead className="bg-gray-100 text-left text-gray-600 text-xs">
-                  <tr>
-                    {/* <th className="p-3">Action</th> */}
-                    <th className="p-3">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 cursor-pointer"
-                        checked={selectAll}
-                        onChange={() => handleSelectAll()}
-                      />
-                    </th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3">Image</th>
-                    <th className="p-3">Listing_name</th>
-                    {(userRole === "Dev Admin" ||
-                      userRole === "Master Admin") && (
-                      <th className="p-3">Publisher</th>
-                    )}
-                    <th className="p-3">Sku</th>
-                    <th className="p-3">Price</th>
-                    <th className="p-3">Compare_at_price</th>
-                    <th className="p-3">Type</th>
-                    <th className="p-3">Inventory</th>
-                    <th className="p-3">Vendor</th>
+    <div className="p-4">
+  {filteredProducts.length === 0 && !Loading ? (
+    <div className="text-center py-10 text-gray-500">
+      <h2>No products available.</h2>
+    </div>
+  ) : (
+    <div className="max-sm:overflow-auto border rounded-lg">
+      <table className="w-full border-collapse bg-white">
+        <thead className="bg-gray-100 text-left text-gray-600 text-xs">
+          <tr>
+            <th className="p-3">
+              <input
+                type="checkbox"
+                className="w-4 h-4 cursor-pointer"
+                checked={selectAll}
+                onChange={() => handleSelectAll()}
+              />
+            </th>
+            <th className="p-3">Status</th>
+            <th className="p-3">Image</th>
+            <th className="p-3">Listing_name</th>
+            {(userRole === "Dev Admin" || userRole === "Master Admin") && (
+              <th className="p-3">Publisher</th>
+            )}
+            <th className="p-3">Sku</th>
+            <th className="p-3">Price</th>
+            <th className="p-3">Compare_at_price</th>
+            <th className="p-3">Type</th>
+            <th className="p-3">Inventory</th>
+            <th className="p-3">Vendor</th>
+            {admin && <th className="p-3">PUBLISHER</th>}
+            <th className="p-3">Edit</th>
+          </tr>
+        </thead>
 
-                    {admin && <th className="p-3">PUBLISHER</th>}
+        <tbody>
+          {filteredProducts.map((product) => (
+            <tr key={product._id} className="border-b hover:bg-gray-50">
+              <td className="p-3">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 cursor-pointer"
+                  checked={selectedProducts.includes(product._id)}
+                  onChange={() => toggleSelection(product._id)}
+                />
+              </td>
+              <td className="p-3">
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    product.status === "active"
+                      ? "bg-green-500"
+                      : "bg-red-500"
+                  }`}
+                  title={product.status}
+                />
+              </td>
+              <td className="p-3">
+                {product.images?.[0] ? (
+                  <img
+                    src={product.images[0].src}
+                    alt={product.images[0].alt || "Product image"}
+                    className="w-16 h-16 object-contain rounded border"
+                  />
+                ) : (
+                  <span className="text-gray-400 text-sm">No Image</span>
+                )}
+              </td>
+              <td className="p-3">
+                {product.title !== "Job Listing"
+                  ? product.title
+                  : "Job Search Listing"}
+              </td>
+              {(userRole === "Dev Admin" || userRole === "Master Admin") && (
+                <td>{product?.username}</td>
+              )}
+              <td className="p-3">{product.variants[0]?.sku}</td>
+              <td className="p-3">${product.variants[0]?.price}</td>
+              <td className="p-3">
+                ${product.variants[0]?.compare_at_price || 0.0}
+              </td>
+              <td className="p-3">{product.product_type}</td>
+              <td className="p-3">
+                {product.variants[0]?.inventory_quantity}
+              </td>
+              <td className="p-3">{product.vendor}</td>
+              {admin && `#${product.shopifyId}`}
+              <td className="p-3">
+                <button
+                  className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
+                  onClick={() => OnEdit(product)}
+                >
+                  <MdEdit className="mr-1" />
+                  Edit
+                </button>
+              </td>
+            </tr>
+          ))}
 
-                    <th className="p-3">Edit</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredProducts.map((product, index) => (
-                    <tr key={product._id} className="border-b hover:bg-gray-50">
-                      <td className="p-3">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer"
-                          checked={selectedProducts.includes(product._id)}
-                          onChange={() => toggleSelection(product._id)}
-                        />
-                      </td>
-
-                      <td className="p-3">
-                        {" "}
-                        <div
-                          className={`w-2 h-2 rounded-full ${
-                            product.status === "active"
-                              ? "bg-green-500"
-                              : "bg-red-500"
-                          }`}
-                          title={product.status}
-                        />
-                      </td>
-                      <td className="p-3">
-                        {product.images && product.images.length > 0 ? (
-                          <img
-                            src={product.images[0].src}
-                            alt={product.images[0].alt || "Product image"}
-                            className="w-16 h-16 object-contain rounded border"
-                          />
-                        ) : (
-                          <span className="text-gray-400 text-sm">
-                            No Image
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-3">
-                        {" "}
-                        {product.title !== "Job Listing"
-                          ? product.title
-                          : "Job Search Listing"}
-                      </td>
-                        {(userRole === "Dev Admin" ||
-                          userRole === "Master Admin") && (
-                          <td>{product?.username}</td>
-                        )}{" "}
-                      <td className="p-3"> {product.variants[0].sku}</td>
-                      <td className="p-3"> ${product.variants[0].price} </td>
-                      <td className="p-3">
-                        {" "}
-                        ${product.variants[0].compare_at_price || 0.0}
-                      </td>
-                      <td className="p-3"> {product.product_type}</td>
-
-                      <td className="p-3">
-                        {" "}
-                        {product.variants[0].inventory_quantity}
-                      </td>
-                      <td className="p-3"> {product.vendor}</td>
-
-                      {admin && `#${product.shopifyId}`}
-                      <td className="p-3">
-                        <button
-                          className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
-                          onClick={() => OnEdit(product)}
-                        >
-                          <MdEdit className="mr-1" />
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          {/* 👇 Loader in table bottom row */}
+          {Loading && (
+            <tr>
+              <td colSpan={12}>
+                <div className="flex justify-center items-center py-6">
+                  <HiOutlineRefresh className="animate-spin text-xl text-gray-500 mr-2" />
+                  <span className="text-gray-500 text-sm">Loading more products...</span>
+                </div>
+              </td>
+            </tr>
           )}
-        </div>
-      )}
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
+
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
           <div

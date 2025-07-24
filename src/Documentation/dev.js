@@ -4982,6 +4982,226 @@ Each CSV row includes:
               </div>
             </div>
           ) : null}
+
+
+           {selected === "getPromotion" ? (
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    {/* LEFT COLUMN */}
+    <div className="bg-white rounded-md shadow-md p-6">
+      <div className="mb-4">
+        <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
+        <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
+          GET /promo
+        </code>
+      </div>
+
+      <div className="text-red-500 flex items-center text-sm mb-4">
+        <FaLock className="mr-2" />
+        Requires{" "}
+        <code className="bg-gray-100 px-1 rounded text-xs mx-1">
+          x-api-key
+        </code>{" "}
+        and{" "}
+        <code className="bg-gray-100 px-1 rounded text-xs">
+          x-api-secret
+        </code>{" "}
+        in headers
+      </div>
+
+      <p className="text-gray-700 text-sm mb-4">
+        This endpoint returns a list of all promotions from the database. Each
+        promotion includes information such as the product SKU, promotional price,
+        product name, variant details, and status (active or inactive).
+      </p>
+
+      <h4 className="font-semibold text-sm text-gray-800 mb-2">
+        Required Headers:
+      </h4>
+      <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
+        <li>
+          <code className="bg-gray-100 px-1 rounded text-xs">
+            x-api-key
+          </code>{" "}
+          – API token
+        </li>
+        <li>
+          <code className="bg-gray-100 px-1 rounded text-xs">
+            x-api-secret
+          </code>{" "}
+          – API secret
+        </li>
+      </ul>
+    </div>
+
+    {/* RIGHT COLUMN */}
+    <div className="space-y-6">
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+            GET
+          </span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+          {`https://multi-vendor-marketplace.vercel.app/promo`}
+        </pre>
+      </div>
+
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Success Response</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+            JSON
+          </span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`[
+  {
+    "_id": "682b03cade9ff1671f55f27a",
+    "startDate": "2025-05-19T00:00:00.000Z",
+    "endDate": "2025-05-19T00:00:00.000Z",
+    "productSku": "sku_009-1",
+    "promoPrice": "10",
+    "productName": "new product listing 0080",
+    "currentStock": "12",
+    "currentPrice": 100,
+    "status": "inactive",
+    "userId": "67d2b1be821a3d82881a2fcc",
+    "createdRole": "Dev Admin",
+    "oldPrice": 100,
+    "variantId": "46678527836416",
+    "variantName": "small / red / fabric",
+    "variantQuantity": "12",
+    "__v": 0
+  },
+  {
+    "_id": "6863d2baaf49ffa5af546a06",
+    "startDate": "2025-07-01T00:00:00.000Z",
+    "endDate": "2025-07-02T00:00:00.000Z",
+    "productSku": "23-1",
+    "promoPrice": "200",
+    "productName": "testing 123",
+    "currentStock": "23",
+    "currentPrice": 213,
+    "status": "inactive",
+    "userId": "67d2b1be821a3d82881a2fcc",
+    "createdRole": "Dev Admin",
+    "oldPrice": 213,
+    "variantId": "46788496228608",
+    "variantName": "2 / 5",
+    "variantQuantity": "23",
+    "__v": 0
+  }
+]`}</pre>
+      </div>
+
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Error Response</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+            JSON
+          </span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`{
+  "message": "Failed to fetch promotions."
+}`}</pre>
+      </div>
+    </div>
+  </div>
+) : null}
+
+
+     {selected === "CreatePromotion" ? (
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    {/* LEFT COLUMN */}
+    <div className="bg-white rounded-md shadow-md p-6">
+      <div className="mb-4">
+        <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
+        <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
+          POST /promo/add
+        </code>
+      </div>
+
+      <div className="text-red-500 flex items-center text-sm mb-4">
+        <FaLock className="mr-2" />
+        Requires{" "}
+        <code className="bg-gray-100 px-1 rounded text-xs mx-1">
+          x-api-key
+        </code>{" "}
+        and{" "}
+        <code className="bg-gray-100 px-1 rounded text-xs">
+          x-api-secret
+        </code>{" "}
+        in headers
+      </div>
+
+      <p className="text-gray-700 text-sm mb-4">
+        This endpoint allows you to add a new promotion to a product and update the product's price.
+      </p>
+      
+      <h4 className="font-semibold text-sm text-gray-800 mb-2">
+        Required Headers:
+      </h4>
+      <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
+        <li>
+          <code className="bg-gray-100 px-1 rounded text-xs">
+            x-api-key
+          </code>{" "}
+          – API token
+        </li>
+        <li>
+          <code className="bg-gray-100 px-1 rounded text-xs">
+            x-api-secret
+          </code>{" "}
+          – API secret
+        </li>
+      </ul>
+    </div>
+
+    {/* RIGHT COLUMN */}
+    <div className="space-y-6">
+      {/* Request Example */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+            POST
+          </span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+          {`POST https://multi-vendor-marketplace.vercel.app/promo/add`}
+        </pre>
+      </div>
+
+      {/* Success Response */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Success Response</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+            JSON
+          </span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`{
+  "message": "Promotion added and product updated successfully."
+}`}</pre>
+      </div>
+
+      {/* Error Response */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Error Response</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+            JSON
+          </span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`{
+  "message": "Failed to add promotion."
+}`}</pre>
+      </div>
+    </div>
+  </div>
+) : null}
+
+
         </main>
       </div>
     </div>

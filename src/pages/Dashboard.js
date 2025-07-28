@@ -13,6 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { CiImport } from "react-icons/ci";
 import { RxCross1 } from "react-icons/rx";
 import { useNotification } from "../context api/NotificationContext";
+
 const Dashboard = () => {
   let admin;
   const { addNotification } = useNotification();
@@ -149,65 +150,153 @@ const Dashboard = () => {
     }
   };
 
-  const handleUploadAndPreview = async () => {
-    if (!selectedFile) return;
+  // const handleUploadAndPreview = async () => {
+  //   if (!selectedFile) return;
 
-    setIsUploading(true);
-    setUploadStarted(true);
-  showToast("success", `Uploading "${selectedFile.name}". Processing in background...`);
+  //   setIsUploading(true);
+  //   setUploadStarted(true);
+  // showToast("success", `Uploading "${selectedFile.name}". Processing in background...`);
 
-    closePopup();
+  //   closePopup();
 
-    setTimeout(async () => {
-      try {
-        const userId = localStorage.getItem("userid");
-         const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
-        if (!userId) {
-          showToast("error", "User ID not found.");
-          return;
-        }
+  //   setTimeout(async () => {
+  //     try {
+  //       const userId = localStorage.getItem("userid");
+  //        const apiKey = localStorage.getItem("apiKey");
+  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
+  //       if (!userId) {
+  //         showToast("error", "User ID not found.");
+  //         return;
+  //       }
 
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-        // formData.append("userId", userId);
-       addNotification(
-        `Product CSV upload triggered for "${selectedFile.name}".`,
-        "Manage product"
-      );
+  //       const formData = new FormData();
+  //       formData.append("file", selectedFile);
+  //       // formData.append("userId", userId);
+  //      addNotification(
+  //       `Product CSV upload triggered for "${selectedFile.name}".`,
+  //       "Manage product"
+  //     );
 
-        const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/upload-product-csv/${userId}`,
-          {
-            method: "POST",
-            body: formData,
-            headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-        },
-          }
-        );
+  //       const response = await fetch(
+  //         `https://multi-vendor-marketplace.vercel.app/product/upload-product-csv/${userId}`,
+  //         {
+  //           method: "POST",
+  //           body: formData,
+  //           headers: {
+  //         "x-api-key": apiKey,
+  //         "x-api-secret": apiSecretKey,
+  //       },
+  //         }
+  //       );
 
-        const result = await response.json();
+  //       const result = await response.json();
 
-      showToast("success", `File "${selectedFile.name}" imported successfully!`);
-      addNotification(`File "${selectedFile.name}" imported successfully!`);
-      } catch (error) {
-        showToast(
-          "error",
-          error.message || "Error occurred while importing the file."
-        );
-        addNotification(
-          "error",
-          error.message || "Error occurred while importing the file."
-        );
-      } finally {
+  //     showToast("success", `File "${selectedFile.name}" imported successfully!`);
+  //     addNotification(`File "${selectedFile.name}" imported successfully!`);
+  //     } catch (error) {
+  //       showToast(
+  //         "error",
+  //         error.message || "Error occurred while importing the file."
+  //       );
+  //       addNotification(
+  //         "error",
+  //         error.message || "Error occurred while importing the file."
+  //       );
+  //     } finally {
+  //       setIsUploading(false);
+  //       setUploadStarted(false);
+  //       setSelectedFile(null);
+  //     }
+  //   }, 2000);
+  // };
+
+
+const handleUploadAndPreview = async () => {
+  if (!selectedFile) return;
+
+  setIsUploading(true);
+  setUploadStarted(true);
+  closePopup();
+
+  const userId = localStorage.getItem("userid");
+  const apiKey = localStorage.getItem("apiKey");
+  const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+  if (!userId) {
+    showToast("error", "User ID not found.");
+    return;
+  }
+
+  showToast("success", `Uploading "${selectedFile.name}" in background...`);
+  addNotification(`Product CSV upload triggered for "${selectedFile.name}".`, "Manage product");
+
+  Papa.parse(selectedFile, {
+    header: true,
+    skipEmptyLines: true,
+    complete: async function (results) {
+      const allRows = results.data;
+      const chunkSize = 25; // 🧠 ~100 seconds per chunk max
+      const totalChunks = Math.ceil(allRows.length / chunkSize);
+
+      if (totalChunks > 3) {
+        showToast("error", `❌ Only up to 75 products allowed per upload (25 x 3 chunks)`);
         setIsUploading(false);
         setUploadStarted(false);
-        setSelectedFile(null);
+        return;
       }
-    }, 2000);
-  };
+
+      for (let i = 0; i < allRows.length; i += chunkSize) {
+        const chunk = allRows.slice(i, i + chunkSize);
+        const chunkCsv = Papa.unparse(chunk);
+        const chunkBlob = new Blob([chunkCsv], { type: "text/csv" });
+
+        const formData = new FormData();
+        formData.append("file", chunkBlob, `chunk_${i / chunkSize + 1}.csv`);
+
+        try {
+          const response = await fetch(
+            `https://multi-vendor-marketplace.vercel.app/product/upload-product-csv/${userId}`,
+            {
+              method: "POST",
+              body: formData,
+              headers: {
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+              },
+            }
+          );
+
+          const result = await response.json();
+
+          if (response.ok) {
+            showToast("success", `✅ Chunk ${i / chunkSize + 1}/${totalChunks} uploaded.`);
+            addNotification(`✅ Chunk ${i / chunkSize + 1} of ${totalChunks} uploaded.`, "Manage product");
+          } else {
+            showToast("error", `❌ Chunk ${i / chunkSize + 1} failed: ${result.message || "Unknown error"}`);
+            addNotification(`❌ Chunk ${i / chunkSize + 1} failed.`, "Manage product");
+          }
+        } catch (error) {
+          showToast("error", `❌ Error in chunk ${i / chunkSize + 1}: ${error.message}`);
+          addNotification(`❌ Upload error in chunk ${i / chunkSize + 1}`, "Manage product");
+        }
+
+        // Add small delay (optional)
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+      }
+
+      showToast("success", `🎉 File "${selectedFile.name}" uploaded successfully!`);
+      addNotification(`🎉 File "${selectedFile.name}" completed.`, "Manage product");
+      setIsUploading(false);
+      setUploadStarted(false);
+      setSelectedFile(null);
+    },
+    error: function (err) {
+      showToast("error", `❌ CSV parsing failed: ${err.message}`);
+      setIsUploading(false);
+      setUploadStarted(false);
+    },
+  });
+};
 
   useEffect(() => {
     const handleClickOutside = (event) => {

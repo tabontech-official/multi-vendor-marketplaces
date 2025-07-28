@@ -235,7 +235,7 @@ const handleUploadAndPreview = async () => {
     skipEmptyLines: true,
     complete: async function (results) {
       const allRows = results.data;
-      const chunkSize = 25; // 🔁 25 products per chunk (safe for Vercel 300s)
+      const chunkSize = 25; 
 
       const totalChunks = Math.ceil(allRows.length / chunkSize);
 
@@ -263,35 +263,36 @@ const handleUploadAndPreview = async () => {
           const result = await response.json();
 
           if (response.ok) {
-            showToast("success", `✅ Chunk ${i / chunkSize + 1}/${totalChunks} uploaded.`);
-            addNotification(`✅ Chunk ${i / chunkSize + 1} of ${totalChunks} uploaded.`, "Manage product");
+            showToast("success", ` Chunk ${i / chunkSize + 1} uploaded.`);
+            addNotification(`Chunk ${i / chunkSize + 1} of uploaded.`, "Manage product");
           } else {
-            showToast("error", `❌ Chunk ${i / chunkSize + 1} failed: ${result.message || "Unknown error"}`);
-            addNotification(`❌ Chunk ${i / chunkSize + 1} failed.`, "Manage product");
+            showToast("error", ` Chunk ${i / chunkSize + 1} failed: ${result.message || "Unknown error"}`);
+            addNotification(` Chunk ${i / chunkSize + 1} failed.`, "Manage product");
           }
         } catch (error) {
-          showToast("error", `❌ Error in chunk ${i / chunkSize + 1}: ${error.message}`);
-          addNotification(`❌ Upload error in chunk ${i / chunkSize + 1}`, "Manage product");
+          showToast("error", `Error in chunk ${i / chunkSize + 1}: ${error.message}`);
+          addNotification(` Upload error in chunk ${i / chunkSize + 1}`, "Manage product");
         }
 
-        // Wait 2 seconds to avoid Shopify 429 rate limits
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
 
-      showToast("success", `🎉 File "${selectedFile.name}" uploaded successfully in ${totalChunks} chunks!`);
-      addNotification(`🎉 Upload complete: "${selectedFile.name}" processed`, "Manage product");
+      showToast("success", ` File "${selectedFile.name}" uploaded successfully in ${totalChunks} chunks!`);
+      addNotification(` Upload complete: "${selectedFile.name}" processed`, "Manage product");
 
       setIsUploading(false);
       setUploadStarted(false);
       setSelectedFile(null);
     },
     error: function (err) {
-      showToast("error", `❌ CSV parsing failed: ${err.message}`);
+      showToast("error", ` CSV parsing failed: ${err.message}`);
       setIsUploading(false);
       setUploadStarted(false);
     },
   });
 };
+
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {

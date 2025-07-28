@@ -5110,17 +5110,19 @@ Each CSV row includes:
 ) : null}
 
 
-     {selected === "CreatePromotion" ? (
+{selected === "CreatePromotion" ? (
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
     {/* LEFT COLUMN */}
     <div className="bg-white rounded-md shadow-md p-6">
+      {/* Endpoint Title */}
       <div className="mb-4">
         <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
         <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-          POST /promo/add
+          POST /promo/:id
         </code>
       </div>
 
+      {/* Access Permissions */}
       <div className="text-red-500 flex items-center text-sm mb-4">
         <FaLock className="mr-2" />
         Requires{" "}
@@ -5131,30 +5133,213 @@ Each CSV row includes:
         <code className="bg-gray-100 px-1 rounded text-xs">
           x-api-secret
         </code>{" "}
-        in headers
+        in headers to access this endpoint.
       </div>
 
+      {/* Instruction */}
       <p className="text-gray-700 text-sm mb-4">
-        This endpoint allows you to add a new promotion to a product and update the product's price.
+        This endpoint applies a promotional price to a specific product variant. Use a{" "}
+        <strong>POST</strong> request with the required headers and fields.
       </p>
-      
+
+      {/* Headers Required */}
       <h4 className="font-semibold text-sm text-gray-800 mb-2">
         Required Headers:
       </h4>
       <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
         <li>
-          <code className="bg-gray-100 px-1 rounded text-xs">
-            x-api-key
-          </code>{" "}
-          – API token
+          <code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code>:
+          (string) API access token
         </li>
         <li>
-          <code className="bg-gray-100 px-1 rounded text-xs">
-            x-api-secret
-          </code>{" "}
-          – API secret
+          <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code>:
+          (string) API secret key
+        </li>
+        <li>
+          <code className="bg-gray-100 px-1 rounded text-xs">Content-Type</code>:{" "}
+          <code>application/json</code>
         </li>
       </ul>
+
+      {/* Body Schema */}
+      <h4 className="font-semibold text-sm text-gray-800 mb-2">
+        Request Body Parameters:
+      </h4>
+      <ul className="text-sm text-gray-700 space-y-2">
+        <li>
+          <strong>promoPrice</strong>{" "}
+          <span className="text-gray-500">(number, required)</span> – New promotional price
+        </li>
+        <li>
+          <strong>startDate</strong>{" "}
+          <span className="text-gray-500">(string, required)</span> – Promotion start date
+        </li>
+        <li>
+          <strong>endDate</strong>{" "}
+          <span className="text-gray-500">(string, required)</span> – Promotion end date
+        </li>
+        <li>
+          <strong>userId</strong>{" "}
+          <span className="text-gray-500">(string, required)</span> – ID of the user applying the promotion
+        </li>
+      </ul>
+
+      {/* Notes */}
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 text-sm text-blue-800 rounded-md mt-6 space-y-3">
+        <div>
+          <strong>Note:</strong> First, fetch all products using:
+          <br />
+          <code className="text-purple-700 font-medium break-words text-xs">
+            GET https://multi-vendor-marketplace.vercel.app/product/getAllProducts
+          </code>
+          <br />
+          Then extract the desired <strong>variant ID</strong> from the <code>variants</code> array inside each product.
+        </div>
+        <div>
+          Missing headers or invalid variant ID will return <code>401</code> or <code>404</code> error responses.
+        </div>
+      </div>
+    </div>
+
+    {/* RIGHT COLUMN */}
+    <div className="space-y-6">
+      {/* Request URL Example */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Example</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+            POST
+          </span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+          {`https://multi-vendor-marketplace.vercel.app/promo/VARIANT_ID`}
+        </pre>
+      </div>
+
+      {/* Request Body */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Request Body</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+            JSON
+          </span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
+          {`{
+  "promoPrice": 8.99,
+  "startDate": "2025-08-01",
+  "endDate": "2025-08-10",
+  "userId": "abc123"
+}`}
+        </pre>
+      </div>
+
+      {/* Response */}
+      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
+        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
+          <span>Response</span>
+          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
+            JSON
+          </span>
+        </div>
+        <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">
+          {`{
+  "message": "Promotion applied and Shopify updated.",
+  "data": {
+    "promoPrice": 8.99,
+    "productName": "Cool Socks",
+    "productSku": "CSK1001-BS",
+    "startDate": "2025-08-01",
+    "endDate": "2025-08-10",
+    "status": "active",
+    "userId": "abc123",
+    "shopifyProductId": 8675309,
+    "shopifyVariantId": 12345678,
+    "variantQuantity": 5
+  }
+}`}
+        </pre>
+      </div>
+    </div>
+  </div>
+) : (
+  <></>
+)}
+
+{selected === "EndPromotion" ? (
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    {/* LEFT COLUMN */}
+    <div className="bg-white rounded-md shadow-md p-6">
+      {/* Endpoint Title */}
+      <div className="mb-4">
+        <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
+        <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
+          DELETE /promo/endPromotions/:id
+        </code>
+      </div>
+
+      {/* Access Permissions */}
+      <div className="text-red-500 flex items-center text-sm mb-4">
+        <FaLock className="mr-2" />
+        Requires{" "}
+        <code className="bg-gray-100 px-1 rounded text-xs mx-1">
+          x-api-key
+        </code>{" "}
+        and{" "}
+        <code className="bg-gray-100 px-1 rounded text-xs">
+          x-api-secret
+        </code>{" "}
+        in headers to access this endpoint.
+      </div>
+
+      {/* Instruction */}
+      <p className="text-gray-700 text-sm mb-4">
+        This endpoint removes a promotion by deleting the record and restoring
+        the original price of the variant on both your database and Shopify.
+      </p>
+
+      {/* Headers Required */}
+      <h4 className="font-semibold text-sm text-gray-800 mb-2">
+        Required Headers:
+      </h4>
+      <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
+        <li>
+          <code className="bg-gray-100 px-1 rounded text-xs">x-api-key</code>:{" "}
+          (string) API access token
+        </li>
+        <li>
+          <code className="bg-gray-100 px-1 rounded text-xs">x-api-secret</code>:{" "}
+          (string) API secret key
+        </li>
+        <li>
+          <code className="bg-gray-100 px-1 rounded text-xs">Content-Type</code>:{" "}
+          <code>application/json</code>
+        </li>
+      </ul>
+
+      {/* Parameters */}
+      <h4 className="font-semibold text-sm text-gray-800 mb-2">
+        URL Parameter:
+      </h4>
+      <ul className="text-sm text-gray-700 space-y-2 mb-6">
+        <li>
+          <strong>id</strong>{" "}
+          <span className="text-gray-500">(string, required)</span> – The promotion ID to be ended.
+        </li>
+      </ul>
+
+      {/* Notes */}
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 text-sm text-blue-800 rounded-md mt-6 space-y-3">
+        <div>
+          <strong>Note:</strong> The `id` used here must be the `_id` from the
+          `PromoModel` collection. Once deleted, the system will find the original
+          product using the stored SKU, restore the old price, and sync with Shopify.
+        </div>
+        <div>
+          If the `oldPrice` is missing in the product record, this operation will
+          return a <code>400</code> error.
+        </div>
+      </div>
     </div>
 
     {/* RIGHT COLUMN */}
@@ -5164,42 +5349,48 @@ Each CSV row includes:
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
           <span>Request Example</span>
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
-            POST
+            DELETE
           </span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-          {`POST https://multi-vendor-marketplace.vercel.app/promo/add`}
+          {`https://multi-vendor-marketplace.vercel.app/promo/endPromotions/64e7f223dc67c123456789ab`}
         </pre>
       </div>
 
-      {/* Success Response */}
+      {/* Response Success */}
       <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
         <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
-          <span>Success Response</span>
+          <span>Response</span>
           <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
             JSON
           </span>
         </div>
-        <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`{
-  "message": "Promotion added and product updated successfully."
-}`}</pre>
+        <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">
+          {`{
+  "message": "Promotion deleted and product price restored successfully."
+}`}
+        </pre>
       </div>
 
       {/* Error Response */}
-      <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
-        <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
-          <span>Error Response</span>
-          <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
-            JSON
+      <div className="rounded-md overflow-hidden shadow border border-red-300 bg-[#fff5f5]">
+        <div className="flex justify-between items-center bg-red-600 px-4 py-2 text-xs font-semibold text-white">
+          <span>Possible Error</span>
+          <span className="bg-red-700 px-2 py-0.5 rounded text-white">
+            400/404/500
           </span>
         </div>
-        <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`{
-  "message": "Failed to add promotion."
-}`}</pre>
+        <pre className="text-sm p-4 font-mono text-red-800 bg-[#fff5f5] whitespace-pre-wrap">
+          {`{
+  "message": "Old price not available for this product."
+}`}
+        </pre>
       </div>
     </div>
   </div>
-) : null}
+) : (
+  <></>
+)}
 
 
         </main>

@@ -65,7 +65,7 @@ const apiSidebarData = [
     endpoints: [
       "getPromotion",
       "CreatePromotion",
-      "deletePromotion",
+      "EndPromotion",
     ],
   },
   {

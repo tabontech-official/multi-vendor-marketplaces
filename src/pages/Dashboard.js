@@ -228,22 +228,16 @@ const handleUploadAndPreview = async () => {
   }
 
   showToast("success", `Uploading "${selectedFile.name}" in background...`);
-  addNotification(`Product CSV upload triggered for "${selectedFile.name}".`, "Manage product");
+  addNotification(`Product CSV upload started for "${selectedFile.name}"`, "Manage product");
 
   Papa.parse(selectedFile, {
     header: true,
     skipEmptyLines: true,
     complete: async function (results) {
       const allRows = results.data;
-      const chunkSize = 25; // 🧠 ~100 seconds per chunk max
-      const totalChunks = Math.ceil(allRows.length / chunkSize);
+      const chunkSize = 25; // 🔁 25 products per chunk (safe for Vercel 300s)
 
-      if (totalChunks > 3) {
-        showToast("error", `❌ Only up to 75 products allowed per upload (25 x 3 chunks)`);
-        setIsUploading(false);
-        setUploadStarted(false);
-        return;
-      }
+      const totalChunks = Math.ceil(allRows.length / chunkSize);
 
       for (let i = 0; i < allRows.length; i += chunkSize) {
         const chunk = allRows.slice(i, i + chunkSize);
@@ -280,12 +274,13 @@ const handleUploadAndPreview = async () => {
           addNotification(`❌ Upload error in chunk ${i / chunkSize + 1}`, "Manage product");
         }
 
-        // Add small delay (optional)
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        // Wait 2 seconds to avoid Shopify 429 rate limits
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
 
-      showToast("success", `🎉 File "${selectedFile.name}" uploaded successfully!`);
-      addNotification(`🎉 File "${selectedFile.name}" completed.`, "Manage product");
+      showToast("success", `🎉 File "${selectedFile.name}" uploaded successfully in ${totalChunks} chunks!`);
+      addNotification(`🎉 Upload complete: "${selectedFile.name}" processed`, "Manage product");
+
       setIsUploading(false);
       setUploadStarted(false);
       setSelectedFile(null);

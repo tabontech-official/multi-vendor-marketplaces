@@ -595,7 +595,7 @@ const CategorySelector = () => {
 
     if (isPopupVisible && userId) {
       fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${userId}/${productId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
         {
           method: "GET",
           headers: {

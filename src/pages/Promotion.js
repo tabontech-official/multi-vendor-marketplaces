@@ -174,7 +174,6 @@ const Promotion = () => {
   const handleSubmitPromotion = async () => {
     const userId = localStorage.getItem("userid");
 
-    // Ensure selectedVariant holds the actual variant object
     const promoPrice = promoPrices[selectedVariant.id]; // Shopify Variant ID
 
     if (!modalStartDate || !modalEndDate) {
@@ -188,7 +187,6 @@ const Promotion = () => {
           promoPrice,
           startDate: modalStartDate,
           endDate: modalEndDate,
-          userId,
         }
       );
 

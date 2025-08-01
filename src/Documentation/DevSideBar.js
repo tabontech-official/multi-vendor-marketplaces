@@ -10,15 +10,11 @@ const formatEndpointName = (str) =>
     .trim();
 
 const apiSidebarData = [
-  {
-    title: "Auth",
-    endpoints: ["SignIn"],
-  },
+ 
   {
     title: "Product",
     endpoints: [
       "getAllProduct",
-      "getProductByUserId",
       "createProduct",
       "updateProduct",
       "publishedProduct",
@@ -40,21 +36,12 @@ const apiSidebarData = [
       "bulkUploadForInventory",
     ],
   },
-  {
-    title: "Category",
-    endpoints: [
-      "createCategory",
-      "getCategory",
-      // "getCategoryById",
-      "deleteCategories",
-    ],
-  },
+ 
   {
     title: "Order",
     endpoints: [
-      "getOrderByUserId",
-      // "getOrderByOrderId",
       "getAllOrders",
+      // "getOrderByOrderId",
       "getCancellationRequests",
       "cancelOrder",
       "exportOrders",
@@ -68,18 +55,7 @@ const apiSidebarData = [
       "EndPromotion",
     ],
   },
-  {
-    title: "Finance",
-    endpoints: [
-      "addPayouts",
-      "addReferenceNumber",
-      "getPendingPayout",
-      "getPayout",
-      "getPayoutByUserId",
-      "getPayoutByQuery",
-      "getAllPayoutByQuery",
-    ],
-  },
+ 
 ];
 
 export default function ApiSidebar({ onSelect }) {

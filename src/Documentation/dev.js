@@ -122,7 +122,7 @@ export default function ApiDocsPage() {
                 <div className="mb-4">
                   <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
                   <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                    GET /product/getAllProducts
+                    GET /product/fetchAllProducts
                   </code>
                   <p className="mt-1 text-xs text-gray-500">
                     This endpoint retrieves all products across all users. It
@@ -204,7 +204,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/getAllProducts`}
+                    {`https://multi-vendor-marketplace.vercel.app/product/fetchAllProducts`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -1780,7 +1780,6 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`{
-  "userId": "65a3f0e7c2f11b001e123abc",
   "images": [
     "https://cdn.shopify.com/s/files/1/abc/image1.jpg",
     "https://cdn.shopify.com/s/files/1/abc/image2.jpg"
@@ -1826,7 +1825,7 @@ export default function ApiDocsPage() {
                 <div className="mb-4">
                   <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
                   <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                    GET /product/getImageGallery/:userId/:productId
+                    GET /product/getImageGallery/:productId
                   </code>
                   <p className="mt-1 text-xs text-gray-500">
                     Optional param <code>productId</code> filters images by
@@ -1863,11 +1862,7 @@ export default function ApiDocsPage() {
                   Path Parameters:
                 </h4>
                 <ul className="text-sm text-gray-700 space-y-2 mb-6">
-                  <li>
-                    <strong>userId</strong>{" "}
-                    <span className="text-gray-500">(string, required)</span> –
-                    User ID whose gallery to fetch.
-                  </li>
+                
                   <li>
                     <strong>productId</strong>{" "}
                     <span className="text-gray-500">(string, optional)</span> –
@@ -1878,7 +1873,7 @@ export default function ApiDocsPage() {
                       URL, like:
                       <br />
                       <code className="text-xs bg-gray-100 px-1 rounded">
-                        /product/getImageGallery/:userId/null
+                        /product/getImageGallery/null
                       </code>
                     </span>
                   </li>
@@ -1902,7 +1897,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/65b1.../65b431....`}
+                    {`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/65b431....`}
                   </pre>
                 </div>
                 {/* Example Response */}
@@ -3387,14 +3382,14 @@ SKU-GREEN-S,5,,,archived`}</pre>
             </div>
           ) : null}
 
-          {selected === "getOrderByUserId" ? (
+          {selected === "getAllOrders" ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
               {/* LEFT COLUMN */}
               <div className="bg-white rounded-md shadow-md p-6">
                 <div className="mb-4">
                   <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
                   <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                    GET /order/order/:userId
+                    GET /order/order
                   </code>
                 </div>
 
@@ -3419,15 +3414,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
                   response.
                 </p>
 
-                <h4 className="font-semibold text-sm text-gray-800 mb-2">
-                  Path Parameter:
-                </h4>
-                <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-                  <li>
-                    <strong>userId</strong> – MongoDB ID of the user whose
-                    products you want to filter orders by
-                  </li>
-                </ul>
+               
 
                 <h4 className="font-semibold text-sm text-gray-800 mb-2">
                   Required Headers:
@@ -3458,7 +3445,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/order/order/64acbe...`}
+                    {`https://multi-vendor-marketplace.vercel.app/order/order`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -3617,140 +3604,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
             </div>
           ) : null}
 
-          {selected === "getAllOrders" ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              {/* LEFT COLUMN */}
-              <div className="bg-white rounded-md shadow-md p-6">
-                <div className="mb-4">
-                  <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
-                  <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                    GET /order/getAllOrder
-                  </code>
-                </div>
-
-                <div className="text-red-500 flex items-center text-sm mb-4">
-                  <FaLock className="mr-2" />
-                  Requires{" "}
-                  <code className="bg-gray-100 px-1 rounded text-xs mx-1">
-                    x-api-key
-                  </code>{" "}
-                  and{" "}
-                  <code className="bg-gray-100 px-1 rounded text-xs">
-                    x-api-secret
-                  </code>{" "}
-                  in headers
-                </div>
-
-                <p className="text-gray-700 text-sm mb-4">
-                  This endpoint fetches all orders from the system and groups
-                  them by order. Each order object contains line items grouped
-                  by merchant. Each merchant includes basic details, total order
-                  value, and count.
-                </p>
-
-                <h4 className="font-semibold text-sm text-gray-800 mb-2">
-                  Required Headers:
-                </h4>
-                <ul className="list-disc list-inside text-sm text-gray-700 mb-6">
-                  <li>
-                    <code className="bg-gray-100 px-1 rounded text-xs">
-                      x-api-key
-                    </code>{" "}
-                    – API token
-                  </li>
-                  <li>
-                    <code className="bg-gray-100 px-1 rounded text-xs">
-                      x-api-secret
-                    </code>{" "}
-                    – API secret
-                  </li>
-                </ul>
-              </div>
-
-              <div className="space-y-6">
-                <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
-                  <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
-                    <span>Request Example</span>
-                    <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
-                      GET
-                    </span>
-                  </div>
-                  <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/order/getAllOrder`}
-                  </pre>
-                </div>
-                <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
-                  <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
-                    <span>Success Response</span>
-                    <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
-                      JSON
-                    </span>
-                  </div>
-                  <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`{
-  "message": "Orders grouped per order (not merged by merchant)",
-  "data": [
-    {
-      "serialNo": 20250721001,
-      "merchants": [
-        {
-          "id": "merchant_id_1",
-          "info": {
-            "_id": "merchant_id_1",
-            "name": "John Doe",
-            "email": "john@example.com",
-            "role": "Merchant",
-            "dispatchAddress": "123 Street",
-            "dispatchCountry": "USA"
-          },
-          "totalOrdersCount": 5,
-          "totalOrderValue": 189.99
-        }
-      ],
-      "lineItemsByMerchant": {
-        "merchant_id_1": [
-          {
-            "variant_id": "123",
-            "title": "Product Name",
-            "quantity": 2,
-            "price": 45,
-            "image": {
-              "id": "img123",
-              "src": "https://cdn.example.com/image.jpg",
-              "alt": "Product Image"
-            },
-            "customer": [
-              {
-                "first_name": "Jane",
-                "last_name": "Smith",
-                "email": "jane@example.com",
-                "phone": "+123456789",
-                "created_at": "2024-12-01T12:34:56Z",
-                "default_address": {}
-              }
-            ],
-            "orderId": "20250721001"
-          }
-        ]
-      }
-    }
-  ]
-}`}</pre>
-                </div>
-
-                <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
-                  <div className="flex justify-between items-center bg-[#2e3a4c] px-4 py-2 text-xs font-semibold text-white">
-                    <span>Error Response</span>
-                    <span className="bg-gray-700 px-2 py-0.5 rounded text-white">
-                      JSON
-                    </span>
-                  </div>
-                  <pre className="text-sm p-4 font-mono text-white bg-[#1e1e1e] whitespace-pre-wrap">{`{
-  "message": "No orders found across merchants"
-}`}</pre>
-                </div>
-              </div>
-            </div>
-          ) : null}
+        
 
           {selected === "getCancellationRequests" ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">

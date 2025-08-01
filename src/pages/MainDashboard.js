@@ -146,7 +146,7 @@ const MainDashboard = () => {
           const decoded = jwtDecode(token);
           decodedRole = decoded.payLoad.role;
         }
-
+console.log(decodedRole)
         let apiUrl = "";
 
         if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {

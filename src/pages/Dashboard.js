@@ -249,7 +249,7 @@ const handleUploadAndPreview = async () => {
 
         try {
           const response = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/product/upload-product-csv/${userId}`,
+            `https://multi-vendor-marketplace.vercel.app/product/upload-product-csv`,
             {
               method: "POST",
               body: formData,

@@ -216,60 +216,64 @@ const Variants = () => {
           })}
         </ul> */}
         <ul className="space-y-2">
-  {product?.variants?.map((variant, idx) => {
-      const normalizeString = (str) => String(str).replace(/['"]/g, "").trim();
+          {product?.variants?.map((variant, idx) => {
+            const normalizeString = (str) =>
+              String(str).replace(/['"]/g, "").trim();
 
-    const titleKey = normalizeString(variant.title || "");
-    
-    let matchedImage = null;
+            const titleKey = normalizeString(variant.title || "");
 
-    // 1️⃣ image_id match
-    if (variant.image_id) {
-      matchedImage =
-        product?.variantImages?.find(img => String(img.id) === String(variant.image_id)) ||
-        product?.images?.find(img => String(img.id) === String(variant.image_id));
-    }
+            let matchedImage = null;
 
-    // 2️⃣ alt/title match
-    if (!matchedImage && product?.variantImages) {
-      matchedImage = product.variantImages.find(img =>
-        normalizeString(img.alt || "").includes(titleKey)
-      );
-    }
+            // 1️⃣ image_id match
+            if (variant.image_id) {
+              matchedImage =
+                product?.variantImages?.find(
+                  (img) => String(img.id) === String(variant.image_id)
+                ) ||
+                product?.images?.find(
+                  (img) => String(img.id) === String(variant.image_id)
+                );
+            }
 
-    // 3️⃣ index match
-    if (!matchedImage && product?.variantImages?.[idx]) {
-      matchedImage = product.variantImages[idx];
-    }
+            // 2️⃣ alt/title match
+            if (!matchedImage && product?.variantImages) {
+              matchedImage = product.variantImages.find((img) =>
+                normalizeString(img.alt || "").includes(titleKey)
+              );
+            }
 
-    return (
-      <li
-        key={variant.id}
-        onClick={() => {
-          handleVariantClick(variant.id);
-          navigate(`/product/${productId}/variants/${variant.id}`, {
-            state: { productId, variantId: variant.id },
-          });
-        }}
-        className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
-      >
-        <div className="w-8 h-8 bg-gray-200 rounded-md flex items-center justify-center overflow-hidden">
-          {matchedImage?.src ? (
-            <img
-              src={matchedImage.src}
-              alt={matchedImage.alt || variant.title}
-              className="w-full h-full object-cover rounded"
-            />
-          ) : (
-            <CiImageOn className="text-gray-400 text-2xl" />
-          )}
-        </div>
-        <button>{variant.title || "Unknown variant"}</button>
-      </li>
-    );
-  })}
-</ul>
+            // 3️⃣ index match
+            if (!matchedImage && product?.variantImages?.[idx]) {
+              matchedImage = product.variantImages[idx];
+            }
 
+            return (
+              <li
+                key={variant.id}
+                onClick={() => {
+                  handleVariantClick(variant.id);
+                  navigate(`/product/${productId}/variants/${variant.id}`, {
+                    state: { productId, variantId: variant.id },
+                  });
+                }}
+                className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
+              >
+                <div className="w-8 h-8 bg-gray-200 rounded-md flex items-center justify-center overflow-hidden">
+                  {matchedImage?.src ? (
+                    <img
+                      src={matchedImage.src}
+                      alt={matchedImage.alt || variant.title}
+                      className="w-full h-full object-cover rounded"
+                    />
+                  ) : (
+                    <CiImageOn className="text-gray-400 text-2xl" />
+                  )}
+                </div>
+                <button>{variant.title || "Unknown variant"}</button>
+              </li>
+            );
+          })}
+        </ul>
       </div>
 
       <div className="w-full max-w-2xl shadow-lg p-3 rounded-md pl-4">

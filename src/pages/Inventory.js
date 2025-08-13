@@ -186,7 +186,6 @@ const Inventory = () => {
     fetchProductData();
   }, [page]);
 
-
   const handleSearch = () => {
     let filtered =
       searchVal === ""
@@ -419,8 +418,8 @@ const Inventory = () => {
 
     try {
       const userId = localStorage.getItem("userid");
-       const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
       if (!userId) {
         alert("User ID not found");
         return;
@@ -434,17 +433,14 @@ const Inventory = () => {
         "inventory"
       );
 
-      fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
-        {
-          method: "POST",
-          body: formData,
-             headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-          },
-        }
-      )
+      fetch("https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory", {
+        method: "POST",
+        body: formData,
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+        },
+      })
         .then((res) => res.json())
         .then((result) => {
           if (result?.message) {
@@ -526,6 +522,7 @@ const Inventory = () => {
       setIsExporting(false);
     }
   };
+  const normalizeString = (str) => String(str).replace(/['"]/g, "").trim();
 
   return user ? (
     <main className="w-full p-4 md:p-8">
@@ -611,69 +608,6 @@ const Inventory = () => {
               <FaFileImport className="w-5 h-5" />
               Export
             </button>
-            {/* {filteredProducts.some((p) => p.isEditable) && (
-              <button
-                onClick={() => {
-                  const selectedId = selectedProducts[0];
-                  const variant = filteredProducts.find(
-                    (v) => `${v.id}` === `${selectedId}`
-                  );
-
-                  if (variant) {
-                    setSelectedProduct(variant);
-                    setPrice(variant.price || "");
-                    setCompareAtPrice(variant.compare_at_price || "");
-                    setQuantity(variant.inventory_quantity || "");
-                    setShowPopup(true);
-                  }
-                }}
-                className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              >
-                {activeTab === "price"
-                  ? "Update all"
-                  : activeTab === "quantity"
-                  ? "Update all"
-                  : "Update"}
-              </button>
-            )} */}
-            {/* {filteredProducts.some((v) => v.isEditable) && (
-              <button
-                onClick={() => {
-                  const reference = filteredProducts.find((v) => v.isEditable);
-
-                  if (!reference) {
-                    alert("Please edit a variant first.");
-                    return;
-                  }
-
-                  const updated = [...filteredProducts];
-
-                  updated.forEach((variant, index) => {
-                    if (activeTab === "price") {
-                      variant.price = reference.price;
-                      variant.compare_at_price = reference.compare_at_price;
-                    } else if (activeTab === "quantity") {
-                      variant.inventory_quantity = reference.inventory_quantity;
-                    }
-
-                    setTimeout(() => {
-                      if (activeTab === "price") {
-                        handlePriceUpdate(variant.id);
-                      } else {
-                        handleQuantityUpdate(variant.id);
-                      }
-                    }, index * 100);
-                  });
-                  updated.forEach((variant) => {
-                    variant.isEditable = false;
-                  });
-                  setFilteredProducts(updated);
-                }}
-                className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              >
-                {activeTab === "price" ? "Update All " : "Update All "}
-              </button>
-            )} */}
           </div>
         </div>
 
@@ -715,35 +649,6 @@ const Inventory = () => {
         </button>
       </div>
       <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0"></div>
-      {/* {selectedProducts.length > 0 && (
-        <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
-          <div className="flex gap-2 items-center w-2/4 max-sm:w-full md:ml-auto justify-end">
-            <button
-              onClick={() => {
-                const selectedId = selectedProducts[0];
-                const variant = filteredProducts.find(
-                  (v) => `${v.id}` === `${selectedId}`
-                );
-
-                if (variant) {
-                  setSelectedProduct(variant);
-                  setPrice(variant.price || "");
-                  setCompareAtPrice(variant.compare_at_price || "");
-                  setQuantity(variant.inventory_quantity || "");
-                  setShowPopup(true);
-                }
-              }}
-              className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-            >
-              {activeTab === "price"
-                ? "Update Price"
-                : activeTab === "quantity"
-                ? "Update Quantity"
-                : "Update"}
-            </button>
-          </div>
-        </div>
-      )} */}
 
       {activeTab === "price" && (
         <div className="p-4">
@@ -789,7 +694,7 @@ const Inventory = () => {
                         />
                       </td>
 
-                      <td className="p-3">
+                      {/* <td className="p-3">
                         {variant.variantImages &&
                         variant.variantImages.length > 0 ? (
                           <img
@@ -804,6 +709,87 @@ const Inventory = () => {
                             No Image
                           </span>
                         )}
+                      </td> */}
+                      <td className="p-3">
+                        {(() => {
+                          const normalizeString = (str) =>
+                            String(str || "")
+                              .toLowerCase()
+                              .replace(/['"]/g, "")
+                              .trim();
+
+                          const option1Key = normalizeString(variant.option1);
+                          const option2Key = normalizeString(variant.option2);
+
+                          let matchedImage = null;
+                          let matchType = "No match";
+
+                          if (variant.image_id) {
+                            matchedImage = variant.variantImages?.find(
+                              (img) =>
+                                String(img.id) === String(variant.image_id)
+                            );
+                            if (matchedImage) matchType = "Matched by image_id";
+                          }
+
+                          if (
+                            !matchedImage &&
+                            variant.variantImages?.length > 0
+                          ) {
+                            matchedImage = variant.variantImages.find((img) => {
+                              const altText = normalizeString(img.alt);
+                              return (
+                                altText.includes(option1Key) &&
+                                altText.includes(option2Key)
+                              );
+                            });
+                            if (matchedImage)
+                              matchType = "Matched by alt (color + size)";
+                          }
+
+                          if (
+                            !matchedImage &&
+                            variant.variantImages?.length > 0
+                          ) {
+                            matchedImage = variant.variantImages.find((img) =>
+                              normalizeString(img.alt).includes(option1Key)
+                            );
+                            if (matchedImage)
+                              matchType = "Matched by alt (color)";
+                          }
+
+                          if (
+                            !matchedImage &&
+                            variant.variantImages?.length > 0
+                          ) {
+                            matchedImage = variant.variantImages[0];
+                            matchType = "Fallback first image";
+                          }
+
+                          console.log(
+                            `Variant: ${variant.title}`,
+                            `| Match type: ${matchType}`,
+                            matchedImage
+                              ? `| Image: ${matchedImage.src}`
+                              : "| No image found"
+                          );
+
+                          return matchedImage?.src ? (
+                            <img
+                              src={matchedImage.src}
+                              alt={
+                                matchedImage.alt ||
+                                variant.title ||
+                                "Variant image"
+                              }
+                              className="w-16 h-16 object-contain rounded border"
+                            />
+                          ) : (
+                            <span className="text-gray-400 text-sm">
+                              No Image
+                            </span>
+                          );
+                        })()}
                       </td>
 
                       <td
@@ -1086,7 +1072,7 @@ const Inventory = () => {
                             />
                           </td>
 
-                          <td className="p-3">
+                          {/* <td className="p-3">
                             {variant.variantImages &&
                             variant.variantImages.length > 0 ? (
                               <img
@@ -1102,8 +1088,98 @@ const Inventory = () => {
                                 No Image
                               </span>
                             )}
-                          </td>
+                          </td> */}
+                          <td className="p-3">
+                            {(() => {
+                              const normalizeString = (str) =>
+                                String(str || "")
+                                  .toLowerCase()
+                                  .replace(/['"]/g, "")
+                                  .trim();
 
+                              const option1Key = normalizeString(
+                                variant.option1
+                              );
+                              const option2Key = normalizeString(
+                                variant.option2
+                              );
+
+                              let matchedImage = null;
+                              let matchType = "No match";
+
+                              if (variant.image_id) {
+                                matchedImage = variant.variantImages?.find(
+                                  (img) =>
+                                    String(img.id) === String(variant.image_id)
+                                );
+                                if (matchedImage)
+                                  matchType = "Matched by image_id";
+                              }
+
+                              if (
+                                !matchedImage &&
+                                variant.variantImages?.length > 0
+                              ) {
+                                matchedImage = variant.variantImages.find(
+                                  (img) => {
+                                    const altText = normalizeString(img.alt);
+                                    return (
+                                      altText.includes(option1Key) &&
+                                      altText.includes(option2Key)
+                                    );
+                                  }
+                                );
+                                if (matchedImage)
+                                  matchType = "Matched by alt (color + size)";
+                              }
+
+                              if (
+                                !matchedImage &&
+                                variant.variantImages?.length > 0
+                              ) {
+                                matchedImage = variant.variantImages.find(
+                                  (img) =>
+                                    normalizeString(img.alt).includes(
+                                      option1Key
+                                    )
+                                );
+                                if (matchedImage)
+                                  matchType = "Matched by alt (color)";
+                              }
+
+                              if (
+                                !matchedImage &&
+                                variant.variantImages?.length > 0
+                              ) {
+                                matchedImage = variant.variantImages[0];
+                                matchType = "Fallback first image";
+                              }
+
+                              console.log(
+                                `Variant: ${variant.title}`,
+                                `| Match type: ${matchType}`,
+                                matchedImage
+                                  ? `| Image: ${matchedImage.src}`
+                                  : "| No image found"
+                              );
+
+                              return matchedImage?.src ? (
+                                <img
+                                  src={matchedImage.src}
+                                  alt={
+                                    matchedImage.alt ||
+                                    variant.title ||
+                                    "Variant image"
+                                  }
+                                  className="w-16 h-16 object-contain rounded border"
+                                />
+                              ) : (
+                                <span className="text-gray-400 text-sm">
+                                  No Image
+                                </span>
+                              );
+                            })()}
+                          </td>
                           <td className="p-3">{variant.sku || "N/A"}</td>
 
                           <td className="p-3">

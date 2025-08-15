@@ -150,21 +150,56 @@ const Promotion = () => {
     };
   }, [isOpen]);
 
+  // useEffect(() => {
+  //   const fetchPromotions = async () => {
+  //     try {
+  //       const res = await fetch(
+  //         "https://multi-vendor-marketplace.vercel.app/promo"
+  //       );
+  //       const data = await res.json();
+  //       setPromotions(data);
+  //     } catch (err) {
+  //       console.error("Failed to fetch promotions:", err);
+  //     }
+  //   };
+
+  //   fetchPromotions();
+  // }, []);
   useEffect(() => {
     const fetchPromotions = async () => {
       try {
-        const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/promo"
-        );
+        let url = "";
+        const apiKey = localStorage.getItem("apiKey");
+        const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+        if (userRole === "Merchant" || userRole === "Merchant Staff") {
+          url = "https://multi-vendor-marketplace.vercel.app/promo/fetchAllPromotions";
+        } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
+          url = "https://multi-vendor-marketplace.vercel.app/promo";
+        }
+
+        if (!url) return;
+
+        const res = await fetch(url, {
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        });
+
         const data = await res.json();
-        setPromotions(data);
+
+        // Always set as array so .filter works
+        setPromotions(Array.isArray(data) ? data : [data]);
       } catch (err) {
         console.error("Failed to fetch promotions:", err);
+        setPromotions([]); // Prevent stale state on error
       }
     };
 
     fetchPromotions();
-  }, []);
+  }, [userRole]);
 
   const [selectedProduct, setSelectedProduct] = useState(null);
   const showToast = (type, message) => {
@@ -173,8 +208,9 @@ const Promotion = () => {
   };
   const handleSubmitPromotion = async () => {
     const userId = localStorage.getItem("userid");
-
-    const promoPrice = promoPrices[selectedVariant.id]; // Shopify Variant ID
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+    const promoPrice = promoPrices[selectedVariant.id];
 
     if (!modalStartDate || !modalEndDate) {
       return alert("Please enter both start and end date.");
@@ -182,11 +218,18 @@ const Promotion = () => {
 
     try {
       const res = await axios.post(
-        `https://multi-vendor-marketplace.vercel.app/promo/${selectedVariant.id}`, // variant ID as param
+        `https://multi-vendor-marketplace.vercel.app/promo/${selectedVariant.id}`,
         {
           promoPrice,
           startDate: modalStartDate,
           endDate: modalEndDate,
+        },
+        {
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
         }
       );
 
@@ -194,7 +237,7 @@ const Promotion = () => {
       setModalOpen(false);
       setModalStartDate("");
       setModalEndDate("");
-      window.location.reload();
+      // window.location.reload();
     } catch (error) {
       console.error("Error adding promotion:", error);
       alert("Failed to add promotion.");
@@ -219,12 +262,9 @@ const Promotion = () => {
     try {
       await Promise.all(
         selectedProducts.map(async (id) => {
-          const response = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/promo/${id}`,
-            {
-              method: "DELETE",
-            }
-          );
+          const response = await fetch(`https://multi-vendor-marketplace.vercel.app/promo/${id}`, {
+            method: "DELETE",
+          });
           if (!response.ok) throw new Error("Failed to delete product");
         })
       );
@@ -380,6 +420,7 @@ const Promotion = () => {
                       product.createdRole === "Staff"
                     );
                   }
+
                   if (userRole === "Client") {
                     return (
                       product.createdRole === "Client" ||
@@ -391,6 +432,16 @@ const Promotion = () => {
                     return (
                       product.createdRole === "Client" ||
                       product.createdRole === "Staff"
+                    );
+                  }
+
+                  if (
+                    userRole === "Merchant" ||
+                    userRole === "Merchant Staff"
+                  ) {
+                    return (
+                      product.createdRole === "Merchant" ||
+                      product.createdRole === "Merchant Staff"
                     );
                   }
 

@@ -122,6 +122,11 @@ const SubNavbar = () => {
       icon: <CiBank className="text-purple-600" />,
       path: "/finance",
     },
+    {
+      name: "Approval",
+      icon: <CiBank className="text-purple-600" />,
+      path: "/approval",
+    },
      {
       name: "Documentation",
       icon: <SlDocs className="text-green-600" />,

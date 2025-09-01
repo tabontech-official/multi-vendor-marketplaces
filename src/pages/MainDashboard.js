@@ -234,7 +234,6 @@ console.log(decodedRole)
             <p className="text-sm text-gray-700 font-medium">Orders</p>
           </div>
 
-          {/* Stats Header Row */}
           <div className="flex justify-between text-xs text-gray-700 font-medium text-center mb-1">
             <div className="w-1/3">Orders</div>
             <div className="w-[1px] bg-gray-300 mx-1" /> {/* Separator */}

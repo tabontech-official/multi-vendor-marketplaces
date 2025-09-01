@@ -50,6 +50,8 @@ import Collection from "./pages/collection";
 import ApiDocsPage from "./Documentation/dev";
 import ApiMainPage from "./Documentation/Main";
 import ApiDocs from "./Documentation/ApiDocs";
+import Approval from "./pages/approval";
+import ApprovalPage from "./pages/ApprovalPage";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -190,6 +192,10 @@ const App = () => {
               path="/finance"
               element={<ProtectedForms element={<Finance />} />}
             />
+             <Route
+              path="/approval"
+              element={<ProtectedForms element={<ApprovalPage />} />}
+            />
             <Route
               path="/order/:orderId"
               element={<ProtectedForms element={<OrdersDetails />} />}
@@ -210,6 +216,10 @@ const App = () => {
             <Route
               path="/Order_Details"
               element={<ProtectedForms element={<SubscriptionHistory />} />}
+            />
+            <Route
+              path="/approval-setting"
+              element={<ProtectedForms element={<Approval />} />}
             />
             <Route
               path="/catalog-performance"

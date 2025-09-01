@@ -14,7 +14,7 @@ import { CiImport } from "react-icons/ci";
 import { RxCross1 } from "react-icons/rx";
 import { useNotification } from "../context api/NotificationContext";
 
-const Dashboard = () => {
+const ApprovalPage = () => {
   let admin;
   const { addNotification } = useNotification();
 
@@ -110,7 +110,7 @@ const Dashboard = () => {
       const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
 
       const url = isAdmin
-        ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
+        ? `https://multi-vendor-marketplace.vercel.app/product/getProductWithApprovalStatus/?page=${page}&limit=${limit}`
         : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
 
       const response = await fetch(url, {
@@ -443,7 +443,7 @@ const Dashboard = () => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "draft") {
             const response = await fetch(
-              ` https://multi-vendor-marketplace.vercel.app/product/publishedProduct/${id}`,
+              ` https://multi-vendor-marketplace.vercel.app/product/approvedProduct/${id}`,
               {
                 method: "PUT",
                 body: JSON.stringify({ userId }),
@@ -554,7 +554,7 @@ const Dashboard = () => {
         const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
 
         const url = isAdmin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
+          ? `https://multi-vendor-marketplace.vercel.app/product/getProductWithApprovalStatus/?page=${page}&limit=${limit}`
           : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
 
         const response = await fetch(url, {
@@ -695,8 +695,11 @@ const Dashboard = () => {
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold mb-1">Manage products</h1>
-          <p className="text-gray-600">Here you can manage products.</p>
+          <h1 className="text-2xl font-semibold mb-1">Manage Approvals</h1>
+          <p className="text-gray-600">
+            Here you can review and approve pending products.
+          </p>
+
           <div className="w-2/4 max-sm:w-full mt-2">
             <input
               type="text"
@@ -709,24 +712,6 @@ const Dashboard = () => {
         </div>
         <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
           <div className="flex flex-col gap-4 items-center w-full justify-end">
-            <div className="flex gap-4 items-center justify-end w-full">
-              <button
-                onClick={openPopup}
-                className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              >
-                <CiImport className="w-5 h-5" />
-                Import
-              </button>
-
-              <button
-                onClick={togglePopup}
-                className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              >
-                <FaFileImport className="w-5 h-5" />
-                Export
-              </button>
-            </div>
-
             {selectedProducts.length > 0 && (
               <div className="flex gap-4 items-center justify-end w-full">
                 <div className="flex gap-4 items-center justify-end w-full">
@@ -743,7 +728,7 @@ const Dashboard = () => {
                     </button>
                   )}
 
-                  {filteredProducts.some(
+                  {/* {filteredProducts.some(
                     (product) =>
                       selectedProducts.includes(product._id) &&
                       product.status === "active"
@@ -761,7 +746,7 @@ const Dashboard = () => {
                     className="bg-red-500 hover:bg-red-400 text-white py-2 px-9 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
                   >
                     Delete
-                  </button>
+                  </button> */}
                 </div>
               </div>
             )}
@@ -817,7 +802,7 @@ const Dashboard = () => {
                   <th className="p-3">Inventory</th>
                   <th className="p-3">Vendor</th>
                   {admin && <th className="p-3">PUBLISHER</th>}
-                  <th className="p-3">Edit</th>
+                  {/* <th className="p-3">Edit</th> */}
                 </tr>
               </thead>
 
@@ -893,7 +878,7 @@ const Dashboard = () => {
                     </td>
                     <td className="p-3">{product.vendor}</td>
                     {admin && `#${product.shopifyId}`}
-                    <td className="p-3">
+                    {/* <td className="p-3">
                       <button
                         className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
                         onClick={() => OnEdit(product)}
@@ -901,7 +886,7 @@ const Dashboard = () => {
                         <MdEdit className="mr-1" />
                         Edit
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
 
@@ -1165,4 +1150,4 @@ const Dashboard = () => {
   ) : null;
 };
 
-export default Dashboard;
+export default ApprovalPage;

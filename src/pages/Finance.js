@@ -416,7 +416,6 @@ useEffect(() => {
       <div className="flex flex-col md:flex-row md:justify-between items-start border-gray-200 pb-4">
         <div className="flex-1">
           <h1 className="text-2xl font-semibold mb-1">Finance</h1>
-          <p className="text-gray-600">Here you can see finance.</p>
         </div>
       </div>
 

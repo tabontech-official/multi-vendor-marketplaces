@@ -218,7 +218,7 @@ const ApprovalSetting = () => {
                 </span>
               </label>
 
-              <label className="flex items-center cursor-pointer">
+              {/* <label className="flex items-center cursor-pointer">
                 <input
                   type="radio"
                   value="Manual"
@@ -231,7 +231,7 @@ const ApprovalSetting = () => {
                   Products remain <span className="font-semibold">Draft</span>{" "}
                   until reviewed by Admin.
                 </span>
-              </label>
+              </label> */}
             </div>
           </div>
         </main>

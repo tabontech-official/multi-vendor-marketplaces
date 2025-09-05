@@ -530,7 +530,7 @@ const Inventory = () => {
         <div className="flex-1">
           <h1 className="text-2xl font-semibold mb-1">Inventory</h1>
           <p className="text-gray-600">
-            Here are your total Collection in Inventory.
+            HHere is your total Collection in Inventory.
           </p>
           <div className="w-2/4 max-sm:w-full mt-2">
             <input

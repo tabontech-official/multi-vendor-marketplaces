@@ -31,7 +31,7 @@ const Dashboard = () => {
 
   // admin = isAdmin();
 
-  const limit = 20;
+  // const limit = 20;
 
   const navigate = useNavigate();
   const { userData, loading, error, variantId } = UseFetchUserData();
@@ -53,6 +53,8 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [limit, setLimit] = useState(50); // default 50
+
   const modalRef = useRef();
   const openPopup = () => setIsOpen(true);
   const closePopup = () => setIsOpen(false);
@@ -64,13 +66,78 @@ const Dashboard = () => {
   const [exportOption, setExportOption] = useState("current");
   const [isExporting, setIsExporting] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
-
+const [sortBy, setSortBy] = useState("");
+const [sortValue, setSortValue] = useState("");
   const [exportAs, setExportAs] = useState("csv");
   const handleCSVUpload = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
   };
   const togglePopup = () => setIsexportOpen(!isOpen);
+
+const getUniqueOptions = (criteria) => {
+  switch (criteria) {
+    case "listing_name":
+      return [...new Set(products.map((p) => p.title).filter(Boolean))];
+    case "approval":
+      return [...new Set(products.map((p) => p.approvalStatus).filter(Boolean))];
+    case "sku":
+      return [
+        ...new Set(products.map((p) => p.variants?.[0]?.sku).filter(Boolean)),
+      ];
+    case "price":
+      return [
+        ...new Set(
+          products.map((p) => p.variants?.[0]?.price?.toString()).filter(Boolean)
+        ),
+      ];
+    case "product_type":
+      return [...new Set(products.map((p) => p.product_type).filter(Boolean))];
+    case "vendor":
+      return [...new Set(products.map((p) => p.vendor).filter(Boolean))];
+
+    // ✅ Published By (unique publishers usernames)
+    case "published_by":
+      return [...new Set(products.map((p) => p.username).filter(Boolean))];
+
+    default:
+      return [];
+  }
+};
+
+
+useEffect(() => {
+  if (sortBy && sortValue) {
+    const filtered = products.filter((p) => {
+      switch (sortBy) {
+        case "listing_name":
+          return p.title === sortValue;
+        case "approval":
+          return p.approvalStatus === sortValue;
+        case "sku":
+          return p.variants?.[0]?.sku === sortValue;
+        case "price":
+          return p.variants?.[0]?.price?.toString() === sortValue;
+        case "product_type":
+          return p.product_type === sortValue;
+        case "vendor":
+          return p.vendor === sortValue;
+
+        // ✅ Published By filter
+        case "published_by":
+          return p.username === sortValue;
+
+        default:
+          return true;
+      }
+    });
+    setFilteredProducts(filtered);
+  } else {
+    setFilteredProducts(products);
+  }
+}, [sortBy, sortValue, products]);
+
+
 
   const toggleSelection = (productId) => {
     setSelectedProducts((prevSelected) =>
@@ -100,6 +167,59 @@ const Dashboard = () => {
     }
   }, []);
 
+  // const fetchProductData = async () => {
+  //   setLoading(true);
+  //   const id = localStorage.getItem("userid");
+  //   const apiKey = localStorage.getItem("apiKey");
+  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+  //   try {
+  //     const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
+
+  //     const url = isAdmin
+  //       ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
+  //       : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
+
+  //     const response = await fetch(url, {
+  //       method: "GET",
+  //       headers: {
+  //         "x-api-key": apiKey,
+  //         "x-api-secret": apiSecretKey,
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+
+  //     if (response.ok) {
+  //       const data = await response.json();
+
+  //       const sortedProducts = data.products.sort(
+  //         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  //       );
+
+  //       setProducts(sortedProducts);
+
+  //       setFilteredProducts((prev) => [
+  //         ...prev,
+  //         ...sortedProducts.filter(
+  //           (newProduct) =>
+  //             !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+  //         ),
+  //       ]);
+
+  //       setHasMore(page < data.totalPages);
+  //     } else {
+  //       console.error("Unauthorized or server error:", response.status);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching products:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // state
+
+  // fetch uses limit
   const fetchProductData = async () => {
     setLoading(true);
     const id = localStorage.getItem("userid");
@@ -129,15 +249,13 @@ const Dashboard = () => {
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
 
-        setProducts(sortedProducts);
-
-        setFilteredProducts((prev) => [
-          ...prev,
-          ...sortedProducts.filter(
-            (newProduct) =>
-              !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-          ),
-        ]);
+        if (page === 1) {
+          setProducts(sortedProducts);
+          setFilteredProducts(sortedProducts);
+        } else {
+          setProducts((prev) => [...prev, ...sortedProducts]);
+          setFilteredProducts((prev) => [...prev, ...sortedProducts]);
+        }
 
         setHasMore(page < data.totalPages);
       } else {
@@ -149,6 +267,8 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+
+  // reset when limit changes
 
   // const handleUploadAndPreview = async () => {
   //   if (!selectedFile) return;
@@ -540,86 +660,70 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (userRole) {
-      fetchProductData();
+      fetchProductData(); // this already handles page + limit
     }
-  }, [userRole, page]);
+  }, [userRole, page, limit]);
 
-  useEffect(() => {
-    const fetchProductData2 = async () => {
-      const id = localStorage.getItem("userid");
-      const apiKey = localStorage.getItem("apiKey");
-      const apiSecretKey = localStorage.getItem("apiSecretKey");
+  // useEffect(() => {
+  //   const fetchProductData2 = async () => {
+  //     const id = localStorage.getItem("userid");
+  //     const apiKey = localStorage.getItem("apiKey");
+  //     const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-      try {
-        const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
+  //     try {
+  //       const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
 
-        const url = isAdmin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
+  //       const url = isAdmin
+  //         ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
+  //         : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
 
-        const response = await fetch(url, {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-        });
+  //       const response = await fetch(url, {
+  //         method: "GET",
+  //         headers: {
+  //           "x-api-key": apiKey,
+  //           "x-api-secret": apiSecretKey,
+  //           "Content-Type": "application/json",
+  //         },
+  //       });
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Second Product render", data);
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         console.log("Second Product render", data);
 
-          const sortedProducts = data.products.sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-          );
+  //         const sortedProducts = data.products.sort(
+  //           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  //         );
 
-          setProducts((prev) => [
-            ...prev,
-            ...sortedProducts.filter(
-              (newProduct) =>
-                !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-            ),
-          ]);
+  //         setProducts((prev) => [
+  //           ...prev,
+  //           ...sortedProducts.filter(
+  //             (newProduct) =>
+  //               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+  //           ),
+  //         ]);
 
-          setFilteredProducts((prev) => [
-            ...prev,
-            ...sortedProducts.filter(
-              (newProduct) =>
-                !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-            ),
-          ]);
+  //         setFilteredProducts((prev) => [
+  //           ...prev,
+  //           ...sortedProducts.filter(
+  //             (newProduct) =>
+  //               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+  //           ),
+  //         ]);
 
-          setHasMore(page < data.totalPages);
-          console.log("Has more:", page < data.totalPages);
-        } else {
-          console.error("Unauthorized or error status:", response.status);
-        }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
+  //         setHasMore(page < data.totalPages);
+  //         console.log("Has more:", page < data.totalPages);
+  //       } else {
+  //         console.error("Unauthorized or error status:", response.status);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching products:", error);
+  //     }
+  //   };
 
-    if (userRole) {
-      fetchProductData2(); // Trigger only after role is known
-    }
-  }, [page, userRole]);
-
-  const handleScroll = async () => {
-    if (
-      window.innerHeight + document.documentElement.scrollTop + 400 >=
-      document.documentElement.scrollHeight
-    ) {
-      if (hasMore && !loading) {
-        setPage((prevPage) => prevPage + 1);
-      }
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
+  //   if (userRole) {
+  //     fetchProductData2(); // Trigger only after role is known
+  //   }
+  // }, [page, userRole]);
 
   const handleExport = async () => {
     try {
@@ -694,19 +798,78 @@ const Dashboard = () => {
   return user ? (
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
-        <div className="flex-1">
-          <h1 className="text-2xl font-semibold mb-1">Manage products</h1>
-          <p className="text-gray-600">Here you can manage products.</p>
-          <div className="w-2/4 max-sm:w-full mt-2">
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchVal}
-              onChange={(e) => setSearchVal(e.target.value)}
-              className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
+      <div className="flex-1">
+  <h1 className="text-2xl font-semibold mb-1">Manage products</h1>
+  <p className="text-gray-600 mb-4">Manage your products here.</p>
+
+  <div className="flex flex-col md:flex-row md:items-center md:space-x-4 gap-3">
+    {/* Search Bar */}
+    <div className="w-full md:w-1/3">
+      <input
+        type="text"
+        placeholder="Search products..."
+        value={searchVal}
+        onChange={(e) => setSearchVal(e.target.value)}
+        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+
+    {/* Sort By Dropdown */}
+    <div className="w-full md:w-1/4">
+      <select
+        value={sortBy}
+        onChange={(e) => {
+          setSortBy(e.target.value);
+          setSortValue(""); // reset when criteria changes
+        }}
+        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="">Sort By</option>
+        <option value="listing_name">Listing Name</option>
+        <option value="approval">Approval</option>
+        <option value="sku">SKU</option>
+        <option value="price">Price</option>
+        <option value="product_type">Product Type</option>
+        <option value="vendor">Vendor</option>
+
+        {/* ✅ Published By only for Dev Admin & Master Admin */}
+        {(userRole === "Dev Admin" || userRole === "Master Admin") && (
+          <option value="published_by">Published By</option>
+        )}
+      </select>
+    </div>
+
+    {/* Dynamic Options Dropdown */}
+    {sortBy && (
+      <div className="w-full md:w-1/4">
+        <select
+          value={sortValue}
+          onChange={(e) => setSortValue(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">
+            Select {sortBy.replace("_", " ")}
+          </option>
+
+          {/* ✅ If published_by is selected → show publishers list */}
+          {sortBy === "published_by"
+            ? [...new Set(products.map((p) => p.username))].map((publisher) => (
+                <option key={publisher} value={publisher}>
+                  {publisher}
+                </option>
+              ))
+            : getUniqueOptions(sortBy).map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+        </select>
+      </div>
+    )}
+  </div>
+</div>
+
+
         <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
           <div className="flex flex-col gap-4 items-center w-full justify-end">
             <div className="flex gap-4 items-center justify-end w-full">
@@ -821,7 +984,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
 
-              <tbody>
+              {/* <tbody>
                 {filteredProducts.map((product) => (
                   <tr key={product._id} className="border-b hover:bg-gray-50">
                     <td className="p-3">
@@ -905,21 +1068,162 @@ const Dashboard = () => {
                   </tr>
                 ))}
 
-                {/* 👇 Loader in table bottom row */}
-                {Loading && (
+           
+              </tbody> */}
+              <tbody>
+                {Loading ? (
                   <tr>
-                    <td colSpan={12}>
-                      <div className="flex justify-center items-center py-6">
-                        <HiOutlineRefresh className="animate-spin text-xl text-gray-500 mr-2" />
-                        <span className="text-gray-500 text-sm">
-                          Loading more products...
+                    <td colSpan="100%" className="py-10">
+                      <div className="flex justify-center items-center">
+                        <svg
+                          className="animate-spin h-6 w-6 text-blue-500 mr-2"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                          ></path>
+                        </svg>
+                        <span className="text-gray-600 text-sm">
+                          Fetching products...
                         </span>
                       </div>
+                    </td>
+                  </tr>
+                ) : filteredProducts.length > 0 ? (
+                  filteredProducts.map((product) => (
+                    <tr key={product._id} className="border-b hover:bg-gray-50">
+                      <td className="p-3">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 cursor-pointer"
+                          checked={selectedProducts.includes(product._id)}
+                          onChange={() => toggleSelection(product._id)}
+                        />
+                      </td>
+                      <td className="p-3">
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            product.status === "active"
+                              ? "bg-green-500"
+                              : "bg-red-500"
+                          }`}
+                          title={product.status}
+                        />
+                      </td>
+                      <td className="p-3">
+                        {product.images?.[0] ? (
+                          <img
+                            src={product.images[0].src}
+                            alt={product.images[0].alt || "Product image"}
+                            className="w-16 h-16 object-contain rounded border"
+                          />
+                        ) : (
+                          <span className="text-gray-400 text-sm">
+                            No Image
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        {product.title !== "Job Listing"
+                          ? product.title
+                          : "Job Search Listing"}
+                      </td>
+                      {(userRole === "Dev Admin" ||
+                        userRole === "Master Admin") && (
+                        <td>{product?.username}</td>
+                      )}
+                      <td className="p-3">
+                        {product?.approvalStatus ? (
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              product.approvalStatus === "pending"
+                                ? "bg-yellow-200 text-yellow-800"
+                                : product.approvalStatus === "approved"
+                                ? "bg-green-200 text-green-800"
+                                : product.approvalStatus === "rejected"
+                                ? "bg-red-200 text-red-800"
+                                : "bg-gray-200 text-gray-700"
+                            }`}
+                          >
+                            {product.approvalStatus}
+                          </span>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td className="p-3">{product.variants[0]?.sku}</td>
+                      <td className="p-3">${product.variants[0]?.price}</td>
+                      <td className="p-3">
+                        ${product.variants[0]?.compare_at_price || 0.0}
+                      </td>
+                      <td className="p-3">{product.product_type}</td>
+                      <td className="p-3">
+                        {product.variants[0]?.inventory_quantity}
+                      </td>
+                      <td className="p-3">{product.vendor}</td>
+                      {admin && `#${product.shopifyId}`}
+                      <td className="p-3">
+                        <button
+                          className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
+                          onClick={() => OnEdit(product)}
+                        >
+                          <MdEdit className="mr-1" />
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="100%"
+                      className="py-10 text-center text-gray-500"
+                    >
+                      No products available.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
+            {/* Pagination */}
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center  px-4 py-3 bg-gray-50 border border-gray-200">
+              <div className="text-sm text-gray-700 mb-2 md:mb-0">
+                Total Products{" "}
+                <span className="font-medium">{products.length}</span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Products per page:
+                </label>
+                <select
+                  className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={limit}
+                  onChange={(e) => {
+                    setLimit(Number(e.target.value));
+                    setPage(1);
+                    setProducts([]);
+                    setFilteredProducts([]);
+                  }}
+                >
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value={200}>200</option>
+                </select>
+              </div>
+            </div>
           </div>
         )}
       </div>

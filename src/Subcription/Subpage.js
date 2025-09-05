@@ -15,8 +15,10 @@ import { FaFileImport } from "react-icons/fa6";
 const SubscriptionHistory = () => {
   const { userData, loading, error, variantId } = UseFetchUserData();
   const { addNotification } = useNotification();
-const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all)
-
+  const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all)
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(50); // default 50
+  const [hasMore, setHasMore] = useState(false);
   const [subscriptions, setSubscriptions] = useState([]);
   const [totalListings, setTotalListings] = useState(0);
   const [activeListings, setActiveListings] = useState(0);
@@ -42,19 +44,38 @@ const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all
 
   // const fetchSubscriptions = async () => {
   //   const userId = localStorage.getItem("userid");
+  //   const token = localStorage.getItem("usertoken");
+  //   const apiKey = localStorage.getItem("apiKey");
+  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
+  //   setIsLoading(true); // start loader
 
-  //   if (!userId) {
-  //     console.error("User ID not found in localStorage.");
+  //   if (!userId || !token) {
+  //     console.error("User ID or token not found in localStorage.");
   //     return;
   //   }
 
   //   try {
-  //     const res = await fetch(
-  //       `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`,
-  //       {
-  //         method: "GET",
-  //       }
-  //     );
+  //     const decoded = jwtDecode(token);
+  //     const role = decoded.payLoad?.role;
+  //     const isTokenValid = decoded.exp * 1000 > Date.now();
+
+  //     const isAdminFlag =
+  //       isTokenValid && (role === "Master Admin" || role === "Dev Admin");
+
+  //     setIsAdmin(isAdminFlag);
+
+  //     const url = isAdminFlag
+  //       ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrder`
+  //       : `https://multi-vendor-marketplace.vercel.app/order/order`;
+
+  //     const res = await fetch(url, {
+  //       method: "GET",
+  //       headers: {
+  //         "x-api-key": apiKey,
+  //         "x-api-secret": apiSecretKey,
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
 
   //     if (res.ok) {
   //       const json = await res.json();
@@ -62,20 +83,23 @@ const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all
   //         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   //       );
   //       setSubscriptions(sortedSubscriptions);
+  //       setFilteredSubscriptions(sortedSubscriptions);
   //     } else {
   //       console.error("Failed to fetch subscriptions:", res.status);
   //     }
   //   } catch (error) {
-  //     console.error("Error fetching subscriptions:", error);
+  //     console.error("Error decoding token or fetching subscriptions:", error);
+  //   } finally {
+  //     setIsLoading(false);
   //   }
   // };
 
   const fetchSubscriptions = async () => {
     const userId = localStorage.getItem("userid");
     const token = localStorage.getItem("usertoken");
-     const apiKey = localStorage.getItem("apiKey");
+    const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
-    setIsLoading(true); // start loader
+    setIsLoading(true);
 
     if (!userId || !token) {
       console.error("User ID or token not found in localStorage.");
@@ -93,12 +117,12 @@ const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all
       setIsAdmin(isAdminFlag);
 
       const url = isAdminFlag
-        ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrder`
-        : `https://multi-vendor-marketplace.vercel.app/order/order`;
+        ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrder?page=${page}&limit=${limit}`
+        : `https://multi-vendor-marketplace.vercel.app/order/order?page=${page}&limit=${limit}`;
 
       const res = await fetch(url, {
         method: "GET",
-         headers: {
+        headers: {
           "x-api-key": apiKey,
           "x-api-secret": apiSecretKey,
           "Content-Type": "application/json",
@@ -112,6 +136,11 @@ const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all
         );
         setSubscriptions(sortedSubscriptions);
         setFilteredSubscriptions(sortedSubscriptions);
+
+        // ✅ If backend sends totalPages
+        if (json.totalPages) {
+          setHasMore(page < json.totalPages);
+        }
       } else {
         console.error("Failed to fetch subscriptions:", res.status);
       }
@@ -122,156 +151,83 @@ const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all
     }
   };
 
+  // useEffect(() => {
+  //   fetchSubscriptions();
+  // }, []);
+
   useEffect(() => {
     fetchSubscriptions();
-  }, []);
+  }, [page, limit]);
 
-  const handleBuyNow = () => {
-    const buyCreditUrl = CreateCheckoutUrl(
-      userData,
-      quantity,
-      loading,
-      error,
-      variantId
-    );
-    console.log(buyCreditUrl);
-    window.open(buyCreditUrl, "_blank");
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+
+      const userId = localStorage.getItem("userid");
+      const token = localStorage.getItem("usertoken");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+      if (!userId || !token || !apiKey || !apiSecretKey) {
+        alert("Missing credentials or token");
+        return;
+      }
+
+      const decoded = jwtDecode(token);
+      const role = decoded?.payLoad?.role;
+      const isTokenValid = decoded?.exp * 1000 > Date.now();
+      const isAdmin =
+        isTokenValid && (role === "Master Admin" || role === "Dev Admin");
+
+      const queryParams = new URLSearchParams({
+        type: exportOption,
+        ...(exportOption === "current" && { limit: 10 }),
+        ...(exportStatus && { status: exportStatus }),
+        // ...(isAdmin ? {} : { userId }),
+      });
+
+      const exportUrl = isAdmin
+        ? `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`
+        : `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
+
+      const response = await fetch(exportUrl, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Export failed");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `orders-${exportOption}-${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      addNotification("Orders exported successfully", "Orders");
+      setIsexportOpen(false);
+    } catch (error) {
+      alert("Export failed: " + error.message);
+      console.error("Export error:", error);
+    } finally {
+      setIsExporting(false);
+    }
   };
-
-
-  // const handleExport = async () => {
-  //   try {
-  //     setIsExporting(true);
-
-  //     const userId = localStorage.getItem("userid");
-  //     const token = localStorage.getItem("usertoken");
-
-  //     if (!userId || !token) {
-  //       alert("User ID or token not found in localStorage");
-  //       return;
-  //     }
-
-  //     const decoded = jwtDecode(token);
-  //     const role = decoded?.payLoad?.role;
-  //     const isTokenValid = decoded?.exp * 1000 > Date.now();
-
-  //     const isAdmin =
-  //       isTokenValid && (role === "Master Admin" || role === "Dev Admin");
-
-  //     let exportUrl;
-
-  //     if (isAdmin) {
-  //       const queryParams = new URLSearchParams({
-  //         type: exportOption,
-  //         ...(exportOption === "current" && { limit: 10 }),
-  //       });
-  //       exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`;
-  //     } else {
-  //       const queryParams = new URLSearchParams({
-  //         userId,
-  //         type: exportOption,
-  //         ...(exportOption === "current" && { limit: 10 }),
-  //       });
-  //       exportUrl = `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
-  //     }
-
-  //     const response = await fetch(exportUrl);
-  //     if (!response.ok) {
-  //       const error = await response.json();
-  //       throw new Error(error.message || "Export failed");
-  //     }
-
-  //     const blob = await response.blob();
-  //     const url = window.URL.createObjectURL(blob);
-  //     const link = document.createElement("a");
-  //     link.href = url;
-  //     link.setAttribute("download", `orders-${exportOption}-${Date.now()}.csv`);
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     link.remove();
-  //     window.URL.revokeObjectURL(url);
-
-  //     addNotification("Orders exported successfully", "Orders");
-  //     setIsexportOpen(false);
-  //   } catch (error) {
-  //     alert("Export failed: " + error.message);
-  //     console.error("Export error:", error);
-  //   } finally {
-  //     setIsExporting(false);
-  //   }
-  // };
-
-const handleExport = async () => {
-  try {
-    setIsExporting(true);
-
-    const userId = localStorage.getItem("userid");
-    const token = localStorage.getItem("usertoken");
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
-
-    if (!userId || !token || !apiKey || !apiSecretKey) {
-      alert("Missing credentials or token");
-      return;
-    }
-
-    const decoded = jwtDecode(token);
-    const role = decoded?.payLoad?.role;
-    const isTokenValid = decoded?.exp * 1000 > Date.now();
-    const isAdmin =
-      isTokenValid && (role === "Master Admin" || role === "Dev Admin");
-
-    const queryParams = new URLSearchParams({
-      type: exportOption,
-      ...(exportOption === "current" && { limit: 10 }),
-      ...(exportStatus && { status: exportStatus }),
-      ...(isAdmin ? {} : { userId }),
-    });
-
-    const exportUrl = isAdmin
-      ? `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`
-      : `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
-
-    const response = await fetch(exportUrl, {
-      method: "GET",
-      headers: {
-        "x-api-key": apiKey,
-        "x-api-secret": apiSecretKey,
-      },
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Export failed");
-    }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `orders-${exportOption}-${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-
-    addNotification("Orders exported successfully", "Orders");
-    setIsexportOpen(false);
-  } catch (error) {
-    alert("Export failed: " + error.message);
-    console.error("Export error:", error);
-  } finally {
-    setIsExporting(false);
-  }
-};
-
-
 
   useEffect(() => {
     const fetchProductData = async () => {
       const id = localStorage.getItem("userid");
-       const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
       if (!id) {
         console.error("User ID not found in localStorage.");
         return;
@@ -280,12 +236,13 @@ const handleExport = async () => {
       try {
         const response = await fetch(
           `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
-          { method: "GET" ,
-             headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
           }
         );
         if (response.ok) {
@@ -356,7 +313,7 @@ const handleExport = async () => {
       );
     }
   }, []);
-  
+
   const [searchVal, setSearchVal] = useState("");
   const [filteredSubscriptions, setFilteredSubscriptions] = useState([]);
 
@@ -457,39 +414,34 @@ const handleExport = async () => {
     >
       <div className="flex">
         <div className="pt-4 min-w-full px-3 bg-white  rounded-lg">
-           <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
-                  <div className="flex-1">
-                    <h1 className="text-2xl font-semibold mb-1">Manage orders</h1>
-                    <p className="text-gray-600">Here you can manage orders.</p>
-                    <div className="w-2/4 max-sm:w-full mt-2">
-                      <input
-                        type="text"
-                        placeholder="Search..."
-                        value={searchVal}
-                        onChange={(e) => setSearchVal(e.target.value)}
-                        className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
-                    <div className="flex flex-col gap-4 items-center w-full justify-end">
-                      <div className="flex gap-4 items-center justify-end w-full">
-                       
-          
-                        <button  onClick={togglePopup}
-                          className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-                        >
-                          <FaFileImport className="w-5 h-5" />
-                          Export
-                        </button>
-                      </div>
-          
-                     
-                    </div>
-                  </div>
-          
-                 
+          <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
+            <div className="flex-1">
+              <h1 className="text-2xl font-semibold mb-1">Manage orders</h1>
+              <p className="text-gray-600">Here you can manage orders.</p>
+              <div className="w-2/4 max-sm:w-full mt-2">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchVal}
+                  onChange={(e) => setSearchVal(e.target.value)}
+                  className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
+              <div className="flex flex-col gap-4 items-center w-full justify-end">
+                <div className="flex gap-4 items-center justify-end w-full">
+                  <button
+                    onClick={togglePopup}
+                    className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+                  >
+                    <FaFileImport className="w-5 h-5" />
+                    Export
+                  </button>
                 </div>
+              </div>
+            </div>
+          </div>
 
           {/* <div className="flex justify-between items-center flex-wrap mb-6">
             <div className="w-full md:w-auto mt-2 max-sm:w-full">
@@ -525,6 +477,9 @@ const handleExport = async () => {
                     <tr>
                       <th scope="col" className="p-3">
                         #
+                      </th>
+                      <th scope="col" className="p-3">
+                        Image
                       </th>
                       <th scope="col" className="p-3">
                         Date Purchased
@@ -614,10 +569,26 @@ const handleExport = async () => {
                                   >
                                     #{orderId}
                                   </td>
-
+                                  <td className="p-3">
+                                    {merchantItems[0]?.image?.src ? (
+                                      <img
+                                        src={merchantItems[0].image.src}
+                                        alt={
+                                          merchantItems[0].image.alt ||
+                                          "Product"
+                                        }
+                                        className="w-16 h-16 object-contain rounded border"
+                                      />
+                                    ) : (
+                                      <span className="text-gray-400 text-xs">
+                                        No Image
+                                      </span>
+                                    )}
+                                  </td>
                                   <td className="p-3">
                                     {orderDate ? formatDate(orderDate) : "N/A"}
                                   </td>
+
                                   <td className="p-3 text-sm">
                                     {merchant.info?.name || "N/A"}
                                   </td>
@@ -690,6 +661,19 @@ const handleExport = async () => {
                                 }}
                               >
                                 #{subscription.shopifyOrderNo}
+                              </td>
+                              <td className="p-3">
+                                {firstItem?.image?.src ? (
+                                  <img
+                                    src={firstItem.image.src}
+                                    alt={firstItem.image.alt || "Product"}
+                                    className="w-16 h-16 object-contain rounded border"
+                                  />
+                                ) : (
+                                  <span className="text-gray-400 text-xs">
+                                    No Image
+                                  </span>
+                                )}
                               </td>
                               <td className="p-3">
                                 {formatDate(subscription.createdAt)}
@@ -771,6 +755,31 @@ const handleExport = async () => {
                         })}
                   </tbody>
                 </table>
+                {/* Pagination controls */}
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center px-4 py-3 bg-gray-50 border border-gray-200">
+                  <div className="text-sm text-gray-700 mb-2 md:mb-0">
+                    Total Orders{" "}
+                    <span className="font-medium">{subscriptions.length}</span>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      Orders per page:
+                    </label>
+                    <select
+                      className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={limit}
+                      onChange={(e) => {
+                        setLimit(Number(e.target.value));
+                        setPage(1);
+                      }}
+                    >
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                      <option value={200}>200</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -829,54 +838,53 @@ const handleExport = async () => {
                   </div>
                 </div>
 
-             <div className="mb-6">
-  <label className="text-md text-gray-600 font-semibold block mb-2">
-    Filter by Fulfillment Status
-  </label>
-  <div className="space-y-2">
-    <label className="flex items-center gap-2">
-      <input
-        type="radio"
-        name="statusFilter"
-        value=""
-        checked={exportStatus === ""}
-        onChange={() => setExportStatus("")}
-      />
-      All
-    </label>
-    <label className="flex items-center gap-2">
-      <input
-        type="radio"
-        name="statusFilter"
-        value="fulfilled"
-        checked={exportStatus === "fulfilled"}
-        onChange={() => setExportStatus("fulfilled")}
-      />
-      Fulfilled
-    </label>
-    <label className="flex items-center gap-2">
-      <input
-        type="radio"
-        name="statusFilter"
-        value="unfulfilled"
-        checked={exportStatus === "unfulfilled"}
-        onChange={() => setExportStatus("unfulfilled")}
-      />
-      Unfulfilled
-    </label>
-    <label className="flex items-center gap-2">
-      <input
-        type="radio"
-        name="statusFilter"
-        value="cancelled"
-        checked={exportStatus === "cancelled"}
-        onChange={() => setExportStatus("cancelled")}
-      />
-      Cancelled
-    </label>
-  </div>
-</div>
-
+                <div className="mb-6">
+                  <label className="text-md text-gray-600 font-semibold block mb-2">
+                    Filter by Fulfillment Status
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="statusFilter"
+                        value=""
+                        checked={exportStatus === ""}
+                        onChange={() => setExportStatus("")}
+                      />
+                      All
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="statusFilter"
+                        value="fulfilled"
+                        checked={exportStatus === "fulfilled"}
+                        onChange={() => setExportStatus("fulfilled")}
+                      />
+                      Fulfilled
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="statusFilter"
+                        value="unfulfilled"
+                        checked={exportStatus === "unfulfilled"}
+                        onChange={() => setExportStatus("unfulfilled")}
+                      />
+                      Unfulfilled
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="statusFilter"
+                        value="cancelled"
+                        checked={exportStatus === "cancelled"}
+                        onChange={() => setExportStatus("cancelled")}
+                      />
+                      Cancelled
+                    </label>
+                  </div>
+                </div>
 
                 <div className="flex justify-end gap-2 border-t border-gray-300">
                   <button

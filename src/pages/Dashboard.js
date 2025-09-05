@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { HiOutlineCheckCircle, HiOutlineXCircle, HiPlus } from "react-icons/hi";
 import { FaCross, FaFileImport } from "react-icons/fa";
 import Papa from "papaparse";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import UseFetchUserData from "../component/fetchUser";
 import { useAuthContext } from "../Hooks/useAuthContext";
 import { HiOutlineRefresh } from "react-icons/hi";
@@ -17,7 +17,7 @@ import { useNotification } from "../context api/NotificationContext";
 const Dashboard = () => {
   let admin;
   const { addNotification } = useNotification();
-
+  const location = useLocation();
   // const isAdmin = () => {
   //   const token = localStorage.getItem("usertoken");
   //   if (token) {
@@ -66,8 +66,8 @@ const Dashboard = () => {
   const [exportOption, setExportOption] = useState("current");
   const [isExporting, setIsExporting] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
-const [sortBy, setSortBy] = useState("");
-const [sortValue, setSortValue] = useState("");
+  const [sortBy, setSortBy] = useState("");
+  const [sortValue, setSortValue] = useState("");
   const [exportAs, setExportAs] = useState("csv");
   const handleCSVUpload = (e) => {
     const file = e.target.files[0];
@@ -75,69 +75,72 @@ const [sortValue, setSortValue] = useState("");
   };
   const togglePopup = () => setIsexportOpen(!isOpen);
 
-const getUniqueOptions = (criteria) => {
-  switch (criteria) {
-    case "listing_name":
-      return [...new Set(products.map((p) => p.title).filter(Boolean))];
-    case "approval":
-      return [...new Set(products.map((p) => p.approvalStatus).filter(Boolean))];
-    case "sku":
-      return [
-        ...new Set(products.map((p) => p.variants?.[0]?.sku).filter(Boolean)),
-      ];
-    case "price":
-      return [
-        ...new Set(
-          products.map((p) => p.variants?.[0]?.price?.toString()).filter(Boolean)
-        ),
-      ];
-    case "product_type":
-      return [...new Set(products.map((p) => p.product_type).filter(Boolean))];
-    case "vendor":
-      return [...new Set(products.map((p) => p.vendor).filter(Boolean))];
+  const getUniqueOptions = (criteria) => {
+    switch (criteria) {
+      case "listing_name":
+        return [...new Set(products.map((p) => p.title).filter(Boolean))];
+      case "approval":
+        return [
+          ...new Set(products.map((p) => p.approvalStatus).filter(Boolean)),
+        ];
+      case "sku":
+        return [
+          ...new Set(products.map((p) => p.variants?.[0]?.sku).filter(Boolean)),
+        ];
+      case "price":
+        return [
+          ...new Set(
+            products
+              .map((p) => p.variants?.[0]?.price?.toString())
+              .filter(Boolean)
+          ),
+        ];
+      case "product_type":
+        return [
+          ...new Set(products.map((p) => p.product_type).filter(Boolean)),
+        ];
+      case "vendor":
+        return [...new Set(products.map((p) => p.vendor).filter(Boolean))];
 
-    // ✅ Published By (unique publishers usernames)
-    case "published_by":
-      return [...new Set(products.map((p) => p.username).filter(Boolean))];
+      // ✅ Published By (unique publishers usernames)
+      case "published_by":
+        return [...new Set(products.map((p) => p.username).filter(Boolean))];
 
-    default:
-      return [];
-  }
-};
+      default:
+        return [];
+    }
+  };
 
+  useEffect(() => {
+    if (sortBy && sortValue) {
+      const filtered = products.filter((p) => {
+        switch (sortBy) {
+          case "listing_name":
+            return p.title === sortValue;
+          case "approval":
+            return p.approvalStatus === sortValue;
+          case "sku":
+            return p.variants?.[0]?.sku === sortValue;
+          case "price":
+            return p.variants?.[0]?.price?.toString() === sortValue;
+          case "product_type":
+            return p.product_type === sortValue;
+          case "vendor":
+            return p.vendor === sortValue;
 
-useEffect(() => {
-  if (sortBy && sortValue) {
-    const filtered = products.filter((p) => {
-      switch (sortBy) {
-        case "listing_name":
-          return p.title === sortValue;
-        case "approval":
-          return p.approvalStatus === sortValue;
-        case "sku":
-          return p.variants?.[0]?.sku === sortValue;
-        case "price":
-          return p.variants?.[0]?.price?.toString() === sortValue;
-        case "product_type":
-          return p.product_type === sortValue;
-        case "vendor":
-          return p.vendor === sortValue;
+          // ✅ Published By filter
+          case "published_by":
+            return p.username === sortValue;
 
-        // ✅ Published By filter
-        case "published_by":
-          return p.username === sortValue;
-
-        default:
-          return true;
-      }
-    });
-    setFilteredProducts(filtered);
-  } else {
-    setFilteredProducts(products);
-  }
-}, [sortBy, sortValue, products]);
-
-
+          default:
+            return true;
+        }
+      });
+      setFilteredProducts(filtered);
+    } else {
+      setFilteredProducts(products);
+    }
+  }, [sortBy, sortValue, products]);
 
   const toggleSelection = (productId) => {
     setSelectedProducts((prevSelected) =>
@@ -152,6 +155,8 @@ useEffect(() => {
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
   const [userRole, setUserRole] = useState(null);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const totalPages = Math.ceil(totalProducts / limit);
 
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
@@ -220,53 +225,59 @@ useEffect(() => {
   // state
 
   // fetch uses limit
-  const fetchProductData = async () => {
-    setLoading(true);
-    const id = localStorage.getItem("userid");
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-    try {
-      const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
+  //   const fetchProductData = async () => {
+  //     setLoading(true);
+  //     const id = localStorage.getItem("userid");
+  //     const apiKey = localStorage.getItem("apiKey");
+  //     const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-      const url = isAdmin
-        ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
-        : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
+  //     try {
+  //       const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
 
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
-      });
+  //       const url = isAdmin
+  //         ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
+  //         : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
 
-      if (response.ok) {
-        const data = await response.json();
+  //       const response = await fetch(url, {
+  //         method: "GET",
+  //         headers: {
+  //           "x-api-key": apiKey,
+  //           "x-api-secret": apiSecretKey,
+  //           "Content-Type": "application/json",
+  //         },
+  //       });
 
-        const sortedProducts = data.products.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
+  //     if (response.ok) {
+  //   const data = await response.json();
 
-        if (page === 1) {
-          setProducts(sortedProducts);
-          setFilteredProducts(sortedProducts);
-        } else {
-          setProducts((prev) => [...prev, ...sortedProducts]);
-          setFilteredProducts((prev) => [...prev, ...sortedProducts]);
-        }
+  //   const sortedProducts = data.products.sort(
+  //     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  //   );
 
-        setHasMore(page < data.totalPages);
-      } else {
-        console.error("Unauthorized or server error:", response.status);
-      }
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   if (page === 1) {
+  //     setProducts(sortedProducts);
+  //     setFilteredProducts(sortedProducts);
+  //   } else {
+  //     setProducts((prev) => [...prev, ...sortedProducts]);
+  //     setFilteredProducts((prev) => [...prev, ...sortedProducts]);
+  //   }
+
+  //   // ✅ yahan total products set karo
+  //   if (data.totalProducts) {
+  //     setTotalProducts(data.totalProducts);
+  //   }
+
+  //   setHasMore(page < data.totalPages);
+  // } else {
+  //         console.error("Unauthorized or server error:", response.status);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching products:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
   // reset when limit changes
 
@@ -329,6 +340,54 @@ useEffect(() => {
   //     }
   //   }, 2000);
   // };
+
+  const fetchProductData = async () => {
+    setLoading(true);
+    const id = localStorage.getItem("userid");
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+    try {
+      const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
+
+      const url = isAdmin
+        ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts?page=${page}&limit=${limit}`
+        : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        const sortedProducts = data.products.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+
+        // ✅ har page par nayi list overwrite hogi
+        setProducts(sortedProducts);
+        setFilteredProducts(sortedProducts);
+
+        if (data.totalProducts) {
+          setTotalProducts(data.totalProducts);
+        }
+
+        setHasMore(page < data.totalPages);
+      } else {
+        console.error("Unauthorized or server error:", response.status);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleUploadAndPreview = async () => {
     if (!selectedFile) return;
@@ -795,80 +854,94 @@ useEffect(() => {
     setSelectAll(allSelected);
   }, [selectedProducts, filteredProducts]);
 
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    query.set("page", page);
+    query.set("limit", limit);
+    navigate(`?${query.toString()}`, { replace: true });
+  }, [page, limit, navigate, location.search]);
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const urlPage = parseInt(query.get("page")) || 1;
+    const urlLimit = parseInt(query.get("limit")) || 50;
+
+    setPage(urlPage);
+    setLimit(urlLimit);
+  }, [location.search]);
   return user ? (
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
-      <div className="flex-1">
-  <h1 className="text-2xl font-semibold mb-1">Manage products</h1>
-  <p className="text-gray-600 mb-4">Manage your products here.</p>
+        <div className="flex-1">
+          <h1 className="text-2xl font-semibold mb-1">Manage products</h1>
+          <p className="text-gray-600 mb-4">Manage your products here.</p>
 
-  <div className="flex flex-col md:flex-row md:items-center md:space-x-4 gap-3">
-    {/* Search Bar */}
-    <div className="w-full md:w-1/3">
-      <input
-        type="text"
-        placeholder="Search products..."
-        value={searchVal}
-        onChange={(e) => setSearchVal(e.target.value)}
-        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-    </div>
+          <div className="flex flex-col md:flex-row md:items-center md:space-x-4 gap-3">
+            {/* Search Bar */}
+            <div className="w-full md:w-1/3">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchVal}
+                onChange={(e) => setSearchVal(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-    {/* Sort By Dropdown */}
-    <div className="w-full md:w-1/4">
-      <select
-        value={sortBy}
-        onChange={(e) => {
-          setSortBy(e.target.value);
-          setSortValue(""); // reset when criteria changes
-        }}
-        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="">Sort By</option>
-        <option value="listing_name">Listing Name</option>
-        <option value="approval">Approval</option>
-        <option value="sku">SKU</option>
-        <option value="price">Price</option>
-        <option value="product_type">Product Type</option>
-        <option value="vendor">Vendor</option>
+            {/* Sort By Dropdown */}
+            <div className="w-full md:w-1/4">
+              <select
+                value={sortBy}
+                onChange={(e) => {
+                  setSortBy(e.target.value);
+                  setSortValue(""); // reset when criteria changes
+                }}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Sort By</option>
+                <option value="listing_name">Listing Name</option>
+                <option value="approval">Approval</option>
+                <option value="sku">SKU</option>
+                <option value="price">Price</option>
+                <option value="product_type">Product Type</option>
+                <option value="vendor">Vendor</option>
 
-        {/* ✅ Published By only for Dev Admin & Master Admin */}
-        {(userRole === "Dev Admin" || userRole === "Master Admin") && (
-          <option value="published_by">Published By</option>
-        )}
-      </select>
-    </div>
+                {/* ✅ Published By only for Dev Admin & Master Admin */}
+                {(userRole === "Dev Admin" || userRole === "Master Admin") && (
+                  <option value="published_by">Published By</option>
+                )}
+              </select>
+            </div>
 
-    {/* Dynamic Options Dropdown */}
-    {sortBy && (
-      <div className="w-full md:w-1/4">
-        <select
-          value={sortValue}
-          onChange={(e) => setSortValue(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">
-            Select {sortBy.replace("_", " ")}
-          </option>
+            {/* Dynamic Options Dropdown */}
+            {sortBy && (
+              <div className="w-full md:w-1/4">
+                <select
+                  value={sortValue}
+                  onChange={(e) => setSortValue(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select {sortBy.replace("_", " ")}</option>
 
-          {/* ✅ If published_by is selected → show publishers list */}
-          {sortBy === "published_by"
-            ? [...new Set(products.map((p) => p.username))].map((publisher) => (
-                <option key={publisher} value={publisher}>
-                  {publisher}
-                </option>
-              ))
-            : getUniqueOptions(sortBy).map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-        </select>
-      </div>
-    )}
-  </div>
-</div>
-
+                  {/* ✅ If published_by is selected → show publishers list */}
+                  {sortBy === "published_by"
+                    ? [...new Set(products.map((p) => p.username))].map(
+                        (publisher) => (
+                          <option key={publisher} value={publisher}>
+                            {publisher}
+                          </option>
+                        )
+                      )
+                    : getUniqueOptions(sortBy).map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                </select>
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
           <div className="flex flex-col gap-4 items-center w-full justify-end">
@@ -1198,32 +1271,80 @@ useEffect(() => {
               </tbody>
             </table>
             {/* Pagination */}
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center  px-4 py-3 bg-gray-50 border border-gray-200">
-              <div className="text-sm text-gray-700 mb-2 md:mb-0">
-                Total Products{" "}
-                <span className="font-medium">{products.length}</span>
-              </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex flex-col md:flex-row justify-between items-center  px-4 py-3 bg-gray-50 border border-gray-200 ">
+                {/* Left: Total Products */}
+                <div className="text-sm text-gray-700 mb-2 md:mb-0">
+                  Total Products{" "}
+                  <span className="font-medium">{totalProducts}</span>
+                </div>
 
-              <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Products per page:
-                </label>
-                <select
-                  className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={limit}
-                  onChange={(e) => {
-                    setLimit(Number(e.target.value));
-                    setPage(1);
-                    setProducts([]);
-                    setFilteredProducts([]);
-                  }}
-                >
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                  <option value={200}>200</option>
-                </select>
+                {/* Center: Page Numbers */}
+                <div className="flex items-center space-x-2 mb-2 md:mb-0">
+                  <button
+                    disabled={page === 1}
+                    onClick={() => setPage((prev) => prev - 1)}
+                    className={`px-3 py-1 border rounded ${
+                      page === 1
+                        ? "text-gray-400 cursor-not-allowed"
+                        : "hover:bg-gray-200"
+                    }`}
+                  >
+                    &lt;
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (p) => (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`px-3 py-1 border rounded ${
+                          page === p
+                            ? "bg-blue-500 text-white"
+                            : "hover:bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    disabled={page === totalPages}
+                    onClick={() => setPage((prev) => prev + 1)}
+                    className={`px-3 py-1 border rounded ${
+                      page === totalPages
+                        ? "text-gray-400 cursor-not-allowed"
+                        : "hover:bg-gray-200"
+                    }`}
+                  >
+                    &gt;
+                  </button>
+                </div>
+
+                {/* Right: Limit Selector */}
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Products per page:
+                  </label>
+                  <select
+                    className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={limit}
+                    onChange={(e) => {
+                      setLimit(Number(e.target.value));
+                      setPage(1); // reset to page 1 on limit change
+                      setProducts([]);
+                      setFilteredProducts([]);
+                    }}
+                  >
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={200}>200</option>
+                  </select>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>

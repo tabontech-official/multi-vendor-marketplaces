@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
-import { FaEdit, FaCheck, FaTimes } from "react-icons/fa";
+import { FaEdit, FaCheck, FaTimes, FaCog } from "react-icons/fa";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 import axios from "axios";
 const PayoutDetails = () => {
@@ -31,6 +31,19 @@ const PayoutDetails = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [subscriptions, setSubscriptions] = useState([]);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("paypal");
+  const [paypalEmail, setPaypalEmail] = useState("");
+  const [bankDetails, setBankDetails] = useState({
+    accountNumber: "",
+    accountHolderName: "",
+    bankName: "",
+    ifscCode: "",
+    branchName: "",
+    swiftCode: "",
+    iban: "",
+    country: "",
+  });
   const navigate = useNavigate();
 
   const showToast = (type, message) => {
@@ -40,7 +53,7 @@ const PayoutDetails = () => {
   const fetchSubscriptions = async () => {
     const userId = merchantId;
     const token = localStorage.getItem("usertoken");
-     const apiKey = localStorage.getItem("apiKey");
+    const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
     setIsLoading(true);
 
@@ -54,7 +67,7 @@ const PayoutDetails = () => {
 
       const res = await fetch(url, {
         method: "GET",
-         headers: {
+        headers: {
           "x-api-key": apiKey,
           "x-api-secret": apiSecretKey,
           "Content-Type": "application/json",
@@ -115,13 +128,10 @@ const PayoutDetails = () => {
       }
 
       // Send PayPal update request
-      const res = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
-        {
-          merchantIds,
-          payPal: account,
-        }
-      );
+      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
+        merchantIds,
+        payPal: account,
+      });
 
       if (res.status === 200) {
         setBankAccount(account);
@@ -145,8 +155,8 @@ const PayoutDetails = () => {
 
     try {
       // Collect all unique userIds from orders
-       const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
       const userIdsSet = new Set();
 
       orders.forEach((order) => {
@@ -170,11 +180,11 @@ const PayoutDetails = () => {
         "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
         {
           method: "POST",
-           headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             UserIds,
             referenceNo: tempReferenceNo,
@@ -280,79 +290,88 @@ const PayoutDetails = () => {
   //   if (payoutDate && status && userRole) fetchData();
   // }, [payoutDate, status, userRole, merchantId]);
 
-useEffect(() => {
-  const fetchData = async () => {
-    if (!userRole || !payoutDate || !status) return;
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!userRole || !payoutDate || !status) return;
 
-    setLoading(true);
+      setLoading(true);
 
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-    if (!apiKey || !apiSecretKey) {
-      console.error("Missing API credentials");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      let url = "";
-      if (userRole === "Merchant") {
-        url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByQuery?payoutDate=${encodeURIComponent(payoutDate)}&status=${status}&userId=${merchantId}`;
-      } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
-        url = `https://multi-vendor-marketplace.vercel.app/order/getAllPayouts?payoutDate=${encodeURIComponent(payoutDate)}&status=${status}`;
-      } else {
-        console.warn("Unauthorized user role:", userRole);
+      if (!apiKey || !apiSecretKey) {
+        console.error("Missing API credentials");
         setLoading(false);
         return;
       }
 
-      const res = await fetch(url, {
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
-      });
+      try {
+        let url = "";
+        if (userRole === "Merchant") {
+          url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByQuery?payoutDate=${encodeURIComponent(
+            payoutDate
+          )}&status=${status}&userId=${merchantId}`;
+        } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
+          url = `https://multi-vendor-marketplace.vercel.app/order/getAllPayouts?payoutDate=${encodeURIComponent(
+            payoutDate
+          )}&status=${status}`;
+        } else {
+          console.warn("Unauthorized user role:", userRole);
+          setLoading(false);
+          return;
+        }
 
-      if (!res.ok) {
-        console.error(`Failed to fetch payout orders: ${res.status}`);
+        const res = await fetch(url, {
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          console.error(`Failed to fetch payout orders: ${res.status}`);
+          setLoading(false);
+          return;
+        }
+
+        const json = await res.json();
+        const fetchedOrders = json?.payouts?.[0]?.orders || [];
+
+        const updatedOrders = fetchedOrders.map((o) => {
+          const fee = Number((o.amount * 0.1).toFixed(2));
+          const net = Number((o.amount - fee).toFixed(2));
+          return { ...o, fee, net };
+        });
+
+        const charges = updatedOrders.reduce(
+          (sum, o) => sum + (o.amount || 0),
+          0
+        );
+        const fees = updatedOrders.reduce((sum, o) => sum + (o.fee || 0), 0);
+        const refunds = updatedOrders.reduce(
+          (sum, o) => sum + (o.refund || 0),
+          0
+        );
+        const net = charges - fees;
+
+        const referenceNo = updatedOrders[0]?.referenceNo || "";
+        const paypalAccount = updatedOrders[0]?.paypalAccount || "";
+
+        setOrders(updatedOrders);
+        setSummary({ charges, refunds, fees, net, referenceNo, paypalAccount });
+        setReferenceNo(referenceNo);
+        setTempReferenceNo(referenceNo);
+        setTempBankAccount(paypalAccount);
+      } catch (err) {
+        console.error("Error fetching payout orders:", err);
+      } finally {
         setLoading(false);
-        return;
       }
+    };
 
-      const json = await res.json();
-      const fetchedOrders = json?.payouts?.[0]?.orders || [];
-
-      const updatedOrders = fetchedOrders.map((o) => {
-        const fee = Number((o.amount * 0.1).toFixed(2));
-        const net = Number((o.amount - fee).toFixed(2));
-        return { ...o, fee, net };
-      });
-
-      const charges = updatedOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
-      const fees = updatedOrders.reduce((sum, o) => sum + (o.fee || 0), 0);
-      const refunds = updatedOrders.reduce((sum, o) => sum + (o.refund || 0), 0);
-      const net = charges - fees;
-
-      const referenceNo = updatedOrders[0]?.referenceNo || "";
-      const paypalAccount = updatedOrders[0]?.paypalAccount || "";
-
-      setOrders(updatedOrders);
-      setSummary({ charges, refunds, fees, net, referenceNo, paypalAccount });
-      setReferenceNo(referenceNo);
-      setTempReferenceNo(referenceNo);
-      setTempBankAccount(paypalAccount);
-    } catch (err) {
-      console.error("Error fetching payout orders:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, [payoutDate, status, userRole, merchantId]);
-
+    fetchData();
+  }, [payoutDate, status, userRole, merchantId]);
 
   const [open, setOpen] = useState(false);
   const [reference, setReference] = useState("");
@@ -361,8 +380,8 @@ useEffect(() => {
   const closeReferencePopup = () => setOpen(false);
   const handleSave = async () => {
     try {
-       const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
       const userIdsSet = new Set();
 
       orders.forEach((order) => {
@@ -384,11 +403,11 @@ useEffect(() => {
         "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
         {
           method: "POST",
-           headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             UserIds,
             referenceNo: reference,
@@ -418,8 +437,84 @@ useEffect(() => {
       setUserRole(role);
     }
   }, []);
+
+  const handleSaveMerchantAccountDetails = async () => {
+    try {
+      setLoading(true);
+
+      const userId = localStorage.getItem("userid");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+      if (!userId) {
+        alert("User ID not found!");
+        return;
+      }
+
+      const payload = {
+        userId,
+        method: paymentMethod,
+        ...(paymentMethod === "paypal"
+          ? {
+              paypalDetails: {
+                paypalAccount: paypalEmail,
+                paypalAccountNo: "",
+                paypalReferenceNo: "",
+              },
+            }
+          : {
+              bankDetails: {
+                accountHolderName: bankDetails.accountHolderName,
+                accountNumber: bankDetails.accountNumber,
+                bankName: bankDetails.bankName,
+                branchName: bankDetails.branchName,
+                ifscCode: bankDetails.ifscCode,
+                swiftCode: bankDetails.swiftCode,
+                iban: bankDetails.iban,
+                country: bankDetails.country,
+              },
+            }),
+      };
+
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/auth/addMerchantAccountDetails",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Payout details saved successfully!");
+        setIsDrawerOpen(false);
+      } else {
+        alert(data.message || "Failed to save details");
+      }
+    } catch (error) {
+      console.error("Error saving payout:", error);
+      alert("Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-6 bg-[#f6f6f7] min-h-screen">
+      {userRole === "Merchant" && (
+        <button
+          onClick={() => setIsDrawerOpen(true)}
+          className="flex items-center gap-2 bg-white px-3 py-2 border rounded shadow hover:bg-gray-100"
+        >
+          <FaCog className="text-gray-600" /> Settings
+        </button>
+      )}
       <div className="flex justify-end mb-2">
         {(userRole === "Master Admin" || userRole === "Dev Admin") && (
           <button
@@ -429,6 +524,138 @@ useEffect(() => {
             Add reference
           </button>
         )}
+      </div>
+
+      <div
+        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 
+        ${isDrawerOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center border-b px-4 py-3">
+          <h2 className="text-lg font-semibold">Payment Settings</h2>
+          <button
+            onClick={() => setIsDrawerOpen(false)}
+            className="text-gray-500 hover:text-red-500 text-xl font-bold"
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-4 space-y-4">
+          {/* Method Selection */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Choose Payment Method
+            </label>
+            <select
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="paypal">PayPal</option>
+              <option value="bank">Bank Account</option>
+            </select>
+          </div>
+
+          {/* PayPal Input */}
+          {paymentMethod === "paypal" && (
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                PayPal Email
+              </label>
+              <input
+                type="email"
+                placeholder="example@paypal.com"
+                value={paypalEmail}
+                onChange={(e) => setPaypalEmail(e.target.value)}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          )}
+
+          {/* Bank Account Inputs */}
+          {paymentMethod === "bank" && (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Account Holder Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  value={bankDetails.accountHolderName}
+                  onChange={(e) =>
+                    setBankDetails({
+                      ...bankDetails,
+                      accountHolderName: e.target.value,
+                    })
+                  }
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Account Number
+                </label>
+                <input
+                  type="text"
+                  placeholder="123456789"
+                  value={bankDetails.accountNumber}
+                  onChange={(e) =>
+                    setBankDetails({
+                      ...bankDetails,
+                      accountNumber: e.target.value,
+                    })
+                  }
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Bank Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="HDFC, SBI, ICICI..."
+                  value={bankDetails.bankName}
+                  onChange={(e) =>
+                    setBankDetails({ ...bankDetails, bankName: e.target.value })
+                  }
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  IFSC / Swift Code
+                </label>
+                <input
+                  type="text"
+                  placeholder="HDFC0001234"
+                  value={bankDetails.ifscCode}
+                  onChange={(e) =>
+                    setBankDetails({ ...bankDetails, ifscCode: e.target.value })
+                  }
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Save Button */}
+        <div className="border-t px-4 py-3">
+          <button
+            onClick={handleSaveMerchantAccountDetails}
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+          >
+            {loading ? "Saving..." : "Save"}
+          </button>
+        </div>
       </div>
 
       <div className="bg-white shadow rounded-lg p-5 mb-6 flex flex-col md:flex-row justify-between gap-6">
@@ -457,7 +684,7 @@ useEffect(() => {
           </div> */}
           {(userRole === "Dev Admin" || userRole === "Master Admin") && (
             <div className="text-sm text-gray-600 space-y-4">
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <strong className="w-40">Account info:</strong>
                 <div className="relative w-64 flex items-center">
                   <input
@@ -523,7 +750,7 @@ useEffect(() => {
                   </div>
                 </div>
               </div>
-
+*/}
               <div className="flex items-center">
                 <strong className="w-40">Bank reference:</strong>
                 <div className="relative w-64 flex items-center">

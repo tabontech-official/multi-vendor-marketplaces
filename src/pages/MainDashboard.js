@@ -27,7 +27,69 @@ const MainDashboard = () => {
   });
   const [productCount, setProductCount] = useState(0);
   const [productActiveCount, setActiveProductCount] = useState(0);
-    const [productInActiveCount, setInActiveProductCount] = useState(0);
+  const [productInActiveCount, setInActiveProductCount] = useState(0);
+
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: [],
+  });
+  useEffect(() => {
+  const fetchMonthlyRevenue = async () => {
+    try {
+      const token = localStorage.getItem("usertoken");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+      const userId = localStorage.getItem("userid");
+      let decodedRole = null;
+
+      if (token) {
+        const decoded = jwtDecode(token);
+        decodedRole = decoded.payLoad.role;
+      }
+
+      let apiUrl = "";
+      if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
+        apiUrl = "https://multi-vendor-marketplace.vercel.app/order/monthlyRevenue"; 
+      } else if (decodedRole === "Merchant" || decodedRole === "Merchant Staff") {
+        apiUrl = `https://multi-vendor-marketplace.vercel.app/order/monthlyRevenue/${userId}`; 
+      }
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch monthly revenue");
+      }
+
+      const data = await response.json();
+
+      // 👇 Agar API "revenue object" bhej rahi hai
+      const revenueObj = data.revenue || {};
+      const labels = Object.keys(revenueObj); // ["2025-01", "2025-02", ...]
+      const incomeData = Object.values(revenueObj); // [1200.5, 800, ...]
+
+      setChartData({
+        labels,
+        datasets: [
+          {
+            label: "Income",
+            data: incomeData,
+            backgroundColor: "#06b6d4",
+            borderRadius: 6,
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("Error fetching monthly revenue:", error);
+    }
+  };
+
+  fetchMonthlyRevenue();
+}, []);
 
 
   const data = {
@@ -114,15 +176,15 @@ const MainDashboard = () => {
           });
 
           const data = await response.json();
-        if (response.ok) {
-          const dataMap = {};
-          data.forEach(item => {
-            dataMap[item.status.toLowerCase()] = item.count;
-          });
+          if (response.ok) {
+            const dataMap = {};
+            data.forEach((item) => {
+              dataMap[item.status.toLowerCase()] = item.count;
+            });
 
-          setProductCount(dataMap.total || 0);
-          setActiveProductCount(dataMap.active || 0);
-          setInActiveProductCount(dataMap.inactive || 0);
+            setProductCount(dataMap.total || 0);
+            setActiveProductCount(dataMap.active || 0);
+            setInActiveProductCount(dataMap.inactive || 0);
           } else {
             console.error("Failed to fetch count:", data.message);
           }
@@ -146,7 +208,7 @@ const MainDashboard = () => {
           const decoded = jwtDecode(token);
           decodedRole = decoded.payLoad.role;
         }
-console.log(decodedRole)
+        console.log(decodedRole);
         let apiUrl = "";
 
         if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
@@ -171,34 +233,79 @@ console.log(decodedRole)
   }, []);
 
   const [viewCount, setViewCount] = useState(0);
-    const [perDayCount, setPerDayCount] = useState(0);
-    const [perHourCount, setHourCount] = useState(0);
+  const [perDayCount, setPerDayCount] = useState(0);
+  const [perHourCount, setHourCount] = useState(0);
 
   const userId = localStorage.getItem("userid");
 
-  useEffect(() => {
-    const fetchUserViewCount = async () => {
-      try {
-        const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/trackingViews/${userId}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setViewCount(data.totalViews);
-          setPerDayCount(data.weeklyViews)
-          setHourCount(data.monthlyViews)
-        } else {
-          console.error("Failed to fetch user view count");
-        }
-      } catch (error) {
-        console.error("Error fetching user view count:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchUserViewCount = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         `https://multi-vendor-marketplace.vercel.app/product/trackingViews/${userId}`
+  //       );
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         setViewCount(data.totalViews);
+  //         setPerDayCount(data.weeklyViews);
+  //         setHourCount(data.monthlyViews);
+  //       } else {
+  //         console.error("Failed to fetch user view count");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching user view count:", error);
+  //     }
+  //   };
 
-    if (userId) {
-      fetchUserViewCount();
+  //   if (userId) {
+  //     fetchUserViewCount();
+  //   }
+  // }, [userId]);
+useEffect(() => {
+  const fetchUserViewCount = async () => {
+    try {
+      const token = localStorage.getItem("usertoken");
+      let role = null;
+
+      if (token) {
+        const decoded = jwtDecode(token);
+        role = decoded.payLoad.role;
+      }
+
+      let url = "";
+
+      if (role === "Merchant" || role === "Merchant Staff") {
+        url = `https://multi-vendor-marketplace.vercel.app/product/trackingViews/${userId}`;
+      } else if (role === "Master Admin" || role === "Dev Admin") {
+        url = `https://multi-vendor-marketplace.vercel.app/product/trackingViews`;
+      }
+
+      if (!url) return;
+
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+
+        if (role === "Merchant" || role === "Merchant Staff") {
+          setViewCount(data.totalViews);
+          setPerDayCount(data.weeklyViews);
+          setHourCount(data.monthlyViews);
+        } else {
+          // Admin case → aggregated data
+          setViewCount(data.totalViews);
+          setPerDayCount(data.weeklyViews);
+          setHourCount(data.monthlyViews);
+        }
+      } else {
+        console.error("Failed to fetch user view count");
+      }
+    } catch (error) {
+      console.error("Error fetching user view count:", error);
     }
-  }, [userId]);
+  };
+
+  fetchUserViewCount();
+}, [userId]);
 
   return (
     <main className="w-full p-4 md:p-8">
@@ -225,7 +332,7 @@ console.log(decodedRole)
             </p>
           </div>
         </div> */}
-<div className="bg-gray-100 rounded-xl p-4 shadow-sm">
+        <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           {/* Icon + Heading */}
           <div className="flex items-center gap-2 mb-3">
             <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-300">
@@ -262,8 +369,7 @@ console.log(decodedRole)
           </div>
         </div>
 
-
-<div className="bg-gray-100 rounded-xl p-4 shadow-sm">
+        <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           {/* Icon + Heading */}
           <div className="flex items-center gap-3 mb-3">
             <div className="bg-gray-300 text-black px-3 py-3 rounded-full">
@@ -285,9 +391,13 @@ console.log(decodedRole)
           <div className="flex justify-between text-center text-base font-semibold">
             <div className="w-1/3">{productCount || 0}</div>
             <div className="w-[1px] bg-gray-200 mx-1" />
-            <div className="w-1/3 text-green-600">{productActiveCount ||0}</div>
+            <div className="w-1/3 text-green-600">
+              {productActiveCount || 0}
+            </div>
             <div className="w-[1px] bg-gray-200 mx-1" />
-            <div className="w-1/3 text-red-500">{productInActiveCount||0}</div>
+            <div className="w-1/3 text-red-500">
+              {productInActiveCount || 0}
+            </div>
           </div>
           <div className="border-t border-gray-300 pt-2 mt-2">
             <p className="text-xs text-green-500 flex items-center gap-1">
@@ -297,10 +407,7 @@ console.log(decodedRole)
           </div>
         </div>
 
-
-
-
- <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
+        <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-3 mb-3">
             <div className="bg-gray-300 text-black px-3 py-3 rounded-full">
               <MdPreview />
@@ -319,9 +426,9 @@ console.log(decodedRole)
           <div className="flex justify-between text-center text-base font-semibold">
             <div className="w-1/3">{viewCount || 0}</div>
             <div className="w-[1px] bg-gray-200 mx-1" />
-            <div className="w-1/3 text-green-600">{perHourCount||0}</div>
+            <div className="w-1/3 text-green-600">{perHourCount || 0}</div>
             <div className="w-[1px] bg-gray-200 mx-1" />
-            <div className="w-1/3 text-blue-600">{perDayCount||0}</div>
+            <div className="w-1/3 text-blue-600">{perDayCount || 0}</div>
           </div>
           <div className="border-t-2 border-gray-300 pt-2 mt-3">
             <p className="text-xs text-red-500 flex items-center gap-1">
@@ -329,8 +436,6 @@ console.log(decodedRole)
             </p>
           </div>
         </div>
-
-
 
         <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           {/* Icon + Heading */}
@@ -387,7 +492,6 @@ console.log(decodedRole)
             </p>
           </div>
         </div> */}
-        
 
         {/* <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-3">
@@ -404,7 +508,6 @@ console.log(decodedRole)
             </p>
           </div>
         </div> */}
-        
 
         {/* <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-3">
@@ -420,7 +523,6 @@ console.log(decodedRole)
             </p>
           </div>
         </div> */}
-       
       </div>
 
       <div className="flex gap-6 mt-6">
@@ -455,7 +557,7 @@ console.log(decodedRole)
             </div> */}
           </div>
 
-          <Bar data={data} options={options} />
+          <Bar data={chartData} options={options} />
         </div>
 
         <div className="bg-cyan-600 text-white p-6 rounded-xl shadow-sm w-[35%]">

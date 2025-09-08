@@ -2088,31 +2088,7 @@ const handleDuplicate = async () => {
               ? "Update Product"
               : "Add Product"}
           </button> */}
-<div className="flex gap-4 mt-4">
-  {/* Update / Add Button */}
-  <button
-    onClick={handleSubmit}
-    type="submit"
-    className="w-full bg-blue-500 text-white px-4 py-2 rounded-md"
-  >
-    {loading
-      ? "Submitting..."
-      : isEditing
-      ? "Update Product"
-      : "Add Product"}
-  </button>
 
-  {/* Duplicate Button - sirf edit mode mein show hoga */}
-  {isEditing && (
-    <button
-      onClick={handleDuplicate}
-      type="button"
-      className="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-    >
-      Duplicate Product
-    </button>
-  )}
-</div>
 
           {message && (
             <p
@@ -2125,6 +2101,30 @@ const handleDuplicate = async () => {
           )}
         </div>
         <div className="space-y-6">
+        <div className="flex gap-4 mb-4">
+  <button
+    onClick={handleSubmit}
+    type="submit"
+    className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+  >
+    {loading
+      ? "Submitting..."
+      : isEditing
+      ? "Update Product"
+      : "Add Product"}
+  </button>
+
+  {isEditing && (
+    <button
+      onClick={handleDuplicate}
+      type="button"
+      className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+    >
+      Duplicate Product
+    </button>
+  )}
+</div>
+
           <div className="bg-white p-4 border border-gray-300 rounded-xl">
             <label className="block text-sm font-medium text-gray-700">
               Status

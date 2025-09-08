@@ -1178,6 +1178,53 @@ if (Object.keys(hydratedVariantImages).length > 0) {
     setVariantSku((prev) => ({ ...prev, [key]: value }));
   };
 
+const handleDuplicate = async () => {
+  const apiKey = localStorage.getItem("apiKey");
+  const apiSecretKey = localStorage.getItem("apiSecretKey");
+  const userId = localStorage.getItem("userid");
+
+  if (!product) return;
+
+  setLoading(true); // 🔥 same loading use karein
+  setMessage(null);
+
+  try {
+    const response = await fetch(
+      `https://multi-vendor-marketplace.vercel.app/product/duplicateProduct/${product.shopifyId}`,
+      {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setMessage({ type: "success", text: "Product duplicated successfully!" });
+      navigate(`/manage-product`, );
+    } else {
+      setMessage({
+        type: "error",
+        text: data.error || "Failed to duplicate product.",
+      });
+    }
+  } catch (err) {
+    console.error("Error duplicating product:", err);
+    setMessage({ type: "error", text: "Server error while duplicating." });
+  } finally {
+    setLoading(false); // 🔥 reset loading
+  }
+};
+
+
+
+
+
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       <div className="w-full max-w-7xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -2030,7 +2077,7 @@ if (Object.keys(hydratedVariantImages).length > 0) {
               </p>
             </div>
           )}
-          <button
+          {/* <button
             onClick={handleSubmit}
             type="submit"
             className="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded-md"
@@ -2040,7 +2087,32 @@ if (Object.keys(hydratedVariantImages).length > 0) {
               : isEditing
               ? "Update Product"
               : "Add Product"}
-          </button>
+          </button> */}
+<div className="flex gap-4 mt-4">
+  {/* Update / Add Button */}
+  <button
+    onClick={handleSubmit}
+    type="submit"
+    className="w-full bg-blue-500 text-white px-4 py-2 rounded-md"
+  >
+    {loading
+      ? "Submitting..."
+      : isEditing
+      ? "Update Product"
+      : "Add Product"}
+  </button>
+
+  {/* Duplicate Button - sirf edit mode mein show hoga */}
+  {isEditing && (
+    <button
+      onClick={handleDuplicate}
+      type="button"
+      className="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+    >
+      Duplicate Product
+    </button>
+  )}
+</div>
 
           {message && (
             <p

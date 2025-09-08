@@ -139,7 +139,7 @@ const Inventory = () => {
         //   ? `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
         //   : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
         admin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
+          ? `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/?page=${page}&limit=${limit}`
           : `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`,
         {
           method: "GET",
@@ -664,6 +664,8 @@ const Inventory = () => {
                     <th className="p-3">Action</th>
                     <th className="p-3">Status</th>
                     <th className="p-3">Image</th>
+                    <th className="p-3">Listing_name</th>
+                    <th className="p-3">Published_at</th>
                     <th className="p-3">SKU</th>
                     <th className="p-3">Price</th>
                     <th className="p-3">Compare_at_price</th>
@@ -790,6 +792,25 @@ const Inventory = () => {
                             </span>
                           );
                         })()}
+                      </td>
+                      <td className="p-3">
+                        {/* Product Title */}
+                        <span className="text-sm font-medium text-gray-800">
+                          {variant.productTitle}
+                        </span>
+                      </td>
+
+                      <td className="p-3">
+                        {/* Product Created Date */}
+                        <span className="text-sm text-gray-600">
+                          {new Date(
+                            variant.productCreatedAt
+                          ).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
                       </td>
 
                       <td
@@ -1036,6 +1057,8 @@ const Inventory = () => {
                       <th className="p-3">Action</th>
                       <th className="p-3">Status</th>
                       <th className="p-3">Image</th>
+                      <th className="p-3">Listing_name</th>
+                      <th className="p-3">Published_at</th>
                       <th className="p-3">SKU</th>
                       <th className="p-3">Inventory</th>
                       {admin && <th className="p-3 text-xs">Shopify ID</th>}
@@ -1180,6 +1203,26 @@ const Inventory = () => {
                               );
                             })()}
                           </td>
+                          <td className="p-3">
+                            {/* Product Title */}
+                            <span className="text-sm font-medium text-gray-800">
+                              {variant.productTitle}
+                            </span>
+                          </td>
+
+                          <td className="p-3">
+                            {/* Product Created Date */}
+                            <span className="text-sm text-gray-600">
+                              {new Date(
+                                variant.productCreatedAt
+                              ).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </span>
+                          </td>
+
                           <td className="p-3">{variant.sku || "N/A"}</td>
 
                           <td className="p-3">

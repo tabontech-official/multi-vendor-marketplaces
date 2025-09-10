@@ -112,44 +112,43 @@ const CategorySelector = () => {
   };
 
   useEffect(() => {
-  const fetchCategories = async () => {
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+    const fetchCategories = async () => {
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-    if (!apiKey || !apiSecretKey) {
-      console.error("API credentials missing.");
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/category/getCategory",
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setCategories(data);
-        setFilteredCategories(data);
-      } else {
-        console.error("Server error:", data.message);
+      if (!apiKey || !apiSecretKey) {
+        console.error("API credentials missing.");
+        return;
       }
-    } catch (err) {
-      console.error("Error fetching categories:", err);
-    }
-  };
 
-  fetchCategories();
-}, []);
+      try {
+        const response = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/category/getCategory",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
+        const data = await response.json();
+
+        if (response.ok) {
+          setCategories(data);
+          setFilteredCategories(data);
+        } else {
+          console.error("Server error:", data.message);
+        }
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [dropdownWidth, setDropdownWidth] = useState(0);
@@ -666,7 +665,6 @@ const CategorySelector = () => {
         })
       );
 
-     
       // const hydratedVariantImages = {};
 
       // product.variants.forEach((variant) => {
@@ -729,43 +727,47 @@ const CategorySelector = () => {
 
       const hydratedVariantImages = {};
 
-product.variants.forEach((variant, idx) => {
-  const titleKey = normalizeString(variant.title || "");
-  let matched = null;
+      product.variants.forEach((variant, idx) => {
+        const titleKey = normalizeString(variant.title || "");
+        let matched = null;
 
-  // 1️⃣ Try image_id match
-  if (variant.image_id) {
-    matched =
-      product.variantImages?.find(img => String(img.id) === String(variant.image_id)) ||
-      product.images?.find(img => String(img.id) === String(variant.image_id));
-  }
+        // 1️⃣ Try image_id match
+        if (variant.image_id) {
+          matched =
+            product.variantImages?.find(
+              (img) => String(img.id) === String(variant.image_id)
+            ) ||
+            product.images?.find(
+              (img) => String(img.id) === String(variant.image_id)
+            );
+        }
 
-  // 2️⃣ Try alt/title match
-  if (!matched && product.variantImages) {
-    matched = product.variantImages.find(img =>
-      normalizeString(img.alt || "").includes(titleKey)
-    );
-  }
+        // 2️⃣ Try alt/title match
+        if (!matched && product.variantImages) {
+          matched = product.variantImages.find((img) =>
+            normalizeString(img.alt || "").includes(titleKey)
+          );
+        }
 
-  // 3️⃣ Fallback to index match
-  if (!matched && product.variantImages?.[idx]) {
-    matched = product.variantImages[idx];
-  }
+        // 3️⃣ Fallback to index match
+        if (!matched && product.variantImages?.[idx]) {
+          matched = product.variantImages[idx];
+        }
 
-  // Final check and set
-  if (matched?.src) {
-    hydratedVariantImages[titleKey] = {
-      preview: matched.src,
-      loading: false,
-    };
-  }
-});
+        // Final check and set
+        if (matched?.src) {
+          hydratedVariantImages[titleKey] = {
+            preview: matched.src,
+            loading: false,
+          };
+        }
+      });
 
-if (Object.keys(hydratedVariantImages).length > 0) {
-  setVariantImages(hydratedVariantImages);
-} else {
-  console.log("No images found for any variants");
-}
+      if (Object.keys(hydratedVariantImages).length > 0) {
+        setVariantImages(hydratedVariantImages);
+      } else {
+        console.log("No images found for any variants");
+      }
 
       setIsEditing(true);
       setTitle(product.title || "");
@@ -868,19 +870,22 @@ if (Object.keys(hydratedVariantImages).length > 0) {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setSelectedImages((prev) => {
             const updated = [...prev];
@@ -1178,52 +1183,51 @@ if (Object.keys(hydratedVariantImages).length > 0) {
     setVariantSku((prev) => ({ ...prev, [key]: value }));
   };
 
-const handleDuplicate = async () => {
-  const apiKey = localStorage.getItem("apiKey");
-  const apiSecretKey = localStorage.getItem("apiSecretKey");
-  const userId = localStorage.getItem("userid");
+  const handleDuplicate = async () => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+    const userId = localStorage.getItem("userid");
 
-  if (!product) return;
+    if (!product) return;
 
-  setLoading(true); // 🔥 same loading use karein
-  setMessage(null);
+    setLoading(true); // 🔥 same loading use karein
+    setMessage(null);
 
-  try {
-    const response = await fetch(
-      `https://multi-vendor-marketplace.vercel.app/product/duplicateProduct/${product.shopifyId}`,
-      {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
-        },
+    try {
+      const response = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/duplicateProduct/${product.shopifyId}`,
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage({
+          type: "success",
+          text: "Product duplicated successfully!",
+        });
+        navigate(`/manage-product`);
+      } else {
+        setMessage({
+          type: "error",
+          text: data.error || "Failed to duplicate product.",
+        });
       }
-    );
-
-    const data = await response.json();
-
-    if (response.ok) {
-      setMessage({ type: "success", text: "Product duplicated successfully!" });
-      navigate(`/manage-product`, );
-    } else {
-      setMessage({
-        type: "error",
-        text: data.error || "Failed to duplicate product.",
-      });
+    } catch (err) {
+      console.error("Error duplicating product:", err);
+      setMessage({ type: "error", text: "Server error while duplicating." });
+    } finally {
+      setLoading(false); // 🔥 reset loading
     }
-  } catch (err) {
-    console.error("Error duplicating product:", err);
-    setMessage({ type: "error", text: "Server error while duplicating." });
-  } finally {
-    setLoading(false); // 🔥 reset loading
-  }
-};
-
-
-
-
+  };
 
   return (
     <main className="flex justify-center bg-gray-100 p-6">
@@ -2089,7 +2093,6 @@ const handleDuplicate = async () => {
               : "Add Product"}
           </button> */}
 
-
           {message && (
             <p
               className={`mt-2 text-${
@@ -2101,29 +2104,29 @@ const handleDuplicate = async () => {
           )}
         </div>
         <div className="space-y-6">
-        <div className="flex gap-4 mb-4">
-  <button
-    onClick={handleSubmit}
-    type="submit"
-    className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
-  >
-    {loading
-      ? "Submitting..."
-      : isEditing
-      ? "Update Product"
-      : "Add Product"}
-  </button>
+          <div className="flex gap-4 mb-4">
+            <button
+              onClick={handleSubmit}
+              type="submit"
+              className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+            >
+              {loading
+                ? "Submitting..."
+                : isEditing
+                ? "Update Product"
+                : "Add Product"}
+            </button>
 
-  {isEditing && (
-    <button
-      onClick={handleDuplicate}
-      type="button"
-      className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
-    >
-      Duplicate Product
-    </button>
-  )}
-</div>
+            {isEditing && (
+              <button
+                onClick={handleDuplicate}
+                type="button"
+                className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+              >
+                Duplicate Product
+              </button>
+            )}
+          </div>
 
           <div className="bg-white p-4 border border-gray-300 rounded-xl">
             <label className="block text-sm font-medium text-gray-700">
@@ -2217,7 +2220,7 @@ const handleDuplicate = async () => {
                     setIsFocused(true);
                     setFilteredCategories(categories);
                   }}
-                  onBlur={() => setTimeout(() => setIsFocused(false), 200)} 
+                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                   placeholder="Search category..."
                   className="w-full border border-gray-300 p-2 rounded-xl"
                 />

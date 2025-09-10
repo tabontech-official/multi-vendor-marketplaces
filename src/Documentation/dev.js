@@ -1940,7 +1940,7 @@ export default function ApiDocsPage() {
                 <div className="mb-4">
                   <p className="text-sm text-gray-500 mb-1">Endpoint:</p>
                   <code className="text-purple-700 font-medium break-words text-xs sm:text-sm">
-                    POST /product/upload-product-csv/:userId
+                    POST /product/upload-product-csv
                   </code>
                   <p className="mt-1 text-xs text-gray-500">
                     Upload a CSV file to bulk create or update products along
@@ -2061,7 +2061,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/upload-product-csv/64acbe...`}
+                    {`https://multi-vendor-marketplace.vercel.app/product/upload-product-csv`}
                   </pre>
                 </div>
                 {/* Example Response */}

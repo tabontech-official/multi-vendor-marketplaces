@@ -75,41 +75,147 @@ const Dashboard = () => {
   };
   const togglePopup = () => setIsexportOpen(!isOpen);
 
+  // const getUniqueOptions = (criteria) => {
+  //   switch (criteria) {
+  //     case "listing_name":
+  //       return [...new Set(products.map((p) => p.title).filter(Boolean))];
+  //     case "approval":
+  //       return [
+  //         ...new Set(products.map((p) => p.approvalStatus).filter(Boolean)),
+  //       ];
+  //     case "sku":
+  //       return [
+  //         ...new Set(products.map((p) => p.variants?.[0]?.sku).filter(Boolean)),
+  //       ];
+  //     case "price":
+  //       return [
+  //         ...new Set(
+  //           products
+  //             .map((p) => p.variants?.[0]?.price?.toString())
+  //             .filter(Boolean)
+  //         ),
+  //       ];
+  //     case "product_type":
+  //       return [
+  //         ...new Set(products.map((p) => p.product_type).filter(Boolean)),
+  //       ];
+  //     case "vendor":
+  //       return [...new Set(products.map((p) => p.vendor).filter(Boolean))];
+
+  //     // ✅ Published By (unique publishers usernames)
+  //     case "published_by":
+  //       return [...new Set(products.map((p) => p.username).filter(Boolean))];
+
+  //     default:
+  //       return [];
+  //   }
+  // };
+  const formatCurrency = (value) => {
+    return `$${Number(value).toFixed(2)}`;
+  };
+
+  const predefinedRanges = [
+    { min: 0, max: 50 },
+    { min: 50, max: 100 },
+    { min: 100, max: 200 },
+    { min: 200, max: 300 },
+    { min: 300, max: 400 },
+    { min: 400, max: 500 },
+    { min: 500, max: 750 },
+    { min: 750, max: 1000 },
+    { min: 1000, max: 2000 },
+    { min: 2000, max: 3000 },
+    { min: 3000, max: 5000 },
+    { min: 5000, max: 7500 },
+    { min: 7500, max: 10000 },
+    { min: 10000, max: 20000 },
+    { min: 20000, max: 50000 },
+    { min: 50000, max: Infinity }, // catch-all above 50k
+  ];
+
   const getUniqueOptions = (criteria) => {
+    let options = [];
     switch (criteria) {
       case "listing_name":
-        return [...new Set(products.map((p) => p.title).filter(Boolean))];
+        options = [...new Set(products.map((p) => p.title).filter(Boolean))];
+        break;
       case "approval":
-        return [
+        options = [
           ...new Set(products.map((p) => p.approvalStatus).filter(Boolean)),
         ];
+        break;
       case "sku":
-        return [
+        options = [
           ...new Set(products.map((p) => p.variants?.[0]?.sku).filter(Boolean)),
         ];
-      case "price":
-        return [
-          ...new Set(
-            products
-              .map((p) => p.variants?.[0]?.price?.toString())
-              .filter(Boolean)
-          ),
-        ];
+        break;
+      case "price": {
+        const prices = products
+          .map((p) => parseFloat(p.variants?.[0]?.price))
+          .filter((price) => !isNaN(price));
+
+        if (prices.length === 0) return [];
+
+        return predefinedRanges
+          .filter((range) =>
+            prices.some((price) => price >= range.min && price <= range.max)
+          )
+          .map(
+            (range) =>
+              `${formatCurrency(range.min)} - ${
+                range.max === Infinity ? "Above" : formatCurrency(range.max)
+              }`
+          );
+      }
+
       case "product_type":
-        return [
+        options = [
           ...new Set(products.map((p) => p.product_type).filter(Boolean)),
         ];
+        break;
       case "vendor":
-        return [...new Set(products.map((p) => p.vendor).filter(Boolean))];
-
-      // ✅ Published By (unique publishers usernames)
+        options = [...new Set(products.map((p) => p.vendor).filter(Boolean))];
+        break;
       case "published_by":
-        return [...new Set(products.map((p) => p.username).filter(Boolean))];
-
+        options = [...new Set(products.map((p) => p.username).filter(Boolean))];
+        break;
       default:
         return [];
     }
+
+    return options.sort((a, b) => a.localeCompare(b));
   };
+
+  // useEffect(() => {
+  //   if (sortBy && sortValue) {
+  //     const filtered = products.filter((p) => {
+  //       switch (sortBy) {
+  //         case "listing_name":
+  //           return p.title === sortValue;
+  //         case "approval":
+  //           return p.approvalStatus === sortValue;
+  //         case "sku":
+  //           return p.variants?.[0]?.sku === sortValue;
+  //         case "price":
+  //           return p.variants?.[0]?.price?.toString() === sortValue;
+  //         case "product_type":
+  //           return p.product_type === sortValue;
+  //         case "vendor":
+  //           return p.vendor === sortValue;
+
+  //         // ✅ Published By filter
+  //         case "published_by":
+  //           return p.username === sortValue;
+
+  //         default:
+  //           return true;
+  //       }
+  //     });
+  //     setFilteredProducts(filtered);
+  //   } else {
+  //     setFilteredProducts(products);
+  //   }
+  // }, [sortBy, sortValue, products]);
 
   useEffect(() => {
     if (sortBy && sortValue) {
@@ -121,17 +227,29 @@ const Dashboard = () => {
             return p.approvalStatus === sortValue;
           case "sku":
             return p.variants?.[0]?.sku === sortValue;
-          case "price":
-            return p.variants?.[0]?.price?.toString() === sortValue;
+          case "price": {
+            const price = parseFloat(p.variants?.[0]?.price || 0);
+
+            if (sortValue.includes("Above")) {
+              const [minStr] = sortValue
+                .split("-")
+                .map((val) => parseFloat(val.replace(/[^0-9.]/g, "")));
+              return price >= minStr;
+            }
+
+            const [minStr, maxStr] = sortValue
+              .split("-")
+              .map((val) => parseFloat(val.replace(/[^0-9.]/g, "")));
+
+            return price >= minStr && price <= maxStr;
+          }
+
           case "product_type":
             return p.product_type === sortValue;
           case "vendor":
             return p.vendor === sortValue;
-
-          // ✅ Published By filter
           case "published_by":
             return p.username === sortValue;
-
           default:
             return true;
         }

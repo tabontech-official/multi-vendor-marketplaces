@@ -94,103 +94,114 @@ const ApiCredentials = () => {
 
   return (
     <div className="flex">
-    <aside className="w-56 mt-3 mb-3 ml-4 rounded-2xl bg-blue-900 p-5 flex flex-col justify-between min-h-screen shadow-lg">
-              {/* Top: Profile */}
-              <div>
-                <div className="flex flex-col items-center border-b border-blue-700 pb-4">
-                  <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center shadow-md">
-                    <FaUser className="text-yellow-400 w-8 h-8" />
-                  </div>
-    
-                  <h2 className="text-lg font-semibold text-white mt-3">
-                    Business Account
-                  </h2>
-    
-                  <div className="flex items-center mt-1 space-x-1">
-                    <span className="text-yellow-400 font-semibold text-sm">
-                      6.0
-                    </span>
-                    <div className="flex space-x-0.5">
-                      {[...Array(5)].map((_, index) => (
-                        <span key={index} className="text-yellow-400 text-sm">
-                          ★
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-    
-                  <p className="text-green-400 text-xs mt-1">
-                    Profile is 75% complete
-                  </p>
-                </div>
-    
-                {/* Navigation Links */}
-                <nav className="mt-6 space-y-3">
-                  {userRole === "Merchant" && (
-                    <NavLink
-                      to="/manage-user"
-                      className={({ isActive }) =>
-                        `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                          isActive
-                            ? "bg-yellow-400 text-blue-900"
-                            : "text-blue-200 hover:bg-blue-800"
-                        }`
-                      }
-                    >
-                      <MdManageAccounts className="mr-2 text-lg" />
-                      <span className="text-sm font-medium">Manage User</span>
-                    </NavLink>
-                  )}
-                  <NavLink
-                    to="/edit-account"
-                    className={({ isActive }) =>
-                      `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                        isActive
-                          ? "bg-yellow-400 text-blue-900"
-                          : "text-blue-200 hover:bg-blue-800"
-                      }`
-                    }
-                  >
-                    <IoSettings className="mr-2 text-lg" />
-                    <span className="text-sm font-medium">Settings</span>
-                  </NavLink>
-    
-                  <NavLink
-                    to="/api-credentials"
-                    className={({ isActive }) =>
-                      `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                        isActive
-                          ? "bg-yellow-400 text-blue-900"
-                          : "text-blue-200 hover:bg-blue-800"
-                      }`
-                    }
-                  >
-                    <IoSettings className="mr-2 text-lg" />
-                    <span className="text-sm font-medium">API Credentials</span>
-                  </NavLink>
-                  {(userRole === "Master Admin" || userRole === "Dev Admin") && (
-                    <NavLink
-                      to="/approval-setting"
-                      className={({ isActive }) =>
-                        `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                          isActive
-                            ? "bg-yellow-400 text-blue-900"
-                            : "text-blue-200 hover:bg-blue-800"
-                        }`
-                      }
-                    >
-                      <MdManageAccounts className="mr-2 text-lg" />
-                      <span className="text-sm font-medium">Approval Settings</span>
-                    </NavLink>
-                  )}
-                </nav>
+  <aside className="w-56 mt-3 mb-3 ml-4 rounded-2xl bg-blue-900 p-5 flex flex-col justify-between min-h-screen shadow-lg">
+          {/* Top: Profile */}
+          <div>
+            <div className="flex flex-col items-center border-b border-blue-700 pb-4">
+              <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center shadow-md">
+                <FaUser className="text-yellow-400 w-8 h-8" />
               </div>
-    
-              {/* Bottom: Promote Button */}
-              <button className="w-full mt-6 py-2 bg-yellow-400 text-blue-900 font-semibold rounded-md hover:bg-yellow-500 transition-all duration-150">
-                🚀 Promote
-              </button>
-            </aside>
+  
+              <h2 className="text-lg font-semibold text-white mt-3">
+                Business Account
+              </h2>
+  
+              <div className="flex items-center mt-1 space-x-1">
+                <span className="text-yellow-400 font-semibold text-sm">6.0</span>
+                <div className="flex space-x-0.5">
+                  {[...Array(5)].map((_, index) => (
+                    <span key={index} className="text-yellow-400 text-sm">
+                      ★
+                    </span>
+                  ))}
+                </div>
+              </div>
+  
+              <p className="text-green-400 text-xs mt-1">
+                Profile is 75% complete
+              </p>
+            </div>
+  
+            {/* Navigation Links */}
+            <nav className="mt-6 space-y-3">
+              {userRole === "Merchant" && (
+                <NavLink
+                  to="/manage-user"
+                  className={({ isActive }) =>
+                    `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+                      isActive
+                        ? "bg-yellow-400 text-blue-900"
+                        : "text-blue-200 hover:bg-blue-800"
+                    }`
+                  }
+                >
+                  <MdManageAccounts className="mr-2 text-lg" />
+                  <span className="text-sm font-medium">Manage User</span>
+                </NavLink>
+              )}
+              <NavLink
+                to="/edit-account"
+                className={({ isActive }) =>
+                  `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+                    isActive
+                      ? "bg-yellow-400 text-blue-900"
+                      : "text-blue-200 hover:bg-blue-800"
+                  }`
+                }
+              >
+                <IoSettings className="mr-2 text-lg" />
+                <span className="text-sm font-medium">Settings</span>
+              </NavLink>
+  
+              <NavLink
+                to="/api-credentials"
+                className={({ isActive }) =>
+                  `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+                    isActive
+                      ? "bg-yellow-400 text-blue-900"
+                      : "text-blue-200 hover:bg-blue-800"
+                  }`
+                }
+              >
+                <IoSettings className="mr-2 text-lg" />
+                <span className="text-sm font-medium">API Credentials</span>
+              </NavLink>
+                <NavLink
+                to="/finance-setting"
+                className={({ isActive }) =>
+                  `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+                    isActive
+                      ? "bg-yellow-400 text-blue-900"
+                      : "text-blue-200 hover:bg-blue-800"
+                  }`
+                }
+              >
+                <IoSettings className="mr-2 text-lg" />
+                <span className="text-sm font-medium">Finance Settings</span>
+              </NavLink>
+              {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+                <NavLink
+                  to="/approval-setting"
+                  className={({ isActive }) =>
+                    `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+                      isActive
+                        ? "bg-yellow-400 text-blue-900"
+                        : "text-blue-200 hover:bg-blue-800"
+                    }`
+                  }
+                >
+                  <MdManageAccounts className="mr-2 text-lg" />
+                  <span className="text-sm font-medium">Approval Settings</span>
+                </NavLink>
+              )}
+            </nav>
+          </div>
+  
+          {/* Bottom: Promote Button */}
+          <button className="w-full mt-6 py-2 bg-yellow-400 text-blue-900 font-semibold rounded-md hover:bg-yellow-500 transition-all duration-150">
+            🚀 Promote
+          </button>
+        </aside>
 
 
       <div className="p-8 bg-gray-50 min-h-screen">

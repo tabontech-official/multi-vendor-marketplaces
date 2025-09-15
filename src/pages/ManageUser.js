@@ -158,68 +158,67 @@ const ManageUser = () => {
   //     alert("Error updating user: " + error.message);
   //   }
   // };
-  
+
   const handleUpdateTags = async () => {
-  if (!email) {
-    alert("Email is required!");
-    return;
-  }
-
-  const loggedInUserId = localStorage.getItem("userid");
-  const token = localStorage.getItem("usertoken");
-
-  let creatorIdToSend = loggedInUserId;
-
-  try {
-    const decoded = jwtDecode(token);
-    const userRole = decoded?.payLoad?.role;
-
-    if (
-      role === "Merchant Staff" &&
-      (userRole === "Dev Admin" || userRole === "Master Admin")
-    ) {
-      if (!selectedMerchantId) {
-        alert("Please select a merchant for this Merchant Staff.");
-        return;
-      }
-      creatorIdToSend = selectedMerchantId;
+    if (!email) {
+      alert("Email is required!");
+      return;
     }
 
-    const response = await fetch(
-      "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          role,
-          modules: selectedModules,
-          creatorId: creatorIdToSend,
-        }),
+    const loggedInUserId = localStorage.getItem("userid");
+    const token = localStorage.getItem("usertoken");
+
+    let creatorIdToSend = loggedInUserId;
+
+    try {
+      const decoded = jwtDecode(token);
+      const userRole = decoded?.payLoad?.role;
+
+      if (
+        role === "Merchant Staff" &&
+        (userRole === "Dev Admin" || userRole === "Master Admin")
+      ) {
+        if (!selectedMerchantId) {
+          alert("Please select a merchant for this Merchant Staff.");
+          return;
+        }
+        creatorIdToSend = selectedMerchantId;
       }
-    );
 
-    const data = await response.json();
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            role,
+            modules: selectedModules,
+            creatorId: creatorIdToSend,
+          }),
+        }
+      );
 
-    if (!response.ok) {
-      throw new Error(data.error || "Failed to update user");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update user");
+      }
+
+      alert("User updated successfully!");
+      setIsOpen(false);
+      setName("");
+      setEmail("");
+      setSelectedModules([]);
+      setIsDropdownOpen(false);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      alert("Error updating user: " + error.message);
     }
+  };
 
-    alert("User updated successfully!");
-    setIsOpen(false);
-    setName("");
-    setEmail("");
-    setSelectedModules([]);
-    setIsDropdownOpen(false);
-  } catch (error) {
-    console.error("Error updating user:", error);
-    alert("Error updating user: " + error.message);
-  }
-};
-
-  
   const modules = [
     { name: "Dashboard", subModules: [] },
     {
@@ -271,92 +270,132 @@ const ManageUser = () => {
     handleSearch();
   }, [searchVal, users]);
   const [merchantList, setMerchantList] = useState([]);
-const [selectedMerchantId, setSelectedMerchantId] = useState("");
+  const [selectedMerchantId, setSelectedMerchantId] = useState("");
 
-useEffect(() => {
-  if (
-    (userRole === "Dev Admin" || userRole === "Master Admin") &&
-    role === "Merchant Staff"
-  ) {
-    fetch(`https://multi-vendor-marketplace.vercel.app/auth/getAllMerchant`)
-      .then((res) => res.json())
-      .then((data) => setMerchantList(data))
-      .catch((err) => console.error("Failed to load merchants", err));
-  } else {
-    setMerchantList([]); // Clear if condition not met
-  }
-}, [role, userRole]);
+  useEffect(() => {
+    if (
+      (userRole === "Dev Admin" || userRole === "Master Admin") &&
+      role === "Merchant Staff"
+    ) {
+      fetch(`https://multi-vendor-marketplace.vercel.app/auth/getAllMerchant`)
+        .then((res) => res.json())
+        .then((data) => setMerchantList(data))
+        .catch((err) => console.error("Failed to load merchants", err));
+    } else {
+      setMerchantList([]); // Clear if condition not met
+    }
+  }, [role, userRole]);
 
   return (
     <div className="flex">
-       <aside className="w-56 mt-3 mb-3 ml-4 rounded-2xl bg-blue-900 p-5 flex flex-col justify-between min-h-screen shadow-lg">
-  {/* Top: Profile */}
-  <div>
-    <div className="flex flex-col items-center border-b border-blue-700 pb-4">
-      <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center shadow-md">
-        <FaUser className="text-yellow-400 w-8 h-8" />
-      </div>
+      <aside className="w-56 mt-3 mb-3 ml-4 rounded-2xl bg-blue-900 p-5 flex flex-col justify-between min-h-screen shadow-lg">
+        {/* Top: Profile */}
+        <div>
+          <div className="flex flex-col items-center border-b border-blue-700 pb-4">
+            <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center shadow-md">
+              <FaUser className="text-yellow-400 w-8 h-8" />
+            </div>
 
-      <h2 className="text-lg font-semibold text-white mt-3">Business Account</h2>
+            <h2 className="text-lg font-semibold text-white mt-3">
+              Business Account
+            </h2>
 
-      <div className="flex items-center mt-1 space-x-1">
-        <span className="text-yellow-400 font-semibold text-sm">6.0</span>
-        <div className="flex space-x-0.5">
-          {[...Array(5)].map((_, index) => (
-            <span key={index} className="text-yellow-400 text-sm">★</span>
-          ))}
+            <div className="flex items-center mt-1 space-x-1">
+              <span className="text-yellow-400 font-semibold text-sm">6.0</span>
+              <div className="flex space-x-0.5">
+                {[...Array(5)].map((_, index) => (
+                  <span key={index} className="text-yellow-400 text-sm">
+                    ★
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-green-400 text-xs mt-1">
+              Profile is 75% complete
+            </p>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="mt-6 space-y-3">
+            {userRole === "Merchant" && (
+              <NavLink
+                to="/manage-user"
+                className={({ isActive }) =>
+                  `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+                    isActive
+                      ? "bg-yellow-400 text-blue-900"
+                      : "text-blue-200 hover:bg-blue-800"
+                  }`
+                }
+              >
+                <MdManageAccounts className="mr-2 text-lg" />
+                <span className="text-sm font-medium">Manage User</span>
+              </NavLink>
+            )}
+            <NavLink
+              to="/edit-account"
+              className={({ isActive }) =>
+                `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+                  isActive
+                    ? "bg-yellow-400 text-blue-900"
+                    : "text-blue-200 hover:bg-blue-800"
+                }`
+              }
+            >
+              <IoSettings className="mr-2 text-lg" />
+              <span className="text-sm font-medium">Settings</span>
+            </NavLink>
+
+            <NavLink
+              to="/api-credentials"
+              className={({ isActive }) =>
+                `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+                  isActive
+                    ? "bg-yellow-400 text-blue-900"
+                    : "text-blue-200 hover:bg-blue-800"
+                }`
+              }
+            >
+              <IoSettings className="mr-2 text-lg" />
+              <span className="text-sm font-medium">API Credentials</span>
+            </NavLink>
+            <NavLink
+              to="/finance-setting"
+              className={({ isActive }) =>
+                `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+                  isActive
+                    ? "bg-yellow-400 text-blue-900"
+                    : "text-blue-200 hover:bg-blue-800"
+                }`
+              }
+            >
+              <IoSettings className="mr-2 text-lg" />
+              <span className="text-sm font-medium">Finance Settings</span>
+            </NavLink>
+            {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+              <NavLink
+                to="/approval-setting"
+                className={({ isActive }) =>
+                  `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+                    isActive
+                      ? "bg-yellow-400 text-blue-900"
+                      : "text-blue-200 hover:bg-blue-800"
+                  }`
+                }
+              >
+                <MdManageAccounts className="mr-2 text-lg" />
+                <span className="text-sm font-medium">Approval Settings</span>
+              </NavLink>
+            )}
+          </nav>
         </div>
-      </div>
 
-      <p className="text-green-400 text-xs mt-1">Profile is 75% complete</p>
-    </div>
-
-    {/* Navigation Links */}
-    <nav className="mt-6 space-y-3">
-      {userRole === "Merchant" && (
-        <NavLink
-          to="/manage-user"
-          className={({ isActive }) =>
-            `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-              isActive ? "bg-yellow-400 text-blue-900" : "text-blue-200 hover:bg-blue-800"
-            }`
-          }
-        >
-          <MdManageAccounts className="mr-2 text-lg" />
-          <span className="text-sm font-medium">Manage User</span>
-        </NavLink>
-      )}
-      <NavLink
-        to="/edit-account"
-        className={({ isActive }) =>
-          `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-            isActive ? "bg-yellow-400 text-blue-900" : "text-blue-200 hover:bg-blue-800"
-          }`
-        }
-      >
-        <IoSettings className="mr-2 text-lg" />
-        <span className="text-sm font-medium">Settings</span>
-      </NavLink>
-
-      <NavLink
-        to="/api-credentials"
-        className={({ isActive }) =>
-          `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-            isActive ? "bg-yellow-400 text-blue-900" : "text-blue-200 hover:bg-blue-800"
-          }`
-        }
-      >
-        <IoSettings className="mr-2 text-lg" />
-        <span className="text-sm font-medium">API Credentials</span>
-      </NavLink>
-    </nav>
-  </div>
-
-  {/* Bottom: Promote Button */}
-  <button className="w-full mt-6 py-2 bg-yellow-400 text-blue-900 font-semibold rounded-md hover:bg-yellow-500 transition-all duration-150">
-    🚀 Promote
-  </button>
-</aside>
+        {/* Bottom: Promote Button */}
+        <button className="w-full mt-6 py-2 bg-yellow-400 text-blue-900 font-semibold rounded-md hover:bg-yellow-500 transition-all duration-150">
+          🚀 Promote
+        </button>
+      </aside>
 
       <div className="flex-1 p-6">
         <div className="flex justify-between items-center mb-4">

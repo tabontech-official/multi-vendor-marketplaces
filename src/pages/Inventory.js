@@ -544,7 +544,7 @@ const Inventory = () => {
         <div className="flex-1">
           <h1 className="text-2xl font-semibold mb-1">Inventory</h1>
           <p className="text-gray-600">
-            HHere is your total Collection in Inventory.
+            Here is your total Collection in Inventory.
           </p>
           <div className="w-2/4 max-sm:w-full mt-2">
             <input
@@ -559,54 +559,58 @@ const Inventory = () => {
         <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
           <div className="flex gap-4 items-center w-full justify-end">
             {filteredProducts.some((v) => v.isEditable) && (
-              <button
-                onClick={() => {
-                  const editableVariants = filteredProducts.filter(
-                    (v) => v.isEditable
-                  );
+  <button
+    onClick={() => {
+      const editableVariants = filteredProducts.filter(
+        (v) => v.isEditable
+      );
 
-                  if (editableVariants.length === 0) {
-                    alert("Please edit at least one variant first.");
-                    return;
-                  }
+      if (editableVariants.length === 0) {
+        alert("Please edit at least one variant first.");
+        return;
+      }
 
-                  const updated = [...filteredProducts];
+      const updated = [...filteredProducts];
 
-                  editableVariants.forEach((editableVariant) => {
-                    const index = updated.findIndex(
-                      (v) => v.id === editableVariant.id
-                    );
-                    if (index !== -1) {
-                      if (activeTab === "price") {
-                        updated[index].price = editableVariant.price;
-                        updated[index].compare_at_price =
-                          editableVariant.compare_at_price;
-                      } else if (activeTab === "quantity") {
-                        updated[index].inventory_quantity =
-                          editableVariant.inventory_quantity;
-                      }
-                    }
-                  });
+      editableVariants.forEach((editableVariant) => {
+        const index = updated.findIndex(
+          (v) => v.id === editableVariant.id
+        );
+        if (index !== -1) {
+          if (activeTab === "price") {
+            updated[index].price = editableVariant.price;
+            updated[index].compare_at_price =
+              editableVariant.compare_at_price;
+          } else if (activeTab === "quantity") {
+            updated[index].inventory_quantity =
+              editableVariant.inventory_quantity;
+          }
+        }
+      });
 
-                  editableVariants.forEach((editableVariant, i) => {
-                    setTimeout(() => {
-                      if (activeTab === "price") {
-                        handlePriceUpdate(editableVariant.id);
-                      } else {
-                        handleQuantityUpdate(editableVariant.id);
-                      }
-                    }, i * 100);
-                  });
+      editableVariants.forEach((editableVariant, i) => {
+        setTimeout(() => {
+          if (activeTab === "price") {
+            handlePriceUpdate(editableVariant.id);
+          } else {
+            handleQuantityUpdate(editableVariant.id);
+          }
+        }, i * 100);
+      });
 
-                  editableVariants.forEach((v) => (v.isEditable = false));
+      editableVariants.forEach((v) => (v.isEditable = false));
 
-                  setFilteredProducts(updated);
-                }}
-                className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              >
-                {activeTab === "price" ? "Update All" : "Update All"}
-              </button>
-            )}
+      setFilteredProducts(updated);
+
+      // ✅ Uncheck all selected checkboxes after update
+      setSelectedProducts([]);
+    }}
+    className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+  >
+    {activeTab === "price" ? "Update All" : "Update All"}
+  </button>
+)}
+
             <button
               onClick={openPopupImport}
               className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"

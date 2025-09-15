@@ -66,7 +66,8 @@ const CategorySelector = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [checkedImages, setCheckedImages] = useState({});
   const [isEditing, setIsEditing] = useState(false);
-
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [expandedParents, setExpandedParents] = useState([]);
   const [variantImages, setVariantImages] = useState({});
   const [productTypesList, setProductTypesList] = useState([]);
@@ -593,18 +594,15 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if (isPopupVisible && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
 
-            "Content-Type": "application/json",
-          },
-        }
-      )
+          "Content-Type": "application/json",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           const allImages = data.flatMap((item) => item.images);
@@ -870,22 +868,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setSelectedImages((prev) => {
             const updated = [...prev];
@@ -1420,7 +1415,7 @@ const CategorySelector = () => {
               </label>
             </div>
 
-            {trackQuantity && (
+            {/* {trackQuantity && (
               <div className="mt-4 border-b border-gray-300">
                 <div className="flex items-center justify-between  ">
                   <label className="text-sm text-gray-700 block">
@@ -1432,6 +1427,29 @@ const CategorySelector = () => {
                     onChange={(e) => setQuantity(e.target.value)}
                     className="w-20 border px-3 py-1 rounded-md text-center mb-3 no-spinner"
                   />
+                </div>
+              </div>
+            )} */}
+            {trackQuantity && (
+              <div className="mt-4 border-b border-gray-300">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm text-gray-700 block">
+                    Quantity
+                  </label>
+
+                  {isEditing ? (
+                    <span className="w-full text-sm text-red-500 italic text-right mb-3">
+                      You can update quantities inside the variants section
+                      below.
+                    </span>
+                  ) : (
+                    <input
+                      type="number"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                      className="w-20 border px-3 py-1 rounded-md text-center mb-3 no-spinner"
+                    />
+                  )}
                 </div>
               </div>
             )}
@@ -1576,9 +1594,7 @@ const CategorySelector = () => {
 
                 <div className="mt-3">
                   <div className="grid grid-cols-7 items-center gap-20 mb-2 p-3">
-                    <h3 className="font-semibold text-xs text-gray-800">
-                      VARIANT_IMG
-                    </h3>
+                    <h3 className="font-semibold text-xs text-gray-800">IMG</h3>
                     <h3 className="font-semibold text-xs text-gray-800">
                       VARIANT
                     </h3>
@@ -1586,7 +1602,7 @@ const CategorySelector = () => {
                       PRICE
                     </h3>
                     <h3 className="font-semibold text-xs text-gray-800 ">
-                      COMPARE_AT
+                      COMPARE
                     </h3>
                     <h3 className="font-semibold text-xs text-gray-800 ">
                       SKU
@@ -1605,7 +1621,10 @@ const CategorySelector = () => {
                         key={index}
                         className="bg-gray-100 p-4 rounded-md mt-2"
                       >
-                        <div className="flex items-center justify-between gap-6">
+                        <div
+                          className="flex items-center justify-between gap-6 cursor-pointer"
+                          onClick={() => toggleChildOptions(index)}
+                        >
                           <div className="font-medium text-gray-700">
                             {combination.parent}
                           </div>
@@ -1620,140 +1639,7 @@ const CategorySelector = () => {
                             )}
                           </button>
                         </div>
-                        {/* {expandedParents.includes(index) && (
-                          <div className="mt-2">
-                            <ul className="space-y-2">
-                              {combinations[index]?.children?.map(
-                                (child, childIndex) => {
-                                  const parentValue =
-                                    combinations[index]?.parent;
-                                  const combinationString = `${parentValue} / ${child}`;
 
-                                  const image =
-                                    variantImages[combinationString];
-
-                                  const matchingVariant =
-                                    product?.variants?.find(
-                                      (variant) =>
-                                        variant.title === combinationString
-                                    );
-
-                                  const variantId = matchingVariant?.id;
-
-                                  return (
-                                    <li
-                                      key={childIndex}
-                                      className="grid grid-cols-7 items-center gap-20"
-                                    >
-                                      <div className="w-12 relative">
-                                        <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
-                                          {image?.preview ? (
-                                            <img
-                                              src={
-                                                variantImages[
-                                                  `${index}-${child}`
-                                                ]?.preview ||
-                                                image?.preview ||
-                                                ""
-                                              }
-                                              alt={`Variant ${child}`}
-                                              className="w-full h-full object-cover"
-                                            />
-                                          ) : (
-                                            <span className="text-3xl text-gray-400">
-                                              +
-                                            </span>
-                                          )}
-                                          <input
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onClick={() => {
-                                              setCurrentVariant({
-                                                index,
-                                                child,
-                                              });
-                                              setIsPopupVisible(true);
-                                            }}
-                                          />
-                                          {image?.preview && (
-                                            <button
-                                              onClick={() =>
-                                                handleRemoveVariantImages(
-                                                  index,
-                                                  child
-                                                )
-                                              }
-                                              className="absolute top-0 right-0 text-white bg-red-600 rounded-full px-2 py-1 text-xs"
-                                              style={{
-                                                transform:
-                                                  "translate(25%, -25%)",
-                                              }}
-                                            >
-                                              X
-                                            </button>
-                                          )}
-                                        </label>
-                                      </div>
-
-                                      <span
-                                        className="font-medium text-sm text-gray-700 cursor-pointer hover:underline whitespace-nowrap"
-                                        onClick={() => {
-                                          navigate(
-                                            `/product/${product.id}/variants/${variantId}`,
-                                            {
-                                              state: {
-                                                productId: product.id,
-                                                variantId: variantId,
-                                              },
-                                            }
-                                          );
-                                        }}
-                                      >
-                                        {child}
-                                      </span>
-
-                                      <div className="relative w-20">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <span className="w-20 p-1 pl-6   text-sm ">
-                                          {price || "N/A"}
-                                        </span>
-                                      </div>
-
-                                      <div className="relative w-20 ">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <span className="w-20 p-1 pl-6   text-sm r">
-                                          {compareAtPrice || "N/A"}
-                                        </span>
-                                      </div>
-
-                                      <span className="w-20 p-1  text-sm r">
-                                        {sku || "N/A"}
-                                      </span>
-                                      <span className="w-20 p-1  text-sm r">
-                                        {quantity}
-                                      </span>
-
-                                      <button
-                                        onClick={() =>
-                                          handleDeleteCombination(
-                                            index,
-                                            childIndex
-                                          )
-                                        }
-                                        className="text-red-600"
-                                      >
-                                        <FaTrash />
-                                      </button>
-                                    </li>
-                                  );
-                                }
-                              )}
-                            </ul>
-                          </div>
-                        )} */}
                         {expandedParents.includes(index) && (
                           <div className="mt-2">
                             <ul className="space-y-2">
@@ -1808,28 +1694,11 @@ const CategorySelector = () => {
                                               setIsPopupVisible(true);
                                             }}
                                           />
-                                          {/* {image?.preview && (
-                                            <button
-                                              onClick={() =>
-                                                handleRemoveVariantImages(
-                                                  index,
-                                                  child
-                                                )
-                                              }
-                                              className="absolute top-0 right-0 text-white bg-red-600 rounded-full px-2 py-1 text-xs"
-                                              style={{
-                                                transform:
-                                                  "translate(25%, -25%)",
-                                              }}
-                                            >
-                                              X
-                                            </button>
-                                          )} */}
                                         </label>
                                       </div>
 
                                       <span
-                                        className="text-sm font-medium text-blue-500 underline hover:text-blue-800 transition cursor-pointer whitespace-nowrap"
+                                        className="text-sm font-medium text-gray-500  hover:text-blue-800 transition cursor-pointer whitespace-nowrap"
                                         onClick={() => {
                                           navigate(
                                             `/product/${product.id}/variants/${variantId}`,
@@ -1845,7 +1714,20 @@ const CategorySelector = () => {
                                         {child}
                                       </span>
 
-                                      <div className="relative w-20">
+                                      <div
+                                        className="relative w-20 cursor-pointer"
+                                        onClick={() => {
+                                          navigate(
+                                            `/product/${product.id}/variants/${variantId}`,
+                                            {
+                                              state: {
+                                                productId: product.id,
+                                                variantId: variantId,
+                                              },
+                                            }
+                                          );
+                                        }}
+                                      >
                                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
                                           $
                                         </span>
@@ -1854,7 +1736,20 @@ const CategorySelector = () => {
                                         </span>
                                       </div>
 
-                                      <div className="relative w-20 ">
+                                      <div
+                                        className="relative w-20 cursor-pointer"
+                                        onClick={() => {
+                                          navigate(
+                                            `/product/${product.id}/variants/${variantId}`,
+                                            {
+                                              state: {
+                                                productId: product.id,
+                                                variantId: variantId,
+                                              },
+                                            }
+                                          );
+                                        }}
+                                      >
                                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
                                           $
                                         </span>
@@ -1863,20 +1758,47 @@ const CategorySelector = () => {
                                         </span>
                                       </div>
 
-                                      <span className="w-20 p-1  text-sm r">
+                                      <span
+                                        className="w-20 p-1  text-sm r cursor-pointer"
+                                        onClick={() => {
+                                          navigate(
+                                            `/product/${product.id}/variants/${variantId}`,
+                                            {
+                                              state: {
+                                                productId: product.id,
+                                                variantId: variantId,
+                                              },
+                                            }
+                                          );
+                                        }}
+                                      >
                                         {sku || "N/A"}
                                       </span>
-                                      <span className="w-20 p-1  text-sm r">
+                                      <span
+                                        className="w-20 p-1  text-sm r cursor-pointer"
+                                        onClick={() => {
+                                          navigate(
+                                            `/product/${product.id}/variants/${variantId}`,
+                                            {
+                                              state: {
+                                                productId: product.id,
+                                                variantId: variantId,
+                                              },
+                                            }
+                                          );
+                                        }}
+                                      >
                                         {quantity}
                                       </span>
 
                                       <button
-                                        onClick={() =>
-                                          handleDeleteCombination(
+                                        onClick={() => {
+                                          setDeleteTarget({
                                             index,
-                                            childIndex
-                                          )
-                                        }
+                                            childIndex,
+                                          });
+                                          setIsDeleteModalOpen(true);
+                                        }}
                                         className="text-red-600"
                                       >
                                         <FaTrash />
@@ -1886,6 +1808,42 @@ const CategorySelector = () => {
                                 }
                               )}
                             </ul>
+                          </div>
+                        )}
+                        {isDeleteModalOpen && (
+                          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                            <div className="bg-white rounded-lg shadow-lg p-6 w-[400px]">
+                              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                                Confirm Delete
+                              </h2>
+                              <p className="text-gray-600 mb-6">
+                                Are you sure you want to delete this variant?
+                                This action cannot be undone.
+                              </p>
+
+                              <div className="flex justify-end gap-3">
+                                <button
+                                  onClick={() => setIsDeleteModalOpen(false)}
+                                  className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (deleteTarget) {
+                                      handleDeleteCombination(
+                                        deleteTarget.index,
+                                        deleteTarget.childIndex
+                                      );
+                                    }
+                                    setIsDeleteModalOpen(false);
+                                  }}
+                                  className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>

@@ -290,175 +290,6 @@ const Dashboard = () => {
     }
   }, []);
 
-  // const fetchProductData = async () => {
-  //   setLoading(true);
-  //   const id = localStorage.getItem("userid");
-  //   const apiKey = localStorage.getItem("apiKey");
-  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
-
-  //   try {
-  //     const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
-
-  //     const url = isAdmin
-  //       ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
-  //       : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
-
-  //     const response = await fetch(url, {
-  //       method: "GET",
-  //       headers: {
-  //         "x-api-key": apiKey,
-  //         "x-api-secret": apiSecretKey,
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-
-  //       const sortedProducts = data.products.sort(
-  //         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  //       );
-
-  //       setProducts(sortedProducts);
-
-  //       setFilteredProducts((prev) => [
-  //         ...prev,
-  //         ...sortedProducts.filter(
-  //           (newProduct) =>
-  //             !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-  //         ),
-  //       ]);
-
-  //       setHasMore(page < data.totalPages);
-  //     } else {
-  //       console.error("Unauthorized or server error:", response.status);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching products:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // state
-
-  // fetch uses limit
-
-  //   const fetchProductData = async () => {
-  //     setLoading(true);
-  //     const id = localStorage.getItem("userid");
-  //     const apiKey = localStorage.getItem("apiKey");
-  //     const apiSecretKey = localStorage.getItem("apiSecretKey");
-
-  //     try {
-  //       const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
-
-  //       const url = isAdmin
-  //         ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
-  //         : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
-
-  //       const response = await fetch(url, {
-  //         method: "GET",
-  //         headers: {
-  //           "x-api-key": apiKey,
-  //           "x-api-secret": apiSecretKey,
-  //           "Content-Type": "application/json",
-  //         },
-  //       });
-
-  //     if (response.ok) {
-  //   const data = await response.json();
-
-  //   const sortedProducts = data.products.sort(
-  //     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  //   );
-
-  //   if (page === 1) {
-  //     setProducts(sortedProducts);
-  //     setFilteredProducts(sortedProducts);
-  //   } else {
-  //     setProducts((prev) => [...prev, ...sortedProducts]);
-  //     setFilteredProducts((prev) => [...prev, ...sortedProducts]);
-  //   }
-
-  //   // ✅ yahan total products set karo
-  //   if (data.totalProducts) {
-  //     setTotalProducts(data.totalProducts);
-  //   }
-
-  //   setHasMore(page < data.totalPages);
-  // } else {
-  //         console.error("Unauthorized or server error:", response.status);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching products:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  // reset when limit changes
-
-  // const handleUploadAndPreview = async () => {
-  //   if (!selectedFile) return;
-
-  //   setIsUploading(true);
-  //   setUploadStarted(true);
-  // showToast("success", `Uploading "${selectedFile.name}". Processing in background...`);
-
-  //   closePopup();
-
-  //   setTimeout(async () => {
-  //     try {
-  //       const userId = localStorage.getItem("userid");
-  //        const apiKey = localStorage.getItem("apiKey");
-  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
-  //       if (!userId) {
-  //         showToast("error", "User ID not found.");
-  //         return;
-  //       }
-
-  //       const formData = new FormData();
-  //       formData.append("file", selectedFile);
-  //       // formData.append("userId", userId);
-  //      addNotification(
-  //       `Product CSV upload triggered for "${selectedFile.name}".`,
-  //       "Manage product"
-  //     );
-
-  //       const response = await fetch(
-  //         `https://multi-vendor-marketplace.vercel.app/product/upload-product-csv/${userId}`,
-  //         {
-  //           method: "POST",
-  //           body: formData,
-  //           headers: {
-  //         "x-api-key": apiKey,
-  //         "x-api-secret": apiSecretKey,
-  //       },
-  //         }
-  //       );
-
-  //       const result = await response.json();
-
-  //     showToast("success", `File "${selectedFile.name}" imported successfully!`);
-  //     addNotification(`File "${selectedFile.name}" imported successfully!`);
-  //     } catch (error) {
-  //       showToast(
-  //         "error",
-  //         error.message || "Error occurred while importing the file."
-  //       );
-  //       addNotification(
-  //         "error",
-  //         error.message || "Error occurred while importing the file."
-  //       );
-  //     } finally {
-  //       setIsUploading(false);
-  //       setUploadStarted(false);
-  //       setSelectedFile(null);
-  //     }
-  //   }, 2000);
-  // };
-
   const fetchProductData = async () => {
     setLoading(true);
     const id = localStorage.getItem("userid");
@@ -488,7 +319,6 @@ const Dashboard = () => {
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
 
-        // ✅ har page par nayi list overwrite hogi
         setProducts(sortedProducts);
         setFilteredProducts(sortedProducts);
 
@@ -987,6 +817,33 @@ const Dashboard = () => {
     setPage(urlPage);
     setLimit(urlLimit);
   }, [location.search]);
+
+  const [sortField, setSortField] = useState(null); // "title" ya "sku"
+  const [sortOrder, setSortOrder] = useState("asc"); // "asc" ya "desc"
+
+  const handleSort = (field, order) => {
+    setSortField(field);
+    setSortOrder(order);
+
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+      let valA, valB;
+
+      if (field === "title") {
+        valA = a.title?.toLowerCase() || "";
+        valB = b.title?.toLowerCase() || "";
+      } else if (field === "sku") {
+        valA = a.variants[0]?.sku || "";
+        valB = b.variants[0]?.sku || "";
+      }
+
+      if (valA < valB) return order === "asc" ? -1 : 1;
+      if (valA > valB) return order === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    setFilteredProducts(sortedProducts);
+  };
+
   return user ? (
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
@@ -1017,9 +874,7 @@ const Dashboard = () => {
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Sort By</option>
-                <option value="listing_name">Listing Name</option>
                 <option value="approval">Approval</option>
-                <option value="sku">SKU</option>
                 <option value="price">Price</option>
                 <option value="product_type">Product Type</option>
                 <option value="vendor">Vendor</option>
@@ -1158,13 +1013,43 @@ const Dashboard = () => {
                   </th>
                   <th className="p-3">Status</th>
                   <th className="p-3">Image</th>
-                  <th className="p-3">Listing_name</th>
+                  <th className="p-3">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium">Listing Name</span>
+                      <select
+                        className="border border-gray-300 rounded-md px-2 py-1 text-xs shadow-sm 
+                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                 transition duration-150"
+                        onChange={(e) => handleSort("title", e.target.value)}
+                        value={sortField === "title" ? sortOrder : ""}
+                      >
+                        <option value="">Sort</option>
+                        <option value="asc">ASC</option>
+                        <option value="desc">DESC</option>
+                      </select>
+                    </div>
+                  </th>{" "}
                   {(userRole === "Dev Admin" ||
                     userRole === "Master Admin") && (
                     <th className="p-3">Publisher</th>
                   )}
                   <th className="p-3">Approval</th>
-                  <th className="p-3">Sku</th>
+                  <th className="p-3">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium">SKU</span>
+                      <select
+                        className="border border-gray-300 rounded-md px-2 py-1 text-xs shadow-sm 
+                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                 transition duration-150"
+                        onChange={(e) => handleSort("sku", e.target.value)}
+                        value={sortField === "sku" ? sortOrder : ""}
+                      >
+                        <option value="">Sort</option>
+                        <option value="asc">ASC</option>
+                        <option value="desc">DESC</option>
+                      </select>
+                    </div>
+                  </th>
                   <th className="p-3">Price</th>
                   <th className="p-3">Compare_at_price</th>
                   <th className="p-3">Type</th>

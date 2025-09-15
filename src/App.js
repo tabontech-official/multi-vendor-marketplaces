@@ -52,6 +52,7 @@ import ApiMainPage from "./Documentation/Main";
 import ApiDocs from "./Documentation/ApiDocs";
 import Approval from "./pages/approval";
 import ApprovalPage from "./pages/ApprovalPage";
+import FinanceSetting from "./pages/FinanceSetting";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -133,6 +134,10 @@ const App = () => {
             <Route
               path="/collection/:id"
               element={<PrivateRoute element={<Collection />} />}
+            />
+             <Route
+              path="/finance-setting"
+              element={<PrivateRoute element={<FinanceSetting />} />}
             />
             <Route
               path="/user-requests/:id"

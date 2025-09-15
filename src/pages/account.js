@@ -508,6 +508,19 @@ const AccountPage = () => {
               <IoSettings className="mr-2 text-lg" />
               <span className="text-sm font-medium">API Credentials</span>
             </NavLink>
+              <NavLink
+              to="/finance-setting"
+              className={({ isActive }) =>
+                `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
+                  isActive
+                    ? "bg-yellow-400 text-blue-900"
+                    : "text-blue-200 hover:bg-blue-800"
+                }`
+              }
+            >
+              <IoSettings className="mr-2 text-lg" />
+              <span className="text-sm font-medium">Finance Settings</span>
+            </NavLink>
             {(userRole === "Master Admin" || userRole === "Dev Admin") && (
               <NavLink
                 to="/approval-setting"

@@ -1051,7 +1051,7 @@ const Dashboard = () => {
                     </div>
                   </th>
                   <th className="p-3">Price</th>
-                  <th className="p-3">Compare_at_price</th>
+                  <th className="p-3">Compare at price</th>
                   <th className="p-3">Type</th>
                   <th className="p-3">Inventory</th>
                   <th className="p-3">Vendor</th>

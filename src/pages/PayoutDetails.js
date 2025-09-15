@@ -5,6 +5,8 @@ import { HiOutlineRefresh } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
 import { FaEdit, FaCheck, FaTimes, FaCog } from "react-icons/fa";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
+import { FaPaypal, FaUniversity } from "react-icons/fa";
+import { BsHash, BsPersonCircle, BsBank } from "react-icons/bs";
 import axios from "axios";
 const PayoutDetails = () => {
   const location = useLocation();
@@ -21,6 +23,8 @@ const PayoutDetails = () => {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState("");
   const [isEditingBank, setIsEditingBank] = useState(false);
+  const [merchantAccount, setMerchantAccount] = useState(null);
+
   const [isEditingRef, setIsEditingRef] = useState(false);
   const [bankAccount, setBankAccount] = useState(summary.paypalAccount || "");
   const [referenceNo, setReferenceNo] = useState(summary.referenceNo || "");
@@ -45,7 +49,30 @@ const PayoutDetails = () => {
     country: "",
   });
   const navigate = useNavigate();
+useEffect(() => {
+  const token = localStorage.getItem("usertoken");
+  if (token) {
+    const decoded = jwtDecode(token);
+    const role = decoded?.payLoad?.role || "";
+    setUserRole(role);
 
+    if (role === "Merchant") {
+      const userId = localStorage.getItem("userid");
+      if (!userId) return;
+
+      fetch(`https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.data) {
+            setMerchantAccount(data.data);
+          }
+        })
+        .catch((err) =>
+          console.error("Error fetching merchant account details:", err)
+        );
+    }
+  }
+}, []);
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
@@ -507,14 +534,7 @@ const PayoutDetails = () => {
 
   return (
     <div className="p-6 bg-[#f6f6f7] min-h-screen">
-      {userRole === "Merchant" && (
-        <button
-          onClick={() => setIsDrawerOpen(true)}
-          className="flex items-center gap-2 bg-white px-3 py-2 border rounded shadow hover:bg-gray-100"
-        >
-          <FaCog className="text-gray-600" /> Settings
-        </button>
-      )}
+     
       <div className="flex justify-end mb-2">
         {(userRole === "Master Admin" || userRole === "Dev Admin") && (
           <button
@@ -542,109 +562,7 @@ const PayoutDetails = () => {
         </div>
 
         {/* Body */}
-        <div className="p-4 space-y-4">
-          {/* Method Selection */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Choose Payment Method
-            </label>
-            <select
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="paypal">PayPal</option>
-              <option value="bank">Bank Account</option>
-            </select>
-          </div>
-
-          {/* PayPal Input */}
-          {paymentMethod === "paypal" && (
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                PayPal Email
-              </label>
-              <input
-                type="email"
-                placeholder="example@paypal.com"
-                value={paypalEmail}
-                onChange={(e) => setPaypalEmail(e.target.value)}
-                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          )}
-
-          {/* Bank Account Inputs */}
-          {paymentMethod === "bank" && (
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Account Holder Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="John Doe"
-                  value={bankDetails.accountHolderName}
-                  onChange={(e) =>
-                    setBankDetails({
-                      ...bankDetails,
-                      accountHolderName: e.target.value,
-                    })
-                  }
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Account Number
-                </label>
-                <input
-                  type="text"
-                  placeholder="123456789"
-                  value={bankDetails.accountNumber}
-                  onChange={(e) =>
-                    setBankDetails({
-                      ...bankDetails,
-                      accountNumber: e.target.value,
-                    })
-                  }
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Bank Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="HDFC, SBI, ICICI..."
-                  value={bankDetails.bankName}
-                  onChange={(e) =>
-                    setBankDetails({ ...bankDetails, bankName: e.target.value })
-                  }
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  IFSC / Swift Code
-                </label>
-                <input
-                  type="text"
-                  placeholder="HDFC0001234"
-                  value={bankDetails.ifscCode}
-                  onChange={(e) =>
-                    setBankDetails({ ...bankDetails, ifscCode: e.target.value })
-                  }
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-            </div>
-          )}
-        </div>
+    
 
         {/* Footer Save Button */}
         <div className="border-t px-4 py-3">
@@ -663,25 +581,55 @@ const PayoutDetails = () => {
           <h1 className="text-2xl font-bold mb-1">
             ${summary.net.toFixed(2)} AUD
           </h1>
-          {userRole === "Merchant" && (
-            <div className="text-sm text-gray-600 space-y-1">
-              <p>
-                <strong>Account info:</strong> {summary.paypalAccount}
-              </p>
-              <p>
-                <strong>Bank reference:</strong> {summary.referenceNo}
-              </p>
-            </div>
+     {userRole === "Merchant" && merchantAccount && (
+  <div className="text-sm text-gray-700 space-y-2">
+    {merchantAccount.paypalAccount && (
+      <p>
+        <strong>PayPal Account:</strong> {merchantAccount.paypalAccount}
+      </p>
+    )}
+
+    {merchantAccount.paypalAccountNo && (
+      <p>
+        <strong>PayPal Account No:</strong> {merchantAccount.paypalAccountNo}
+      </p>
+    )}
+
+    {merchantAccount.paypalReferenceNo && (
+      <p>
+        <strong>PayPal Reference No:</strong> {merchantAccount.paypalReferenceNo}
+      </p>
+    )}
+
+    {merchantAccount.bankDetails &&
+      Object.keys(merchantAccount.bankDetails).length > 0 && (
+        <div className="mt-2 space-y-2">
+          {merchantAccount.bankDetails.bankName && (
+            <p>
+              <strong>Bank Name:</strong> {merchantAccount.bankDetails.bankName}
+            </p>
           )}
-          {/* <p className="text-gray-500 mb-4">Shopify Payments</p> */}
-          {/* <div className="text-sm text-gray-600 space-y-1">
+          {merchantAccount.bankDetails.accountNumber && (
             <p>
-              <strong>Bank account:</strong> PayPal
+              <strong>Account Number:</strong> {merchantAccount.bankDetails.accountNumber}
             </p>
+          )}
+          {merchantAccount.bankDetails.accountHolderName && (
             <p>
-              <strong>Bank reference:</strong> {summary.referenceNo}
+              <strong>Account Holder:</strong> {merchantAccount.bankDetails.accountHolderName}
             </p>
-          </div> */}
+          )}
+          {merchantAccount.bankDetails.ifscCode && (
+            <p>
+              <strong>IFSC:</strong> {merchantAccount.bankDetails.ifscCode}
+            </p>
+          )}
+        </div>
+      )}
+  </div>
+)}
+
+      
           {(userRole === "Dev Admin" || userRole === "Master Admin") && (
             <div className="text-sm text-gray-600 space-y-4">
               {/* <div className="flex items-center">

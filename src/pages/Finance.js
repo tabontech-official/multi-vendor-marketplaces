@@ -1387,7 +1387,7 @@ useEffect(() => {
         </div>
       )}
 
-      {paypalPopup && (
+      {/* {paypalPopup && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 max-w-md w-full relative border shadow-xl">
             <button
@@ -1422,7 +1422,7 @@ useEffect(() => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </main>
   ) : null;
 };

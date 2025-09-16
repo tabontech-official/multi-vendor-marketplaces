@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { HiOutlineCheckCircle, HiOutlineXCircle, HiPlus } from "react-icons/hi";
-import { FaCross, FaFileImport } from "react-icons/fa";
+import { FaArrowDown, FaArrowUp, FaCross, FaFileImport } from "react-icons/fa";
 import Papa from "papaparse";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import UseFetchUserData from "../component/fetchUser";
@@ -832,8 +832,8 @@ const Dashboard = () => {
         valA = a.title?.toLowerCase() || "";
         valB = b.title?.toLowerCase() || "";
       } else if (field === "sku") {
-        valA = a.variants[0]?.sku || "";
-        valB = b.variants[0]?.sku || "";
+        valA = a.variants[0]?.sku?.toLowerCase() || "";
+        valB = b.variants[0]?.sku?.toLowerCase() || "";
       }
 
       if (valA < valB) return order === "asc" ? -1 : 1;
@@ -863,13 +863,12 @@ const Dashboard = () => {
               />
             </div>
 
-            {/* Sort By Dropdown */}
-            <div className="w-full md:w-1/4">
+            {/* <div className="w-full md:w-1/4">
               <select
                 value={sortBy}
                 onChange={(e) => {
                   setSortBy(e.target.value);
-                  setSortValue(""); // reset when criteria changes
+                  setSortValue(""); 
                 }}
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
@@ -879,14 +878,12 @@ const Dashboard = () => {
                 <option value="product_type">Product Type</option>
                 <option value="vendor">Vendor</option>
 
-                {/* ✅ Published By only for Dev Admin & Master Admin */}
                 {(userRole === "Dev Admin" || userRole === "Master Admin") && (
                   <option value="published_by">Published By</option>
                 )}
               </select>
             </div>
 
-            {/* Dynamic Options Dropdown */}
             {sortBy && (
               <div className="w-full md:w-1/4">
                 <select
@@ -896,7 +893,6 @@ const Dashboard = () => {
                 >
                   <option value="">Select {sortBy.replace("_", " ")}</option>
 
-                  {/* ✅ If published_by is selected → show publishers list */}
                   {sortBy === "published_by"
                     ? [...new Set(products.map((p) => p.username))].map(
                         (publisher) => (
@@ -912,7 +908,7 @@ const Dashboard = () => {
                       ))}
                 </select>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 
@@ -1013,41 +1009,55 @@ const Dashboard = () => {
                   </th>
                   <th className="p-3">Status</th>
                   <th className="p-3">Image</th>
-                  <th className="p-3">
+                  <th
+                    className="p-3 cursor-pointer"
+                    onClick={() => {
+                      let nextOrder = "asc";
+                      if (sortField === "title" && sortOrder === "asc") {
+                        nextOrder = "desc";
+                      }
+                      handleSort("title", nextOrder);
+                    }}
+                  >
                     <div className="flex items-center space-x-2">
                       <span className="font-medium">Listing Name</span>
-                      <select
-                        className="border border-gray-300 rounded-md px-2 py-1 text-xs shadow-sm 
-                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-                 transition duration-150"
-                        onChange={(e) => handleSort("title", e.target.value)}
-                        value={sortField === "title" ? sortOrder : ""}
-                      >
-                        <option value="">Sort</option>
-                        <option value="asc">ASC</option>
-                        <option value="desc">DESC</option>
-                      </select>
+                      {sortField === "title" ? (
+                        sortOrder === "asc" ? (
+                          <FaArrowUp className="text-blue-500" />
+                        ) : (
+                          <FaArrowDown className="text-blue-500" />
+                        )
+                      ) : (
+                        <FaArrowUp className="text-gray-400" />
+                      )}
                     </div>
-                  </th>{" "}
+                  </th>
                   {(userRole === "Dev Admin" ||
                     userRole === "Master Admin") && (
                     <th className="p-3">Publisher</th>
                   )}
                   <th className="p-3">Approval</th>
-                  <th className="p-3">
+                  <th
+                    className="p-3 cursor-pointer"
+                    onClick={() => {
+                      let nextOrder = "asc";
+                      if (sortField === "sku" && sortOrder === "asc") {
+                        nextOrder = "desc";
+                      }
+                      handleSort("sku", nextOrder);
+                    }}
+                  >
                     <div className="flex items-center space-x-2">
                       <span className="font-medium">SKU</span>
-                      <select
-                        className="border border-gray-300 rounded-md px-2 py-1 text-xs shadow-sm 
-                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-                 transition duration-150"
-                        onChange={(e) => handleSort("sku", e.target.value)}
-                        value={sortField === "sku" ? sortOrder : ""}
-                      >
-                        <option value="">Sort</option>
-                        <option value="asc">ASC</option>
-                        <option value="desc">DESC</option>
-                      </select>
+                      {sortField === "sku" ? (
+                        sortOrder === "asc" ? (
+                          <FaArrowUp className="text-blue-500" />
+                        ) : (
+                          <FaArrowDown className="text-blue-500" />
+                        )
+                      ) : (
+                        <FaArrowUp className="text-gray-400" /> 
+                      )}
                     </div>
                   </th>
                   <th className="p-3">Price</th>

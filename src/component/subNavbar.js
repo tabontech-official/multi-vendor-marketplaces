@@ -87,13 +87,13 @@ const SubNavbar = () => {
   //     ],
   //   },
   //   {
-  //     name: "Orders",
-  //     icon: <FaTags className="text-blue-600" />,
-  //     path: "#",
-  //     subModules: [
-  //       { name: "ManageOrders", path: "/Order_Details" },
-  //       { name: "Manage Requests", path: "/manage-requests" },
-  //     ],
+      // name: "Orders",
+      // icon: <FaTags className="text-blue-600" />,
+      // path: "#",
+      // subModules: [
+      //   { name: "ManageOrders", path: "/Order_Details" },
+      //   { name: "Manage Requests", path: "/manage-requests" },
+      // ],
   //   },
   //   {
   //     name: "Promotions",
@@ -154,13 +154,13 @@ const SubNavbar = () => {
     ],
   },
   {
-    name: "Orders",
-    icon: <FiTag className="text-blue-600" />,
-    path: "#",
-    subModules: [
-      { name: "Manage Orders", path: "/Order_Details" },
-      { name: "Manage Requests", path: "/manage-requests" },
-    ],
+      name: "Orders",
+      icon: <FaTags className="text-blue-600" />,
+      path: "#",
+      subModules: [
+        { name: "ManageOrders", path: "/Order_Details" },
+        { name: "Manage Requests", path: "/manage-requests" },
+      ],
   },
   {
     name: "Promotions",

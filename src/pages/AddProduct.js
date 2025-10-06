@@ -594,15 +594,18 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if (isPopupVisible && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
 
-          "Content-Type": "application/json",
-        },
-      })
+            "Content-Type": "application/json",
+          },
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           const allImages = data.flatMap((item) => item.images);
@@ -868,19 +871,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setSelectedImages((prev) => {
             const updated = [...prev];
@@ -1534,6 +1540,8 @@ const CategorySelector = () => {
             )}
           </div>
 
+          {/*  VARINATS COMBINATION STARTED FROM THERE */}
+
           <div className="border rounded-2xl p-3 mt-3 bg-white border-gray-300 w-full">
             <h2 className="text-sm font-medium text-gray-800">Variants</h2>
 
@@ -1788,7 +1796,9 @@ const CategorySelector = () => {
                                           );
                                         }}
                                       >
-                                        {quantity}
+                                        {/* {quantity} */}
+                                        {matchingVariant?.inventory_quantity ??
+                                          "N/A"}
                                       </span>
 
                                       <button

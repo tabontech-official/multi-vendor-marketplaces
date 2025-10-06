@@ -106,6 +106,8 @@ const Variants = () => {
   };
 
   // const handleSave = async () => {
+  //   const apiKey = localStorage.getItem("apiKey");
+  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
   //   try {
   //     setIsLoading(true);
 
@@ -113,8 +115,16 @@ const Variants = () => {
   //       `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
   //       {
   //         variant: updatedVariant,
+  //       },
+  //       {
+  //         headers: {
+  //           "x-api-key": apiKey,
+  //           "x-api-secret": apiSecretKey,
+  //           "Content-Type": "application/json",
+  //         },
   //       }
   //     );
+
   //     toast.success("Variant updated successfully!");
   //     setIsLoading(false);
   //   } catch (error) {
@@ -126,14 +136,13 @@ const Variants = () => {
   const handleSave = async () => {
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
+
     try {
       setIsLoading(true);
 
-      const response = await axios.put(
+      await axios.put(
         `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
-        {
-          variant: updatedVariant,
-        },
+        { variant: updatedVariant },
         {
           headers: {
             "x-api-key": apiKey,
@@ -144,9 +153,25 @@ const Variants = () => {
       );
 
       toast.success("Variant updated successfully!");
-      setIsLoading(false);
+
+      const refreshedProduct = await axios.get(
+        `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`,
+        {
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      navigate("/add-product", {
+        state: { product: refreshedProduct.data },
+      });
     } catch (error) {
       console.error("Error updating variant:", error);
+      toast.error("Failed to update variant");
+    } finally {
       setIsLoading(false);
     }
   };

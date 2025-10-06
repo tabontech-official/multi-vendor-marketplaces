@@ -828,12 +828,30 @@ const Dashboard = () => {
     const sortedProducts = [...filteredProducts].sort((a, b) => {
       let valA, valB;
 
-      if (field === "title") {
-        valA = a.title?.toLowerCase() || "";
-        valB = b.title?.toLowerCase() || "";
-      } else if (field === "sku") {
-        valA = a.variants[0]?.sku?.toLowerCase() || "";
-        valB = b.variants[0]?.sku?.toLowerCase() || "";
+      switch (field) {
+        case "title":
+          valA = a.title?.toLowerCase() || "";
+          valB = b.title?.toLowerCase() || "";
+          break;
+        case "sku":
+          valA = a.variants?.[0]?.sku?.toLowerCase() || "";
+          valB = b.variants?.[0]?.sku?.toLowerCase() || "";
+          break;
+        case "price":
+          valA = parseFloat(a.variants?.[0]?.price || 0);
+          valB = parseFloat(b.variants?.[0]?.price || 0);
+          break;
+        case "compare_at_price":
+          valA = parseFloat(a.variants?.[0]?.compare_at_price || 0);
+          valB = parseFloat(b.variants?.[0]?.compare_at_price || 0);
+          break;
+        case "inventory":
+          valA = parseFloat(a.variants?.[0]?.inventory_quantity || 0);
+          valB = parseFloat(b.variants?.[0]?.inventory_quantity || 0);
+          break;
+        default:
+          valA = 0;
+          valB = 0;
       }
 
       if (valA < valB) return order === "asc" ? -1 : 1;
@@ -1056,14 +1074,80 @@ const Dashboard = () => {
                           <FaArrowDown className="text-blue-500" />
                         )
                       ) : (
-                        <FaArrowUp className="text-gray-400" /> 
+                        <FaArrowUp className="text-gray-400" />
                       )}
                     </div>
                   </th>
-                  <th className="p-3">Price</th>
-                  <th className="p-3">Compare at price</th>
+                  <th
+                    className="p-3 cursor-pointer"
+                    onClick={() => {
+                      let nextOrder = "asc";
+                      if (sortField === "price" && sortOrder === "asc")
+                        nextOrder = "desc";
+                      handleSort("price", nextOrder);
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium">Price</span>
+                      {sortField === "price" ? (
+                        sortOrder === "asc" ? (
+                          <FaArrowUp className="text-blue-500" />
+                        ) : (
+                          <FaArrowDown className="text-blue-500" />
+                        )
+                      ) : (
+                        <FaArrowUp className="text-gray-400" />
+                      )}
+                    </div>
+                  </th>{" "}
+                  <th
+                    className="p-3 cursor-pointer"
+                    onClick={() => {
+                      let nextOrder = "asc";
+                      if (
+                        sortField === "compare_at_price" &&
+                        sortOrder === "asc"
+                      )
+                        nextOrder = "desc";
+                      handleSort("compare_at_price", nextOrder);
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium">Compare at price</span>
+                      {sortField === "compare_at_price" ? (
+                        sortOrder === "asc" ? (
+                          <FaArrowUp className="text-blue-500" />
+                        ) : (
+                          <FaArrowDown className="text-blue-500" />
+                        )
+                      ) : (
+                        <FaArrowUp className="text-gray-400" />
+                      )}
+                    </div>
+                  </th>
                   <th className="p-3">Type</th>
-                  <th className="p-3">Inventory</th>
+                  <th
+                    className="p-3 cursor-pointer"
+                    onClick={() => {
+                      let nextOrder = "asc";
+                      if (sortField === "inventory" && sortOrder === "asc")
+                        nextOrder = "desc";
+                      handleSort("inventory", nextOrder);
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium">Inventory</span>
+                      {sortField === "inventory" ? (
+                        sortOrder === "asc" ? (
+                          <FaArrowUp className="text-blue-500" />
+                        ) : (
+                          <FaArrowDown className="text-blue-500" />
+                        )
+                      ) : (
+                        <FaArrowUp className="text-gray-400" />
+                      )}
+                    </div>
+                  </th>{" "}
                   <th className="p-3">Vendor</th>
                   {admin && <th className="p-3">PUBLISHER</th>}
                   <th className="p-3">Edit</th>
@@ -1255,9 +1339,24 @@ const Dashboard = () => {
                         ${product.variants[0]?.compare_at_price || 0.0}
                       </td>
                       <td className="p-3">{product.product_type}</td>
-                      <td className="p-3">
+                      {/* <td className="p-3">
                         {product.variants[0]?.inventory_quantity}
+                      </td> */}
+                      <td className="p-3 text-sm text-gray-700">
+                        {(() => {
+                          const totalQuantity = product.variants?.reduce(
+                            (sum, v) =>
+                              sum + (parseFloat(v.inventory_quantity) || 0),
+                            0
+                          );
+                          const variantCount = product.variants?.length || 0;
+
+                          return `${totalQuantity} total (${variantCount} variant${
+                            variantCount !== 1 ? "s" : ""
+                          })`;
+                        })()}
                       </td>
+
                       <td className="p-3">{product.vendor}</td>
                       {admin && `#${product.shopifyId}`}
                       <td className="p-3">

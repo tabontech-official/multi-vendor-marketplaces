@@ -1240,7 +1240,7 @@ const CategorySelector = () => {
       console.error("Error duplicating product:", err);
       setMessage({ type: "error", text: "Server error while duplicating." });
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 

@@ -4,7 +4,7 @@ import {
   HiOutlineCheckCircle,
   HiOutlineXCircle,
 } from "react-icons/hi";
-import { FaTimes } from "react-icons/fa";
+import { FaPercentage, FaTimes } from "react-icons/fa";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaUser, FaBars, FaArrowLeft } from "react-icons/fa";
 import { IoSettings } from "react-icons/io5";
@@ -22,6 +22,8 @@ import { CiCalendarDate } from "react-icons/ci";
 const AccountPage = () => {
   const navigate = useNavigate();
   const [selectedModule, setSelectedModule] = useState("Manage User");
+  const [commission, setCommission] = useState("");
+
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -188,9 +190,12 @@ const AccountPage = () => {
       }
 
       try {
-        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
-          method: "GET",
-        });
+        const response = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
+          {
+            method: "GET",
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
@@ -339,13 +344,16 @@ const AccountPage = () => {
 
   const updateAllProductsStatus = async (status) => {
     try {
-      const response = await fetch("https://multi-vendor-marketplace.vercel.app/product/holiday", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status }),
-      });
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/product/holiday",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
@@ -508,7 +516,7 @@ const AccountPage = () => {
               <IoSettings className="mr-2 text-lg" />
               <span className="text-sm font-medium">API Credentials</span>
             </NavLink>
-              <NavLink
+            <NavLink
               to="/finance-setting"
               className={({ isActive }) =>
                 `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
@@ -1086,9 +1094,12 @@ const AccountPage = () => {
               <p className="text-sm text-blue-600 mt-2 leading-relaxed">
                 While holiday mode is on, all your products will be hidden, but
                 you can still access and fulfill existing orders. <br />
-                Note: Your start and end dates are **inclusive**.
+                <span className="font-medium">Note:</span> Your start and end
+                dates are
+                <strong> inclusive</strong>.
               </p>
 
+              {/* ✅ Active / Inactive Buttons */}
               <div className="flex gap-4 mt-5">
                 <button
                   onClick={() => {
@@ -1131,7 +1142,7 @@ const AccountPage = () => {
                   />
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 mb-4">
                   <label className="w-28 flex items-center text-sm font-semibold text-blue-900">
                     <CiCalendarDate className="mr-1 text-lg" />
                     End Date
@@ -1141,13 +1152,68 @@ const AccountPage = () => {
                     className="flex-1 p-2 border border-blue-300 rounded-md text-sm text-blue-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
+                {(userRole === "Dev Admin" || userRole === "Master Admin") && (
+                  <div className="flex items-center gap-4 mt-4">
+                    <label className="w-28 flex items-center text-sm font-semibold text-blue-900">
+                      <FaPercentage className="mr-1 text-lg text-blue-700" />{" "}
+                      Commission
+                    </label>
+
+                    <div className="relative flex-1">
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        placeholder="Enter %"
+                        value={commission}
+                        onChange={(e) => setCommission(e.target.value)}
+                        className="w-full p-2 pr-20 border border-blue-300 rounded-md text-sm text-blue-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                      <button
+                        onClick={async () => {
+                          if (!commission) {
+                            showToast(
+                              "error",
+                              "Please enter a commission percentage"
+                            );
+                            return;
+                          }
+
+                          try {
+                            const res = await axios.post(
+                              "https://multi-vendor-marketplace.vercel.app/order/addCommision",
+                              { comission: commission }
+                            );
+
+                            if (res.status === 200) {
+                              showToast(
+                                "sucess",
+                                "Commission updated successfully "
+                              );
+                            } else {
+                              showToast("error", "Failed to update commission");
+                            }
+                          } catch (err) {
+                            console.error("Commission update error:", err);
+                          }
+                        }}
+                        className="absolute right-1 top-1 bottom-1 px-4 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md transition"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="flex justify-end mt-6">
-                <button className="px-6 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md text-sm font-semibold shadow transition">
-                  Save Changes
-                </button>
-              </div>
+              {/* <div className="flex justify-end mt-6">
+      <button
+        // onClick={handleSaveHolidayMode}
+        className="px-6 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md text-sm font-semibold shadow transition"
+      >
+        Save Changes
+      </button>
+    </div> */}
             </div>
           )}
         </div>

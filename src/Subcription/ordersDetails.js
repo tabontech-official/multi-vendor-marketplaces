@@ -191,18 +191,15 @@ const OrdersDetails = () => {
         }),
       });
 
-      await fetch(
-        `https://multi-vendor-marketplace.vercel.app/order/updatetrackingShopify`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fulfillmentId: selectedFulfillment.id,
-            tracking_number: trackingNumber,
-            tracking_company: shippingCarrier,
-          }),
-        }
-      );
+      await fetch(`https://multi-vendor-marketplace.vercel.app/order/updatetrackingShopify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fulfillmentId: selectedFulfillment.id,
+          tracking_number: trackingNumber,
+          tracking_company: shippingCarrier,
+        }),
+      });
 
       setShowTrackingModal(false);
     } catch (err) {
@@ -242,22 +239,19 @@ const OrdersDetails = () => {
         return;
       }
 
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/cancelOrder",
-        {
-          method: "POST",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            orderId,
-            reason: "customer",
-            lineItemIds,
-          }),
-        }
-      );
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/order/cancelOrder", {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderId,
+          reason: "customer",
+          lineItemIds,
+        }),
+      });
 
       const result = await response.json();
       console.log("🧾 Cancel Response:", result);
@@ -342,138 +336,7 @@ const OrdersDetails = () => {
               <span>{toast.message}</span>
             </div>
           )}
-          {/* {Array.isArray(lineItems) &&
-            lineItems.some((i) => i.fulfillment_status === null) && (
-              <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
-                <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
-                  <span>
-                    Unfulfilled (
-                    {
-                      lineItems.filter((i) => i.fulfillment_status === null)
-                        .length
-                    }
-                    )
-                  </span>
-                </div>
 
-                <div className="border border-gray-200 rounded-lg p-4 space-y-4">
-                  <div className="text-sm space-y-2">
-                    <div>
-                      <p className="text-gray-600 font-semibold">Location</p>
-                      <p className="text-gray-900">Shop location</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600 font-semibold">
-                        Delivery method
-                      </p>
-                      <p className="text-gray-900">Standard</p>
-                    </div>
-                  </div>
-
-                  <hr className="border-gray-200" />
-
-                  <div className="divide-y border rounded mb-4">
-                    {lineItems
-                      .filter((item) => item.fulfillment_status === null)
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-3"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-                              {item.image?.src ? (
-                                <img
-                                  src={item.image.src}
-                                  alt={item.image.alt || "Product image"}
-                                  className="w-full h-full object-contain rounded"
-                                />
-                              ) : (
-                                <span className="text-gray-400 text-xs font-semibold">
-                                  No Image
-                                </span>
-                              )}
-                            </div>
-
-                            <div>
-                              <p className="text-sm font-medium text-gray-800">
-                                {item.name}
-                              </p>
-                              {item.variant_title && (
-                                <span className="inline-block text-[10px] px-2 py-1 bg-gray-200 text-gray-600 rounded mt-1">
-                                  {item.variant_title}
-                                </span>
-                              )}
-                              <p className="text-xs text-gray-500 mt-1">
-                                SKU: {item.sku || "N/A"}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="text-right">
-                            <p className="text-sm text-gray-800 font-medium">
-                              ${parseFloat(item.price).toFixed(2)} ×{" "}
-                              {item.quantity - (item.fulfilled_quantity || 0)}
-                            </p>
-                            <p className="text-sm font-semibold text-gray-900">
-                              $
-                              {(
-                                parseFloat(item.price) *
-                                (item.quantity - (item.fulfilled_quantity || 0))
-                              ).toFixed(2)}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-
-                  <div className="flex space-x-2 justify-end">
-                    <button
-                      onClick={() => {
-                        const resolvedMerchantId =
-                          location.state?.merchantId || order?.merchantId || "";
-
-                        console.log("📦 fullOrder:", order);
-                        console.log("🏪 merchantId:", resolvedMerchantId);
-
-                        navigate(`/order/${orderId}/fulfillment_orders`, {
-                          state: {
-                            order: orderData,
-                            fullOrder: order,
-                            productName: orderData?.name,
-                            sku:
-                              Array.isArray(orderData?.line_items) &&
-                              orderData.line_items.length > 0
-                                ? orderData.line_items[0]?.sku
-                                : "",
-                            fulfillable_quantity:
-                              Array.isArray(orderData?.fulfillments) &&
-                              orderData.fulfillments.length > 0 &&
-                              Array.isArray(
-                                orderData.fulfillments[0]?.line_items
-                              ) &&
-                              orderData.fulfillments[0].line_items.length > 0
-                                ? orderData.fulfillments[0].line_items[0]
-                                    ?.fulfillable_quantity
-                                : 0,
-                            orderId,
-                            merchantId: resolvedMerchantId,
-                            index: 1,
-                          },
-                        });
-                      }}
-                      className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
-                    >
-                      Fulfill item
-                    </button>
-
-                    <button className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition">
-                      Create shipping label
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )} */}
           {Array.isArray(lineItems) &&
             lineItems.some(
               (i) =>
@@ -638,15 +501,6 @@ const OrdersDetails = () => {
                       >
                         Edit Tracking
                       </button>
-                      {/* <button
-                        onClick={() => {
-                          setOpenMenu(null);
-                          console.log("Cancel Fulfillment for", fulfillment.id);
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600"
-                      >
-                        Cancel Fulfillment
-                      </button> */}
                     </div>
                   )}
                 </div>
@@ -765,15 +619,6 @@ const OrdersDetails = () => {
         </div>
 
         <div className="col-span-4 space-y-4">
-          {/* {Array.isArray(lineItems) &&
-            lineItems.some((i) => i.fulfillment_status === null) && (
-              <button
-                className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
-                onClick={handleCancelOrder}
-              >
-                Cancel Order
-              </button>
-            )} */}
           {Array.isArray(lineItems) &&
             lineItems.some((i) => i.fulfillment_status === null) && (
               <>
@@ -786,14 +631,6 @@ const OrdersDetails = () => {
                   </button>
                 ) : role === "Merchant" ? (
                   <div className="text-sm text-gray-300-600 font-medium">
-                    {/* Please{" "}
-                    <span
-                      className="underline text-blue-600 cursor-pointer hover:text-blue-800"
-                      onClick={() => setShowRequestPopup(true)}
-                    >
-                      Submit request
-                    </span>{" "}
-                    for cancelling this order. */}
                     <button
                       className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
                       onClick={() => setShowRequestPopup(true)}

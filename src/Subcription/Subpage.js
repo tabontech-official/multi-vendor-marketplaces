@@ -223,66 +223,66 @@ const SubscriptionHistory = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchProductData = async () => {
-      const id = localStorage.getItem("userid");
-      const apiKey = localStorage.getItem("apiKey");
-      const apiSecretKey = localStorage.getItem("apiSecretKey");
-      if (!id) {
-        console.error("User ID not found in localStorage.");
-        return;
-      }
+  // useEffect(() => {
+  //   const fetchProductData = async () => {
+  //     const id = localStorage.getItem("userid");
+  //     const apiKey = localStorage.getItem("apiKey");
+  //     const apiSecretKey = localStorage.getItem("apiSecretKey");
+  //     if (!id) {
+  //       console.error("User ID not found in localStorage.");
+  //       return;
+  //     }
 
-      try {
-        const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
-          {
-            method: "GET",
-            headers: {
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (response.ok) {
-          const data = await response.json();
-          console.log(data);
-          if (Array.isArray(data.products)) {
-            setTotalListings(data.products.length);
-            const activeCount = data.products.filter(
-              (product) => product.status === "active"
-            ).length;
-            setActiveListings(activeCount);
-            const freeCount = data.products.filter(
-              (product) =>
-                product.product_type === "Used Equipment" &&
-                product.status === "active"
-            ).length;
-            setFreeListing(freeCount);
-            const paidCount = data.products.filter(
-              (product) =>
-                product.product_type !== "Used Equipment" &&
-                product.status === "active"
-            ).length;
-            setPaidListing(paidCount);
-          } else {
-            console.error("Expected products array, but got:", data.products);
-          }
-        } else {
-          console.error(
-            "Failed to fetch product data. Status:",
-            response.status
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching product data:", error);
-      }
-    };
+  //     try {
+  //       const response = await fetch(
+  //         `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             "x-api-key": apiKey,
+  //             "x-api-secret": apiSecretKey,
+  //             "Content-Type": "application/json",
+  //           },
+  //         }
+  //       );
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         console.log(data);
+  //         if (Array.isArray(data.products)) {
+  //           setTotalListings(data.products.length);
+  //           const activeCount = data.products.filter(
+  //             (product) => product.status === "active"
+  //           ).length;
+  //           setActiveListings(activeCount);
+  //           const freeCount = data.products.filter(
+  //             (product) =>
+  //               product.product_type === "Used Equipment" &&
+  //               product.status === "active"
+  //           ).length;
+  //           setFreeListing(freeCount);
+  //           const paidCount = data.products.filter(
+  //             (product) =>
+  //               product.product_type !== "Used Equipment" &&
+  //               product.status === "active"
+  //           ).length;
+  //           setPaidListing(paidCount);
+  //         } else {
+  //           console.error("Expected products array, but got:", data.products);
+  //         }
+  //       } else {
+  //         console.error(
+  //           "Failed to fetch product data. Status:",
+  //           response.status
+  //         );
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching product data:", error);
+  //     }
+  //   };
 
-    fetchProductData();
-    fetchSubscriptions();
-  }, []);
+  //   fetchProductData();
+  //   fetchSubscriptions();
+  // }, []);
 
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
@@ -291,7 +291,7 @@ const SubscriptionHistory = () => {
 
   const handleClickOutside = (event) => {
     if (dialogRef.current && !dialogRef.current.contains(event.target)) {
-      setIsDialogOpen(false); // Close the dialog
+      setIsDialogOpen(false); 
     }
   };
 

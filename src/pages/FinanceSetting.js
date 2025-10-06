@@ -29,126 +29,122 @@ const FinanceSetting = () => {
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
 
-useEffect(() => {
-  const fetchFinance = async () => {
-    const userId = localStorage.getItem("userid");
-    if (!userId) return;
+  useEffect(() => {
+    const fetchFinance = async () => {
+      const userId = localStorage.getItem("userid");
+      if (!userId) return;
 
-    try {
-      const res = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`
-      );
-      const data = await res.json();
+      try {
+        const res = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`
+        );
+        const data = await res.json();
 
-      if (res.ok && data?.data) {
-        const {
-          bankDetails,
-          paypalAccount,
-          paypalAccountNo,
-          paypalReferenceNo,
-        } = data.data;
+        if (res.ok && data?.data) {
+          const {
+            bankDetails,
+            paypalAccount,
+            paypalAccountNo,
+            paypalReferenceNo,
+          } = data.data;
 
-        // 🔹 Detect method
-        if (paypalAccount || paypalAccountNo || paypalReferenceNo) {
-          setActiveTab("paypal");
-          setFormData((prev) => ({
-            ...prev,
-            paypalEmail: paypalAccount || "",
-            paypalAccountNo: paypalAccountNo || "",
-            paypalReferenceNo: paypalReferenceNo || "",
-          }));
-        } else if (bankDetails && Object.keys(bankDetails).length > 0) {
-          setActiveTab("bank");
-          setFormData((prev) => ({
-            ...prev,
-            bankName: bankDetails.bankName || "",
-            accountNumber: bankDetails.accountNumber || "",
-            ifscCode: bankDetails.ifscCode || "",
-            accountHolder: bankDetails.accountHolderName || "",
-            branchName: bankDetails.branchName || "",
-            swiftCode: bankDetails.swiftCode || "",
-            iban: bankDetails.iban || "",
-            country: bankDetails.country || "",
-          }));
-        }
-      }
-    } catch (err) {
-      console.error("Finance fetch error:", err);
-    }
-  };
-
-  fetchFinance();
-}, []);
-
-
-
-
-const handleSaveMerchantAccountDetails = async (method) => {
-  try {
-    setLoading(true);
-
-    const userId = localStorage.getItem("userid");
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
-
-    if (!userId) {
-      showToast("error", "User ID not found!");
-      return;
-    }
-
-    const payload = {
-      userId,
-      method,
-      ...(method === "paypal"
-        ? {
-            paypalDetails: {
-              paypalAccount: formData.paypalEmail,
-              paypalAccountNo: formData.paypalAccountNo || "",     
-              paypalReferenceNo: formData.paypalReferenceNo || "",   
-            },
+          // 🔹 Detect method
+          if (paypalAccount || paypalAccountNo || paypalReferenceNo) {
+            setActiveTab("paypal");
+            setFormData((prev) => ({
+              ...prev,
+              paypalEmail: paypalAccount || "",
+              paypalAccountNo: paypalAccountNo || "",
+              paypalReferenceNo: paypalReferenceNo || "",
+            }));
+          } else if (bankDetails && Object.keys(bankDetails).length > 0) {
+            setActiveTab("bank");
+            setFormData((prev) => ({
+              ...prev,
+              bankName: bankDetails.bankName || "",
+              accountNumber: bankDetails.accountNumber || "",
+              ifscCode: bankDetails.ifscCode || "",
+              accountHolder: bankDetails.accountHolderName || "",
+              branchName: bankDetails.branchName || "",
+              swiftCode: bankDetails.swiftCode || "",
+              iban: bankDetails.iban || "",
+              country: bankDetails.country || "",
+            }));
           }
-        : {
-            bankDetails: {
-              accountHolderName: formData.accountHolder,
-              accountNumber: formData.accountNumber,
-              bankName: formData.bankName,
-              branchName: formData.branchName,
-              ifscCode: formData.ifscCode,
-              swiftCode: formData.swiftCode,
-              iban: formData.iban,
-              country: formData.country,
-            },
-          }),
+        }
+      } catch (err) {
+        console.error("Finance fetch error:", err);
+      }
     };
 
-    const res = await fetch(
-      "https://multi-vendor-marketplace.vercel.app/auth/addMerchantAccountDetails",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-        },
-        body: JSON.stringify(payload),
+    fetchFinance();
+  }, []);
+
+  const handleSaveMerchantAccountDetails = async (method) => {
+    try {
+      setLoading(true);
+
+      const userId = localStorage.getItem("userid");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+      if (!userId) {
+        showToast("error", "User ID not found!");
+        return;
       }
-    );
 
-    const data = await res.json();
+      const payload = {
+        userId,
+        method,
+        ...(method === "paypal"
+          ? {
+              paypalDetails: {
+                paypalAccount: formData.paypalEmail,
+                paypalAccountNo: formData.paypalAccountNo || "",
+                paypalReferenceNo: formData.paypalReferenceNo || "",
+              },
+            }
+          : {
+              bankDetails: {
+                accountHolderName: formData.accountHolder,
+                accountNumber: formData.accountNumber,
+                bankName: formData.bankName,
+                branchName: formData.branchName,
+                ifscCode: formData.ifscCode,
+                swiftCode: formData.swiftCode,
+                iban: formData.iban,
+                country: formData.country,
+              },
+            }),
+      };
 
-    if (res.ok) {
-      showToast("success", "Payout details saved successfully!");
-    } else {
-      showToast("error", data.message || "Failed to save details");
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/auth/addMerchantAccountDetails",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        showToast("success", "Payout details saved successfully!");
+      } else {
+        showToast("error", data.message || "Failed to save details");
+      }
+    } catch (error) {
+      console.error("Error saving payout:", error);
+      showToast("error", "Something went wrong!");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error saving payout:", error);
-    showToast("error", "Something went wrong!");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -250,68 +246,73 @@ const handleSaveMerchantAccountDetails = async (method) => {
         </div>
 
         {activeTab === "paypal" && (
-  <div className="bg-gray-50 rounded-xl p-6 shadow-inner">
-    <h2 className="text-lg font-semibold text-gray-700 mb-4">
-      PayPal Details
-    </h2>
+          <div className="bg-gray-50 rounded-xl p-6 shadow-inner">
+            <h2 className="text-lg font-semibold text-gray-700 mb-4">
+              PayPal Details
+            </h2>
 
-    <div className="flex flex-col max-w-md gap-4">
-      <div>
-        <label className="text-sm font-medium mb-1">PayPal Email</label>
-        <input
-          type="email"
-          name="paypalEmail"
-          value={formData.paypalEmail}
-          onChange={handleChange}
-          placeholder="example@paypal.com"
-          className="p-2 border rounded-md focus:ring-2 focus:ring-blue-400 w-full"
-        />
-      </div>
+            <div className="flex flex-col max-w-md gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1">PayPal Email</label>
+                <input
+                  type="email"
+                  name="paypalEmail"
+                  value={formData.paypalEmail}
+                  onChange={handleChange}
+                  placeholder="example@paypal.com"
+                  className="p-2 border rounded-md focus:ring-2 focus:ring-blue-400 w-full"
+                />
+              </div>
 
-      <div>
-        <label className="text-sm font-medium mb-1">PayPal Account No</label>
-        <input
-          type="text"
-          name="paypalAccountNo"
-          value={formData.paypalAccountNo || ""}
-          onChange={handleChange}
-          placeholder="Enter PayPal Account No"
-          className="p-2 border rounded-md focus:ring-2 focus:ring-blue-400 w-full"
-        />
-      </div>
+              <div>
+                <label className="text-sm font-medium mb-1">
+                  PayPal Account No
+                </label>
+                <input
+                  type="text"
+                  name="paypalAccountNo"
+                  value={formData.paypalAccountNo || ""}
+                  onChange={handleChange}
+                  placeholder="Enter PayPal Account No"
+                  className="p-2 border rounded-md focus:ring-2 focus:ring-blue-400 w-full"
+                />
+              </div>
 
-      <div>
-        <label className="text-sm font-medium mb-1">PayPal Reference No</label>
-        <input
-          type="text"
-          name="paypalReferenceNo"
-          value={formData.paypalReferenceNo || ""}
-          onChange={handleChange}
-          placeholder="Enter PayPal Reference No"
-          className="p-2 border rounded-md focus:ring-2 focus:ring-blue-400 w-full"
-        />
-      </div>
-    </div>
+              <div>
+                <label className="text-sm font-medium mb-1">
+                  PayPal Reference No
+                </label>
+                <input
+                  type="text"
+                  name="paypalReferenceNo"
+                  value={formData.paypalReferenceNo || ""}
+                  onChange={handleChange}
+                  placeholder="Enter PayPal Reference No"
+                  className="p-2 border rounded-md focus:ring-2 focus:ring-blue-400 w-full"
+                />
+              </div>
+            </div>
 
-    <div className="flex justify-end mt-6">
-      <button
-        onClick={() => handleSaveMerchantAccountDetails("paypal")}
-        disabled={loading}
-        className="px-6 py-2 bg-blue-700 text-white rounded-md hover:bg-blue-800"
-      >
-        {loading ? "Saving..." : "Save PayPal Details"}
-      </button>
-    </div>
-  </div>
-)}
-
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => handleSaveMerchantAccountDetails("paypal")}
+                disabled={loading}
+                className="px-6 py-2 bg-blue-700 text-white rounded-md hover:bg-blue-800"
+              >
+                {loading ? "Saving..." : "Save PayPal Details"}
+              </button>
+            </div>
+          </div>
+        )}
 
         {activeTab === "bank" && (
           <div className="bg-gray-50 rounded-xl p-6 shadow-inner">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">
               Bank Details
             </h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Bank Name */}
               <input
                 type="text"
                 name="bankName"
@@ -320,6 +321,18 @@ const handleSaveMerchantAccountDetails = async (method) => {
                 placeholder="Bank Name"
                 className="p-2 border rounded-md"
               />
+
+              {/* BSB (but still saved as ifscCode in backend) */}
+              <input
+                type="text"
+                name="ifscCode" // 👈 backend me same key rahegi
+                value={formData.ifscCode}
+                onChange={handleChange}
+                placeholder="BSB (Bank State Branch)"
+                className="p-2 border rounded-md"
+              />
+
+              {/* Account Number */}
               <input
                 type="text"
                 name="accountNumber"
@@ -328,52 +341,14 @@ const handleSaveMerchantAccountDetails = async (method) => {
                 placeholder="Account Number"
                 className="p-2 border rounded-md"
               />
-              <input
-                type="text"
-                name="ifscCode"
-                value={formData.ifscCode}
-                onChange={handleChange}
-                placeholder="IFSC / SWIFT Code"
-                className="p-2 border rounded-md"
-              />
+
+              {/* Account Holder Name */}
               <input
                 type="text"
                 name="accountHolder"
                 value={formData.accountHolder}
                 onChange={handleChange}
                 placeholder="Account Holder Name"
-                className="p-2 border rounded-md"
-              />
-              <input
-                type="text"
-                name="branchName"
-                value={formData.branchName}
-                onChange={handleChange}
-                placeholder="Branch Name"
-                className="p-2 border rounded-md"
-              />
-              <input
-                type="text"
-                name="swiftCode"
-                value={formData.swiftCode}
-                onChange={handleChange}
-                placeholder="SWIFT Code"
-                className="p-2 border rounded-md"
-              />
-              <input
-                type="text"
-                name="iban"
-                value={formData.iban}
-                onChange={handleChange}
-                placeholder="IBAN"
-                className="p-2 border rounded-md"
-              />
-              <input
-                type="text"
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-                placeholder="Country"
                 className="p-2 border rounded-md"
               />
             </div>

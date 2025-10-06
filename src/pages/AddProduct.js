@@ -22,6 +22,7 @@ import {
   ContentState,
   convertFromRaw,
 } from "draft-js";
+import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 const CategorySelector = () => {
   const stripHtml = (html) => {
     const div = document.createElement("div");
@@ -40,6 +41,7 @@ const CategorySelector = () => {
   const [seoHandle, setSeoHandle] = useState(
     `https://www.aydiactive.com/products/${product?.title || ""} `
   );
+  const [isChanged, setIsChanged] = useState(false);
 
   const [vendor, setVendor] = useState([]);
   const [keyWord, setKeyWord] = useState([]);
@@ -92,6 +94,7 @@ const CategorySelector = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredCategories, setFilteredCategories] = useState([]);
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
 
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
@@ -103,7 +106,10 @@ const CategorySelector = () => {
     const rawContent = convertToRaw(newEditorState.getCurrentContent());
     setDescription(JSON.stringify(rawContent));
   };
-
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+  };
   const toggleChildOptions = (parentIndex) => {
     setExpandedParents((prev) =>
       prev.includes(parentIndex)
@@ -371,12 +377,14 @@ const CategorySelector = () => {
       ...prev,
       [index]: !prev[index],
     }));
+    setIsChanged(true);
   };
 
   const handleRemoveSelected = () => {
     const filtered = selectedImages.filter((_, index) => !checkedImages[index]);
     setSelectedImages(filtered);
     setCheckedImages({});
+    setIsChanged(true);
   };
 
   const handleDeleteCombination = (parentIndex, childIndex) => {
@@ -850,6 +858,7 @@ const CategorySelector = () => {
 
     const updatedImages = [...selectedImages, ...previews];
     setSelectedImages(updatedImages);
+    setIsChanged(true);
     const userId = localStorage.getItem("userid");
     const token = localStorage.getItem("usertoken");
     for (let i = 0; i < files.length; i++) {
@@ -1185,6 +1194,11 @@ const CategorySelector = () => {
   };
 
   const handleDuplicate = async () => {
+    // 🔍 Check if user made changes but didn’t update
+    if (isChanged) {
+      showToast("error", "Please update the product first, then duplicate.");
+      return; // Stop here
+    }
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
     const userId = localStorage.getItem("userid");
@@ -1226,12 +1240,26 @@ const CategorySelector = () => {
       console.error("Error duplicating product:", err);
       setMessage({ type: "error", text: "Server error while duplicating." });
     } finally {
-      setLoading(false); // 🔥 reset loading
+      setLoading(false); 
     }
   };
 
   return (
     <main className="flex justify-center bg-gray-100 p-6">
+      {toast.show && (
+        <div
+          className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+            toast.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
+        >
+          {toast.type === "success" ? (
+            <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+          ) : (
+            <HiOutlineXCircle className="w-6 h-6 mr-2" />
+          )}
+          <span>{toast.message}</span>
+        </div>
+      )}
       <div className="w-full max-w-7xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 bg-white p-6 border border-gray-300 rounded-2xl">
           <div className="mb-4">
@@ -1241,7 +1269,10 @@ const CategorySelector = () => {
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setIsChanged(true);
+              }}
               placeholder="Enter product title"
               className="mt-1 block w-full border border-gray-500 p-2 rounded-xl"
             />
@@ -1252,9 +1283,18 @@ const CategorySelector = () => {
               Description
             </label>
             <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-auto">
-              <Editor
+              {/* <Editor
                 editorState={editorState}
                 onEditorStateChange={onEditorStateChange}
+                wrapperClassName="border-none"
+                editorClassName="min-h-[200px] bg-white p-2"
+              /> */}
+              <Editor
+                editorState={editorState}
+                onEditorStateChange={(newEditorState) => {
+                  onEditorStateChange(newEditorState);
+                  setIsChanged(true);
+                }}
                 wrapperClassName="border-none"
                 editorClassName="min-h-[200px] bg-white p-2"
               />
@@ -1367,6 +1407,7 @@ const CategorySelector = () => {
                       const value = e.target.value;
                       if (/^\d*\.?\d{0,2}$/.test(value)) {
                         setPrice(value);
+                        setIsChanged(true);
                       }
                     }}
                     className="w-full pl-7 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
@@ -1387,7 +1428,10 @@ const CategorySelector = () => {
                   <input
                     type="number"
                     value={compareAtPrice}
-                    onChange={(e) => setCompareAtPrice(e.target.value)}
+                    onChange={(e) => {
+                      setCompareAtPrice(e.target.value);
+                      setIsChanged(true); // ✅ This now runs correctly
+                    }}
                     placeholder=" 0.00"
                     className="w-full pl-7 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
                   />
@@ -1405,12 +1449,17 @@ const CategorySelector = () => {
 
           <div className="border rounded-2xl p-4 bg-white mb-4 border-gray-500">
             <h2 className="font-semibold text-gray-700">Inventory</h2>
+
+            {/* Track Quantity Checkbox */}
             <div className="flex items-center mt-3">
               <input
                 type="checkbox"
                 id="trackQuantity"
                 checked={trackQuantity}
-                onChange={() => setTrackQuantity(!trackQuantity)}
+                onChange={() => {
+                  setTrackQuantity(!trackQuantity);
+                  setIsChanged(true); // ✅ Mark as changed
+                }}
                 className="h-4 w-4 text-blue-500"
               />
               <label
@@ -1421,21 +1470,7 @@ const CategorySelector = () => {
               </label>
             </div>
 
-            {/* {trackQuantity && (
-              <div className="mt-4 border-b border-gray-300">
-                <div className="flex items-center justify-between  ">
-                  <label className="text-sm text-gray-700 block">
-                    Quantity
-                  </label>{" "}
-                  <input
-                    type="number"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    className="w-20 border px-3 py-1 rounded-md text-center mb-3 no-spinner"
-                  />
-                </div>
-              </div>
-            )} */}
+            {/* Quantity Input */}
             {trackQuantity && (
               <div className="mt-4 border-b border-gray-300">
                 <div className="flex items-center justify-between">
@@ -1452,7 +1487,10 @@ const CategorySelector = () => {
                     <input
                       type="number"
                       value={quantity}
-                      onChange={(e) => setQuantity(e.target.value)}
+                      onChange={(e) => {
+                        setQuantity(e.target.value);
+                        setIsChanged(true); // ✅ Mark as changed
+                      }}
                       className="w-20 border px-3 py-1 rounded-md text-center mb-3 no-spinner"
                     />
                   )}
@@ -1460,12 +1498,16 @@ const CategorySelector = () => {
               </div>
             )}
 
+            {/* SKU Checkbox */}
             <div className="flex items-center mt-3">
               <input
                 type="checkbox"
                 id="hasSKU"
                 checked={hasSKU}
-                onChange={() => setHasSKU(!hasSKU)}
+                onChange={() => {
+                  setHasSKU(!hasSKU);
+                  setIsChanged(true); // ✅ Mark as changed
+                }}
                 className="h-4 w-4 text-blue-500"
               />
               <label htmlFor="hasSKU" className="ml-2 text-sm text-gray-700">
@@ -1473,20 +1515,27 @@ const CategorySelector = () => {
               </label>
             </div>
 
+            {/* SKU & Barcode Inputs */}
             {hasSKU && (
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <input
                   type="text"
                   placeholder="SKU"
                   value={sku}
-                  onChange={(e) => setSKU(e.target.value)}
+                  onChange={(e) => {
+                    setSKU(e.target.value);
+                    setIsChanged(true); // ✅ Mark as changed
+                  }}
                   className="w-full border p-2 rounded-md"
                 />
                 <input
                   type="text"
                   placeholder="Barcode"
                   value={barcode}
-                  onChange={(e) => setBarcode(e.target.value)}
+                  onChange={(e) => {
+                    setBarcode(e.target.value);
+                    setIsChanged(true); // ✅ Mark as changed
+                  }}
                   className="w-full border p-2 rounded-md"
                 />
               </div>
@@ -1499,7 +1548,10 @@ const CategorySelector = () => {
                 type="checkbox"
                 id="trackShipping"
                 checked={trackShipping}
-                onChange={() => setTrackShipping(!trackShipping)}
+                onChange={() => {
+                  setTrackShipping(!trackShipping);
+                  setIsChanged(true); // ✅ mark as changed
+                }}
                 className="h-4 w-4 text-blue-500"
               />
               <label
@@ -1509,17 +1561,22 @@ const CategorySelector = () => {
                 This is a physical product
               </label>
             </div>
+
             {trackShipping && (
               <div className="mt-4">
                 <label className="text-sm text-gray-700 border-b border-gray-300 pb-2 block">
                   Weight
                 </label>
+
                 <div className="flex items-center space-x-2 mt-2">
                   <div className="flex items-center border border-gray-300 rounded-md">
                     <input
                       type="text"
                       value={weight}
-                      onChange={handleChange}
+                      onChange={(e) => {
+                        handleChange(e);
+                        setIsChanged(true); // ✅ mark as changed when typing weight
+                      }}
                       className="w-20 text-center py-1 border-0 focus:ring-0"
                       placeholder="0.00"
                     />
@@ -1527,7 +1584,10 @@ const CategorySelector = () => {
 
                   <select
                     value={unit}
-                    onChange={(e) => setUnit(e.target.value)}
+                    onChange={(e) => {
+                      setUnit(e.target.value);
+                      setIsChanged(true); // ✅ mark as changed when changing unit
+                    }}
                     className="border px-2 py-1 rounded-md"
                   >
                     <option value="kg">kg</option>
@@ -1548,7 +1608,10 @@ const CategorySelector = () => {
             {!showVariantForm && (
               <div className="flex gap-2 items-center mt-2">
                 <button
-                  onClick={handleOpenForm}
+                  onClick={() => {
+                    handleOpenForm();
+                    setIsChanged(true); // ✅ mark as changed
+                  }}
                   className="text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-200"
                 >
                   Add option like size or color
@@ -1700,6 +1763,7 @@ const CategorySelector = () => {
                                                 child,
                                               });
                                               setIsPopupVisible(true);
+                                              setIsChanged(true);
                                             }}
                                           />
                                         </label>
@@ -1708,6 +1772,7 @@ const CategorySelector = () => {
                                       <span
                                         className="text-sm font-medium text-gray-500  hover:text-blue-800 transition cursor-pointer whitespace-nowrap"
                                         onClick={() => {
+                                          setIsChanged(true);
                                           navigate(
                                             `/product/${product.id}/variants/${variantId}`,
                                             {
@@ -1725,6 +1790,7 @@ const CategorySelector = () => {
                                       <div
                                         className="relative w-20 cursor-pointer"
                                         onClick={() => {
+                                          setIsChanged(true);
                                           navigate(
                                             `/product/${product.id}/variants/${variantId}`,
                                             {
@@ -1747,6 +1813,7 @@ const CategorySelector = () => {
                                       <div
                                         className="relative w-20 cursor-pointer"
                                         onClick={() => {
+                                          setIsChanged(true);
                                           navigate(
                                             `/product/${product.id}/variants/${variantId}`,
                                             {
@@ -1769,6 +1836,7 @@ const CategorySelector = () => {
                                       <span
                                         className="w-20 p-1  text-sm r cursor-pointer"
                                         onClick={() => {
+                                          setIsChanged(true);
                                           navigate(
                                             `/product/${product.id}/variants/${variantId}`,
                                             {
@@ -1785,6 +1853,7 @@ const CategorySelector = () => {
                                       <span
                                         className="w-20 p-1  text-sm r cursor-pointer"
                                         onClick={() => {
+                                          setIsChanged(true);
                                           navigate(
                                             `/product/${product.id}/variants/${variantId}`,
                                             {
@@ -1808,6 +1877,7 @@ const CategorySelector = () => {
                                             childIndex,
                                           });
                                           setIsDeleteModalOpen(true);
+                                          setIsChanged(true);
                                         }}
                                         className="text-red-600"
                                       >
@@ -1864,7 +1934,10 @@ const CategorySelector = () => {
                 </div>
 
                 <button
-                  onClick={handleOpenForm}
+                  onClick={() => {
+                    handleOpenForm();
+                    setIsChanged(true); // ✅ mark as changed
+                  }}
                   className="flex gap-2 items-center text-sm text-blue-600 mt-2 hover:underline"
                 >
                   Add another option
@@ -1880,7 +1953,10 @@ const CategorySelector = () => {
                 <input
                   type="text"
                   value={newOption.name}
-                  onChange={(e) => handleNewOptionNameChange(e.target.value)}
+                  onChange={(e) => {
+                    handleNewOptionNameChange(e.target.value);
+                    setIsChanged(true); // ✅ mark when typing
+                  }}
                   placeholder="Size"
                   className="w-full border-gray-300 rounded-md p-2 mt-1 focus:ring focus:ring-gray-400 focus:border-gray-500"
                 />
@@ -1908,7 +1984,10 @@ const CategorySelector = () => {
                     />
                     {newOption.values.length > 1 && (
                       <button
-                        onClick={() => handleDeleteNewValue(index)}
+                        onClick={() => {
+                          handleDeleteNewValue(index);
+                          setIsChanged(true); // ✅ mark on delete
+                        }}
                         className="text-red-600 text-sm border rounded-md p-1 hover:bg-red-100"
                       >
                         <FaTrash />
@@ -1918,7 +1997,10 @@ const CategorySelector = () => {
                 ))}
 
                 <button
-                  onClick={handleAddNewValue}
+                  onClick={() => {
+                    handleAddNewValue();
+                    setIsChanged(true); // ✅ mark on add
+                  }}
                   className="text-sm text-blue-600 mt-2 hover:underline"
                 >
                   + Add another value
@@ -1926,13 +2008,19 @@ const CategorySelector = () => {
 
                 <div className="flex justify-between mt-4">
                   <button
-                    onClick={() => setShowVariantForm(false)}
+                    onClick={() => {
+                      setShowVariantForm(false);
+                      setIsChanged(true); // ✅ mark when canceling edit
+                    }}
                     className="text-sm text-red-600 border border-red-400 px-3 py-1 rounded-lg hover:bg-red-100"
                   >
                     Cancel
                   </button>
                   <button
-                    onClick={handleDone}
+                    onClick={() => {
+                      handleDone();
+                      setIsChanged(true); // ✅ mark as changed when saving new variant option
+                    }}
                     className="text-sm text-white bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-900"
                   >
                     Done

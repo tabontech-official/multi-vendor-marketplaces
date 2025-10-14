@@ -33,7 +33,7 @@ const CategorySelector = () => {
   const locationData = useLocation();
   const { product } = locationData.state || {};
   const [editing, setEditing] = useState(false);
-
+  const [mongooseProductId, setMongooseProductId] = useState();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -460,7 +460,6 @@ const CategorySelector = () => {
     if (!options || options.length === 0) return [];
 
     if (options.length === 1) {
-      // Only one option like Size
       return [
         {
           parent: options[0].name,
@@ -602,18 +601,15 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if (isPopupVisible && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
 
-            "Content-Type": "application/json",
-          },
-        }
-      )
+          "Content-Type": "application/json",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           const allImages = data.flatMap((item) => item.images);
@@ -751,19 +747,16 @@ const CategorySelector = () => {
             );
         }
 
-        // 2️⃣ Try alt/title match
         if (!matched && product.variantImages) {
           matched = product.variantImages.find((img) =>
             normalizeString(img.alt || "").includes(titleKey)
           );
         }
 
-        // 3️⃣ Fallback to index match
         if (!matched && product.variantImages?.[idx]) {
           matched = product.variantImages[idx];
         }
 
-        // Final check and set
         if (matched?.src) {
           hydratedVariantImages[titleKey] = {
             preview: matched.src,
@@ -793,7 +786,7 @@ const CategorySelector = () => {
       setUnit(product.shipping?.weight_unit || "kg");
       setStatus(product.status || "publish");
       setUserId(product.userId || "");
-
+      setMongooseProductId(product._id);
       const imageURLs =
         product.images?.map((img) => ({
           cloudUrl: img.src,
@@ -880,22 +873,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setSelectedImages((prev) => {
             const updated = [...prev];
@@ -955,7 +945,8 @@ const CategorySelector = () => {
       return newImages;
     });
   };
-
+  const mongoProductId = product?._id;
+  console.log("mongoproductid", mongoProductId);
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
@@ -1067,7 +1058,7 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${product._id}`
+        ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
         : "  https://multi-vendor-marketplace.vercel.app/product/createProduct";
 
       const method = isEditing ? "PATCH" : "POST";
@@ -1160,6 +1151,8 @@ const CategorySelector = () => {
       setVariants([]);
       setVendor("");
       setKeyWord("");
+      setIsChanged(false);
+
       navigate("/manage-product");
     } catch (error) {
       console.error("Error uploading product:", error);
@@ -1194,10 +1187,9 @@ const CategorySelector = () => {
   };
 
   const handleDuplicate = async () => {
-    // 🔍 Check if user made changes but didn’t update
     if (isChanged) {
       showToast("error", "Please update the product first, then duplicate.");
-      return; // Stop here
+      return; 
     }
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
@@ -1205,7 +1197,7 @@ const CategorySelector = () => {
 
     if (!product) return;
 
-    setLoading(true); // 🔥 same loading use karein
+    setLoading(true); 
     setMessage(null);
 
     try {
@@ -1243,6 +1235,84 @@ const CategorySelector = () => {
       setLoading(false);
     }
   };
+
+  // useEffect(() => {
+  //   const handleBeforeUnload = (e) => {
+  //     if (isChanged) {
+  //       e.preventDefault();
+  //       e.returnValue = "";
+  //     }
+  //   };
+
+  //   const handlePopState = () => {
+  //     if (isChanged) {
+  //       showToast(
+  //         "error",
+  //         "You have unsaved changes! Please update the product before leaving."
+  //       );
+  //       window.history.pushState(null, "", window.location.href);
+  //     }
+  //   };
+
+  //   if (isChanged && !window.__blockerActive) {
+  //     window.__blockerActive = true;
+  //     window.addEventListener("beforeunload", handleBeforeUnload);
+  //     window.addEventListener("popstate", handlePopState);
+  //     window.history.pushState(null, "", window.location.href);
+  //   }
+
+  //   if (!isChanged && window.__blockerActive) {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //     window.removeEventListener("popstate", handlePopState);
+  //     window.__blockerActive = false;
+  //   }
+
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //     window.removeEventListener("popstate", handlePopState);
+  //     window.__blockerActive = false;
+  //   };
+  // }, [isChanged]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isChanged) {
+        e.preventDefault();
+        e.returnValue = ""; 
+      }
+    };
+
+    const handlePopState = (e) => {
+      if (isChanged) {
+        e.preventDefault();
+        showToast(
+          "error",
+          "You have unsaved changes! Please update the product before leaving."
+        );
+
+        window.history.forward();
+      }
+    };
+
+    if (isChanged && !window.__blockerActive) {
+      window.__blockerActive = true;
+      window.addEventListener("beforeunload", handleBeforeUnload);
+      window.addEventListener("popstate", handlePopState);
+      window.history.pushState(null, "", window.location.href);
+    }
+
+    if (!isChanged && window.__blockerActive) {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+      window.__blockerActive = false;
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+      window.__blockerActive = false;
+    };
+  }, [isChanged]);
 
   return (
     <main className="flex justify-center bg-gray-100 p-6">
@@ -1450,7 +1520,6 @@ const CategorySelector = () => {
           <div className="border rounded-2xl p-4 bg-white mb-4 border-gray-500">
             <h2 className="font-semibold text-gray-700">Inventory</h2>
 
-            {/* Track Quantity Checkbox */}
             <div className="flex items-center mt-3">
               <input
                 type="checkbox"
@@ -1458,7 +1527,7 @@ const CategorySelector = () => {
                 checked={trackQuantity}
                 onChange={() => {
                   setTrackQuantity(!trackQuantity);
-                  setIsChanged(true); // ✅ Mark as changed
+                  setIsChanged(true);
                 }}
                 className="h-4 w-4 text-blue-500"
               />
@@ -1470,7 +1539,6 @@ const CategorySelector = () => {
               </label>
             </div>
 
-            {/* Quantity Input */}
             {trackQuantity && (
               <div className="mt-4 border-b border-gray-300">
                 <div className="flex items-center justify-between">

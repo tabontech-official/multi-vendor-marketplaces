@@ -670,65 +670,7 @@ const CategorySelector = () => {
         })
       );
 
-      // const hydratedVariantImages = {};
-
-      // product.variants.forEach((variant) => {
-      //   const titleKey = normalizeString(variant.title || "");
-
-      //   const imageId = variant.image_id;
-
-      //   const matched =
-      //     product.variantImages?.find(
-      //       (img) => String(img.id) === String(imageId)
-      //     ) ||
-      //     product.images?.find((img) => String(img.id) === String(imageId));
-
-      //   if (matched?.src) {
-      //     console.log(` Found image for "${titleKey}":`, matched.src);
-
-      //     hydratedVariantImages[titleKey] = {
-      //       preview: matched.src,
-      //       loading: false,
-      //     };
-      //   }
-      // });
-
-      // console.log(
-      //   "Hydrated Images from formattedVariants (title based):",
-      //   hydratedVariantImages
-      // );
-
-      // if (Object.keys(hydratedVariantImages).length > 0) {
-      //   setVariantImages(hydratedVariantImages);
-      // } else {
-      //   const fallbackVariantImages = {};
-
-      //   product?.variants?.forEach((variant) => {
-      //     const titleKey = normalizeString(variant.title || "");
-
-      //     const matchedImage = product?.variantImages?.find(
-      //       (img) => String(img.id) === String(variant.image_id)
-      //     );
-
-      //     if (matchedImage?.src) {
-      //       fallbackVariantImages[titleKey] = {
-      //         preview: matchedImage.src,
-      //         loading: false,
-      //       };
-      //     }
-      //   });
-
-      //   console.log(
-      //     "Fallback Images from product.variants (title based):",
-      //     fallbackVariantImages
-      //   );
-
-      //   if (Object.keys(fallbackVariantImages).length > 0) {
-      //     setVariantImages(fallbackVariantImages);
-      //   } else {
-      //     console.log("No images found from either method");
-      //   }
-      // }
+    
 
       const hydratedVariantImages = {};
 
@@ -753,9 +695,9 @@ const CategorySelector = () => {
           );
         }
 
-        if (!matched && product.variantImages?.[idx]) {
-          matched = product.variantImages[idx];
-        }
+        // if (!matched && product.variantImages?.[idx]) {
+        //   matched = product.variantImages[idx];
+        // }
 
         if (matched?.src) {
           hydratedVariantImages[titleKey] = {
@@ -945,8 +887,6 @@ const CategorySelector = () => {
       return newImages;
     });
   };
-  const mongoProductId = product?._id;
-  console.log("mongoproductid", mongoProductId);
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");

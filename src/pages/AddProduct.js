@@ -117,6 +117,12 @@ const CategorySelector = () => {
         : [...prev, parentIndex]
     );
   };
+  const [variantEditModalVisible, setVariantEditModalVisible] = useState(false);
+
+  const handleVariantEditModal = (index, child) => {
+    setCurrentVariant({ index, child });
+    setVariantEditModalVisible(true);
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -1066,6 +1072,68 @@ const CategorySelector = () => {
     }
   };
 
+  // const handleMediaUpload = async (event) => {
+  //   const apiKey = localStorage.getItem("apiKey");
+  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
+  //   const userId = localStorage.getItem("userid");
+  //   const token = localStorage.getItem("usertoken");
+
+  //   const files = Array.from(event.target.files);
+  //   if (files.length === 0) return;
+
+  //   const previews = files.map((file) => ({
+  //     localUrl: URL.createObjectURL(file),
+  //     loading: true,
+  //     cloudUrl: null,
+  //   }));
+
+  //   setSelectedImages((prev) => [...previews, ...prev]); // ✅ Only affects media
+
+  //   for (const file of files) {
+  //     const formData = new FormData();
+  //     formData.append("file", file);
+  //     formData.append("upload_preset", "images");
+
+  //     try {
+  //       const res = await fetch(
+  //         "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+  //         {
+  //           method: "POST",
+  //           body: formData,
+  //         }
+  //       );
+  //       const data = await res.json();
+
+  //       if (data.secure_url) {
+  //         await fetch(
+  //           "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+  //           {
+  //             method: "POST",
+  //             headers: {
+  //               Authorization: `Bearer ${token}`,
+  //               "x-api-key": apiKey,
+  //               "x-api-secret": apiSecretKey,
+  //               "Content-Type": "application/json",
+  //             },
+  //             body: JSON.stringify({ userId, images: [data.secure_url] }),
+  //           }
+  //         );
+
+  //         setSelectedImages((prev) =>
+  //           prev.map((img) =>
+  //             img.localUrl === previews[0].localUrl
+  //               ? { ...img, cloudUrl: data.secure_url, loading: false }
+  //               : img
+  //           )
+  //         );
+  //       }
+  //     } catch (error) {
+  //       console.error("Media upload failed:", error);
+  //       showToast("error", "Media upload failed");
+  //     }
+  //   }
+  // };
+
   const handleMediaUpload = async (event) => {
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
@@ -1075,57 +1143,74 @@ const CategorySelector = () => {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
 
-    const previews = files.map((file) => ({
+    // ✅ Step 1: Create stable preview IDs (don’t rely on createObjectURL for matching)
+    const newPreviews = files.map((file) => ({
+      id: Date.now() + Math.random(), // stable unique id
+      file,
       localUrl: URL.createObjectURL(file),
       loading: true,
       cloudUrl: null,
     }));
 
-    setSelectedImages((prev) => [...previews, ...prev]); // ✅ Only affects media
+    // ✅ Step 2: Instantly show previews
+    setSelectedImages((prev) => [...newPreviews, ...prev]);
+    setIsChanged(true);
 
-    for (const file of files) {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "images");
+    // ✅ Step 3: Upload all images (parallel)
+    await Promise.all(
+      newPreviews.map(async (preview) => {
+        const formData = new FormData();
+        formData.append("file", preview.file);
+        formData.append("upload_preset", "images");
 
-      try {
-        const res = await fetch(
-          "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-        const data = await res.json();
-
-        if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            }
+        try {
+          // 🔹 Upload to Cloudinary
+          const res = await fetch(
+            "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+            { method: "POST", body: formData }
           );
+          const data = await res.json();
+
+          if (data.secure_url) {
+            // 🔹 Save to your backend gallery
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
+              }
+            );
+
+            // 🔹 Update that specific image (using its unique `id`)
+            setSelectedImages((prev) =>
+              prev.map((img) =>
+                img.id === preview.id
+                  ? { ...img, cloudUrl: data.secure_url, loading: false }
+                  : img
+              )
+            );
+          }
+        } catch (error) {
+          console.error("❌ Media upload failed:", error);
+          showToast("error", "Media upload failed");
 
           setSelectedImages((prev) =>
             prev.map((img) =>
-              img.localUrl === previews[0].localUrl
-                ? { ...img, cloudUrl: data.secure_url, loading: false }
-                : img
+              img.id === preview.id ? { ...img, loading: false } : img
             )
           );
         }
-      } catch (error) {
-        console.error("Media upload failed:", error);
-        showToast("error", "Media upload failed");
-      }
-    }
+      })
+    );
+
+    // ✅ Step 4: Reset input (to allow uploading same file again)
+    event.target.value = "";
   };
 
   const files = [
@@ -1149,11 +1234,227 @@ const CategorySelector = () => {
       return newImages;
     });
   };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const userId = localStorage.getItem("userid");
+  //   const apiKey = localStorage.getItem("apiKey");
+  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
+  //   if (!userId) {
+  //     setMessage({
+  //       type: "error",
+  //       text: "User ID is missing. Cannot submit form.",
+  //     });
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   setMessage(null);
+
+  //   const rawContentState = convertToRaw(editorState.getCurrentContent());
+  //   const htmlContent = draftToHtml(rawContentState);
+  //   const modifiedContent = htmlContent
+  //     .replace(/<p>/g, "")
+  //     .replace(/<\/p>/g, "<br />")
+  //     .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
+  //     .replace(/&nbsp;/g, " ");
+
+  //   const prepareVariantPrices = () => {
+  //     return combinations.flatMap((combination, index) => {
+  //       return combination.children.map((child) => {
+  //         const key = `${index}-${child}`;
+  //         return variantPrices[key] !== undefined ? variantPrices[key] : null;
+  //       });
+  //     });
+  //   };
+  //   const prepareVariantCompareAtPrices = () => {
+  //     return combinations.flatMap((combination, index) => {
+  //       return combination.children.map((child) => {
+  //         const key = `${index}-${child}`;
+  //         return variantCompareAtPrices[key] !== undefined
+  //           ? variantCompareAtPrices[key]
+  //           : null;
+  //       });
+  //     });
+  //   };
+
+  //   const defaultQuantity = parseFloat(quantity) || 0;
+
+  //   const prepareVarianQuantities = () => {
+  //     return combinations.flatMap((combination, index) => {
+  //       return combination.children.map((child) => {
+  //         const key = `${index}-${child}`;
+  //         const variantQty = parseFloat(variantQuantities[key]);
+
+  //         if (!isNaN(variantQty) && variantQty > 0) {
+  //           return variantQty;
+  //         } else {
+  //           return defaultQuantity;
+  //         }
+  //       });
+  //     });
+  //   };
+  //   const prepareVariansku = () => {
+  //     return combinations.flatMap((combination, index) => {
+  //       return combination.children.map((child) => {
+  //         const key = `${index}-${child}`;
+  //         return variantSku[key] !== undefined ? variantSku[key] : null;
+  //       });
+  //     });
+  //   };
+
+  //   const categoryIds = finalCategoryPayload.map((item) =>
+  //     item.catNo.toString()
+  //   );
+
+  //   const combinedKeywords = [
+  //     selectedExportTitle,
+  //     ...categoryIds,
+  //     ...keywordsList,
+  //   ].join(", ");
+  //   const payload = {
+  //     // keyWord: keywordsList.join(", "),
+  //     keyWord: combinedKeywords,
+
+  //     title,
+  //     description: modifiedContent,
+  //     productType: productType,
+  //     price: parseFloat(price),
+  //     compare_at_price: compareAtPrice ? parseFloat(compareAtPrice) : undefined,
+  //     track_quantity: trackQuantity,
+  //     quantity: trackQuantity ? parseFloat(quantity) : 0,
+  //     continue_selling: continueSelling,
+  //     has_sku: hasSKU,
+  //     sku: hasSKU && sku ? sku : undefined,
+  //     barcode: hasSKU && barcode ? barcode : undefined,
+  //     track_shipping: trackShipping,
+  //     weight: trackShipping && weight ? parseFloat(weight) : undefined,
+  //     weight_unit: trackShipping && unit ? unit : undefined,
+  //     status,
+  //     userId,
+  //     vendor: vendor,
+  //     options,
+  //     variants,
+  //     variantPrices: prepareVariantPrices(),
+  //     variantCompareAtPrices: prepareVariantCompareAtPrices(),
+  //     variantQuantites: prepareVarianQuantities(),
+  //     variantSku: prepareVariansku(),
+  //     categories: selectedExportTitle,
+  //   };
+
+  //   console.log("Payload being sent:", payload);
+
+  //   try {
+  //     const url = isEditing
+  //       ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
+  //       : "  https://multi-vendor-marketplace.vercel.app/product/createProduct";
+
+  //     const method = isEditing ? "PATCH" : "POST";
+
+  //     const response = await fetch(url, {
+  //       method,
+  //       headers: {
+  //         "x-api-key": apiKey,
+  //         "x-api-secret": apiSecretKey,
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(payload),
+  //     });
+
+  //     const data = await response.json();
+  //     const productId = data.product.id;
+
+  //     if (!response.ok) {
+  //       setMessage({
+  //         type: "error",
+  //         text: data.error || "Something went wrong!",
+  //       });
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     const formData = new FormData();
+
+  //     images.forEach((image) => formData.append("images", image));
+  //     Object.entries(variantImages).forEach(([key, { file }]) => {
+  //       formData.append("variantImages", file);
+  //       formData.append("variantImageKeys", key);
+  //     });
+
+  //     // const cloudinaryURLs = [];
+  //     // const uploadedVariantImages = [];
+
+  //     const cloudinaryURLs = selectedImages
+  //       .filter((img) => img.cloudUrl)
+  //       .map((img) => img.cloudUrl);
+
+  //     const uploadedVariantImages = Object.entries(variantImages).map(
+  //       ([key, { preview }]) => ({
+  //         key,
+  //         url: preview,
+  //       })
+  //     );
+
+  //     const imageSaveResponse = await fetch(
+  //       ` https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
+  //       {
+  //         method: "PUT",
+  //         headers: {
+  //           "x-api-key": apiKey,
+  //           "x-api-secret": apiSecretKey,
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           images: cloudinaryURLs,
+  //           variantImages: uploadedVariantImages,
+  //         }),
+  //       }
+  //     );
+
+  //     const imageSaveJson = await imageSaveResponse.json();
+
+  //     if (!imageSaveResponse.ok) {
+  //       setMessage({
+  //         type: "error",
+  //         text: imageSaveJson.error || "Failed to save image URLs",
+  //       });
+  //       setLoading(false);
+  //       return;
+  //     }
+  //     setTitle("");
+  //     setDescription("");
+  //     setProductType("");
+  //     setPrice("");
+  //     setCompareAtPrice("");
+  //     setTrackQuantity(false);
+  //     setQuantity(0);
+  //     setContinueSelling(false);
+  //     setHasSKU(false);
+  //     setSKU("");
+  //     setBarcode("");
+  //     setTrackShipping(false);
+  //     setWeight("");
+  //     setUnit("kg");
+  //     setOptions([]);
+  //     setVariants([]);
+  //     setVendor("");
+  //     setKeyWord("");
+  //     setIsChanged(false);
+
+  //     navigate("/manage-product");
+  //   } catch (error) {
+  //     console.error("Error uploading product:", error);
+  //     setMessage({ type: "error", text: "Failed to connect to server." });
+  //   }
+
+  //   setLoading(false);
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
+
     if (!userId) {
       setMessage({
         type: "error",
@@ -1165,6 +1466,7 @@ const CategorySelector = () => {
     setLoading(true);
     setMessage(null);
 
+    // 🧩 Convert editor content
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
     const modifiedContent = htmlContent
@@ -1173,66 +1475,54 @@ const CategorySelector = () => {
       .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
       .replace(/&nbsp;/g, " ");
 
-    const prepareVariantPrices = () => {
-      return combinations.flatMap((combination, index) => {
-        return combination.children.map((child) => {
+    // 🧩 Prepare variant-specific arrays
+    const prepareVariantPrices = () =>
+      combinations.flatMap((combination, index) =>
+        combination.children.map((child) => {
           const key = `${index}-${child}`;
-          return variantPrices[key] !== undefined ? variantPrices[key] : null;
-        });
-      });
-    };
-    const prepareVariantCompareAtPrices = () => {
-      return combinations.flatMap((combination, index) => {
-        return combination.children.map((child) => {
+          return variantPrices[key] ?? null;
+        })
+      );
+
+    const prepareVariantCompareAtPrices = () =>
+      combinations.flatMap((combination, index) =>
+        combination.children.map((child) => {
           const key = `${index}-${child}`;
-          return variantCompareAtPrices[key] !== undefined
-            ? variantCompareAtPrices[key]
-            : null;
-        });
-      });
-    };
+          return variantCompareAtPrices[key] ?? null;
+        })
+      );
 
     const defaultQuantity = parseFloat(quantity) || 0;
-
-    const prepareVarianQuantities = () => {
-      return combinations.flatMap((combination, index) => {
-        return combination.children.map((child) => {
+    const prepareVariantQuantities = () =>
+      combinations.flatMap((combination, index) =>
+        combination.children.map((child) => {
           const key = `${index}-${child}`;
-          const variantQty = parseFloat(variantQuantities[key]);
+          const val = parseFloat(variantQuantities[key]);
+          return !isNaN(val) && val > 0 ? val : defaultQuantity;
+        })
+      );
 
-          if (!isNaN(variantQty) && variantQty > 0) {
-            return variantQty;
-          } else {
-            return defaultQuantity;
-          }
-        });
-      });
-    };
-    const prepareVariansku = () => {
-      return combinations.flatMap((combination, index) => {
-        return combination.children.map((child) => {
+    const prepareVariantSku = () =>
+      combinations.flatMap((combination, index) =>
+        combination.children.map((child) => {
           const key = `${index}-${child}`;
-          return variantSku[key] !== undefined ? variantSku[key] : null;
-        });
-      });
-    };
+          return variantSku[key] ?? null;
+        })
+      );
 
-    const categoryIds = finalCategoryPayload.map((item) =>
-      item.catNo.toString()
-    );
-
+    const categoryIds = finalCategoryPayload.map((c) => c.catNo.toString());
     const combinedKeywords = [
       selectedExportTitle,
       ...categoryIds,
       ...keywordsList,
     ].join(", ");
-    const payload = {
-      // keyWord: keywordsList.join(", "),
-      keyWord: combinedKeywords,
 
+    // 🧩 Main product payload
+    const payload = {
+      keyWord: combinedKeywords,
       title,
       description: modifiedContent,
-      productType: productType,
+      productType,
       price: parseFloat(price),
       compare_at_price: compareAtPrice ? parseFloat(compareAtPrice) : undefined,
       track_quantity: trackQuantity,
@@ -1246,22 +1536,23 @@ const CategorySelector = () => {
       weight_unit: trackShipping && unit ? unit : undefined,
       status,
       userId,
-      vendor: vendor,
+      vendor,
       options,
       variants,
       variantPrices: prepareVariantPrices(),
       variantCompareAtPrices: prepareVariantCompareAtPrices(),
-      variantQuantites: prepareVarianQuantities(),
-      variantSku: prepareVariansku(),
+      variantQuantites: prepareVariantQuantities(),
+      variantSku: prepareVariantSku(),
       categories: selectedExportTitle,
     };
 
-    console.log("Payload being sent:", payload);
+    console.log("📦 Payload being sent:", payload);
 
     try {
+      // 🧩 Decide if creating or updating
       const url = isEditing
-        ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
-        : "  https://multi-vendor-marketplace.vercel.app/product/createProduct";
+        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
+        : `https://multi-vendor-marketplace.vercel.app/product/createProduct`;
 
       const method = isEditing ? "PATCH" : "POST";
 
@@ -1276,8 +1567,6 @@ const CategorySelector = () => {
       });
 
       const data = await response.json();
-      const productId = data.product.id;
-
       if (!response.ok) {
         setMessage({
           type: "error",
@@ -1287,30 +1576,64 @@ const CategorySelector = () => {
         return;
       }
 
-      const formData = new FormData();
+      const productId = data.product?.id;
+      console.log("✅ Product created/updated:", productId);
 
-      images.forEach((image) => formData.append("images", image));
-      Object.entries(variantImages).forEach(([key, { file }]) => {
-        formData.append("variantImages", file);
-        formData.append("variantImageKeys", key);
-      });
+      // 🧩 If it's a NEW product → update variants after IDs exist
+      if (!isEditing && productId) {
+        const variantUpdates = combinations.flatMap((combination, index) =>
+          combination.children.map((child) => {
+            const key = `${index}-${child}`;
+            const matchingVariant = data.product?.variants?.find(
+              (v) => v.title.trim().toLowerCase() === child.trim().toLowerCase()
+            );
 
-      // const cloudinaryURLs = [];
-      // const uploadedVariantImages = [];
+            return {
+              variantId: matchingVariant?.id, // Shopify variant ID
+              price: variantPrices[key] || price || 0,
+              compare_at_price:
+                variantCompareAtPrices[key] || compareAtPrice || 0,
+              sku: variantSku[key] || "",
+              inventory_quantity: variantQuantities[key] || quantity || 0,
+              option1: matchingVariant?.option1 || null,
+              option2: matchingVariant?.option2 || null,
+              option3: matchingVariant?.option3 || null,
+            };
+          })
+        );
 
+        console.log("🧩 Updating each variant via /updateVariant API");
+
+        for (const variant of variantUpdates) {
+          if (!variant.variantId) continue;
+
+          await fetch(
+            `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variant.variantId}`,
+            {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ variant }),
+            }
+          );
+        }
+      }
+
+      // 🧩 Upload image URLs to product
       const cloudinaryURLs = selectedImages
         .filter((img) => img.cloudUrl)
         .map((img) => img.cloudUrl);
 
       const uploadedVariantImages = Object.entries(variantImages).map(
-        ([key, { preview }]) => ({
-          key,
-          url: preview,
-        })
+        ([key, { preview }]) => ({ key, url: preview })
       );
 
       const imageSaveResponse = await fetch(
-        ` https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
         {
           method: "PUT",
           headers: {
@@ -1326,7 +1649,6 @@ const CategorySelector = () => {
       );
 
       const imageSaveJson = await imageSaveResponse.json();
-
       if (!imageSaveResponse.ok) {
         setMessage({
           type: "error",
@@ -1335,6 +1657,8 @@ const CategorySelector = () => {
         setLoading(false);
         return;
       }
+
+      // 🧩 Reset form after success
       setTitle("");
       setDescription("");
       setProductType("");
@@ -1355,13 +1679,20 @@ const CategorySelector = () => {
       setKeyWord("");
       setIsChanged(false);
 
+      setMessage({
+        type: "success",
+        text: isEditing
+          ? "Product updated successfully!"
+          : "Product created successfully!",
+      });
+
       navigate("/manage-product");
     } catch (error) {
-      console.error("Error uploading product:", error);
+      console.error("❌ Error uploading product:", error);
       setMessage({ type: "error", text: "Failed to connect to server." });
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handlePriceChange = (index, child, value) => {
@@ -1670,7 +2001,7 @@ const CategorySelector = () => {
                     type="file"
                     accept="image/*"
                     multiple
-                    onChange={handleVariantImageChange}
+                    onChange={handleMediaUpload}
                     className="hidden"
                     id="uploadMore"
                   />
@@ -1786,7 +2117,7 @@ const CategorySelector = () => {
                       value={quantity}
                       onChange={(e) => {
                         setQuantity(e.target.value);
-                        setIsChanged(true); // ✅ Mark as changed
+                        setIsChanged(true);
                       }}
                       className="w-20 border px-3 py-1 rounded-md text-center mb-3 no-spinner"
                     />
@@ -1795,7 +2126,6 @@ const CategorySelector = () => {
               </div>
             )}
 
-            {/* SKU Checkbox */}
             <div className="flex items-center mt-3">
               <input
                 type="checkbox"
@@ -1803,7 +2133,7 @@ const CategorySelector = () => {
                 checked={hasSKU}
                 onChange={() => {
                   setHasSKU(!hasSKU);
-                  setIsChanged(true); // ✅ Mark as changed
+                  setIsChanged(true);
                 }}
                 className="h-4 w-4 text-blue-500"
               />
@@ -1812,7 +2142,6 @@ const CategorySelector = () => {
               </label>
             </div>
 
-            {/* SKU & Barcode Inputs */}
             {hasSKU && (
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <input
@@ -1821,7 +2150,7 @@ const CategorySelector = () => {
                   value={sku}
                   onChange={(e) => {
                     setSKU(e.target.value);
-                    setIsChanged(true); // ✅ Mark as changed
+                    setIsChanged(true);
                   }}
                   className="w-full border p-2 rounded-md"
                 />
@@ -1907,7 +2236,7 @@ const CategorySelector = () => {
                 <button
                   onClick={() => {
                     handleOpenForm();
-                    setIsChanged(true); // ✅ mark as changed
+                    setIsChanged(true);
                   }}
                   className="text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-200"
                 >
@@ -1938,7 +2267,6 @@ const CategorySelector = () => {
                           : "bg-gray-50 hover:bg-gray-100 border-gray-300"
                       }`}
                     >
-                      {/* 🔹 Option Header */}
                       <div className="flex justify-between items-center">
                         <h3 className="text-sm font-medium text-gray-800">
                           {option.name}
@@ -1947,7 +2275,7 @@ const CategorySelector = () => {
                         {editingOptionIndex === optionIndex && (
                           <button
                             onClick={(e) => {
-                              e.stopPropagation(); // prevent re-triggering the click
+                              e.stopPropagation();
                               handleSaveEditedOption(optionIndex);
                             }}
                             className="text-xs text-white bg-blue-600 px-3 py-1 rounded-md hover:bg-blue-700"
@@ -1957,7 +2285,6 @@ const CategorySelector = () => {
                         )}
                       </div>
 
-                      {/* 🔹 Static view */}
                       {editingOptionIndex !== optionIndex && (
                         <div className="flex flex-wrap gap-2 mt-2">
                           {option.values
@@ -1973,7 +2300,6 @@ const CategorySelector = () => {
                         </div>
                       )}
 
-                      {/* 🔹 Editable view */}
                       {editingOptionIndex === optionIndex && (
                         <div className="mt-2 space-y-2">
                           {newOption.values.map((value, i) => (
@@ -2014,274 +2340,6 @@ const CategorySelector = () => {
                     </div>
                   ))}
 
-                {/* <div className="mt-3">
-                  <div className="grid grid-cols-7 items-center gap-20 mb-2 p-3">
-                    <h3 className="font-semibold text-xs text-gray-800">IMG</h3>
-                    <h3 className="font-semibold text-xs text-gray-800">
-                      VARIANT
-                    </h3>
-                    <h3 className="font-semibold text-xs text-gray-800 ">
-                      PRICE
-                    </h3>
-                    <h3 className="font-semibold text-xs text-gray-800 ">
-                      COMPARE
-                    </h3>
-                    <h3 className="font-semibold text-xs text-gray-800 ">
-                      SKU
-                    </h3>
-                    <h3 className="font-semibold text-xs text-gray-800 ">
-                      QTY
-                    </h3>
-                    <h3 className="font-semibold text-xs text-gray-800 ">
-                      ACTION
-                    </h3>
-                  </div>
-
-                  {generateVariants().length > 0 ? (
-                    generateVariants().map((combination, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-100 p-4 rounded-md mt-2"
-                      >
-                        <div
-                          className="flex items-center justify-between gap-6 cursor-pointer"
-                          onClick={() => toggleChildOptions(index)}
-                        >
-                          <div className="font-medium text-gray-700">
-                            {combination.parent}
-                          </div>
-                          <button
-                            onClick={() => toggleChildOptions(index)}
-                            className="text-gray-500"
-                          >
-                            {expandedParents.includes(index) ? (
-                              <IoIosArrowUp className="text-xl" />
-                            ) : (
-                              <MdOutlineKeyboardArrowDown className="text-2xl" />
-                            )}
-                          </button>
-                        </div>
-
-                        {expandedParents.includes(index) && (
-                          <div className="mt-2">
-                            <ul className="space-y-2">
-                              {combinations[index]?.children?.map(
-                                (child, childIndex) => {
-                                  const parentValue =
-                                    combinations[index]?.parent;
-
-                                  const combinationString =
-                                    options.length === 1
-                                      ? child
-                                      : `${parentValue} / ${child}`;
-                                  const normalizedKey = combinationString
-                                    .replace(/['"]/g, "")
-                                    .trim();
-
-                                  const image = variantImages[normalizedKey];
-                                  const matchingVariant =
-                                    product?.variants?.find(
-                                      (variant) =>
-                                        normalizeString(variant.title) ===
-                                        normalizedKey
-                                    );
-
-                                  const variantId = matchingVariant?.id;
-
-                                  return (
-                                    <li
-                                      key={childIndex}
-                                      className="grid grid-cols-7 items-center gap-20"
-                                    >
-                                      <div className="w-12 relative">
-                                        <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
-                                          {image?.preview ? (
-                                            <img
-                                              src={image.preview}
-                                              alt={`Variant ${child}`}
-                                              className="w-full h-full object-cover"
-                                            />
-                                          ) : (
-                                            <span className="text-3xl text-gray-400">
-                                              +
-                                            </span>
-                                          )}
-                                          <input
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onClick={() => {
-                                              setCurrentVariant({
-                                                index,
-                                                child,
-                                              });
-                                              setIsPopupVisible(true);
-                                              setIsChanged(true);
-                                            }}
-                                          />
-                                        </label>
-                                      </div>
-
-                                      <span
-                                        className="text-sm font-medium text-gray-500  hover:text-blue-800 transition cursor-pointer whitespace-nowrap"
-                                        onClick={() => {
-                                          setIsChanged(true);
-                                          navigate(
-                                            `/product/${product.id}/variants/${variantId}`,
-                                            {
-                                              state: {
-                                                productId: product.id,
-                                                variantId: variantId,
-                                              },
-                                            }
-                                          );
-                                        }}
-                                      >
-                                        {child}
-                                      </span>
-
-                                      <div
-                                        className="relative w-20 cursor-pointer"
-                                        onClick={() => {
-                                          setIsChanged(true);
-                                          navigate(
-                                            `/product/${product.id}/variants/${variantId}`,
-                                            {
-                                              state: {
-                                                productId: product.id,
-                                                variantId: variantId,
-                                              },
-                                            }
-                                          );
-                                        }}
-                                      >
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <span className="w-20 p-1 pl-6   text-sm ">
-                                          {price || "N/A"}
-                                        </span>
-                                      </div>
-
-                                      <div
-                                        className="relative w-20 cursor-pointer"
-                                        onClick={() => {
-                                          setIsChanged(true);
-                                          navigate(
-                                            `/product/${product.id}/variants/${variantId}`,
-                                            {
-                                              state: {
-                                                productId: product.id,
-                                                variantId: variantId,
-                                              },
-                                            }
-                                          );
-                                        }}
-                                      >
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <span className="w-20 p-1 pl-6   text-sm r">
-                                          {compareAtPrice || "N/A"}
-                                        </span>
-                                      </div>
-
-                                      <span
-                                        className="w-20 p-1  text-sm r cursor-pointer"
-                                        onClick={() => {
-                                          setIsChanged(true);
-                                          navigate(
-                                            `/product/${product.id}/variants/${variantId}`,
-                                            {
-                                              state: {
-                                                productId: product.id,
-                                                variantId: variantId,
-                                              },
-                                            }
-                                          );
-                                        }}
-                                      >
-                                        {sku || "N/A"}
-                                      </span>
-                                      <span
-                                        className="w-20 p-1  text-sm r cursor-pointer"
-                                        onClick={() => {
-                                          setIsChanged(true);
-                                          navigate(
-                                            `/product/${product.id}/variants/${variantId}`,
-                                            {
-                                              state: {
-                                                productId: product.id,
-                                                variantId: variantId,
-                                              },
-                                            }
-                                          );
-                                        }}
-                                      >
-                                        {matchingVariant?.inventory_quantity ??
-                                          "N/A"}
-                                      </span>
-
-                                      <button
-                                        onClick={() => {
-                                          setDeleteTarget({
-                                            index,
-                                            childIndex,
-                                          });
-                                          setIsDeleteModalOpen(true);
-                                          setIsChanged(true);
-                                        }}
-                                        className="text-red-600"
-                                      >
-                                        <FaTrash />
-                                      </button>
-                                    </li>
-                                  );
-                                }
-                              )}
-                            </ul>
-                          </div>
-                        )}
-                        {isDeleteModalOpen && (
-                          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                            <div className="bg-white rounded-lg shadow-lg p-6 w-[400px]">
-                              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                                Confirm Delete
-                              </h2>
-                              <p className="text-gray-600 mb-6">
-                                Are you sure you want to delete this variant?
-                                This action cannot be undone.
-                              </p>
-
-                              <div className="flex justify-end gap-3">
-                                <button
-                                  onClick={() => setIsDeleteModalOpen(false)}
-                                  className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
-                                >
-                                  Cancel
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (deleteTarget) {
-                                      handleDeleteCombination(
-                                        deleteTarget.index,
-                                        deleteTarget.childIndex
-                                      );
-                                    }
-                                    setIsDeleteModalOpen(false);
-                                  }}
-                                  className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-600"></p>
-                  )}
-                </div> */}
                 <div className="mt-3">
                   <div className="grid grid-cols-6 items-center gap-20 mb-2 p-3">
                     <h3 className="font-semibold text-xs text-gray-800">IMG</h3>
@@ -2326,33 +2384,7 @@ const CategorySelector = () => {
                         </div>
 
                         {expandedParents.includes(index) && (
-                          <div
-                            className="mt-2"
-                            onClick={(e) => {
-                              const targetTag = e.target.tagName.toLowerCase();
-                              if (
-                                [
-                                  "button",
-                                  "input",
-                                  "img",
-                                  "svg",
-                                  "path",
-                                ].includes(targetTag) ||
-                                e.target.closest("button") ||
-                                e.target.closest("input")
-                              ) {
-                                return;
-                              }
-
-                              if (!isEditing) {
-                                showToast(
-                                  "info",
-                                  " Please save the product first, then go to Variants to update their details."
-                                );
-                              }
-                            }}
-                          >
-                            {" "}
+                          <div className="mt-2">
                             <ul className="space-y-2">
                               {combinations[index]?.children?.map(
                                 (child, childIndex) => {
@@ -2410,24 +2442,23 @@ const CategorySelector = () => {
                                       <span
                                         className="text-sm font-medium text-gray-500 hover:text-blue-800 transition cursor-pointer whitespace-nowrap"
                                         onClick={() => {
-                                          if (!isEditing) {
-                                            showToast(
-                                              "info",
-                                              " Please save the product first, then go to Variants to update their details."
+                                          if (isEditing) {
+                                            setIsChanged(true);
+                                            navigate(
+                                              `/product/${product.id}/variants/${variantId}`,
+                                              {
+                                                state: {
+                                                  productId: product.id,
+                                                  variantId,
+                                                },
+                                              }
                                             );
-                                            return;
+                                          } else {
+                                            handleVariantEditModal(
+                                              index,
+                                              child
+                                            );
                                           }
-
-                                          setIsChanged(true);
-                                          navigate(
-                                            `/product/${product.id}/variants/${variantId}`,
-                                            {
-                                              state: {
-                                                productId: product.id,
-                                                variantId: variantId,
-                                              },
-                                            }
-                                          );
                                         }}
                                       >
                                         {child}
@@ -2436,111 +2467,92 @@ const CategorySelector = () => {
                                       <div
                                         className="relative w-20 cursor-pointer"
                                         onClick={() => {
-                                          if (!price) {
-                                            showToast(
-                                              "info",
-                                              " Add a value in the price field to see it here."
+                                          if (isEditing) {
+                                            navigate(
+                                              `/product/${product.id}/variants/${variantId}`,
+                                              {
+                                                state: {
+                                                  productId: product.id,
+                                                  variantId,
+                                                },
+                                              }
                                             );
-                                            return;
-                                          }
-                                          if (!isEditing) {
-                                            showToast(
-                                              "info",
-                                              " Please save the product first, then go to Variants to update their details."
+                                          } else {
+                                            handleVariantEditModal(
+                                              index,
+                                              child
                                             );
-                                            return;
                                           }
-                                          setIsChanged(true);
-                                          navigate(
-                                            `/product/${product.id}/variants/${variantId}`,
-                                            {
-                                              state: {
-                                                productId: product.id,
-                                                variantId: variantId,
-                                              },
-                                            }
-                                          );
                                         }}
                                       >
                                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
                                           $
                                         </span>
                                         <span className="w-20 p-1 pl-6 text-sm">
-                                          {price || "0.00"}
+                                          {variantPrices[`${index}-${child}`] ??
+                                            matchingVariant?.price ??
+                                            "0.00"}
                                         </span>
                                       </div>
 
                                       <div
                                         className="relative w-20 cursor-pointer"
                                         onClick={() => {
-                                          if (!price) {
-                                            showToast(
-                                              "info",
-                                              " Add a value in the price field to see it here."
+                                          if (isEditing) {
+                                            navigate(
+                                              `/product/${product.id}/variants/${variantId}`,
+                                              {
+                                                state: {
+                                                  productId: product.id,
+                                                  variantId,
+                                                },
+                                              }
                                             );
-                                            return;
-                                          }
-                                          if (!isEditing) {
-                                            showToast(
-                                              "info",
-                                              " Please save the product first, then go to Variants to update their details."
+                                          } else {
+                                            handleVariantEditModal(
+                                              index,
+                                              child
                                             );
-                                            return;
                                           }
-                                          setIsChanged(true);
-                                          navigate(
-                                            `/product/${product.id}/variants/${variantId}`,
-                                            {
-                                              state: {
-                                                productId: product.id,
-                                                variantId: variantId,
-                                              },
-                                            }
-                                          );
                                         }}
                                       >
                                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
                                           $
                                         </span>
                                         <span className="w-20 p-1 pl-6 text-sm">
-                                          {compareAtPrice || "0.00"}
+                                          {variantCompareAtPrices[
+                                            `${index}-${child}`
+                                          ] ??
+                                            matchingVariant?.compare_at_price ??
+                                            "0.00"}
                                         </span>
                                       </div>
 
                                       <span
                                         className="w-20 p-1 text-sm cursor-pointer"
                                         onClick={() => {
-                                          const quantityValue =
-                                            matchingVariant?.inventory_quantity ??
-                                            0;
-                                          if (quantityValue === 0) {
-                                            showToast(
-                                              "info",
-                                              "0.00 Add a quantity value to see it here."
+                                          if (isEditing) {
+                                            navigate(
+                                              `/product/${product.id}/variants/${variantId}`,
+                                              {
+                                                state: {
+                                                  productId: product.id,
+                                                  variantId,
+                                                },
+                                              }
                                             );
-                                            return;
-                                          }
-                                          if (!isEditing) {
-                                            showToast(
-                                              "info",
-                                              "0.00 Please save the product first, then go to Variants to update their quantity."
+                                          } else {
+                                            handleVariantEditModal(
+                                              index,
+                                              child
                                             );
-                                            return;
                                           }
-
-                                          setIsChanged(true);
-                                          navigate(
-                                            `/product/${product.id}/variants/${variantId}`,
-                                            {
-                                              state: {
-                                                productId: product.id,
-                                                variantId: variantId,
-                                              },
-                                            }
-                                          );
                                         }}
                                       >
-                                        {matchingVariant?.inventory_quantity ??
+                                        {variantQuantities[
+                                          `${index}-${child}`
+                                        ] ??
+                                          matchingVariant?.inventory_quantity ??
                                           "0"}
                                       </span>
 
@@ -2810,17 +2822,6 @@ const CategorySelector = () => {
               </p>
             </div>
           )}
-          {/* <button
-            onClick={handleSubmit}
-            type="submit"
-            className="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded-md"
-          >
-            {loading
-              ? "Submitting..."
-              : isEditing
-              ? "Update Product"
-              : "Add Product"}
-          </button> */}
 
           {message && (
             <p
@@ -2876,65 +2877,6 @@ const CategorySelector = () => {
               Product organization
             </label>
             <div className="mt-2 space-y-2">
-              {/* <div ref={containerRef} className="relative w-full">
-                <label className="block text-sm text-gray-600 mb-1">
-                  Category
-                </label>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Search category..."
-                  className="w-full border border-gray-300 p-2 rounded-xl"
-                />
-
-                {searchTerm.trim() !== "" && filteredCategories.length > 0 && (
-                  <ul
-                    className="absolute z-10 bg-white border border-gray-300 rounded-xl mt-1 max-h-60 overflow-y-auto shadow-lg"
-                    style={{ width: `${dropdownWidth}px` }}
-                  >
-                    {filteredCategories.map((category, index) => (
-                      <li
-                        key={category.catNo}
-                        onClick={() => handleCategorySelect(category)}
-                        className={`p-2 cursor-pointer hover:bg-gray-100 ${
-                          index === highlightIndex ? "bg-gray-200" : ""
-                        }`}
-                      >
-                        {buildCategoryPath(category)}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {selectedVisibleCategories.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {selectedVisibleCategories.map((catNo, index) => {
-                      const category = categories.find(
-                        (cat) => cat.catNo === catNo
-                      );
-                      if (!category) return null;
-
-                      return (
-                        <span
-                          key={index}
-                          className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
-                        >
-                          {buildCategoryPath(category)}
-                          <button
-                            type="button"
-                            className="ml-2 text-red-500"
-                            onClick={() => removeCategory(catNo)}
-                          >
-                            &times;
-                          </button>
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
-              </div> */}
               <div ref={containerRef} className="relative w-full">
                 <label className="block text-sm text-gray-600 mb-1">
                   Category
@@ -3063,103 +3005,110 @@ const CategorySelector = () => {
           </div>
         </div>
 
-        {/* {isPopupVisible && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
-            <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">
-              <div className="sticky top-0 bg-white z-10 pb-4 border-b flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  Select Image
-                </h2>
+        {/* {variantEditModalVisible && currentVariant && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-[400px]">
+              <h2 className="text-lg font-semibold mb-4">
+                Edit Variant – {currentVariant.child}
+              </h2>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm text-gray-600">Price ($)</label>
+                  <input
+                    type="number"
+                    value={
+                      variantPrices[
+                        `${currentVariant.index}-${currentVariant.child}`
+                      ] || ""
+                    }
+                    onChange={(e) =>
+                      handlePriceChange(
+                        currentVariant.index,
+                        currentVariant.child,
+                        e.target.value
+                      )
+                    }
+                    className="border w-full p-2 rounded-md"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm text-gray-600">
+                    Compare at Price ($)
+                  </label>
+                  <input
+                    type="number"
+                    value={
+                      variantCompareAtPrices[
+                        `${currentVariant.index}-${currentVariant.child}`
+                      ] || ""
+                    }
+                    onChange={(e) =>
+                      handleVariantComparePriceChange(
+                        currentVariant.index,
+                        currentVariant.child,
+                        e.target.value
+                      )
+                    }
+                    className="border w-full p-2 rounded-md"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm text-gray-600">SKU</label>
+                  <input
+                    type="text"
+                    value={
+                      variantSku[
+                        `${currentVariant.index}-${currentVariant.child}`
+                      ] || ""
+                    }
+                    onChange={(e) =>
+                      handleVariantSkuChange(
+                        currentVariant.index,
+                        currentVariant.child,
+                        e.target.value
+                      )
+                    }
+                    className="border w-full p-2 rounded-md"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm text-gray-600">Quantity</label>
+                  <input
+                    type="number"
+                    value={
+                      variantQuantities[
+                        `${currentVariant.index}-${currentVariant.child}`
+                      ] || ""
+                    }
+                    onChange={(e) =>
+                      handleQuantityChange(
+                        currentVariant.index,
+                        currentVariant.child,
+                        e.target.value
+                      )
+                    }
+                    className="border w-full p-2 rounded-md"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
                 <button
-                  onClick={() => setIsPopupVisible(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <RxCross1 />
-                </button>
-              </div>
-
-              <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageChange}
-                  className="hidden"
-                  id="fileUpload"
-                />
-                <label
-                  htmlFor="fileUpload"
-                  className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
-                >
-                  Add images
-                </label>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
-                {galleryImages.map((file) => (
-                  <div
-                    key={file.id || file.src}
-                    className={`border rounded p-2 relative ${
-                      selectedFiles.includes(file.id)
-                        ? "border-blue-500"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <div
-                      onClick={() => {
-                        if (currentVariant) {
-                          const parentValue =
-                            combinations[currentVariant.index]?.parent;
-                          const combinationString = `${parentValue} / ${currentVariant.child}`;
-
-                          setVariantImages((prev) => ({
-                            ...prev,
-                            [combinationString]: { preview: file.src },
-                          }));
-
-                          setIsPopupVisible(false);
-                        }
-                      }}
-                      className="cursor-pointer hover:opacity-80 transition"
-                    >
-                      <img
-                        src={file.src}
-                        alt={file.name || "Image"}
-                        className="w-full h-24 object-cover rounded"
-                      />
-                    </div>
-
-                    <input
-                      type="checkbox"
-                      className="absolute top-2 left-2 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                      checked={
-                        currentVariant &&
-                        variantImages[
-                          `${combinations[currentVariant.index]?.parent} / ${
-                            currentVariant.child
-                          }`
-                        ]?.preview === file.src
-                      }
-                      readOnly
-                    />
-
-                    <p className="text-sm text-center mt-2 truncate">
-                      {file.name || "Image"}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex justify-end mt-6 border-t pt-4">
-                <button
-                  onClick={() => setIsPopupVisible(false)}
-                  className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"
+                  onClick={() => setVariantEditModalVisible(false)}
+                  className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={() => console.log(selectedFiles)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
+                  onClick={() => {
+                    setVariantEditModalVisible(false);
+                    setIsChanged(true);
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Done
                 </button>
@@ -3167,6 +3116,139 @@ const CategorySelector = () => {
             </div>
           </div>
         )} */}
+        {variantEditModalVisible && currentVariant && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fadeIn">
+            <div className="bg-white rounded-2xl shadow-2xl w-[420px] p-6 relative transform transition-all duration-300 scale-100 animate-slideUp">
+              <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Edit Variant –{" "}
+                  <span className="text-blue-600">{currentVariant.child}</span>
+                </h2>
+                <button
+                  onClick={() => setVariantEditModalVisible(false)}
+                  className="text-gray-400 hover:text-gray-600 transition"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Form */}
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Price <span className="text-gray-400 text-xs">(USD)</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={
+                      variantPrices[
+                        `${currentVariant.index}-${currentVariant.child}`
+                      ] || ""
+                    }
+                    onChange={(e) =>
+                      handlePriceChange(
+                        currentVariant.index,
+                        currentVariant.child,
+                        e.target.value
+                      )
+                    }
+                    className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
+                    placeholder="Enter price"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Compare at Price{" "}
+                    <span className="text-gray-400 text-xs">(USD)</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={
+                      variantCompareAtPrices[
+                        `${currentVariant.index}-${currentVariant.child}`
+                      ] || ""
+                    }
+                    onChange={(e) =>
+                      handleVariantComparePriceChange(
+                        currentVariant.index,
+                        currentVariant.child,
+                        e.target.value
+                      )
+                    }
+                    className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
+                    placeholder="Enter compare-at price"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    SKU
+                  </label>
+                  <input
+                    type="text"
+                    value={
+                      variantSku[
+                        `${currentVariant.index}-${currentVariant.child}`
+                      ] || ""
+                    }
+                    onChange={(e) =>
+                      handleVariantSkuChange(
+                        currentVariant.index,
+                        currentVariant.child,
+                        e.target.value
+                      )
+                    }
+                    className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
+                    placeholder="Enter SKU"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={
+                      variantQuantities[
+                        `${currentVariant.index}-${currentVariant.child}`
+                      ] || ""
+                    }
+                    onChange={(e) =>
+                      handleQuantityChange(
+                        currentVariant.index,
+                        currentVariant.child,
+                        e.target.value
+                      )
+                    }
+                    className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
+                    placeholder="Enter quantity"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6 border-t pt-4">
+                <button
+                  onClick={() => setVariantEditModalVisible(false)}
+                  className="px-4 py-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 transition font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setVariantEditModalVisible(false);
+                    setIsChanged(true);
+                  }}
+                  className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition font-medium"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {isPopupVisible && (
           <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
             <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">

@@ -324,7 +324,6 @@ const Variants = () => {
             )}
           </button>
         </div>
-        {/* Option box */}
         <div className="mt-4 bg-white p-3 border border-gray-300 rounded-2xl">
           <h3 className="font-semibold text-md">Options</h3>
           {variantData.options.map((option, index) => (

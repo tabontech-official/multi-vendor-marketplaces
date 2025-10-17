@@ -241,15 +241,17 @@ const Variants = () => {
           })}
         </ul> */}
         <ul className="space-y-2">
-          {product?.variants?.map((variant, idx) => {
+          {product?.variants?.map((variant) => {
             const normalizeString = (str) =>
-              String(str).replace(/['"]/g, "").trim();
+              String(str || "")
+                .replace(/['"]/g, "")
+                .trim()
+                .toLowerCase();
 
             const titleKey = normalizeString(variant.title || "");
 
             let matchedImage = null;
 
-            // 1️⃣ image_id match
             if (variant.image_id) {
               matchedImage =
                 product?.variantImages?.find(
@@ -260,17 +262,12 @@ const Variants = () => {
                 );
             }
 
-            // 2️⃣ alt/title match
-            if (!matchedImage && product?.variantImages) {
+            if (!matchedImage && product?.variantImages?.length > 0) {
               matchedImage = product.variantImages.find((img) =>
                 normalizeString(img.alt || "").includes(titleKey)
               );
             }
 
-            // 3️⃣ index match
-            if (!matchedImage && product?.variantImages?.[idx]) {
-              matchedImage = product.variantImages[idx];
-            }
 
             return (
               <li

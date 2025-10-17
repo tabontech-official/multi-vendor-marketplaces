@@ -2329,7 +2329,6 @@ const CategorySelector = () => {
                           <div
                             className="mt-2"
                             onClick={(e) => {
-                              // Prevent triggering when clicking specific inner elements (like delete or input)
                               const targetTag = e.target.tagName.toLowerCase();
                               if (
                                 [

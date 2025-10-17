@@ -425,7 +425,16 @@ const CategorySelector = () => {
   };
 
   // const generateVariants = () => {
-  //   if (options.length < 2) return [];
+  //   if (!options || options.length === 0) return [];
+
+  //   if (options.length === 1) {
+  //     return [
+  //       {
+  //         parent: options[0].name,
+  //         children: options[0].values,
+  //       },
+  //     ];
+  //   }
 
   //   const parentOption = options[0];
   //   const childOptions = options.slice(1);
@@ -455,44 +464,55 @@ const CategorySelector = () => {
 
   //   return combinations;
   // };
-
   const generateVariants = () => {
     if (!options || options.length === 0) return [];
 
-    if (options.length === 1) {
+    // 🧹 Filter out options that have no valid values
+    const validOptions = options.filter(
+      (opt) => opt.values && opt.values.some((val) => val.trim() !== "")
+    );
+
+    if (validOptions.length === 0) return [];
+
+    if (validOptions.length === 1) {
       return [
         {
-          parent: options[0].name,
-          children: options[0].values,
+          parent: validOptions[0].name,
+          children: validOptions[0].values.filter((v) => v.trim() !== ""),
         },
       ];
     }
 
-    const parentOption = options[0];
-    const childOptions = options.slice(1);
-
+    const parentOption = validOptions[0];
+    const childOptions = validOptions.slice(1);
     let combinations = [];
 
-    parentOption.values.forEach((parentValue) => {
-      let childCombinations = [];
+    parentOption.values
+      .filter((v) => v.trim() !== "")
+      .forEach((parentValue) => {
+        let childCombinations = [];
 
-      if (childOptions.length === 1) {
-        childOptions[0].values.forEach((val) => {
-          childCombinations.push(`${val}`);
-        });
-      } else if (childOptions.length === 2) {
-        childOptions[0].values.forEach((val1) => {
-          childOptions[1].values.forEach((val2) => {
-            childCombinations.push(`${val1} / ${val2}`);
+        if (childOptions.length === 1) {
+          childOptions[0].values
+            .filter((v) => v.trim() !== "")
+            .forEach((val) => {
+              childCombinations.push(`${val}`);
+            });
+        } else if (childOptions.length === 2) {
+          const first = childOptions[0].values.filter((v) => v.trim() !== "");
+          const second = childOptions[1].values.filter((v) => v.trim() !== "");
+          first.forEach((val1) => {
+            second.forEach((val2) => {
+              childCombinations.push(`${val1} / ${val2}`);
+            });
           });
-        });
-      }
+        }
 
-      combinations.push({
-        parent: parentValue,
-        children: childCombinations,
+        combinations.push({
+          parent: parentValue,
+          children: childCombinations,
+        });
       });
-    });
 
     return combinations;
   };
@@ -526,13 +546,53 @@ const CategorySelector = () => {
     setNewOption({ ...newOption, values: updatedValues });
   };
 
-  const handleDone = () => {
-    if (newOption.name.trim() === "" || newOption.values.length === 0) return;
+  // const handleDone = () => {
+  //   if (newOption.name.trim() === "" || newOption.values.length === 0) return;
 
-    const updatedOptions = [...options, { ...newOption }];
+  //   const updatedOptions = [...options, { ...newOption }];
+  //   setOptions(updatedOptions);
+  //   setShowVariantForm(false);
+  // };
+
+  const handleDone = () => {
+    const hasValidValues = newOption.values.some((val) => val.trim() !== "");
+    if (newOption.name.trim() === "" || !hasValidValues) {
+      alert("Please enter at least one value before saving the option.");
+      return;
+    }
+
+    const cleanedValues = newOption.values.filter((val) => val.trim() !== "");
+
+    // 🔍 Check if option already exists (e.g., Size, Color)
+    const existingOptionIndex = options.findIndex(
+      (opt) =>
+        opt.name.toLowerCase().trim() === newOption.name.toLowerCase().trim()
+    );
+
+    let updatedOptions;
+
+    if (existingOptionIndex !== -1) {
+      // 🧩 Merge with existing option (no duplicates)
+      const existingOption = options[existingOptionIndex];
+      const mergedValues = Array.from(
+        new Set([...existingOption.values, ...cleanedValues])
+      );
+
+      updatedOptions = options.map((opt, i) =>
+        i === existingOptionIndex ? { ...opt, values: mergedValues } : opt
+      );
+    } else {
+      // ➕ Add a completely new option
+      updatedOptions = [...options, { ...newOption, values: cleanedValues }];
+    }
+
     setOptions(updatedOptions);
     setShowVariantForm(false);
+    setNewOption({ name: "", values: [""] });
+    setIsChanged(true);
   };
+
+  const [editingOptionIndex, setEditingOptionIndex] = useState(null);
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("userid");
@@ -601,15 +661,18 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if (isPopupVisible && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
 
-          "Content-Type": "application/json",
-        },
-      })
+            "Content-Type": "application/json",
+          },
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           const allImages = data.flatMap((item) => item.images);
@@ -669,8 +732,6 @@ const CategorySelector = () => {
           subVariants: groupedVariants[key].children,
         })
       );
-
-    
 
       const hydratedVariantImages = {};
 
@@ -781,71 +842,159 @@ const CategorySelector = () => {
     }
   }, [product]);
 
+  // const handleImageChange = async (event) => {
+  //   const apiKey = localStorage.getItem("apiKey");
+  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
+  //   const files = Array.from(event.target.files);
+  //   const previews = files.map((file) => ({
+  //     localUrl: URL.createObjectURL(file),
+  //     loading: true,
+  //     cloudUrl: null,
+  //   }));
+
+  //   const updatedImages = [...selectedImages, ...previews];
+  //   setSelectedImages(updatedImages);
+  //   setIsChanged(true);
+  //   const userId = localStorage.getItem("userid");
+  //   const token = localStorage.getItem("usertoken");
+  //   for (let i = 0; i < files.length; i++) {
+  //     const file = files[i];
+
+  //     const formData = new FormData();
+  //     formData.append("file", file);
+  //     formData.append("upload_preset", "images");
+
+  //     try {
+  //       const res = await fetch(
+  //         `https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload`,
+  //         {
+  //           method: "POST",
+  //           body: formData,
+  //         }
+  //       );
+
+  //       const data = await res.json();
+
+  //       if (data.secure_url) {
+  //         await fetch(
+  //           "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+  //           {
+  //             method: "POST",
+  //             headers: {
+  //               Authorization: `Bearer ${token}`,
+  //               "x-api-key": apiKey,
+  //               "x-api-secret": apiSecretKey,
+  //               "Content-Type": "application/json",
+  //             },
+  //             body: JSON.stringify({
+  //               userId,
+  //               images: [data.secure_url],
+  //             }),
+  //           }
+  //         );
+
+  //         setSelectedImages((prev) => {
+  //           const updated = [...prev];
+  //           const target = updated.find(
+  //             (img) => img.localUrl === previews[i].localUrl
+  //           );
+  //           if (target) {
+  //             target.cloudUrl = data.secure_url;
+  //             target.loading = false;
+  //           }
+  //           return updated;
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error("Image upload failed:", error);
+  //     }
+  //   }
+  // };
+
   const handleImageChange = async (event) => {
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
+    const userId = localStorage.getItem("userid");
+    const token = localStorage.getItem("usertoken");
+
     const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
     const previews = files.map((file) => ({
       localUrl: URL.createObjectURL(file),
       loading: true,
       cloudUrl: null,
     }));
 
-    const updatedImages = [...selectedImages, ...previews];
-    setSelectedImages(updatedImages);
-    setIsChanged(true);
-    const userId = localStorage.getItem("userid");
-    const token = localStorage.getItem("usertoken");
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    // 🔹 Step 1: Show previews instantly in modal gallery
+    setGalleryImages((prev) => [...previews, ...prev]);
 
+    for (const file of files) {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", "images");
 
       try {
+        // 🔹 Upload to Cloudinary
         const res = await fetch(
-          `https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload`,
+          "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
           {
             method: "POST",
             body: formData,
           }
         );
-
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
-
-          setSelectedImages((prev) => {
-            const updated = [...prev];
-            const target = updated.find(
-              (img) => img.localUrl === previews[i].localUrl
-            );
-            if (target) {
-              target.cloudUrl = data.secure_url;
-              target.loading = false;
+          // 🔹 Save to backend gallery (optional)
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
             }
-            return updated;
-          });
+          );
+
+          // 🔹 Add it visually to modal gallery
+          setGalleryImages((prev) => [
+            { id: Date.now(), src: data.secure_url, name: file.name },
+            ...prev,
+          ]);
+
+          // 🔹 If a variant is open, auto-assign this image
+          if (currentVariant) {
+            const parentValue = combinations[currentVariant.index]?.parent;
+            const combinationKey =
+              options.length === 1
+                ? currentVariant.child
+                : `${parentValue} / ${currentVariant.child}`;
+            const normalizedKey = combinationKey.replace(/['"]/g, "").trim();
+
+            setVariantImages((prev) => ({
+              ...prev,
+              [normalizedKey]: { preview: data.secure_url, loading: false },
+            }));
+            setTimeout(() => setIsPopupVisible(false), 150);
+
+            showToast("success", "Image  assigned to variant!");
+          }
         }
       } catch (error) {
         console.error("Image upload failed:", error);
+        showToast("error", "Image upload failed");
       }
     }
   };
+
   const normalizeString = (str) => String(str).replace(/['"]/g, "").trim();
 
   const handleChange = (e) => {
@@ -855,17 +1004,130 @@ const CategorySelector = () => {
     }
   };
 
-  const handleVariantImageUpload = (event, parentIndex, child) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  const handleVariantImageChange = async (event) => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+    const userId = localStorage.getItem("userid");
+    const token = localStorage.getItem("usertoken");
 
-    const imagePreview = URL.createObjectURL(file);
+    const files = Array.from(event.target.files);
+    if (files.length === 0 || !currentVariant) return;
 
+    const parentValue = combinations[currentVariant.index]?.parent;
+    const combinationKey =
+      options.length === 1
+        ? currentVariant.child
+        : `${parentValue} / ${currentVariant.child}`;
+    const normalizedKey = combinationKey.replace(/['"]/g, "").trim();
+
+    // 🔹 STEP 1: Show loader immediately
     setVariantImages((prev) => ({
       ...prev,
-      [`${parentIndex}-${child}`]: { file, preview: imagePreview },
+      [normalizedKey]: {
+        ...prev[normalizedKey],
+        loading: true,
+      },
     }));
+
+    const formData = new FormData();
+    formData.append("file", files[0]); // only one file for variant
+    formData.append("upload_preset", "images");
+
+    try {
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+        { method: "POST", body: formData }
+      );
+      const data = await res.json();
+
+      if (data.secure_url) {
+        setVariantImages((prev) => ({
+          ...prev,
+          [normalizedKey]: {
+            preview: data.secure_url,
+            loading: false,
+          },
+        }));
+
+        // ✅ Close modal after assign
+        setTimeout(() => setIsPopupVisible(false), 150);
+        showToast("success", "Image assigned to variant!");
+      }
+    } catch (error) {
+      console.error("Variant upload failed:", error);
+      setVariantImages((prev) => ({
+        ...prev,
+        [normalizedKey]: {
+          ...prev[normalizedKey],
+          loading: false,
+        },
+      }));
+      showToast("error", "Variant image upload failed");
+    }
   };
+
+  const handleMediaUpload = async (event) => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+    const userId = localStorage.getItem("userid");
+    const token = localStorage.getItem("usertoken");
+
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    const previews = files.map((file) => ({
+      localUrl: URL.createObjectURL(file),
+      loading: true,
+      cloudUrl: null,
+    }));
+
+    setSelectedImages((prev) => [...previews, ...prev]); // ✅ Only affects media
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "images");
+
+      try {
+        const res = await fetch(
+          "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+        const data = await res.json();
+
+        if (data.secure_url) {
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            }
+          );
+
+          setSelectedImages((prev) =>
+            prev.map((img) =>
+              img.localUrl === previews[0].localUrl
+                ? { ...img, cloudUrl: data.secure_url, loading: false }
+                : img
+            )
+          );
+        }
+      } catch (error) {
+        console.error("Media upload failed:", error);
+        showToast("error", "Media upload failed");
+      }
+    }
+  };
+
   const files = [
     {
       id: 1,
@@ -1129,7 +1391,7 @@ const CategorySelector = () => {
   const handleDuplicate = async () => {
     if (isChanged) {
       showToast("error", "Please update the product first, then duplicate.");
-      return; 
+      return;
     }
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
@@ -1137,7 +1399,7 @@ const CategorySelector = () => {
 
     if (!product) return;
 
-    setLoading(true); 
+    setLoading(true);
     setMessage(null);
 
     try {
@@ -1218,7 +1480,7 @@ const CategorySelector = () => {
     const handleBeforeUnload = (e) => {
       if (isChanged) {
         e.preventDefault();
-        e.returnValue = ""; 
+        e.returnValue = "";
       }
     };
 
@@ -1253,6 +1515,33 @@ const CategorySelector = () => {
       window.__blockerActive = false;
     };
   }, [isChanged]);
+  const handleEditOptionValueChange = (index, value) => {
+    const updatedValues = [...newOption.values];
+    updatedValues[index] = value;
+    setNewOption({ ...newOption, values: updatedValues });
+  };
+
+  const handleAddEditedValue = () => {
+    setNewOption({ ...newOption, values: [...newOption.values, ""] });
+  };
+
+  const handleDeleteEditedValue = (index) => {
+    const updatedValues = newOption.values.filter((_, i) => i !== index);
+    setNewOption({ ...newOption, values: updatedValues });
+  };
+
+  const handleSaveEditedOption = (optionIndex) => {
+    const cleanedValues = newOption.values.filter((v) => v.trim() !== "");
+
+    const updated = options.map((opt, i) =>
+      i === optionIndex ? { ...opt, values: cleanedValues } : opt
+    );
+
+    setOptions(updated);
+    setEditingOptionIndex(null);
+    setNewOption({ name: "", values: [""] });
+    setIsChanged(true);
+  };
 
   return (
     <main className="flex justify-center bg-gray-100 p-6">
@@ -1337,7 +1626,7 @@ const CategorySelector = () => {
                   type="file"
                   accept="image/*"
                   multiple
-                  onChange={handleImageChange}
+                  onChange={handleMediaUpload}
                   className="hidden"
                   id="fileUpload"
                 />
@@ -1381,7 +1670,7 @@ const CategorySelector = () => {
                     type="file"
                     accept="image/*"
                     multiple
-                    onChange={handleImageChange}
+                    onChange={handleVariantImageChange}
                     className="hidden"
                     id="uploadMore"
                   />
@@ -1629,49 +1918,103 @@ const CategorySelector = () => {
 
             {options.length > 0 && (
               <div className="mt-3">
-                {options.slice(0, 1).map((option, optionIndex) => (
-                  <div
-                    key={optionIndex}
-                    className="border p-2 rounded-lg mt-2 bg-gray-50"
-                  >
-                    <h3 className="text-sm font-medium text-gray-800">
-                      {option.name}
-                    </h3>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {option.values.map((value, valueIndex) => (
-                        <span
-                          key={valueIndex}
-                          className="text-sm bg-gray-200 px-2 py-1 rounded-md"
-                        >
-                          {value}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                {options
+                  .filter((opt) => opt.values.some((v) => v.trim() !== ""))
+                  .map((option, optionIndex) => (
+                    <div
+                      key={optionIndex}
+                      onClick={() => {
+                        if (editingOptionIndex !== optionIndex) {
+                          setEditingOptionIndex(optionIndex);
+                          setNewOption({
+                            name: option.name,
+                            values: [...option.values],
+                          });
+                        }
+                      }}
+                      className={`border p-3 rounded-lg mt-2 transition-all duration-200 cursor-pointer ${
+                        editingOptionIndex === optionIndex
+                          ? "bg-gray-100 border-blue-400 shadow-inner"
+                          : "bg-gray-50 hover:bg-gray-100 border-gray-300"
+                      }`}
+                    >
+                      {/* 🔹 Option Header */}
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-sm font-medium text-gray-800">
+                          {option.name}
+                        </h3>
 
-                {options.slice(1).map((option, optionIndex) => (
-                  <div
-                    key={optionIndex}
-                    className="border p-2 rounded-lg mt-2 bg-gray-50"
-                  >
-                    <h3 className="text-sm font-medium text-gray-800">
-                      {option.name}
-                    </h3>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {option.values.map((value, valueIndex) => (
-                        <span
-                          key={valueIndex}
-                          className="text-sm bg-gray-200 px-2 py-1 rounded-md"
-                        >
-                          {value}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                        {editingOptionIndex === optionIndex && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // prevent re-triggering the click
+                              handleSaveEditedOption(optionIndex);
+                            }}
+                            className="text-xs text-white bg-blue-600 px-3 py-1 rounded-md hover:bg-blue-700"
+                          >
+                            Done
+                          </button>
+                        )}
+                      </div>
 
-                <div className="mt-3">
+                      {/* 🔹 Static view */}
+                      {editingOptionIndex !== optionIndex && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {option.values
+                            .filter((v) => v.trim() !== "")
+                            .map((value, valueIndex) => (
+                              <span
+                                key={valueIndex}
+                                className="text-sm bg-gray-200 px-2 py-1 rounded-md"
+                              >
+                                {value}
+                              </span>
+                            ))}
+                        </div>
+                      )}
+
+                      {/* 🔹 Editable view */}
+                      {editingOptionIndex === optionIndex && (
+                        <div className="mt-2 space-y-2">
+                          {newOption.values.map((value, i) => (
+                            <div key={i} className="flex gap-2 items-center">
+                              <input
+                                type="text"
+                                value={value}
+                                onChange={(e) =>
+                                  handleEditOptionValueChange(i, e.target.value)
+                                }
+                                className="w-full border border-gray-300 rounded-md p-1 text-sm"
+                              />
+                              {newOption.values.length > 1 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteEditedValue(i);
+                                  }}
+                                  className="text-red-600 border p-1 rounded-md hover:bg-red-100"
+                                >
+                                  <FaTrash />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddEditedValue();
+                            }}
+                            className="text-xs text-blue-600 hover:underline mt-1"
+                          >
+                            + Add another value
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                {/* <div className="mt-3">
                   <div className="grid grid-cols-7 items-center gap-20 mb-2 p-3">
                     <h3 className="font-semibold text-xs text-gray-800">IMG</h3>
                     <h3 className="font-semibold text-xs text-gray-800">
@@ -1873,7 +2216,6 @@ const CategorySelector = () => {
                                           );
                                         }}
                                       >
-                                        {/* {quantity} */}
                                         {matchingVariant?.inventory_quantity ??
                                           "N/A"}
                                       </span>
@@ -1939,12 +2281,337 @@ const CategorySelector = () => {
                   ) : (
                     <p className="text-gray-600"></p>
                   )}
+                </div> */}
+                <div className="mt-3">
+                  <div className="grid grid-cols-6 items-center gap-20 mb-2 p-3">
+                    <h3 className="font-semibold text-xs text-gray-800">IMG</h3>
+                    <h3 className="font-semibold text-xs text-gray-800">
+                      VARIANT
+                    </h3>
+                    <h3 className="font-semibold text-xs text-gray-800">
+                      PRICE
+                    </h3>
+                    <h3 className="font-semibold text-xs text-gray-800">
+                      COMPARE
+                    </h3>
+                    <h3 className="font-semibold text-xs text-gray-800">QTY</h3>
+                    <h3 className="font-semibold text-xs text-gray-800">
+                      ACTION
+                    </h3>
+                  </div>
+
+                  {generateVariants().length > 0 ? (
+                    generateVariants().map((combination, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-100 p-4 rounded-md mt-2"
+                      >
+                        <div
+                          className="flex items-center justify-between gap-6 cursor-pointer"
+                          onClick={() => toggleChildOptions(index)}
+                        >
+                          <div className="font-medium text-gray-700">
+                            {combination.parent}
+                          </div>
+                          <button
+                            onClick={() => toggleChildOptions(index)}
+                            className="text-gray-500"
+                          >
+                            {expandedParents.includes(index) ? (
+                              <IoIosArrowUp className="text-xl" />
+                            ) : (
+                              <MdOutlineKeyboardArrowDown className="text-2xl" />
+                            )}
+                          </button>
+                        </div>
+
+                        {expandedParents.includes(index) && (
+                          <div
+                            className="mt-2"
+                            onClick={(e) => {
+                              // Prevent triggering when clicking specific inner elements (like delete or input)
+                              const targetTag = e.target.tagName.toLowerCase();
+                              if (
+                                [
+                                  "button",
+                                  "input",
+                                  "img",
+                                  "svg",
+                                  "path",
+                                ].includes(targetTag) ||
+                                e.target.closest("button") ||
+                                e.target.closest("input")
+                              ) {
+                                return;
+                              }
+
+                              if (!isEditing) {
+                                showToast(
+                                  "info",
+                                  " Please save the product first, then go to Variants to update their details."
+                                );
+                              }
+                            }}
+                          >
+                            {" "}
+                            <ul className="space-y-2">
+                              {combinations[index]?.children?.map(
+                                (child, childIndex) => {
+                                  const parentValue =
+                                    combinations[index]?.parent;
+                                  const combinationString =
+                                    options.length === 1
+                                      ? child
+                                      : `${parentValue} / ${child}`;
+                                  const normalizedKey = combinationString
+                                    .replace(/['"]/g, "")
+                                    .trim();
+
+                                  const image = variantImages[normalizedKey];
+                                  const matchingVariant =
+                                    product?.variants?.find(
+                                      (variant) =>
+                                        normalizeString(variant.title) ===
+                                        normalizedKey
+                                    );
+                                  const variantId = matchingVariant?.id;
+
+                                  return (
+                                    <li
+                                      key={childIndex}
+                                      className="grid grid-cols-6 items-center gap-20"
+                                    >
+                                      <div className="w-12 relative">
+                                        <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
+                                          {image?.preview ? (
+                                            <img
+                                              src={image.preview}
+                                              alt={`Variant ${child}`}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          ) : (
+                                            <span className="text-3xl text-gray-400">
+                                              +
+                                            </span>
+                                          )}
+                                          <input
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onClick={() => {
+                                              setCurrentVariant({
+                                                index,
+                                                child,
+                                              });
+                                              setIsPopupVisible(true);
+                                              setIsChanged(true);
+                                            }}
+                                          />
+                                        </label>
+                                      </div>
+
+                                      <span
+                                        className="text-sm font-medium text-gray-500 hover:text-blue-800 transition cursor-pointer whitespace-nowrap"
+                                        onClick={() => {
+                                          if (!isEditing) {
+                                            showToast(
+                                              "info",
+                                              " Please save the product first, then go to Variants to update their details."
+                                            );
+                                            return;
+                                          }
+
+                                          setIsChanged(true);
+                                          navigate(
+                                            `/product/${product.id}/variants/${variantId}`,
+                                            {
+                                              state: {
+                                                productId: product.id,
+                                                variantId: variantId,
+                                              },
+                                            }
+                                          );
+                                        }}
+                                      >
+                                        {child}
+                                      </span>
+
+                                      <div
+                                        className="relative w-20 cursor-pointer"
+                                        onClick={() => {
+                                          if (!price) {
+                                            showToast(
+                                              "info",
+                                              " Add a value in the price field to see it here."
+                                            );
+                                            return;
+                                          }
+                                          if (!isEditing) {
+                                            showToast(
+                                              "info",
+                                              " Please save the product first, then go to Variants to update their details."
+                                            );
+                                            return;
+                                          }
+                                          setIsChanged(true);
+                                          navigate(
+                                            `/product/${product.id}/variants/${variantId}`,
+                                            {
+                                              state: {
+                                                productId: product.id,
+                                                variantId: variantId,
+                                              },
+                                            }
+                                          );
+                                        }}
+                                      >
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                          $
+                                        </span>
+                                        <span className="w-20 p-1 pl-6 text-sm">
+                                          {price || "0.00"}
+                                        </span>
+                                      </div>
+
+                                      <div
+                                        className="relative w-20 cursor-pointer"
+                                        onClick={() => {
+                                          if (!price) {
+                                            showToast(
+                                              "info",
+                                              " Add a value in the price field to see it here."
+                                            );
+                                            return;
+                                          }
+                                          if (!isEditing) {
+                                            showToast(
+                                              "info",
+                                              " Please save the product first, then go to Variants to update their details."
+                                            );
+                                            return;
+                                          }
+                                          setIsChanged(true);
+                                          navigate(
+                                            `/product/${product.id}/variants/${variantId}`,
+                                            {
+                                              state: {
+                                                productId: product.id,
+                                                variantId: variantId,
+                                              },
+                                            }
+                                          );
+                                        }}
+                                      >
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                          $
+                                        </span>
+                                        <span className="w-20 p-1 pl-6 text-sm">
+                                          {compareAtPrice || "0.00"}
+                                        </span>
+                                      </div>
+
+                                      <span
+                                        className="w-20 p-1 text-sm cursor-pointer"
+                                        onClick={() => {
+                                          const quantityValue =
+                                            matchingVariant?.inventory_quantity ??
+                                            0;
+                                          if (quantityValue === 0) {
+                                            showToast(
+                                              "info",
+                                              "0.00 Add a quantity value to see it here."
+                                            );
+                                            return;
+                                          }
+                                          if (!isEditing) {
+                                            showToast(
+                                              "info",
+                                              "0.00 Please save the product first, then go to Variants to update their quantity."
+                                            );
+                                            return;
+                                          }
+
+                                          setIsChanged(true);
+                                          navigate(
+                                            `/product/${product.id}/variants/${variantId}`,
+                                            {
+                                              state: {
+                                                productId: product.id,
+                                                variantId: variantId,
+                                              },
+                                            }
+                                          );
+                                        }}
+                                      >
+                                        {matchingVariant?.inventory_quantity ??
+                                          "0"}
+                                      </span>
+
+                                      <button
+                                        onClick={() => {
+                                          setDeleteTarget({
+                                            index,
+                                            childIndex,
+                                          });
+                                          setIsDeleteModalOpen(true);
+                                          setIsChanged(true);
+                                        }}
+                                        className="text-red-600"
+                                      >
+                                        <FaTrash />
+                                      </button>
+                                    </li>
+                                  );
+                                }
+                              )}
+                            </ul>
+                          </div>
+                        )}
+
+                        {isDeleteModalOpen && (
+                          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                            <div className="bg-white rounded-lg shadow-lg p-6 w-[400px]">
+                              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                                Confirm Delete
+                              </h2>
+                              <p className="text-gray-600 mb-6">
+                                Are you sure you want to delete this variant?
+                                This action cannot be undone.
+                              </p>
+                              <div className="flex justify-end gap-3">
+                                <button
+                                  onClick={() => setIsDeleteModalOpen(false)}
+                                  className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (deleteTarget) {
+                                      handleDeleteCombination(
+                                        deleteTarget.index,
+                                        deleteTarget.childIndex
+                                      );
+                                    }
+                                    setIsDeleteModalOpen(false);
+                                  }}
+                                  className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-600"></p>
+                  )}
                 </div>
 
                 <button
                   onClick={() => {
                     handleOpenForm();
-                    setIsChanged(true); // ✅ mark as changed
+                    setIsChanged(true);
                   }}
                   className="flex gap-2 items-center text-sm text-blue-600 mt-2 hover:underline"
                 >
@@ -1963,7 +2630,7 @@ const CategorySelector = () => {
                   value={newOption.name}
                   onChange={(e) => {
                     handleNewOptionNameChange(e.target.value);
-                    setIsChanged(true); // ✅ mark when typing
+                    setIsChanged(true);
                   }}
                   placeholder="Size"
                   className="w-full border-gray-300 rounded-md p-2 mt-1 focus:ring focus:ring-gray-400 focus:border-gray-500"
@@ -1994,7 +2661,6 @@ const CategorySelector = () => {
                       <button
                         onClick={() => {
                           handleDeleteNewValue(index);
-                          setIsChanged(true); // ✅ mark on delete
                         }}
                         className="text-red-600 text-sm border rounded-md p-1 hover:bg-red-100"
                       >
@@ -2007,7 +2673,7 @@ const CategorySelector = () => {
                 <button
                   onClick={() => {
                     handleAddNewValue();
-                    setIsChanged(true); // ✅ mark on add
+                    setIsChanged(true);
                   }}
                   className="text-sm text-blue-600 mt-2 hover:underline"
                 >

@@ -63,7 +63,7 @@ const Promotion = () => {
   useEffect(() => {
     const initialState = {};
     filteredProducts.forEach((p) => {
-      initialState[p._id] = false; 
+      initialState[p._id] = false;
     });
     setCollapsedProducts(initialState);
   }, [filteredProducts]);
@@ -172,7 +172,8 @@ const Promotion = () => {
         const apiSecretKey = localStorage.getItem("apiSecretKey");
 
         if (userRole === "Merchant" || userRole === "Merchant Staff") {
-          url = "https://multi-vendor-marketplace.vercel.app/promo/fetchAllPromotions";
+          url =
+            "https://multi-vendor-marketplace.vercel.app/promo/fetchAllPromotions";
         } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
           url = "https://multi-vendor-marketplace.vercel.app/promo";
         }
@@ -212,7 +213,7 @@ const Promotion = () => {
     const promoPrice = promoPrices[selectedVariant.id];
 
     if (!modalStartDate || !modalEndDate) {
-      return showToast("error",'Please enter both start and end date.');
+      return showToast("error", "Please enter both start and end date.");
     }
 
     try {
@@ -239,7 +240,7 @@ const Promotion = () => {
       // window.location.reload();
     } catch (error) {
       console.error("Error adding promotion:", error);
-      showToast("error","Failed to add promotion.");
+      showToast("error", "Failed to add promotion.");
     }
   };
 
@@ -261,9 +262,12 @@ const Promotion = () => {
     try {
       await Promise.all(
         selectedProducts.map(async (id) => {
-          const response = await fetch(`https://multi-vendor-marketplace.vercel.app/promo/${id}`, {
-            method: "DELETE",
-          });
+          const response = await fetch(
+            `https://multi-vendor-marketplace.vercel.app/promo/${id}`,
+            {
+              method: "DELETE",
+            }
+          );
           if (!response.ok) throw new Error("Failed to delete product");
         })
       );
@@ -364,21 +368,7 @@ const Promotion = () => {
           )}
         </div>
 
-        {/* <div className="flex gap-2 items-center">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-
-          <button className="bg-blue-500 hover:bg-blue-400 text-sm text-white py-1 px-3 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
-            Export PDF
-          </button>
-
-          <button className="bg-blue-500 hover:bg-blue-400 text-sm text-white py-1 px-3 rounded-md transition duration-300 ease-in-out flex items-center space-x-2">
-            Export Excel
-          </button>
-        </div> */}
+      
       </div>
       {activeTab === "Submitted Promotions" && selectedProducts.length > 0 && (
         <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
@@ -406,34 +396,7 @@ const Promotion = () => {
             <div className="space-y-6">
               {promotions
                 .filter((product) => {
-                  if (product.status !== "active") return false;
-
-                  if (userRole === "Dev Admin") {
-                    return true;
-                  }
-
-                  if (userRole === "Master Admin") {
-                    return (
-                      product.createdRole === "Master Admin" ||
-                      product.createdRole === "Client" ||
-                      product.createdRole === "Staff"
-                    );
-                  }
-
-                  if (userRole === "Client") {
-                    return (
-                      product.createdRole === "Client" ||
-                      product.createdRole === "Staff"
-                    );
-                  }
-
-                  if (userRole === "Staff") {
-                    return (
-                      product.createdRole === "Client" ||
-                      product.createdRole === "Staff"
-                    );
-                  }
-
+                  // ✅ Show both active and inactive for merchants
                   if (
                     userRole === "Merchant" ||
                     userRole === "Merchant Staff"
@@ -444,8 +407,23 @@ const Promotion = () => {
                     );
                   }
 
-                  return false;
+                  // ✅ For Admins, keep active filter
+                  if (product.status !== "active") return false;
+
+                  switch (userRole) {
+                    case "Dev Admin":
+                      return true;
+                    case "Master Admin":
+                      return (
+                        product.createdRole === "Master Admin" ||
+                        product.createdRole === "Merchant" ||
+                        product.createdRole === "Merchant Staff"
+                      );
+                    default:
+                      return false;
+                  }
                 })
+
                 .map((product) => (
                   <div
                     key={product._id}
@@ -500,71 +478,7 @@ const Promotion = () => {
             </div>
           )}
 
-          {/* {activeTab === "Add Promotions" && (
-            <div className=" max-sm:overflow-auto border rounded-lg">
-              <table className="w-full border-collapse bg-white">
-                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-                  <tr>
-                    <th className="p-3">LISTING NAME</th>
-                    <th className="p-3">SELLER_SKU</th>
-                    <th className="p-3">ORIGINAL_PRICE</th>
-                    <th className="p-3">PROMO_PRICE</th>
-                    <th className="p-3">CURRENT_STOCK</th>
-                    <th className="p-3">ADD PROMOTION</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredProducts.map((product, index) => (
-                    <tr key={product._id} className="border-b hover:bg-gray-50">
-                      
-
-                     
-                      <td className="p-3">
-                        {" "}
-                        {product.title !== "Job Listing"
-                          ? product.title
-                          : "Job Search Listing"}
-                      </td>
-                      {admin && product.tags?.split(",")[1]?.split("_")[1]}
-                      <td className="p-3"> {product.variants[0].sku} </td>
-                      <td className="p-3">
-                        {" "}
-                        ${product.oldPrice || product.variants[0].price}{" "}
-                      </td>
-                      <td className="p-3">
-                        <input
-                          type="text"
-                          value={promoPrices[product._id] || ""}
-                          onChange={(e) =>
-                            setPromoPrices((prev) => ({
-                              ...prev,
-                              [product._id]: e.target.value,
-                            }))
-                          }
-                          className="border border-gray-300 rounded px-2 py-1 text-sm w-full"
-                          placeholder="Enter promo price"
-                        />
-                      </td>
-                      <td className="p-3">
-                        {" "}
-                        {product.variants[0].inventory_quantity}
-                      </td>
-
-                      <td className="p-3">
-                        <button
-                          className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
-                          onClick={() => addToPromotions(product)}
-                        >
-                          Add to promotion
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )} */}
+       
           {activeTab === "Add Promotions" && (
             <div className="max-sm:overflow-auto border rounded-lg">
               <table className="w-full border-collapse bg-white">
@@ -684,31 +598,34 @@ const Promotion = () => {
               <tbody>
                 {promotions
                   .filter((product) => {
+                    // ✅ Show both active and inactive for merchants
+                    if (
+                      userRole === "Merchant" ||
+                      userRole === "Merchant Staff"
+                    ) {
+                      return (
+                        product.createdRole === "Merchant" ||
+                        product.createdRole === "Merchant Staff"
+                      );
+                    }
+
+                    // ✅ For Admins, keep active filter
                     if (product.status !== "active") return false;
 
-                    if (userRole === "Dev Admin") {
-                      return true;
+                    switch (userRole) {
+                      case "Dev Admin":
+                        return true;
+                      case "Master Admin":
+                        return (
+                          product.createdRole === "Master Admin" ||
+                          product.createdRole === "Merchant" ||
+                          product.createdRole === "Merchant Staff"
+                        );
+                      default:
+                        return false;
                     }
-
-                    if (userRole === "Master Admin") {
-                      return (
-                        product.createdRole === "Master Admin" ||
-                        product.createdRole === "Client"
-                      );
-                    }
-                    if (userRole === "Client") {
-                      return (
-                        product.createdRole === "Client" ||
-                        product.createdRole === "Staff"
-                      );
-                    }
-
-                    if (userRole === "Staff") {
-                      return product.userId === currentUserId;
-                    }
-
-                    return false;
                   })
+
                   .map((product) => (
                     <tr key={product._id} className="border-b hover:bg-gray-50">
                       <td className="p-3">
@@ -730,19 +647,10 @@ const Promotion = () => {
                       <td className="p-3">${product.currentPrice}</td>
                       <td className="p-3">${product.promoPrice || "-"}</td>
                       <td className="p-3">{product.currentStock || "-"}</td>
-                      {/* <td className="p-3">
-                        <button
-                          className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
-                          onClick={() => OnEdit(product)}
-                        >
-                          <MdEdit className="mr-1" />
-                          Edit
-                        </button>
-                      </td> */}
+                     
                     </tr>
                   ))}
 
-                {/* Optional: If no active promotions found */}
                 {promotions.filter((product) => {
                   if (product.status !== "active") return false;
 
@@ -769,172 +677,7 @@ const Promotion = () => {
           )}
         </>
       )}
-      {/* {isPopupOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-lg w-full max-w-2xl relative">
-            <div className="border-b px-4 py-3 flex justify-between items-center">
-              <h2 className="text-sm font-semibold text-blue-700">
-                Add New Discount
-              </h2>
-              <button
-                onClick={closePopup}
-                className="text-gray-600 hover:text-black text-2xl"
-              >
-                ×
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="w-full">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Discount Name
-                    </label>
-                    <input
-                      type="text"
-                      value={promoName}
-                      onChange={(e) => setPromoName(e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                      placeholder="Enter promo name"
-                    />
-                  </div>
-
-                  <div className="flex flex-col">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Discount Code
-                    </label>
-                    <input
-                      type="text"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                      placeholder="Enter discount code"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-4"></div>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Discount Type
-                  </label>
-                  <select
-                    value={discountType}
-                    onChange={(e) => setDiscountType(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                  >
-                    <option value="percentage">Percentage</option>
-                    <option value="fixed">Fixed Price</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Discount Value
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={discountValue}
-                      onChange={(e) => setDiscountValue(e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                      placeholder="Enter value"
-                    />
-                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
-                      {discountType === "percentage" ? "%" : "$"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Applies To
-                </label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                >
-                  <option value="">Select product</option>
-                  <option value="active">product 1</option>
-                  <option value="inactive">product 2</option>
-                </select>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Discount Price
-                </label>
-                <input
-                  type="number"
-                  value={promoPrice}
-                  onChange={(e) => setPromoPrice(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                  placeholder="Enter promo price"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Discount Duration
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-1/2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                  />
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-1/2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-500"
-                  />
-                </div>
-              </div>
-              <div className="text-right"></div>
-            </div>
-            {/* <div className="">
-              <div className="hover:bg-gray-300 cursor-pointer  p-2 border-b-2">
-                <label>Amount of Products</label>
-                <p className="text-gray-500">
-                  Discount Specific Product or collection of products
-                </p>
-              </div> 
-              <div className="hover:bg-gray-300 cursor-pointer  p-2 border-b-2">
-                <label>Buy X get Y</label>
-                <p className="text-gray-500">
-                  Discount product based on a customer,s purchase
-                </p>
-              </div>
-              <div className="hover:bg-gray-300 cursor-pointer  p-2 border-b-2">
-                <label>Amount of order</label>
-                <p className="text-gray-500">
-                  Discount the total order ammount
-                </p>
-              </div>
-              <div className="hover:bg-gray-300 cursor-pointer  p-2 border-b-2">
-                <label>Free shipping</label>
-                <p className="text-gray-500">Offer free shipping on a order</p>
-              </div>
-              <div className="hover:bg-gray-300 cursor-pointer  p-2 ">
-                <label>Boost bundle</label>
-                <p className="text-gray-500">Discount function extensin</p>
-              </div>
-            </div> */}
-      {/* <div className="flex justify-end p-4 border-t-2">
-              <button
-                onClick={handleSubmit}
-                className="button bg-blue-500 border rounded-lg px-2 py-1 text-white"
-              >
-                Submit
-              </button>
-            </div>
-          </div>
-        </div>
-      )}  */}
+  
 
       {isPopupOpen && (
         <div className="fixed inset-0 bg-gradient-to-br from-black/80 to-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50">

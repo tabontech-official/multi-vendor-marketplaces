@@ -1154,92 +1154,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
 
-              {/* <tbody>
-                {filteredProducts.map((product) => (
-                  <tr key={product._id} className="border-b hover:bg-gray-50">
-                    <td className="p-3">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 cursor-pointer"
-                        checked={selectedProducts.includes(product._id)}
-                        onChange={() => toggleSelection(product._id)}
-                      />
-                    </td>
-                    <td className="p-3">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          product.status === "active"
-                            ? "bg-green-500"
-                            : "bg-red-500"
-                        }`}
-                        title={product.status}
-                      />
-                    </td>
-                    <td className="p-3">
-                      {product.images?.[0] ? (
-                        <img
-                          src={product.images[0].src}
-                          alt={product.images[0].alt || "Product image"}
-                          className="w-16 h-16 object-contain rounded border"
-                        />
-                      ) : (
-                        <span className="text-gray-400 text-sm">No Image</span>
-                      )}
-                    </td>
-                    <td className="p-3">
-                      {product.title !== "Job Listing"
-                        ? product.title
-                        : "Job Search Listing"}
-                    </td>
-                    {(userRole === "Dev Admin" ||
-                      userRole === "Master Admin") && (
-                      <td>{product?.username}</td>
-                    )}
-                    <td className="p-3">
-                      {product?.approvalStatus ? (
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            product.approvalStatus === "pending"
-                              ? "bg-yellow-200 text-yellow-800"
-                              : product.approvalStatus === "approved"
-                              ? "bg-green-200 text-green-800"
-                              : product.approvalStatus === "rejected"
-                              ? "bg-red-200 text-red-800"
-                              : "bg-gray-200 text-gray-700"
-                          }`}
-                        >
-                          {product.approvalStatus}
-                        </span>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-
-                    <td className="p-3">{product.variants[0]?.sku}</td>
-                    <td className="p-3">${product.variants[0]?.price}</td>
-                    <td className="p-3">
-                      ${product.variants[0]?.compare_at_price || 0.0}
-                    </td>
-                    <td className="p-3">{product.product_type}</td>
-                    <td className="p-3">
-                      {product.variants[0]?.inventory_quantity}
-                    </td>
-                    <td className="p-3">{product.vendor}</td>
-                    {admin && `#${product.shopifyId}`}
-                    <td className="p-3">
-                      <button
-                        className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
-                        onClick={() => OnEdit(product)}
-                      >
-                        <MdEdit className="mr-1" />
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-
-           
-              </tbody> */}
+       
               <tbody>
                 {Loading ? (
                   <tr>
@@ -1333,12 +1248,12 @@ const Dashboard = () => {
                           "-"
                         )}
                       </td>
-                      <td className="p-3">{product.variants[0]?.sku}</td>
+                      <td className="p-3">{product.variants[0]?.sku || "N/A"}</td>
                       <td className="p-3">${product.variants[0]?.price}</td>
                       <td className="p-3">
                         ${product.variants[0]?.compare_at_price || 0.0}
                       </td>
-                      <td className="p-3">{product.product_type}</td>
+                      <td className="p-3">{product.product_type || "N/A"}</td>
                       {/* <td className="p-3">
                         {product.variants[0]?.inventory_quantity}
                       </td> */}

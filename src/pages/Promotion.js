@@ -61,10 +61,9 @@ const Promotion = () => {
   });
   const [collapsedProducts, setCollapsedProducts] = useState({});
   useEffect(() => {
-    // On products load, set all as expanded (collapsed = false)
     const initialState = {};
     filteredProducts.forEach((p) => {
-      initialState[p._id] = false; // false means expanded
+      initialState[p._id] = false; 
     });
     setCollapsedProducts(initialState);
   }, [filteredProducts]);
@@ -213,7 +212,7 @@ const Promotion = () => {
     const promoPrice = promoPrices[selectedVariant.id];
 
     if (!modalStartDate || !modalEndDate) {
-      return alert("Please enter both start and end date.");
+      return showToast("error",'Please enter both start and end date.');
     }
 
     try {
@@ -240,7 +239,7 @@ const Promotion = () => {
       // window.location.reload();
     } catch (error) {
       console.error("Error adding promotion:", error);
-      alert("Failed to add promotion.");
+      showToast("error","Failed to add promotion.");
     }
   };
 

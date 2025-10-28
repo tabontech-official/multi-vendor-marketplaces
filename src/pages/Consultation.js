@@ -16,7 +16,12 @@ const EcommerceConsultation = () => {
     type: "",
     message: "",
   });
-
+    const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  
+ const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+  };
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -42,16 +47,25 @@ const EcommerceConsultation = () => {
         "https://multi-vendor-marketplace.vercel.app/consultation",
         payload
       );
-      alert("Consultation booked successfully!");
+      showToast("success","Consultation booked successfully!");
       console.log("Response:", res.data);
     } catch (err) {
       console.error("Error booking consultation:", err);
-      alert("Failed to book consultation. Please try again.");
+      showToast("error","Failed to book consultation. Please try again.");
     }
   };
 
   return (
     <main className="w-full p-4 md:p-8">
+       {toast.show && (
+          <div
+            className={`fixed top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-md shadow-lg z-50 text-white text-sm ${
+              toast.type === "success" ? "bg-green-500" : "bg-red-500"
+            }`}
+          >
+            {toast.message}
+          </div>
+        )}
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
         <div className="flex-1">
           <h1 className="text-2xl font-semibold mb-1">

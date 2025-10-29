@@ -53,6 +53,7 @@ import ApiDocs from "./Documentation/ApiDocs";
 import Approval from "./pages/approval";
 import ApprovalPage from "./pages/ApprovalPage";
 import FinanceSetting from "./pages/FinanceSetting";
+import ManageVariantOptions from "./pages/ManageVariantOptions";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -130,6 +131,10 @@ const App = () => {
             <Route
               path="/manage-categories"
               element={<PrivateRoute element={<ManageCategory />} />}
+            />
+              <Route
+              path="/manage-options"
+              element={<PrivateRoute element={<ManageVariantOptions />} />}
             />
             <Route
               path="/collection/:id"

@@ -367,8 +367,6 @@ const Promotion = () => {
             )
           )}
         </div>
-
-      
       </div>
       {activeTab === "Submitted Promotions" && selectedProducts.length > 0 && (
         <div className="flex flex-col md:flex-row md:justify-between items-center mt-4 space-y-4 md:space-y-0">
@@ -478,7 +476,6 @@ const Promotion = () => {
             </div>
           )}
 
-       
           {activeTab === "Add Promotions" && (
             <div className="max-sm:overflow-auto border rounded-lg">
               <table className="w-full border-collapse bg-white">
@@ -647,7 +644,6 @@ const Promotion = () => {
                       <td className="p-3">${product.currentPrice}</td>
                       <td className="p-3">${product.promoPrice || "-"}</td>
                       <td className="p-3">{product.currentStock || "-"}</td>
-                     
                     </tr>
                   ))}
 
@@ -677,7 +673,6 @@ const Promotion = () => {
           )}
         </>
       )}
-  
 
       {isPopupOpen && (
         <div className="fixed inset-0 bg-gradient-to-br from-black/80 to-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50">

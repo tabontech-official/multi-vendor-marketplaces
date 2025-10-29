@@ -7,7 +7,15 @@ import { MdDashboard } from "react-icons/md";
 import { jwtDecode } from "jwt-decode";
 import { CiBank } from "react-icons/ci";
 import { SlDocs } from "react-icons/sl";
-import { FiHome, FiBox, FiTag, FiBarChart2, FiUsers, FiFileText, FiDollarSign } from "react-icons/fi";
+import {
+  FiHome,
+  FiBox,
+  FiTag,
+  FiBarChart2,
+  FiUsers,
+  FiFileText,
+  FiDollarSign,
+} from "react-icons/fi";
 import { MdCategory } from "react-icons/md";
 import { FaRegClipboard } from "react-icons/fa";
 const SubNavbar = () => {
@@ -69,91 +77,25 @@ const SubNavbar = () => {
     fetchUserModules();
   }, []);
 
-  // const modulesList = [
-  //   {
-  //     name: "Dashboard",
-  //     icon: <MdDashboard className="text-green-600" />,
-  //     path: "/",
-  //   },
-  //   {
-  //     name: "Products",
-  //     icon: <FaTh className="text-green-600" />,
-  //     path: "#",
-  //     subModules: [
-  //       { name: "Manage Product", path: "/manage-product" },
-  //       { name: "Add Product", path: "/add-product" },
-  //       { name: "Inventory", path: "/inventory" },
-  //       { name: "Manage Categories", path: "/manage-categories" },
-  //     ],
-  //   },
-  //   {
-      // name: "Orders",
-      // icon: <FaTags className="text-blue-600" />,
-      // path: "#",
-      // subModules: [
-      //   { name: "ManageOrders", path: "/Order_Details" },
-      //   { name: "Manage Requests", path: "/manage-requests" },
-      // ],
-  //   },
-  //   {
-  //     name: "Promotions",
-  //     icon: <FaBullhorn className="text-yellow-500" />,
-  //     path: "#",
-  //     subModules: [
-  //       { name: "my Promitions", path: "#" },
-  //       { name: "All Promotions", path: "/promotions" },
-  //     ],
-  //   },
-  //   {
-  //     name: "Reports",
-  //     icon: <BsGraphUp className="text-purple-500" />,
-  //     path: "#",
-  //     subModules: [
-  //       { name: "Catalog Performance", path: "/catalog-performance" },
-  //       { name: "eCommerence Consultion", path: "/consultation" },
-  //       { name: "Seller Rating", path: "#" },
-  //     ],
-  //   },
-  //   {
-  //     name: "OnBoardUser",
-  //     icon: <MdDashboard className="text-green-600" />,
-  //     path: "/on-board-users",
-  //   },
-  //   {
-  //     name: "Finance",
-  //     icon: <CiBank className="text-purple-600" />,
-  //     path: "/finance",
-  //   },
-  //   // {
-  //   //   name: "Approval",
-  //   //   icon: <CiBank className="text-purple-600" />,
-  //   //   path: "/approval",
-  //   // },
-  //    {
-  //     name: "Documentation",
-  //     icon: <SlDocs className="text-green-600" />,
-  //     path: "/api-docs",
-  //   },
-  // ];
-
   const modulesList = [
-  {
-    name: "Dashboard",
-    icon: <FiHome className="text-indigo-600" />,
-    path: "/",
-  },
-  {
-    name: "Products",
-    icon: <FiBox className="text-pink-600" />,
-    path: "#",
-    subModules: [
-      { name: "Manage Product", path: "/manage-product" },
-      { name: "Add Product", path: "/add-product" },
-      { name: "Inventory", path: "/inventory" },
-      { name: "Manage Categories", path: "/manage-categories" },
-    ],
-  },
-  {
+    {
+      name: "Dashboard",
+      icon: <FiHome className="text-indigo-600" />,
+      path: "/",
+    },
+    {
+      name: "Products",
+      icon: <FiBox className="text-pink-600" />,
+      path: "#",
+      subModules: [
+        { name: "Manage Product", path: "/manage-product" },
+        { name: "Add Product", path: "/add-product" },
+        { name: "Inventory", path: "/inventory" },
+        { name: "Manage Categories", path: "/manage-categories" },
+        { name: "Manage Options", path: "/manage-options" },
+      ],
+    },
+    {
       name: "Orders",
       icon: <FaTags className="text-blue-600" />,
       path: "#",
@@ -161,42 +103,42 @@ const SubNavbar = () => {
         { name: "ManageOrders", path: "/Order_Details" },
         { name: "Manage Requests", path: "/manage-requests" },
       ],
-  },
-  {
-    name: "Promotions",
-    icon: <FaRegClipboard className="text-yellow-500" />,
-    path: "#",
-    subModules: [
-      { name: "My Promotions", path: "#" },
-      { name: "All Promotions", path: "/promotions" },
-    ],
-  },
-  {
-    name: "Reports",
-    icon: <FiBarChart2 className="text-purple-500" />,
-    path: "#",
-    subModules: [
-      { name: "Catalog Performance", path: "/catalog-performance" },
-      { name: "eCommerce Consultation", path: "/consultation" },
-      { name: "Seller Rating", path: "#" },
-    ],
-  },
-  {
-    name: "OnBoard User",
-    icon: <FiUsers className="text-green-600" />,
-    path: "/on-board-users",
-  },
-  {
-    name: "Finance",
-    icon: <FiDollarSign className="text-purple-600" />,
-    path: "/finance",
-  },
-  {
-    name: "Documentation",
-    icon: <FiFileText className="text-green-600" />,
-    path: "/api-docs",
-  },
-];
+    },
+    {
+      name: "Promotions",
+      icon: <FaRegClipboard className="text-yellow-500" />,
+      path: "#",
+      subModules: [
+        { name: "My Promotions", path: "#" },
+        { name: "All Promotions", path: "/promotions" },
+      ],
+    },
+    {
+      name: "Reports",
+      icon: <FiBarChart2 className="text-purple-500" />,
+      path: "#",
+      subModules: [
+        { name: "Catalog Performance", path: "/catalog-performance" },
+        { name: "eCommerce Consultation", path: "/consultation" },
+        { name: "Seller Rating", path: "#" },
+      ],
+    },
+    {
+      name: "OnBoard User",
+      icon: <FiUsers className="text-green-600" />,
+      path: "/on-board-users",
+    },
+    {
+      name: "Finance",
+      icon: <FiDollarSign className="text-purple-600" />,
+      path: "/finance",
+    },
+    {
+      name: "Documentation",
+      icon: <FiFileText className="text-green-600" />,
+      path: "/api-docs",
+    },
+  ];
   return (
     <div className="flex items-center bg-white border border-gray-300 px-4 py-2 shadow-sm relative">
       <ul className="flex space-x-6 text-sm text-gray-700">

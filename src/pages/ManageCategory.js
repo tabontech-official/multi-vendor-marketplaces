@@ -15,7 +15,7 @@ useEffect(() => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/category/getCategory",
+        "http://localhost:5000/category/getCategory",
         {
           method: "GET",
           headers: {
@@ -49,7 +49,7 @@ useEffect(() => {
   const handleExport = async () => {
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/category/getCsvForCategories",
+        "http://localhost:5000/category/getCsvForCategories",
         {
           method: "GET",
         }
@@ -83,7 +83,7 @@ useEffect(() => {
 
   try {
     await axios.delete(
-      "https://multi-vendor-marketplace.vercel.app/category/deleteCategory",
+      "http://localhost:5000/category/deleteCategory",
       {
         headers: {
           "x-api-key": apiKey,

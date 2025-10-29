@@ -80,7 +80,7 @@ const AccountPage = () => {
 
       try {
         const res = await fetch(
-          `http://localhost:5000/auth/getCollcetion/${userId}`
+          `https://multi-vendor-marketplace.vercel.app/auth/getCollcetion/${userId}`
         );
         const data = await res.json();
         if (res.ok) {
@@ -117,7 +117,7 @@ const AccountPage = () => {
 
       try {
         const res = await fetch(
-          `http://localhost:5000/auth/getBrandAssets/${userId}`
+          `https://multi-vendor-marketplace.vercel.app/auth/getBrandAssets/${userId}`
         );
         const json = await res.json();
 
@@ -158,7 +158,7 @@ const AccountPage = () => {
       }
 
       const response = await axios.post(
-        "http://localhost:5000/auth/addBrandAsset",
+        "https://multi-vendor-marketplace.vercel.app/auth/addBrandAsset",
         formData,
         {
           headers: {
@@ -191,7 +191,7 @@ const AccountPage = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/auth/user/${id}`,
+          `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
           {
             method: "GET",
           }
@@ -285,7 +285,7 @@ const AccountPage = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/auth/editProfile/${userId}`,
+        `https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`,
         {
           method: "PUT",
           body: form,
@@ -345,7 +345,7 @@ const AccountPage = () => {
   const updateAllProductsStatus = async (status) => {
     try {
       const response = await fetch(
-        "http://localhost:5000/product/holiday",
+        "https://multi-vendor-marketplace.vercel.app/product/holiday",
         {
           method: "POST",
           headers: {
@@ -395,7 +395,7 @@ const AccountPage = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/auth/createUserTagsModule",
+        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {
@@ -1181,7 +1181,7 @@ const AccountPage = () => {
 
                           try {
                             const res = await axios.post(
-                              "http://localhost:5000/order/addCommision",
+                              "https://multi-vendor-marketplace.vercel.app/order/addCommision",
                               { comission: commission }
                             );
 

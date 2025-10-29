@@ -25,7 +25,7 @@ const ApiCredentials = () => {
       const userId = localStorage.getItem("userid");
 
       const res = await fetch(
-        "http://localhost:5000/generateAcessKeys/generate-keys",
+        "https://multi-vendor-marketplace.vercel.app/generateAcessKeys/generate-keys",
         {
           method: "POST",
           headers: {
@@ -59,7 +59,7 @@ const ApiCredentials = () => {
 
       try {
         const res = await fetch(
-          `http://localhost:5000/generateAcessKeys/getApiCredentialByUserId/${userId}`
+          `https://multi-vendor-marketplace.vercel.app/generateAcessKeys/getApiCredentialByUserId/${userId}`
         );
 
         if (!res.ok) {

@@ -2062,12 +2062,19 @@ const CategorySelector = () => {
                                             {(
                                               variantImages[normalizedKey] || []
                                             ).map((img, i) => (
-                                             <img
-  src={variantImages[normalizedKey]?.[0]?.preview}
-  alt={variantImages[normalizedKey]?.[0]?.alt}
-  className="w-12 h-12 object-cover rounded-md border border-gray-300"
-/>
-
+                                              <img
+                                                src={
+                                                  variantImages[
+                                                    normalizedKey
+                                                  ]?.[0]?.preview
+                                                }
+                                                alt={
+                                                  variantImages[
+                                                    normalizedKey
+                                                  ]?.[0]?.alt
+                                                }
+                                                className="w-12 h-12 object-cover rounded-md border border-gray-300"
+                                              />
                                             ))}
                                             <label className="flex items-center justify-center w-10 h-10 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition">
                                               <span className="text-xl text-gray-400">
@@ -2928,220 +2935,223 @@ const CategorySelector = () => {
         )}
 
         {isPopupVisible && (
-  <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
-    <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">
-      {/* Header */}
-      <div className="sticky top-0 bg-white z-10 pb-4 border-b flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Select Image for Variant
-        </h2>
-        <button
-          onClick={() => setIsPopupVisible(false)}
-          className="text-gray-500 hover:text-gray-700"
-        >
-          <RxCross1 />
-        </button>
-      </div>
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+            <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">
+              <div className="sticky top-0 bg-white z-10 pb-4 border-b flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Select Image for Variant
+                </h2>
+                <button
+                  onClick={() => setIsPopupVisible(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <RxCross1 />
+                </button>
+              </div>
 
-      {/* Upload new */}
-      <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleImageChange}
-          className="hidden"
-          id="fileUpload"
-        />
-        <label
-          htmlFor="fileUpload"
-          className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
-        >
-          Add images
-        </label>
-      </div>
+              <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageChange}
+                  className="hidden"
+                  id="fileUpload"
+                />
+                <label
+                  htmlFor="fileUpload"
+                  className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
+                >
+                  Add images
+                </label>
+              </div>
 
-      {/* ✅ Assigned Images Section */}
-      <div className="mt-6 border border-gray-300 rounded-lg p-4 bg-gray-50">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">
-          Assigned Images for Variant:
-          <span className="ml-2 text-blue-600">
-            {currentVariant?.child
-              ? `${
-                  combinations[currentVariant?.index]?.parent || ""
-                } / ${currentVariant?.child}`
-              : "N/A"}
-          </span>
-        </h3>
+              <div className="mt-6 border border-gray-300 rounded-lg p-4 bg-gray-50">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Assigned Images for Variant:
+                  <span className="ml-2 text-blue-600">
+                    {currentVariant?.child
+                      ? `${
+                          combinations[currentVariant?.index]?.parent || ""
+                        } / ${currentVariant?.child}`
+                      : "N/A"}
+                  </span>
+                </h3>
 
-        {(() => {
-          const parentValue = combinations[currentVariant?.index]?.parent;
-          const combinationKey =
-            options.length === 1
-              ? currentVariant?.child
-              : `${parentValue} / ${currentVariant?.child}`;
-          const normalizedKey = combinationKey?.replace(/['"]/g, "").trim();
+                {(() => {
+                  const parentValue =
+                    combinations[currentVariant?.index]?.parent;
+                  const combinationKey =
+                    options.length === 1
+                      ? currentVariant?.child
+                      : `${parentValue} / ${currentVariant?.child}`;
+                  const normalizedKey = combinationKey
+                    ?.replace(/['"]/g, "")
+                    .trim();
 
-          const assigned = Array.isArray(variantImages[normalizedKey])
-            ? variantImages[normalizedKey]
-            : [];
+                  const assigned = Array.isArray(variantImages[normalizedKey])
+                    ? variantImages[normalizedKey]
+                    : [];
 
-          return (
-            <div className="flex flex-wrap gap-3">
-              {assigned.length > 0 ? (
-                assigned.map((img, i) => (
-                  <div
-                    key={i}
-                    className={`relative border border-gray-300 rounded-lg overflow-hidden group cursor-pointer transition-all duration-150 ${
-                      i === 0
-                        ? "ring-2 ring-blue-500 shadow-md scale-105"
-                        : "hover:ring-2 hover:ring-gray-400"
-                    }`}
-                    onClick={() => {
-                      // 🔹 Click any image to make it main
-                      if (i === 0) return;
-                      setVariantImages((prev) => {
-                        const current = Array.isArray(prev[normalizedKey])
-                          ? [...prev[normalizedKey]]
-                          : [];
-                        const [clicked] = current.splice(i, 1);
-                        current.unshift(clicked); // move clicked to front
-                        return { ...prev, [normalizedKey]: current };
-                      });
-                    }}
-                    title={
-                      i === 0
-                        ? "Featured image"
-                        : "Click to make this the main image"
-                    }
-                  >
-                    <img
-                      src={img.preview}
-                      alt={img.alt}
-                      className="w-24 h-24 object-cover rounded"
-                    />
-                    {/* <p className="text-[10px] text-center text-gray-500 truncate px-1">
+                  return (
+                    <div className="flex flex-wrap gap-3">
+                      {assigned.length > 0 ? (
+                        assigned.map((img, i) => (
+                          <div
+                            key={i}
+                            className={`relative border border-gray-300 rounded-lg overflow-hidden group cursor-pointer transition-all duration-150 ${
+                              i === 0
+                                ? "ring-2 ring-blue-500 shadow-md scale-105"
+                                : "hover:ring-2 hover:ring-gray-400"
+                            }`}
+                            onClick={() => {
+                              if (i === 0) return;
+                              setVariantImages((prev) => {
+                                const current = Array.isArray(
+                                  prev[normalizedKey]
+                                )
+                                  ? [...prev[normalizedKey]]
+                                  : [];
+                                const [clicked] = current.splice(i, 1);
+                                current.unshift(clicked);
+                                return { ...prev, [normalizedKey]: current };
+                              });
+                            }}
+                            title={
+                              i === 0
+                                ? "Featured image"
+                                : "Click to make this the main image"
+                            }
+                          >
+                            <img
+                              src={img.preview}
+                              alt={img.alt}
+                              className="w-24 h-24 object-cover rounded"
+                            />
+                            {/* <p className="text-[10px] text-center text-gray-500 truncate px-1">
                       {i === 0 ? "⭐ Main Image" : img.alt}
                     </p> */}
 
-                    {i === 0 && (
-                      <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-[1px] rounded">
-                        Featured
-                      </div>
-                    )}
+                            {i === 0 && (
+                              <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-[1px] rounded">
+                                Featured
+                              </div>
+                            )}
 
-                    {/* 🗑️ Delete */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setVariantImages((prev) => ({
-                          ...prev,
-                          [normalizedKey]: prev[normalizedKey].filter(
-                            (_, idx) => idx !== i
-                          ),
-                        }));
-                      }}
-                      className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-100 transition"
-                    >
-                      <RxCross1 className="text-red-500 text-sm" />
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-sm italic">
-                  No images assigned yet.
-                </p>
-              )}
-            </div>
-          );
-        })()}
-      </div>
+                            {/* 🗑️ Delete */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setVariantImages((prev) => ({
+                                  ...prev,
+                                  [normalizedKey]: prev[normalizedKey].filter(
+                                    (_, idx) => idx !== i
+                                  ),
+                                }));
+                              }}
+                              className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-100 transition"
+                            >
+                              <RxCross1 className="text-red-500 text-sm" />
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-500 text-sm italic">
+                          No images assigned yet.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
 
-      {/* Gallery images grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
-        {galleryImages.map((file) => {
-          const parentValue = combinations[currentVariant?.index]?.parent;
-          const combinationKey =
-            options.length === 1
-              ? currentVariant?.child
-              : `${parentValue} / ${currentVariant?.child}`;
-          const normalizedKey = combinationKey.replace(/['"]/g, "").trim();
+              {/* Gallery images grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
+                {galleryImages.map((file) => {
+                  const parentValue =
+                    combinations[currentVariant?.index]?.parent;
+                  const combinationKey =
+                    options.length === 1
+                      ? currentVariant?.child
+                      : `${parentValue} / ${currentVariant?.child}`;
+                  const normalizedKey = combinationKey
+                    .replace(/['"]/g, "")
+                    .trim();
 
-          const assigned = Array.isArray(variantImages[normalizedKey])
-            ? variantImages[normalizedKey]
-            : [];
-
-          const isAssigned = assigned.some(
-            (img) => img.preview === file.src
-          );
-
-          return (
-            <div
-              key={file.id || file.src}
-              className={`border rounded p-2 relative hover:border-blue-400 transition cursor-pointer ${
-                isAssigned ? "border-blue-500" : "border-gray-300"
-              }`}
-              onClick={() => {
-                setVariantImages((prev) => {
-                  const existing = Array.isArray(prev[normalizedKey])
-                    ? [...prev[normalizedKey]]
+                  const assigned = Array.isArray(variantImages[normalizedKey])
+                    ? variantImages[normalizedKey]
                     : [];
-                  const newImage = {
-                    preview: file.src,
-                    alt: normalizedKey
-                      .replace(/\s*\/\s*/g, "-")
-                      .toLowerCase(),
-                    loading: false,
-                  };
 
-                  // if image already exists → move it to main
-                  const existingIndex = existing.findIndex(
+                  const isAssigned = assigned.some(
                     (img) => img.preview === file.src
                   );
 
-                  if (existingIndex !== -1) {
-                    const [clicked] = existing.splice(existingIndex, 1);
-                    existing.unshift(clicked);
-                  } else {
-                    existing.unshift(newImage);
-                  }
+                  return (
+                    <div
+                      key={file.id || file.src}
+                      className={`border rounded p-2 relative hover:border-blue-400 transition cursor-pointer ${
+                        isAssigned ? "border-blue-500" : "border-gray-300"
+                      }`}
+                      onClick={() => {
+                        setVariantImages((prev) => {
+                          const existing = Array.isArray(prev[normalizedKey])
+                            ? [...prev[normalizedKey]]
+                            : [];
+                          const newImage = {
+                            preview: file.src,
+                            alt: normalizedKey
+                              .replace(/\s*\/\s*/g, "-")
+                              .toLowerCase(),
+                            loading: false,
+                          };
 
-                  return { ...prev, [normalizedKey]: existing };
-                });
-              }}
-            >
-              <img
-                src={file.src}
-                alt={file.name || "Image"}
-                className="w-full h-24 object-cover rounded"
-              />
-              <p className="text-sm text-center mt-2 truncate">
-                {file.name || "Image"}
-              </p>
+                          // if image already exists → move it to main
+                          const existingIndex = existing.findIndex(
+                            (img) => img.preview === file.src
+                          );
+
+                          if (existingIndex !== -1) {
+                            const [clicked] = existing.splice(existingIndex, 1);
+                            existing.unshift(clicked);
+                          } else {
+                            existing.unshift(newImage);
+                          }
+
+                          return { ...prev, [normalizedKey]: existing };
+                        });
+                      }}
+                    >
+                      <img
+                        src={file.src}
+                        alt={file.name || "Image"}
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <p className="text-sm text-center mt-2 truncate">
+                        {file.name || "Image"}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Footer buttons */}
+              <div className="flex justify-end mt-6 border-t pt-4">
+                <button
+                  onClick={() => setIsPopupVisible(false)}
+                  className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => setIsPopupVisible(false)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
+                >
+                  Done
+                </button>
+              </div>
             </div>
-          );
-        })}
-      </div>
-
-      {/* Footer buttons */}
-      <div className="flex justify-end mt-6 border-t pt-4">
-        <button
-          onClick={() => setIsPopupVisible(false)}
-          className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() => setIsPopupVisible(false)}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
-        >
-          Done
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+          </div>
+        )}
       </div>
     </main>
   );

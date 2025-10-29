@@ -841,7 +841,7 @@ const CategorySelector = () => {
 
         setVariantImages(normalizedVariantImages);
       } else {
-        console.log("⚠️ No variant images found for this product");
+        console.log("No variant images found for this product");
       }
 
       setIsEditing(true);
@@ -974,7 +974,6 @@ const CategorySelector = () => {
                 ? currentVariant.child
                 : `${parentValue} / ${currentVariant.child}`;
 
-            // ✅ Clean combination handle for consistent keys & alt text
             const normalizedKey = combinationKey.replace(/['"]/g, "").trim();
             const handleAlt = normalizedKey
               .replace(/\s*\/\s*/g, "-")
@@ -988,13 +987,13 @@ const CategorySelector = () => {
                   : []),
                 {
                   preview: data.secure_url,
-                  alt: handleAlt, // ✅ always correct alt
+                  alt: handleAlt, 
                   loading: false,
                 },
               ],
             }));
 
-            showToast("success", "✅ Image assigned to variant!");
+            showToast("success", " Image assigned to variant!");
             setTimeout(() => setIsPopupVisible(false), 150);
           }
         }
@@ -1031,11 +1030,9 @@ const CategorySelector = () => {
       cloudUrl: null,
     }));
 
-    // ✅ Step 2: Instantly show previews
     setSelectedImages((prev) => [...newPreviews, ...prev]);
     setIsChanged(true);
 
-    // ✅ Step 3: Upload all images (parallel)
     await Promise.all(
       newPreviews.map(async (preview) => {
         const formData = new FormData();
@@ -1043,7 +1040,6 @@ const CategorySelector = () => {
         formData.append("upload_preset", "images");
 
         try {
-          // 🔹 Upload to Cloudinary
           const res = await fetch(
             "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
             { method: "POST", body: formData }
@@ -1051,7 +1047,6 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            // 🔹 Save to your backend gallery
             await fetch(
               "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
               {
@@ -1066,7 +1061,6 @@ const CategorySelector = () => {
               }
             );
 
-            // 🔹 Update that specific image (using its unique `id`)
             setSelectedImages((prev) =>
               prev.map((img) =>
                 img.id === preview.id
@@ -1076,7 +1070,7 @@ const CategorySelector = () => {
             );
           }
         } catch (error) {
-          console.error("❌ Media upload failed:", error);
+          console.error(" Media upload failed:", error);
           showToast("error", "Media upload failed");
 
           setSelectedImages((prev) =>
@@ -1088,32 +1082,11 @@ const CategorySelector = () => {
       })
     );
 
-    // ✅ Step 4: Reset input (to allow uploading same file again)
     event.target.value = "";
   };
 
-  const files = [
-    {
-      id: 1,
-      name: "file1.png",
-      type: "PNG",
-      src: "https://cdn.shopify.com/s/files/1/0730/5553/5360/files/wnxzfpn2njdvpmlmel1o.png?v=1745405853",
-    },
-    {
-      id: 2,
-      name: "file2.jpg",
-      type: "JPG",
-      src: "https://cdn.shopify.com/s/files/1/0730/5553/5360/files/wnxzfpn2njdvpmlmel1o.png?v=1745405853",
-    },
-  ];
-  const handleRemoveVariantImages = (parentIndex, child) => {
-    setVariantImages((prev) => {
-      const newImages = { ...prev };
-      delete newImages[`${parentIndex}-${child}`];
-      return newImages;
-    });
-  };
-
+ 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
@@ -2094,47 +2067,7 @@ const CategorySelector = () => {
                                               />
                                             </label>
                                           </div>
-                                          {/* <div className="relative">
-                                            {Array.isArray(
-                                              variantImages[normalizedKey]
-                                            ) &&
-                                            variantImages[normalizedKey]
-                                              .length > 0 ? (
-                                              <img
-                                                src={
-                                                  variantImages[normalizedKey][
-                                                    variantImages[normalizedKey]
-                                                      .length - 1
-                                                  ].preview
-                                                }
-                                                alt={
-                                                  variantImages[normalizedKey][
-                                                    variantImages[normalizedKey]
-                                                      .length - 1
-                                                  ].alt
-                                                }
-                                                className="w-12 h-12 object-cover rounded-md border border-gray-300"
-                                              />
-                                            ) : (
-                                              <span className="text-xl text-gray-400">
-                                                +
-                                              </span>
-                                            )}
-
-                                            <input
-                                              type="file"
-                                              className="absolute inset-0 opacity-0 cursor-pointer"
-                                              onClick={() => {
-                                                setCurrentVariant({
-                                                  index,
-                                                  child,
-                                                });
-                                                setIsPopupVisible(true);
-                                                setIsChanged(true);
-                                              }}
-                                            />
-                                          </div> */}
-
+                                        
                                           <input
                                             className="absolute inset-0 opacity-0 cursor-pointer"
                                             onClick={() => {
@@ -2817,7 +2750,6 @@ const CategorySelector = () => {
                 </button>
               </div>
 
-              {/* Form */}
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700">
@@ -3038,7 +2970,6 @@ const CategorySelector = () => {
                               </div>
                             )}
 
-                            {/* 🗑️ Delete */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -3065,7 +2996,6 @@ const CategorySelector = () => {
                 })()}
               </div>
 
-              {/* Gallery images grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
                 {galleryImages.map((file) => {
                   const parentValue =
@@ -3105,7 +3035,6 @@ const CategorySelector = () => {
                             loading: false,
                           };
 
-                          // if image already exists → move it to main
                           const existingIndex = existing.findIndex(
                             (img) => img.preview === file.src
                           );
@@ -3134,7 +3063,6 @@ const CategorySelector = () => {
                 })}
               </div>
 
-              {/* Footer buttons */}
               <div className="flex justify-end mt-6 border-t pt-4">
                 <button
                   onClick={() => setIsPopupVisible(false)}

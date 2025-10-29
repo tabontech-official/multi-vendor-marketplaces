@@ -115,7 +115,8 @@ const CategorySelector = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
-
+  const [selectedOptionName, setSelectedOptionName] = useState(""); // dropdown selected name
+  const [isCustomOption, setIsCustomOption] = useState(false);
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
   );
@@ -662,18 +663,15 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if (isPopupVisible && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
 
-            "Content-Type": "application/json",
-          },
-        }
-      )
+          "Content-Type": "application/json",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           const allImages = data.flatMap((item) => item.images);
@@ -726,6 +724,55 @@ const CategorySelector = () => {
         return acc;
       }, {});
 
+      // const formattedVariants = Object.keys(groupedVariants).map(
+      //   (key, index) => ({
+      //     ...groupedVariants[key].parent,
+      //     group: `parent-${index}`,
+      //     subVariants: groupedVariants[key].children,
+      //   })
+      // );
+
+      // const hydratedVariantImages = {};
+
+      // product.variants.forEach((variant, idx) => {
+      //   const titleKey = normalizeString(variant.title || "");
+      //   let matched = null;
+
+      //   // 1️⃣ Try image_id match
+      //   if (variant.image_id) {
+      //     matched =
+      //       product.variantImages?.find(
+      //         (img) => String(img.id) === String(variant.image_id)
+      //       ) ||
+      //       product.images?.find(
+      //         (img) => String(img.id) === String(variant.image_id)
+      //       );
+      //   }
+
+      //   if (!matched && product.variantImages) {
+      //     matched = product.variantImages.find((img) =>
+      //       normalizeString(img.alt || "").includes(titleKey)
+      //     );
+      //   }
+
+      //   // if (!matched && product.variantImages?.[idx]) {
+      //   //   matched = product.variantImages[idx];
+      //   // }
+
+      //   if (matched?.src) {
+      //     hydratedVariantImages[titleKey] = {
+      //       preview: matched.src,
+      //       loading: false,
+      //     };
+      //   }
+      // });
+
+      // if (Object.keys(hydratedVariantImages).length > 0) {
+      //   setVariantImages(hydratedVariantImages);
+      // } else {
+      //   console.log("No images found for any variants");
+      // }
+
       const formattedVariants = Object.keys(groupedVariants).map(
         (key, index) => ({
           ...groupedVariants[key].parent,
@@ -738,41 +785,60 @@ const CategorySelector = () => {
 
       product.variants.forEach((variant, idx) => {
         const titleKey = normalizeString(variant.title || "");
-        let matched = null;
+        let matchedImages = [];
 
-        // 1️⃣ Try image_id match
-        if (variant.image_id) {
-          matched =
-            product.variantImages?.find(
-              (img) => String(img.id) === String(variant.image_id)
-            ) ||
-            product.images?.find(
-              (img) => String(img.id) === String(variant.image_id)
+        if (product.variantImages?.length) {
+          matchedImages = product.variantImages.filter((img) => {
+            const alt = normalizeString(img.alt || "");
+            return (
+              alt.includes(titleKey.toLowerCase()) ||
+              alt.includes(titleKey.replace(/\s*\/\s*/g, "-").toLowerCase())
             );
+          });
         }
 
-        if (!matched && product.variantImages) {
-          matched = product.variantImages.find((img) =>
-            normalizeString(img.alt || "").includes(titleKey)
+        if (!matchedImages.length && variant.image_id) {
+          const found = product.images?.find(
+            (img) => String(img.id) === String(variant.image_id)
           );
+          if (found) matchedImages = [found];
         }
 
-        // if (!matched && product.variantImages?.[idx]) {
-        //   matched = product.variantImages[idx];
-        // }
+        const combinationAlt = titleKey.replace(/\s*\/\s*/g, "-").toLowerCase();
 
-        if (matched?.src) {
-          hydratedVariantImages[titleKey] = {
-            preview: matched.src,
+        if (matchedImages.length) {
+          hydratedVariantImages[titleKey] = matchedImages.map((img) => ({
+            preview: img.src,
+            alt: combinationAlt,
             loading: false,
-          };
+          }));
         }
       });
 
       if (Object.keys(hydratedVariantImages).length > 0) {
-        setVariantImages(hydratedVariantImages);
+        const normalizedVariantImages = Object.fromEntries(
+          Object.entries(hydratedVariantImages).map(([key, value]) => [
+            key,
+            Array.isArray(value)
+              ? value.map((img) => ({
+                  preview: img.preview || img.src,
+                  alt: img.alt || key.replace(/\s*\/\s*/g, "-").toLowerCase(),
+                  loading: false,
+                }))
+              : [
+                  {
+                    preview: value.preview || value.src,
+                    alt:
+                      value.alt || key.replace(/\s*\/\s*/g, "-").toLowerCase(),
+                    loading: false,
+                  },
+                ],
+          ])
+        );
+
+        setVariantImages(normalizedVariantImages);
       } else {
-        console.log("No images found for any variants");
+        console.log("⚠️ No variant images found for this product");
       }
 
       setIsEditing(true);
@@ -876,22 +942,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setGalleryImages((prev) => [
             { id: Date.now(), src: data.secure_url, name: file.name },
@@ -904,15 +967,29 @@ const CategorySelector = () => {
               options.length === 1
                 ? currentVariant.child
                 : `${parentValue} / ${currentVariant.child}`;
+
+            // ✅ Clean combination handle for consistent keys & alt text
             const normalizedKey = combinationKey.replace(/['"]/g, "").trim();
+            const handleAlt = normalizedKey
+              .replace(/\s*\/\s*/g, "-")
+              .toLowerCase();
 
             setVariantImages((prev) => ({
               ...prev,
-              [normalizedKey]: { preview: data.secure_url, loading: false },
+              [normalizedKey]: [
+                ...(Array.isArray(prev[normalizedKey])
+                  ? prev[normalizedKey]
+                  : []),
+                {
+                  preview: data.secure_url,
+                  alt: handleAlt, // ✅ always correct alt
+                  loading: false,
+                },
+              ],
             }));
-            setTimeout(() => setIsPopupVisible(false), 150);
 
-            showToast("success", "Image  assigned to variant!");
+            showToast("success", "✅ Image assigned to variant!");
+            setTimeout(() => setIsPopupVisible(false), 150);
           }
         }
       } catch (error) {
@@ -928,66 +1005,6 @@ const CategorySelector = () => {
     const value = e.target.value;
     if (/^\d*(\.\d{0,2})?$/.test(value)) {
       setWeight(value);
-    }
-  };
-
-  const handleVariantImageChange = async (event) => {
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
-    const userId = localStorage.getItem("userid");
-    const token = localStorage.getItem("usertoken");
-
-    const files = Array.from(event.target.files);
-    if (files.length === 0 || !currentVariant) return;
-
-    const parentValue = combinations[currentVariant.index]?.parent;
-    const combinationKey =
-      options.length === 1
-        ? currentVariant.child
-        : `${parentValue} / ${currentVariant.child}`;
-    const normalizedKey = combinationKey.replace(/['"]/g, "").trim();
-
-    setVariantImages((prev) => ({
-      ...prev,
-      [normalizedKey]: {
-        ...prev[normalizedKey],
-        loading: true,
-      },
-    }));
-
-    const formData = new FormData();
-    formData.append("file", files[0]); // only one file for variant
-    formData.append("upload_preset", "images");
-
-    try {
-      const res = await fetch(
-        "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-        { method: "POST", body: formData }
-      );
-      const data = await res.json();
-
-      if (data.secure_url) {
-        setVariantImages((prev) => ({
-          ...prev,
-          [normalizedKey]: {
-            preview: data.secure_url,
-            loading: false,
-          },
-        }));
-
-        setTimeout(() => setIsPopupVisible(false), 150);
-        showToast("success", "Image assigned to variant!");
-      }
-    } catch (error) {
-      console.error("Variant upload failed:", error);
-      setVariantImages((prev) => ({
-        ...prev,
-        [normalizedKey]: {
-          ...prev[normalizedKey],
-          loading: false,
-        },
-      }));
-      showToast("error", "Variant image upload failed");
     }
   };
 
@@ -1029,19 +1046,16 @@ const CategorySelector = () => {
 
           if (data.secure_url) {
             // 🔹 Save to your backend gallery
-            await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "x-api-key": apiKey,
-                  "x-api-secret": apiSecretKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId, images: [data.secure_url] }),
-              }
-            );
+            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            });
 
             // 🔹 Update that specific image (using its unique `id`)
             setSelectedImages((prev) =>
@@ -1270,8 +1284,25 @@ const CategorySelector = () => {
         .filter((img) => img.cloudUrl)
         .map((img) => img.cloudUrl);
 
-      const uploadedVariantImages = Object.entries(variantImages).map(
-        ([key, { preview }]) => ({ key, url: preview })
+      const uploadedVariantImages = Object.entries(variantImages).flatMap(
+        ([key, images]) => {
+          // ✅ Generate a clean alt handle like "style-classic"
+          const combinationAlt = key.replace(/\s*\/\s*/g, "-").toLowerCase();
+
+          // ✅ Ensure images is always an array
+          const safeImages = Array.isArray(images)
+            ? images
+            : images
+            ? [images]
+            : [];
+
+          // ✅ Force consistent alt for all images
+          return safeImages.map((img) => ({
+            key,
+            url: img.preview || img.src,
+            alt: combinationAlt, // ✅ override any "Variant Image Modern" alt
+          }));
+        }
       );
 
       const imageSaveResponse = await fetch(
@@ -2018,17 +2049,36 @@ const CategorySelector = () => {
                                     >
                                       <div className="w-12 relative">
                                         <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
-                                          {image?.preview ? (
-                                            <img
-                                              src={image.preview}
-                                              alt={`Variant ${child}`}
-                                              className="w-full h-full object-cover"
-                                            />
-                                          ) : (
-                                            <span className="text-3xl text-gray-400">
-                                              +
-                                            </span>
-                                          )}
+                                          <div className="flex gap-2 flex-wrap">
+                                            {(
+                                              variantImages[normalizedKey] || []
+                                            ).map((img, i) => (
+                                              <img
+                                                key={i}
+                                                src={img.preview}
+                                                alt={img.alt}
+                                                className="w-10 h-10 object-cover rounded-md border border-gray-300"
+                                              />
+                                            ))}
+                                            <label className="flex items-center justify-center w-10 h-10 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition">
+                                              <span className="text-xl text-gray-400">
+                                                +
+                                              </span>
+                                              <input
+                                                type="file"
+                                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                                onClick={() => {
+                                                  setCurrentVariant({
+                                                    index,
+                                                    child,
+                                                  });
+                                                  setIsPopupVisible(true);
+                                                  setIsChanged(true);
+                                                }}
+                                              />
+                                            </label>
+                                          </div>
+
                                           <input
                                             className="absolute inset-0 opacity-0 cursor-pointer"
                                             onClick={() => {
@@ -2236,132 +2286,72 @@ const CategorySelector = () => {
             )}
 
             {showVariantForm && (
-              // <div className="mt-3 border border-gray-300 rounded-lg p-4 bg-gray-50">
-              //   <label className="block text-sm font-medium text-gray-700">
-              //     Option name
-              //   </label>
-              //   <input
-              //     type="text"
-              //     value={newOption.name}
-              //     onChange={(e) => {
-              //       handleNewOptionNameChange(e.target.value);
-              //       setIsChanged(true);
-              //     }}
-              //     placeholder="Size"
-              //     className="w-full border-gray-300 rounded-md p-2 mt-1 focus:ring focus:ring-gray-400 focus:border-gray-500"
-              //   />
-
-              //   <label className="block text-sm font-medium text-gray-700 mt-3">
-              //     Option values
-              //   </label>
-              //   {newOption.values.map((value, index) => (
-              //     <div key={index} className="flex gap-2 items-center mt-2">
-              //       <input
-              //         type="text"
-              //         value={value}
-              //         ref={(el) => (inputRefs.current[index] = el)}
-              //         onChange={(e) =>
-              //           handleNewOptionValueChange(index, e.target.value)
-              //         }
-              //         placeholder="Medium"
-              //         className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
-              //         onKeyDown={(e) => {
-              //           if (e.key === "Enter") {
-              //             e.preventDefault();
-              //             handleAddNewValue();
-              //           }
-              //         }}
-              //       />
-              //       {newOption.values.length > 1 && (
-              //         <button
-              //           onClick={() => {
-              //             handleDeleteNewValue(index);
-              //           }}
-              //           className="text-red-600 text-sm border rounded-md p-1 hover:bg-red-100"
-              //         >
-              //           <FaTrash />
-              //         </button>
-              //       )}
-              //     </div>
-              //   ))}
-
-              //   <button
-              //     onClick={() => {
-              //       handleAddNewValue();
-              //       setIsChanged(true);
-              //     }}
-              //     className="text-sm text-blue-600 mt-2 hover:underline"
-              //   >
-              //     + Add another value
-              //   </button>
-
-              //   <div className="flex justify-between mt-4">
-              //     <button
-              //       onClick={() => {
-              //         setShowVariantForm(false);
-              //         setIsChanged(true); // ✅ mark when canceling edit
-              //       }}
-              //       className="text-sm text-red-600 border border-red-400 px-3 py-1 rounded-lg hover:bg-red-100"
-              //     >
-              //       Cancel
-              //     </button>
-              //     <button
-              //       onClick={() => {
-              //         handleDone();
-              //         setIsChanged(true); // ✅ mark as changed when saving new variant option
-              //       }}
-              //       className="text-sm text-white bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-900"
-              //     >
-              //       Done
-              //     </button>
-              //   </div>
-              // </div>
               <div className="mt-3 border border-gray-300 rounded-lg p-4 bg-gray-50">
-                {/* Mode toggle */}
-                <div className="flex items-center gap-4 mb-3">
-                  <label className="flex items-center text-sm text-gray-700">
-                    <input
-                      type="radio"
-                      name="optionMode"
-                      value="any"
-                      checked={optionMode === "any"}
-                      onChange={() => setOptionMode("any")}
-                      className="mr-2"
-                    />
-                    Any
-                  </label>
-                  <label className="flex items-center text-sm text-gray-700">
-                    <input
-                      type="radio"
-                      name="optionMode"
-                      value="other"
-                      checked={optionMode === "other"}
-                      onChange={() => setOptionMode("other")}
-                      className="mr-2"
-                    />
-                    Other
-                  </label>
-                </div>
-
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Option name
                 </label>
-                <input
-                  type="text"
-                  value={newOption.name}
-                  onChange={(e) => {
-                    handleNewOptionNameChange(e.target.value);
-                    setIsChanged(true);
-                  }}
-                  placeholder="e.g., Color or Size"
-                  className="w-full border-gray-300 rounded-md p-2 mt-1 focus:ring focus:ring-gray-400 focus:border-gray-500"
-                />
+
+                {!isCustomOption ? (
+                  <select
+                    value={selectedOptionName}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSelectedOptionName(value);
+                      setIsChanged(true);
+
+                      if (value === "Other") {
+                        setIsCustomOption(true);
+                        setNewOption({ name: "", values: [""] });
+                        setMatchedOptionValues([]);
+                      } else {
+                        setIsCustomOption(false);
+                        setNewOption({ ...newOption, name: value });
+
+                        const found = dbOptions.find((opt) =>
+                          opt.optionName.some(
+                            (name) =>
+                              name.toLowerCase().trim() ===
+                              value.toLowerCase().trim()
+                          )
+                        );
+
+                        if (found) {
+                          setMatchedOptionValues(found.optionValues || []);
+                        } else {
+                          setMatchedOptionValues([]);
+                        }
+                      }
+                    }}
+                    className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
+                  >
+                    <option value="">Select option name</option>
+                    {dbOptions.map((opt, i) =>
+                      opt.optionName.map((name, j) => (
+                        <option key={`${i}-${j}`} value={name}>
+                          {name}
+                        </option>
+                      ))
+                    )}
+                    <option value="Other">Other</option>
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={newOption.name}
+                    onChange={(e) => {
+                      handleNewOptionNameChange(e.target.value);
+                      setIsChanged(true);
+                    }}
+                    placeholder="Enter option name (e.g., Material)"
+                    className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
+                  />
+                )}
 
                 <label className="block text-sm font-medium text-gray-700 mt-3">
                   Option values
                 </label>
 
-                {optionMode === "any" && matchedOptionValues.length > 0 ? (
+                {!isCustomOption && matchedOptionValues.length > 0 ? (
                   <>
                     {newOption.values.map((value, index) => (
                       <div key={index} className="flex gap-2 items-center mt-2">
@@ -2392,7 +2382,6 @@ const CategorySelector = () => {
                     ))}
                   </>
                 ) : (
-                  // fallback to normal input if no match or "other" mode
                   <>
                     {newOption.values.map((value, index) => (
                       <div key={index} className="flex gap-2 items-center mt-2">
@@ -2403,7 +2392,7 @@ const CategorySelector = () => {
                           onChange={(e) =>
                             handleNewOptionValueChange(index, e.target.value)
                           }
-                          placeholder="Medium"
+                          placeholder="Enter value"
                           className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
@@ -2440,6 +2429,8 @@ const CategorySelector = () => {
                     onClick={() => {
                       setShowVariantForm(false);
                       setIsChanged(true);
+                      setIsCustomOption(false);
+                      setSelectedOptionName("");
                     }}
                     className="text-sm text-red-600 border border-red-400 px-3 py-1 rounded-lg hover:bg-red-100"
                   >
@@ -2449,6 +2440,11 @@ const CategorySelector = () => {
                     onClick={() => {
                       handleDone();
                       setIsChanged(true);
+
+                      setSelectedOptionName("");
+                      setIsCustomOption(false);
+                      setNewOption({ name: "", values: [""] });
+                      setMatchedOptionValues([]);
                     }}
                     className="text-sm text-white bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-900"
                   >
@@ -2885,9 +2881,10 @@ const CategorySelector = () => {
         {isPopupVisible && (
           <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
             <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">
+              {/* Header */}
               <div className="sticky top-0 bg-white z-10 pb-4 border-b flex justify-between items-center">
                 <h2 className="text-lg font-semibold text-gray-800">
-                  Select Image
+                  Select Image for Variant
                 </h2>
                 <button
                   onClick={() => setIsPopupVisible(false)}
@@ -2897,6 +2894,7 @@ const CategorySelector = () => {
                 </button>
               </div>
 
+              {/* Upload new */}
               <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
                 <input
                   type="file"
@@ -2914,6 +2912,90 @@ const CategorySelector = () => {
                 </label>
               </div>
 
+              {/* ✅ Assigned Images Section */}
+              <div className="mt-6 border border-gray-300 rounded-lg p-4 bg-gray-50">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Assigned Images for Variant:
+                  <span className="ml-2 text-blue-600">
+                    {currentVariant?.child
+                      ? `${
+                          combinations[currentVariant?.index]?.parent || ""
+                        } / ${currentVariant?.child}`
+                      : "N/A"}
+                  </span>
+                </h3>
+
+                {/* ✅ Show all assigned images */}
+                <div className="flex flex-wrap gap-3">
+                  {(() => {
+                    const parentValue =
+                      combinations[currentVariant?.index]?.parent;
+                    const combinationKey =
+                      options.length === 1
+                        ? currentVariant?.child
+                        : `${parentValue} / ${currentVariant?.child}`;
+                    const normalizedKey = combinationKey
+                      ?.replace(/['"]/g, "")
+                      .trim();
+
+                    // ✅ Always treat as array and normalize structure
+                    const rawImages = variantImages[normalizedKey];
+                    const assigned = Array.isArray(rawImages)
+                      ? rawImages
+                      : rawImages
+                      ? [rawImages]
+                      : [];
+
+                    // ✅ Normalize any backend format (with `src` instead of `preview`)
+                    const normalizedAssigned = assigned.map((img) => ({
+                      preview: img.preview || img.src,
+                      alt:
+                        img.alt ||
+                        normalizedKey.replace(/\s*\/\s*/g, "-").toLowerCase(),
+                      loading: img.loading || false,
+                    }));
+
+                    return normalizedAssigned.length > 0 ? (
+                      normalizedAssigned.map((img, i) => (
+                        <div
+                          key={i}
+                          className="relative border border-gray-300 rounded-lg overflow-hidden group"
+                        >
+                          <img
+                            src={img.preview}
+                            alt={img.alt}
+                            className="w-20 h-20 object-cover rounded"
+                          />
+                          <p className="text-[10px] text-center text-gray-500 truncate px-1">
+                            {img.alt}
+                          </p>
+
+                          {/* 🗑️ Delete button */}
+                          <button
+                            onClick={() => {
+                              setVariantImages((prev) => ({
+                                ...prev,
+                                [normalizedKey]: prev[normalizedKey].filter(
+                                  (_, idx) => idx !== i
+                                ),
+                              }));
+                            }}
+                            className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-100 transition"
+                          >
+                            <RxCross1 className="text-red-500 text-sm" />
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm italic">
+                        No images assigned yet.
+                      </p>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Gallery images grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
                 {galleryImages.map((file) => {
                   const parentValue =
@@ -2929,8 +3011,10 @@ const CategorySelector = () => {
                   return (
                     <div
                       key={file.id || file.src}
-                      className={`border rounded p-2 relative ${
-                        variantImages[normalizedKey]?.preview === file.src
+                      className={`border rounded p-2 relative hover:border-blue-400 transition ${
+                        variantImages[normalizedKey]?.some?.(
+                          (img) => img.preview === file.src
+                        )
                           ? "border-blue-500"
                           : "border-gray-300"
                       }`}
@@ -2938,14 +3022,26 @@ const CategorySelector = () => {
                       <div
                         onClick={() => {
                           if (currentVariant) {
-                            setVariantImages((prev) => ({
-                              ...prev,
-                              [normalizedKey]: {
+                            setVariantImages((prev) => {
+                              const existing = Array.isArray(
+                                prev[normalizedKey]
+                              )
+                                ? prev[normalizedKey]
+                                : prev[normalizedKey]
+                                ? [prev[normalizedKey]]
+                                : [];
+                              const newImage = {
                                 preview: file.src,
+                                alt: normalizedKey
+                                  .replace(/\s*\/\s*/g, "-")
+                                  .toLowerCase(),
                                 loading: false,
-                              },
-                            }));
-                            setIsPopupVisible(false);
+                              };
+                              return {
+                                ...prev,
+                                [normalizedKey]: [...existing, newImage],
+                              };
+                            });
                           }
                         }}
                         className="cursor-pointer hover:opacity-80 transition"
@@ -2956,16 +3052,6 @@ const CategorySelector = () => {
                           className="w-full h-24 object-cover rounded"
                         />
                       </div>
-
-                      <input
-                        type="checkbox"
-                        className="absolute top-2 left-2 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                        checked={
-                          variantImages[normalizedKey]?.preview === file.src
-                        }
-                        readOnly
-                      />
-
                       <p className="text-sm text-center mt-2 truncate">
                         {file.name || "Image"}
                       </p>
@@ -2974,6 +3060,7 @@ const CategorySelector = () => {
                 })}
               </div>
 
+              {/* Footer buttons */}
               <div className="flex justify-end mt-6 border-t pt-4">
                 <button
                   onClick={() => setIsPopupVisible(false)}
@@ -2982,7 +3069,7 @@ const CategorySelector = () => {
                   Cancel
                 </button>
                 <button
-                  onClick={() => console.log(variantImages)}
+                  onClick={() => setIsPopupVisible(false)}
                   className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
                 >
                   Done

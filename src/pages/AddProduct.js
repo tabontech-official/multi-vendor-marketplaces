@@ -663,15 +663,18 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if (isPopupVisible && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
 
-          "Content-Type": "application/json",
-        },
-      })
+            "Content-Type": "application/json",
+          },
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           const allImages = data.flatMap((item) => item.images);
@@ -942,19 +945,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setGalleryImages((prev) => [
             { id: Date.now(), src: data.secure_url, name: file.name },
@@ -1046,16 +1052,19 @@ const CategorySelector = () => {
 
           if (data.secure_url) {
             // 🔹 Save to your backend gallery
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            });
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
+              }
+            );
 
             // 🔹 Update that specific image (using its unique `id`)
             setSelectedImages((prev) =>
@@ -2053,12 +2062,12 @@ const CategorySelector = () => {
                                             {(
                                               variantImages[normalizedKey] || []
                                             ).map((img, i) => (
-                                              <img
-                                                key={i}
-                                                src={img.preview}
-                                                alt={img.alt}
-                                                className="w-10 h-10 object-cover rounded-md border border-gray-300"
-                                              />
+                                             <img
+  src={variantImages[normalizedKey]?.[0]?.preview}
+  alt={variantImages[normalizedKey]?.[0]?.alt}
+  className="w-12 h-12 object-cover rounded-md border border-gray-300"
+/>
+
                                             ))}
                                             <label className="flex items-center justify-center w-10 h-10 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition">
                                               <span className="text-xl text-gray-400">
@@ -2078,6 +2087,46 @@ const CategorySelector = () => {
                                               />
                                             </label>
                                           </div>
+                                          {/* <div className="relative">
+                                            {Array.isArray(
+                                              variantImages[normalizedKey]
+                                            ) &&
+                                            variantImages[normalizedKey]
+                                              .length > 0 ? (
+                                              <img
+                                                src={
+                                                  variantImages[normalizedKey][
+                                                    variantImages[normalizedKey]
+                                                      .length - 1
+                                                  ].preview
+                                                }
+                                                alt={
+                                                  variantImages[normalizedKey][
+                                                    variantImages[normalizedKey]
+                                                      .length - 1
+                                                  ].alt
+                                                }
+                                                className="w-12 h-12 object-cover rounded-md border border-gray-300"
+                                              />
+                                            ) : (
+                                              <span className="text-xl text-gray-400">
+                                                +
+                                              </span>
+                                            )}
+
+                                            <input
+                                              type="file"
+                                              className="absolute inset-0 opacity-0 cursor-pointer"
+                                              onClick={() => {
+                                                setCurrentVariant({
+                                                  index,
+                                                  child,
+                                                });
+                                                setIsPopupVisible(true);
+                                                setIsChanged(true);
+                                              }}
+                                            />
+                                          </div> */}
 
                                           <input
                                             className="absolute inset-0 opacity-0 cursor-pointer"
@@ -2879,205 +2928,220 @@ const CategorySelector = () => {
         )}
 
         {isPopupVisible && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
-            <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">
-              {/* Header */}
-              <div className="sticky top-0 bg-white z-10 pb-4 border-b flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  Select Image for Variant
-                </h2>
-                <button
-                  onClick={() => setIsPopupVisible(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <RxCross1 />
-                </button>
-              </div>
+  <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+    <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">
+      {/* Header */}
+      <div className="sticky top-0 bg-white z-10 pb-4 border-b flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Select Image for Variant
+        </h2>
+        <button
+          onClick={() => setIsPopupVisible(false)}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <RxCross1 />
+        </button>
+      </div>
 
-              {/* Upload new */}
-              <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageChange}
-                  className="hidden"
-                  id="fileUpload"
-                />
-                <label
-                  htmlFor="fileUpload"
-                  className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
-                >
-                  Add images
-                </label>
-              </div>
+      {/* Upload new */}
+      <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleImageChange}
+          className="hidden"
+          id="fileUpload"
+        />
+        <label
+          htmlFor="fileUpload"
+          className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
+        >
+          Add images
+        </label>
+      </div>
 
-              {/* ✅ Assigned Images Section */}
-              <div className="mt-6 border border-gray-300 rounded-lg p-4 bg-gray-50">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Assigned Images for Variant:
-                  <span className="ml-2 text-blue-600">
-                    {currentVariant?.child
-                      ? `${
-                          combinations[currentVariant?.index]?.parent || ""
-                        } / ${currentVariant?.child}`
-                      : "N/A"}
-                  </span>
-                </h3>
+      {/* ✅ Assigned Images Section */}
+      <div className="mt-6 border border-gray-300 rounded-lg p-4 bg-gray-50">
+        <h3 className="text-sm font-semibold text-gray-700 mb-3">
+          Assigned Images for Variant:
+          <span className="ml-2 text-blue-600">
+            {currentVariant?.child
+              ? `${
+                  combinations[currentVariant?.index]?.parent || ""
+                } / ${currentVariant?.child}`
+              : "N/A"}
+          </span>
+        </h3>
 
-                {/* ✅ Show all assigned images */}
-                <div className="flex flex-wrap gap-3">
-                  {(() => {
-                    const parentValue =
-                      combinations[currentVariant?.index]?.parent;
-                    const combinationKey =
-                      options.length === 1
-                        ? currentVariant?.child
-                        : `${parentValue} / ${currentVariant?.child}`;
-                    const normalizedKey = combinationKey
-                      ?.replace(/['"]/g, "")
-                      .trim();
+        {(() => {
+          const parentValue = combinations[currentVariant?.index]?.parent;
+          const combinationKey =
+            options.length === 1
+              ? currentVariant?.child
+              : `${parentValue} / ${currentVariant?.child}`;
+          const normalizedKey = combinationKey?.replace(/['"]/g, "").trim();
 
-                    // ✅ Always treat as array and normalize structure
-                    const rawImages = variantImages[normalizedKey];
-                    const assigned = Array.isArray(rawImages)
-                      ? rawImages
-                      : rawImages
-                      ? [rawImages]
-                      : [];
+          const assigned = Array.isArray(variantImages[normalizedKey])
+            ? variantImages[normalizedKey]
+            : [];
 
-                    // ✅ Normalize any backend format (with `src` instead of `preview`)
-                    const normalizedAssigned = assigned.map((img) => ({
-                      preview: img.preview || img.src,
-                      alt:
-                        img.alt ||
-                        normalizedKey.replace(/\s*\/\s*/g, "-").toLowerCase(),
-                      loading: img.loading || false,
-                    }));
+          return (
+            <div className="flex flex-wrap gap-3">
+              {assigned.length > 0 ? (
+                assigned.map((img, i) => (
+                  <div
+                    key={i}
+                    className={`relative border border-gray-300 rounded-lg overflow-hidden group cursor-pointer transition-all duration-150 ${
+                      i === 0
+                        ? "ring-2 ring-blue-500 shadow-md scale-105"
+                        : "hover:ring-2 hover:ring-gray-400"
+                    }`}
+                    onClick={() => {
+                      // 🔹 Click any image to make it main
+                      if (i === 0) return;
+                      setVariantImages((prev) => {
+                        const current = Array.isArray(prev[normalizedKey])
+                          ? [...prev[normalizedKey]]
+                          : [];
+                        const [clicked] = current.splice(i, 1);
+                        current.unshift(clicked); // move clicked to front
+                        return { ...prev, [normalizedKey]: current };
+                      });
+                    }}
+                    title={
+                      i === 0
+                        ? "Featured image"
+                        : "Click to make this the main image"
+                    }
+                  >
+                    <img
+                      src={img.preview}
+                      alt={img.alt}
+                      className="w-24 h-24 object-cover rounded"
+                    />
+                    {/* <p className="text-[10px] text-center text-gray-500 truncate px-1">
+                      {i === 0 ? "⭐ Main Image" : img.alt}
+                    </p> */}
 
-                    return normalizedAssigned.length > 0 ? (
-                      normalizedAssigned.map((img, i) => (
-                        <div
-                          key={i}
-                          className="relative border border-gray-300 rounded-lg overflow-hidden group"
-                        >
-                          <img
-                            src={img.preview}
-                            alt={img.alt}
-                            className="w-20 h-20 object-cover rounded"
-                          />
-                          <p className="text-[10px] text-center text-gray-500 truncate px-1">
-                            {img.alt}
-                          </p>
-
-                          {/* 🗑️ Delete button */}
-                          <button
-                            onClick={() => {
-                              setVariantImages((prev) => ({
-                                ...prev,
-                                [normalizedKey]: prev[normalizedKey].filter(
-                                  (_, idx) => idx !== i
-                                ),
-                              }));
-                            }}
-                            className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-100 transition"
-                          >
-                            <RxCross1 className="text-red-500 text-sm" />
-                          </button>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-gray-500 text-sm italic">
-                        No images assigned yet.
-                      </p>
-                    );
-                  })()}
-                </div>
-              </div>
-
-              {/* Gallery images grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
-                {galleryImages.map((file) => {
-                  const parentValue =
-                    combinations[currentVariant?.index]?.parent;
-                  const combinationKey =
-                    options.length === 1
-                      ? currentVariant?.child
-                      : `${parentValue} / ${currentVariant?.child}`;
-                  const normalizedKey = combinationKey
-                    .replace(/['"]/g, "")
-                    .trim();
-
-                  return (
-                    <div
-                      key={file.id || file.src}
-                      className={`border rounded p-2 relative hover:border-blue-400 transition ${
-                        variantImages[normalizedKey]?.some?.(
-                          (img) => img.preview === file.src
-                        )
-                          ? "border-blue-500"
-                          : "border-gray-300"
-                      }`}
-                    >
-                      <div
-                        onClick={() => {
-                          if (currentVariant) {
-                            setVariantImages((prev) => {
-                              const existing = Array.isArray(
-                                prev[normalizedKey]
-                              )
-                                ? prev[normalizedKey]
-                                : prev[normalizedKey]
-                                ? [prev[normalizedKey]]
-                                : [];
-                              const newImage = {
-                                preview: file.src,
-                                alt: normalizedKey
-                                  .replace(/\s*\/\s*/g, "-")
-                                  .toLowerCase(),
-                                loading: false,
-                              };
-                              return {
-                                ...prev,
-                                [normalizedKey]: [...existing, newImage],
-                              };
-                            });
-                          }
-                        }}
-                        className="cursor-pointer hover:opacity-80 transition"
-                      >
-                        <img
-                          src={file.src}
-                          alt={file.name || "Image"}
-                          className="w-full h-24 object-cover rounded"
-                        />
+                    {i === 0 && (
+                      <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-[1px] rounded">
+                        Featured
                       </div>
-                      <p className="text-sm text-center mt-2 truncate">
-                        {file.name || "Image"}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+                    )}
 
-              {/* Footer buttons */}
-              <div className="flex justify-end mt-6 border-t pt-4">
-                <button
-                  onClick={() => setIsPopupVisible(false)}
-                  className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => setIsPopupVisible(false)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
-                >
-                  Done
-                </button>
-              </div>
+                    {/* 🗑️ Delete */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setVariantImages((prev) => ({
+                          ...prev,
+                          [normalizedKey]: prev[normalizedKey].filter(
+                            (_, idx) => idx !== i
+                          ),
+                        }));
+                      }}
+                      className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-100 transition"
+                    >
+                      <RxCross1 className="text-red-500 text-sm" />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm italic">
+                  No images assigned yet.
+                </p>
+              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
+      </div>
+
+      {/* Gallery images grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
+        {galleryImages.map((file) => {
+          const parentValue = combinations[currentVariant?.index]?.parent;
+          const combinationKey =
+            options.length === 1
+              ? currentVariant?.child
+              : `${parentValue} / ${currentVariant?.child}`;
+          const normalizedKey = combinationKey.replace(/['"]/g, "").trim();
+
+          const assigned = Array.isArray(variantImages[normalizedKey])
+            ? variantImages[normalizedKey]
+            : [];
+
+          const isAssigned = assigned.some(
+            (img) => img.preview === file.src
+          );
+
+          return (
+            <div
+              key={file.id || file.src}
+              className={`border rounded p-2 relative hover:border-blue-400 transition cursor-pointer ${
+                isAssigned ? "border-blue-500" : "border-gray-300"
+              }`}
+              onClick={() => {
+                setVariantImages((prev) => {
+                  const existing = Array.isArray(prev[normalizedKey])
+                    ? [...prev[normalizedKey]]
+                    : [];
+                  const newImage = {
+                    preview: file.src,
+                    alt: normalizedKey
+                      .replace(/\s*\/\s*/g, "-")
+                      .toLowerCase(),
+                    loading: false,
+                  };
+
+                  // if image already exists → move it to main
+                  const existingIndex = existing.findIndex(
+                    (img) => img.preview === file.src
+                  );
+
+                  if (existingIndex !== -1) {
+                    const [clicked] = existing.splice(existingIndex, 1);
+                    existing.unshift(clicked);
+                  } else {
+                    existing.unshift(newImage);
+                  }
+
+                  return { ...prev, [normalizedKey]: existing };
+                });
+              }}
+            >
+              <img
+                src={file.src}
+                alt={file.name || "Image"}
+                className="w-full h-24 object-cover rounded"
+              />
+              <p className="text-sm text-center mt-2 truncate">
+                {file.name || "Image"}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer buttons */}
+      <div className="flex justify-end mt-6 border-t pt-4">
+        <button
+          onClick={() => setIsPopupVisible(false)}
+          className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => setIsPopupVisible(false)}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       </div>
     </main>
   );

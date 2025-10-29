@@ -987,7 +987,7 @@ const CategorySelector = () => {
                   : []),
                 {
                   preview: data.secure_url,
-                  alt: handleAlt, 
+                  alt: handleAlt,
                   loading: false,
                 },
               ],
@@ -1085,8 +1085,6 @@ const CategorySelector = () => {
     event.target.value = "";
   };
 
- 
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem("userid");
@@ -2067,7 +2065,7 @@ const CategorySelector = () => {
                                               />
                                             </label>
                                           </div>
-                                        
+
                                           <input
                                             className="absolute inset-0 opacity-0 cursor-pointer"
                                             onClick={() => {
@@ -2900,7 +2898,7 @@ const CategorySelector = () => {
 
               <div className="mt-6 border border-gray-300 rounded-lg p-4 bg-gray-50">
                 <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Assigned Images for Variant:
+                  assign Multiple images to variant{" "}
                   <span className="ml-2 text-blue-600">
                     {currentVariant?.child
                       ? `${

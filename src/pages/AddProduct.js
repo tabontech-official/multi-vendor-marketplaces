@@ -29,6 +29,26 @@ const CategorySelector = () => {
     div.innerHTML = html;
     return div.textContent || div.innerText || "";
   };
+  const [optionMode, setOptionMode] = useState("any"); // 'any' or 'other'
+  const [dbOptions, setDbOptions] = useState([]); // from backend
+  const [matchedOptionValues, setMatchedOptionValues] = useState([]); // values of matched option
+  useEffect(() => {
+    const fetchDbOptions = async () => {
+      try {
+        const res = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
+        );
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setDbOptions(data);
+        }
+      } catch (err) {
+        console.error("Error fetching variant options:", err);
+      }
+    };
+
+    fetchDbOptions();
+  }, []);
 
   const locationData = useLocation();
   const { product } = locationData.state || {};
@@ -430,50 +450,9 @@ const CategorySelector = () => {
     });
   };
 
-  // const generateVariants = () => {
-  //   if (!options || options.length === 0) return [];
-
-  //   if (options.length === 1) {
-  //     return [
-  //       {
-  //         parent: options[0].name,
-  //         children: options[0].values,
-  //       },
-  //     ];
-  //   }
-
-  //   const parentOption = options[0];
-  //   const childOptions = options.slice(1);
-
-  //   let combinations = [];
-
-  //   parentOption.values.forEach((parentValue) => {
-  //     let childCombinations = [];
-
-  //     if (childOptions.length === 1) {
-  //       childOptions[0].values.forEach((val) => {
-  //         childCombinations.push(`${val}`);
-  //       });
-  //     } else if (childOptions.length === 2) {
-  //       childOptions[0].values.forEach((val1) => {
-  //         childOptions[1].values.forEach((val2) => {
-  //           childCombinations.push(`${val1} / ${val2}`);
-  //         });
-  //       });
-  //     }
-
-  //     combinations.push({
-  //       parent: parentValue,
-  //       children: childCombinations,
-  //     });
-  //   });
-
-  //   return combinations;
-  // };
   const generateVariants = () => {
     if (!options || options.length === 0) return [];
 
-    // 🧹 Filter out options that have no valid values
     const validOptions = options.filter(
       (opt) => opt.values && opt.values.some((val) => val.trim() !== "")
     );
@@ -533,8 +512,24 @@ const CategorySelector = () => {
     setShowVariantForm(true);
   };
 
+  // const handleNewOptionNameChange = (value) => {
+  //   setNewOption({ ...newOption, name: value });
+  // };
   const handleNewOptionNameChange = (value) => {
     setNewOption({ ...newOption, name: value });
+
+    // Match DB option
+    const found = dbOptions.find((opt) =>
+      opt.optionName.some(
+        (name) => name.toLowerCase().trim() === value.toLowerCase().trim()
+      )
+    );
+
+    if (found) {
+      setMatchedOptionValues(found.optionValues || []);
+    } else {
+      setMatchedOptionValues([]);
+    }
   };
 
   const handleNewOptionValueChange = (index, value) => {
@@ -848,75 +843,6 @@ const CategorySelector = () => {
     }
   }, [product]);
 
-  // const handleImageChange = async (event) => {
-  //   const apiKey = localStorage.getItem("apiKey");
-  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
-  //   const files = Array.from(event.target.files);
-  //   const previews = files.map((file) => ({
-  //     localUrl: URL.createObjectURL(file),
-  //     loading: true,
-  //     cloudUrl: null,
-  //   }));
-
-  //   const updatedImages = [...selectedImages, ...previews];
-  //   setSelectedImages(updatedImages);
-  //   setIsChanged(true);
-  //   const userId = localStorage.getItem("userid");
-  //   const token = localStorage.getItem("usertoken");
-  //   for (let i = 0; i < files.length; i++) {
-  //     const file = files[i];
-
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-  //     formData.append("upload_preset", "images");
-
-  //     try {
-  //       const res = await fetch(
-  //         `https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload`,
-  //         {
-  //           method: "POST",
-  //           body: formData,
-  //         }
-  //       );
-
-  //       const data = await res.json();
-
-  //       if (data.secure_url) {
-  //         await fetch(
-  //           "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-  //           {
-  //             method: "POST",
-  //             headers: {
-  //               Authorization: `Bearer ${token}`,
-  //               "x-api-key": apiKey,
-  //               "x-api-secret": apiSecretKey,
-  //               "Content-Type": "application/json",
-  //             },
-  //             body: JSON.stringify({
-  //               userId,
-  //               images: [data.secure_url],
-  //             }),
-  //           }
-  //         );
-
-  //         setSelectedImages((prev) => {
-  //           const updated = [...prev];
-  //           const target = updated.find(
-  //             (img) => img.localUrl === previews[i].localUrl
-  //           );
-  //           if (target) {
-  //             target.cloudUrl = data.secure_url;
-  //             target.loading = false;
-  //           }
-  //           return updated;
-  //         });
-  //       }
-  //     } catch (error) {
-  //       console.error("Image upload failed:", error);
-  //     }
-  //   }
-  // };
-
   const handleImageChange = async (event) => {
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
@@ -932,7 +858,6 @@ const CategorySelector = () => {
       cloudUrl: null,
     }));
 
-    // 🔹 Step 1: Show previews instantly in modal gallery
     setGalleryImages((prev) => [...previews, ...prev]);
 
     for (const file of files) {
@@ -941,7 +866,6 @@ const CategorySelector = () => {
       formData.append("upload_preset", "images");
 
       try {
-        // 🔹 Upload to Cloudinary
         const res = await fetch(
           "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
           {
@@ -952,7 +876,6 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          // 🔹 Save to backend gallery (optional)
           await fetch(
             "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
             {
@@ -970,13 +893,11 @@ const CategorySelector = () => {
             }
           );
 
-          // 🔹 Add it visually to modal gallery
           setGalleryImages((prev) => [
             { id: Date.now(), src: data.secure_url, name: file.name },
             ...prev,
           ]);
 
-          // 🔹 If a variant is open, auto-assign this image
           if (currentVariant) {
             const parentValue = combinations[currentVariant.index]?.parent;
             const combinationKey =
@@ -1026,7 +947,6 @@ const CategorySelector = () => {
         : `${parentValue} / ${currentVariant.child}`;
     const normalizedKey = combinationKey.replace(/['"]/g, "").trim();
 
-    // 🔹 STEP 1: Show loader immediately
     setVariantImages((prev) => ({
       ...prev,
       [normalizedKey]: {
@@ -1055,7 +975,6 @@ const CategorySelector = () => {
           },
         }));
 
-        // ✅ Close modal after assign
         setTimeout(() => setIsPopupVisible(false), 150);
         showToast("success", "Image assigned to variant!");
       }
@@ -1072,68 +991,6 @@ const CategorySelector = () => {
     }
   };
 
-  // const handleMediaUpload = async (event) => {
-  //   const apiKey = localStorage.getItem("apiKey");
-  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
-  //   const userId = localStorage.getItem("userid");
-  //   const token = localStorage.getItem("usertoken");
-
-  //   const files = Array.from(event.target.files);
-  //   if (files.length === 0) return;
-
-  //   const previews = files.map((file) => ({
-  //     localUrl: URL.createObjectURL(file),
-  //     loading: true,
-  //     cloudUrl: null,
-  //   }));
-
-  //   setSelectedImages((prev) => [...previews, ...prev]); // ✅ Only affects media
-
-  //   for (const file of files) {
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-  //     formData.append("upload_preset", "images");
-
-  //     try {
-  //       const res = await fetch(
-  //         "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-  //         {
-  //           method: "POST",
-  //           body: formData,
-  //         }
-  //       );
-  //       const data = await res.json();
-
-  //       if (data.secure_url) {
-  //         await fetch(
-  //           "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-  //           {
-  //             method: "POST",
-  //             headers: {
-  //               Authorization: `Bearer ${token}`,
-  //               "x-api-key": apiKey,
-  //               "x-api-secret": apiSecretKey,
-  //               "Content-Type": "application/json",
-  //             },
-  //             body: JSON.stringify({ userId, images: [data.secure_url] }),
-  //           }
-  //         );
-
-  //         setSelectedImages((prev) =>
-  //           prev.map((img) =>
-  //             img.localUrl === previews[0].localUrl
-  //               ? { ...img, cloudUrl: data.secure_url, loading: false }
-  //               : img
-  //           )
-  //         );
-  //       }
-  //     } catch (error) {
-  //       console.error("Media upload failed:", error);
-  //       showToast("error", "Media upload failed");
-  //     }
-  //   }
-  // };
-
   const handleMediaUpload = async (event) => {
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
@@ -1143,9 +1000,8 @@ const CategorySelector = () => {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
 
-    // ✅ Step 1: Create stable preview IDs (don’t rely on createObjectURL for matching)
     const newPreviews = files.map((file) => ({
-      id: Date.now() + Math.random(), // stable unique id
+      id: Date.now() + Math.random(),
       file,
       localUrl: URL.createObjectURL(file),
       loading: true,
@@ -1234,220 +1090,6 @@ const CategorySelector = () => {
       return newImages;
     });
   };
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   const userId = localStorage.getItem("userid");
-  //   const apiKey = localStorage.getItem("apiKey");
-  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
-  //   if (!userId) {
-  //     setMessage({
-  //       type: "error",
-  //       text: "User ID is missing. Cannot submit form.",
-  //     });
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   setMessage(null);
-
-  //   const rawContentState = convertToRaw(editorState.getCurrentContent());
-  //   const htmlContent = draftToHtml(rawContentState);
-  //   const modifiedContent = htmlContent
-  //     .replace(/<p>/g, "")
-  //     .replace(/<\/p>/g, "<br />")
-  //     .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
-  //     .replace(/&nbsp;/g, " ");
-
-  //   const prepareVariantPrices = () => {
-  //     return combinations.flatMap((combination, index) => {
-  //       return combination.children.map((child) => {
-  //         const key = `${index}-${child}`;
-  //         return variantPrices[key] !== undefined ? variantPrices[key] : null;
-  //       });
-  //     });
-  //   };
-  //   const prepareVariantCompareAtPrices = () => {
-  //     return combinations.flatMap((combination, index) => {
-  //       return combination.children.map((child) => {
-  //         const key = `${index}-${child}`;
-  //         return variantCompareAtPrices[key] !== undefined
-  //           ? variantCompareAtPrices[key]
-  //           : null;
-  //       });
-  //     });
-  //   };
-
-  //   const defaultQuantity = parseFloat(quantity) || 0;
-
-  //   const prepareVarianQuantities = () => {
-  //     return combinations.flatMap((combination, index) => {
-  //       return combination.children.map((child) => {
-  //         const key = `${index}-${child}`;
-  //         const variantQty = parseFloat(variantQuantities[key]);
-
-  //         if (!isNaN(variantQty) && variantQty > 0) {
-  //           return variantQty;
-  //         } else {
-  //           return defaultQuantity;
-  //         }
-  //       });
-  //     });
-  //   };
-  //   const prepareVariansku = () => {
-  //     return combinations.flatMap((combination, index) => {
-  //       return combination.children.map((child) => {
-  //         const key = `${index}-${child}`;
-  //         return variantSku[key] !== undefined ? variantSku[key] : null;
-  //       });
-  //     });
-  //   };
-
-  //   const categoryIds = finalCategoryPayload.map((item) =>
-  //     item.catNo.toString()
-  //   );
-
-  //   const combinedKeywords = [
-  //     selectedExportTitle,
-  //     ...categoryIds,
-  //     ...keywordsList,
-  //   ].join(", ");
-  //   const payload = {
-  //     // keyWord: keywordsList.join(", "),
-  //     keyWord: combinedKeywords,
-
-  //     title,
-  //     description: modifiedContent,
-  //     productType: productType,
-  //     price: parseFloat(price),
-  //     compare_at_price: compareAtPrice ? parseFloat(compareAtPrice) : undefined,
-  //     track_quantity: trackQuantity,
-  //     quantity: trackQuantity ? parseFloat(quantity) : 0,
-  //     continue_selling: continueSelling,
-  //     has_sku: hasSKU,
-  //     sku: hasSKU && sku ? sku : undefined,
-  //     barcode: hasSKU && barcode ? barcode : undefined,
-  //     track_shipping: trackShipping,
-  //     weight: trackShipping && weight ? parseFloat(weight) : undefined,
-  //     weight_unit: trackShipping && unit ? unit : undefined,
-  //     status,
-  //     userId,
-  //     vendor: vendor,
-  //     options,
-  //     variants,
-  //     variantPrices: prepareVariantPrices(),
-  //     variantCompareAtPrices: prepareVariantCompareAtPrices(),
-  //     variantQuantites: prepareVarianQuantities(),
-  //     variantSku: prepareVariansku(),
-  //     categories: selectedExportTitle,
-  //   };
-
-  //   console.log("Payload being sent:", payload);
-
-  //   try {
-  //     const url = isEditing
-  //       ? ` https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
-  //       : "  https://multi-vendor-marketplace.vercel.app/product/createProduct";
-
-  //     const method = isEditing ? "PATCH" : "POST";
-
-  //     const response = await fetch(url, {
-  //       method,
-  //       headers: {
-  //         "x-api-key": apiKey,
-  //         "x-api-secret": apiSecretKey,
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(payload),
-  //     });
-
-  //     const data = await response.json();
-  //     const productId = data.product.id;
-
-  //     if (!response.ok) {
-  //       setMessage({
-  //         type: "error",
-  //         text: data.error || "Something went wrong!",
-  //       });
-  //       setLoading(false);
-  //       return;
-  //     }
-
-  //     const formData = new FormData();
-
-  //     images.forEach((image) => formData.append("images", image));
-  //     Object.entries(variantImages).forEach(([key, { file }]) => {
-  //       formData.append("variantImages", file);
-  //       formData.append("variantImageKeys", key);
-  //     });
-
-  //     // const cloudinaryURLs = [];
-  //     // const uploadedVariantImages = [];
-
-  //     const cloudinaryURLs = selectedImages
-  //       .filter((img) => img.cloudUrl)
-  //       .map((img) => img.cloudUrl);
-
-  //     const uploadedVariantImages = Object.entries(variantImages).map(
-  //       ([key, { preview }]) => ({
-  //         key,
-  //         url: preview,
-  //       })
-  //     );
-
-  //     const imageSaveResponse = await fetch(
-  //       ` https://multi-vendor-marketplace.vercel.app/product/updateImages/${data.product.id}`,
-  //       {
-  //         method: "PUT",
-  //         headers: {
-  //           "x-api-key": apiKey,
-  //           "x-api-secret": apiSecretKey,
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           images: cloudinaryURLs,
-  //           variantImages: uploadedVariantImages,
-  //         }),
-  //       }
-  //     );
-
-  //     const imageSaveJson = await imageSaveResponse.json();
-
-  //     if (!imageSaveResponse.ok) {
-  //       setMessage({
-  //         type: "error",
-  //         text: imageSaveJson.error || "Failed to save image URLs",
-  //       });
-  //       setLoading(false);
-  //       return;
-  //     }
-  //     setTitle("");
-  //     setDescription("");
-  //     setProductType("");
-  //     setPrice("");
-  //     setCompareAtPrice("");
-  //     setTrackQuantity(false);
-  //     setQuantity(0);
-  //     setContinueSelling(false);
-  //     setHasSKU(false);
-  //     setSKU("");
-  //     setBarcode("");
-  //     setTrackShipping(false);
-  //     setWeight("");
-  //     setUnit("kg");
-  //     setOptions([]);
-  //     setVariants([]);
-  //     setVendor("");
-  //     setKeyWord("");
-  //     setIsChanged(false);
-
-  //     navigate("/manage-product");
-  //   } catch (error) {
-  //     console.error("Error uploading product:", error);
-  //     setMessage({ type: "error", text: "Failed to connect to server." });
-  //   }
-
-  //   setLoading(false);
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1768,44 +1410,6 @@ const CategorySelector = () => {
       setLoading(false);
     }
   };
-
-  // useEffect(() => {
-  //   const handleBeforeUnload = (e) => {
-  //     if (isChanged) {
-  //       e.preventDefault();
-  //       e.returnValue = "";
-  //     }
-  //   };
-
-  //   const handlePopState = () => {
-  //     if (isChanged) {
-  //       showToast(
-  //         "error",
-  //         "You have unsaved changes! Please update the product before leaving."
-  //       );
-  //       window.history.pushState(null, "", window.location.href);
-  //     }
-  //   };
-
-  //   if (isChanged && !window.__blockerActive) {
-  //     window.__blockerActive = true;
-  //     window.addEventListener("beforeunload", handleBeforeUnload);
-  //     window.addEventListener("popstate", handlePopState);
-  //     window.history.pushState(null, "", window.location.href);
-  //   }
-
-  //   if (!isChanged && window.__blockerActive) {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //     window.removeEventListener("popstate", handlePopState);
-  //     window.__blockerActive = false;
-  //   }
-
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //     window.removeEventListener("popstate", handlePopState);
-  //     window.__blockerActive = false;
-  //   };
-  // }, [isChanged]);
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -2632,7 +2236,113 @@ const CategorySelector = () => {
             )}
 
             {showVariantForm && (
+              // <div className="mt-3 border border-gray-300 rounded-lg p-4 bg-gray-50">
+              //   <label className="block text-sm font-medium text-gray-700">
+              //     Option name
+              //   </label>
+              //   <input
+              //     type="text"
+              //     value={newOption.name}
+              //     onChange={(e) => {
+              //       handleNewOptionNameChange(e.target.value);
+              //       setIsChanged(true);
+              //     }}
+              //     placeholder="Size"
+              //     className="w-full border-gray-300 rounded-md p-2 mt-1 focus:ring focus:ring-gray-400 focus:border-gray-500"
+              //   />
+
+              //   <label className="block text-sm font-medium text-gray-700 mt-3">
+              //     Option values
+              //   </label>
+              //   {newOption.values.map((value, index) => (
+              //     <div key={index} className="flex gap-2 items-center mt-2">
+              //       <input
+              //         type="text"
+              //         value={value}
+              //         ref={(el) => (inputRefs.current[index] = el)}
+              //         onChange={(e) =>
+              //           handleNewOptionValueChange(index, e.target.value)
+              //         }
+              //         placeholder="Medium"
+              //         className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
+              //         onKeyDown={(e) => {
+              //           if (e.key === "Enter") {
+              //             e.preventDefault();
+              //             handleAddNewValue();
+              //           }
+              //         }}
+              //       />
+              //       {newOption.values.length > 1 && (
+              //         <button
+              //           onClick={() => {
+              //             handleDeleteNewValue(index);
+              //           }}
+              //           className="text-red-600 text-sm border rounded-md p-1 hover:bg-red-100"
+              //         >
+              //           <FaTrash />
+              //         </button>
+              //       )}
+              //     </div>
+              //   ))}
+
+              //   <button
+              //     onClick={() => {
+              //       handleAddNewValue();
+              //       setIsChanged(true);
+              //     }}
+              //     className="text-sm text-blue-600 mt-2 hover:underline"
+              //   >
+              //     + Add another value
+              //   </button>
+
+              //   <div className="flex justify-between mt-4">
+              //     <button
+              //       onClick={() => {
+              //         setShowVariantForm(false);
+              //         setIsChanged(true); // ✅ mark when canceling edit
+              //       }}
+              //       className="text-sm text-red-600 border border-red-400 px-3 py-1 rounded-lg hover:bg-red-100"
+              //     >
+              //       Cancel
+              //     </button>
+              //     <button
+              //       onClick={() => {
+              //         handleDone();
+              //         setIsChanged(true); // ✅ mark as changed when saving new variant option
+              //       }}
+              //       className="text-sm text-white bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-900"
+              //     >
+              //       Done
+              //     </button>
+              //   </div>
+              // </div>
               <div className="mt-3 border border-gray-300 rounded-lg p-4 bg-gray-50">
+                {/* Mode toggle */}
+                <div className="flex items-center gap-4 mb-3">
+                  <label className="flex items-center text-sm text-gray-700">
+                    <input
+                      type="radio"
+                      name="optionMode"
+                      value="any"
+                      checked={optionMode === "any"}
+                      onChange={() => setOptionMode("any")}
+                      className="mr-2"
+                    />
+                    Any
+                  </label>
+                  <label className="flex items-center text-sm text-gray-700">
+                    <input
+                      type="radio"
+                      name="optionMode"
+                      value="other"
+                      checked={optionMode === "other"}
+                      onChange={() => setOptionMode("other")}
+                      className="mr-2"
+                    />
+                    Other
+                  </label>
+                </div>
+
                 <label className="block text-sm font-medium text-gray-700">
                   Option name
                 </label>
@@ -2643,43 +2353,77 @@ const CategorySelector = () => {
                     handleNewOptionNameChange(e.target.value);
                     setIsChanged(true);
                   }}
-                  placeholder="Size"
+                  placeholder="e.g., Color or Size"
                   className="w-full border-gray-300 rounded-md p-2 mt-1 focus:ring focus:ring-gray-400 focus:border-gray-500"
                 />
 
                 <label className="block text-sm font-medium text-gray-700 mt-3">
                   Option values
                 </label>
-                {newOption.values.map((value, index) => (
-                  <div key={index} className="flex gap-2 items-center mt-2">
-                    <input
-                      type="text"
-                      value={value}
-                      ref={(el) => (inputRefs.current[index] = el)}
-                      onChange={(e) =>
-                        handleNewOptionValueChange(index, e.target.value)
-                      }
-                      placeholder="Medium"
-                      className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddNewValue();
-                        }
-                      }}
-                    />
-                    {newOption.values.length > 1 && (
-                      <button
-                        onClick={() => {
-                          handleDeleteNewValue(index);
-                        }}
-                        className="text-red-600 text-sm border rounded-md p-1 hover:bg-red-100"
-                      >
-                        <FaTrash />
-                      </button>
-                    )}
-                  </div>
-                ))}
+
+                {optionMode === "any" && matchedOptionValues.length > 0 ? (
+                  <>
+                    {newOption.values.map((value, index) => (
+                      <div key={index} className="flex gap-2 items-center mt-2">
+                        <select
+                          value={value}
+                          onChange={(e) =>
+                            handleNewOptionValueChange(index, e.target.value)
+                          }
+                          className="w-full border-gray-300 rounded-md p-2"
+                        >
+                          <option value="">Select value</option>
+                          {matchedOptionValues.map((val, i) => (
+                            <option key={i} value={val}>
+                              {val}
+                            </option>
+                          ))}
+                        </select>
+
+                        {newOption.values.length > 1 && (
+                          <button
+                            onClick={() => handleDeleteNewValue(index)}
+                            className="text-red-600 text-sm border rounded-md p-1 hover:bg-red-100"
+                          >
+                            <FaTrash />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  // fallback to normal input if no match or "other" mode
+                  <>
+                    {newOption.values.map((value, index) => (
+                      <div key={index} className="flex gap-2 items-center mt-2">
+                        <input
+                          type="text"
+                          value={value}
+                          ref={(el) => (inputRefs.current[index] = el)}
+                          onChange={(e) =>
+                            handleNewOptionValueChange(index, e.target.value)
+                          }
+                          placeholder="Medium"
+                          className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleAddNewValue();
+                            }
+                          }}
+                        />
+                        {newOption.values.length > 1 && (
+                          <button
+                            onClick={() => handleDeleteNewValue(index)}
+                            className="text-red-600 text-sm border rounded-md p-1 hover:bg-red-100"
+                          >
+                            <FaTrash />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </>
+                )}
 
                 <button
                   onClick={() => {
@@ -2695,7 +2439,7 @@ const CategorySelector = () => {
                   <button
                     onClick={() => {
                       setShowVariantForm(false);
-                      setIsChanged(true); // ✅ mark when canceling edit
+                      setIsChanged(true);
                     }}
                     className="text-sm text-red-600 border border-red-400 px-3 py-1 rounded-lg hover:bg-red-100"
                   >
@@ -2704,7 +2448,7 @@ const CategorySelector = () => {
                   <button
                     onClick={() => {
                       handleDone();
-                      setIsChanged(true); // ✅ mark as changed when saving new variant option
+                      setIsChanged(true);
                     }}
                     className="text-sm text-white bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-900"
                   >
@@ -3005,117 +2749,6 @@ const CategorySelector = () => {
           </div>
         </div>
 
-        {/* {variantEditModalVisible && currentVariant && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-[400px]">
-              <h2 className="text-lg font-semibold mb-4">
-                Edit Variant – {currentVariant.child}
-              </h2>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm text-gray-600">Price ($)</label>
-                  <input
-                    type="number"
-                    value={
-                      variantPrices[
-                        `${currentVariant.index}-${currentVariant.child}`
-                      ] || ""
-                    }
-                    onChange={(e) =>
-                      handlePriceChange(
-                        currentVariant.index,
-                        currentVariant.child,
-                        e.target.value
-                      )
-                    }
-                    className="border w-full p-2 rounded-md"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm text-gray-600">
-                    Compare at Price ($)
-                  </label>
-                  <input
-                    type="number"
-                    value={
-                      variantCompareAtPrices[
-                        `${currentVariant.index}-${currentVariant.child}`
-                      ] || ""
-                    }
-                    onChange={(e) =>
-                      handleVariantComparePriceChange(
-                        currentVariant.index,
-                        currentVariant.child,
-                        e.target.value
-                      )
-                    }
-                    className="border w-full p-2 rounded-md"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm text-gray-600">SKU</label>
-                  <input
-                    type="text"
-                    value={
-                      variantSku[
-                        `${currentVariant.index}-${currentVariant.child}`
-                      ] || ""
-                    }
-                    onChange={(e) =>
-                      handleVariantSkuChange(
-                        currentVariant.index,
-                        currentVariant.child,
-                        e.target.value
-                      )
-                    }
-                    className="border w-full p-2 rounded-md"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm text-gray-600">Quantity</label>
-                  <input
-                    type="number"
-                    value={
-                      variantQuantities[
-                        `${currentVariant.index}-${currentVariant.child}`
-                      ] || ""
-                    }
-                    onChange={(e) =>
-                      handleQuantityChange(
-                        currentVariant.index,
-                        currentVariant.child,
-                        e.target.value
-                      )
-                    }
-                    className="border w-full p-2 rounded-md"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  onClick={() => setVariantEditModalVisible(false)}
-                  className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    setVariantEditModalVisible(false);
-                    setIsChanged(true);
-                  }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          </div>
-        )} */}
         {variantEditModalVisible && currentVariant && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fadeIn">
             <div className="bg-white rounded-2xl shadow-2xl w-[420px] p-6 relative transform transition-all duration-300 scale-100 animate-slideUp">

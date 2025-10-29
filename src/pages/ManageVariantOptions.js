@@ -3,6 +3,7 @@ import { IoOptionsOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 
 const ManageVariantOptions = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const ManageVariantOptions = () => {
   const [file, setFile] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -45,16 +47,19 @@ const ManageVariantOptions = () => {
         a.click();
         a.remove();
       } else {
-        alert("Failed to export CSV.");
+        showToast("error","Failed to export CSV.");
       }
     } catch (error) {
       console.error("Export Error:", error);
     }
   };
-
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+  };
   const handleImport = async () => {
     if (!file) {
-      alert("Please select a CSV file first.");
+      showToast("error","Please select a CSV file first.");
       return;
     }
 
@@ -71,7 +76,7 @@ const ManageVariantOptions = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert(`✅ ${result.count} options imported successfully.`);
+        showToast("success",`${result.count} options imported successfully.`);
         setShowModal(false);
         setFile(null);
         const updated = await fetch(
@@ -79,11 +84,11 @@ const ManageVariantOptions = () => {
         );
         setOptions(await updated.json());
       } else {
-        alert(result.message || "Failed to import CSV.");
+        showToast("error",result.message || "Failed to import CSV.");
       }
     } catch (error) {
       console.error("Import Error:", error);
-      alert("Error importing CSV file.");
+      showToast("error","Error importing CSV file.");
     } finally {
       setIsImporting(false);
     }
@@ -91,25 +96,42 @@ const ManageVariantOptions = () => {
 
   const handleDeleteOptions = async () => {
     if (selectedOptionIds.length === 0)
-      return alert("Please select at least one option to delete.");
+      return showToast("error","Please select at least one option to delete.");
 
     try {
-      await axios.delete("https://multi-vendor-marketplace.vercel.app/variantOption/deleteOptions", {
-        data: { optionIds: selectedOptionIds },
-      });
-      alert("Selected options deleted!");
+      await axios.delete(
+        "https://multi-vendor-marketplace.vercel.app/variantOption/deleteOptions",
+        {
+          data: { optionIds: selectedOptionIds },
+        }
+      );
+      showToast("success","Selected options deleted!");
       setOptions((prev) =>
         prev.filter((opt) => !selectedOptionIds.includes(opt._id))
       );
       setSelectedOptionIds([]);
     } catch (error) {
       console.error("Delete Error:", error);
-      alert("Error deleting options.");
+      showToast("error","Error deleting options.");
     }
   };
 
   return (
     <div className="p-6">
+      {toast.show && (
+        <div
+          className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+            toast.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
+        >
+          {toast.type === "success" ? (
+            <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+          ) : (
+            <HiOutlineXCircle className="w-6 h-6 mr-2" />
+          )}
+          <span>{toast.message}</span>
+        </div>
+      )}
       <div className="flex justify-between items-center pb-4 border-b">
         <div className="flex items-center space-x-2">
           <IoOptionsOutline size={26} className="text-gray-700" />

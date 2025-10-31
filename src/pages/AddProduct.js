@@ -699,17 +699,14 @@ const CategorySelector = () => {
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -897,6 +894,10 @@ const CategorySelector = () => {
       setUnit(product.shipping?.weight_unit || "kg");
       setStatus(product.status || "publish");
       setUserId(product.userId || "");
+      if (product.metafields && product.metafields.length > 0) {
+        setEnableMetafields(true);
+        setMetafields(product.metafields);
+      }
       setMongooseProductId(product._id);
       const imageURLs =
         product.images?.map((img) => ({
@@ -1096,22 +1097,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1184,19 +1182,16 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "x-api-key": apiKey,
-                  "x-api-secret": apiSecretKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId, images: [data.secure_url] }),
-              }
-            );
+            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            });
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1234,6 +1229,16 @@ const CategorySelector = () => {
         text: "User ID is missing. Cannot submit form.",
       });
       return;
+    }
+    // 🧩 Validate metafields before submitting
+    if (enableMetafields) {
+      const invalid = metafields.some(
+        (m) => !m.label.trim() || !m.value.trim()
+      );
+      if (invalid) {
+        showToast("error", "Please fill all metafield labels and values.");
+        return;
+      }
     }
 
     setLoading(true);
@@ -1318,7 +1323,11 @@ const CategorySelector = () => {
       variantSku: prepareVariantSku(),
       categories: selectedExportTitle,
     };
-
+    if (enableMetafields) {
+      payload.metafields = metafields.filter(
+        (m) => m.label.trim() !== "" && m.value.trim() !== ""
+      );
+    }
     console.log("📦 Payload being sent:", payload);
 
     try {
@@ -1560,13 +1569,13 @@ const CategorySelector = () => {
   };
 
   // For delete confirmation modal
-const [showDeleteOptionModal, setShowDeleteOptionModal] = useState(false);
-const [deleteOptionTarget, setDeleteOptionTarget] = useState(null);
+  const [showDeleteOptionModal, setShowDeleteOptionModal] = useState(false);
+  const [deleteOptionTarget, setDeleteOptionTarget] = useState(null);
 
-const handleDeleteOption = (index) => {
-  setDeleteOptionTarget(index);
-  setShowDeleteOptionModal(true);
-};
+  const handleDeleteOption = (index) => {
+    setDeleteOptionTarget(index);
+    setShowDeleteOptionModal(true);
+  };
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -1635,10 +1644,25 @@ const handleDeleteOption = (index) => {
     setIsChanged(true);
   };
 
+  const [enableMetafields, setEnableMetafields] = useState(false);
+  const [metafields, setMetafields] = useState([{ label: "", value: "" }]);
+
+  const handleMetafieldChange = (index, field, value) => {
+    const updated = [...metafields];
+    updated[index][field] = value;
+    setMetafields(updated);
+  };
+
+  const addMetafield = () => {
+    setMetafields([...metafields, { label: "", value: "" }]);
+  };
+
+  const removeMetafield = (index) => {
+    setMetafields(metafields.filter((_, i) => i !== index));
+  };
+
   return (
     <main className="flex justify-center bg-gray-100 p-6">
-    
-
       {toast.show && (
         <div
           className={`fixed top-16 z-30 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
@@ -2086,32 +2110,31 @@ const handleDeleteOption = (index) => {
                           {option.name}
                         </h3>
 
-                     {editingOptionIndex === optionIndex && (
-  <div className="flex gap-2">
-    {/* Save changes */}
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        handleSaveEditedOption(optionIndex);
-      }}
-      className="text-xs text-white bg-blue-600 px-3 py-1 rounded-md hover:bg-blue-700"
-    >
-      Done
-    </button>
+                        {editingOptionIndex === optionIndex && (
+                          <div className="flex gap-2">
+                            {/* Save changes */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSaveEditedOption(optionIndex);
+                              }}
+                              className="text-xs text-white bg-blue-600 px-3 py-1 rounded-md hover:bg-blue-700"
+                            >
+                              Done
+                            </button>
 
-    {/* Delete entire option */}
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        handleDeleteOption(optionIndex);
-      }}
-      className="text-xs text-red-600 border border-red-400 px-3 py-1 rounded-md hover:bg-red-100"
-    >
-      Delete
-    </button>
-  </div>
-)}
-
+                            {/* Delete entire option */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteOption(optionIndex);
+                              }}
+                              className="text-xs text-red-600 border border-red-400 px-3 py-1 rounded-md hover:bg-red-100"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {editingOptionIndex !== optionIndex && (
@@ -2653,6 +2676,100 @@ const handleDeleteOption = (index) => {
                     Done
                   </button>
                 </div>
+              </div>
+            )}
+          </div>
+          {/* ✅ META FIELD SECTION */}
+          <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-medium text-gray-800">Metafields</h2>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="enableMetafields"
+                  checked={enableMetafields}
+                  onChange={() => setEnableMetafields(!enableMetafields)}
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="enableMetafields"
+                  className="text-sm text-gray-700"
+                >
+                  Create metafields
+                </label>
+              </div>
+            </div>
+
+            {enableMetafields && (
+              <div className="mt-4 space-y-4">
+                {metafields.map((field, index) => (
+                  <div
+                    key={index}
+                    className="border border-gray-200 rounded-xl p-4 bg-gray-50 relative"
+                  >
+                    <h3 className="text-sm font-semibold text-gray-800 mb-3">
+                      Custom Field {index + 1}
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs text-gray-600 mb-1 block">
+                          Label
+                        </label>
+                        <input
+                          type="text"
+                          value={field.label}
+                          onChange={(e) =>
+                            handleMetafieldChange(
+                              index,
+                              "label",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Enter label (e.g., Fabric Type)"
+                          className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring focus:ring-blue-200 focus:border-blue-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-600 mb-1 block">
+                          Value
+                        </label>
+                        <input
+                          type="text"
+                          value={field.value}
+                          onChange={(e) =>
+                            handleMetafieldChange(
+                              index,
+                              "value",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Enter value (e.g., Cotton)"
+                          className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring focus:ring-blue-200 focus:border-blue-400"
+                        />
+                      </div>
+                    </div>
+
+                    {metafields.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeMetafield(index)}
+                        className="absolute top-3 right-3 text-red-500 hover:text-red-700 transition"
+                        title="Remove this metafield"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={addMetafield}
+                  className="text-sm text-blue-600 font-medium mt-2 hover:underline"
+                >
+                  + Add another
+                </button>
               </div>
             )}
           </div>
@@ -3313,191 +3430,190 @@ const handleDeleteOption = (index) => {
             </div>
           </div>
         )}
-          {showDeleteOptionModal && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-    <div className="bg-white rounded-xl shadow-xl p-6 w-[400px] animate-fadeIn">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">
-        Delete Option
-      </h2>
-      <p className="text-gray-600 text-sm mb-6">
-        Are you sure you want to delete the option{" "}
-        <span className="font-semibold text-gray-800">
-          "{options[deleteOptionTarget]?.name}"
-        </span>
-        ? <br /> This will remove all its values and related variants.
-      </p>
-
-      <div className="flex justify-end gap-3">
-        <button
-          onClick={() => setShowDeleteOptionModal(false)}
-          className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() => {
-            const updated = [...options];
-            updated.splice(deleteOptionTarget, 1);
-            setOptions(updated);
-            setCombinations(generateVariants(updated));
-            setEditingOptionIndex(null);
-            setIsChanged(true);
-            setShowDeleteOptionModal(false);
-          }}
-          className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-      {isMediaModalVisible && (
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
-          <div className="bg-white w-full max-w-6xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
-            <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-                Manage Product Media
+        {showDeleteOptionModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+            <div className="bg-white rounded-xl shadow-xl p-6 w-[400px] animate-fadeIn">
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                Delete Option
               </h2>
+              <p className="text-gray-600 text-sm mb-6">
+                Are you sure you want to delete the option{" "}
+                <span className="font-semibold text-gray-800">
+                  "{options[deleteOptionTarget]?.name}"
+                </span>
+                ? <br /> This will remove all its values and related variants.
+              </p>
 
-              <div className="flex items-center gap-3">
+              <div className="flex justify-end gap-3">
                 <button
-                  onClick={() => setIsMediaModalVisible(false)}
-                  className="bg-blue-600 text-white px-5 py-2 rounded-md font-medium shadow-sm hover:bg-blue-700 active:scale-95 transition-transform duration-150"
+                  onClick={() => setShowDeleteOptionModal(false)}
+                  className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
                 >
-                  Done
+                  Cancel
                 </button>
                 <button
-                  onClick={() => setIsMediaModalVisible(false)}
-                  className="text-gray-500 hover:text-gray-700 transition"
-                  title="Close"
+                  onClick={() => {
+                    const updated = [...options];
+                    updated.splice(deleteOptionTarget, 1);
+                    setOptions(updated);
+                    setCombinations(generateVariants(updated));
+                    setEditingOptionIndex(null);
+                    setIsChanged(true);
+                    setShowDeleteOptionModal(false);
+                  }}
+                  className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
                 >
-                  ✕
+                  Delete
                 </button>
               </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-              <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center text-gray-500 bg-white shadow-sm transition hover:shadow-md">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleMediaUpload}
-                  className="hidden"
-                  id="mediaFileUpload"
-                />
-
-                <div className="flex gap-4 flex-wrap justify-center">
-                  <label
-                    htmlFor="mediaFileUpload"
-                    className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-md cursor-pointer 
-                         hover:bg-blue-700 active:scale-95 transition-transform duration-150"
-                  >
-                    Add New Images
-                  </label>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowGallery(true)}
-                    className="px-6 py-2.5 bg-gray-600 text-white font-medium rounded-lg shadow-md cursor-pointer 
-                         hover:bg-gray-700 active:scale-95 transition-transform duration-150"
-                  >
-                    Browse
-                  </button>
-                </div>
-
-                <p className="text-sm mt-3 text-gray-500">
-                  or drag & drop images here
-                </p>
-              </div>
-
-              <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Product Images
-                </h3>
-
-                <div className="flex flex-wrap gap-3">
-                  {selectedImages.length > 0 ? (
-                    selectedImages.map((img, i) => (
-                      <div
-                        key={i}
-                        className="relative border border-gray-300 rounded-lg overflow-hidden group hover:shadow-md transition"
-                      >
-                        <img
-                          src={img.cloudUrl || img.localUrl}
-                          alt={`Image ${i}`}
-                          className="w-24 h-24 sm:w-28 sm:h-28 object-cover"
-                        />
-                        {img.loading && (
-                          <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                            <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
-                          </div>
-                        )}
-                        <button
-                          onClick={() => {
-                            const updated = [...selectedImages];
-                            updated.splice(i, 1);
-                            setSelectedImages(updated);
-                            setIsChanged(true);
-                          }}
-                          className="absolute top-1 right-1 bg-white/80 rounded-full p-1 hover:bg-red-100 transition"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-500 italic text-sm">
-                      No product images yet.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-             
-              {showGallery && galleryImages.length > 0 && (
-                <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                    Gallery Images
-                  </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {galleryImages.map((file) => (
-                      <div
-                        key={file.id || file.src}
-                        className="border rounded-lg p-2 bg-white hover:border-blue-400 hover:shadow-md transition cursor-pointer"
-                        onClick={() => {
-                          if (
-                            !selectedImages.some(
-                              (img) => img.cloudUrl === file.src
-                            )
-                          ) {
-                            setSelectedImages((prev) => [
-                              { cloudUrl: file.src, loading: false },
-                              ...prev,
-                            ]);
-                            setIsChanged(true);
-                          }
-                        }}
-                      >
-                        <img
-                          src={file.src}
-                          alt={file.name || "Gallery Image"}
-                          className="w-full h-28 object-cover rounded-md"
-                        />
-                        <p className="text-xs text-center mt-1 truncate text-gray-700">
-                          {file.name || "Image"}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {isMediaModalVisible && (
+          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
+            <div className="bg-white w-full max-w-6xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
+              <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                  Manage Product Media
+                </h2>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setIsMediaModalVisible(false)}
+                    className="bg-blue-600 text-white px-5 py-2 rounded-md font-medium shadow-sm hover:bg-blue-700 active:scale-95 transition-transform duration-150"
+                  >
+                    Done
+                  </button>
+                  <button
+                    onClick={() => setIsMediaModalVisible(false)}
+                    className="text-gray-500 hover:text-gray-700 transition"
+                    title="Close"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center text-gray-500 bg-white shadow-sm transition hover:shadow-md">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleMediaUpload}
+                    className="hidden"
+                    id="mediaFileUpload"
+                  />
+
+                  <div className="flex gap-4 flex-wrap justify-center">
+                    <label
+                      htmlFor="mediaFileUpload"
+                      className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-md cursor-pointer 
+                         hover:bg-blue-700 active:scale-95 transition-transform duration-150"
+                    >
+                      Add New Images
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowGallery(true)}
+                      className="px-6 py-2.5 bg-gray-600 text-white font-medium rounded-lg shadow-md cursor-pointer 
+                         hover:bg-gray-700 active:scale-95 transition-transform duration-150"
+                    >
+                      Browse
+                    </button>
+                  </div>
+
+                  <p className="text-sm mt-3 text-gray-500">
+                    or drag & drop images here
+                  </p>
+                </div>
+
+                <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                    Product Images
+                  </h3>
+
+                  <div className="flex flex-wrap gap-3">
+                    {selectedImages.length > 0 ? (
+                      selectedImages.map((img, i) => (
+                        <div
+                          key={i}
+                          className="relative border border-gray-300 rounded-lg overflow-hidden group hover:shadow-md transition"
+                        >
+                          <img
+                            src={img.cloudUrl || img.localUrl}
+                            alt={`Image ${i}`}
+                            className="w-24 h-24 sm:w-28 sm:h-28 object-cover"
+                          />
+                          {img.loading && (
+                            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                              <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                            </div>
+                          )}
+                          <button
+                            onClick={() => {
+                              const updated = [...selectedImages];
+                              updated.splice(i, 1);
+                              setSelectedImages(updated);
+                              setIsChanged(true);
+                            }}
+                            className="absolute top-1 right-1 bg-white/80 rounded-full p-1 hover:bg-red-100 transition"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 italic text-sm">
+                        No product images yet.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {showGallery && galleryImages.length > 0 && (
+                  <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                      Gallery Images
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {galleryImages.map((file) => (
+                        <div
+                          key={file.id || file.src}
+                          className="border rounded-lg p-2 bg-white hover:border-blue-400 hover:shadow-md transition cursor-pointer"
+                          onClick={() => {
+                            if (
+                              !selectedImages.some(
+                                (img) => img.cloudUrl === file.src
+                              )
+                            ) {
+                              setSelectedImages((prev) => [
+                                { cloudUrl: file.src, loading: false },
+                                ...prev,
+                              ]);
+                              setIsChanged(true);
+                            }
+                          }}
+                        >
+                          <img
+                            src={file.src}
+                            alt={file.name || "Gallery Image"}
+                            className="w-full h-28 object-cover rounded-md"
+                          />
+                          <p className="text-xs text-center mt-1 truncate text-gray-700">
+                            {file.name || "Image"}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

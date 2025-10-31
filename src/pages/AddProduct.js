@@ -1637,191 +1637,7 @@ const handleDeleteOption = (index) => {
 
   return (
     <main className="flex justify-center bg-gray-100 p-6">
-      {showDeleteOptionModal && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-    <div className="bg-white rounded-xl shadow-xl p-6 w-[400px] animate-fadeIn">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">
-        Delete Option
-      </h2>
-      <p className="text-gray-600 text-sm mb-6">
-        Are you sure you want to delete the option{" "}
-        <span className="font-semibold text-gray-800">
-          "{options[deleteOptionTarget]?.name}"
-        </span>
-        ? <br /> This will remove all its values and related variants.
-      </p>
-
-      <div className="flex justify-end gap-3">
-        <button
-          onClick={() => setShowDeleteOptionModal(false)}
-          className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() => {
-            const updated = [...options];
-            updated.splice(deleteOptionTarget, 1);
-            setOptions(updated);
-            setCombinations(generateVariants(updated));
-            setEditingOptionIndex(null);
-            setIsChanged(true);
-            setShowDeleteOptionModal(false);
-          }}
-          className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-      {isMediaModalVisible && (
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
-          <div className="bg-white w-full max-w-6xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
-            <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-                Manage Product Media
-              </h2>
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setIsMediaModalVisible(false)}
-                  className="bg-blue-600 text-white px-5 py-2 rounded-md font-medium shadow-sm hover:bg-blue-700 active:scale-95 transition-transform duration-150"
-                >
-                  Done
-                </button>
-                <button
-                  onClick={() => setIsMediaModalVisible(false)}
-                  className="text-gray-500 hover:text-gray-700 transition"
-                  title="Close"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-              <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center text-gray-500 bg-white shadow-sm transition hover:shadow-md">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleMediaUpload}
-                  className="hidden"
-                  id="mediaFileUpload"
-                />
-
-                <div className="flex gap-4 flex-wrap justify-center">
-                  <label
-                    htmlFor="mediaFileUpload"
-                    className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-md cursor-pointer 
-                         hover:bg-blue-700 active:scale-95 transition-transform duration-150"
-                  >
-                    Add New Images
-                  </label>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowGallery(true)}
-                    className="px-6 py-2.5 bg-gray-600 text-white font-medium rounded-lg shadow-md cursor-pointer 
-                         hover:bg-gray-700 active:scale-95 transition-transform duration-150"
-                  >
-                    Browse
-                  </button>
-                </div>
-
-                <p className="text-sm mt-3 text-gray-500">
-                  or drag & drop images here
-                </p>
-              </div>
-
-              <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Current Product Images
-                </h3>
-
-                <div className="flex flex-wrap gap-3">
-                  {selectedImages.length > 0 ? (
-                    selectedImages.map((img, i) => (
-                      <div
-                        key={i}
-                        className="relative border border-gray-300 rounded-lg overflow-hidden group hover:shadow-md transition"
-                      >
-                        <img
-                          src={img.cloudUrl || img.localUrl}
-                          alt={`Image ${i}`}
-                          className="w-24 h-24 sm:w-28 sm:h-28 object-cover"
-                        />
-                        {img.loading && (
-                          <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                            <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
-                          </div>
-                        )}
-                        <button
-                          onClick={() => {
-                            const updated = [...selectedImages];
-                            updated.splice(i, 1);
-                            setSelectedImages(updated);
-                            setIsChanged(true);
-                          }}
-                          className="absolute top-1 right-1 bg-white/80 rounded-full p-1 hover:bg-red-100 transition"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-500 italic text-sm">
-                      No product images yet.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Gallery Section */}
-              {showGallery && galleryImages.length > 0 && (
-                <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                    Gallery Images
-                  </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {galleryImages.map((file) => (
-                      <div
-                        key={file.id || file.src}
-                        className="border rounded-lg p-2 bg-white hover:border-blue-400 hover:shadow-md transition cursor-pointer"
-                        onClick={() => {
-                          if (
-                            !selectedImages.some(
-                              (img) => img.cloudUrl === file.src
-                            )
-                          ) {
-                            setSelectedImages((prev) => [
-                              { cloudUrl: file.src, loading: false },
-                              ...prev,
-                            ]);
-                            setIsChanged(true);
-                          }
-                        }}
-                      >
-                        <img
-                          src={file.src}
-                          alt={file.name || "Gallery Image"}
-                          className="w-full h-28 object-cover rounded-md"
-                        />
-                        <p className="text-xs text-center mt-1 truncate text-gray-700">
-                          {file.name || "Image"}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+    
 
       {toast.show && (
         <div
@@ -3497,6 +3313,191 @@ const handleDeleteOption = (index) => {
             </div>
           </div>
         )}
+          {showDeleteOptionModal && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+    <div className="bg-white rounded-xl shadow-xl p-6 w-[400px] animate-fadeIn">
+      <h2 className="text-lg font-semibold text-gray-800 mb-3">
+        Delete Option
+      </h2>
+      <p className="text-gray-600 text-sm mb-6">
+        Are you sure you want to delete the option{" "}
+        <span className="font-semibold text-gray-800">
+          "{options[deleteOptionTarget]?.name}"
+        </span>
+        ? <br /> This will remove all its values and related variants.
+      </p>
+
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setShowDeleteOptionModal(false)}
+          className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            const updated = [...options];
+            updated.splice(deleteOptionTarget, 1);
+            setOptions(updated);
+            setCombinations(generateVariants(updated));
+            setEditingOptionIndex(null);
+            setIsChanged(true);
+            setShowDeleteOptionModal(false);
+          }}
+          className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+      {isMediaModalVisible && (
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
+          <div className="bg-white w-full max-w-6xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                Manage Product Media
+              </h2>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsMediaModalVisible(false)}
+                  className="bg-blue-600 text-white px-5 py-2 rounded-md font-medium shadow-sm hover:bg-blue-700 active:scale-95 transition-transform duration-150"
+                >
+                  Done
+                </button>
+                <button
+                  onClick={() => setIsMediaModalVisible(false)}
+                  className="text-gray-500 hover:text-gray-700 transition"
+                  title="Close"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+              <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center text-gray-500 bg-white shadow-sm transition hover:shadow-md">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleMediaUpload}
+                  className="hidden"
+                  id="mediaFileUpload"
+                />
+
+                <div className="flex gap-4 flex-wrap justify-center">
+                  <label
+                    htmlFor="mediaFileUpload"
+                    className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-md cursor-pointer 
+                         hover:bg-blue-700 active:scale-95 transition-transform duration-150"
+                  >
+                    Add New Images
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowGallery(true)}
+                    className="px-6 py-2.5 bg-gray-600 text-white font-medium rounded-lg shadow-md cursor-pointer 
+                         hover:bg-gray-700 active:scale-95 transition-transform duration-150"
+                  >
+                    Browse
+                  </button>
+                </div>
+
+                <p className="text-sm mt-3 text-gray-500">
+                  or drag & drop images here
+                </p>
+              </div>
+
+              <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Product Images
+                </h3>
+
+                <div className="flex flex-wrap gap-3">
+                  {selectedImages.length > 0 ? (
+                    selectedImages.map((img, i) => (
+                      <div
+                        key={i}
+                        className="relative border border-gray-300 rounded-lg overflow-hidden group hover:shadow-md transition"
+                      >
+                        <img
+                          src={img.cloudUrl || img.localUrl}
+                          alt={`Image ${i}`}
+                          className="w-24 h-24 sm:w-28 sm:h-28 object-cover"
+                        />
+                        {img.loading && (
+                          <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                            <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => {
+                            const updated = [...selectedImages];
+                            updated.splice(i, 1);
+                            setSelectedImages(updated);
+                            setIsChanged(true);
+                          }}
+                          className="absolute top-1 right-1 bg-white/80 rounded-full p-1 hover:bg-red-100 transition"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 italic text-sm">
+                      No product images yet.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+             
+              {showGallery && galleryImages.length > 0 && (
+                <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                    Gallery Images
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {galleryImages.map((file) => (
+                      <div
+                        key={file.id || file.src}
+                        className="border rounded-lg p-2 bg-white hover:border-blue-400 hover:shadow-md transition cursor-pointer"
+                        onClick={() => {
+                          if (
+                            !selectedImages.some(
+                              (img) => img.cloudUrl === file.src
+                            )
+                          ) {
+                            setSelectedImages((prev) => [
+                              { cloudUrl: file.src, loading: false },
+                              ...prev,
+                            ]);
+                            setIsChanged(true);
+                          }
+                        }}
+                      >
+                        <img
+                          src={file.src}
+                          alt={file.name || "Gallery Image"}
+                          className="w-full h-28 object-cover rounded-md"
+                        />
+                        <p className="text-xs text-center mt-1 truncate text-gray-700">
+                          {file.name || "Image"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </main>
   );

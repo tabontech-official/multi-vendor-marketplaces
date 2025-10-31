@@ -2770,8 +2770,7 @@ const CategorySelector = () => {
               </div>
             )}
           </div>
-          {/* ✅ META FIELD SECTION */}
-          <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
+          {/* <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-medium text-gray-800">Metafields</h2>
               <div className="flex items-center space-x-2">
@@ -2863,7 +2862,7 @@ const CategorySelector = () => {
                 </button>
               </div>
             )}
-          </div>
+          </div> */}
 
           <div className="border rounded-lg p-4 shadow-sm bg-white mt-3">
             <h2 className="text-md font-medium text-gray-800 mb-3">

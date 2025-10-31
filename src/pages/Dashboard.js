@@ -1013,9 +1013,364 @@ const Dashboard = () => {
             <h2>No products available.</h2>
           </div>
         ) : (
-          <div className="max-sm:overflow-auto border rounded-lg">
-            <table className="w-full border-collapse bg-white">
-              <thead className="bg-gray-100 text-left text-gray-600 text-xs">
+          // <div className="max-sm:overflow-auto border rounded-lg">
+          //   <table className="w-full border-collapse bg-white">
+          //     <thead className="bg-gray-100 text-left text-gray-600 text-xs">
+          //       <tr>
+          //         <th className="p-3">
+          //           <input
+          //             type="checkbox"
+          //             className="w-4 h-4 cursor-pointer"
+          //             checked={selectAll}
+          //             onChange={() => handleSelectAll()}
+          //           />
+          //         </th>
+          //         <th className="p-3">Status</th>
+          //         <th className="p-3">Image</th>
+          //         <th
+          //           className="p-3 cursor-pointer"
+          //           onClick={() => {
+          //             let nextOrder = "asc";
+          //             if (sortField === "title" && sortOrder === "asc") {
+          //               nextOrder = "desc";
+          //             }
+          //             handleSort("title", nextOrder);
+          //           }}
+          //         >
+          //           <div className="flex items-center space-x-2">
+          //             <span className="font-medium">Listing Name</span>
+          //             {sortField === "title" ? (
+          //               sortOrder === "asc" ? (
+          //                 <FaArrowUp className="text-blue-500" />
+          //               ) : (
+          //                 <FaArrowDown className="text-blue-500" />
+          //               )
+          //             ) : (
+          //               <FaArrowUp className="text-gray-400" />
+          //             )}
+          //           </div>
+          //         </th>
+          //         {(userRole === "Dev Admin" ||
+          //           userRole === "Master Admin") && (
+          //           <th className="p-3">Publisher</th>
+          //         )}
+          //         <th className="p-3">Approval</th>
+          //         <th
+          //           className="p-3 cursor-pointer"
+          //           onClick={() => {
+          //             let nextOrder = "asc";
+          //             if (sortField === "sku" && sortOrder === "asc") {
+          //               nextOrder = "desc";
+          //             }
+          //             handleSort("sku", nextOrder);
+          //           }}
+          //         >
+          //           <div className="flex items-center space-x-2">
+          //             <span className="font-medium">SKU</span>
+          //             {sortField === "sku" ? (
+          //               sortOrder === "asc" ? (
+          //                 <FaArrowUp className="text-blue-500" />
+          //               ) : (
+          //                 <FaArrowDown className="text-blue-500" />
+          //               )
+          //             ) : (
+          //               <FaArrowUp className="text-gray-400" />
+          //             )}
+          //           </div>
+          //         </th>
+          //         <th
+          //           className="p-3 cursor-pointer"
+          //           onClick={() => {
+          //             let nextOrder = "asc";
+          //             if (sortField === "price" && sortOrder === "asc")
+          //               nextOrder = "desc";
+          //             handleSort("price", nextOrder);
+          //           }}
+          //         >
+          //           <div className="flex items-center space-x-2">
+          //             <span className="font-medium">Price</span>
+          //             {sortField === "price" ? (
+          //               sortOrder === "asc" ? (
+          //                 <FaArrowUp className="text-blue-500" />
+          //               ) : (
+          //                 <FaArrowDown className="text-blue-500" />
+          //               )
+          //             ) : (
+          //               <FaArrowUp className="text-gray-400" />
+          //             )}
+          //           </div>
+          //         </th>{" "}
+          //         <th
+          //           className="p-3 cursor-pointer"
+          //           onClick={() => {
+          //             let nextOrder = "asc";
+          //             if (
+          //               sortField === "compare_at_price" &&
+          //               sortOrder === "asc"
+          //             )
+          //               nextOrder = "desc";
+          //             handleSort("compare_at_price", nextOrder);
+          //           }}
+          //         >
+          //           <div className="flex items-center space-x-2">
+          //             <span className="font-medium">Compare at price</span>
+          //             {sortField === "compare_at_price" ? (
+          //               sortOrder === "asc" ? (
+          //                 <FaArrowUp className="text-blue-500" />
+          //               ) : (
+          //                 <FaArrowDown className="text-blue-500" />
+          //               )
+          //             ) : (
+          //               <FaArrowUp className="text-gray-400" />
+          //             )}
+          //           </div>
+          //         </th>
+          //         <th className="p-3">Type</th>
+          //         <th
+          //           className="p-3 cursor-pointer"
+          //           onClick={() => {
+          //             let nextOrder = "asc";
+          //             if (sortField === "inventory" && sortOrder === "asc")
+          //               nextOrder = "desc";
+          //             handleSort("inventory", nextOrder);
+          //           }}
+          //         >
+          //           <div className="flex items-center space-x-2">
+          //             <span className="font-medium">Inventory</span>
+          //             {sortField === "inventory" ? (
+          //               sortOrder === "asc" ? (
+          //                 <FaArrowUp className="text-blue-500" />
+          //               ) : (
+          //                 <FaArrowDown className="text-blue-500" />
+          //               )
+          //             ) : (
+          //               <FaArrowUp className="text-gray-400" />
+          //             )}
+          //           </div>
+          //         </th>{" "}
+          //         <th className="p-3">Vendor</th>
+          //         {admin && <th className="p-3">PUBLISHER</th>}
+          //         <th className="p-3">Edit</th>
+          //       </tr>
+          //     </thead>
+
+          //     <tbody>
+          //       {Loading ? (
+          //         <tr>
+          //           <td colSpan="100%" className="py-10">
+          //             <div className="flex justify-center items-center">
+          //               <svg
+          //                 className="animate-spin h-6 w-6 text-blue-500 mr-2"
+          //                 xmlns="http://www.w3.org/2000/svg"
+          //                 fill="none"
+          //                 viewBox="0 0 24 24"
+          //               >
+          //                 <circle
+          //                   className="opacity-25"
+          //                   cx="12"
+          //                   cy="12"
+          //                   r="10"
+          //                   stroke="currentColor"
+          //                   strokeWidth="4"
+          //                 ></circle>
+          //                 <path
+          //                   className="opacity-75"
+          //                   fill="currentColor"
+          //                   d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          //                 ></path>
+          //               </svg>
+          //               <span className="text-gray-600 text-sm">
+          //                 Fetching products...
+          //               </span>
+          //             </div>
+          //           </td>
+          //         </tr>
+          //       ) : filteredProducts.length > 0 ? (
+          //         filteredProducts.map((product) => (
+          //           <tr key={product._id} className="border-b hover:bg-gray-50">
+          //             <td className="p-3">
+          //               <input
+          //                 type="checkbox"
+          //                 className="w-4 h-4 cursor-pointer"
+          //                 checked={selectedProducts.includes(product._id)}
+          //                 onChange={() => toggleSelection(product._id)}
+          //               />
+          //             </td>
+          //             <td className="p-3">
+          //               <div
+          //                 className={`w-2 h-2 rounded-full ${
+          //                   product.status === "active"
+          //                     ? "bg-green-500"
+          //                     : "bg-red-500"
+          //                 }`}
+          //                 title={product.status}
+          //               />
+          //             </td>
+          //             <td className="p-3">
+          //               {product.images?.[0] ? (
+          //                 <img
+          //                   src={product.images[0].src}
+          //                   alt={product.images[0].alt || "Product image"}
+          //                   className="w-16 h-16 object-contain rounded border"
+          //                 />
+          //               ) : (
+          //                 <span className="text-gray-400 text-sm">
+          //                   No Image
+          //                 </span>
+          //               )}
+          //             </td>
+          //             <td className="p-3">
+          //               {product.title !== "Job Listing"
+          //                 ? product.title
+          //                 : "Job Search Listing"}
+          //             </td>
+          //             {(userRole === "Dev Admin" ||
+          //               userRole === "Master Admin") && (
+          //               <td>{product?.username}</td>
+          //             )}
+          //             <td className="p-3">
+          //               {product?.approvalStatus ? (
+          //                 <span
+          //                   className={`px-2 py-1 rounded-full text-xs font-semibold ${
+          //                     product.approvalStatus === "pending"
+          //                       ? "bg-yellow-200 text-yellow-800"
+          //                       : product.approvalStatus === "approved"
+          //                       ? "bg-green-200 text-green-800"
+          //                       : product.approvalStatus === "rejected"
+          //                       ? "bg-red-200 text-red-800"
+          //                       : "bg-gray-200 text-gray-700"
+          //                   }`}
+          //                 >
+          //                   {product.approvalStatus}
+          //                 </span>
+          //               ) : (
+          //                 "-"
+          //               )}
+          //             </td>
+          //             <td className="p-3">{product.variants[0]?.sku || "N/A"}</td>
+          //             <td className="p-3">${product.variants[0]?.price}</td>
+          //             <td className="p-3">
+          //               ${product.variants[0]?.compare_at_price || 0.0}
+          //             </td>
+          //             <td className="p-3">{product.product_type || "N/A"}</td>
+
+          //             <td className="p-3 text-sm text-gray-700">
+          //               {(() => {
+          //                 const totalQuantity = product.variants?.reduce(
+          //                   (sum, v) =>
+          //                     sum + (parseFloat(v.inventory_quantity) || 0),
+          //                   0
+          //                 );
+          //                 const variantCount = product.variants?.length || 0;
+
+          //                 return `${totalQuantity} total (${variantCount} variant${
+          //                   variantCount !== 1 ? "s" : ""
+          //                 })`;
+          //               })()}
+          //             </td>
+
+          //             <td className="p-3">{product.vendor}</td>
+          //             {admin && `#${product.shopifyId}`}
+          //             <td className="p-3">
+          //               <button
+          //                 className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
+          //                 onClick={() => OnEdit(product)}
+          //               >
+          //                 <MdEdit className="mr-1" />
+          //                 Edit
+          //               </button>
+          //             </td>
+          //           </tr>
+          //         ))
+          //       ) : (
+          //         <tr>
+          //           <td
+          //             colSpan="100%"
+          //             className="py-10 text-center text-gray-500"
+          //           >
+          //             No products available.
+          //           </td>
+          //         </tr>
+          //       )}
+          //     </tbody>
+          //   </table>
+
+          //   {totalPages > 1 && (
+          //     <div className="flex flex-col md:flex-row justify-between items-center  px-4 py-3 bg-gray-50 border border-gray-200 ">
+          //       <div className="text-sm text-gray-700 mb-2 md:mb-0">
+          //         Total Products{" "}
+          //         <span className="font-medium">{totalProducts}</span>
+          //       </div>
+
+          //       {/* Center: Page Numbers */}
+          //       <div className="flex items-center space-x-2 mb-2 md:mb-0">
+          //         <button
+          //           disabled={page === 1}
+          //           onClick={() => setPage((prev) => prev - 1)}
+          //           className={`px-3 py-1 border rounded ${
+          //             page === 1
+          //               ? "text-gray-400 cursor-not-allowed"
+          //               : "hover:bg-gray-200"
+          //           }`}
+          //         >
+          //           &lt;
+          //         </button>
+
+          //         {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+          //           (p) => (
+          //             <button
+          //               key={p}
+          //               onClick={() => setPage(p)}
+          //               className={`px-3 py-1 border rounded ${
+          //                 page === p
+          //                   ? "bg-blue-500 text-white"
+          //                   : "hover:bg-gray-200 text-gray-700"
+          //               }`}
+          //             >
+          //               {p}
+          //             </button>
+          //           )
+          //         )}
+
+          //         <button
+          //           disabled={page === totalPages}
+          //           onClick={() => setPage((prev) => prev + 1)}
+          //           className={`px-3 py-1 border rounded ${
+          //             page === totalPages
+          //               ? "text-gray-400 cursor-not-allowed"
+          //               : "hover:bg-gray-200"
+          //           }`}
+          //         >
+          //           &gt;
+          //         </button>
+          //       </div>
+
+          //       {/* Right: Limit Selector */}
+          //       <div className="flex items-center space-x-2">
+          //         <label className="text-sm font-medium text-gray-700">
+          //           Products per page:
+          //         </label>
+          //         <select
+          //           className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          //           value={limit}
+          //           onChange={(e) => {
+          //             setLimit(Number(e.target.value));
+          //             setPage(1); // reset to page 1 on limit change
+          //             setProducts([]);
+          //             setFilteredProducts([]);
+          //           }}
+          //         >
+          //           <option value={50}>50</option>
+          //           <option value={100}>100</option>
+          //           <option value={200}>200</option>
+          //         </select>
+          //       </div>
+          //     </div>
+          //   )}
+          // </div>
+          <div className="w-full overflow-x-auto border rounded-lg bg-white shadow-sm">
+            <table className="min-w-full border-collapse text-sm">
+              <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0">
                 <tr>
                   <th className="p-3">
                     <input
@@ -1025,15 +1380,14 @@ const Dashboard = () => {
                       onChange={() => handleSelectAll()}
                     />
                   </th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Image</th>
+                  <th className="p-3 whitespace-nowrap">Status</th>
+                  <th className="p-3 whitespace-nowrap">Image</th>
                   <th
-                    className="p-3 cursor-pointer"
+                    className="p-3 cursor-pointer whitespace-nowrap"
                     onClick={() => {
                       let nextOrder = "asc";
-                      if (sortField === "title" && sortOrder === "asc") {
+                      if (sortField === "title" && sortOrder === "asc")
                         nextOrder = "desc";
-                      }
                       handleSort("title", nextOrder);
                     }}
                   >
@@ -1050,145 +1404,41 @@ const Dashboard = () => {
                       )}
                     </div>
                   </th>
+
                   {(userRole === "Dev Admin" ||
                     userRole === "Master Admin") && (
-                    <th className="p-3">Publisher</th>
+                    <th className="p-3 whitespace-nowrap">Publisher</th>
                   )}
-                  <th className="p-3">Approval</th>
-                  <th
-                    className="p-3 cursor-pointer"
-                    onClick={() => {
-                      let nextOrder = "asc";
-                      if (sortField === "sku" && sortOrder === "asc") {
-                        nextOrder = "desc";
-                      }
-                      handleSort("sku", nextOrder);
-                    }}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium">SKU</span>
-                      {sortField === "sku" ? (
-                        sortOrder === "asc" ? (
-                          <FaArrowUp className="text-blue-500" />
-                        ) : (
-                          <FaArrowDown className="text-blue-500" />
-                        )
-                      ) : (
-                        <FaArrowUp className="text-gray-400" />
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="p-3 cursor-pointer"
-                    onClick={() => {
-                      let nextOrder = "asc";
-                      if (sortField === "price" && sortOrder === "asc")
-                        nextOrder = "desc";
-                      handleSort("price", nextOrder);
-                    }}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium">Price</span>
-                      {sortField === "price" ? (
-                        sortOrder === "asc" ? (
-                          <FaArrowUp className="text-blue-500" />
-                        ) : (
-                          <FaArrowDown className="text-blue-500" />
-                        )
-                      ) : (
-                        <FaArrowUp className="text-gray-400" />
-                      )}
-                    </div>
-                  </th>{" "}
-                  <th
-                    className="p-3 cursor-pointer"
-                    onClick={() => {
-                      let nextOrder = "asc";
-                      if (
-                        sortField === "compare_at_price" &&
-                        sortOrder === "asc"
-                      )
-                        nextOrder = "desc";
-                      handleSort("compare_at_price", nextOrder);
-                    }}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium">Compare at price</span>
-                      {sortField === "compare_at_price" ? (
-                        sortOrder === "asc" ? (
-                          <FaArrowUp className="text-blue-500" />
-                        ) : (
-                          <FaArrowDown className="text-blue-500" />
-                        )
-                      ) : (
-                        <FaArrowUp className="text-gray-400" />
-                      )}
-                    </div>
-                  </th>
-                  <th className="p-3">Type</th>
-                  <th
-                    className="p-3 cursor-pointer"
-                    onClick={() => {
-                      let nextOrder = "asc";
-                      if (sortField === "inventory" && sortOrder === "asc")
-                        nextOrder = "desc";
-                      handleSort("inventory", nextOrder);
-                    }}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium">Inventory</span>
-                      {sortField === "inventory" ? (
-                        sortOrder === "asc" ? (
-                          <FaArrowUp className="text-blue-500" />
-                        ) : (
-                          <FaArrowDown className="text-blue-500" />
-                        )
-                      ) : (
-                        <FaArrowUp className="text-gray-400" />
-                      )}
-                    </div>
-                  </th>{" "}
-                  <th className="p-3">Vendor</th>
-                  {admin && <th className="p-3">PUBLISHER</th>}
-                  <th className="p-3">Edit</th>
+                  <th className="p-3 whitespace-nowrap">Approval</th>
+                  <th className="p-3 whitespace-nowrap">SKU</th>
+                  <th className="p-3 whitespace-nowrap">Price</th>
+                  <th className="p-3 whitespace-nowrap">Compare Price</th>
+                  <th className="p-3 whitespace-nowrap">Type</th>
+                  <th className="p-3 whitespace-nowrap">Inventory</th>
+                  <th className="p-3 whitespace-nowrap">Vendor</th>
+                  {admin && (
+                    <th className="p-3 whitespace-nowrap">Publisher ID</th>
+                  )}
+                  <th className="p-3 whitespace-nowrap">Edit</th>
                 </tr>
               </thead>
 
-       
               <tbody>
                 {Loading ? (
                   <tr>
-                    <td colSpan="100%" className="py-10">
-                      <div className="flex justify-center items-center">
-                        <svg
-                          className="animate-spin h-6 w-6 text-blue-500 mr-2"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                          ></path>
-                        </svg>
-                        <span className="text-gray-600 text-sm">
-                          Fetching products...
-                        </span>
-                      </div>
+                    <td
+                      colSpan="100%"
+                      className="py-10 text-center text-gray-500"
+                    >
+                      Loading...
                     </td>
                   </tr>
                 ) : filteredProducts.length > 0 ? (
                   filteredProducts.map((product) => (
-                    <tr key={product._id} className="border-b hover:bg-gray-50">
+                    <tr
+                      key={product._id}
+                      className="border-b hover:bg-gray-50 transition-colors"
+                    >
                       <td className="p-3">
                         <input
                           type="checkbox"
@@ -1197,22 +1447,23 @@ const Dashboard = () => {
                           onChange={() => toggleSelection(product._id)}
                         />
                       </td>
+
                       <td className="p-3">
-                        <div
-                          className={`w-2 h-2 rounded-full ${
+                        <span
+                          className={`inline-block w-3 h-3 rounded-full ${
                             product.status === "active"
                               ? "bg-green-500"
                               : "bg-red-500"
                           }`}
-                          title={product.status}
-                        />
+                        ></span>
                       </td>
+
                       <td className="p-3">
                         {product.images?.[0] ? (
                           <img
                             src={product.images[0].src}
                             alt={product.images[0].alt || "Product image"}
-                            className="w-16 h-16 object-contain rounded border"
+                            className="w-14 h-14 object-cover rounded border"
                           />
                         ) : (
                           <span className="text-gray-400 text-sm">
@@ -1220,15 +1471,20 @@ const Dashboard = () => {
                           </span>
                         )}
                       </td>
-                      <td className="p-3">
+
+                      <td className="p-3 font-medium text-gray-800">
                         {product.title !== "Job Listing"
                           ? product.title
                           : "Job Search Listing"}
                       </td>
+
                       {(userRole === "Dev Admin" ||
                         userRole === "Master Admin") && (
-                        <td>{product?.username}</td>
+                        <td className="p-3 text-gray-700">
+                          {product?.username}
+                        </td>
                       )}
+
                       <td className="p-3">
                         {product?.approvalStatus ? (
                           <span
@@ -1248,16 +1504,19 @@ const Dashboard = () => {
                           "-"
                         )}
                       </td>
-                      <td className="p-3">{product.variants[0]?.sku || "N/A"}</td>
-                      <td className="p-3">${product.variants[0]?.price}</td>
+
                       <td className="p-3">
-                        ${product.variants[0]?.compare_at_price || 0.0}
+                        {product.variants?.[0]?.sku || "N/A"}
+                      </td>
+                      <td className="p-3">
+                        ${product.variants?.[0]?.price || 0.0}
+                      </td>
+                      <td className="p-3">
+                        ${product.variants?.[0]?.compare_at_price || 0.0}
                       </td>
                       <td className="p-3">{product.product_type || "N/A"}</td>
-                      {/* <td className="p-3">
-                        {product.variants[0]?.inventory_quantity}
-                      </td> */}
-                      <td className="p-3 text-sm text-gray-700">
+
+                      <td className="p-3 text-gray-700 text-sm">
                         {(() => {
                           const totalQuantity = product.variants?.reduce(
                             (sum, v) =>
@@ -1265,18 +1524,22 @@ const Dashboard = () => {
                             0
                           );
                           const variantCount = product.variants?.length || 0;
-
                           return `${totalQuantity} total (${variantCount} variant${
                             variantCount !== 1 ? "s" : ""
                           })`;
                         })()}
                       </td>
 
-                      <td className="p-3">{product.vendor}</td>
-                      {admin && `#${product.shopifyId}`}
+                      <td className="p-3">{product.vendor || "N/A"}</td>
+                      {admin && (
+                        <td className="p-3 text-gray-600">
+                          #{product.shopifyId}
+                        </td>
+                      )}
+
                       <td className="p-3">
                         <button
-                          className="flex items-center text-blue-500 hover:text-blue-700 transition duration-200"
+                          className="flex items-center text-blue-500 hover:text-blue-700 transition"
                           onClick={() => OnEdit(product)}
                         >
                           <MdEdit className="mr-1" />
@@ -1297,81 +1560,6 @@ const Dashboard = () => {
                 )}
               </tbody>
             </table>
-            {/* Pagination */}
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex flex-col md:flex-row justify-between items-center  px-4 py-3 bg-gray-50 border border-gray-200 ">
-                {/* Left: Total Products */}
-                <div className="text-sm text-gray-700 mb-2 md:mb-0">
-                  Total Products{" "}
-                  <span className="font-medium">{totalProducts}</span>
-                </div>
-
-                {/* Center: Page Numbers */}
-                <div className="flex items-center space-x-2 mb-2 md:mb-0">
-                  <button
-                    disabled={page === 1}
-                    onClick={() => setPage((prev) => prev - 1)}
-                    className={`px-3 py-1 border rounded ${
-                      page === 1
-                        ? "text-gray-400 cursor-not-allowed"
-                        : "hover:bg-gray-200"
-                    }`}
-                  >
-                    &lt;
-                  </button>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (p) => (
-                      <button
-                        key={p}
-                        onClick={() => setPage(p)}
-                        className={`px-3 py-1 border rounded ${
-                          page === p
-                            ? "bg-blue-500 text-white"
-                            : "hover:bg-gray-200 text-gray-700"
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    )
-                  )}
-
-                  <button
-                    disabled={page === totalPages}
-                    onClick={() => setPage((prev) => prev + 1)}
-                    className={`px-3 py-1 border rounded ${
-                      page === totalPages
-                        ? "text-gray-400 cursor-not-allowed"
-                        : "hover:bg-gray-200"
-                    }`}
-                  >
-                    &gt;
-                  </button>
-                </div>
-
-                {/* Right: Limit Selector */}
-                <div className="flex items-center space-x-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Products per page:
-                  </label>
-                  <select
-                    className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={limit}
-                    onChange={(e) => {
-                      setLimit(Number(e.target.value));
-                      setPage(1); // reset to page 1 on limit change
-                      setProducts([]);
-                      setFilteredProducts([]);
-                    }}
-                  >
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                    <option value={200}>200</option>
-                  </select>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>

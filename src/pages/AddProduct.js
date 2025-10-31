@@ -2264,7 +2264,7 @@ const CategorySelector = () => {
                           <div className="font-medium text-gray-700">
                             {combination.parent}
                           </div>
-                          <button
+                          {/* <button
                             onClick={() => toggleChildOptions(index)}
                             className="text-gray-500"
                           >
@@ -2273,7 +2273,26 @@ const CategorySelector = () => {
                             ) : (
                               <MdOutlineKeyboardArrowDown className="text-2xl" />
                             )}
-                          </button>
+                          </button> */}
+                          <div
+                            className="flex items-center justify-between gap-6 cursor-pointer"
+                            onClick={() => toggleChildOptions(index)} // ✅ Only one click handler
+                          >
+                            <button
+                              type="button"
+                              className="text-gray-500 hover:text-gray-700 transition"
+                              onClick={(e) => {
+                                e.stopPropagation(); // ✅ Prevent parent click from firing twice
+                                toggleChildOptions(index);
+                              }}
+                            >
+                              {expandedParents.includes(index) ? (
+                                <IoIosArrowUp className="text-xl transition-transform duration-200" />
+                              ) : (
+                                <MdOutlineKeyboardArrowDown className="text-2xl transition-transform duration-200" />
+                              )}
+                            </button>
+                          </div>
                         </div>
 
                         {expandedParents.includes(index) && (

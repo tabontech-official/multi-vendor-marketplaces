@@ -139,7 +139,7 @@ Headers:
             </h2>
             <div className="bg-black text-white p-4 rounded-md font-mono text-sm overflow-x-auto">
               <pre>
-{`fetch("http://localhost:5000/product/getProduct/USER_ID", {
+{`fetch("https://multi-vendor-marketplace.vercel.app/product/getProduct/USER_ID", {
   method: "GET",
   headers: {
     "x-api-key": "your_public_key_here",

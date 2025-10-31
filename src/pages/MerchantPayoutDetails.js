@@ -50,7 +50,7 @@ const MerchantPayoutDetails = () => {
     setPaypalLoading(true);
     try {
       const res = await axios.post(
-        "http://localhost:5000/order/addPaypal",
+        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
         {
           merchantId: userId,
           payPal: account,
@@ -99,7 +99,7 @@ const MerchantPayoutDetails = () => {
 
   //     try {
   //       const res = await fetch(
-  //         `http://localhost:5000/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+  //         `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
   //           payoutDate
   //         )}&status=${status}&userId=${merchantId}`
   //       );
@@ -154,7 +154,7 @@ const MerchantPayoutDetails = () => {
 
       try {
         const res = await fetch(
-          `http://localhost:5000/order/getPayoutByQuery?payoutDate=${encodeURIComponent(
+          `https://multi-vendor-marketplace.vercel.app/order/getPayoutByQuery?payoutDate=${encodeURIComponent(
             payoutDate
           )}&status=${status}&userId=${merchantId}`,
           {
@@ -218,7 +218,7 @@ const MerchantPayoutDetails = () => {
     const apiSecretKey = localStorage.getItem("apiSecretKey");
     try {
       const res = await fetch(
-        "http://localhost:5000/order/addReferenceNumber",
+        "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
         {
           method: "POST",
 

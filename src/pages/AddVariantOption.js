@@ -38,7 +38,7 @@ const AddVariantOption = () => {
     setLoading(true);
     try {
       const res = await fetch(
-        "http://localhost:5000/variantOption/addOptions",
+        "https://multi-vendor-marketplace.vercel.app/variantOption/addOptions",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -13,13 +13,16 @@ const ManageVariantOptions = () => {
   const [file, setFile] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [editModal, setEditModal] = useState({ show: false, option: null });
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  const [loading, setLoading] = useState(true);
 
+  // 🔹 Fetch all variant options
   useEffect(() => {
     const fetchOptions = async () => {
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
+          "http://localhost:5000/variantOption/getOptions"
         );
         const data = await response.json();
         if (response.ok) setOptions(data);
@@ -27,15 +30,24 @@ const ManageVariantOptions = () => {
       } catch (err) {
         console.error("Error fetching options:", err);
         setError("An error occurred while fetching options.");
+      } finally {
+        setLoading(false);
       }
     };
     fetchOptions();
   }, []);
 
+  // 🔹 Show Toast
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+  };
+
+  // 🔹 Export CSV
   const handleExport = async () => {
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/variantOption/getCsvForOptions"
+        "http://localhost:5000/variantOption/getCsvForOptions"
       );
       if (response.ok) {
         const blob = await response.blob();
@@ -46,22 +58,15 @@ const ManageVariantOptions = () => {
         document.body.appendChild(a);
         a.click();
         a.remove();
-      } else {
-        showToast("error", "Failed to export CSV.");
-      }
+      } else showToast("error", "Failed to export CSV.");
     } catch (error) {
       console.error("Export Error:", error);
     }
   };
-  const showToast = (type, message) => {
-    setToast({ show: true, type, message });
-    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
-  };
+
+  // 🔹 Import CSV
   const handleImport = async () => {
-    if (!file) {
-      showToast("error", "Please select a CSV file first.");
-      return;
-    }
+    if (!file) return showToast("error", "Please select a CSV file first.");
 
     const formData = new FormData();
     formData.append("file", file);
@@ -69,18 +74,18 @@ const ManageVariantOptions = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/variantOption/importOptions",
+        "http://localhost:5000/variantOption/importOptions",
         { method: "POST", body: formData }
       );
 
       const result = await response.json();
-
       if (response.ok) {
         showToast("success", `${result.count} options imported successfully.`);
         setShowModal(false);
         setFile(null);
+
         const updated = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
+          "http://localhost:5000/variantOption/getOptions"
         );
         setOptions(await updated.json());
       } else {
@@ -94,16 +99,15 @@ const ManageVariantOptions = () => {
     }
   };
 
+  // 🔹 Delete Selected Options
   const handleDeleteOptions = async () => {
     if (selectedOptionIds.length === 0)
       return showToast("error", "Please select at least one option to delete.");
 
     try {
       await axios.delete(
-        "https://multi-vendor-marketplace.vercel.app/variantOption/deleteOptions",
-        {
-          data: { optionIds: selectedOptionIds },
-        }
+        "http://localhost:5000/variantOption/deleteOptions",
+        { data: { optionIds: selectedOptionIds } }
       );
       showToast("success", "Selected options deleted!");
       setOptions((prev) =>
@@ -116,13 +120,38 @@ const ManageVariantOptions = () => {
     }
   };
 
+  // 🔹 Save Edited Option
+  const handleEditSave = async () => {
+    const { option } = editModal;
+    if (!option.optionName || !option.optionValues)
+      return showToast("error", "Please fill all fields.");
+
+    try {
+      const response = await axios.put(
+        "http://localhost:5000/variantOption/updateOption",
+        option
+      );
+      if (response.status === 200) {
+        showToast("success", "Option updated successfully!");
+        setOptions((prev) =>
+          prev.map((opt) => (opt._id === option._id ? option : opt))
+        );
+        setEditModal({ show: false, option: null });
+      }
+    } catch (error) {
+      console.error("Update Error:", error);
+      showToast("error", "Failed to update option.");
+    }
+  };
+
   return (
     <div className="p-6">
+      {/* ✅ Toast */}
       {toast.show && (
         <div
           className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
             toast.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
+          } text-white z-50`}
         >
           {toast.type === "success" ? (
             <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
@@ -132,31 +161,31 @@ const ManageVariantOptions = () => {
           <span>{toast.message}</span>
         </div>
       )}
+
+      {/* Header */}
       <div className="flex justify-between items-center pb-4 border-b">
         <div className="flex items-center space-x-2">
           <IoOptionsOutline size={26} className="text-gray-700" />
           <h1 className="font-semibold text-2xl text-gray-800">
-            Variant Options
+            Manage Variant Options
           </h1>
         </div>
 
-        <div className="flex space-x-2 mt-4">
+        <div className="flex space-x-2">
           {selectedOptionIds.length > 0 && (
             <button
-              className="bg-red-500 text-white px-4 py-2 rounded-md"
               onClick={handleDeleteOptions}
+              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
             >
               Delete
             </button>
           )}
-
           <button
             onClick={handleExport}
             className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
           >
             Export
           </button>
-
           <button
             onClick={() => setShowModal(true)}
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
@@ -172,65 +201,83 @@ const ManageVariantOptions = () => {
         </div>
       </div>
 
+      {/* Error */}
       {error && <div className="text-red-500 mt-3">{error}</div>}
 
-      <table className="w-full mt-4 border bg-white rounded-lg shadow-sm">
-        <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-          <tr>
-            <th className="p-3">Select</th>
-            <th className="p-3">ID</th>
-            <th className="p-3">Option Names</th>
-            <th className="p-3">Option Values</th>
-          </tr>
-        </thead>
-        <tbody>
-          {options.length ? (
-            options.map((option, i) => (
-              <tr
-                key={option._id}
-                className={`border-b ${
-                  i % 2 === 0 ? "bg-white" : "bg-gray-50"
-                } hover:bg-gray-100`}
-              >
-                <td className="p-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedOptionIds.includes(option._id)}
-                    onChange={(e) =>
-                      setSelectedOptionIds((prev) =>
-                        e.target.checked
-                          ? [...prev, option._id]
-                          : prev.filter((id) => id !== option._id)
-                      )
-                    }
-                  />
-                </td>
-                <td className="p-3 text-sm text-gray-700">{option._id}</td>
-                <td className="p-3 text-sm text-gray-800">
-                  {Array.isArray(option.optionName)
-                    ? option.optionName.join(", ")
-                    : option.optionName}
-                </td>
-                <td className="p-3 text-sm text-gray-800">
-                  {Array.isArray(option.optionValues)
-                    ? option.optionValues.join(", ")
-                    : option.optionValues}
+      {/* Loading */}
+      {loading ? (
+        <div className="text-center py-10 text-gray-500">Loading options...</div>
+      ) : (
+        <table className="w-full mt-4 border bg-white rounded-lg shadow-sm">
+          <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+            <tr>
+              <th className="p-3">Select</th>
+              <th className="p-3">ID</th>
+              <th className="p-3">Option Name</th>
+              <th className="p-3">Option Values</th>
+              <th className="p-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {options.length ? (
+              options.map((option, i) => (
+                <tr
+                  key={option._id}
+                  className={`border-b ${
+                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  } hover:bg-gray-100`}
+                >
+                  <td className="p-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedOptionIds.includes(option._id)}
+                      onChange={(e) =>
+                        setSelectedOptionIds((prev) =>
+                          e.target.checked
+                            ? [...prev, option._id]
+                            : prev.filter((id) => id !== option._id)
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="p-3 text-sm text-gray-700">{option._id}</td>
+                  <td className="p-3 text-sm text-gray-800">
+                    {Array.isArray(option.optionName)
+                      ? option.optionName.join(", ")
+                      : option.optionName}
+                  </td>
+                  <td className="p-3 text-sm text-gray-800">
+                    {Array.isArray(option.optionValues)
+                      ? option.optionValues.join(", ")
+                      : option.optionValues}
+                  </td>
+                  <td className="p-3 text-right">
+                    <button
+                      onClick={() =>
+                        setEditModal({
+                          show: true,
+                          option: { ...option },
+                        })
+                      }
+                      className="text-blue-500 hover:underline text-sm font-medium"
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="text-center text-gray-500 py-6 text-sm">
+                  No options found.
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan={4}
-                className="text-center text-gray-500 py-6 text-sm"
-              >
-                No options found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      )}
 
+      {/* Import Modal */}
       <AnimatePresence>
         {showModal && (
           <motion.div
@@ -297,6 +344,77 @@ const ManageVariantOptions = () => {
                   }`}
                 >
                   {isImporting ? "Importing..." : "Upload"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Modal */}
+      <AnimatePresence>
+        {editModal.show && (
+          <motion.div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white rounded-xl shadow-lg w-full max-w-md p-6"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+            >
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                Edit Variant Option
+              </h2>
+
+              <label className="block mb-3">
+                <span className="text-gray-700">Option Name</span>
+                <input
+                  type="text"
+                  value={editModal.option.optionName}
+                  onChange={(e) =>
+                    setEditModal((prev) => ({
+                      ...prev,
+                      option: { ...prev.option, optionName: e.target.value },
+                    }))
+                  }
+                  className="w-full border px-3 py-2 rounded-md mt-1"
+                />
+              </label>
+
+              <label className="block mb-3">
+                <span className="text-gray-700">Option Values (comma separated)</span>
+                <input
+                  type="text"
+                  value={editModal.option.optionValues}
+                  onChange={(e) =>
+                    setEditModal((prev) => ({
+                      ...prev,
+                      option: {
+                        ...prev.option,
+                        optionValues: e.target.value.split(",").map((v) => v.trim()),
+                      },
+                    }))
+                  }
+                  className="w-full border px-3 py-2 rounded-md mt-1"
+                />
+              </label>
+
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => setEditModal({ show: false, option: null })}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleEditSave}
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+                >
+                  Save Changes
                 </button>
               </div>
             </motion.div>

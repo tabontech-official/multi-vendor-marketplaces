@@ -44,7 +44,7 @@ const ManageUser = () => {
         }
 
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getUserByRole/${id}`
+          `http://localhost:5000/auth/getUserByRole/${id}`
         );
 
         if (!response.ok) {
@@ -126,7 +126,7 @@ const ManageUser = () => {
 
   //   try {
   //     const response = await fetch(
-  //       "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+  //       "http://localhost:5000/auth/createUserTagsModule",
   //       {
   //         method: "POST",
   //         headers: {
@@ -186,7 +186,7 @@ const ManageUser = () => {
       }
 
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+        "http://localhost:5000/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {
@@ -277,7 +277,7 @@ const ManageUser = () => {
       (userRole === "Dev Admin" || userRole === "Master Admin") &&
       role === "Merchant Staff"
     ) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/auth/getAllMerchant`)
+      fetch(`http://localhost:5000/auth/getAllMerchant`)
         .then((res) => res.json())
         .then((data) => setMerchantList(data))
         .catch((err) => console.error("Failed to load merchants", err));

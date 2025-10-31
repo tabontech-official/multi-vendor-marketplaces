@@ -36,7 +36,7 @@ const FinanceSetting = () => {
 
       try {
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`
+          `http://localhost:5000/auth/getMerchantAccountDetails/${userId}`
         );
         const data = await res.json();
 
@@ -119,7 +119,7 @@ const FinanceSetting = () => {
       };
 
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/addMerchantAccountDetails",
+        "http://localhost:5000/auth/addMerchantAccountDetails",
         {
           method: "POST",
           headers: {

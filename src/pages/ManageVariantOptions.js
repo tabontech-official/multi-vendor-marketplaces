@@ -47,7 +47,7 @@ const ManageVariantOptions = () => {
         a.click();
         a.remove();
       } else {
-        showToast("error","Failed to export CSV.");
+        showToast("error", "Failed to export CSV.");
       }
     } catch (error) {
       console.error("Export Error:", error);
@@ -59,7 +59,7 @@ const ManageVariantOptions = () => {
   };
   const handleImport = async () => {
     if (!file) {
-      showToast("error","Please select a CSV file first.");
+      showToast("error", "Please select a CSV file first.");
       return;
     }
 
@@ -76,7 +76,7 @@ const ManageVariantOptions = () => {
       const result = await response.json();
 
       if (response.ok) {
-        showToast("success",`${result.count} options imported successfully.`);
+        showToast("success", `${result.count} options imported successfully.`);
         setShowModal(false);
         setFile(null);
         const updated = await fetch(
@@ -84,11 +84,11 @@ const ManageVariantOptions = () => {
         );
         setOptions(await updated.json());
       } else {
-        showToast("error",result.message || "Failed to import CSV.");
+        showToast("error", result.message || "Failed to import CSV.");
       }
     } catch (error) {
       console.error("Import Error:", error);
-      showToast("error","Error importing CSV file.");
+      showToast("error", "Error importing CSV file.");
     } finally {
       setIsImporting(false);
     }
@@ -96,7 +96,7 @@ const ManageVariantOptions = () => {
 
   const handleDeleteOptions = async () => {
     if (selectedOptionIds.length === 0)
-      return showToast("error","Please select at least one option to delete.");
+      return showToast("error", "Please select at least one option to delete.");
 
     try {
       await axios.delete(
@@ -105,14 +105,14 @@ const ManageVariantOptions = () => {
           data: { optionIds: selectedOptionIds },
         }
       );
-      showToast("success","Selected options deleted!");
+      showToast("success", "Selected options deleted!");
       setOptions((prev) =>
         prev.filter((opt) => !selectedOptionIds.includes(opt._id))
       );
       setSelectedOptionIds([]);
     } catch (error) {
       console.error("Delete Error:", error);
-      showToast("error","Error deleting options.");
+      showToast("error", "Error deleting options.");
     }
   };
 
@@ -162,6 +162,12 @@ const ManageVariantOptions = () => {
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
           >
             Import CSV
+          </button>
+          <button
+            onClick={() => navigate("/add/option")}
+            className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+          >
+            Add Option
           </button>
         </div>
       </div>

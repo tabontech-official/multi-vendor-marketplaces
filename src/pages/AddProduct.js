@@ -511,6 +511,10 @@ const CategorySelector = () => {
   }, [options]);
 
   const handleOpenForm = () => {
+    if (options.length >= 3) {
+      showToast("error", "You can only add up to 3 option names.");
+      return;
+    }
     setNewOption({ name: "", values: [""] });
     setShowVariantForm(true);
   };
@@ -685,6 +689,8 @@ const CategorySelector = () => {
   //       .catch((err) => console.error("Failed to fetch images:", err));
   //   }
   // }, [isPopupVisible, product]);
+  const [showGallery, setShowGallery] = useState(false);
+
   useEffect(() => {
     const userId = localStorage.getItem("userid");
     const apiKey = localStorage.getItem("apiKey");
@@ -944,6 +950,95 @@ const CategorySelector = () => {
     }
   }, [product]);
 
+  // const handleImageChange = async (event) => {
+  //   const apiKey = localStorage.getItem("apiKey");
+  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
+  //   const userId = localStorage.getItem("userid");
+  //   const token = localStorage.getItem("usertoken");
+
+  //   const files = Array.from(event.target.files);
+  //   if (files.length === 0) return;
+
+  //   const previews = files.map((file) => ({
+  //     localUrl: URL.createObjectURL(file),
+  //     loading: true,
+  //     cloudUrl: null,
+  //   }));
+
+  //   setGalleryImages((prev) => [...previews, ...prev]);
+
+  //   for (const file of files) {
+  //     const formData = new FormData();
+  //     formData.append("file", file);
+  //     formData.append("upload_preset", "images");
+
+  //     try {
+  //       const res = await fetch(
+  //         "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+  //         {
+  //           method: "POST",
+  //           body: formData,
+  //         }
+  //       );
+  //       const data = await res.json();
+
+  //       if (data.secure_url) {
+  //         await fetch(
+  //           "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+  //           {
+  //             method: "POST",
+  //             headers: {
+  //               Authorization: `Bearer ${token}`,
+  //               "x-api-key": apiKey,
+  //               "x-api-secret": apiSecretKey,
+  //               "Content-Type": "application/json",
+  //             },
+  //             body: JSON.stringify({
+  //               userId,
+  //               images: [data.secure_url],
+  //             }),
+  //           }
+  //         );
+
+  //         setGalleryImages((prev) => [
+  //           { id: Date.now(), src: data.secure_url, name: file.name },
+  //           ...prev,
+  //         ]);
+
+  //         if (currentVariant) {
+  //           const parentValue = combinations[currentVariant.index]?.parent;
+  //           const combinationKey =
+  //             options.length === 1
+  //               ? currentVariant.child
+  //               : `${parentValue} / ${currentVariant.child}`;
+
+  //           const normalizedKey = combinationKey.replace(/['"]/g, "").trim();
+  //           const handleAlt = normalizedKey
+  //             .replace(/\s*\/\s*/g, "-")
+  //             .toLowerCase();
+
+  //           setVariantImages((prev) => ({
+  //             ...prev,
+  //             [normalizedKey]: [
+  //               ...(Array.isArray(prev[normalizedKey])
+  //                 ? prev[normalizedKey]
+  //                 : []),
+  //               {
+  //                 preview: data.secure_url,
+  //                 alt: handleAlt,
+  //                 loading: false,
+  //               },
+  //             ],
+  //           }));
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("Image upload failed:", error);
+  //       showToast("error", "Image upload failed");
+  //     }
+  //   }
+  // };
+
   const handleImageChange = async (event) => {
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
@@ -953,15 +1048,39 @@ const CategorySelector = () => {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
 
+    const parentValue = combinations[currentVariant?.index]?.parent;
+    const combinationKey =
+      options.length === 1
+        ? currentVariant?.child
+        : `${parentValue} / ${currentVariant?.child}`;
+    const normalizedKey = combinationKey?.replace(/['"]/g, "").trim();
+    const altText = normalizedKey?.replace(/\s*\/\s*/g, "-").toLowerCase();
+
     const previews = files.map((file) => ({
-      localUrl: URL.createObjectURL(file),
+      id: Date.now() + Math.random(),
+      preview: URL.createObjectURL(file),
+      alt: altText,
       loading: true,
-      cloudUrl: null,
     }));
 
-    setGalleryImages((prev) => [...previews, ...prev]);
+    setVariantImages((prev) => ({
+      ...prev,
+      [normalizedKey]: [
+        ...(Array.isArray(prev[normalizedKey]) ? prev[normalizedKey] : []),
+        ...previews,
+      ],
+    }));
 
-    for (const file of files) {
+    setGalleryImages((prev) => [
+      ...previews.map((p) => ({
+        id: p.id,
+        src: p.preview,
+        name: "Uploading...",
+      })),
+      ...prev,
+    ]);
+
+    for (const [index, file] of files.entries()) {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", "images");
@@ -994,44 +1113,30 @@ const CategorySelector = () => {
             }
           );
 
+          setVariantImages((prev) => ({
+            ...prev,
+            [normalizedKey]: prev[normalizedKey].map((img) =>
+              img.preview === previews[index].preview
+                ? { ...img, preview: data.secure_url, loading: false }
+                : img
+            ),
+          }));
+
           setGalleryImages((prev) => [
             { id: Date.now(), src: data.secure_url, name: file.name },
-            ...prev,
+            ...prev.filter((img) => img.src !== previews[index].preview),
           ]);
-
-          if (currentVariant) {
-            const parentValue = combinations[currentVariant.index]?.parent;
-            const combinationKey =
-              options.length === 1
-                ? currentVariant.child
-                : `${parentValue} / ${currentVariant.child}`;
-
-            const normalizedKey = combinationKey.replace(/['"]/g, "").trim();
-            const handleAlt = normalizedKey
-              .replace(/\s*\/\s*/g, "-")
-              .toLowerCase();
-
-            setVariantImages((prev) => ({
-              ...prev,
-              [normalizedKey]: [
-                ...(Array.isArray(prev[normalizedKey])
-                  ? prev[normalizedKey]
-                  : []),
-                {
-                  preview: data.secure_url,
-                  alt: handleAlt,
-                  loading: false,
-                },
-              ],
-            }));
-
-            showToast("success", " Image assigned to variant!");
-            setTimeout(() => setIsPopupVisible(false), 150);
-          }
         }
       } catch (error) {
         console.error("Image upload failed:", error);
         showToast("error", "Image upload failed");
+
+        setVariantImages((prev) => ({
+          ...prev,
+          [normalizedKey]: prev[normalizedKey].filter(
+            (img) => img.preview !== previews[index].preview
+          ),
+        }));
       }
     }
   };
@@ -1454,6 +1559,15 @@ const CategorySelector = () => {
     }
   };
 
+  // For delete confirmation modal
+const [showDeleteOptionModal, setShowDeleteOptionModal] = useState(false);
+const [deleteOptionTarget, setDeleteOptionTarget] = useState(null);
+
+const handleDeleteOption = (index) => {
+  setDeleteOptionTarget(index);
+  setShowDeleteOptionModal(true);
+};
+
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (isChanged) {
@@ -1523,140 +1637,187 @@ const CategorySelector = () => {
 
   return (
     <main className="flex justify-center bg-gray-100 p-6">
+      {showDeleteOptionModal && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+    <div className="bg-white rounded-xl shadow-xl p-6 w-[400px] animate-fadeIn">
+      <h2 className="text-lg font-semibold text-gray-800 mb-3">
+        Delete Option
+      </h2>
+      <p className="text-gray-600 text-sm mb-6">
+        Are you sure you want to delete the option{" "}
+        <span className="font-semibold text-gray-800">
+          "{options[deleteOptionTarget]?.name}"
+        </span>
+        ? <br /> This will remove all its values and related variants.
+      </p>
+
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setShowDeleteOptionModal(false)}
+          className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            const updated = [...options];
+            updated.splice(deleteOptionTarget, 1);
+            setOptions(updated);
+            setCombinations(generateVariants(updated));
+            setEditingOptionIndex(null);
+            setIsChanged(true);
+            setShowDeleteOptionModal(false);
+          }}
+          className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       {isMediaModalVisible && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
-          <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">
-            {/* Header */}
-            <div className="sticky top-0 bg-white z-10 pb-4 border-b flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-800">
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
+          <div className="bg-white w-full max-w-6xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
                 Manage Product Media
               </h2>
-              <button
-                onClick={() => setIsMediaModalVisible(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsMediaModalVisible(false)}
+                  className="bg-blue-600 text-white px-5 py-2 rounded-md font-medium shadow-sm hover:bg-blue-700 active:scale-95 transition-transform duration-150"
+                >
+                  Done
+                </button>
+                <button
+                  onClick={() => setIsMediaModalVisible(false)}
+                  className="text-gray-500 hover:text-gray-700 transition"
+                  title="Close"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
-            {/* Upload Box */}
-            <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleMediaUpload}
-                className="hidden"
-                id="mediaFileUpload"
-              />
-              <label
-                htmlFor="mediaFileUpload"
-                className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
-              >
-                Add New Images
-              </label>
-            </div>
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+              <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center text-gray-500 bg-white shadow-sm transition hover:shadow-md">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleMediaUpload}
+                  className="hidden"
+                  id="mediaFileUpload"
+                />
 
-            {/* Product Images */}
-            <div className="mt-6 border border-gray-300 rounded-lg p-4 bg-gray-50">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                Current Product Images
-              </h3>
-              <div className="flex flex-wrap gap-3">
-                {selectedImages.length > 0 ? (
-                  selectedImages.map((img, i) => (
-                    <div
-                      key={i}
-                      className="relative border border-gray-300 rounded-lg overflow-hidden group"
-                    >
-                      <img
-                        src={img.cloudUrl || img.localUrl}
-                        alt={`Image ${i}`}
-                        className="w-24 h-24 object-cover"
-                      />
-                      {img.loading && (
-                        <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center">
-                          <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
-                        </div>
-                      )}
-                      <button
-                        onClick={() => {
-                          const updated = [...selectedImages];
-                          updated.splice(i, 1);
-                          setSelectedImages(updated);
-                          setIsChanged(true);
-                        }}
-                        className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-100 transition"
+                <div className="flex gap-4 flex-wrap justify-center">
+                  <label
+                    htmlFor="mediaFileUpload"
+                    className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-md cursor-pointer 
+                         hover:bg-blue-700 active:scale-95 transition-transform duration-150"
+                  >
+                    Add New Images
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowGallery(true)}
+                    className="px-6 py-2.5 bg-gray-600 text-white font-medium rounded-lg shadow-md cursor-pointer 
+                         hover:bg-gray-700 active:scale-95 transition-transform duration-150"
+                  >
+                    Browse
+                  </button>
+                </div>
+
+                <p className="text-sm mt-3 text-gray-500">
+                  or drag & drop images here
+                </p>
+              </div>
+
+              <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Current Product Images
+                </h3>
+
+                <div className="flex flex-wrap gap-3">
+                  {selectedImages.length > 0 ? (
+                    selectedImages.map((img, i) => (
+                      <div
+                        key={i}
+                        className="relative border border-gray-300 rounded-lg overflow-hidden group hover:shadow-md transition"
                       >
-                        ✕
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500 italic text-sm">
-                    No product images yet.
-                  </p>
-                )}
+                        <img
+                          src={img.cloudUrl || img.localUrl}
+                          alt={`Image ${i}`}
+                          className="w-24 h-24 sm:w-28 sm:h-28 object-cover"
+                        />
+                        {img.loading && (
+                          <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                            <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => {
+                            const updated = [...selectedImages];
+                            updated.splice(i, 1);
+                            setSelectedImages(updated);
+                            setIsChanged(true);
+                          }}
+                          className="absolute top-1 right-1 bg-white/80 rounded-full p-1 hover:bg-red-100 transition"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 italic text-sm">
+                      No product images yet.
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Gallery Images */}
-            <div className="mt-6 border border-gray-300 rounded-lg p-4 bg-gray-50">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                Gallery Images
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {galleryImages.length > 0 ? (
-                  galleryImages.map((file) => (
-                    <div
-                      key={file.id || file.src}
-                      className="border rounded p-2 relative hover:border-blue-400 transition cursor-pointer"
-                      onClick={() => {
-                        if (
-                          !selectedImages.some(
-                            (img) => img.cloudUrl === file.src
-                          )
-                        ) {
-                          setSelectedImages((prev) => [
-                            { cloudUrl: file.src, loading: false },
-                            ...prev,
-                          ]);
-                          setIsChanged(true);
-                        }
-                      }}
-                    >
-                      <img
-                        src={file.src}
-                        alt={file.name || "Gallery Image"}
-                        className="w-full h-24 object-cover rounded"
-                      />
-                      <p className="text-xs text-center mt-1 truncate">
-                        {file.name || "Image"}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500 italic text-sm">
-                    No images found in gallery.
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex justify-end mt-6 border-t pt-4">
-              <button
-                onClick={() => setIsMediaModalVisible(false)}
-                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => setIsMediaModalVisible(false)}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
-              >
-                Done
-              </button>
+              {/* Gallery Section */}
+              {showGallery && galleryImages.length > 0 && (
+                <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                    Gallery Images
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {galleryImages.map((file) => (
+                      <div
+                        key={file.id || file.src}
+                        className="border rounded-lg p-2 bg-white hover:border-blue-400 hover:shadow-md transition cursor-pointer"
+                        onClick={() => {
+                          if (
+                            !selectedImages.some(
+                              (img) => img.cloudUrl === file.src
+                            )
+                          ) {
+                            setSelectedImages((prev) => [
+                              { cloudUrl: file.src, loading: false },
+                              ...prev,
+                            ]);
+                            setIsChanged(true);
+                          }
+                        }}
+                      >
+                        <img
+                          src={file.src}
+                          alt={file.name || "Gallery Image"}
+                          className="w-full h-28 object-cover rounded-md"
+                        />
+                        <p className="text-xs text-center mt-1 truncate text-gray-700">
+                          {file.name || "Image"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1664,7 +1825,7 @@ const CategorySelector = () => {
 
       {toast.show && (
         <div
-          className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+          className={`fixed top-16 z-30 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
             toast.type === "success" ? "bg-green-500" : "bg-red-500"
           } text-white`}
         >
@@ -1699,12 +1860,6 @@ const CategorySelector = () => {
               Description
             </label>
             <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-auto">
-              {/* <Editor
-                editorState={editorState}
-                onEditorStateChange={onEditorStateChange}
-                wrapperClassName="border-none"
-                editorClassName="min-h-[200px] bg-white p-2"
-              /> */}
               <Editor
                 editorState={editorState}
                 onEditorStateChange={(newEditorState) => {
@@ -1717,96 +1872,12 @@ const CategorySelector = () => {
             </div>
           </div>
 
-          {/* <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Media
-            </label>
-
-            {Object.values(checkedImages).some((isChecked) => isChecked) && (
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-sm text-gray-700">
-                  {Object.values(checkedImages).filter(Boolean).length} file
-                  selected
-                </p>
-                <button
-                  onClick={handleRemoveSelected}
-                  className="text-red-500 text-sm font-medium hover:underline"
-                >
-                  Remove
-                </button>
-              </div>
-            )}
-
-            {selectedImages.length === 0 ? (
-              <div className="border border-dashed border-gray-400 p-6 text-center rounded-xl">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleMediaUpload}
-                  className="hidden"
-                  id="fileUpload"
-                />
-                <label
-                  htmlFor="fileUpload"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer"
-                >
-                  Upload new
-                </label>
-                <p className="text-gray-500 text-sm mt-2">
-                  Accepts images only
-                </p>
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                {selectedImages.map((img, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={img.cloudUrl || img.localUrl}
-                      alt={`Uploaded ${index}`}
-                      className={`w-40 h-40 object-cover rounded-md border border-gray-300 transition ${
-                        checkedImages[index] ? "opacity-50" : "opacity-100"
-                      }`}
-                    />
-                    {img.loading && (
-                      <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center rounded-md">
-                        <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
-                      </div>
-                    )}
-                    <input
-                      type="checkbox"
-                      className="absolute top-2 left-2 w-5 h-5 cursor-pointer opacity-0 group-hover:opacity-100"
-                      onChange={() => toggleImageSelection(index)}
-                      checked={checkedImages[index] || false}
-                    />
-                  </div>
-                ))}
-
-                <div className="w-[80px] h-[80px] border border-gray-300 flex items-center justify-center rounded-md">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleMediaUpload}
-                    className="hidden"
-                    id="uploadMore"
-                  />
-                  <label
-                    htmlFor="uploadMore"
-                    className="text-gray-500 text-2xl cursor-pointer"
-                  >
-                    +
-                  </label>
-                </div>
-              </div>
-            )}
-          </div> */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Media
             </label>
 
-            {Object.values(checkedImages).some((isChecked) => isChecked) && (
+            {Object.values(checkedImages).some(Boolean) && (
               <div className="flex justify-between items-center mb-2">
                 <p className="text-sm text-gray-700">
                   {Object.values(checkedImages).filter(Boolean).length} file
@@ -1826,16 +1897,7 @@ const CategorySelector = () => {
                 onClick={() => setIsMediaModalVisible(true)}
                 className="border border-dashed border-gray-400 p-6 text-center rounded-xl cursor-pointer hover:bg-gray-50"
               >
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleMediaUpload}
-                  className="hidden"
-                  id="fileUpload"
-                />
                 <label
-                  // htmlFor="fileUpload"
                   className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1849,49 +1911,87 @@ const CategorySelector = () => {
                 </p>
               </div>
             ) : (
-              <div className="flex gap-2 flex-wrap">
-                {selectedImages.slice(0, 4).map((img, index) => (
-                  <div
-                    key={index}
-                    className="relative group cursor-pointer"
-                    onClick={() => setIsMediaModalVisible(true)}
-                  >
-                    <img
-                      src={img.cloudUrl || img.localUrl}
-                      alt={`Uploaded ${index}`}
-                      className={`w-40 h-40 object-cover rounded-md border border-gray-300 transition ${
-                        checkedImages[index] ? "opacity-50" : "opacity-100"
-                      }`}
-                    />
-                    {img.loading && (
-                      <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center rounded-md">
-                        <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
-                      </div>
-                    )}
-                    <input
-                      type="checkbox"
-                      className="absolute top-2 left-2 w-5 h-5 cursor-pointer opacity-0 group-hover:opacity-100"
-                      onChange={() => toggleImageSelection(index)}
-                      checked={checkedImages[index] || false}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                ))}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                {selectedImages.slice(0, 6).map((img, index) => {
+                  const isChecked = checkedImages[index] || false;
 
-                {selectedImages.length > 4 && (
+                  return (
+                    <div
+                      key={index}
+                      className={`relative aspect-square rounded-md overflow-hidden cursor-pointer border transition
+          ${
+            isChecked
+              ? "ring-2 ring-blue-500 border-blue-400"
+              : "border-gray-200 hover:shadow-md"
+          }
+        `}
+                      onClick={() => setIsMediaModalVisible(true)}
+                    >
+                      {/* Image */}
+                      <img
+                        src={img.cloudUrl || img.localUrl}
+                        alt={`Uploaded ${index}`}
+                        className={`w-full h-full object-cover transition duration-300 ${
+                          isChecked ? "opacity-60" : "opacity-100"
+                        }`}
+                      />
+
+                      {/* Hover Overlay */}
+                      <div
+                        className={`absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 ${
+                          isChecked ? "opacity-100" : ""
+                        }`}
+                      ></div>
+
+                      {/* Checkbox (Top Left) */}
+                      <div className="absolute top-2 left-2 opacity-0 hover:opacity-100 transition-opacity duration-200 group-hover:opacity-100">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleImageSelection(index)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-5 h-5 accent-blue-600 cursor-pointer bg-white border border-gray-300 rounded"
+                        />
+                      </div>
+
+                      {/* Drag Handle Icon (Top Right) */}
+                      <div className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity duration-200 group-hover:opacity-100 text-gray-200">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                          className="w-4 h-4"
+                        >
+                          <path d="M8 6h2V4H8v2zm0 7h2v-2H8v2zm0 7h2v-2H8v2zm6-14h2V4h-2v2zm0 7h2v-2h-2v2zm0 7h2v-2h-2v2z" />
+                        </svg>
+                      </div>
+
+                      {/* Loading Spinner */}
+                      {img.loading && (
+                        <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                          <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* + More Tile */}
+                {selectedImages.length > 6 && (
                   <div
                     onClick={() => setIsMediaModalVisible(true)}
-                    className="w-40 h-40 flex items-center justify-center border border-gray-300 rounded-md bg-gray-100 text-gray-600 text-lg font-medium cursor-pointer hover:bg-gray-200"
+                    className="aspect-square flex items-center justify-center rounded-md border border-gray-200 bg-gray-100 text-gray-700 font-medium text-lg cursor-pointer hover:bg-gray-200 transition"
                   >
-                    +{selectedImages.length - 4} more
+                    +{selectedImages.length - 6}
                   </div>
                 )}
 
+                {/* Add Tile */}
                 <div
                   onClick={() => setIsMediaModalVisible(true)}
-                  className="w-40 h-40 border border-gray-300 flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-100"
+                  className="aspect-square flex items-center justify-center rounded-md border border-dashed border-gray-300 text-gray-500 text-3xl cursor-pointer hover:bg-gray-50 transition"
                 >
-                  <span className="text-gray-500 text-4xl">+</span>
+                  +
                 </div>
               </div>
             )}
@@ -2114,12 +2214,29 @@ const CategorySelector = () => {
 
             {!showVariantForm && (
               <div className="flex gap-2 items-center mt-2">
-                <button
+                {/* <button
                   onClick={() => {
                     handleOpenForm();
                     setIsChanged(true);
                   }}
                   className="text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-200"
+                >
+                  Add option like size or color
+                </button> */}
+                <button
+                  onClick={() => {
+                    if (options.length >= 3) {
+                      showToast("warning", "You can only add up to 3 options.");
+                      return;
+                    }
+                    handleOpenForm();
+                    setIsChanged(true);
+                  }}
+                  className={`text-sm text-gray-700 px-3 py-1 rounded-lg border transition ${
+                    options.length >= 3
+                      ? "bg-gray-200  text-gray-400"
+                      : "bg-gray-100 hover:bg-gray-200"
+                  }`}
                 >
                   Add option like size or color
                 </button>
@@ -2153,17 +2270,32 @@ const CategorySelector = () => {
                           {option.name}
                         </h3>
 
-                        {editingOptionIndex === optionIndex && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSaveEditedOption(optionIndex);
-                            }}
-                            className="text-xs text-white bg-blue-600 px-3 py-1 rounded-md hover:bg-blue-700"
-                          >
-                            Done
-                          </button>
-                        )}
+                     {editingOptionIndex === optionIndex && (
+  <div className="flex gap-2">
+    {/* Save changes */}
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleSaveEditedOption(optionIndex);
+      }}
+      className="text-xs text-white bg-blue-600 px-3 py-1 rounded-md hover:bg-blue-700"
+    >
+      Done
+    </button>
+
+    {/* Delete entire option */}
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleDeleteOption(optionIndex);
+      }}
+      className="text-xs text-red-600 border border-red-400 px-3 py-1 rounded-md hover:bg-red-100"
+    >
+      Delete
+    </button>
+  </div>
+)}
+
                       </div>
 
                       {editingOptionIndex !== optionIndex && (
@@ -2827,7 +2959,7 @@ const CategorySelector = () => {
             </p>
           )}
         </div>
-        <div className="space-y-6">
+        <div className="space-y-6 md:sticky md:top-6 self-start h-fit">
           <div className="flex gap-4 mb-4">
             <button
               onClick={handleSubmit}
@@ -3141,215 +3273,226 @@ const CategorySelector = () => {
         )}
 
         {isPopupVisible && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
-            <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">
-              <div className="sticky top-0 bg-white z-10 pb-4 border-b flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-gray-800">
+          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
+            <div className="bg-white w-full max-w-5xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
+              <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
                   Select Image for Variant
                 </h2>
-                <button
-                  onClick={() => setIsPopupVisible(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <RxCross1 />
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setIsPopupVisible(false)}
+                    className="bg-blue-600 text-white px-5 py-2 rounded-md font-medium shadow-sm hover:bg-blue-700 active:scale-95 transition-transform duration-150"
+                  >
+                    Done
+                  </button>
+                  <button
+                    onClick={() => setIsPopupVisible(false)}
+                    className="text-gray-500 hover:text-gray-700 transition"
+                  >
+                    <RxCross1 size={18} />
+                  </button>
+                </div>
               </div>
 
-              <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageChange}
-                  className="hidden"
-                  id="fileUpload"
-                />
-                <label
-                  htmlFor="fileUpload"
-                  className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
-                >
-                  Add images
-                </label>
-              </div>
+              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center text-gray-500 bg-white shadow-sm transition hover:shadow-md">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                    className="hidden"
+                    id="fileUpload"
+                  />
 
-              <div className="mt-6 border border-gray-300 rounded-lg p-4 bg-gray-50">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  assign Multiple images to variant{" "}
-                  <span className="ml-2 text-blue-600">
-                    {currentVariant?.child
-                      ? `${
-                          combinations[currentVariant?.index]?.parent || ""
-                        } / ${currentVariant?.child}`
-                      : "N/A"}
-                  </span>
-                </h3>
+                  <div className="flex gap-4 flex-wrap justify-center">
+                    <label
+                      htmlFor="fileUpload"
+                      className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-md cursor-pointer hover:bg-blue-700 active:scale-95 transition-transform duration-150"
+                    >
+                      Add Images
+                    </label>
 
-                {(() => {
-                  const parentValue =
-                    combinations[currentVariant?.index]?.parent;
-                  const combinationKey =
-                    options.length === 1
-                      ? currentVariant?.child
-                      : `${parentValue} / ${currentVariant?.child}`;
-                  const normalizedKey = combinationKey
-                    ?.replace(/['"]/g, "")
-                    .trim();
+                    <button
+                      type="button"
+                      onClick={() => setShowGallery(true)}
+                      className="px-6 py-2.5 bg-gray-600 text-white font-medium rounded-lg shadow-md cursor-pointer hover:bg-gray-700 active:scale-95 transition-transform duration-150"
+                    >
+                      Browse
+                    </button>
+                  </div>
 
-                  const assigned = Array.isArray(variantImages[normalizedKey])
-                    ? variantImages[normalizedKey]
-                    : [];
+                  <p className="text-sm mt-3 text-gray-500">
+                    or drag & drop images here
+                  </p>
+                </div>
 
-                  return (
-                    <div className="flex flex-wrap gap-3">
-                      {assigned.length > 0 ? (
-                        assigned.map((img, i) => (
+                <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                    Assign Multiple Images to Variant{" "}
+                    <span className="ml-2 text-blue-600 font-medium">
+                      {currentVariant?.child
+                        ? `${
+                            combinations[currentVariant?.index]?.parent || ""
+                          } / ${currentVariant?.child}`
+                        : "N/A"}
+                    </span>
+                  </h3>
+
+                  {(() => {
+                    const parentValue =
+                      combinations[currentVariant?.index]?.parent;
+                    const combinationKey =
+                      options.length === 1
+                        ? currentVariant?.child
+                        : `${parentValue} / ${currentVariant?.child}`;
+                    const normalizedKey = combinationKey
+                      ?.replace(/['"]/g, "")
+                      .trim();
+
+                    const assigned = Array.isArray(variantImages[normalizedKey])
+                      ? variantImages[normalizedKey]
+                      : [];
+
+                    return (
+                      <div className="flex flex-wrap gap-3">
+                        {assigned.length > 0 ? (
+                          assigned.map((img, i) => (
+                            <div
+                              key={i}
+                              className={`relative border border-gray-300 rounded-lg overflow-hidden group cursor-pointer transition-all duration-150 ${
+                                i === 0
+                                  ? "ring-2 ring-blue-500 shadow-md scale-105"
+                                  : "hover:ring-2 hover:ring-gray-400"
+                              }`}
+                              onClick={() => {
+                                if (i === 0) return;
+                                setVariantImages((prev) => {
+                                  const current = [...prev[normalizedKey]];
+                                  const [clicked] = current.splice(i, 1);
+                                  current.unshift(clicked);
+                                  return { ...prev, [normalizedKey]: current };
+                                });
+                              }}
+                              title={
+                                i === 0
+                                  ? "Featured image"
+                                  : "Click to make this the main image"
+                              }
+                            >
+                              <img
+                                src={img.preview}
+                                alt={img.alt}
+                                className="w-24 h-24 sm:w-28 sm:h-28 object-cover"
+                              />
+
+                              {img.loading && (
+                                <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                                  <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                                </div>
+                              )}
+
+                              {i === 0 && (
+                                <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-[1px] rounded">
+                                  Featured
+                                </div>
+                              )}
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setVariantImages((prev) => ({
+                                    ...prev,
+                                    [normalizedKey]: prev[normalizedKey].filter(
+                                      (_, idx) => idx !== i
+                                    ),
+                                  }));
+                                }}
+                                className="absolute top-1 right-1 bg-white/80 rounded-full p-1 hover:bg-red-100 transition"
+                              >
+                                <RxCross1 className="text-red-500 text-sm" />
+                              </button>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 text-sm italic">
+                            No images assigned yet.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {showGallery && galleryImages.length > 0 && (
+                  <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                      Gallery Images
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {galleryImages.map((file) => {
+                        const parentValue =
+                          combinations[currentVariant?.index]?.parent;
+                        const combinationKey =
+                          options.length === 1
+                            ? currentVariant?.child
+                            : `${parentValue} / ${currentVariant?.child}`;
+                        const normalizedKey = combinationKey
+                          .replace(/['"]/g, "")
+                          .trim();
+
+                        return (
                           <div
-                            key={i}
-                            className={`relative border border-gray-300 rounded-lg overflow-hidden group cursor-pointer transition-all duration-150 ${
-                              i === 0
-                                ? "ring-2 ring-blue-500 shadow-md scale-105"
-                                : "hover:ring-2 hover:ring-gray-400"
-                            }`}
+                            key={file.id || file.src}
+                            className="border rounded-lg p-2 bg-white hover:border-blue-400 hover:shadow-md transition cursor-pointer relative"
                             onClick={() => {
-                              if (i === 0) return;
                               setVariantImages((prev) => {
-                                const current = Array.isArray(
+                                const existing = Array.isArray(
                                   prev[normalizedKey]
                                 )
                                   ? [...prev[normalizedKey]]
                                   : [];
-                                const [clicked] = current.splice(i, 1);
-                                current.unshift(clicked);
-                                return { ...prev, [normalizedKey]: current };
+                                const newImage = {
+                                  preview: file.src,
+                                  alt: normalizedKey
+                                    .replace(/\s*\/\s*/g, "-")
+                                    .toLowerCase(),
+                                  loading: true,
+                                };
+
+                                const updated = [newImage, ...existing];
+
+                                setTimeout(() => {
+                                  setVariantImages((prev2) => ({
+                                    ...prev2,
+                                    [normalizedKey]: prev2[normalizedKey].map(
+                                      (img) =>
+                                        img.preview === file.src
+                                          ? { ...img, loading: false }
+                                          : img
+                                    ),
+                                  }));
+                                }, 1000);
+
+                                return { ...prev, [normalizedKey]: updated };
                               });
                             }}
-                            title={
-                              i === 0
-                                ? "Featured image"
-                                : "Click to make this the main image"
-                            }
                           >
                             <img
-                              src={img.preview}
-                              alt={img.alt}
-                              className="w-24 h-24 object-cover rounded"
+                              src={file.src}
+                              alt={file.name || "Image"}
+                              className="w-full h-28 object-cover rounded-md"
                             />
-                            {/* <p className="text-[10px] text-center text-gray-500 truncate px-1">
-                      {i === 0 ? "⭐ Main Image" : img.alt}
-                    </p> */}
-
-                            {i === 0 && (
-                              <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-[1px] rounded">
-                                Featured
-                              </div>
-                            )}
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setVariantImages((prev) => ({
-                                  ...prev,
-                                  [normalizedKey]: prev[normalizedKey].filter(
-                                    (_, idx) => idx !== i
-                                  ),
-                                }));
-                              }}
-                              className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-100 transition"
-                            >
-                              <RxCross1 className="text-red-500 text-sm" />
-                            </button>
+                            <p className="text-xs text-center mt-1 truncate text-gray-700">
+                              {file.name || "Image"}
+                            </p>
                           </div>
-                        ))
-                      ) : (
-                        <p className="text-gray-500 text-sm italic">
-                          No images assigned yet.
-                        </p>
-                      )}
+                        );
+                      })}
                     </div>
-                  );
-                })()}
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
-                {galleryImages.map((file) => {
-                  const parentValue =
-                    combinations[currentVariant?.index]?.parent;
-                  const combinationKey =
-                    options.length === 1
-                      ? currentVariant?.child
-                      : `${parentValue} / ${currentVariant?.child}`;
-                  const normalizedKey = combinationKey
-                    .replace(/['"]/g, "")
-                    .trim();
-
-                  const assigned = Array.isArray(variantImages[normalizedKey])
-                    ? variantImages[normalizedKey]
-                    : [];
-
-                  const isAssigned = assigned.some(
-                    (img) => img.preview === file.src
-                  );
-
-                  return (
-                    <div
-                      key={file.id || file.src}
-                      className={`border rounded p-2 relative hover:border-blue-400 transition cursor-pointer ${
-                        isAssigned ? "border-blue-500" : "border-gray-300"
-                      }`}
-                      onClick={() => {
-                        setVariantImages((prev) => {
-                          const existing = Array.isArray(prev[normalizedKey])
-                            ? [...prev[normalizedKey]]
-                            : [];
-                          const newImage = {
-                            preview: file.src,
-                            alt: normalizedKey
-                              .replace(/\s*\/\s*/g, "-")
-                              .toLowerCase(),
-                            loading: false,
-                          };
-
-                          const existingIndex = existing.findIndex(
-                            (img) => img.preview === file.src
-                          );
-
-                          if (existingIndex !== -1) {
-                            const [clicked] = existing.splice(existingIndex, 1);
-                            existing.unshift(clicked);
-                          } else {
-                            existing.unshift(newImage);
-                          }
-
-                          return { ...prev, [normalizedKey]: existing };
-                        });
-                      }}
-                    >
-                      <img
-                        src={file.src}
-                        alt={file.name || "Image"}
-                        className="w-full h-24 object-cover rounded"
-                      />
-                      <p className="text-sm text-center mt-2 truncate">
-                        {file.name || "Image"}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="flex justify-end mt-6 border-t pt-4">
-                <button
-                  onClick={() => setIsPopupVisible(false)}
-                  className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => setIsPopupVisible(false)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
-                >
-                  Done
-                </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

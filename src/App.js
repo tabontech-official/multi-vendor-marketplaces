@@ -54,6 +54,7 @@ import Approval from "./pages/approval";
 import ApprovalPage from "./pages/ApprovalPage";
 import FinanceSetting from "./pages/FinanceSetting";
 import ManageVariantOptions from "./pages/ManageVariantOptions";
+import AddVariantOption from "./pages/AddVariantOption";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -139,6 +140,10 @@ const App = () => {
             <Route
               path="/collection/:id"
               element={<PrivateRoute element={<Collection />} />}
+            />
+            <Route
+              path="/add/option"
+              element={<PrivateRoute element={<AddVariantOption />} />}
             />
              <Route
               path="/finance-setting"

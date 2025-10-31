@@ -62,6 +62,8 @@ const CategorySelector = () => {
     `https://www.aydiactive.com/products/${product?.title || ""} `
   );
   const [isChanged, setIsChanged] = useState(false);
+  const [popupMode, setPopupMode] = useState("variant"); // "variant" | "media"
+  const [isMediaModalVisible, setIsMediaModalVisible] = useState(false);
 
   const [vendor, setVendor] = useState([]);
   const [keyWord, setKeyWord] = useState([]);
@@ -656,13 +658,41 @@ const CategorySelector = () => {
     setKeywordsList(tagsArray);
   }, [product, categories]);
 
+  // useEffect(() => {
+  //   const userId = localStorage.getItem("userid");
+  //   const apiKey = localStorage.getItem("apiKey");
+  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
+  //   const productId = product?.id || "null";
+
+  //   if (isPopupVisible && userId) {
+  //     fetch(
+  //       `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+  //       {
+  //         method: "GET",
+  //         headers: {
+  //           "x-api-key": apiKey,
+  //           "x-api-secret": apiSecretKey,
+
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     )
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         const allImages = data.flatMap((item) => item.images);
+  //         setGalleryImages(allImages);
+  //       })
+  //       .catch((err) => console.error("Failed to fetch images:", err));
+  //   }
+  // }, [isPopupVisible, product]);
   useEffect(() => {
     const userId = localStorage.getItem("userid");
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
     const productId = product?.id || "null";
 
-    if (isPopupVisible && userId) {
+    // Run only if any modal that uses gallery is open
+    if ((isPopupVisible || isMediaModalVisible) && userId) {
       fetch(
         `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
         {
@@ -670,19 +700,21 @@ const CategorySelector = () => {
           headers: {
             "x-api-key": apiKey,
             "x-api-secret": apiSecretKey,
-
             "Content-Type": "application/json",
           },
         }
       )
         .then((res) => res.json())
         .then((data) => {
-          const allImages = data.flatMap((item) => item.images);
+          console.log("📸 Gallery data fetched:", data); // ✅ For debugging
+          const allImages = Array.isArray(data)
+            ? data.flatMap((item) => item.images)
+            : [];
           setGalleryImages(allImages);
         })
-        .catch((err) => console.error("Failed to fetch images:", err));
+        .catch((err) => console.error("Failed to fetch gallery images:", err));
     }
-  }, [isPopupVisible, product]);
+  }, [isPopupVisible, isMediaModalVisible, product]);
 
   const normalizeKey = (index, option) => {
     return `${index}-${String(option)
@@ -1491,6 +1523,145 @@ const CategorySelector = () => {
 
   return (
     <main className="flex justify-center bg-gray-100 p-6">
+      {isMediaModalVisible && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+          <div className="bg-white w-[90%] max-w-5xl max-h-[90vh] rounded-lg shadow-lg p-6 relative overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-white z-10 pb-4 border-b flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-gray-800">
+                Manage Product Media
+              </h2>
+              <button
+                onClick={() => setIsMediaModalVisible(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Upload Box */}
+            <div className="border-2 border-dashed rounded-lg h-32 flex flex-col justify-center items-center text-gray-500 mt-4">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleMediaUpload}
+                className="hidden"
+                id="mediaFileUpload"
+              />
+              <label
+                htmlFor="mediaFileUpload"
+                className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
+              >
+                Add New Images
+              </label>
+            </div>
+
+            {/* Product Images */}
+            <div className="mt-6 border border-gray-300 rounded-lg p-4 bg-gray-50">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                Current Product Images
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {selectedImages.length > 0 ? (
+                  selectedImages.map((img, i) => (
+                    <div
+                      key={i}
+                      className="relative border border-gray-300 rounded-lg overflow-hidden group"
+                    >
+                      <img
+                        src={img.cloudUrl || img.localUrl}
+                        alt={`Image ${i}`}
+                        className="w-24 h-24 object-cover"
+                      />
+                      {img.loading && (
+                        <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center">
+                          <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => {
+                          const updated = [...selectedImages];
+                          updated.splice(i, 1);
+                          setSelectedImages(updated);
+                          setIsChanged(true);
+                        }}
+                        className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-100 transition"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 italic text-sm">
+                    No product images yet.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Gallery Images */}
+            <div className="mt-6 border border-gray-300 rounded-lg p-4 bg-gray-50">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                Gallery Images
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {galleryImages.length > 0 ? (
+                  galleryImages.map((file) => (
+                    <div
+                      key={file.id || file.src}
+                      className="border rounded p-2 relative hover:border-blue-400 transition cursor-pointer"
+                      onClick={() => {
+                        if (
+                          !selectedImages.some(
+                            (img) => img.cloudUrl === file.src
+                          )
+                        ) {
+                          setSelectedImages((prev) => [
+                            { cloudUrl: file.src, loading: false },
+                            ...prev,
+                          ]);
+                          setIsChanged(true);
+                        }
+                      }}
+                    >
+                      <img
+                        src={file.src}
+                        alt={file.name || "Gallery Image"}
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <p className="text-xs text-center mt-1 truncate">
+                        {file.name || "Image"}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 italic text-sm">
+                    No images found in gallery.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end mt-6 border-t pt-4">
+              <button
+                onClick={() => setIsMediaModalVisible(false)}
+                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 mr-2 mt-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setIsMediaModalVisible(false)}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {toast.show && (
         <div
           className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
@@ -1546,7 +1717,7 @@ const CategorySelector = () => {
             </div>
           </div>
 
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Media
             </label>
@@ -1626,6 +1797,101 @@ const CategorySelector = () => {
                   >
                     +
                   </label>
+                </div>
+              </div>
+            )}
+          </div> */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Media
+            </label>
+
+            {Object.values(checkedImages).some((isChecked) => isChecked) && (
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-sm text-gray-700">
+                  {Object.values(checkedImages).filter(Boolean).length} file
+                  selected
+                </p>
+                <button
+                  onClick={handleRemoveSelected}
+                  className="text-red-500 text-sm font-medium hover:underline"
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+
+            {selectedImages.length === 0 ? (
+              <div
+                onClick={() => setIsMediaModalVisible(true)}
+                className="border border-dashed border-gray-400 p-6 text-center rounded-xl cursor-pointer hover:bg-gray-50"
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleMediaUpload}
+                  className="hidden"
+                  id="fileUpload"
+                />
+                <label
+                  // htmlFor="fileUpload"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsMediaModalVisible(true);
+                  }}
+                >
+                  Upload new
+                </label>
+                <p className="text-gray-500 text-sm mt-2">
+                  Accepts images only
+                </p>
+              </div>
+            ) : (
+              <div className="flex gap-2 flex-wrap">
+                {selectedImages.slice(0, 4).map((img, index) => (
+                  <div
+                    key={index}
+                    className="relative group cursor-pointer"
+                    onClick={() => setIsMediaModalVisible(true)}
+                  >
+                    <img
+                      src={img.cloudUrl || img.localUrl}
+                      alt={`Uploaded ${index}`}
+                      className={`w-40 h-40 object-cover rounded-md border border-gray-300 transition ${
+                        checkedImages[index] ? "opacity-50" : "opacity-100"
+                      }`}
+                    />
+                    {img.loading && (
+                      <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center rounded-md">
+                        <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                    <input
+                      type="checkbox"
+                      className="absolute top-2 left-2 w-5 h-5 cursor-pointer opacity-0 group-hover:opacity-100"
+                      onChange={() => toggleImageSelection(index)}
+                      checked={checkedImages[index] || false}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                ))}
+
+                {selectedImages.length > 4 && (
+                  <div
+                    onClick={() => setIsMediaModalVisible(true)}
+                    className="w-40 h-40 flex items-center justify-center border border-gray-300 rounded-md bg-gray-100 text-gray-600 text-lg font-medium cursor-pointer hover:bg-gray-200"
+                  >
+                    +{selectedImages.length - 4} more
+                  </div>
+                )}
+
+                <div
+                  onClick={() => setIsMediaModalVisible(true)}
+                  className="w-40 h-40 border border-gray-300 flex items-center justify-center rounded-md cursor-pointer hover:bg-gray-100"
+                >
+                  <span className="text-gray-500 text-4xl">+</span>
                 </div>
               </div>
             )}
@@ -2061,6 +2327,7 @@ const CategorySelector = () => {
                                                   });
                                                   setIsPopupVisible(true);
                                                   setIsChanged(true);
+                                                  setPopupMode("variant");
                                                 }}
                                               />
                                             </label>

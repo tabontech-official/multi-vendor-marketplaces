@@ -699,14 +699,17 @@ const CategorySelector = () => {
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
-      })
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -774,41 +777,60 @@ const CategorySelector = () => {
 
       // product.variants.forEach((variant, idx) => {
       //   const titleKey = normalizeString(variant.title || "");
-      //   let matched = null;
+      //   let matchedImages = [];
 
-      //   // 1️⃣ Try image_id match
-      //   if (variant.image_id) {
-      //     matched =
-      //       product.variantImages?.find(
-      //         (img) => String(img.id) === String(variant.image_id)
-      //       ) ||
-      //       product.images?.find(
-      //         (img) => String(img.id) === String(variant.image_id)
+      //   if (product.variantImages?.length) {
+      //     matchedImages = product.variantImages.filter((img) => {
+      //       const alt = normalizeString(img.alt || "");
+      //       return (
+      //         alt.includes(titleKey.toLowerCase()) ||
+      //         alt.includes(titleKey.replace(/\s*\/\s*/g, "-").toLowerCase())
       //       );
+      //     });
       //   }
 
-      //   if (!matched && product.variantImages) {
-      //     matched = product.variantImages.find((img) =>
-      //       normalizeString(img.alt || "").includes(titleKey)
+      //   if (!matchedImages.length && variant.image_id) {
+      //     const found = product.images?.find(
+      //       (img) => String(img.id) === String(variant.image_id)
       //     );
+      //     if (found) matchedImages = [found];
       //   }
 
-      //   // if (!matched && product.variantImages?.[idx]) {
-      //   //   matched = product.variantImages[idx];
-      //   // }
+      //   const combinationAlt = titleKey.replace(/\s*\/\s*/g, "-").toLowerCase();
 
-      //   if (matched?.src) {
-      //     hydratedVariantImages[titleKey] = {
-      //       preview: matched.src,
+      //   if (matchedImages.length) {
+      //     hydratedVariantImages[titleKey] = matchedImages.map((img) => ({
+      //       preview: img.src,
+      //       alt: combinationAlt,
       //       loading: false,
-      //     };
+      //     }));
       //   }
       // });
 
       // if (Object.keys(hydratedVariantImages).length > 0) {
-      //   setVariantImages(hydratedVariantImages);
+      //   const normalizedVariantImages = Object.fromEntries(
+      //     Object.entries(hydratedVariantImages).map(([key, value]) => [
+      //       key,
+      //       Array.isArray(value)
+      //         ? value.map((img) => ({
+      //             preview: img.preview || img.src,
+      //             alt: img.alt || key.replace(/\s*\/\s*/g, "-").toLowerCase(),
+      //             loading: false,
+      //           }))
+      //         : [
+      //             {
+      //               preview: value.preview || value.src,
+      //               alt:
+      //                 value.alt || key.replace(/\s*\/\s*/g, "-").toLowerCase(),
+      //               loading: false,
+      //             },
+      //           ],
+      //     ])
+      //   );
+
+      //   setVariantImages(normalizedVariantImages);
       // } else {
-      //   console.log("No images found for any variants");
+      //   console.log("No variant images found for this product");
       // }
 
       const formattedVariants = Object.keys(groupedVariants).map(
@@ -825,9 +847,10 @@ const CategorySelector = () => {
         const titleKey = normalizeString(variant.title || "");
         let matchedImages = [];
 
+        // 🧩 1️⃣ Try matching alt text from variantImages
         if (product.variantImages?.length) {
           matchedImages = product.variantImages.filter((img) => {
-            const alt = normalizeString(img.alt || "");
+            const alt = normalizeString(img.alt || "").toLowerCase();
             return (
               alt.includes(titleKey.toLowerCase()) ||
               alt.includes(titleKey.replace(/\s*\/\s*/g, "-").toLowerCase())
@@ -835,6 +858,7 @@ const CategorySelector = () => {
           });
         }
 
+        // 🧩 2️⃣ Fallback to Shopify variant.image_id match
         if (!matchedImages.length && variant.image_id) {
           const found = product.images?.find(
             (img) => String(img.id) === String(variant.image_id)
@@ -842,17 +866,26 @@ const CategorySelector = () => {
           if (found) matchedImages = [found];
         }
 
-        const combinationAlt = titleKey.replace(/\s*\/\s*/g, "-").toLowerCase();
-
-        if (matchedImages.length) {
-          hydratedVariantImages[titleKey] = matchedImages.map((img) => ({
-            preview: img.src,
-            alt: combinationAlt,
-            loading: false,
-          }));
+        // 🧩 3️⃣ FINAL fallback — use first product image if variant has none
+        if (!matchedImages.length && product.images?.length > 0) {
+          matchedImages = [product.images[0]];
         }
+
+        // 🧩 Normalize the alt for consistency
+        const combinationAlt = titleKey
+          .replace(/\s*\/\s*/g, "-")
+          .replace(/\s+/g, "-")
+          .toLowerCase();
+
+        // 🧩 Store hydrated images
+        hydratedVariantImages[titleKey] = matchedImages.map((img) => ({
+          preview: img.src,
+          alt: combinationAlt,
+          loading: false,
+        }));
       });
 
+      // 🧩 Normalize & set final variant image state
       if (Object.keys(hydratedVariantImages).length > 0) {
         const normalizedVariantImages = Object.fromEntries(
           Object.entries(hydratedVariantImages).map(([key, value]) => [
@@ -876,7 +909,9 @@ const CategorySelector = () => {
 
         setVariantImages(normalizedVariantImages);
       } else {
-        console.log("No variant images found for this product");
+        console.log(
+          "⚠️ No variant images found, and no fallback images available."
+        );
       }
 
       setIsEditing(true);
@@ -1097,19 +1132,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1182,16 +1220,19 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            });
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
+              }
+            );
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -2264,7 +2305,7 @@ const CategorySelector = () => {
                                       key={childIndex}
                                       className="grid grid-cols-6 items-center gap-20"
                                     >
-                                      <div className="w-12 relative">
+                                      {/* <div className="w-12 relative">
                                         <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
                                           <div className="flex gap-2 flex-wrap">
                                             {(
@@ -2313,6 +2354,56 @@ const CategorySelector = () => {
                                               });
                                               setIsPopupVisible(true);
                                               setIsChanged(true);
+                                            }}
+                                          />
+                                        </label>
+                                      </div> */}
+                                      <div className="relative w-14 h-14">
+                                        <label className="flex items-center justify-center w-full h-full border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden bg-gray-50">
+                                          {variantImages[normalizedKey]
+                                            ?.length > 0 ? (
+                                            <>
+                                              <img
+                                                src={
+                                                  variantImages[
+                                                    normalizedKey
+                                                  ][0].preview
+                                                }
+                                                alt={
+                                                  variantImages[
+                                                    normalizedKey
+                                                  ][0].alt || "variant"
+                                                }
+                                                className="w-full h-full object-cover rounded-md"
+                                              />
+
+                                              {/* ✅ Overlay counter if multiple images exist */}
+                                              {variantImages[normalizedKey]
+                                                .length > 1 && (
+                                                <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                                                  +
+                                                  {variantImages[normalizedKey]
+                                                    .length - 1}
+                                                </div>
+                                              )}
+                                            </>
+                                          ) : (
+                                            <span className="text-gray-400 text-xl">
+                                              +
+                                            </span>
+                                          )}
+
+                                          <input
+                                            multiple
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onClick={() => {
+                                              setCurrentVariant({
+                                                index,
+                                                child,
+                                              });
+                                              setIsPopupVisible(true);
+                                              setIsChanged(true);
+                                              setPopupMode("variant");
                                             }}
                                           />
                                         </label>

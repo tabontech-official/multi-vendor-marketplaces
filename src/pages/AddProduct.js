@@ -539,13 +539,31 @@ const CategorySelector = () => {
     }
   };
 
-  const handleNewOptionValueChange = (index, value) => {
-    let updatedValues = [...newOption.values];
-    updatedValues[index] = value;
-    setNewOption({ ...newOption, values: updatedValues });
-  };
+  // const handleNewOptionValueChange = (index, value) => {
+  //   let updatedValues = [...newOption.values];
+  //   updatedValues[index] = value;
+  //   setNewOption({ ...newOption, values: updatedValues });
+  // };
 
-  const handleAddNewValue = () => {
+const handleNewOptionValueChange = (index, value) => {
+  const trimmedValue = value.trim();
+
+  // Prevent duplicate values in the same option (case-insensitive)
+  const isDuplicate = newOption.values.some(
+    (v, i) => i !== index && v.trim().toLowerCase() === trimmedValue.toLowerCase()
+  );
+
+  if (isDuplicate) {
+    showToast("error", "This value already exists in this option.");
+    return;
+  }
+
+  let updatedValues = [...newOption.values];
+  updatedValues[index] = value;
+  setNewOption({ ...newOption, values: updatedValues });
+};
+
+const handleAddNewValue = () => {
     setNewOption({ ...newOption, values: [...newOption.values, ""] });
   };
 
@@ -1667,11 +1685,27 @@ const CategorySelector = () => {
       window.__blockerActive = false;
     };
   }, [isChanged]);
-  const handleEditOptionValueChange = (index, value) => {
-    const updatedValues = [...newOption.values];
-    updatedValues[index] = value;
-    setNewOption({ ...newOption, values: updatedValues });
-  };
+  // const handleEditOptionValueChange = (index, value) => {
+  //   const updatedValues = [...newOption.values];
+  //   updatedValues[index] = value;
+  //   setNewOption({ ...newOption, values: updatedValues });
+  // };
+const handleEditOptionValueChange = (index, value) => {
+  const trimmedValue = value.trim();
+
+  const isDuplicate = newOption.values.some(
+    (v, i) => i !== index && v.trim().toLowerCase() === trimmedValue.toLowerCase()
+  );
+
+  if (isDuplicate) {
+    showToast("error", "This value already exists in this option.");
+    return;
+  }
+
+  const updatedValues = [...newOption.values];
+  updatedValues[index] = value;
+  setNewOption({ ...newOption, values: updatedValues });
+};
 
   const handleAddEditedValue = () => {
     setNewOption({ ...newOption, values: [...newOption.values, ""] });

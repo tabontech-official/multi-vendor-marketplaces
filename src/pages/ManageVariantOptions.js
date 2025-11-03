@@ -216,7 +216,7 @@ const ManageVariantOptions = () => {
             <tr>
               <th className="p-3">Select</th>
               <th className="p-3">Option Name</th>
-              <th className="p-3">Aliases</th>
+              <th className="p-3">Allias</th>
               <th className="p-3">Option Values</th>
               <th className="p-3 text-right">Actions</th>
             </tr>

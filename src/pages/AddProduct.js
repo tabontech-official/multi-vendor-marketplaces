@@ -2268,14 +2268,86 @@ const CategorySelector = () => {
                       )}
 
                       {editingOptionIndex === optionIndex && (
-                        <EditOptionValues
-                          newOption={newOption}
-                          setNewOption={setNewOption}
-                          dbOptions={dbOptions}
-                          handleDeleteEditedValue={handleDeleteEditedValue}
-                          handleAddEditedValue={handleAddEditedValue}
-                          showToast={showToast} // ✅ pass here
-                        />
+                        <div className="mt-2 space-y-2">
+                          {newOption.values.map((value, i) => {
+                            // 🔍 Match option name with API
+                            const matchedDbOption = dbOptions.find((opt) =>
+                              Array.isArray(opt.optionName)
+                                ? opt.optionName.some(
+                                    (name) =>
+                                      name.toLowerCase().trim() ===
+                                      newOption.name.toLowerCase().trim()
+                                  )
+                                : opt.optionName.toLowerCase().trim() ===
+                                  newOption.name.toLowerCase().trim()
+                            );
+
+                            const possibleValues =
+                              matchedDbOption?.optionValues || [];
+
+                            return (
+                              <div key={i} className="flex gap-2 items-center">
+                                {/* ✅ Show dropdown if we have predefined values */}
+                                {possibleValues.length > 0 ? (
+                                  <select
+                                    value={value}
+                                    onChange={(e) => {
+                                      handleEditOptionValueChange(
+                                        i,
+                                        e.target.value
+                                      );
+                                    }}
+                                    className="w-full border border-gray-300 rounded-md p-1 text-sm"
+                                  >
+                                    <option value="">Select value</option>
+                                    {possibleValues.map((val, idx) => (
+                                      <option key={idx} value={val}>
+                                        {val}
+                                      </option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  // ✅ Text input if no predefined values exist
+                                  <input
+                                    type="text"
+                                    value={value}
+                                    onChange={(e) =>
+                                      handleEditOptionValueChange(
+                                        i,
+                                        e.target.value
+                                      )
+                                    }
+                                    placeholder="Enter value"
+                                    className="w-full border border-gray-300 rounded-md p-1 text-sm"
+                                  />
+                                )}
+
+                                {/* delete button */}
+                                {newOption.values.length > 1 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteEditedValue(i);
+                                    }}
+                                    className="text-red-600 border p-1 rounded-md hover:bg-red-100"
+                                  >
+                                    <FaTrash />
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddEditedValue();
+                            }}
+                            className="text-xs text-blue-600 hover:underline mt-1"
+                          >
+                            + Add another value
+                          </button>
+                        </div>
                       )}
                     </div>
                   ))}
@@ -3715,144 +3787,3 @@ const CategorySelector = () => {
 };
 
 export default CategorySelector;
-
-const EditOptionValues = ({
-  newOption,
-  setNewOption,
-  dbOptions,
-  handleDeleteEditedValue,
-  handleAddEditedValue,
-  showToast, // ✅ pass toast function from parent
-}) => {
-  const [customFields, setCustomFields] = React.useState([]);
-
-  const toggleToCustom = (index) => {
-    setCustomFields((prev) => [...prev, index]);
-  };
-
-  const toggleToDropdown = (index) => {
-    setCustomFields((prev) => prev.filter((i) => i !== index));
-  };
-
-  const isDuplicate = (value, currentIndex) => {
-    return newOption.values.some(
-      (v, i) =>
-        i !== currentIndex &&
-        v.trim().toLowerCase() === value.trim().toLowerCase()
-    );
-  };
-
-  return (
-    <div className="mt-2 space-y-2">
-      {newOption.values.map((value, i) => {
-        const matchedDbOption = dbOptions.find((opt) =>
-          Array.isArray(opt.optionName)
-            ? opt.optionName.some(
-                (name) =>
-                  name.toLowerCase().trim() ===
-                  newOption.name.toLowerCase().trim()
-              )
-            : opt.optionName.toLowerCase().trim() ===
-              newOption.name.toLowerCase().trim()
-        );
-
-        const possibleValues = matchedDbOption?.optionValues || [];
-        const isCustom = customFields.includes(i);
-
-        return (
-          <div key={i} className="flex gap-2 items-center">
-            {/* Dropdown if predefined values exist and not in custom mode */}
-            {possibleValues.length > 0 && !isCustom ? (
-              <select
-                value={value}
-                onChange={(e) => {
-                  const selected = e.target.value;
-                  const updated = [...newOption.values];
-
-                  // 🧠 Prevent duplicates
-                  if (
-                    selected !== "Other" &&
-                    selected.trim() !== "" &&
-                    isDuplicate(selected, i)
-                  ) {
-                    showToast(
-                      "error",
-                      "This value already exists in this option."
-                    );
-                    return;
-                  }
-
-                  if (selected === "Other") {
-                    toggleToCustom(i);
-                    updated[i] = "";
-                  } else {
-                    toggleToDropdown(i);
-                    updated[i] = selected;
-                  }
-
-                  setNewOption({ ...newOption, values: updated });
-                }}
-                className="w-full border border-gray-300 rounded-md p-1 text-sm"
-              >
-                <option value="">Select value</option>
-                {possibleValues.map((val, idx) => (
-                  <option key={idx} value={val}>
-                    {val}
-                  </option>
-                ))}
-                <option value="Other">Other</option>
-              </select>
-            ) : (
-              // ✅ Text input for "Other"
-              <input
-                type="text"
-                value={value}
-                onChange={(e) => {
-                  const inputValue = e.target.value;
-                  const updated = [...newOption.values];
-
-                  // 🧠 Prevent duplicates
-                  if (isDuplicate(inputValue, i)) {
-                    showToast(
-                      "error",
-                      "This value already exists in this option."
-                    );
-                    return;
-                  }
-
-                  updated[i] = inputValue;
-                  setNewOption({ ...newOption, values: updated });
-                }}
-                placeholder="Enter custom value"
-                className="w-full border border-gray-300 rounded-md p-1 text-sm"
-              />
-            )}
-
-            {/* delete button */}
-            {newOption.values.length > 1 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteEditedValue(i);
-                }}
-                className="text-red-600 border p-1 rounded-md hover:bg-red-100"
-              >
-                <FaTrash />
-              </button>
-            )}
-          </div>
-        );
-      })}
-
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          handleAddEditedValue();
-        }}
-        className="text-xs text-blue-600 hover:underline mt-1"
-      >
-        + Add another value
-      </button>
-    </div>
-  );
-};

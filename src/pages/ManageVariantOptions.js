@@ -76,7 +76,7 @@ const ManageVariantOptions = () => {
 
       const result = await response.json();
       if (response.ok) {
-        showToast("success", `${result.count} options imported successfully.`);
+        showToast("success", `options imported successfully.`);
         setShowModal(false);
         setFile(null);
 

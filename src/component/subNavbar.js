@@ -76,6 +76,7 @@ const SubNavbar = () => {
 
     fetchUserModules();
   }, []);
+console.log("Allowed modules:", allowedModules);
 
   const modulesList = [
     {

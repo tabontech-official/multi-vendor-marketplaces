@@ -17,7 +17,6 @@ const ManageVariantOptions = () => {
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Fetch all variant options
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -37,13 +36,11 @@ const ManageVariantOptions = () => {
     fetchOptions();
   }, []);
 
-  // 🔹 Show Toast
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
 
-  // 🔹 Export CSV
   const handleExport = async () => {
     try {
       const response = await fetch(
@@ -64,7 +61,6 @@ const ManageVariantOptions = () => {
     }
   };
 
-  // 🔹 Import CSV
   const handleImport = async () => {
     if (!file) return showToast("error", "Please select a CSV file first.");
 
@@ -99,15 +95,17 @@ const ManageVariantOptions = () => {
     }
   };
 
-  // 🔹 Delete Selected Options
   const handleDeleteOptions = async () => {
     if (selectedOptionIds.length === 0)
       return showToast("error", "Please select at least one option to delete.");
 
     try {
-      await axios.delete("https://multi-vendor-marketplace.vercel.app/variantOption/deleteOptions", {
-        data: { optionIds: selectedOptionIds },
-      });
+      await axios.delete(
+        "https://multi-vendor-marketplace.vercel.app/variantOption/deleteOptions",
+        {
+          data: { optionIds: selectedOptionIds },
+        }
+      );
       showToast("success", "Selected options deleted!");
       setOptions((prev) =>
         prev.filter((opt) => !selectedOptionIds.includes(opt._id))
@@ -120,34 +118,32 @@ const ManageVariantOptions = () => {
   };
 
   const handleEditSave = async () => {
-  const { option } = editModal;
-  if (!option.name || !option.optionValues?.length) {
-    return showToast("error", "Please fill all fields correctly.");
-  }
-
-  try {
-    const response = await axios.put(
-      "https://multi-vendor-marketplace.vercel.app/variantOption/updateOption",
-      option
-    );
-
-    if (response.status === 200) {
-      showToast("success", "Option updated successfully!");
-      setOptions((prev) =>
-        prev.map((opt) => (opt._id === option._id ? option : opt))
-      );
-      setEditModal({ show: false, option: null });
+    const { option } = editModal;
+    if (!option.name || !option.optionValues?.length) {
+      return showToast("error", "Please fill all fields correctly.");
     }
-  } catch (error) {
-    console.error("Update Error:", error);
-    showToast("error", "Failed to update option.");
-  }
-};
 
+    try {
+      const response = await axios.put(
+        "https://multi-vendor-marketplace.vercel.app/variantOption/updateOption",
+        option
+      );
+
+      if (response.status === 200) {
+        showToast("success", "Option updated successfully!");
+        setOptions((prev) =>
+          prev.map((opt) => (opt._id === option._id ? option : opt))
+        );
+        setEditModal({ show: false, option: null });
+      }
+    } catch (error) {
+      console.error("Update Error:", error);
+      showToast("error", "Failed to update option.");
+    }
+  };
 
   return (
     <div className="p-6">
-      {/* ✅ Toast */}
       {toast.show && (
         <div
           className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
@@ -163,7 +159,6 @@ const ManageVariantOptions = () => {
         </div>
       )}
 
-      {/* Header */}
       <div className="flex justify-between items-center pb-4 border-b">
         <div className="flex items-center space-x-2">
           <IoOptionsOutline size={26} className="text-gray-700" />
@@ -202,10 +197,8 @@ const ManageVariantOptions = () => {
         </div>
       </div>
 
-      {/* Error */}
       {error && <div className="text-red-500 mt-3">{error}</div>}
 
-      {/* Loading */}
       {loading ? (
         <div className="text-center py-10 text-gray-500">
           Loading options...
@@ -245,7 +238,6 @@ const ManageVariantOptions = () => {
                   </td>
                   <td className="p-3 text-sm text-gray-800">{option.name}</td>
 
-                  {/* 🆕 Aliases column */}
                   <td className="p-3 text-sm text-gray-800">
                     {Array.isArray(option.optionName)
                       ? option.optionName.join(", ")
@@ -287,7 +279,6 @@ const ManageVariantOptions = () => {
         </table>
       )}
 
-      {/* Import Modal */}
       <AnimatePresence>
         {showModal && (
           <motion.div
@@ -361,8 +352,6 @@ const ManageVariantOptions = () => {
         )}
       </AnimatePresence>
 
-      {/* Edit Modal */}
-      {/* Edit Modal */}
       <AnimatePresence>
         {editModal.show && (
           <motion.div
@@ -382,7 +371,6 @@ const ManageVariantOptions = () => {
                 Edit Variant Option
               </h2>
 
-              {/* ✅ Option Name */}
               <label className="block mb-4">
                 <span className="text-gray-700 font-medium">Option Name</span>
                 <input
@@ -399,7 +387,6 @@ const ManageVariantOptions = () => {
                 />
               </label>
 
-              {/* ✅ Aliases */}
               <label className="block mb-4">
                 <span className="text-gray-700 font-medium">
                   Aliases (comma separated)
@@ -428,7 +415,6 @@ const ManageVariantOptions = () => {
                 />
               </label>
 
-              {/* ✅ Option Values */}
               <label className="block mb-4">
                 <span className="text-gray-700 font-medium">
                   Option Values (comma separated)
@@ -457,7 +443,6 @@ const ManageVariantOptions = () => {
                 />
               </label>
 
-              {/* ✅ Buttons */}
               <div className="flex justify-end space-x-3 mt-6 border-t border-gray-100 pt-4">
                 <button
                   onClick={() => setEditModal({ show: false, option: null })}

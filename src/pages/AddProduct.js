@@ -3259,7 +3259,7 @@ const CategorySelector = () => {
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700">
-                    Price <span className="text-gray-400 text-xs">(USD)</span>
+                    Price <span className="text-gray-400 text-xs">(AUD)</span>
                   </label>
                   <input
                     type="number"
@@ -3283,7 +3283,7 @@ const CategorySelector = () => {
                 <div>
                   <label className="text-sm font-medium text-gray-700">
                     Compare at Price{" "}
-                    <span className="text-gray-400 text-xs">(USD)</span>
+                    <span className="text-gray-400 text-xs">(AUD)</span>
                   </label>
                   <input
                     type="number"

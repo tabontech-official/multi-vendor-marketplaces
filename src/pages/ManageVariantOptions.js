@@ -22,7 +22,7 @@ const ManageVariantOptions = () => {
     const fetchOptions = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/variantOption/getOptions"
+          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
         );
         const data = await response.json();
         if (response.ok) setOptions(data);
@@ -47,7 +47,7 @@ const ManageVariantOptions = () => {
   const handleExport = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/variantOption/getCsvForOptions"
+        "https://multi-vendor-marketplace.vercel.app/variantOption/getCsvForOptions"
       );
       if (response.ok) {
         const blob = await response.blob();
@@ -74,7 +74,7 @@ const ManageVariantOptions = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/variantOption/importOptions",
+        "https://multi-vendor-marketplace.vercel.app/variantOption/importOptions",
         { method: "POST", body: formData }
       );
 
@@ -85,7 +85,7 @@ const ManageVariantOptions = () => {
         setFile(null);
 
         const updated = await fetch(
-          "http://localhost:5000/variantOption/getOptions"
+          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
         );
         setOptions(await updated.json());
       } else {
@@ -106,7 +106,7 @@ const ManageVariantOptions = () => {
 
     try {
       await axios.delete(
-        "http://localhost:5000/variantOption/deleteOptions",
+        "https://multi-vendor-marketplace.vercel.app/variantOption/deleteOptions",
         { data: { optionIds: selectedOptionIds } }
       );
       showToast("success", "Selected options deleted!");
@@ -128,7 +128,7 @@ const ManageVariantOptions = () => {
 
     try {
       const response = await axios.put(
-        "http://localhost:5000/variantOption/updateOption",
+        "https://multi-vendor-marketplace.vercel.app/variantOption/updateOption",
         option
       );
       if (response.status === 200) {

@@ -750,17 +750,14 @@ const CategorySelector = () => {
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -1200,22 +1197,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1288,19 +1282,16 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "x-api-key": apiKey,
-                  "x-api-secret": apiSecretKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId, images: [data.secure_url] }),
-              }
-            );
+            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            });
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -2277,41 +2268,14 @@ const CategorySelector = () => {
                       )}
 
                       {editingOptionIndex === optionIndex && (
-                        <div className="mt-2 space-y-2">
-                          {newOption.values.map((value, i) => (
-                            <div key={i} className="flex gap-2 items-center">
-                              <input
-                                type="text"
-                                value={value}
-                                onChange={(e) =>
-                                  handleEditOptionValueChange(i, e.target.value)
-                                }
-                                className="w-full border border-gray-300 rounded-md p-1 text-sm"
-                              />
-                              {newOption.values.length > 1 && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteEditedValue(i);
-                                  }}
-                                  className="text-red-600 border p-1 rounded-md hover:bg-red-100"
-                                >
-                                  <FaTrash />
-                                </button>
-                              )}
-                            </div>
-                          ))}
-
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddEditedValue();
-                            }}
-                            className="text-xs text-blue-600 hover:underline mt-1"
-                          >
-                            + Add another value
-                          </button>
-                        </div>
+                        <EditOptionValues
+                          newOption={newOption}
+                          setNewOption={setNewOption}
+                          dbOptions={dbOptions}
+                          handleDeleteEditedValue={handleDeleteEditedValue}
+                          handleAddEditedValue={handleAddEditedValue}
+                          showToast={showToast} // ✅ pass here
+                        />
                       )}
                     </div>
                   ))}
@@ -2347,16 +2311,7 @@ const CategorySelector = () => {
                           <div className="font-medium text-gray-700">
                             {combination.parent}
                           </div>
-                          {/* <button
-                            onClick={() => toggleChildOptions(index)}
-                            className="text-gray-500"
-                          >
-                            {expandedParents.includes(index) ? (
-                              <IoIosArrowUp className="text-xl" />
-                            ) : (
-                              <MdOutlineKeyboardArrowDown className="text-2xl" />
-                            )}
-                          </button> */}
+
                           <div
                             className="flex items-center justify-between gap-6 cursor-pointer"
                             onClick={() => toggleChildOptions(index)} // ✅ Only one click handler
@@ -2407,59 +2362,6 @@ const CategorySelector = () => {
                                       key={childIndex}
                                       className="grid grid-cols-6 items-center gap-20"
                                     >
-                                      {/* <div className="w-12 relative">
-                                        <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden">
-                                          <div className="flex gap-2 flex-wrap">
-                                            {(
-                                              variantImages[normalizedKey] || []
-                                            ).map((img, i) => (
-                                              <img
-                                                src={
-                                                  variantImages[
-                                                    normalizedKey
-                                                  ]?.[0]?.preview
-                                                }
-                                                alt={
-                                                  variantImages[
-                                                    normalizedKey
-                                                  ]?.[0]?.alt
-                                                }
-                                                className="w-12 h-12 object-cover rounded-md border border-gray-300"
-                                              />
-                                            ))}
-                                            <label className="flex items-center justify-center w-10 h-10 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition">
-                                              <span className="text-xl text-gray-400">
-                                                +
-                                              </span>
-                                              <input
-                                                type="file"
-                                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                                onClick={() => {
-                                                  setCurrentVariant({
-                                                    index,
-                                                    child,
-                                                  });
-                                                  setIsPopupVisible(true);
-                                                  setIsChanged(true);
-                                                  setPopupMode("variant");
-                                                }}
-                                              />
-                                            </label>
-                                          </div>
-
-                                          <input
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onClick={() => {
-                                              setCurrentVariant({
-                                                index,
-                                                child,
-                                              });
-                                              setIsPopupVisible(true);
-                                              setIsChanged(true);
-                                            }}
-                                          />
-                                        </label>
-                                      </div> */}
                                       <div className="relative w-14 h-14">
                                         <label className="flex items-center justify-center w-full h-full border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden bg-gray-50">
                                           {variantImages[normalizedKey]
@@ -3813,3 +3715,144 @@ const CategorySelector = () => {
 };
 
 export default CategorySelector;
+
+const EditOptionValues = ({
+  newOption,
+  setNewOption,
+  dbOptions,
+  handleDeleteEditedValue,
+  handleAddEditedValue,
+  showToast, // ✅ pass toast function from parent
+}) => {
+  const [customFields, setCustomFields] = React.useState([]);
+
+  const toggleToCustom = (index) => {
+    setCustomFields((prev) => [...prev, index]);
+  };
+
+  const toggleToDropdown = (index) => {
+    setCustomFields((prev) => prev.filter((i) => i !== index));
+  };
+
+  const isDuplicate = (value, currentIndex) => {
+    return newOption.values.some(
+      (v, i) =>
+        i !== currentIndex &&
+        v.trim().toLowerCase() === value.trim().toLowerCase()
+    );
+  };
+
+  return (
+    <div className="mt-2 space-y-2">
+      {newOption.values.map((value, i) => {
+        const matchedDbOption = dbOptions.find((opt) =>
+          Array.isArray(opt.optionName)
+            ? opt.optionName.some(
+                (name) =>
+                  name.toLowerCase().trim() ===
+                  newOption.name.toLowerCase().trim()
+              )
+            : opt.optionName.toLowerCase().trim() ===
+              newOption.name.toLowerCase().trim()
+        );
+
+        const possibleValues = matchedDbOption?.optionValues || [];
+        const isCustom = customFields.includes(i);
+
+        return (
+          <div key={i} className="flex gap-2 items-center">
+            {/* Dropdown if predefined values exist and not in custom mode */}
+            {possibleValues.length > 0 && !isCustom ? (
+              <select
+                value={value}
+                onChange={(e) => {
+                  const selected = e.target.value;
+                  const updated = [...newOption.values];
+
+                  // 🧠 Prevent duplicates
+                  if (
+                    selected !== "Other" &&
+                    selected.trim() !== "" &&
+                    isDuplicate(selected, i)
+                  ) {
+                    showToast(
+                      "error",
+                      "This value already exists in this option."
+                    );
+                    return;
+                  }
+
+                  if (selected === "Other") {
+                    toggleToCustom(i);
+                    updated[i] = "";
+                  } else {
+                    toggleToDropdown(i);
+                    updated[i] = selected;
+                  }
+
+                  setNewOption({ ...newOption, values: updated });
+                }}
+                className="w-full border border-gray-300 rounded-md p-1 text-sm"
+              >
+                <option value="">Select value</option>
+                {possibleValues.map((val, idx) => (
+                  <option key={idx} value={val}>
+                    {val}
+                  </option>
+                ))}
+                <option value="Other">Other</option>
+              </select>
+            ) : (
+              // ✅ Text input for "Other"
+              <input
+                type="text"
+                value={value}
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  const updated = [...newOption.values];
+
+                  // 🧠 Prevent duplicates
+                  if (isDuplicate(inputValue, i)) {
+                    showToast(
+                      "error",
+                      "This value already exists in this option."
+                    );
+                    return;
+                  }
+
+                  updated[i] = inputValue;
+                  setNewOption({ ...newOption, values: updated });
+                }}
+                placeholder="Enter custom value"
+                className="w-full border border-gray-300 rounded-md p-1 text-sm"
+              />
+            )}
+
+            {/* delete button */}
+            {newOption.values.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteEditedValue(i);
+                }}
+                className="text-red-600 border p-1 rounded-md hover:bg-red-100"
+              >
+                <FaTrash />
+              </button>
+            )}
+          </div>
+        );
+      })}
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handleAddEditedValue();
+        }}
+        className="text-xs text-blue-600 hover:underline mt-1"
+      >
+        + Add another value
+      </button>
+    </div>
+  );
+};

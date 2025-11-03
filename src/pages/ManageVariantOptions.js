@@ -105,10 +105,9 @@ const ManageVariantOptions = () => {
       return showToast("error", "Please select at least one option to delete.");
 
     try {
-      await axios.delete(
-        "https://multi-vendor-marketplace.vercel.app/variantOption/deleteOptions",
-        { data: { optionIds: selectedOptionIds } }
-      );
+      await axios.delete("https://multi-vendor-marketplace.vercel.app/variantOption/deleteOptions", {
+        data: { optionIds: selectedOptionIds },
+      });
       showToast("success", "Selected options deleted!");
       setOptions((prev) =>
         prev.filter((opt) => !selectedOptionIds.includes(opt._id))
@@ -120,29 +119,31 @@ const ManageVariantOptions = () => {
     }
   };
 
-  // 🔹 Save Edited Option
   const handleEditSave = async () => {
-    const { option } = editModal;
-    if (!option.optionName || !option.optionValues)
-      return showToast("error", "Please fill all fields.");
+  const { option } = editModal;
+  if (!option.name || !option.optionValues?.length) {
+    return showToast("error", "Please fill all fields correctly.");
+  }
 
-    try {
-      const response = await axios.put(
-        "https://multi-vendor-marketplace.vercel.app/variantOption/updateOption",
-        option
+  try {
+    const response = await axios.put(
+      "https://multi-vendor-marketplace.vercel.app/variantOption/updateOption",
+      option
+    );
+
+    if (response.status === 200) {
+      showToast("success", "Option updated successfully!");
+      setOptions((prev) =>
+        prev.map((opt) => (opt._id === option._id ? option : opt))
       );
-      if (response.status === 200) {
-        showToast("success", "Option updated successfully!");
-        setOptions((prev) =>
-          prev.map((opt) => (opt._id === option._id ? option : opt))
-        );
-        setEditModal({ show: false, option: null });
-      }
-    } catch (error) {
-      console.error("Update Error:", error);
-      showToast("error", "Failed to update option.");
+      setEditModal({ show: false, option: null });
     }
-  };
+  } catch (error) {
+    console.error("Update Error:", error);
+    showToast("error", "Failed to update option.");
+  }
+};
+
 
   return (
     <div className="p-6">
@@ -206,14 +207,16 @@ const ManageVariantOptions = () => {
 
       {/* Loading */}
       {loading ? (
-        <div className="text-center py-10 text-gray-500">Loading options...</div>
+        <div className="text-center py-10 text-gray-500">
+          Loading options...
+        </div>
       ) : (
         <table className="w-full mt-4 border bg-white rounded-lg shadow-sm">
           <thead className="bg-gray-100 text-left text-gray-600 text-sm">
             <tr>
               <th className="p-3">Select</th>
-              <th className="p-3">ID</th>
               <th className="p-3">Option Name</th>
+              <th className="p-3">Aliases</th>
               <th className="p-3">Option Values</th>
               <th className="p-3 text-right">Actions</th>
             </tr>
@@ -240,17 +243,21 @@ const ManageVariantOptions = () => {
                       }
                     />
                   </td>
-                  <td className="p-3 text-sm text-gray-700">{option._id}</td>
+                  <td className="p-3 text-sm text-gray-800">{option.name}</td>
+
+                  {/* 🆕 Aliases column */}
                   <td className="p-3 text-sm text-gray-800">
                     {Array.isArray(option.optionName)
                       ? option.optionName.join(", ")
                       : option.optionName}
                   </td>
+
                   <td className="p-3 text-sm text-gray-800">
                     {Array.isArray(option.optionValues)
                       ? option.optionValues.join(", ")
                       : option.optionValues}
                   </td>
+
                   <td className="p-3 text-right">
                     <button
                       onClick={() =>
@@ -268,7 +275,10 @@ const ManageVariantOptions = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="text-center text-gray-500 py-6 text-sm">
+                <td
+                  colSpan={6}
+                  className="text-center text-gray-500 py-6 text-sm"
+                >
                   No options found.
                 </td>
               </tr>
@@ -352,6 +362,7 @@ const ManageVariantOptions = () => {
       </AnimatePresence>
 
       {/* Edit Modal */}
+      {/* Edit Modal */}
       <AnimatePresence>
         {editModal.show && (
           <motion.div
@@ -362,57 +373,101 @@ const ManageVariantOptions = () => {
           >
             <motion.div
               className="bg-white rounded-xl shadow-lg w-full max-w-md p-6"
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
+              exit={{ scale: 0.9, opacity: 0 }}
             >
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
+                <IoOptionsOutline className="text-blue-500" size={22} />
                 Edit Variant Option
               </h2>
 
-              <label className="block mb-3">
-                <span className="text-gray-700">Option Name</span>
+              {/* ✅ Option Name */}
+              <label className="block mb-4">
+                <span className="text-gray-700 font-medium">Option Name</span>
                 <input
                   type="text"
-                  value={editModal.option.optionName}
+                  value={editModal.option.name || ""}
                   onChange={(e) =>
                     setEditModal((prev) => ({
                       ...prev,
-                      option: { ...prev.option, optionName: e.target.value },
+                      option: { ...prev.option, name: e.target.value },
                     }))
                   }
-                  className="w-full border px-3 py-2 rounded-md mt-1"
+                  placeholder="e.g. Color, Size, Material"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-md mt-1 focus:ring focus:ring-blue-100"
                 />
               </label>
 
-              <label className="block mb-3">
-                <span className="text-gray-700">Option Values (comma separated)</span>
+              {/* ✅ Aliases */}
+              <label className="block mb-4">
+                <span className="text-gray-700 font-medium">
+                  Aliases (comma separated)
+                </span>
                 <input
                   type="text"
-                  value={editModal.option.optionValues}
+                  value={
+                    Array.isArray(editModal.option.optionName)
+                      ? editModal.option.optionName.join(", ")
+                      : editModal.option.optionName || ""
+                  }
                   onChange={(e) =>
                     setEditModal((prev) => ({
                       ...prev,
                       option: {
                         ...prev.option,
-                        optionValues: e.target.value.split(",").map((v) => v.trim()),
+                        optionName: e.target.value
+                          .split(",")
+                          .map((v) => v.trim())
+                          .filter(Boolean),
                       },
                     }))
                   }
-                  className="w-full border px-3 py-2 rounded-md mt-1"
+                  placeholder="e.g. Kolour, Hue, Tone"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-md mt-1 focus:ring focus:ring-blue-100"
                 />
               </label>
 
-              <div className="flex justify-end space-x-3 mt-6">
+              {/* ✅ Option Values */}
+              <label className="block mb-4">
+                <span className="text-gray-700 font-medium">
+                  Option Values (comma separated)
+                </span>
+                <input
+                  type="text"
+                  value={
+                    Array.isArray(editModal.option.optionValues)
+                      ? editModal.option.optionValues.join(", ")
+                      : editModal.option.optionValues || ""
+                  }
+                  onChange={(e) =>
+                    setEditModal((prev) => ({
+                      ...prev,
+                      option: {
+                        ...prev.option,
+                        optionValues: e.target.value
+                          .split(",")
+                          .map((v) => v.trim())
+                          .filter(Boolean),
+                      },
+                    }))
+                  }
+                  placeholder="e.g. Red, Blue, Green"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-md mt-1 focus:ring focus:ring-blue-100"
+                />
+              </label>
+
+              {/* ✅ Buttons */}
+              <div className="flex justify-end space-x-3 mt-6 border-t border-gray-100 pt-4">
                 <button
                   onClick={() => setEditModal({ show: false, option: null })}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleEditSave}
-                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium"
                 >
                   Save Changes
                 </button>

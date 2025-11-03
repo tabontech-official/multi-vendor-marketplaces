@@ -1,6 +1,3 @@
-optionName,optionValues
-"Colour, Kolour, Kolor","Red, Green, Blue, Yellow"
-"Size, Sizing","S, M, L, XL"
-Material,"Cotton, Silk, Wool, Denim"
-"Fragrance, Aroma","Fruity, Woody, Fresh, Oriental"
-"Style, Type","Classic, Modern, Street, Minimal"
+optionName,aliases,optionValues
+Color,"Kolour, colour, kolor","Red, Green, Blue"
+Size,"Dimension, Sizing","Medium, Large"

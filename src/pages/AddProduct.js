@@ -36,7 +36,7 @@ const CategorySelector = () => {
     const fetchDbOptions = async () => {
       try {
         const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
+          "http://localhost:5000/variantOption/getOptions"
         );
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -62,7 +62,7 @@ const CategorySelector = () => {
     `https://www.aydiactive.com/products/${product?.title || ""} `
   );
   const [isChanged, setIsChanged] = useState(false);
-  const [popupMode, setPopupMode] = useState("variant"); // "variant" | "media"
+  const [popupMode, setPopupMode] = useState("variant");
   const [isMediaModalVisible, setIsMediaModalVisible] = useState(false);
 
   const [vendor, setVendor] = useState([]);
@@ -117,7 +117,7 @@ const CategorySelector = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
-  const [selectedOptionName, setSelectedOptionName] = useState(""); // dropdown selected name
+  const [selectedOptionName, setSelectedOptionName] = useState(""); 
   const [isCustomOption, setIsCustomOption] = useState(false);
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
@@ -159,7 +159,7 @@ const CategorySelector = () => {
 
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/category/getCategory",
+          "http://localhost:5000/category/getCategory",
           {
             method: "GET",
             headers: {
@@ -571,7 +571,6 @@ const CategorySelector = () => {
 
     const cleanedValues = newOption.values.filter((val) => val.trim() !== "");
 
-    // 🔍 Check if option already exists (e.g., Size, Color)
     const existingOptionIndex = options.findIndex(
       (opt) =>
         opt.name.toLowerCase().trim() === newOption.name.toLowerCase().trim()
@@ -580,7 +579,6 @@ const CategorySelector = () => {
     let updatedOptions;
 
     if (existingOptionIndex !== -1) {
-      // 🧩 Merge with existing option (no duplicates)
       const existingOption = options[existingOptionIndex];
       const mergedValues = Array.from(
         new Set([...existingOption.values, ...cleanedValues])
@@ -590,7 +588,6 @@ const CategorySelector = () => {
         i === existingOptionIndex ? { ...opt, values: mergedValues } : opt
       );
     } else {
-      // ➕ Add a completely new option
       updatedOptions = [...options, { ...newOption, values: cleanedValues }];
     }
 
@@ -670,7 +667,7 @@ const CategorySelector = () => {
 
   //   if (isPopupVisible && userId) {
   //     fetch(
-  //       `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+  //       `http://localhost:5000/product/getImageGallery/${productId}`,
   //       {
   //         method: "GET",
   //         headers: {
@@ -699,17 +696,14 @@ const CategorySelector = () => {
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      fetch(`http://localhost:5000/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -931,8 +925,21 @@ const CategorySelector = () => {
       setUserId(product.userId || "");
       if (product.metafields && product.metafields.length > 0) {
         setEnableMetafields(true);
-        setMetafields(product.metafields);
+        // Always keep 4 metafields
+        const filled = [...product.metafields];
+        while (filled.length < 4) {
+          filled.push({ label: "", value: "" });
+        }
+        setMetafields(filled.slice(0, 4)); // cap at 4
+      } else {
+        setMetafields([
+          { label: "", value: "" },
+          { label: "", value: "" },
+          { label: "", value: "" },
+          { label: "", value: "" },
+        ]);
       }
+
       setMongooseProductId(product._id);
       const imageURLs =
         product.images?.map((img) => ({
@@ -1020,7 +1027,7 @@ const CategorySelector = () => {
 
   //       if (data.secure_url) {
   //         await fetch(
-  //           "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+  //           "http://localhost:5000/product/addImageGallery",
   //           {
   //             method: "POST",
   //             headers: {
@@ -1132,22 +1139,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch("http://localhost:5000/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1220,19 +1224,16 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "x-api-key": apiKey,
-                  "x-api-secret": apiSecretKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId, images: [data.secure_url] }),
-              }
-            );
+            await fetch("http://localhost:5000/product/addImageGallery", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            });
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1276,10 +1277,6 @@ const CategorySelector = () => {
       const invalid = metafields.some(
         (m) => !m.label.trim() || !m.value.trim()
       );
-      if (invalid) {
-        showToast("error", "Please fill all metafield labels and values.");
-        return;
-      }
     }
 
     setLoading(true);
@@ -1374,8 +1371,8 @@ const CategorySelector = () => {
     try {
       // 🧩 Decide if creating or updating
       const url = isEditing
-        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
-        : `https://multi-vendor-marketplace.vercel.app/product/createProduct`;
+        ? `http://localhost:5000/product/updateProducts/${mongooseProductId}`
+        : `http://localhost:5000/product/createProduct`;
 
       const method = isEditing ? "PATCH" : "POST";
 
@@ -1431,7 +1428,7 @@ const CategorySelector = () => {
           if (!variant.variantId) continue;
 
           await fetch(
-            `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variant.variantId}`,
+            `http://localhost:5000/product/updateVariant/${productId}/${variant.variantId}`,
             {
               method: "PUT",
               headers: {
@@ -1473,7 +1470,7 @@ const CategorySelector = () => {
       );
 
       const imageSaveResponse = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
+        `http://localhost:5000/product/updateImages/${productId}`,
         {
           method: "PUT",
           headers: {
@@ -1575,7 +1572,7 @@ const CategorySelector = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/duplicateProduct/${product.shopifyId}`,
+        `http://localhost:5000/product/duplicateProduct/${product.shopifyId}`,
         {
           method: "POST",
           headers: {
@@ -1686,12 +1683,21 @@ const CategorySelector = () => {
   };
 
   const [enableMetafields, setEnableMetafields] = useState(false);
-  const [metafields, setMetafields] = useState([{ label: "", value: "" }]);
+
+  // Always maintain 4 metafields in state
+  const [metafields, setMetafields] = useState([
+    { label: "", value: "" },
+    { label: "", value: "" },
+    { label: "", value: "" },
+    { label: "", value: "" },
+  ]);
 
   const handleMetafieldChange = (index, field, value) => {
-    const updated = [...metafields];
-    updated[index][field] = value;
-    setMetafields(updated);
+    setMetafields((prev) => {
+      const updated = [...prev];
+      updated[index][field] = value;
+      return updated;
+    });
   };
 
   const addMetafield = () => {
@@ -2789,7 +2795,7 @@ const CategorySelector = () => {
               </div>
             )}
           </div>
-          {/* <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
+          <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-medium text-gray-800">Metafields</h2>
               <div className="flex items-center space-x-2">
@@ -2797,7 +2803,9 @@ const CategorySelector = () => {
                   type="checkbox"
                   id="enableMetafields"
                   checked={enableMetafields}
-                  onChange={() => setEnableMetafields(!enableMetafields)}
+                  onChange={() => {
+                    setEnableMetafields((prev) => !prev);
+                  }}
                   className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                 />
                 <label
@@ -2814,7 +2822,7 @@ const CategorySelector = () => {
                 {metafields.map((field, index) => (
                   <div
                     key={index}
-                    className="border border-gray-200 rounded-xl p-4 bg-gray-50 relative"
+                    className="border border-gray-200 rounded-xl p-4 bg-gray-50"
                   >
                     <h3 className="text-sm font-semibold text-gray-800 mb-3">
                       Custom Field {index + 1}
@@ -2858,30 +2866,11 @@ const CategorySelector = () => {
                         />
                       </div>
                     </div>
-
-                    {metafields.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeMetafield(index)}
-                        className="absolute top-3 right-3 text-red-500 hover:text-red-700 transition"
-                        title="Remove this metafield"
-                      >
-                        ✕
-                      </button>
-                    )}
                   </div>
                 ))}
-
-                <button
-                  type="button"
-                  onClick={addMetafield}
-                  className="text-sm text-blue-600 font-medium mt-2 hover:underline"
-                >
-                  + Add another
-                </button>
               </div>
             )}
-          </div> */}
+          </div>
 
           <div className="border rounded-lg p-4 shadow-sm bg-white mt-3">
             <h2 className="text-md font-medium text-gray-800 mb-3">

@@ -18,7 +18,7 @@ const Collection = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/category/category/${id}`,
+        `http://localhost:5000/category/category/${id}`,
         {
           method: "GET",
           headers: {

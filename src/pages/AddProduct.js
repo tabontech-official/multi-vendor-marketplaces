@@ -117,7 +117,7 @@ const CategorySelector = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
-  const [selectedOptionName, setSelectedOptionName] = useState(""); 
+  const [selectedOptionName, setSelectedOptionName] = useState("");
   const [isCustomOption, setIsCustomOption] = useState(false);
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
@@ -696,14 +696,17 @@ const CategorySelector = () => {
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
-      })
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -925,19 +928,23 @@ const CategorySelector = () => {
       setUserId(product.userId || "");
       if (product.metafields && product.metafields.length > 0) {
         setEnableMetafields(true);
-        // Always keep 4 metafields
-        const filled = [...product.metafields];
-        while (filled.length < 4) {
-          filled.push({ label: "", value: "" });
-        }
-        setMetafields(filled.slice(0, 4)); // cap at 4
+
+        // ✅ Only include metafields that have at least one non-empty value
+        const validMetafields = product.metafields.filter(
+          (m) => m.label?.trim() !== "" || m.value?.trim() !== ""
+        );
+
+        // ✅ Limit to 4 max
+        const limitedMetafields = validMetafields.slice(0, 4);
+
+        setMetafields(
+          limitedMetafields.length > 0
+            ? limitedMetafields
+            : [{ label: "", value: "" }]
+        );
       } else {
-        setMetafields([
-          { label: "", value: "" },
-          { label: "", value: "" },
-          { label: "", value: "" },
-          { label: "", value: "" },
-        ]);
+        setEnableMetafields(false);
+        setMetafields([{ label: "", value: "" }]);
       }
 
       setMongooseProductId(product._id);
@@ -1139,19 +1146,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1224,16 +1234,19 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            });
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
+              }
+            );
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1681,31 +1694,24 @@ const CategorySelector = () => {
     setNewOption({ name: "", values: [""] });
     setIsChanged(true);
   };
-
   const [enableMetafields, setEnableMetafields] = useState(false);
+  const [metafields, setMetafields] = useState([{ label: "", value: "" }]);
 
-  // Always maintain 4 metafields in state
-  const [metafields, setMetafields] = useState([
-    { label: "", value: "" },
-    { label: "", value: "" },
-    { label: "", value: "" },
-    { label: "", value: "" },
-  ]);
-
-  const handleMetafieldChange = (index, field, value) => {
-    setMetafields((prev) => {
-      const updated = [...prev];
-      updated[index][field] = value;
-      return updated;
-    });
+  const handleMetafieldChange = (index, key, value) => {
+    const updated = [...metafields];
+    updated[index][key] = value;
+    setMetafields(updated);
   };
 
-  const addMetafield = () => {
-    setMetafields([...metafields, { label: "", value: "" }]);
+  const handleAddMetafield = () => {
+    if (metafields.length < 4) {
+      setMetafields([...metafields, { label: "", value: "" }]);
+    }
   };
 
-  const removeMetafield = (index) => {
-    setMetafields(metafields.filter((_, i) => i !== index));
+  const handleRemoveMetafield = (index) => {
+    const updated = metafields.filter((_, i) => i !== index);
+    setMetafields(updated);
   };
 
   return (
@@ -2803,9 +2809,7 @@ const CategorySelector = () => {
                   type="checkbox"
                   id="enableMetafields"
                   checked={enableMetafields}
-                  onChange={() => {
-                    setEnableMetafields((prev) => !prev);
-                  }}
+                  onChange={() => setEnableMetafields((prev) => !prev)}
                   className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                 />
                 <label
@@ -2824,9 +2828,19 @@ const CategorySelector = () => {
                     key={index}
                     className="border border-gray-200 rounded-xl p-4 bg-gray-50"
                   >
-                    <h3 className="text-sm font-semibold text-gray-800 mb-3">
-                      Custom Field {index + 1}
-                    </h3>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-gray-800">
+                        Custom Field {index + 1}
+                      </h3>
+                      {metafields.length > 1 && (
+                        <button
+                          onClick={() => handleRemoveMetafield(index)}
+                          className="text-xs text-red-600 hover:underline"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
@@ -2868,6 +2882,16 @@ const CategorySelector = () => {
                     </div>
                   </div>
                 ))}
+
+                {/* Add button (limit 4) */}
+                {metafields.length < 4 && (
+                  <button
+                    onClick={handleAddMetafield}
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    + Add Field
+                  </button>
+                )}
               </div>
             )}
           </div>

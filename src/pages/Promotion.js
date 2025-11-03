@@ -172,8 +172,7 @@ const Promotion = () => {
         const apiSecretKey = localStorage.getItem("apiSecretKey");
 
         if (userRole === "Merchant" || userRole === "Merchant Staff") {
-          url =
-            "https://multi-vendor-marketplace.vercel.app/promo/fetchAllPromotions";
+          url = "https://multi-vendor-marketplace.vercel.app/promo/fetchAllPromotions";
         } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
           url = "https://multi-vendor-marketplace.vercel.app/promo";
         }
@@ -190,11 +189,17 @@ const Promotion = () => {
 
         const data = await res.json();
 
-        // Always set as array so .filter works
-        setPromotions(Array.isArray(data) ? data : [data]);
+        if (Array.isArray(data)) {
+          setPromotions(data);
+        } else if (data) {
+          setPromotions((prev) => {
+            const exists = prev.some((p) => p._id === data._id);
+            return exists ? prev : [...prev, data];
+          });
+        }
       } catch (err) {
         console.error("Failed to fetch promotions:", err);
-        setPromotions([]); // Prevent stale state on error
+        setPromotions([]);
       }
     };
 
@@ -262,12 +267,9 @@ const Promotion = () => {
     try {
       await Promise.all(
         selectedProducts.map(async (id) => {
-          const response = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/promo/${id}`,
-            {
-              method: "DELETE",
-            }
-          );
+          const response = await fetch(`https://multi-vendor-marketplace.vercel.app/promo/${id}`, {
+            method: "DELETE",
+          });
           if (!response.ok) throw new Error("Failed to delete product");
         })
       );
@@ -301,28 +303,48 @@ const Promotion = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
+  const [promotionToEnd, setPromotionToEnd] = useState(null);
 
   const endPromotion = async () => {
+    if (!promotionToEnd) {
+      showToast("error", "No promotion selected to end.");
+      return;
+    }
+
     try {
-      await Promise.all(
-        selectedProducts.map(async (id) => {
-          const response = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/promo/endPromotions/${id}`,
-            {
-              method: "DELETE",
-            }
-          );
-          if (!response.ok) throw new Error("Failed to delete product");
-        })
+      setLoading(true);
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+      const response = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/promo/endPromotions/${promotionToEnd}`,
+        {
+          method: "DELETE",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        }
       );
 
-      setProducts(products.filter((p) => !selectedProducts.includes(p._id)));
-      setPromotions(
-        promotions.filter((p) => !selectedProducts.includes(p._id))
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Failed to end promotion");
+
+      // ✅ Remove ended promotion from UI
+      setPromotions((prev) =>
+        prev.filter((promo) => promo._id !== promotionToEnd)
       );
-      setSelectedProducts([]);
+
+      setPromotionToEnd(null);
+      setIsPopupOpen(false);
+      showToast("success", "Promotion ended successfully!");
     } catch (error) {
-      console.error("Error deleting products:", error);
+      console.error("❌ Error ending promotion:", error);
+      showToast("error", error.message || "Failed to end promotion.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -393,19 +415,44 @@ const Promotion = () => {
           {activeTab === "Promotions Details" && (
             <div className="space-y-6">
               {promotions
+                // .filter((product) => {
+                //   // ✅ Show both active and inactive for merchants
+                //   if (
+                //     userRole === "Merchant" ||
+                //     userRole === "Merchant Staff"
+                //   ) {
+                //     return (
+                //       product.createdRole === "Merchant" ||
+                //       product.createdRole === "Merchant Staff"
+                //     );
+                //   }
+
+                //   // ✅ For Admins, keep active filter
+                //   if (product.status !== "active") return false;
+
+                //   switch (userRole) {
+                //     case "Dev Admin":
+                //       return true;
+                //     case "Master Admin":
+                //       return (
+                //         product.createdRole === "Master Admin" ||
+                //         product.createdRole === "Merchant" ||
+                //         product.createdRole === "Merchant Staff"
+                //       );
+                //     default:
+                //       return false;
+                //   }
+                // })
                 .filter((product) => {
-                  // ✅ Show both active and inactive for merchants
+                  // ✅ Merchants & Merchant Staff see all promotions (active or inactive)
                   if (
                     userRole === "Merchant" ||
                     userRole === "Merchant Staff"
                   ) {
-                    return (
-                      product.createdRole === "Merchant" ||
-                      product.createdRole === "Merchant Staff"
-                    );
+                    return true;
                   }
 
-                  // ✅ For Admins, keep active filter
+                  // ✅ Admins only see active promotions
                   if (product.status !== "active") return false;
 
                   switch (userRole) {
@@ -465,7 +512,10 @@ const Promotion = () => {
                       </p>
 
                       <button
-                        onClick={openPopup}
+                        onClick={() => {
+                          setPromotionToEnd(product._id); // store promo id
+                          setIsPopupOpen(true); // open modal
+                        }}
                         className="text-blue-600 text-md hover:underline"
                       >
                         End Promotion
@@ -594,19 +644,44 @@ const Promotion = () => {
 
               <tbody>
                 {promotions
+                  // .filter((product) => {
+                  //   // ✅ Show both active and inactive for merchants
+                  //   if (
+                  //     userRole === "Merchant" ||
+                  //     userRole === "Merchant Staff"
+                  //   ) {
+                  //     return (
+                  //       product.createdRole === "Merchant" ||
+                  //       product.createdRole === "Merchant Staff"
+                  //     );
+                  //   }
+
+                  //   // ✅ For Admins, keep active filter
+                  //   if (product.status !== "active") return false;
+
+                  //   switch (userRole) {
+                  //     case "Dev Admin":
+                  //       return true;
+                  //     case "Master Admin":
+                  //       return (
+                  //         product.createdRole === "Master Admin" ||
+                  //         product.createdRole === "Merchant" ||
+                  //         product.createdRole === "Merchant Staff"
+                  //       );
+                  //     default:
+                  //       return false;
+                  //   }
+                  // })
                   .filter((product) => {
-                    // ✅ Show both active and inactive for merchants
+                    // ✅ Merchants & Merchant Staff see all promotions (active or inactive)
                     if (
                       userRole === "Merchant" ||
                       userRole === "Merchant Staff"
                     ) {
-                      return (
-                        product.createdRole === "Merchant" ||
-                        product.createdRole === "Merchant Staff"
-                      );
+                      return true;
                     }
 
-                    // ✅ For Admins, keep active filter
+                    // ✅ Admins only see active promotions
                     if (product.status !== "active") return false;
 
                     switch (userRole) {
@@ -648,19 +723,29 @@ const Promotion = () => {
                   ))}
 
                 {promotions.filter((product) => {
+                  // ✅ Merchants & Merchant Staff see all promotions (active or inactive)
+                  if (
+                    userRole === "Merchant" ||
+                    userRole === "Merchant Staff"
+                  ) {
+                    return true;
+                  }
+
+                  // ✅ Admins only see active promotions
                   if (product.status !== "active") return false;
 
-                  if (userRole === "dev") return true;
-                  if (userRole === "masterAdmin") {
-                    return (
-                      product.createdByRole === "masterAdmin" ||
-                      product.createdByRole === "clientStaff"
-                    );
+                  switch (userRole) {
+                    case "Dev Admin":
+                      return true;
+                    case "Master Admin":
+                      return (
+                        product.createdRole === "Master Admin" ||
+                        product.createdRole === "Merchant" ||
+                        product.createdRole === "Merchant Staff"
+                      );
+                    default:
+                      return false;
                   }
-                  if (userRole === "clientStaff") {
-                    return product.userId === currentUserId;
-                  }
-                  return false;
                 }).length === 0 && (
                   <tr>
                     <td colSpan="7" className="p-4 text-center text-gray-500">
@@ -677,7 +762,6 @@ const Promotion = () => {
       {isPopupOpen && (
         <div className="fixed inset-0 bg-gradient-to-br from-black/80 to-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-fadeInUp p-8 relative border border-gray-200">
-            {/* Close (X) button */}
             <button
               onClick={closePopup}
               className="absolute top-3 right-3 text-gray-400 hover:text-black transition"
@@ -694,15 +778,16 @@ const Promotion = () => {
               </p>
 
               <button
-                onClick={endPromotion}
+                onClick={endPromotion} // ✅ this calls your fixed function
                 className="mt-6 inline-block px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition"
               >
-                Okay
+                {Loading ? "Ending..." : "Okay"}
               </button>
             </div>
           </div>
         </div>
       )}
+
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white p-6 rounded-md w-full max-w-md">

@@ -416,40 +416,75 @@ const CategorySelector = () => {
     setIsChanged(true);
   };
 
+  // const handleDeleteCombination = (parentIndex, childIndex) => {
+  //   setCombinations((prevCombinations) => {
+  //     const updatedCombinations = [...prevCombinations];
+  //     const updatedChildren = [...updatedCombinations[parentIndex].children];
+  //     updatedChildren.splice(childIndex, 1);
+
+  //     if (updatedChildren.length === 0) {
+  //       updatedCombinations.splice(parentIndex, 1);
+  //     } else {
+  //       updatedCombinations[parentIndex] = {
+  //         ...updatedCombinations[parentIndex],
+  //         children: updatedChildren,
+  //       };
+  //     }
+
+  //     return updatedCombinations;
+  //   });
+
+  //   setOptions((prevOptions) => {
+  //     const updated = prevOptions.map((option) => {
+  //       const updatedValues = option.values.filter((val) => {
+  //         const parent = combinations[parentIndex]?.parent || "";
+  //         const child = combinations[parentIndex]?.children?.[childIndex] || "";
+
+  //         return val !== child;
+  //       });
+
+  //       return {
+  //         ...option,
+  //         values: updatedValues,
+  //       };
+  //     });
+
+  //     return updated;
+  //   });
+  // };
   const handleDeleteCombination = (parentIndex, childIndex) => {
     setCombinations((prevCombinations) => {
-      const updatedCombinations = [...prevCombinations];
-      const updatedChildren = [...updatedCombinations[parentIndex].children];
-      updatedChildren.splice(childIndex, 1);
+      const updatedCombinations = prevCombinations.map((comb) => ({
+        parent: comb.parent,
+        children: [...comb.children],
+      }));
 
-      if (updatedChildren.length === 0) {
-        updatedCombinations.splice(parentIndex, 1);
-      } else {
-        updatedCombinations[parentIndex] = {
-          ...updatedCombinations[parentIndex],
-          children: updatedChildren,
-        };
-      }
+      const parentObj = updatedCombinations[parentIndex];
+      if (!parentObj) return prevCombinations;
 
-      return updatedCombinations;
-    });
+      const deletedChild = parentObj.children[childIndex];
+      if (!deletedChild) return prevCombinations;
 
-    setOptions((prevOptions) => {
-      const updated = prevOptions.map((option) => {
-        const updatedValues = option.values.filter((val) => {
-          const parent = combinations[parentIndex]?.parent || "";
-          const child = combinations[parentIndex]?.children?.[childIndex] || "";
+      parentObj.children.splice(childIndex, 1);
 
-          return val !== child;
-        });
+      const nextCombinations = parentObj.children.length
+        ? updatedCombinations
+        : updatedCombinations.filter((_, i) => i !== parentIndex);
 
-        return {
-          ...option,
-          values: updatedValues,
-        };
+      const pureChildValue = deletedChild.split("/").pop().trim().toLowerCase();
+
+      setOptions((prevOptions) => {
+        let updatedOptions = prevOptions.map((opt) => ({
+          ...opt,
+          values: opt.values.filter(
+            (val) => val.trim().toLowerCase() !== pureChildValue
+          ),
+        }));
+        updatedOptions = updatedOptions.filter((opt) => opt.values.length > 0);
+        return [...updatedOptions]; // ✅ ensure new array reference
       });
 
-      return updated;
+      return [...nextCombinations]; // ✅ ensure new array reference
     });
   };
 
@@ -545,25 +580,26 @@ const CategorySelector = () => {
   //   setNewOption({ ...newOption, values: updatedValues });
   // };
 
-const handleNewOptionValueChange = (index, value) => {
-  const trimmedValue = value.trim();
+  const handleNewOptionValueChange = (index, value) => {
+    const trimmedValue = value.trim();
 
-  // Prevent duplicate values in the same option (case-insensitive)
-  const isDuplicate = newOption.values.some(
-    (v, i) => i !== index && v.trim().toLowerCase() === trimmedValue.toLowerCase()
-  );
+    // Prevent duplicate values in the same option (case-insensitive)
+    const isDuplicate = newOption.values.some(
+      (v, i) =>
+        i !== index && v.trim().toLowerCase() === trimmedValue.toLowerCase()
+    );
 
-  if (isDuplicate) {
-    showToast("error", "This value already exists in this option.");
-    return;
-  }
+    if (isDuplicate) {
+      showToast("error", "This value already exists in this option.");
+      return;
+    }
 
-  let updatedValues = [...newOption.values];
-  updatedValues[index] = value;
-  setNewOption({ ...newOption, values: updatedValues });
-};
+    let updatedValues = [...newOption.values];
+    updatedValues[index] = value;
+    setNewOption({ ...newOption, values: updatedValues });
+  };
 
-const handleAddNewValue = () => {
+  const handleAddNewValue = () => {
     setNewOption({ ...newOption, values: [...newOption.values, ""] });
   };
 
@@ -1690,22 +1726,23 @@ const handleAddNewValue = () => {
   //   updatedValues[index] = value;
   //   setNewOption({ ...newOption, values: updatedValues });
   // };
-const handleEditOptionValueChange = (index, value) => {
-  const trimmedValue = value.trim();
+  const handleEditOptionValueChange = (index, value) => {
+    const trimmedValue = value.trim();
 
-  const isDuplicate = newOption.values.some(
-    (v, i) => i !== index && v.trim().toLowerCase() === trimmedValue.toLowerCase()
-  );
+    const isDuplicate = newOption.values.some(
+      (v, i) =>
+        i !== index && v.trim().toLowerCase() === trimmedValue.toLowerCase()
+    );
 
-  if (isDuplicate) {
-    showToast("error", "This value already exists in this option.");
-    return;
-  }
+    if (isDuplicate) {
+      showToast("error", "This value already exists in this option.");
+      return;
+    }
 
-  const updatedValues = [...newOption.values];
-  updatedValues[index] = value;
-  setNewOption({ ...newOption, values: updatedValues });
-};
+    const updatedValues = [...newOption.values];
+    updatedValues[index] = value;
+    setNewOption({ ...newOption, values: updatedValues });
+  };
 
   const handleAddEditedValue = () => {
     setNewOption({ ...newOption, values: [...newOption.values, ""] });

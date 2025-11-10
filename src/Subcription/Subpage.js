@@ -223,67 +223,6 @@ const SubscriptionHistory = () => {
     }
   };
 
-  // useEffect(() => {
-  //   const fetchProductData = async () => {
-  //     const id = localStorage.getItem("userid");
-  //     const apiKey = localStorage.getItem("apiKey");
-  //     const apiSecretKey = localStorage.getItem("apiSecretKey");
-  //     if (!id) {
-  //       console.error("User ID not found in localStorage.");
-  //       return;
-  //     }
-
-  //     try {
-  //       const response = await fetch(
-  //         `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
-  //         {
-  //           method: "GET",
-  //           headers: {
-  //             "x-api-key": apiKey,
-  //             "x-api-secret": apiSecretKey,
-  //             "Content-Type": "application/json",
-  //           },
-  //         }
-  //       );
-  //       if (response.ok) {
-  //         const data = await response.json();
-  //         console.log(data);
-  //         if (Array.isArray(data.products)) {
-  //           setTotalListings(data.products.length);
-  //           const activeCount = data.products.filter(
-  //             (product) => product.status === "active"
-  //           ).length;
-  //           setActiveListings(activeCount);
-  //           const freeCount = data.products.filter(
-  //             (product) =>
-  //               product.product_type === "Used Equipment" &&
-  //               product.status === "active"
-  //           ).length;
-  //           setFreeListing(freeCount);
-  //           const paidCount = data.products.filter(
-  //             (product) =>
-  //               product.product_type !== "Used Equipment" &&
-  //               product.status === "active"
-  //           ).length;
-  //           setPaidListing(paidCount);
-  //         } else {
-  //           console.error("Expected products array, but got:", data.products);
-  //         }
-  //       } else {
-  //         console.error(
-  //           "Failed to fetch product data. Status:",
-  //           response.status
-  //         );
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching product data:", error);
-  //     }
-  //   };
-
-  //   fetchProductData();
-  //   fetchSubscriptions();
-  // }, []);
-
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -291,7 +230,7 @@ const SubscriptionHistory = () => {
 
   const handleClickOutside = (event) => {
     if (dialogRef.current && !dialogRef.current.contains(event.target)) {
-      setIsDialogOpen(false); 
+      setIsDialogOpen(false);
     }
   };
 
@@ -438,31 +377,17 @@ const SubscriptionHistory = () => {
                     <FaFileImport className="w-5 h-5" />
                     Export
                   </button>
+
+                  <button
+                    onClick={() => console.log("Manage Shipping clicked")}
+                    className="bg-green-600 hover:bg-green-500 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+                  >
+                    Manage Shipping
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* <div className="flex justify-between items-center flex-wrap mb-6">
-            <div className="w-full md:w-auto mt-2 max-sm:w-full">
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchVal}
-                onChange={(e) => setSearchVal(e.target.value)}
-                className="w-full md:w-96 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div className="mt-2">
-              <button
-                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
-                onClick={togglePopup}
-              >
-                Export
-              </button>
-            </div>
-          </div> */}
 
           <div className="w-full  max-sm:w-auto  max-sm:flex items-center mt-2">
             {isLoading ? (
@@ -494,12 +419,7 @@ const SubscriptionHistory = () => {
                       <th scope="col" className="p-3">
                         Item
                       </th>
-                      {/* <th scope="col" className="p-3">
-                        Address
-                      </th>
-                      <th scope="col" className="p-3">
-                        Country
-                      </th> */}
+
                       <th scope="col" className="p-3">
                         Status
                       </th>
@@ -593,12 +513,7 @@ const SubscriptionHistory = () => {
                                     {merchant.info?.name || "N/A"}
                                   </td>
                                   <td className="p-3">{totalQuantity} items</td>
-                                  {/* <td className="p-3">
-                                    {merchant.info?.dispatchAddress || "N/A"}
-                                  </td>
-                                  <td className="p-3">
-                                    {merchant.info?.dispatchCountry || "N/A"}
-                                  </td> */}
+
                                   <td className="p-3">
                                     <span
                                       className={`px-2 py-1 rounded text-xs font-medium ${
@@ -678,34 +593,7 @@ const SubscriptionHistory = () => {
                               <td className="p-3">
                                 {formatDate(subscription.createdAt)}
                               </td>
-                              {/* <td
-                                className="p-3"
-                                // onClick={() => {
-                                //   console.log("Navigating with data:", {
-                                //     order: subscription,
-                                //     productName: firstItem.name,
-                                //     sku: firstItem.sku,
-                                //     index: 101 + index,
-                                //     serialNumber: subscription.orderId,
-                                //   });
 
-                                //   navigate(`/order/${subscription.orderId}`, {
-                                //     state: {
-                                //       order: subscription,
-                                //       productName: firstItem.name,
-                                //       sku: firstItem.sku,
-                                //       index: 101 + index,
-                                //       serialNumber: subscription.orderId,
-                                //     },
-                                //   });
-                                // }}
-                              >
-                                {firstItem.name}
-                                <br />
-                                <span className="text-xs text-gray-500">
-                                  SKU: {firstItem.sku || "N/A"}
-                                </span>
-                              </td> */}
                               <td className="p-3">
                                 <div className="text-xs text-blue-500 mt-1">
                                   {subscription.lineItems.length}{" "}
@@ -714,14 +602,7 @@ const SubscriptionHistory = () => {
                                     : "items"}
                                 </div>
                               </td>
-                              {/* <td className="p-3">
-                                {address
-                                  ? `${address.address1}, ${address.city}, ${address.province}`
-                                  : "N/A"}
-                              </td>
-                              <td className="p-3">
-                                {address?.country || "N/A"}
-                              </td> */}
+
                               <td className="p-3">
                                 <span
                                   className={`px-2 py-1 rounded text-xs font-medium ${
@@ -755,7 +636,6 @@ const SubscriptionHistory = () => {
                         })}
                   </tbody>
                 </table>
-                {/* Pagination controls */}
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center px-4 py-3 bg-gray-50 border border-gray-200">
                   <div className="text-sm text-gray-700 mb-2 md:mb-0">
                     Total Orders{" "}

@@ -32,6 +32,40 @@ const CategorySelector = () => {
   const [optionMode, setOptionMode] = useState("any"); // 'any' or 'other'
   const [dbOptions, setDbOptions] = useState([]); // from backend
   const [matchedOptionValues, setMatchedOptionValues] = useState([]); // values of matched option
+  const [enableShippingPlans, setEnableShippingPlans] = useState(false);
+  const [shippingPlans, setShippingPlans] = useState([]);
+  useEffect(() => {
+    const fetchShippingProfiles = async () => {
+      try {
+        const apiKey = localStorage.getItem("apiKey");
+        const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+        const res = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/shippingProfile/getProfiles",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setShippingPlans(data);
+        } else {
+          console.error("Invalid shipping profile response:", data);
+        }
+      } catch (err) {
+        console.error("Error fetching shipping profiles:", err);
+      }
+    };
+
+    fetchShippingProfiles();
+  }, []);
+
   useEffect(() => {
     const fetchDbOptions = async () => {
       try {
@@ -122,6 +156,7 @@ const CategorySelector = () => {
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
   );
+  const [selectedShippingPlan, setSelectedShippingPlan] = useState("");
 
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
@@ -750,14 +785,17 @@ const CategorySelector = () => {
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
-      })
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -1197,19 +1235,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1282,16 +1323,19 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            });
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
+              }
+            );
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1390,6 +1434,8 @@ const CategorySelector = () => {
       ...categoryIds,
       ...keywordsList,
     ].join(", ");
+    const selectedShippingData =
+      shippingPlans.find((p) => p.profileId === selectedShippingPlan) || null;
 
     // 🧩 Main product payload
     const payload = {
@@ -1418,6 +1464,7 @@ const CategorySelector = () => {
       variantQuantites: prepareVariantQuantities(),
       variantSku: prepareVariantSku(),
       categories: selectedExportTitle,
+      shippingProfileData: selectedShippingData, // ✅ new field for backend
     };
     if (enableMetafields) {
       payload.metafields = metafields.filter(
@@ -2158,6 +2205,79 @@ const CategorySelector = () => {
                     <option value="g">g</option>
                   </select>
                 </div>
+              </div>
+            )}
+          </div>
+          {/* === Shipping Plans Section === */}
+          <div className="border rounded-2xl p-4 bg-white border-gray-500 mt-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="enableShippingPlans"
+                checked={enableShippingPlans}
+                onChange={() => {
+                  setEnableShippingPlans(!enableShippingPlans);
+                  setIsChanged(true);
+                }}
+                className="h-4 w-4 text-blue-500"
+                // disabled={!trackShipping}
+              />
+              <label
+                htmlFor="enableShippingPlans"
+                className="ml-2 text-sm text-gray-700"
+              >
+                Enable Shipping Options
+              </label>
+            </div>
+
+            {enableShippingPlans && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Shipping Profile
+                </label>
+
+                <select
+                  value={selectedShippingPlan}
+                  onChange={(e) => {
+                    setSelectedShippingPlan(e.target.value);
+                    setIsChanged(true);
+                  }}
+                  className="w-full border border-gray-300 p-2 rounded-md"
+                >
+                  <option value="">Select a plan</option>
+                  {shippingPlans.map((plan) => (
+                    <option key={plan._id} value={plan.profileId}>
+                      {plan.profileName.toUpperCase()} — {plan.rateName} ($
+                      {plan.ratePrice})
+                    </option>
+                  ))}
+                </select>
+
+                {selectedShippingPlan && (
+                  <div className="mt-3 text-sm text-gray-700">
+                    Selected plan:{" "}
+                    <span className="font-semibold">
+                      {
+                        shippingPlans.find(
+                          (p) => p.profileId === selectedShippingPlan
+                        )?.profileName
+                      }{" "}
+                      (
+                      {
+                        shippingPlans.find(
+                          (p) => p.profileId === selectedShippingPlan
+                        )?.rateName
+                      }{" "}
+                      - $
+                      {
+                        shippingPlans.find(
+                          (p) => p.profileId === selectedShippingPlan
+                        )?.ratePrice
+                      }
+                      )
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>

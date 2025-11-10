@@ -207,39 +207,7 @@ const Variants = () => {
             Active
           </div>
         </div>
-        {/* <ul className="space-y-2">
-          {product?.variants?.map((variant) => {
-            const matchedImage = product?.variantImages?.find(
-              (img) => img.id === variant.image_id
-            );
 
-            return (
-              <li
-                key={variant.id}
-                onClick={() => {
-                  handleVariantClick(variant.id);
-                  navigate(`/product/${productId}/variants/${variant.id}`, {
-                    state: { productId, variantId: variant.id },
-                  });
-                }}
-                className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
-              >
-                <div className="w-8 h-8 bg-gray-200 rounded-md flex items-center justify-center overflow-hidden">
-                  {matchedImage?.src ? (
-                    <img
-                      src={matchedImage.src}
-                      alt={matchedImage.alt || variant.title}
-                      className="w-full h-full object-cover rounded"
-                    />
-                  ) : (
-                    <CiImageOn className="text-gray-400 text-2xl" />
-                  )}
-                </div>
-                <button>{variant.title || "Unknown variant"}</button>
-              </li>
-            );
-          })}
-        </ul> */}
         <ul className="space-y-2">
           {product?.variants?.map((variant) => {
             const normalizeString = (str) =>
@@ -267,7 +235,6 @@ const Variants = () => {
                 normalizeString(img.alt || "").includes(titleKey)
               );
             }
-
 
             return (
               <li
@@ -299,7 +266,7 @@ const Variants = () => {
       </div>
 
       <div className="w-full max-w-2xl shadow-lg p-3 rounded-md pl-4">
-        <div className="flex justify-between">
+        {/* <div className="flex justify-between">
           <FaArrowLeft
             onClick={() => {
               console.log("Navigating with product:", product);
@@ -323,7 +290,33 @@ const Variants = () => {
               "Update"
             )}
           </button>
+        </div> */}
+        <div className="flex justify-end items-center sticky top-0  z-50 py-3 ">
+          {/* <FaArrowLeft
+    onClick={() => {
+      console.log("Navigating with product:", product);
+      navigate("/add-product", {
+        state: { product: product },
+      });
+    }}
+    className="text-gray-500 hover:text-gray-600 cursor-pointer text-xl"
+  /> */}
+
+          <button
+            onClick={handleSave}
+            className={`px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition ${
+              isLoading ? "opacity-50 cursor-wait" : ""
+            }`}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="spinner-border animate-spin w-5 h-5 border-t-2 border-b-2 border-white rounded-full"></div>
+            ) : (
+              "Update"
+            )}
+          </button>
         </div>
+
         <div className="mt-4 bg-white p-3 border border-gray-300 rounded-2xl">
           <h3 className="font-semibold text-md">Options</h3>
           {variantData.options.map((option, index) => (

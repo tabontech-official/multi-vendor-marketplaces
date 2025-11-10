@@ -378,12 +378,12 @@ const SubscriptionHistory = () => {
                     Export
                   </button>
 
-                  <button
+                  {/* <button
                     onClick={() => console.log("Manage Shipping clicked")}
                     className="bg-green-600 hover:bg-green-500 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
                   >
                     Manage Shipping
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>

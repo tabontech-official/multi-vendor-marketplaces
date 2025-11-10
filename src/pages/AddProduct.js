@@ -35,36 +35,42 @@ const CategorySelector = () => {
   const [enableShippingPlans, setEnableShippingPlans] = useState(false);
   const [shippingPlans, setShippingPlans] = useState([]);
   useEffect(() => {
-    const fetchShippingProfiles = async () => {
-      try {
-        const apiKey = localStorage.getItem("apiKey");
-        const apiSecretKey = localStorage.getItem("apiSecretKey");
+  let isFetched = false;
 
-        const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/shippingProfile/getProfiles",
-          {
-            method: "GET",
-            headers: {
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+  const fetchShippingProfiles = async () => {
+    if (isFetched) return; // prevent duplicate calls
+    isFetched = true;
 
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setShippingPlans(data);
-        } else {
-          console.error("Invalid shipping profile response:", data);
+    try {
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/shippingProfile/getProfiles",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
         }
-      } catch (err) {
-        console.error("Error fetching shipping profiles:", err);
-      }
-    };
+      );
 
-    fetchShippingProfiles();
-  }, []);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setShippingPlans(data);
+      } else {
+        console.error("Invalid shipping profile response:", data);
+      }
+    } catch (err) {
+      console.error("Error fetching shipping profiles:", err);
+    }
+  };
+
+  fetchShippingProfiles();
+}, []);
+
 
   useEffect(() => {
     const fetchDbOptions = async () => {

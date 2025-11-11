@@ -2995,7 +2995,7 @@ const CategorySelector = () => {
           </div>
           <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium text-gray-800">Metafields</h2>
+              <h2 className="text-sm font-medium text-gray-800">Custom Fields</h2>
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -3008,7 +3008,7 @@ const CategorySelector = () => {
                   htmlFor="enableMetafields"
                   className="text-sm text-gray-700"
                 >
-                  Create metafields
+                  Create Custom Fields
                 </label>
               </div>
             </div>

@@ -25,73 +25,61 @@ const CategorySelector = () => {
     return div.textContent || div.innerText || "";
   };
   const [optionMode, setOptionMode] = useState("any");
-  const [dbOptions, setDbOptions] = useState([]); 
+  const [dbOptions, setDbOptions] = useState([]);
   const [matchedOptionValues, setMatchedOptionValues] = useState([]);
   const [enableShippingPlans, setEnableShippingPlans] = useState(false);
+  const [enableFreeShipping, setEnableFreeShipping] = useState(false);
+
   const [shippingPlans, setShippingPlans] = useState([]);
-    const isFetched = useRef(false);
+  const isFetched = useRef(false);
 
- useEffect(() => {
+  useEffect(() => {
+    const fetchShippingProfiles = async () => {
+      if (isFetched.current) return;
+      isFetched.current = true;
 
-  const fetchShippingProfiles = async () => {
-    if (isFetched.current) return;
-    isFetched.current = true;
+      try {
+        const apiKey = localStorage.getItem("apiKey");
+        const apiSecretKey = localStorage.getItem("apiSecretKey");
+        const userId = localStorage.getItem("userid");
 
-    try {
-      const apiKey = localStorage.getItem("apiKey");
-      const apiSecretKey = localStorage.getItem("apiSecretKey");
-      const userId = localStorage.getItem("userid");
-
-      if (!userId) {
-        console.error("❌ Missing userId in localStorage");
-        return;
-      }
-
-      console.log("👤 Fetching active shipping profiles for user:", userId);
-
-      const res = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
+        if (!userId) {
+          console.error("❌ Missing userId in localStorage");
+          return;
         }
-      );
 
-      if (!res.ok) throw new Error("Failed to fetch user active profiles");
+        console.log("👤 Fetching active shipping profiles for user:", userId);
 
-      const data = await res.json();
-      console.log("📦 Active Profiles:", data);
+        const res = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`,
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-      // 🟢 Always include Free Shipping as default
-      const freeShipping = {
-        _id: "free-shipping-fixed",
-        profileId: "free-shipping-fixed",
-        profileName: "Free Shipping",
-        rateName: "Free",
-        ratePrice: 0,
-        isLocked: true,
-        isActive: true,
-      };
+        if (!res.ok) throw new Error("Failed to fetch user active profiles");
 
-      // ✅ Combine Free Shipping + user active profiles
-      const mergedProfiles = Array.isArray(data)
-        ? [freeShipping, ...data]
-        : [freeShipping];
+        const data = await res.json();
+        console.log("📦 Active Profiles:", data);
 
-      setShippingPlans(mergedProfiles);
-    } catch (err) {
-      console.error("❌ Error fetching user active shipping profiles:", err);
-    }
-  };
+        // ✅ Only use user’s actual shipping profiles
+        if (Array.isArray(data)) {
+          setShippingPlans(data);
+        } else {
+          setShippingPlans([]);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching user active shipping profiles:", err);
+      }
+    };
 
-  fetchShippingProfiles();
-}, []);
-
-
+    fetchShippingProfiles();
+  }, []);
 
   useEffect(() => {
     const fetchDbOptions = async () => {
@@ -812,17 +800,14 @@ const CategorySelector = () => {
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -1042,6 +1027,29 @@ const CategorySelector = () => {
       setUnit(product.shipping?.weight_unit || "kg");
       setStatus(product.status || "publish");
       setUserId(product.userId || "");
+      if (product.shipping) {
+        const { freeShipping = false, profile = null } = product.shipping;
+
+        if (freeShipping) {
+          // ✅ Case 1: Free Shipping
+          setEnableFreeShipping(true);
+          setEnableShippingPlans(false);
+          setSelectedShippingPlan(""); // clear any previous plan
+        } else if (profile && profile.profileId) {
+          setEnableShippingPlans(true);
+          setEnableFreeShipping(false);
+          setSelectedShippingPlan(profile.profileId);
+        } else {
+          setEnableFreeShipping(false);
+          setEnableShippingPlans(false);
+          setSelectedShippingPlan("");
+        }
+      } else {
+        setEnableFreeShipping(false);
+        setEnableShippingPlans(false);
+        setSelectedShippingPlan("");
+      }
+
       if (product.metafields && product.metafields.length > 0) {
         setEnableMetafields(true);
 
@@ -1262,22 +1270,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1350,19 +1355,16 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "x-api-key": apiKey,
-                  "x-api-secret": apiSecretKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId, images: [data.secure_url] }),
-              }
-            );
+            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            });
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1461,10 +1463,24 @@ const CategorySelector = () => {
       ...categoryIds,
       ...keywordsList,
     ].join(", ");
-    const selectedShippingData =
-      shippingPlans.find((p) => p.profileId === selectedShippingPlan) || null;
+    // const selectedShippingData =
+    //   shippingPlans.find((p) => p.profileId === selectedShippingPlan) || null;
 
-    // 🧩 Main product payload
+    let selectedShippingData = null;
+
+    // 🧠 Free shipping should work even if Shipping Options are OFF
+    if (enableFreeShipping) {
+      selectedShippingData = {
+        profileName: "Free Shipping",
+        rateName: "Free",
+        ratePrice: 0,
+      };
+    } else if (enableShippingPlans && selectedShippingPlan) {
+      selectedShippingData = shippingPlans.find(
+        (p) => p.profileId === selectedShippingPlan
+      );
+    }
+
     const payload = {
       keyWord: combinedKeywords,
       title,
@@ -2237,6 +2253,7 @@ const CategorySelector = () => {
           </div>
           {/* === Shipping Plans Section === */}
           <div className="border rounded-2xl p-4 bg-white border-gray-500 mt-4">
+            {/* Enable Shipping Options */}
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -2247,17 +2264,37 @@ const CategorySelector = () => {
                   setIsChanged(true);
                 }}
                 className="h-4 w-4 text-blue-500"
-                // disabled={!trackShipping}
               />
               <label
                 htmlFor="enableShippingPlans"
                 className="ml-2 text-sm text-gray-700"
               >
-                Enable Shipping Options
+                Shipping Options
               </label>
             </div>
 
-            {enableShippingPlans && (
+            {/* Enable Free Shipping */}
+            <div className="flex items-center mt-2">
+              <input
+                type="checkbox"
+                id="enableFreeShipping"
+                checked={enableFreeShipping}
+                onChange={() => {
+                  setEnableFreeShipping(!enableFreeShipping);
+                  setIsChanged(true);
+                }}
+                className="h-4 w-4 text-blue-500"
+              />
+              <label
+                htmlFor="enableFreeShipping"
+                className="ml-2 text-sm text-gray-700"
+              >
+                Free Shipping
+              </label>
+            </div>
+
+            {/* Shipping Plans Section */}
+            {enableShippingPlans && !enableFreeShipping && (
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Select Shipping Profile
@@ -2305,6 +2342,13 @@ const CategorySelector = () => {
                     </span>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Show Free Shipping Message */}
+            {enableShippingPlans && enableFreeShipping && (
+              <div className="mt-4 text-sm text-green-600 font-medium">
+                ✅ Free shipping is enabled — no need to select a plan.
               </div>
             )}
           </div>
@@ -2995,7 +3039,9 @@ const CategorySelector = () => {
           </div>
           <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium text-gray-800">Custom Fields</h2>
+              <h2 className="text-sm font-medium text-gray-800">
+                Custom Fields
+              </h2>
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"

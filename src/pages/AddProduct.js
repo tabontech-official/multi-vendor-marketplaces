@@ -34,19 +34,28 @@ const CategorySelector = () => {
   const [matchedOptionValues, setMatchedOptionValues] = useState([]); // values of matched option
   const [enableShippingPlans, setEnableShippingPlans] = useState(false);
   const [shippingPlans, setShippingPlans] = useState([]);
-  useEffect(() => {
-  let isFetched = false;
+    const isFetched = useRef(false);
+
+ useEffect(() => {
 
   const fetchShippingProfiles = async () => {
-    if (isFetched) return; // prevent duplicate calls
-    isFetched = true;
+    if (isFetched.current) return;
+    isFetched.current = true;
 
     try {
       const apiKey = localStorage.getItem("apiKey");
       const apiSecretKey = localStorage.getItem("apiSecretKey");
+      const userId = localStorage.getItem("userid");
+
+      if (!userId) {
+        console.error("❌ Missing userId in localStorage");
+        return;
+      }
+
+      console.log("👤 Fetching active shipping profiles for user:", userId);
 
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/shippingProfile/getProfiles",
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`,
         {
           method: "GET",
           headers: {
@@ -57,19 +66,36 @@ const CategorySelector = () => {
         }
       );
 
+      if (!res.ok) throw new Error("Failed to fetch user active profiles");
+
       const data = await res.json();
-      if (Array.isArray(data)) {
-        setShippingPlans(data);
-      } else {
-        console.error("Invalid shipping profile response:", data);
-      }
+      console.log("📦 Active Profiles:", data);
+
+      // 🟢 Always include Free Shipping as default
+      const freeShipping = {
+        _id: "free-shipping-fixed",
+        profileId: "free-shipping-fixed",
+        profileName: "Free Shipping",
+        rateName: "Free",
+        ratePrice: 0,
+        isLocked: true,
+        isActive: true,
+      };
+
+      // ✅ Combine Free Shipping + user active profiles
+      const mergedProfiles = Array.isArray(data)
+        ? [freeShipping, ...data]
+        : [freeShipping];
+
+      setShippingPlans(mergedProfiles);
     } catch (err) {
-      console.error("Error fetching shipping profiles:", err);
+      console.error("❌ Error fetching user active shipping profiles:", err);
     }
   };
 
   fetchShippingProfiles();
 }, []);
+
 
 
   useEffect(() => {

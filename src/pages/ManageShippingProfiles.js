@@ -17,39 +17,59 @@ const ManageShippingProfiles = () => {
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
 
-  const [activeProfiles, setActiveProfiles] = useState([]); 
+  const [activeProfiles, setActiveProfiles] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [profilesPerPage] = useState(10);
 
-useEffect(() => {
-  const token = localStorage.getItem("usertoken");
-  const id = localStorage.getItem("userid");
-  if (id) setUserId(id);
+  useEffect(() => {
+    const token = localStorage.getItem("usertoken");
+    const id = localStorage.getItem("userid");
+    if (id) setUserId(id);
 
-  if (token) {
-    try {
-     const decoded = jwtDecode(token);
-      console.log("🔍 Decoded Token:", decoded);
-    console.log("🔍 Decoded Payload:", decoded.payLoad);
-     setUser(decoded.payLoad); 
-    } catch (err) {
-      console.error("Invalid token:", err);
-      localStorage.removeItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        console.log("🔍 Decoded Token:", decoded);
+        console.log("🔍 Decoded Payload:", decoded.payLoad);
+        setUser(decoded.payLoad);
+      } catch (err) {
+        console.error("Invalid token:", err);
+        localStorage.removeItem("token");
+      }
     }
-  }
-}, []);
+  }, []);
 
-
- const isAdmin = user?.role === "Dev Admin" || user?.role === "Master Admin";
-const isMerchant = user?.role === "Merchant" || user?.role === "Merchant Staff";
+  const isAdmin = user?.role === "Dev Admin" || user?.role === "Master Admin";
+  const isMerchant =
+    user?.role === "Merchant" || user?.role === "Merchant Staff";
 
   const fetchProfiles = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get("https://multi-vendor-marketplace.vercel.app/shippingProfile/getProfiles");
-      const unique = Array.from(new Map(data.map((p) => [p.profileId, p])).values());
-      setProfiles(unique);
+      const { data } = await axios.get(
+        "https://multi-vendor-marketplace.vercel.app/shippingProfile/getProfiles"
+      );
+
+      const unique = Array.from(
+        new Map(data.map((p) => [p.profileId, p])).values()
+      );
+
+      // 🟩 Add a permanent Free Shipping profile
+      const freeShippingProfile = {
+        _id: "free-shipping-fixed",
+        profileId: "free-shipping-fixed",
+        profileName: "Free Shipping",
+        rateName: "Free",
+        ratePrice: 0,
+        status: "enabled",
+        isLocked: true, // custom flag to prevent toggling/deletion
+      };
+
+      // Insert Free Shipping at the top of the list
+      const allProfiles = [freeShippingProfile, ...unique];
+
+      setProfiles(allProfiles);
     } catch (err) {
       console.error("Error fetching shipping profiles:", err);
     } finally {
@@ -59,45 +79,53 @@ const isMerchant = user?.role === "Merchant" || user?.role === "Merchant Staff";
 
   const fetchUserActiveProfiles = async (userId) => {
     try {
-      const { data } = await axios.get(`https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`);
+      const { data } = await axios.get(
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`
+      );
       setActiveProfiles(data.map((p) => p.profileId));
     } catch (err) {
       console.error("Error fetching user active profiles:", err);
     }
   };
 
- 
-
- useEffect(() => {
-  if (userId && isMerchant) {
-    fetchUserActiveProfiles(userId);
-  }
-}, [userId, isMerchant]);
- useEffect(() => {
+  useEffect(() => {
+    if (userId && isMerchant) {
+      fetchUserActiveProfiles(userId);
+    }
+  }, [userId, isMerchant]);
+  useEffect(() => {
     fetchProfiles();
   }, []);
 
   const handleUserToggle = async (profile, checked) => {
     try {
       setActiveProfiles((prev) =>
-        checked ? [...prev, profile.profileId] : prev.filter((id) => id !== profile.profileId)
+        checked
+          ? [...prev, profile.profileId]
+          : prev.filter((id) => id !== profile.profileId)
       );
 
       if (checked) {
-        await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/activate", {
-          userId: userId,
-          profile: {
-            profileId: profile.profileId,
-            profileName: profile.profileName,
-            rateName: profile.rateName,
-            ratePrice: profile.ratePrice,
-          },
-        });
+        await axios.post(
+          "https://multi-vendor-marketplace.vercel.app/shippingProfile/activate",
+          {
+            userId: userId,
+            profile: {
+              profileId: profile.profileId,
+              profileName: profile.profileName,
+              rateName: profile.rateName,
+              ratePrice: profile.ratePrice,
+            },
+          }
+        );
       } else {
-        await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate", {
-          userId: userId,
-          profileId: profile.profileId,
-        });
+        await axios.post(
+          "https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate",
+          {
+            userId: userId,
+            profileId: profile.profileId,
+          }
+        );
       }
     } catch (err) {
       console.error("Toggle error:", err);
@@ -109,13 +137,18 @@ const isMerchant = user?.role === "Merchant" || user?.role === "Merchant Staff";
     try {
       setProfiles((prev) =>
         prev.map((p) =>
-          p._id === profile._id ? { ...p, status: checked ? "enabled" : "disabled" } : p
+          p._id === profile._id
+            ? { ...p, status: checked ? "enabled" : "disabled" }
+            : p
         )
       );
 
-      await axios.put(`https://multi-vendor-marketplace.vercel.app/shippingProfile/updateStatus/${profile._id}`, {
-        status: checked ? "enabled" : "disabled",
-      });
+      await axios.put(
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/updateStatus/${profile._id}`,
+        {
+          status: checked ? "enabled" : "disabled",
+        }
+      );
     } catch (err) {
       console.error("Error updating status:", err);
       fetchProfiles();
@@ -138,7 +171,9 @@ const isMerchant = user?.role === "Merchant" || user?.role === "Merchant Staff";
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this shipping profile?")) return;
     try {
-      await axios.delete(`https://multi-vendor-marketplace.vercel.app/shippingProfile/delete/${id}`);
+      await axios.delete(
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/delete/${id}`
+      );
       fetchProfiles();
     } catch (err) {
       console.error("Error deleting profile:", err);
@@ -196,7 +231,10 @@ const isMerchant = user?.role === "Merchant" || user?.role === "Merchant Staff";
             </thead>
             <tbody className="divide-y divide-gray-200">
               {currentProfiles.map((profile) => (
-                <tr key={profile._id} className="hover:bg-gray-50 transition-colors">
+                <tr
+                  key={profile._id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-4 py-2 font-medium text-gray-800 flex items-center">
                     <FaShippingFast className="text-blue-500 mr-2" />
                     {profile.profileName}
@@ -216,34 +254,47 @@ const isMerchant = user?.role === "Merchant" || user?.role === "Merchant Staff";
                         type="checkbox"
                         className="sr-only peer"
                         checked={
-                          isAdmin
+                          profile.isLocked
+                            ? true // 🟩 Always checked for Free Shipping
+                            : isAdmin
                             ? profile.status === "enabled"
                             : activeProfiles.includes(profile.profileId)
                         }
+                        disabled={profile.isLocked} // 🟩 Disable toggle for Free Shipping
                         onChange={(e) =>
-                          isAdmin
+                          !profile.isLocked && // 🟩 Prevent changes
+                          (isAdmin
                             ? handleAdminToggle(profile, e.target.checked)
-                            : handleUserToggle(profile, e.target.checked)
+                            : handleUserToggle(profile, e.target.checked))
                         }
                       />
+
                       <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:h-5 after:w-5 after:rounded-full after:transition-all peer-checked:after:translate-x-full" />
                     </label>
                   </td>
 
                   {isAdmin && (
                     <td className="px-4 py-2 text-center flex justify-center gap-3">
-                      <button
-                        onClick={() => setEditingProfile(profile)}
-                        className="p-2 rounded-md text-blue-600 hover:bg-blue-50 transition"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(profile._id)}
-                        className="p-2 rounded-md text-red-600 hover:bg-red-50 transition"
-                      >
-                        <FaTrash />
-                      </button>
+                      {!profile.isLocked ? (
+                        <>
+                          <button
+                            onClick={() => setEditingProfile(profile)}
+                            className="p-2 rounded-md text-blue-600 hover:bg-blue-50 transition"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(profile._id)}
+                            className="p-2 rounded-md text-red-600 hover:bg-red-50 transition"
+                          >
+                            <FaTrash />
+                          </button>
+                        </>
+                      ) : (
+                        <span className="text-xs text-green-700 bg-green-100 px-3 py-1 rounded-md font-medium">
+                          🟢 Always Active
+                        </span>
+                      )}
                     </td>
                   )}
                 </tr>

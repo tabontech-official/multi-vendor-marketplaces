@@ -3630,9 +3630,9 @@ const CategorySelector = () => {
                   </p>
                 </div>
 
-<div
-  className="sticky top-6 mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm z-10"
->                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                <div className="sticky top-6 mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm z-10">
+                  {" "}
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
                     Assign Multiple Images to Variant{" "}
                     <span className="ml-2 text-blue-600 font-medium">
                       {currentVariant?.child
@@ -3642,7 +3642,6 @@ const CategorySelector = () => {
                         : "N/A"}
                     </span>
                   </h3>
-
                   {(() => {
                     const parentValue =
                       combinations[currentVariant?.index]?.parent;
@@ -3659,7 +3658,7 @@ const CategorySelector = () => {
                       : [];
 
                     return (
-  <div className="flex flex-wrap gap-3 max-h-[300px] overflow-y-auto">
+                      <div className="flex flex-wrap gap-3 max-h-[300px] overflow-y-auto">
                         {assigned.length > 0 ? (
                           assigned.map((img, i) => (
                             <div
@@ -3905,7 +3904,7 @@ const CategorySelector = () => {
                   <h3 className="text-sm font-semibold text-gray-700 mb-3">
                     Product Images
                   </h3>
-  <div className="flex flex-wrap gap-3 max-h-[300px] overflow-y-auto">
+                  <div className="flex flex-wrap gap-3 max-h-[300px] overflow-y-auto">
                     {selectedImages.length > 0 ? (
                       selectedImages.map((img, i) => (
                         <div

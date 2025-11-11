@@ -31,8 +31,9 @@ const ManageShippingProfiles = () => {
       try {
         const decoded = jwtDecode(token);
         console.log("🔍 Decoded Token:", decoded);
-        console.log("🔍 Decoded Payload:", decoded.payLoad);
-        setUser(decoded.payLoad);
+
+        const userData = decoded.payLoad || decoded.user || decoded;
+        setUser(userData);
       } catch (err) {
         console.error("Invalid token:", err);
         localStorage.removeItem("token");
@@ -47,27 +48,33 @@ const ManageShippingProfiles = () => {
   const fetchProfiles = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(
-        "https://multi-vendor-marketplace.vercel.app/shippingProfile/getProfiles"
-      );
+
+      const endpoint = isAdmin
+        ? "https://multi-vendor-marketplace.vercel.app/shippingProfile/get/admin"
+        : "https://multi-vendor-marketplace.vercel.app/shippingProfile/getProfiles";
+
+      const { data } = await axios.get(endpoint);
+
+      const profilesData = isAdmin ? data.profiles : data;
 
       const unique = Array.from(
-        new Map(data.map((p) => [p.profileId, p])).values()
+        new Map(profilesData.map((p) => [p.profileId, p])).values()
       );
 
-      // 🟩 Add a permanent Free Shipping profile
-      const freeShippingProfile = {
-        _id: "free-shipping-fixed",
-        profileId: "free-shipping-fixed",
-        profileName: "Free Shipping",
-        rateName: "Free",
-        ratePrice: 0,
-        status: "enabled",
-        isLocked: true, // custom flag to prevent toggling/deletion
-      };
-
-      // Insert Free Shipping at the top of the list
-      const allProfiles = [freeShippingProfile, ...unique];
+      // 🟩 Add permanent Free Shipping profile for merchants only
+      let allProfiles = unique;
+      if (!isAdmin) {
+        const freeShippingProfile = {
+          _id: "free-shipping-fixed",
+          profileId: "free-shipping-fixed",
+          profileName: "Free Shipping",
+          rateName: "Free",
+          ratePrice: 0,
+          status: "enabled",
+          isLocked: true,
+        };
+        allProfiles = [freeShippingProfile, ...unique];
+      }
 
       setProfiles(allProfiles);
     } catch (err) {
@@ -106,26 +113,20 @@ const ManageShippingProfiles = () => {
       );
 
       if (checked) {
-        await axios.post(
-          "https://multi-vendor-marketplace.vercel.app/shippingProfile/activate",
-          {
-            userId: userId,
-            profile: {
-              profileId: profile.profileId,
-              profileName: profile.profileName,
-              rateName: profile.rateName,
-              ratePrice: profile.ratePrice,
-            },
-          }
-        );
-      } else {
-        await axios.post(
-          "https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate",
-          {
-            userId: userId,
+        await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/activate", {
+          userId: userId,
+          profile: {
             profileId: profile.profileId,
-          }
-        );
+            profileName: profile.profileName,
+            rateName: profile.rateName,
+            ratePrice: profile.ratePrice,
+          },
+        });
+      } else {
+        await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate", {
+          userId: userId,
+          profileId: profile.profileId,
+        });
       }
     } catch (err) {
       console.error("Toggle error:", err);
@@ -171,9 +172,7 @@ const ManageShippingProfiles = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this shipping profile?")) return;
     try {
-      await axios.delete(
-        `https://multi-vendor-marketplace.vercel.app/shippingProfile/delete/${id}`
-      );
+      await axios.delete(`https://multi-vendor-marketplace.vercel.app/shippingProfile/delete/${id}`);
       fetchProfiles();
     } catch (err) {
       console.error("Error deleting profile:", err);
@@ -220,7 +219,7 @@ const ManageShippingProfiles = () => {
                   Rate Price ($)
                 </th>
                 <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">
-                  {isAdmin ? "Status" : "Active"}
+                  {isAdmin ? "Linked Products" : "Active"}
                 </th>
                 {isAdmin && (
                   <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">
@@ -229,50 +228,59 @@ const ManageShippingProfiles = () => {
                 )}
               </tr>
             </thead>
+
             <tbody className="divide-y divide-gray-200">
               {currentProfiles.map((profile) => (
                 <tr
                   key={profile._id}
                   className="hover:bg-gray-50 transition-colors"
                 >
+                  {/* 🟦 Profile Name */}
                   <td className="px-4 py-2 font-medium text-gray-800 flex items-center">
                     <FaShippingFast className="text-blue-500 mr-2" />
                     {profile.profileName}
                   </td>
+
+                  {/* 🟦 Rate Name */}
                   <td className="px-4 py-2 text-gray-600">
                     <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium">
                       {profile.rateName}
                     </span>
                   </td>
+
+                  {/* 🟦 Rate Price */}
                   <td className="px-4 py-2 font-semibold text-green-600">
-                    ${profile.ratePrice.toFixed(2)}
+                    ${profile.ratePrice?.toFixed(2) ?? "0.00"}
                   </td>
 
+                  {/* 🟦 Admin → Linked Products | Merchant → Active Toggle */}
                   <td className="px-4 py-2 text-center">
-                    <label className="inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={
-                          profile.isLocked
-                            ? true // 🟩 Always checked for Free Shipping
-                            : isAdmin
-                            ? profile.status === "enabled"
-                            : activeProfiles.includes(profile.profileId)
-                        }
-                        disabled={profile.isLocked} // 🟩 Disable toggle for Free Shipping
-                        onChange={(e) =>
-                          !profile.isLocked && // 🟩 Prevent changes
-                          (isAdmin
-                            ? handleAdminToggle(profile, e.target.checked)
-                            : handleUserToggle(profile, e.target.checked))
-                        }
-                      />
-
-                      <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:h-5 after:w-5 after:rounded-full after:transition-all peer-checked:after:translate-x-full" />
-                    </label>
+                    {isAdmin ? (
+                      <span className="text-gray-800 font-semibold">
+                        {profile.productCount ?? 0}
+                      </span>
+                    ) : (
+                      <label className="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={
+                            profile.isLocked
+                              ? true
+                              : activeProfiles.includes(profile.profileId)
+                          }
+                          disabled={profile.isLocked}
+                          onChange={(e) =>
+                            !profile.isLocked &&
+                            handleUserToggle(profile, e.target.checked)
+                          }
+                        />
+                        <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:h-5 after:w-5 after:rounded-full after:transition-all peer-checked:after:translate-x-full" />
+                      </label>
+                    )}
                   </td>
 
+                  {/* 🟦 Admin Action Buttons */}
                   {isAdmin && (
                     <td className="px-4 py-2 text-center flex justify-center gap-3">
                       {!profile.isLocked ? (

@@ -24,9 +24,9 @@ const CategorySelector = () => {
     div.innerHTML = html;
     return div.textContent || div.innerText || "";
   };
-  const [optionMode, setOptionMode] = useState("any"); // 'any' or 'other'
-  const [dbOptions, setDbOptions] = useState([]); // from backend
-  const [matchedOptionValues, setMatchedOptionValues] = useState([]); // values of matched option
+  const [optionMode, setOptionMode] = useState("any");
+  const [dbOptions, setDbOptions] = useState([]); 
+  const [matchedOptionValues, setMatchedOptionValues] = useState([]);
   const [enableShippingPlans, setEnableShippingPlans] = useState(false);
   const [shippingPlans, setShippingPlans] = useState([]);
     const isFetched = useRef(false);

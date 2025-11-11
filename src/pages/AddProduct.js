@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaCirclePlus } from "react-icons/fa6";
 import { FaTrash, FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { FcAddImage } from "react-icons/fc";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { FaPlus, FaMinus } from "react-icons/fa";
-import { FiMinus } from "react-icons/fi";
 import { IoIosArrowUp } from "react-icons/io";
 import { MdEdit, MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { RiDeleteBin5Fill } from "react-icons/ri";

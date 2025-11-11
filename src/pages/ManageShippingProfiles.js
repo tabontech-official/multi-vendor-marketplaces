@@ -20,7 +20,7 @@ const ManageShippingProfiles = () => {
   const [userId, setUserId] = useState(null);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
 
-  const [addingProfile, setAddingProfile] = useState(false); // ✅ new modal
+  const [addingProfile, setAddingProfile] = useState(false); 
   const [deleteModal, setDeleteModal] = useState({
     open: false,
     id: null,
@@ -66,7 +66,7 @@ const ManageShippingProfiles = () => {
         showToast("success", "New shipping profile created successfully!");
         setAddingProfile(false);
         setNewProfile({ profileName: "", rateName: "", ratePrice: "" });
-        await fetchProfiles(user); // auto-refresh table
+        await fetchProfiles(user); 
       } else {
         showToast("error", "Shopify returned an issue. Check console.");
         console.error("Shopify API Error:", data);
@@ -119,7 +119,6 @@ const ManageShippingProfiles = () => {
       const decoded = jwtDecode(token);
       console.log("🔍 Decoded Token:", decoded);
 
-      // ✅ Always read from payLoad
       const userData = decoded.payLoad;
       setUser(userData);
     } catch (err) {
@@ -152,7 +151,6 @@ const ManageShippingProfiles = () => {
         new Map(profilesData.map((p) => [p.profileId, p])).values()
       );
 
-      // For merchants only → add free shipping profile
       let allProfiles = unique;
       if (!isAdmin) {
         allProfiles = [
@@ -364,25 +362,21 @@ const ManageShippingProfiles = () => {
                   key={profile._id}
                   className="hover:bg-gray-50 transition-colors"
                 >
-                  {/* 🟦 Profile Name */}
                   <td className="px-4 py-2 font-medium text-gray-800 flex items-center">
                     <FaShippingFast className="text-blue-500 mr-2" />
                     {profile.profileName}
                   </td>
 
-                  {/* 🟦 Rate Name */}
                   <td className="px-4 py-2 text-gray-600">
                     <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium">
                       {profile.rateName}
                     </span>
                   </td>
 
-                  {/* 🟦 Rate Price */}
                   <td className="px-4 py-2 font-semibold text-green-600">
                     ${profile.ratePrice?.toFixed(2) ?? "0.00"}
                   </td>
 
-                  {/* 🟦 Admin → Linked Products | Merchant → Active Toggle */}
                   <td className="px-4 py-2 text-center">
                     {isAdmin ? (
                       <span className="text-gray-800 font-semibold">
@@ -409,7 +403,6 @@ const ManageShippingProfiles = () => {
                     )}
                   </td>
 
-                  {/* 🟦 Admin Action Buttons */}
                   {isAdmin && (
                     <td className="px-4 py-2 text-center flex justify-center gap-3">
                       {!profile.isLocked ? (
@@ -429,7 +422,7 @@ const ManageShippingProfiles = () => {
                         </>
                       ) : (
                         <span className="text-xs text-green-700 bg-green-100 px-3 py-1 rounded-md font-medium">
-                          🟢 Always Active
+                           Always Active
                         </span>
                       )}
                     </td>

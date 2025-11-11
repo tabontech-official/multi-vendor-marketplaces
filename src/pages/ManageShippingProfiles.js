@@ -8,6 +8,7 @@ import {
   FaSyncAlt,
   FaChevronLeft,
   FaChevronRight,
+  FaPlus,
 } from "react-icons/fa";
 
 const ManageShippingProfiles = () => {
@@ -16,11 +17,79 @@ const ManageShippingProfiles = () => {
   const [editingProfile, setEditingProfile] = useState(null);
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [addingProfile, setAddingProfile] = useState(false); // ✅ new modal
 
   const [activeProfiles, setActiveProfiles] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [profilesPerPage] = useState(10);
+const [newProfile, setNewProfile] = useState({
+    profileName: "",
+    rateName: "",
+    ratePrice: "",
+  });
+  const handleAddProfile = async () => {
+  // 🧩 Basic form validation
+  if (
+    !newProfile.profileName.trim() ||
+    !newProfile.rateName.trim() ||
+    newProfile.ratePrice === "" ||
+    isNaN(newProfile.ratePrice)
+  ) {
+    alert("⚠️ Please fill in all fields correctly.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    // 🟩 Prepare payload
+    const payload = {
+      profileName: newProfile.profileName.trim(),
+      rateName: newProfile.rateName.trim(),
+      ratePrice: parseFloat(newProfile.ratePrice),
+    };
+
+    console.log("📤 Creating profile:", payload);
+
+    // 🧭 API endpoint
+    const endpoint =
+      "https://multi-vendor-marketplace.vercel.app/shippingProfile/add-shippings";
+
+    // 🧠 Shopify expects JSON
+    const { data } = await axios.post(endpoint, payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (data.success) {
+      alert(`✅ ${data.message}`);
+    } else {
+      alert("⚠️ Shopify returned an issue. Check console for details.");
+      console.error("Shopify API Error:", data);
+    }
+
+    // 🟩 Close modal and reset form
+    setAddingProfile(false);
+    setNewProfile({ profileName: "", rateName: "", ratePrice: "" });
+
+    // 🔁 Refresh list
+    await fetchProfiles();
+  } catch (err) {
+    console.error("❌ Error adding new shipping profile:", err);
+    if (err.response?.data?.error) {
+      alert(`⚠️ ${err.response.data.error}`);
+    } else {
+      alert("🚨 Failed to create shipping profile. Please try again.");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
 
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
@@ -196,14 +265,24 @@ const ManageShippingProfiles = () => {
             <FaShippingFast className="text-blue-600 mr-3" />
             Manage Shipping Profiles
           </h2>
-          <button
-            onClick={fetchProfiles}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-          >
-            <FaSyncAlt className={loading ? "animate-spin" : ""} />
-            Refresh
-          </button>
-        </div>
+          <div className="flex gap-2">
+            {isAdmin && (
+              <button
+                onClick={() => setAddingProfile(true)}
+                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+              >
+                <FaPlus /> Add New
+              </button>
+            )}
+            <button
+              onClick={fetchProfiles}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+            >
+              <FaSyncAlt className={loading ? "animate-spin" : ""} />
+              Refresh
+            </button>
+          </div>
+          </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full border border-gray-200 divide-y divide-gray-200">
@@ -353,7 +432,66 @@ const ManageShippingProfiles = () => {
           </div>
         )}
       </div>
+{addingProfile && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
+            <h3 className="text-xl font-semibold mb-4 text-gray-800">
+              Add New Shipping Profile
+            </h3>
 
+            <div className="flex flex-col gap-3">
+              <label className="text-sm font-medium text-gray-700">
+                Profile Name
+                <input
+                  type="text"
+                  value={newProfile.profileName}
+                  onChange={(e) =>
+                    setNewProfile({ ...newProfile, profileName: e.target.value })
+                  }
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 outline-none"
+                />
+              </label>
+              <label className="text-sm font-medium text-gray-700">
+                Rate Name
+                <input
+                  type="text"
+                  value={newProfile.rateName}
+                  onChange={(e) =>
+                    setNewProfile({ ...newProfile, rateName: e.target.value })
+                  }
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 outline-none"
+                />
+              </label>
+              <label className="text-sm font-medium text-gray-700">
+                Rate Price ($)
+                <input
+                  type="number"
+                  value={newProfile.ratePrice}
+                  onChange={(e) =>
+                    setNewProfile({ ...newProfile, ratePrice: e.target.value })
+                  }
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 outline-none"
+                />
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setAddingProfile(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddProfile}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {editingProfile && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96 shadow-lg">

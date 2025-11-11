@@ -800,14 +800,17 @@ const CategorySelector = () => {
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
-      })
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -1270,19 +1273,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1355,16 +1361,19 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            });
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
+              }
+            );
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -3621,8 +3630,9 @@ const CategorySelector = () => {
                   </p>
                 </div>
 
-                <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
+<div
+  className="sticky top-6 mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm z-10"
+>                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
                     Assign Multiple Images to Variant{" "}
                     <span className="ml-2 text-blue-600 font-medium">
                       {currentVariant?.child
@@ -3649,7 +3659,7 @@ const CategorySelector = () => {
                       : [];
 
                     return (
-                      <div className="flex flex-wrap gap-3">
+  <div className="flex flex-wrap gap-3 max-h-[300px] overflow-y-auto">
                         {assigned.length > 0 ? (
                           assigned.map((img, i) => (
                             <div
@@ -3890,12 +3900,12 @@ const CategorySelector = () => {
                   </p>
                 </div>
 
-                <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
+                <div className="sticky top-6 mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm z-10">
+                  {" "}
                   <h3 className="text-sm font-semibold text-gray-700 mb-3">
                     Product Images
                   </h3>
-
-                  <div className="flex flex-wrap gap-3">
+  <div className="flex flex-wrap gap-3 max-h-[300px] overflow-y-auto">
                     {selectedImages.length > 0 ? (
                       selectedImages.map((img, i) => (
                         <div

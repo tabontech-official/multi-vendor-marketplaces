@@ -10,6 +10,7 @@ import {
   FaChevronRight,
   FaPlus,
 } from "react-icons/fa";
+import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 
 const ManageShippingProfiles = () => {
   const [profiles, setProfiles] = useState([]);
@@ -17,96 +18,113 @@ const ManageShippingProfiles = () => {
   const [editingProfile, setEditingProfile] = useState(null);
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
-  const [addingProfile, setAddingProfile] = useState(false); // ✅ new modal
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
 
+  const [addingProfile, setAddingProfile] = useState(false); // ✅ new modal
+  const [deleteModal, setDeleteModal] = useState({
+    open: false,
+    id: null,
+    name: "",
+  });
   const [activeProfiles, setActiveProfiles] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [profilesPerPage] = useState(10);
-const [newProfile, setNewProfile] = useState({
+  const [newProfile, setNewProfile] = useState({
     profileName: "",
     rateName: "",
     ratePrice: "",
   });
   const handleAddProfile = async () => {
-  // 🧩 Basic form validation
-  if (
-    !newProfile.profileName.trim() ||
-    !newProfile.rateName.trim() ||
-    newProfile.ratePrice === "" ||
-    isNaN(newProfile.ratePrice)
-  ) {
-    alert("⚠️ Please fill in all fields correctly.");
-    return;
-  }
+    if (
+      !newProfile.profileName.trim() ||
+      !newProfile.rateName.trim() ||
+      newProfile.ratePrice === "" ||
+      isNaN(newProfile.ratePrice)
+    ) {
+      showToast("error", "Please fill in all fields correctly.");
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // 🟩 Prepare payload
-    const payload = {
-      profileName: newProfile.profileName.trim(),
-      rateName: newProfile.rateName.trim(),
-      ratePrice: parseFloat(newProfile.ratePrice),
-    };
+      const payload = {
+        profileName: newProfile.profileName.trim(),
+        rateName: newProfile.rateName.trim(),
+        ratePrice: parseFloat(newProfile.ratePrice),
+      };
 
-    console.log("📤 Creating profile:", payload);
+      const endpoint =
+        "https://multi-vendor-marketplace.vercel.app/shippingProfile/add-shipping-profiles";
 
-    // 🧭 API endpoint
-    const endpoint =
-      "https://multi-vendor-marketplace.vercel.app/shippingProfile/add-shippings";
+      const { data } = await axios.post(endpoint, payload, {
+        headers: { "Content-Type": "application/json" },
+      });
 
-    // 🧠 Shopify expects JSON
-    const { data } = await axios.post(endpoint, payload, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+      if (data.success) {
+        showToast("success", "New shipping profile created successfully!");
+        setAddingProfile(false);
+        setNewProfile({ profileName: "", rateName: "", ratePrice: "" });
+        await fetchProfiles(user); // auto-refresh table
+      } else {
+        showToast("error", "Shopify returned an issue. Check console.");
+        console.error("Shopify API Error:", data);
+      }
+    } catch (err) {
+      console.error("❌ Error adding profile:", err);
+      showToast(
+        "error",
+        err.response?.data?.error ||
+          "Failed to create shipping profile. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmDelete = (profile) => {
+    setDeleteModal({
+      open: true,
+      id: profile._id,
+      name: profile.profileName,
     });
+  };
+  const handleDeleteConfirmed = async () => {
+    try {
+      if (!deleteModal.id) return;
 
-    if (data.success) {
-      alert(`✅ ${data.message}`);
-    } else {
-      alert("⚠️ Shopify returned an issue. Check console for details.");
-      console.error("Shopify API Error:", data);
+      setLoading(true);
+
+      await axios.delete(
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/shipping-profiles/${deleteModal.id}`
+      );
+
+      showToast("success", "Shipping profile deleted successfully!");
+      setDeleteModal({ open: false, id: null, name: "" });
+      await fetchProfiles(user);
+    } catch (err) {
+      console.error("Error deleting profile:", err);
+      showToast("error", "Failed to delete profile. Please try again!");
+    } finally {
+      setLoading(false);
     }
-
-    // 🟩 Close modal and reset form
-    setAddingProfile(false);
-    setNewProfile({ profileName: "", rateName: "", ratePrice: "" });
-
-    // 🔁 Refresh list
-    await fetchProfiles();
-  } catch (err) {
-    console.error("❌ Error adding new shipping profile:", err);
-    if (err.response?.data?.error) {
-      alert(`⚠️ ${err.response.data.error}`);
-    } else {
-      alert("🚨 Failed to create shipping profile. Please try again.");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
-    const id = localStorage.getItem("userid");
-    if (id) setUserId(id);
+    if (!token) return;
 
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        console.log("🔍 Decoded Token:", decoded);
+    try {
+      const decoded = jwtDecode(token);
+      console.log("🔍 Decoded Token:", decoded);
 
-        const userData = decoded.payLoad || decoded.user || decoded;
-        setUser(userData);
-      } catch (err) {
-        console.error("Invalid token:", err);
-        localStorage.removeItem("token");
-      }
+      // ✅ Always read from payLoad
+      const userData = decoded.payLoad;
+      setUser(userData);
+    } catch (err) {
+      console.error("❌ Invalid token:", err);
+      localStorage.removeItem("usertoken");
     }
   }, []);
 
@@ -114,40 +132,46 @@ const [newProfile, setNewProfile] = useState({
   const isMerchant =
     user?.role === "Merchant" || user?.role === "Merchant Staff";
 
-  const fetchProfiles = async () => {
+  const fetchProfiles = async (userData) => {
     try {
       setLoading(true);
+
+      const isAdmin =
+        userData.role === "Dev Admin" || userData.role === "Master Admin";
 
       const endpoint = isAdmin
         ? "https://multi-vendor-marketplace.vercel.app/shippingProfile/get/admin"
         : "https://multi-vendor-marketplace.vercel.app/shippingProfile/getProfiles";
 
-      const { data } = await axios.get(endpoint);
+      console.log("📡 Fetching profiles from:", endpoint);
 
+      const { data } = await axios.get(endpoint);
       const profilesData = isAdmin ? data.profiles : data;
 
       const unique = Array.from(
         new Map(profilesData.map((p) => [p.profileId, p])).values()
       );
 
-      // 🟩 Add permanent Free Shipping profile for merchants only
+      // For merchants only → add free shipping profile
       let allProfiles = unique;
       if (!isAdmin) {
-        const freeShippingProfile = {
-          _id: "free-shipping-fixed",
-          profileId: "free-shipping-fixed",
-          profileName: "Free Shipping",
-          rateName: "Free",
-          ratePrice: 0,
-          status: "enabled",
-          isLocked: true,
-        };
-        allProfiles = [freeShippingProfile, ...unique];
+        allProfiles = [
+          {
+            _id: "free-shipping-fixed",
+            profileId: "free-shipping-fixed",
+            profileName: "Free Shipping",
+            rateName: "Free",
+            ratePrice: 0,
+            status: "enabled",
+            isLocked: true,
+          },
+          ...unique,
+        ];
       }
 
       setProfiles(allProfiles);
     } catch (err) {
-      console.error("Error fetching shipping profiles:", err);
+      console.error("🚨 Error fetching shipping profiles:", err);
     } finally {
       setLoading(false);
     }
@@ -170,9 +194,10 @@ const [newProfile, setNewProfile] = useState({
     }
   }, [userId, isMerchant]);
   useEffect(() => {
-    fetchProfiles();
-  }, []);
-
+    if (user) {
+      fetchProfiles(user);
+    }
+  }, [user]);
   const handleUserToggle = async (profile, checked) => {
     try {
       setActiveProfiles((prev) =>
@@ -227,21 +252,29 @@ const [newProfile, setNewProfile] = useState({
 
   const handleSaveEdit = async () => {
     try {
+      setLoading(true);
       await axios.put(
         `https://multi-vendor-marketplace.vercel.app/shippingProfile/update/${editingProfile._id}`,
         editingProfile
       );
+
+      showToast("success", "Shipping profile updated successfully!");
       setEditingProfile(null);
-      fetchProfiles();
+      await fetchProfiles(user);
     } catch (err) {
       console.error("Error updating profile:", err);
+      showToast("error", "Failed to update profile. Please try again!");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this shipping profile?")) return;
     try {
-      await axios.delete(`https://multi-vendor-marketplace.vercel.app/shippingProfile/delete/${id}`);
+      await axios.delete(
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/shipping-profiles/${id}`
+      );
       fetchProfiles();
     } catch (err) {
       console.error("Error deleting profile:", err);
@@ -256,9 +289,26 @@ const [newProfile, setNewProfile] = useState({
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
-
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+  };
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-6">
+      {toast.show && (
+        <div
+          className={`fixed top-16 z-30 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+            toast.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
+        >
+          {toast.type === "success" ? (
+            <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+          ) : (
+            <HiOutlineXCircle className="w-6 h-6 mr-2" />
+          )}
+          <span>{toast.message}</span>
+        </div>
+      )}
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="flex items-center text-2xl font-semibold text-gray-800">
@@ -282,7 +332,7 @@ const [newProfile, setNewProfile] = useState({
               Refresh
             </button>
           </div>
-          </div>
+        </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full border border-gray-200 divide-y divide-gray-200">
@@ -371,7 +421,7 @@ const [newProfile, setNewProfile] = useState({
                             <FaEdit />
                           </button>
                           <button
-                            onClick={() => handleDelete(profile._id)}
+                            onClick={() => confirmDelete(profile)}
                             className="p-2 rounded-md text-red-600 hover:bg-red-50 transition"
                           >
                             <FaTrash />
@@ -432,7 +482,7 @@ const [newProfile, setNewProfile] = useState({
           </div>
         )}
       </div>
-{addingProfile && (
+      {addingProfile && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
             <h3 className="text-xl font-semibold mb-4 text-gray-800">
@@ -446,7 +496,10 @@ const [newProfile, setNewProfile] = useState({
                   type="text"
                   value={newProfile.profileName}
                   onChange={(e) =>
-                    setNewProfile({ ...newProfile, profileName: e.target.value })
+                    setNewProfile({
+                      ...newProfile,
+                      profileName: e.target.value,
+                    })
                   }
                   className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 outline-none"
                 />
@@ -556,6 +609,41 @@ const [newProfile, setNewProfile] = useState({
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
               >
                 Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteModal.open && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
+            <h3 className="text-xl font-semibold mb-3 text-gray-800">
+              Confirm Deletion
+            </h3>
+
+            <p className="text-gray-600 text-sm mb-6">
+              Are you sure you want to delete the shipping profile{" "}
+              <span className="font-semibold text-red-600">
+                "{deleteModal.name}"
+              </span>
+              ? This action cannot be undone.
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() =>
+                  setDeleteModal({ open: false, id: null, name: "" })
+                }
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirmed}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+              >
+                Delete
               </button>
             </div>
           </div>

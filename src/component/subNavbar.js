@@ -76,7 +76,7 @@ const SubNavbar = () => {
 
     fetchUserModules();
   }, []);
-console.log("Allowed modules:", allowedModules);
+  console.log("Allowed modules:", allowedModules);
 
   const modulesList = [
     {
@@ -94,6 +94,7 @@ console.log("Allowed modules:", allowedModules);
         { name: "Inventory", path: "/inventory" },
         { name: "Manage Categories", path: "/manage-categories" },
         { name: "Manage Options", path: "/manage-options" },
+        { name: "Manage Shipping", path: "/manage-shipping" },
       ],
     },
     {

@@ -55,6 +55,7 @@ import ApprovalPage from "./pages/ApprovalPage";
 import FinanceSetting from "./pages/FinanceSetting";
 import ManageVariantOptions from "./pages/ManageVariantOptions";
 import AddVariantOption from "./pages/AddVariantOption";
+import ManageShippingProfiles from "./pages/ManageShippingProfiles";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -136,6 +137,10 @@ const App = () => {
               <Route
               path="/manage-options"
               element={<PrivateRoute element={<ManageVariantOptions />} />}
+            />
+              <Route
+              path="/manage-shipping"
+              element={<PrivateRoute element={<ManageShippingProfiles />} />}
             />
             <Route
               path="/collection/:id"

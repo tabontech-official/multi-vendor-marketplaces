@@ -5,7 +5,8 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { BsThreeDots } from "react-icons/bs";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
-
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 const OrdersDetails = () => {
   const location = useLocation();
   const { order, productName, sku, index, merchantId } = location.state || {};
@@ -96,6 +97,114 @@ const OrdersDetails = () => {
 
     fetchOrderData();
   }, [orderId, merchantId]);
+
+  const handleGenerateInvoice = () => {
+    const activeOrder = order; // coming from location.state.order
+
+    if (!activeOrder) {
+      alert("Order data missing!");
+      return;
+    }
+
+    const customer = activeOrder.customer || {};
+    const address = customer.default_address || {};
+    const lineItems = activeOrder.lineItems || [];
+
+    // Initialize PDF
+    const doc = new jsPDF({
+      unit: "pt",
+      format: "a4",
+    });
+
+    // === HEADER ===
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("AYDI ACTIVE", 50, 60);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Order #${activeOrder.shopifyOrderNo || "N/A"}`, 500, 60);
+    doc.text(
+      `${new Date(activeOrder.createdAt).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })}`,
+      500,
+      75
+    );
+
+    // === SHIP TO & BILL TO ===
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("SHIP TO", 50, 110);
+    doc.text("BILL TO", 300, 110);
+
+    doc.setFont("helvetica", "normal");
+    const shipToY = 125;
+    const shipToLines = [
+      `${address.first_name || customer.first_name || ""} ${
+        address.last_name || customer.last_name || ""
+      }`,
+      `${address.address1 || ""}`,
+      `${address.city || ""} ${address.province || ""} ${address.zip || ""}`,
+      `${address.country || ""}`,
+    ];
+
+    let y = shipToY;
+    shipToLines.forEach((line) => {
+      doc.text(line, 50, y);
+      doc.text(line, 300, y); // Billing same
+      y += 14;
+    });
+
+    // === ITEMS TABLE ===
+    const itemsData = lineItems.map((item) => [
+      item.name || item.title || "Unnamed Item",
+      item.sku || "-",
+      `${item.quantity || 1}`,
+    ]);
+
+    // ✅ Correct way to use autoTable
+    autoTable(doc, {
+      head: [["ITEMS", "SKU", "QUANTITY"]],
+      body: itemsData,
+      startY: y + 25,
+      theme: "plain",
+      styles: { fontSize: 10, lineColor: [0, 0, 0], lineWidth: 0.2 },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontStyle: "bold",
+        lineWidth: 0.5,
+      },
+    });
+
+    const finalY = doc.lastAutoTable.finalY + 30;
+
+    // === FOOTER ===
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("Thank you for shopping with us!", 220, finalY, {
+      align: "center",
+    });
+
+    const footerText = [
+      "Aydi Active",
+      "PO Box 241, Doncaster Heights VIC 3109, Australia",
+      "contact@aydiactive.com",
+      "www.aydiactive.com",
+    ];
+
+    let footerY = finalY + 20;
+    footerText.forEach((line) => {
+      doc.text(line, 220, footerY, { align: "center" });
+      footerY += 14;
+    });
+
+    // === SAVE PDF ===
+    doc.save(`Invoice_${activeOrder.shopifyOrderNo || "Order"}.pdf`);
+  };
 
   const totalPrice = Array.isArray(lineItems)
     ? lineItems
@@ -191,15 +300,18 @@ const OrdersDetails = () => {
         }),
       });
 
-      await fetch(`https://multi-vendor-marketplace.vercel.app/order/updatetrackingShopify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fulfillmentId: selectedFulfillment.id,
-          tracking_number: trackingNumber,
-          tracking_company: shippingCarrier,
-        }),
-      });
+      await fetch(
+        `https://multi-vendor-marketplace.vercel.app/order/updatetrackingShopify`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fulfillmentId: selectedFulfillment.id,
+            tracking_number: trackingNumber,
+            tracking_company: shippingCarrier,
+          }),
+        }
+      );
 
       setShowTrackingModal(false);
     } catch (err) {
@@ -239,19 +351,22 @@ const OrdersDetails = () => {
         return;
       }
 
-      const response = await fetch("https://multi-vendor-marketplace.vercel.app/order/cancelOrder", {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orderId,
-          reason: "customer",
-          lineItemIds,
-        }),
-      });
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/order/cancelOrder",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderId,
+            reason: "customer",
+            lineItemIds,
+          }),
+        }
+      );
 
       const result = await response.json();
       console.log("🧾 Cancel Response:", result);
@@ -312,7 +427,7 @@ const OrdersDetails = () => {
           <div class="flex space-x-8">
             <div>
               <span class="text-gray-900 font-semibold block">
-                Orderno: #{order?.serialNo}
+                Orderno: #{order?.serialNumber}
               </span>
               <span class="text-gray-900 font-semibold block mt-1">
                 {formattedDate} from Online store
@@ -454,8 +569,13 @@ const OrdersDetails = () => {
                         Fulfill item
                       </button>
 
-                      <button className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition">
-                        Create shipping label
+                      <button
+                        onClick={() =>
+                          navigate("/invoice-preview", { state: { order } })
+                        }
+                        className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition"
+                      >
+                        Print packing slip
                       </button>
                     </div>
                   )}

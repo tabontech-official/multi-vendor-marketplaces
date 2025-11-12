@@ -303,6 +303,7 @@ const OnBoard = () => {
         "Add Product",
         "Inventory",
         "Manage Categories",
+        "Manage Shipping",
       ],
     },
     {

@@ -198,6 +198,7 @@ const ManageShippingProfiles = () => {
   }, [user]);
   const handleUserToggle = async (profile, checked) => {
     try {
+      const profileUserId=localStorage.getItem("userid")
       setActiveProfiles((prev) =>
         checked
           ? [...prev, profile.profileId]
@@ -206,7 +207,7 @@ const ManageShippingProfiles = () => {
 
       if (checked) {
         await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/activate", {
-          userId: userId,
+          userId: profileUserId,
           profile: {
             profileId: profile.profileId,
             profileName: profile.profileName,

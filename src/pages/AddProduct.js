@@ -2303,7 +2303,7 @@ const CategorySelector = () => {
             </div>
 
             {/* Shipping Plans Section */}
-            {enableShippingPlans && !enableFreeShipping && (
+            {/* {enableShippingPlans && !enableFreeShipping && (
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Select Shipping Profile
@@ -2352,12 +2352,80 @@ const CategorySelector = () => {
                   </div>
                 )}
               </div>
-            )}
+            )} */}
+{enableShippingPlans && !enableFreeShipping && (
+  <div className="mt-4">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Select Shipping Profile
+    </label>
+
+    {shippingPlans.length > 0 ? (
+      <>
+        <select
+          value={selectedShippingPlan}
+          onChange={(e) => {
+            setSelectedShippingPlan(e.target.value);
+            setIsChanged(true);
+          }}
+          className="w-full border border-gray-300 p-2 rounded-md"
+        >
+          <option value="">Select a plan</option>
+          {shippingPlans.map((plan) => (
+            <option key={plan._id} value={plan.profileId}>
+              {plan.profileName.toUpperCase()} — {plan.rateName} ($
+              {plan.ratePrice})
+            </option>
+          ))}
+        </select>
+
+        {selectedShippingPlan && (
+          <div className="mt-3 text-sm text-gray-700">
+            Selected plan:{" "}
+            <span className="font-semibold">
+              {
+                shippingPlans.find(
+                  (p) => p.profileId === selectedShippingPlan
+                )?.profileName
+              }{" "}
+              (
+              {
+                shippingPlans.find(
+                  (p) => p.profileId === selectedShippingPlan
+                )?.rateName
+              }{" "}
+              - $
+              {
+                shippingPlans.find(
+                  (p) => p.profileId === selectedShippingPlan
+                )?.ratePrice
+              }
+              )
+            </span>
+          </div>
+        )}
+      </>
+    ) : (
+      <div className="text-sm text-gray-700 bg-yellow-50 border border-yellow-300 rounded-md p-3">
+         No active shipping profiles found.{" "}
+        <button
+          onClick={() => navigate("/manage-shipping")}
+          className="text-blue-600 underline hover:text-blue-800 font-medium ml-1"
+        >
+          Click here to manage shipping.
+        </button>
+        <p className="mt-2 text-gray-600">
+          Once you activate a profile, it will appear here. Until then, products
+          will default to Free Shipping.
+        </p>
+      </div>
+    )}
+  </div>
+)}
 
             {/* Show Free Shipping Message */}
             {enableShippingPlans && enableFreeShipping && (
               <div className="mt-4 text-sm text-green-600 font-medium">
-                ✅ Free shipping is enabled — no need to select a plan.
+                Free shipping is enabled — no need to select a plan.
               </div>
             )}
           </div>

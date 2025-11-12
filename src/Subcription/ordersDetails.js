@@ -584,7 +584,7 @@ const OrdersDetails = () => {
             )}
 
           {/* fullfill box */}
-
+ 
           {orderData?.fulfillments?.map((fulfillment, index) => (
             <div
               key={index}

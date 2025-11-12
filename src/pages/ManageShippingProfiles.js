@@ -217,7 +217,7 @@ const ManageShippingProfiles = () => {
         });
       } else {
         await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate", {
-          userId: userId,
+          userId: profileUserId,
           profileId: profile.profileId,
         });
       }

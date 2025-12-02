@@ -15,9 +15,9 @@ import { FaFileImport } from "react-icons/fa6";
 const SubscriptionHistory = () => {
   const { userData, loading, error, variantId } = UseFetchUserData();
   const { addNotification } = useNotification();
-  const [exportStatus, setExportStatus] = useState(""); // '' means no filter (all)
+  const [exportStatus, setExportStatus] = useState("");
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(50); // default 50
+  const [limit, setLimit] = useState(50);
   const [hasMore, setHasMore] = useState(false);
   const [subscriptions, setSubscriptions] = useState([]);
   const [totalListings, setTotalListings] = useState(0);
@@ -37,8 +37,8 @@ const SubscriptionHistory = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isExportOpen, setIsexportOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [exportAs, setExportAs] = useState("csv"); // not used yet but can be extended
-  const [exportOption, setExportOption] = useState("all"); // default to 'all'
+  const [exportAs, setExportAs] = useState("csv");
+  const [exportOption, setExportOption] = useState("all");
 
   const togglePopup = () => setIsexportOpen(!isOpen);
 
@@ -65,8 +65,8 @@ const SubscriptionHistory = () => {
   //     setIsAdmin(isAdminFlag);
 
   //     const url = isAdminFlag
-  //       ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrder`
-  //       : `https://multi-vendor-marketplace.vercel.app/order/order`;
+  //       ? `http://localhost:5000/order/getAllOrder`
+  //       : `http://localhost:5000/order/order`;
 
   //     const res = await fetch(url, {
   //       method: "GET",
@@ -117,8 +117,8 @@ const SubscriptionHistory = () => {
       setIsAdmin(isAdminFlag);
 
       const url = isAdminFlag
-        ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrder?page=${page}&limit=${limit}`
-        : `https://multi-vendor-marketplace.vercel.app/order/order?page=${page}&limit=${limit}`;
+        ? `http://localhost:5000/order/getAllOrder?page=${page}&limit=${limit}`
+        : `http://localhost:5000/order/order?page=${page}&limit=${limit}`;
 
       const res = await fetch(url, {
         method: "GET",
@@ -187,8 +187,8 @@ const SubscriptionHistory = () => {
       });
 
       const exportUrl = isAdmin
-        ? `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`
-        : `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
+        ? `http://localhost:5000/order/exportAllOrder?${queryParams.toString()}`
+        : `http://localhost:5000/order/exportOrderByUserId?${queryParams.toString()}`;
 
       const response = await fetch(exportUrl, {
         method: "GET",
@@ -624,12 +624,22 @@ const SubscriptionHistory = () => {
                                     : "Unfulfilled"}
                                 </span>
                               </td>
-                              <td className="p-3">
+                              {/* <td className="p-3">
                                 $
                                 {(
                                   parseFloat(firstItem.price || 0) *
                                   (firstItem.quantity || 1)
                                 ).toFixed(2)}
+                              </td> */}
+                              <td className="p-3">
+                                $
+                                {subscription.lineItems
+                                  .reduce((total, item) => {
+                                    const price = parseFloat(item.price || 0);
+                                    const qty = parseInt(item.quantity || 0);
+                                    return total + price * qty;
+                                  }, 0)
+                                  .toFixed(2)}
                               </td>
                             </tr>
                           );

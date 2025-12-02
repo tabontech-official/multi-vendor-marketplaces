@@ -46,7 +46,7 @@ const ManageRequests = () => {
 
   useEffect(() => {
     fetch(
-      "http://localhost:5000/order/getCancellationRequests"
+      "https://multi-vendor-marketplace.vercel.app/order/getCancellationRequests"
     )
       .then((res) => res.json())
       .then((data) => {

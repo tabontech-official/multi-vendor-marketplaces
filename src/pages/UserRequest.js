@@ -9,7 +9,7 @@
 //   const [isLoading, setIsLoading] = useState(true);
 
 //   useEffect(() => {
-//     fetch(`http://localhost:5000/order/getCancellationRequestsByUserId/${id}`)
+//     fetch(`https://multi-vendor-marketplace.vercel.app/order/getCancellationRequestsByUserId/${id}`)
 //       .then((res) => res.json())
 //       .then((data) => {
 //         if (data.success) {
@@ -84,7 +84,7 @@ const RequestDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/order/getCancellationRequestsByUserId/${id}`)
+    fetch(`https://multi-vendor-marketplace.vercel.app/order/getCancellationRequestsByUserId/${id}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {

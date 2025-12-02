@@ -44,7 +44,7 @@ const EcommerceConsultation = () => {
       };
 
       const res = await axios.post(
-        "http://localhost:5000/consultation",
+        "https://multi-vendor-marketplace.vercel.app/consultation",
         payload
       );
       showToast("success","Consultation booked successfully!");

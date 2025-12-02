@@ -51,7 +51,7 @@ const CategorySelector = () => {
         console.log("👤 Fetching active shipping profiles for user:", userId);
 
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`,
+          `http://localhost:5000/shippingProfile/${userId}`,
           {
             method: "GET",
             headers: {
@@ -85,7 +85,7 @@ const CategorySelector = () => {
     const fetchDbOptions = async () => {
       try {
         const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
+          "http://localhost:5000/variantOption/getOptions"
         );
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -209,7 +209,7 @@ const CategorySelector = () => {
 
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/category/getCategory",
+          "http://localhost:5000/category/getCategory",
           {
             method: "GET",
             headers: {
@@ -771,7 +771,7 @@ const CategorySelector = () => {
 
   //   if (isPopupVisible && userId) {
   //     fetch(
-  //       `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+  //       `http://localhost:5000/product/getImageGallery/${productId}`,
   //       {
   //         method: "GET",
   //         headers: {
@@ -801,7 +801,7 @@ const CategorySelector = () => {
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
       fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        `http://localhost:5000/product/getImageGallery/${productId}`,
         {
           method: "GET",
           headers: {
@@ -1161,7 +1161,7 @@ const CategorySelector = () => {
 
   //       if (data.secure_url) {
   //         await fetch(
-  //           "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+  //           "http://localhost:5000/product/addImageGallery",
   //           {
   //             method: "POST",
   //             headers: {
@@ -1274,7 +1274,7 @@ const CategorySelector = () => {
 
         if (data.secure_url) {
           await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            "http://localhost:5000/product/addImageGallery",
             {
               method: "POST",
               headers: {
@@ -1362,7 +1362,7 @@ const CategorySelector = () => {
 
           if (data.secure_url) {
             await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              "http://localhost:5000/product/addImageGallery",
               {
                 method: "POST",
                 headers: {
@@ -1528,8 +1528,8 @@ const CategorySelector = () => {
     try {
       // 🧩 Decide if creating or updating
       const url = isEditing
-        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
-        : `https://multi-vendor-marketplace.vercel.app/product/createProduct`;
+        ? `http://localhost:5000/product/updateProducts/${mongooseProductId}`
+        : `http://localhost:5000/product/createProduct`;
 
       const method = isEditing ? "PATCH" : "POST";
 
@@ -1585,7 +1585,7 @@ const CategorySelector = () => {
           if (!variant.variantId) continue;
 
           await fetch(
-            `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variant.variantId}`,
+            `http://localhost:5000/product/updateVariant/${productId}/${variant.variantId}`,
             {
               method: "PUT",
               headers: {
@@ -1627,7 +1627,7 @@ const CategorySelector = () => {
       );
 
       const imageSaveResponse = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
+        `http://localhost:5000/product/updateImages/${productId}`,
         {
           method: "PUT",
           headers: {
@@ -1729,7 +1729,7 @@ const CategorySelector = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/duplicateProduct/${product.shopifyId}`,
+        `http://localhost:5000/product/duplicateProduct/${product.shopifyId}`,
         {
           method: "POST",
           headers: {

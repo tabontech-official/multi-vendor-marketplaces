@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const Collection = () => {
   const { id } = useParams();
   const [category, setCategory] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const navigateTo = useNavigate();
+const [saving, setSaving] = useState(false);
   const [conditions, setConditions] = useState([
     { field: "tag", operator: "equals", value: "" },
   ]);
@@ -18,7 +20,7 @@ const Collection = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/category/category/${id}`,
+        `http://localhost:5000/category/category/${id}`,
         {
           method: "GET",
           headers: {

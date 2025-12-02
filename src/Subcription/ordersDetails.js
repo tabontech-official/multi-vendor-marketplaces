@@ -84,7 +84,7 @@ const OrdersDetails = () => {
 
       try {
         const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${orderId}/${finalUserId}`
+          `http://localhost:5000/order/getOrderFromShopify/${orderId}/${finalUserId}`
         );
         setOrderData(response.data?.data);
         setIsLoading(false);
@@ -301,7 +301,7 @@ const OrdersDetails = () => {
       });
 
       await fetch(
-        `https://multi-vendor-marketplace.vercel.app/order/updatetrackingShopify`,
+        `http://localhost:5000/order/updatetrackingShopify`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -352,7 +352,7 @@ const OrdersDetails = () => {
       }
 
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/cancelOrder",
+        "http://localhost:5000/order/cancelOrder",
         {
           method: "POST",
           headers: {
@@ -401,7 +401,7 @@ const OrdersDetails = () => {
     const fetchLineItemCount = async () => {
       try {
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/order/lineItemCount/${orderId}`
+          `http://localhost:5000/order/lineItemCount/${orderId}`
         );
         const data = await res.json();
 
@@ -979,7 +979,7 @@ const OrdersDetails = () => {
 
                     try {
                       const response = await fetch(
-                        `https://multi-vendor-marketplace.vercel.app/auth/addRequestForOrderCancellation/${userId}`,
+                        `http://localhost:5000/auth/addRequestForOrderCancellation/${userId}`,
                         {
                           method: "POST",
                           headers: {

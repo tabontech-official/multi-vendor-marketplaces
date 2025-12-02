@@ -26,7 +26,7 @@ const AddVariantOption = () => {
     const fetchOptions = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/variantOption/getOptions"
+          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
         );
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -89,7 +89,7 @@ const AddVariantOption = () => {
       }
 
       const res = await fetch(
-        "http://localhost:5000/variantOption/addOptions",
+        "https://multi-vendor-marketplace.vercel.app/variantOption/addOptions",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

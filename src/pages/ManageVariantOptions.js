@@ -117,31 +117,58 @@ const ManageVariantOptions = () => {
     }
   };
 
-  const handleEditSave = async () => {
-    const { option } = editModal;
-    if (!option.name || !option.optionValues?.length) {
-      return showToast("error", "Please fill all fields correctly.");
-    }
+ const handleEditSave = async () => {
+  const { option } = editModal;
 
-    try {
-      const response = await axios.put(
-        "https://multi-vendor-marketplace.vercel.app/variantOption/updateOption",
-        option
-      );
+  // Convert text → array (comma separated)
+  const finalOptionValues = editOptionValuesText
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
 
-      if (response.status === 200) {
-        showToast("success", "Option updated successfully!");
-        setOptions((prev) =>
-          prev.map((opt) => (opt._id === option._id ? option : opt))
-        );
-        setEditModal({ show: false, option: null });
-      }
-    } catch (error) {
-      console.error("Update Error:", error);
-      showToast("error", "Failed to update option.");
-    }
+  const finalOptionNames = editOptionNameText
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+
+  // Validation
+  if (!option.name || finalOptionValues.length === 0) {
+    return showToast("error", "Please fill all fields correctly.");
+  }
+
+  // Prepare updated option
+  const updatedOption = {
+    ...option,
+    optionValues: finalOptionValues,
+    optionName: finalOptionNames,
   };
 
+  try {
+    const response = await axios.put(
+      "https://multi-vendor-marketplace.vercel.app/variantOption/updateOption",
+      updatedOption
+    );
+
+    if (response.status === 200) {
+      showToast("success", "Option updated successfully!");
+
+      // Update UI
+      setOptions((prev) =>
+        prev.map((opt) =>
+          opt._id === updatedOption._id ? updatedOption : opt
+        )
+      );
+
+      setEditModal({ show: false, option: null });
+    }
+  } catch (error) {
+    console.error("Update Error:", error);
+    showToast("error", "Failed to update option.");
+  }
+};
+
+const [editOptionNameText, setEditOptionNameText] = useState("");
+const [editOptionValuesText, setEditOptionValuesText] = useState("");
   return (
     <div className="p-6">
       {toast.show && (
@@ -251,17 +278,30 @@ const ManageVariantOptions = () => {
                   </td>
 
                   <td className="p-3 text-right">
-                    <button
-                      onClick={() =>
-                        setEditModal({
-                          show: true,
-                          option: { ...option },
-                        })
-                      }
-                      className="text-blue-500 hover:underline text-sm font-medium"
-                    >
-                      Edit
-                    </button>
+                   <button
+  onClick={() => {
+    setEditModal({
+      show: true,
+      option: { ...option },
+    });
+
+    // Prefill temporary states
+    setEditOptionValuesText(
+      Array.isArray(option.optionValues)
+        ? option.optionValues.join(", ")
+        : option.optionValues || ""
+    );
+    setEditOptionNameText(
+      Array.isArray(option.optionName)
+        ? option.optionName.join(", ")
+        : option.optionName || ""
+    );
+  }}
+  className="text-blue-500 hover:underline text-sm font-medium"
+>
+  Edit
+</button>
+
                   </td>
                 </tr>
               ))
@@ -419,28 +459,14 @@ const ManageVariantOptions = () => {
                 <span className="text-gray-700 font-medium">
                   Option Values (comma separated)
                 </span>
-                <input
-                  type="text"
-                  value={
-                    Array.isArray(editModal.option.optionValues)
-                      ? editModal.option.optionValues.join(", ")
-                      : editModal.option.optionValues || ""
-                  }
-                  onChange={(e) =>
-                    setEditModal((prev) => ({
-                      ...prev,
-                      option: {
-                        ...prev.option,
-                        optionValues: e.target.value
-                          .split(",")
-                          .map((v) => v.trim())
-                          .filter(Boolean),
-                      },
-                    }))
-                  }
-                  placeholder="e.g. Red, Blue, Green"
-                  className="w-full border border-gray-300 px-3 py-2 rounded-md mt-1 focus:ring focus:ring-blue-100"
-                />
+               <input
+  type="text"
+  value={editOptionValuesText}
+  onChange={(e) => setEditOptionValuesText(e.target.value)}
+  placeholder="e.g. Red, Blue, Green"
+  className="w-full border border-gray-300 px-3 py-2 rounded-md mt-1 focus:ring focus:ring-blue-100"
+/>
+
               </label>
 
               <div className="flex justify-end space-x-3 mt-6 border-t border-gray-100 pt-4">

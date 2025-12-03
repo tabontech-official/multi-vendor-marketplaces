@@ -3426,7 +3426,7 @@ const CategorySelector = () => {
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
 
-              <label htmlFor="keywords" className="block text-gray-600 text-sm">
+              {/* <label htmlFor="keywords" className="block text-gray-600 text-sm">
                 Keywords
               </label>
               <input
@@ -3469,7 +3469,7 @@ const CategorySelector = () => {
                       ))}
                   </div>
                 )}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

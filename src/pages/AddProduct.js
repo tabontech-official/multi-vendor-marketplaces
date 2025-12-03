@@ -29,9 +29,37 @@ const CategorySelector = () => {
   const [matchedOptionValues, setMatchedOptionValues] = useState([]);
   const [enableShippingPlans, setEnableShippingPlans] = useState(false);
   const [enableFreeShipping, setEnableFreeShipping] = useState(false);
-
+  const [enableSizeChart, setEnableSizeChart] = useState(false);
+  const [sizeCharts, setSizeCharts] = useState([]);
+  const [selectedSizeChart, setSelectedSizeChart] = useState("");
   const [shippingPlans, setShippingPlans] = useState([]);
+  const [chartData, setChartData] = useState({
+    image: "",
+    loading: false,
+  });
+
   const isFetched = useRef(false);
+  useEffect(() => {
+    const fetchSizeCharts = async () => {
+      try {
+        const userId = localStorage.getItem("userid");
+        if (!userId) return;
+
+        const res = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`
+        );
+        const data = await res.json();
+
+        if (Array.isArray(data.data)) {
+          setSizeCharts(data.data);
+        }
+      } catch (err) {
+        console.error("Error loading size charts:", err);
+      }
+    };
+
+    fetchSizeCharts();
+  }, []);
 
   useEffect(() => {
     const fetchShippingProfiles = async () => {
@@ -800,17 +828,14 @@ const CategorySelector = () => {
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -1073,6 +1098,22 @@ const CategorySelector = () => {
         setEnableMetafields(false);
         setMetafields([{ label: "", value: "" }]);
       }
+      if (product.custom?.size_chart_id) {
+        setEnableSizeChart(true);
+        setSelectedSizeChart(product.custom.size_chart_id);
+
+        setChartData({
+          image: product.custom.size_chart,
+          loading: false,
+        });
+      } else {
+        setEnableSizeChart(false);
+        setSelectedSizeChart("");
+        setChartData({
+          image: "",
+          loading: false,
+        });
+      }
 
       setMongooseProductId(product._id);
       const imageURLs =
@@ -1126,95 +1167,6 @@ const CategorySelector = () => {
       }
     }
   }, [product]);
-
-  // const handleImageChange = async (event) => {
-  //   const apiKey = localStorage.getItem("apiKey");
-  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
-  //   const userId = localStorage.getItem("userid");
-  //   const token = localStorage.getItem("usertoken");
-
-  //   const files = Array.from(event.target.files);
-  //   if (files.length === 0) return;
-
-  //   const previews = files.map((file) => ({
-  //     localUrl: URL.createObjectURL(file),
-  //     loading: true,
-  //     cloudUrl: null,
-  //   }));
-
-  //   setGalleryImages((prev) => [...previews, ...prev]);
-
-  //   for (const file of files) {
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-  //     formData.append("upload_preset", "images");
-
-  //     try {
-  //       const res = await fetch(
-  //         "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-  //         {
-  //           method: "POST",
-  //           body: formData,
-  //         }
-  //       );
-  //       const data = await res.json();
-
-  //       if (data.secure_url) {
-  //         await fetch(
-  //           "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-  //           {
-  //             method: "POST",
-  //             headers: {
-  //               Authorization: `Bearer ${token}`,
-  //               "x-api-key": apiKey,
-  //               "x-api-secret": apiSecretKey,
-  //               "Content-Type": "application/json",
-  //             },
-  //             body: JSON.stringify({
-  //               userId,
-  //               images: [data.secure_url],
-  //             }),
-  //           }
-  //         );
-
-  //         setGalleryImages((prev) => [
-  //           { id: Date.now(), src: data.secure_url, name: file.name },
-  //           ...prev,
-  //         ]);
-
-  //         if (currentVariant) {
-  //           const parentValue = combinations[currentVariant.index]?.parent;
-  //           const combinationKey =
-  //             options.length === 1
-  //               ? currentVariant.child
-  //               : `${parentValue} / ${currentVariant.child}`;
-
-  //           const normalizedKey = combinationKey.replace(/['"]/g, "").trim();
-  //           const handleAlt = normalizedKey
-  //             .replace(/\s*\/\s*/g, "-")
-  //             .toLowerCase();
-
-  //           setVariantImages((prev) => ({
-  //             ...prev,
-  //             [normalizedKey]: [
-  //               ...(Array.isArray(prev[normalizedKey])
-  //                 ? prev[normalizedKey]
-  //                 : []),
-  //               {
-  //                 preview: data.secure_url,
-  //                 alt: handleAlt,
-  //                 loading: false,
-  //               },
-  //             ],
-  //           }));
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error("Image upload failed:", error);
-  //       showToast("error", "Image upload failed");
-  //     }
-  //   }
-  // };
 
   const handleImageChange = async (event) => {
     const apiKey = localStorage.getItem("apiKey");
@@ -1273,22 +1225,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1361,19 +1310,16 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "x-api-key": apiKey,
-                  "x-api-secret": apiSecretKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId, images: [data.secure_url] }),
-              }
-            );
+            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            });
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1516,12 +1462,19 @@ const CategorySelector = () => {
       variantQuantites: prepareVariantQuantities(),
       variantSku: prepareVariantSku(),
       categories: selectedExportTitle,
-      shippingProfileData: selectedShippingData, // ✅ new field for backend
+      shippingProfileData: selectedShippingData,
     };
     if (enableMetafields) {
       payload.metafields = metafields.filter(
         (m) => m.label.trim() !== "" && m.value.trim() !== ""
       );
+    }
+    if (enableSizeChart && selectedSizeChart) {
+      const chartData = sizeCharts.find((c) => c._id === selectedSizeChart);
+      payload.size_chart_id = selectedSizeChart;
+
+      payload.size_chart = selectedSizeChart;
+      payload.size_chart_image = chartData?.image || null;
     }
     console.log("📦 Payload being sent:", payload);
 
@@ -2302,57 +2255,6 @@ const CategorySelector = () => {
               </label>
             </div>
 
-            {/* Shipping Plans Section */}
-            {/* {enableShippingPlans && !enableFreeShipping && (
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Shipping Profile
-                </label>
-
-                <select
-                  value={selectedShippingPlan}
-                  onChange={(e) => {
-                    setSelectedShippingPlan(e.target.value);
-                    setIsChanged(true);
-                  }}
-                  className="w-full border border-gray-300 p-2 rounded-md"
-                >
-                  <option value="">Select a plan</option>
-                  {shippingPlans.map((plan) => (
-                    <option key={plan._id} value={plan.profileId}>
-                      {plan.profileName.toUpperCase()} — {plan.rateName} ($
-                      {plan.ratePrice})
-                    </option>
-                  ))}
-                </select>
-
-                {selectedShippingPlan && (
-                  <div className="mt-3 text-sm text-gray-700">
-                    Selected plan:{" "}
-                    <span className="font-semibold">
-                      {
-                        shippingPlans.find(
-                          (p) => p.profileId === selectedShippingPlan
-                        )?.profileName
-                      }{" "}
-                      (
-                      {
-                        shippingPlans.find(
-                          (p) => p.profileId === selectedShippingPlan
-                        )?.rateName
-                      }{" "}
-                      - $
-                      {
-                        shippingPlans.find(
-                          (p) => p.profileId === selectedShippingPlan
-                        )?.ratePrice
-                      }
-                      )
-                    </span>
-                  </div>
-                )}
-              </div>
-            )} */}
             {enableShippingPlans && !enableFreeShipping && (
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -2422,7 +2324,6 @@ const CategorySelector = () => {
               </div>
             )}
 
-            {/* Show Free Shipping Message */}
             {enableShippingPlans && enableFreeShipping && (
               <div className="mt-4 text-sm text-green-600 font-medium">
                 Free shipping is enabled — no need to select a plan.
@@ -2430,22 +2331,11 @@ const CategorySelector = () => {
             )}
           </div>
 
-          {/*  VARINATS COMBINATION STARTED FROM THERE */}
-
           <div className="border rounded-2xl p-3 mt-3 bg-white border-gray-300 w-full">
             <h2 className="text-sm font-medium text-gray-800">Variants</h2>
 
             {!showVariantForm && (
               <div className="flex gap-2 items-center mt-2">
-                {/* <button
-                  onClick={() => {
-                    handleOpenForm();
-                    setIsChanged(true);
-                  }}
-                  className="text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-200"
-                >
-                  Add option like size or color
-                </button> */}
                 <button
                   onClick={() => {
                     if (options.length >= 3) {
@@ -2555,7 +2445,6 @@ const CategorySelector = () => {
 
                             return (
                               <div key={i} className="flex gap-2 items-center">
-                                {/* ✅ Show dropdown if we have predefined values */}
                                 {possibleValues.length > 0 ? (
                                   <select
                                     value={value}
@@ -2575,7 +2464,6 @@ const CategorySelector = () => {
                                     ))}
                                   </select>
                                 ) : (
-                                  // ✅ Text input if no predefined values exist
                                   <input
                                     type="text"
                                     value={value}
@@ -2590,7 +2478,6 @@ const CategorySelector = () => {
                                   />
                                 )}
 
-                                {/* delete button */}
                                 {newOption.values.length > 1 && (
                                   <button
                                     onClick={(e) => {
@@ -3116,6 +3003,75 @@ const CategorySelector = () => {
           </div>
           <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
             <div className="flex items-center justify-between">
+              <h2 className="text-sm font-medium text-gray-800">Size Chart</h2>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="enableSizeChart"
+                  checked={enableSizeChart}
+                  onChange={() => setEnableSizeChart(!enableSizeChart)}
+                  className="w-4 h-4 text-blue-600 rounded"
+                />
+                <label
+                  htmlFor="enableSizeChart"
+                  className="text-sm text-gray-700"
+                >
+                  Add Size Chart
+                </label>
+              </div>
+            </div>
+
+            {enableSizeChart && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Size Chart
+                </label>
+
+                {sizeCharts.length > 0 ? (
+                  <select
+                    value={selectedSizeChart}
+                    onChange={(e) => setSelectedSizeChart(e.target.value)}
+                    className="w-full border border-gray-300 p-2 rounded-md"
+                  >
+                    <option value="">Choose Size Chart</option>
+
+                    {sizeCharts.map((chart) => (
+                      <option key={chart._id} value={chart._id}>
+                        {chart.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="text-sm text-gray-600 bg-yellow-50 border border-yellow-300 p-3 rounded-md">
+                    No size charts found.
+                    <button
+                      className="text-blue-600 underline ml-1"
+                      onClick={() => navigate("/create-size-chart")}
+                    >
+                      Create one
+                    </button>
+                  </div>
+                )}
+
+                {selectedSizeChart && (
+                  <div className="mt-3">
+                    <img
+                      src={
+                        sizeCharts.find((c) => c._id === selectedSizeChart)
+                          ?.image
+                      }
+                      alt="Size Chart Preview"
+                      className="w-40 h-40 border rounded object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
+            <div className="flex items-center justify-between">
               <h2 className="text-sm font-medium text-gray-800">
                 Custom Fields
               </h2>
@@ -3198,7 +3154,6 @@ const CategorySelector = () => {
                   </div>
                 ))}
 
-                {/* Add button (limit 4) */}
                 {metafields.length < 4 && (
                   <button
                     onClick={handleAddMetafield}

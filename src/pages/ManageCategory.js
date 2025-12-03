@@ -137,16 +137,19 @@ const ManageCategory = () => {
     const apiSecretKey = localStorage.getItem("apiSecretKey");
 
     try {
-      await axios.delete("https://multi-vendor-marketplace.vercel.app/category/deleteCategory", {
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
-        data: {
-          categoryIds: selectedCategoryIds,
-        },
-      });
+      await axios.delete(
+        "https://multi-vendor-marketplace.vercel.app/category/deleteCategory",
+        {
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+          data: {
+            categoryIds: selectedCategoryIds,
+          },
+        }
+      );
 
       alert("Selected categories deleted successfully!");
 
@@ -197,40 +200,40 @@ const ManageCategory = () => {
     }
   };
   const handleImportCsv = async () => {
-  if (!importFile) {
-    alert("Please select a CSV file.");
-    return;
-  }
+    if (!importFile) {
+      alert("Please select a CSV file.");
+      return;
+    }
 
-  const formData = new FormData();
-  formData.append("file", importFile); // ✅ MATCHES multer.single("file")
+    const formData = new FormData();
+    formData.append("file", importFile); // ✅ MATCHES multer.single("file")
 
-  try {
-    setIsImporting(true);
+    try {
+      setIsImporting(true);
 
-    const response = await axios.post(
-      "https://multi-vendor-marketplace.vercel.app/category/uploadCsvForCategories",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+      const response = await axios.post(
+        "https://multi-vendor-marketplace.vercel.app/category/uploadCsvForCategories",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-    alert("CSV Imported Successfully!");
+      alert("CSV Imported Successfully!");
 
-    setShowImportModal(false);
-    setImportFile(null);
-    setIsImporting(false);
+      setShowImportModal(false);
+      setImportFile(null);
+      setIsImporting(false);
 
-    window.location.reload();
-  } catch (error) {
-    console.error("CSV Upload Error:", error);
-    alert(error?.response?.data?.error || "Error importing CSV");
-    setIsImporting(false);
-  }
-};
+      window.location.reload();
+    } catch (error) {
+      console.error("CSV Upload Error:", error);
+      alert(error?.response?.data?.error || "Error importing CSV");
+      setIsImporting(false);
+    }
+  };
 
   const [importLevel, setImportLevel] = useState("");
   const [importParentCat1, setImportParentCat1] = useState(""); // for level 2
@@ -275,12 +278,12 @@ const ManageCategory = () => {
               Create Collection
             </button>
           )}
-          <button
+          {/* <button
             onClick={() => setShowImportModal(true)}
             className="bg-blue-500 text-white px-4 py-1 border rounded-md hover:bg-blue-600"
           >
             Import CSV
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -308,8 +311,12 @@ const ManageCategory = () => {
             <th className="p-3">Id</th>
             <th className="p-3">Level</th>
             <th className="p-3">Title</th>
-            <th className="p-3">Products</th>
-            <th className="p-3">Published</th>
+            {(role === "Master Admin" || role === "Dev Admin") && (
+              <th className="p-3">Products</th>
+            )}
+            {(role === "Master Admin" || role === "Dev Admin") && (
+              <th className="p-3">Published</th>
+            )}
             <th className="p-3">Hierarchy</th>
           </tr>
         </thead>
@@ -348,12 +355,16 @@ const ManageCategory = () => {
                   <td className="p-1 text-sm">{root.catNo}</td>
                   <td className="p-1 text-sm">{root.level}</td>
                   <td className="p-1 text-sm">{root.title}</td>
-                  <td className="p-1 text-sm">{root.productCount}</td>
-                  <td className="p-1 text-sm">
-                    {root.createdAt
-                      ? new Date(root.createdAt).toLocaleDateString()
-                      : "-"}
-                  </td>
+                  {(role === "Master Admin" || role === "Dev Admin") && (
+                    <td className="p-1 text-sm">{root.productCount}</td>
+                  )}
+                  {(role === "Master Admin" || role === "Dev Admin") && (
+                    <td className="p-1 text-sm">
+                      {root.createdAt
+                        ? new Date(root.createdAt).toLocaleDateString()
+                        : "-"}
+                    </td>
+                  )}
                   <td className="p-1 text-sm">{root.title}</td>
                 </tr>
               );
@@ -390,12 +401,17 @@ const ManageCategory = () => {
                     <td className="p-1 text-sm">{lvl2.catNo}</td>
                     <td className="p-1 text-sm">{lvl2.level}</td>
                     <td className="p-1 text-sm">{lvl2.title}</td>
-                    <td className="p-1 text-sm">{lvl2.productCount}</td>
-                    <td className="p-1 text-sm">
-                      {lvl2.createdAt
-                        ? new Date(lvl2.createdAt).toLocaleDateString()
-                        : "-"}
-                    </td>
+
+                    {(role === "Master Admin" || role === "Dev Admin") && (
+                      <td className="p-1 text-sm">{lvl2.productCount}</td>
+                    )}
+                    {(role === "Master Admin" || role === "Dev Admin") && (
+                      <td className="p-1 text-sm">
+                        {lvl2.createdAt
+                          ? new Date(lvl2.createdAt).toLocaleDateString()
+                          : "-"}
+                      </td>
+                    )}
                     <td className="p-1 text-sm">
                       {`${root.title} > ${lvl2.title}`}
                     </td>
@@ -429,12 +445,16 @@ const ManageCategory = () => {
                     <td className="p-1 text-sm">{lvl3.catNo}</td>
                     <td className="p-1 text-sm">{lvl3.level}</td>
                     <td className="p-1 text-sm">{lvl3.title}</td>
-                    <td className="p-1 text-sm">{lvl3.productCount}</td>
-                    <td className="p-1 text-sm">
-                      {lvl3.createdAt
-                        ? new Date(lvl3.createdAt).toLocaleDateString()
-                        : "-"}
-                    </td>
+                    {(role === "Master Admin" || role === "Dev Admin") && (
+                      <td className="p-1 text-sm">{lvl3.productCount}</td>
+                    )}
+                    {(role === "Master Admin" || role === "Dev Admin") && (
+                      <td className="p-1 text-sm">
+                        {lvl3.createdAt
+                          ? new Date(lvl3.createdAt).toLocaleDateString()
+                          : "-"}
+                      </td>
+                    )}
                     <td className="p-1 text-sm">
                       {`${root.title} > ${lvl2.title} > ${lvl3.title}`}
                     </td>

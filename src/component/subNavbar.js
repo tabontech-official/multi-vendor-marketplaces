@@ -94,6 +94,7 @@ const SubNavbar = () => {
         { name: "Inventory", path: "/inventory" },
         { name: "Manage Categories", path: "/manage-categories" },
         { name: "Manage Options", path: "/manage-options" },
+        { name: "Manage Size Charts", path: "/manage-size-chart" },
         { name: "Manage Shipping", path: "/manage-shipping" },
       ],
     },

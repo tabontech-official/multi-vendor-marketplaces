@@ -57,6 +57,8 @@ import ManageVariantOptions from "./pages/ManageVariantOptions";
 import AddVariantOption from "./pages/AddVariantOption";
 import ManageShippingProfiles from "./pages/ManageShippingProfiles";
 import InvoicePreview from "./pages/InvoicePreview";
+import ManageSizeChart from "./pages/ManageSizeChart";
+import CreateSizeChart from "./pages/CreateSizeChart";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -134,6 +136,14 @@ const App = () => {
             <Route
               path="/manage-categories"
               element={<PrivateRoute element={<ManageCategory />} />}
+            />
+              <Route
+              path="/manage-size-chart"
+              element={<PrivateRoute element={<ManageSizeChart />} />}
+            />
+            <Route
+              path="/create-size-chart"
+              element={<PrivateRoute element={<CreateSizeChart />} />}
             />
               <Route
               path="/manage-options"

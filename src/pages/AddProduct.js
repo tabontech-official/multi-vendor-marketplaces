@@ -828,14 +828,17 @@ const CategorySelector = () => {
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
-      })
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -1225,19 +1228,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1310,16 +1316,19 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            });
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
+              }
+            );
 
             setSelectedImages((prev) =>
               prev.map((img) =>

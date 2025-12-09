@@ -60,7 +60,7 @@ useEffect(() => {
       const userId = localStorage.getItem("userid");
       if (!userId) return;
 
-      fetch(`http://localhost:5000/auth/getMerchantAccountDetails/${userId}`)
+      fetch(`https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`)
         .then((res) => res.json())
         .then((data) => {
           if (data?.data) {
@@ -90,7 +90,7 @@ useEffect(() => {
     }
 
     try {
-      const url = `http://localhost:5000/order/order/${userId}`;
+      const url = `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`;
 
       const res = await fetch(url, {
         method: "GET",
@@ -155,7 +155,7 @@ useEffect(() => {
       }
 
       // Send PayPal update request
-      const res = await axios.post("http://localhost:5000/order/addPaypal", {
+      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
         merchantIds,
         payPal: account,
       });
@@ -204,7 +204,7 @@ useEffect(() => {
 
       // Send reference number update to backend
       const res = await fetch(
-        "http://localhost:5000/order/addReferenceNumber",
+        "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
         {
           method: "POST",
           headers: {
@@ -259,17 +259,17 @@ useEffect(() => {
 
   //       if (userRole === "Merchant") {
   //         res = await fetch(
-  //           `http://localhost:5000/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+  //           `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
   //             payoutDate
   //           )}&status=${status}&userId=${merchantId}`
   //         );
   //       } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
   //         // res = await fetch(
-  //         //   `http://localhost:5000/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(
+  //         //   `https://multi-vendor-marketplace.vercel.app/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(
   //         //     payoutDate
   //         //   )}&status=${status}`
   //         res = await fetch(
-  //           `http://localhost:5000/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+  //           `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
   //             payoutDate
   //           )}&status=${status}&userId=${merchantId}`
   //         );
@@ -335,11 +335,11 @@ useEffect(() => {
       try {
         let url = "";
         if (userRole === "Merchant") {
-          url = `http://localhost:5000/order/getPayoutByQuery?payoutDate=${encodeURIComponent(
+          url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByQuery?payoutDate=${encodeURIComponent(
             payoutDate
           )}&status=${status}&userId=${merchantId}`;
         } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
-          url = `http://localhost:5000/order/getAllPayouts?payoutDate=${encodeURIComponent(
+          url = `https://multi-vendor-marketplace.vercel.app/order/getAllPayouts?payoutDate=${encodeURIComponent(
             payoutDate
           )}&status=${status}`;
         } else {
@@ -427,7 +427,7 @@ useEffect(() => {
       }
 
       const res = await fetch(
-        "http://localhost:5000/order/addReferenceNumber",
+        "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
         {
           method: "POST",
           headers: {
@@ -504,7 +504,7 @@ useEffect(() => {
       };
 
       const res = await fetch(
-        "http://localhost:5000/auth/addMerchantAccountDetails",
+        "https://multi-vendor-marketplace.vercel.app/auth/addMerchantAccountDetails",
         {
           method: "POST",
           headers: {

@@ -54,7 +54,7 @@ const CreateSizeChart = () => {
       if (editData) {
         // UPDATE
         await axios.put(
-          `http://localhost:5000/size-chart/update/${editData._id}`,
+          `https://multi-vendor-marketplace.vercel.app/size-chart/update/${editData._id}`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -62,7 +62,7 @@ const CreateSizeChart = () => {
         showToast("success", "Size chart updated!");
       } else {
         // CREATE
-        await axios.post("http://localhost:5000/size-chart/create", formData, {
+        await axios.post("https://multi-vendor-marketplace.vercel.app/size-chart/create", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
 

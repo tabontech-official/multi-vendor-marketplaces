@@ -11,27 +11,7 @@ const ManageCategory = () => {
   const [filterLevel, setFilterLevel] = useState("");
   const [filterParent, setFilterParent] = useState("");
 
-  useEffect(() => {
-    const fetchAllCategories = async () => {
-      const apiKey = localStorage.getItem("apiKey");
-      const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-      const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/category/getCategory?page=1&limit=5000",
-        {
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-          },
-        }
-      );
-
-      const data = await res.json();
-      setAllCategories(data.categories || []);
-    };
-
-    fetchAllCategories();
-  }, []);
 
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
@@ -50,7 +30,7 @@ const ManageCategory = () => {
       loading...
     </div>
   );
- const filteredCategories = allCategories.filter((cat) => {
+const filteredCategories = categories.filter((cat) => {
   const matchesSearch =
     cat.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     cat.catNo.toLowerCase().includes(searchTerm.toLowerCase());
@@ -156,6 +136,7 @@ const ManageCategory = () => {
         if (response.ok) {
           setCategories(data.categories || []); // ✔ FIXED
           setTotalPages(data.totalPages || 1); // ✔ FIXED
+          
           setTotalCategories(data.totalCategories || 0); // ✔ FIXED
         } else {
           setError(data.message || "Failed to fetch categories.");
@@ -172,24 +153,22 @@ const ManageCategory = () => {
   }, [page, limit]);
 
   const getHierarchy = (cat) => {
-    if (!cat.parentCatNo) return cat.title;
+  if (!cat.parentCatNo) return cat.title;
 
-    const parent = allCategories.find((c) => c.catNo === cat.parentCatNo);
-    if (!parent) return cat.title;
+  const parent = categories.find((c) => c.catNo === cat.parentCatNo);
+  if (!parent) return cat.title;
 
-    if (!parent.parentCatNo) {
-      return `${parent.title} > ${cat.title}`;
-    }
+  if (!parent.parentCatNo) {
+    return `${parent.title} > ${cat.title}`;
+  }
 
-    const grandParent = allCategories.find(
-      (c) => c.catNo === parent.parentCatNo
-    );
-    if (!grandParent) {
-      return `${parent.title} > ${cat.title}`;
-    }
+  const grandParent = categories.find((c) => c.catNo === parent.parentCatNo);
 
-    return `${grandParent.title} > ${parent.title} > ${cat.title}`;
-  };
+  if (!grandParent) return `${parent.title} > ${cat.title}`;
+
+  return `${grandParent.title} > ${parent.title} > ${cat.title}`;
+};
+
 
   const handleButtonClick = () => {
     navigate("/create-categories");

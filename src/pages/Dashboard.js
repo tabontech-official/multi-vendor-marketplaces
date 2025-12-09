@@ -807,10 +807,11 @@ const Dashboard = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute(
-        "download",
-        `products-${exportOption}-${Date.now()}.csv`
-      );
+   link.setAttribute(
+  "download",
+  `products-${exportOption}-${Date.now()}.xlsx`
+);
+
       document.body.appendChild(link);
       link.click();
       link.remove();

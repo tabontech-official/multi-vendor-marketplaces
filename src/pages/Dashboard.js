@@ -577,7 +577,7 @@ const Dashboard = () => {
               "Manage product"
             );
           }
-          window.location.reload()
+          window.location.reload();
         })
       );
 
@@ -807,10 +807,10 @@ const Dashboard = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-   link.setAttribute(
-  "download",
-  `products-${exportOption}-${Date.now()}.xlsx`
-);
+      link.setAttribute(
+        "download",
+        `products-${exportOption}-${Date.now()}.xlsx`
+      );
 
       document.body.appendChild(link);
       link.click();
@@ -1597,7 +1597,7 @@ const Dashboard = () => {
                 )}
               </tbody>
             </table>
-                {totalPages > 1 && (
+            {totalPages > 1 && (
               <div className="flex flex-col md:flex-row justify-between items-center  px-4 py-3 bg-gray-50 border border-gray-200 ">
                 <div className="text-sm text-gray-700 mb-2 md:mb-0">
                   Total Products{" "}

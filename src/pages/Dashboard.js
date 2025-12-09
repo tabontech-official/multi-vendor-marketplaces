@@ -1595,6 +1595,78 @@ const Dashboard = () => {
                 )}
               </tbody>
             </table>
+                {totalPages > 1 && (
+              <div className="flex flex-col md:flex-row justify-between items-center  px-4 py-3 bg-gray-50 border border-gray-200 ">
+                <div className="text-sm text-gray-700 mb-2 md:mb-0">
+                  Total Products{" "}
+                  <span className="font-medium">{totalProducts}</span>
+                </div>
+
+                {/* Center: Page Numbers */}
+                <div className="flex items-center space-x-2 mb-2 md:mb-0">
+                  <button
+                    disabled={page === 1}
+                    onClick={() => setPage((prev) => prev - 1)}
+                    className={`px-3 py-1 border rounded ${
+                      page === 1
+                        ? "text-gray-400 cursor-not-allowed"
+                        : "hover:bg-gray-200"
+                    }`}
+                  >
+                    &lt;
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (p) => (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`px-3 py-1 border rounded ${
+                          page === p
+                            ? "bg-blue-500 text-white"
+                            : "hover:bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    disabled={page === totalPages}
+                    onClick={() => setPage((prev) => prev + 1)}
+                    className={`px-3 py-1 border rounded ${
+                      page === totalPages
+                        ? "text-gray-400 cursor-not-allowed"
+                        : "hover:bg-gray-200"
+                    }`}
+                  >
+                    &gt;
+                  </button>
+                </div>
+
+                {/* Right: Limit Selector */}
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Products per page:
+                  </label>
+                  <select
+                    className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={limit}
+                    onChange={(e) => {
+                      setLimit(Number(e.target.value));
+                      setPage(1); // reset to page 1 on limit change
+                      setProducts([]);
+                      setFilteredProducts([]);
+                    }}
+                  >
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={200}>200</option>
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

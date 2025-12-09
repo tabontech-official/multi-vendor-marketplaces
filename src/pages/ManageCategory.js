@@ -3,14 +3,69 @@ import { IoPricetagsOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { HiOutlineRefresh } from "react-icons/hi";
 const ManageCategory = () => {
   const navigate = useNavigate();
+  const [allCategories, setAllCategories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterLevel, setFilterLevel] = useState("");
+  const [filterParent, setFilterParent] = useState("");
+
+  useEffect(() => {
+    const fetchAllCategories = async () => {
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/category/getCategory?page=1&limit=5000",
+        {
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+          },
+        }
+      );
+
+      const data = await res.json();
+      setAllCategories(data.categories || []);
+    };
+
+    fetchAllCategories();
+  }, []);
+
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
   const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(true);
   const [replacementNames, setReplacementNames] = useState({});
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(50);
+  const [totalCategories, setTotalCategories] = useState(0);
+
+  const [totalPages, setTotalPages] = useState(1);
+  const Loader = () => (
+    <div className="flex justify-center items-center py-10">
+      <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
+      loading...
+    </div>
+  );
+ const filteredCategories = allCategories.filter((cat) => {
+  const matchesSearch =
+    cat.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cat.catNo.toLowerCase().includes(searchTerm.toLowerCase());
+
+  const matchesLevel =
+    filterLevel === "" ||
+    cat.level.toLowerCase() === filterLevel.toLowerCase();
+
+  const matchesParent =
+    filterParent === "" || cat.parentCatNo === filterParent;
+
+  return matchesSearch && matchesLevel && matchesParent;
+});
+
+
   const handleReplaceMulti = async () => {
     for (let cat of conflictCategories) {
       if (!replacementNames[cat._id]) {
@@ -41,10 +96,7 @@ const ManageCategory = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+    if (!token) return;
 
     try {
       const decoded = jwtDecode(token);
@@ -56,19 +108,39 @@ const ManageCategory = () => {
       }
     } catch (error) {
       console.error("Error decoding token:", error);
-    } finally {
-      setLoading(false);
     }
   }, []);
+  const getPageNumbers = () => {
+    const maxPagesToShow = 4;
+
+    if (totalPages <= maxPagesToShow) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    let startPage = Math.max(1, page - 1);
+    let endPage = startPage + maxPagesToShow - 1;
+
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = endPage - maxPagesToShow + 1;
+    }
+
+    return Array.from(
+      { length: endPage - startPage + 1 },
+      (_, i) => startPage + i
+    );
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
+      setLoading(true);
+
       const apiKey = localStorage.getItem("apiKey");
       const apiSecretKey = localStorage.getItem("apiSecretKey");
 
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/category/getCategory",
+          `https://multi-vendor-marketplace.vercel.app/category/getCategory?page=${page}&limit=${limit}`,
           {
             method: "GET",
             headers: {
@@ -82,18 +154,42 @@ const ManageCategory = () => {
         const data = await response.json();
 
         if (response.ok) {
-          setCategories(data);
+          setCategories(data.categories || []); // ✔ FIXED
+          setTotalPages(data.totalPages || 1); // ✔ FIXED
+          setTotalCategories(data.totalCategories || 0); // ✔ FIXED
         } else {
           setError(data.message || "Failed to fetch categories.");
         }
       } catch (err) {
         console.error("Error fetching categories:", err);
         setError("An error occurred while fetching categories");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCategories();
-  }, []);
+  }, [page, limit]);
+
+  const getHierarchy = (cat) => {
+    if (!cat.parentCatNo) return cat.title;
+
+    const parent = allCategories.find((c) => c.catNo === cat.parentCatNo);
+    if (!parent) return cat.title;
+
+    if (!parent.parentCatNo) {
+      return `${parent.title} > ${cat.title}`;
+    }
+
+    const grandParent = allCategories.find(
+      (c) => c.catNo === parent.parentCatNo
+    );
+    if (!grandParent) {
+      return `${parent.title} > ${cat.title}`;
+    }
+
+    return `${grandParent.title} > ${parent.title} > ${cat.title}`;
+  };
 
   const handleButtonClick = () => {
     navigate("/create-categories");
@@ -137,19 +233,16 @@ const ManageCategory = () => {
     const apiSecretKey = localStorage.getItem("apiSecretKey");
 
     try {
-      await axios.delete(
-        "https://multi-vendor-marketplace.vercel.app/category/deleteCategory",
-        {
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-          data: {
-            categoryIds: selectedCategoryIds,
-          },
-        }
-      );
+      await axios.delete("https://multi-vendor-marketplace.vercel.app/category/deleteCategory", {
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+        data: {
+          categoryIds: selectedCategoryIds,
+        },
+      });
 
       alert("Selected categories deleted successfully!");
 
@@ -288,186 +381,164 @@ const ManageCategory = () => {
       </div>
 
       {error && <div className="text-red-500">{error}</div>}
+      {loading ? (
+        <Loader />
+      ) : (
+        <>
+          <div className="flex flex-wrap gap-4 p-4 bg-gray-100 rounded-md mb-4">
+            {/* SEARCH BOX */}
+            <input
+              type="text"
+              placeholder="Search by title or ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="border p-2 rounded w-64"
+            />
 
-      <table className="w-full border-collapse bg-white border rounded-2xl">
-        <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-          <tr>
-            <th className="p-3">
-              <input
-                type="checkbox"
-                checked={
-                  categories.length > 0 &&
-                  selectedCategoryIds.length === categories.length
-                }
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedCategoryIds(categories.map((cat) => cat._id));
-                  } else {
-                    setSelectedCategoryIds([]);
-                  }
-                }}
-              />
-            </th>
-            <th className="p-3">Id</th>
-            <th className="p-3">Level</th>
-            <th className="p-3">Title</th>
-            {(role === "Master Admin" || role === "Dev Admin") && (
-              <th className="p-3">Products</th>
-            )}
-            {(role === "Master Admin" || role === "Dev Admin") && (
-              <th className="p-3">Published</th>
-            )}
-            <th className="p-3">Hierarchy</th>
-          </tr>
-        </thead>
+           
+          </div>
+          <table className="w-full border-collapse bg-white border rounded-2xl">
+            <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+              <tr>
+                <th className="p-3">
+                  <input
+                    type="checkbox"
+                    checked={
+                      categories.length > 0 &&
+                      selectedCategoryIds.length === categories.length
+                    }
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedCategoryIds(
+                          categories.map((cat) => cat._id)
+                        );
+                      } else {
+                        setSelectedCategoryIds([]);
+                      }
+                    }}
+                  />
+                </th>
+                <th className="p-3">Hierarchy</th>
 
-        <tbody>
-          {categories
-            .filter((cat) => !cat.parentCatNo) // ✔ SHOW ALL ROOT CATEGORIES
-            .map((root, rootIndex) => {
-              const level2s = categories.filter(
-                (c) => c.parentCatNo === root.catNo
-              );
+                <th className="p-3">Id</th>
+                <th className="p-3">Level</th>
+                <th className="p-3">Title</th>
+                {(role === "Master Admin" || role === "Dev Admin") && (
+                  <th className="p-3">Products</th>
+                )}
+                {(role === "Master Admin" || role === "Dev Admin") && (
+                  <th className="p-3">Published</th>
+                )}
+              </tr>
+            </thead>
 
-              const rootRow = (
-                <tr
-                  key={`root-${rootIndex}`}
-                  className={`border-b ${
-                    rootIndex % 2 === 0 ? "bg-white" : "bg-gray-100"
-                  }`}
-                >
-                  <td className="p-1 text-sm">
+            <tbody>
+              {filteredCategories.map((cat, index) => (
+                <tr key={cat._id} className="border-b">
+                  <td className="p-1">
                     <input
                       type="checkbox"
-                      checked={selectedCategoryIds.includes(root._id)}
+                      checked={selectedCategoryIds.includes(cat._id)}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedCategoryIds((prev) => [...prev, root._id]);
+                          setSelectedCategoryIds((prev) => [...prev, cat._id]);
                         } else {
                           setSelectedCategoryIds((prev) =>
-                            prev.filter((id) => id !== root._id)
+                            prev.filter((id) => id !== cat._id)
                           );
                         }
                       }}
                     />
                   </td>
-
-                  <td className="p-1 text-sm">{root.catNo}</td>
-                  <td className="p-1 text-sm">{root.level}</td>
-                  <td className="p-1 text-sm">{root.title}</td>
-                  {(role === "Master Admin" || role === "Dev Admin") && (
-                    <td className="p-1 text-sm">{root.productCount}</td>
-                  )}
-                  {(role === "Master Admin" || role === "Dev Admin") && (
-                    <td className="p-1 text-sm">
-                      {root.createdAt
-                        ? new Date(root.createdAt).toLocaleDateString()
-                        : "-"}
-                    </td>
-                  )}
-                  <td className="p-1 text-sm">{root.title}</td>
+                  <td className="p-1 text-sm">{getHierarchy(cat)}</td>{" "}
+                  <td className="p-1">{cat.catNo}</td>
+                  <td className="p-1">{cat.level}</td>
+                  <td className="p-1">{cat.title}</td> {/* Title */}
+                  <td className="p-1">{cat.productCount}</td>
+                  <td className="p-1">
+                    {cat.createdAt
+                      ? new Date(cat.createdAt).toLocaleDateString()
+                      : "-"}
+                  </td>
+                  {/* Hierarchy */}
                 </tr>
-              );
+              ))}
+            </tbody>
+          </table>{" "}
+          {totalPages > 1 && (
+            <div className="flex flex-col md:flex-row justify-between items-center px-4 py-3 bg-gray-50 border border-gray-200 mt-4">
+              {/* Left Side (Optional) */}
+              <div className="text-sm text-gray-700 mb-2 md:mb-0">
+                Total Categories:{" "}
+                <span className="font-medium">{totalCategories}</span>
+              </div>
 
-              const level2Rows = level2s.flatMap((lvl2, lvl2Index) => {
-                const level3s = categories.filter(
-                  (c) => c.parentCatNo === lvl2.catNo
-                );
+              {/* Center Pagination */}
+              <div className="flex items-center space-x-2 mb-2 md:mb-0">
+                {/* PREVIOUS BUTTON */}
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage(page - 1)}
+                  className={`px-3 py-1 border rounded ${
+                    page === 1
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "hover:bg-gray-200"
+                  }`}
+                >
+                  &lt;
+                </button>
 
-                const lvl2Row = (
-                  <tr
-                    key={`lvl2-${rootIndex}-${lvl2Index}`}
-                    className="border-b bg-gray-50"
+                {/* PAGE NUMBER WINDOW */}
+                {getPageNumbers().map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`px-3 py-1 border rounded ${
+                      page === p
+                        ? "bg-blue-500 text-white"
+                        : "hover:bg-gray-200 text-gray-700"
+                    }`}
                   >
-                    <td className="p-1 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategoryIds.includes(lvl2._id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedCategoryIds((prev) => [
-                              ...prev,
-                              lvl2._id,
-                            ]);
-                          } else {
-                            setSelectedCategoryIds((prev) =>
-                              prev.filter((id) => id !== lvl2._id)
-                            );
-                          }
-                        }}
-                      />
-                    </td>
+                    {p}
+                  </button>
+                ))}
 
-                    <td className="p-1 text-sm">{lvl2.catNo}</td>
-                    <td className="p-1 text-sm">{lvl2.level}</td>
-                    <td className="p-1 text-sm">{lvl2.title}</td>
+                {/* NEXT BUTTON */}
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => setPage(page + 1)}
+                  className={`px-3 py-1 border rounded ${
+                    page === totalPages
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "hover:bg-gray-200"
+                  }`}
+                >
+                  &gt;
+                </button>
+              </div>
 
-                    {(role === "Master Admin" || role === "Dev Admin") && (
-                      <td className="p-1 text-sm">{lvl2.productCount}</td>
-                    )}
-                    {(role === "Master Admin" || role === "Dev Admin") && (
-                      <td className="p-1 text-sm">
-                        {lvl2.createdAt
-                          ? new Date(lvl2.createdAt).toLocaleDateString()
-                          : "-"}
-                      </td>
-                    )}
-                    <td className="p-1 text-sm">
-                      {`${root.title} > ${lvl2.title}`}
-                    </td>
-                  </tr>
-                );
-
-                const level3Rows = level3s.map((lvl3, lvl3Index) => (
-                  <tr
-                    key={`lvl3-${rootIndex}-${lvl2Index}-${lvl3Index}`}
-                    className="border-b bg-gray-100"
-                  >
-                    <td className="p-1 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategoryIds.includes(lvl3._id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedCategoryIds((prev) => [
-                              ...prev,
-                              lvl3._id,
-                            ]);
-                          } else {
-                            setSelectedCategoryIds((prev) =>
-                              prev.filter((id) => id !== lvl3._id)
-                            );
-                          }
-                        }}
-                      />
-                    </td>
-
-                    <td className="p-1 text-sm">{lvl3.catNo}</td>
-                    <td className="p-1 text-sm">{lvl3.level}</td>
-                    <td className="p-1 text-sm">{lvl3.title}</td>
-                    {(role === "Master Admin" || role === "Dev Admin") && (
-                      <td className="p-1 text-sm">{lvl3.productCount}</td>
-                    )}
-                    {(role === "Master Admin" || role === "Dev Admin") && (
-                      <td className="p-1 text-sm">
-                        {lvl3.createdAt
-                          ? new Date(lvl3.createdAt).toLocaleDateString()
-                          : "-"}
-                      </td>
-                    )}
-                    <td className="p-1 text-sm">
-                      {`${root.title} > ${lvl2.title} > ${lvl3.title}`}
-                    </td>
-                  </tr>
-                ));
-
-                return [lvl2Row, ...level3Rows];
-              });
-
-              return [rootRow, ...level2Rows];
-            })}
-        </tbody>
-      </table>
+              {/* Right Side Limit Selector */}
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Items per page:
+                </label>
+                <select
+                  className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={limit}
+                  onChange={(e) => {
+                    setLimit(Number(e.target.value));
+                    setPage(1);
+                  }}
+                >
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value={200}>200</option>
+                </select>
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">

@@ -46,7 +46,7 @@ const CategorySelector = () => {
         if (!userId) return;
 
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`
+          `http://localhost:5000/size-chart/all/${userId}`
         );
         const data = await res.json();
 
@@ -79,7 +79,7 @@ const CategorySelector = () => {
         console.log("👤 Fetching active shipping profiles for user:", userId);
 
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`,
+          `http://localhost:5000/shippingProfile/${userId}`,
           {
             method: "GET",
             headers: {
@@ -111,7 +111,7 @@ const CategorySelector = () => {
     const fetchDbOptions = async () => {
       try {
         const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
+          "http://localhost:5000/variantOption/getOptions"
         );
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -235,7 +235,7 @@ const CategorySelector = () => {
 
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/category/getCategoryForProduct",
+          "http://localhost:5000/category/getCategoryForProduct",
           {
             method: "GET",
             headers: {
@@ -297,24 +297,32 @@ const CategorySelector = () => {
       setDropdownWidth(inputRef.current.offsetWidth);
     }
   }, [searchTerm]);
+const normalizeLevel = (level) => level.replace(" ", "").toLowerCase();
 
-  const buildCategoryPath = (category) => {
-    let path = category.title;
-    if (category.level === "level2") {
-      const parent = categories.find((c) => c.catNo === category.parentCatNo);
-      if (parent) path = `${parent.title} > ${category.title}`;
-    }
-    if (category.level === "level3") {
-      const parent = categories.find((c) => c.catNo === category.parentCatNo);
-      const grandparent = parent
-        ? categories.find((c) => c.catNo === parent.parentCatNo)
-        : null;
-      if (parent && grandparent) {
-        path = `${grandparent.title} > ${parent.title} > ${category.title}`;
-      }
-    }
-    return path;
-  };
+  const buildCategoryPath = (cat) => {
+  if (!cat) return "";
+
+  const level = normalizeLevel(cat.level);
+
+  if (level === "level1") {
+    return cat.title;
+  }
+
+  if (level === "level2") {
+    const parent = categories.find((c) => c.catNo === cat.parentCatNo);
+    return `${parent?.title} > ${cat.title}`;
+  }
+
+  if (level === "level3") {
+    const level2 = categories.find((c) => c.catNo === cat.parentCatNo);
+    const level1 = categories.find((c) => c.catNo === level2?.parentCatNo);
+
+    return `${level1?.title} > ${level2?.title} > ${cat.title}`;
+  }
+
+  return cat.title;
+};
+
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
@@ -371,61 +379,45 @@ const CategorySelector = () => {
     }
   };
 
-  const handleCategorySelect = (selectedCategory) => {
-    let categoryData = [];
-    let payloadData = [];
-    let exportTitle = "";
+ const handleCategorySelect = (cat) => {
+  const level = normalizeLevel(cat.level);
 
-    const pushCategory = (cat) => {
-      if (cat && !selectedCategories.includes(cat.catNo)) {
-        categoryData.push(cat.catNo);
-        payloadData.push({
-          catNo: cat.catNo,
-          title: buildCategoryPath(cat),
-        });
-      }
-    };
+  let hierarchy = [];
 
-    if (selectedCategory.level === "level1") {
-      pushCategory(selectedCategory);
-      exportTitle = selectedCategory.title;
-    }
+  if (level === "level1") {
+    hierarchy = [cat];
+  } 
 
-    if (selectedCategory.level === "level2") {
-      const parent = categories.find(
-        (c) => c.catNo === selectedCategory.parentCatNo
-      );
-      pushCategory(parent);
-      pushCategory(selectedCategory);
+  else if (level === "level2") {
+    const parent = categories.find(c => c.catNo === cat.parentCatNo);
+    hierarchy = [parent, cat];
+  }
 
-      exportTitle = `${selectedCategory.title} > ${selectedCategory.title}`;
-    }
+  else if (level === "level3") {
+    const parent2 = categories.find(c => c.catNo === cat.parentCatNo);
+    const parent1 = categories.find(c => c.catNo === parent2?.parentCatNo);
+    hierarchy = [parent1, parent2, cat];
+  }
 
-    if (selectedCategory.level === "level3") {
-      const parent = categories.find(
-        (c) => c.catNo === selectedCategory.parentCatNo
-      );
-      const grandparent = parent
-        ? categories.find((c) => c.catNo === parent.parentCatNo)
-        : null;
+  // ✔ set visible categories
+  setSelectedVisibleCategories(hierarchy.map((c) => c.catNo));
 
-      pushCategory(grandparent);
-      pushCategory(parent);
-      pushCategory(selectedCategory);
+  // ✔ set payload data
+  setFinalCategoryPayload(
+    hierarchy.map((c) => ({
+      catNo: c.catNo,
+      title: buildCategoryPath(c),
+    }))
+  );
 
-      if (grandparent && parent) {
-        exportTitle = `${grandparent.title} > ${parent.title} > ${selectedCategory.title}`;
-      }
-    }
+  // ✔ exportTitle (complete path)
+  setSelectedExportTitle(buildCategoryPath(cat));
 
-    setSelectedCategories((prev) => [...prev, ...categoryData]);
-    setSelectedVisibleCategories((prev) => [...prev, selectedCategory.catNo]);
-    setFinalCategoryPayload((prev) => [...prev, ...payloadData]);
-    setSearchTerm("");
-    setFilteredCategories([]);
+  // Close dropdown
+  setSearchTerm("");
+  setFilteredCategories([]);
+};
 
-    setSelectedExportTitle(exportTitle);
-  };
 
   const removeCategory = (catNoToRemove) => {
     setSelectedVisibleCategories((prev) =>
@@ -797,7 +789,7 @@ const CategorySelector = () => {
 
   //   if (isPopupVisible && userId) {
   //     fetch(
-  //       `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+  //       `http://localhost:5000/product/getImageGallery/${productId}`,
   //       {
   //         method: "GET",
   //         headers: {
@@ -827,7 +819,7 @@ const CategorySelector = () => {
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
       fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        `http://localhost:5000/product/getImageGallery/${productId}`,
         {
           method: "GET",
           headers: {
@@ -1227,7 +1219,7 @@ const CategorySelector = () => {
 
         if (data.secure_url) {
           await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            "http://localhost:5000/product/addImageGallery",
             {
               method: "POST",
               headers: {
@@ -1315,7 +1307,7 @@ const CategorySelector = () => {
 
           if (data.secure_url) {
             await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              "http://localhost:5000/product/addImageGallery",
               {
                 method: "POST",
                 headers: {
@@ -1419,12 +1411,18 @@ const CategorySelector = () => {
         })
       );
 
-    const categoryIds = finalCategoryPayload.map((c) => c.catNo.toString());
-    const combinedKeywords = [
-      selectedExportTitle,
-      ...categoryIds,
-      ...keywordsList,
-    ].join(", ");
+    // const categoryIds = finalCategoryPayload.map((c) => c.catNo.toString());
+    // const combinedKeywords = [
+    //   selectedExportTitle,
+    //   ...categoryIds,
+    //   ...keywordsList,
+    // ].join(", ");
+    // Build category tags from full hierarchy
+const categoryTags = finalCategoryPayload.map(c => c.catNo)
+
+// Final keywords for Shopify TAGS + Search filter
+const combinedKeywords = [...categoryTags, ...keywordsList].join(", ");
+
     // const selectedShippingData =
     //   shippingPlans.find((p) => p.profileId === selectedShippingPlan) || null;
 
@@ -1468,7 +1466,7 @@ const CategorySelector = () => {
       variantCompareAtPrices: prepareVariantCompareAtPrices(),
       variantQuantites: prepareVariantQuantities(),
       variantSku: prepareVariantSku(),
-      categories: selectedExportTitle,
+categories: finalCategoryPayload.map(c => c.title), // full hierarchy for DB
       shippingProfileData: selectedShippingData,
     };
     if (enableMetafields) {
@@ -1488,8 +1486,8 @@ const CategorySelector = () => {
     try {
       // 🧩 Decide if creating or updating
       const url = isEditing
-        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
-        : `https://multi-vendor-marketplace.vercel.app/product/createProduct`;
+        ? `http://localhost:5000/product/updateProducts/${mongooseProductId}`
+        : `http://localhost:5000/product/createProduct`;
 
       const method = isEditing ? "PATCH" : "POST";
 
@@ -1545,7 +1543,7 @@ const CategorySelector = () => {
           if (!variant.variantId) continue;
 
           await fetch(
-            `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variant.variantId}`,
+            `http://localhost:5000/product/updateVariant/${productId}/${variant.variantId}`,
             {
               method: "PUT",
               headers: {
@@ -1587,7 +1585,7 @@ const CategorySelector = () => {
       );
 
       const imageSaveResponse = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
+        `http://localhost:5000/product/updateImages/${productId}`,
         {
           method: "PUT",
           headers: {
@@ -1689,7 +1687,7 @@ const CategorySelector = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/duplicateProduct/${product.shopifyId}`,
+        `http://localhost:5000/product/duplicateProduct/${product.shopifyId}`,
         {
           method: "POST",
           headers: {

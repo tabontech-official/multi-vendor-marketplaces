@@ -13,6 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { CiImport } from "react-icons/ci";
 import { RxCross1 } from "react-icons/rx";
 import { useNotification } from "../context api/NotificationContext";
+import * as XLSX from "xlsx"; // Make sure you imported this at the top
 
 const Dashboard = () => {
   let admin;
@@ -300,8 +301,8 @@ const Dashboard = () => {
       const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
 
       const url = isAdmin
-        ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts?page=${page}&limit=${limit}`
-        : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
+        ? `http://localhost:5000/product/getAllProducts?page=${page}&limit=${limit}`
+        : `http://localhost:5000/product/getProduct/${id}?page=${page}&limit=${limit}`;
 
       const response = await fetch(url, {
         method: "GET",
@@ -378,7 +379,7 @@ const Dashboard = () => {
 
   //         try {
   //           const response = await fetch(
-  //             `https://multi-vendor-marketplace.vercel.app/product/upload-product-csv`,
+  //             `http://localhost:5000/product/upload-product-csv`,
   //             {
   //               method: "POST",
   //               body: formData,
@@ -443,41 +444,118 @@ const Dashboard = () => {
   //     },
   //   });
   // };
-  const handleUploadAndPreview = async () => {
-    if (!selectedFile) return;
+ 
+const handleUploadAndPreview = async () => {
+  if (!selectedFile) return;
 
-    setIsUploading(true);
-    closePopup();
+  setIsUploading(true);
+  closePopup();
 
-    const userId = localStorage.getItem("userid");
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+  const userId = localStorage.getItem("userid");
+  const apiKey = localStorage.getItem("apiKey");
+  const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-    const formData = new FormData();
-    formData.append("file", selectedFile);
+  showToast("success", `Uploading "${selectedFile.name}" in background...`);
+  addNotification(
+    `Excel upload started for "${selectedFile.name}"`,
+    "Manage product"
+  );
 
-    try {
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
-        {
-          method: "POST",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-          },
-          body: formData,
-        }
+  try {
+    // ----------- READ EXCEL FILE -----------
+    const fileBuffer = await selectedFile.arrayBuffer();
+    const workbook = XLSX.read(fileBuffer, { type: "array" });
+
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    const allRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    const chunkSize = 25;
+
+    const totalChunks = Math.ceil(allRows.length / chunkSize);
+
+    // ----------- PROCESS CHUNKS -----------
+    for (let i = 0; i < allRows.length; i += chunkSize) {
+      const chunk = allRows.slice(i, i + chunkSize);
+
+      // Convert JSON → CSV because your backend expects CSV
+      const csvData = Papa.unparse(chunk);
+      const chunkBlob = new Blob([csvData], { type: "text/csv" });
+
+      const formData = new FormData();
+      formData.append(
+        "file",
+        chunkBlob,
+        `excel_chunk_${Math.floor(i / chunkSize) + 1}.csv`
       );
 
-      const result = await response.json();
+      try {
+        const response = await fetch(
+          "http://localhost:5000/product/upload-product-csv",
+          {
+            method: "POST",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+            },
+            body: formData,
+          }
+        );
 
-      showToast("success", "Upload completed!");
-    } catch (err) {
-      showToast("error", err.message);
+        const result = await response.json();
+
+        if (response.ok) {
+          showToast(
+            "success",
+            `Chunk ${Math.floor(i / chunkSize) + 1} uploaded successfully`
+          );
+          addNotification(
+            `Chunk ${Math.floor(i / chunkSize) + 1} uploaded`,
+            "Manage product"
+          );
+        } else {
+          showToast(
+            "error",
+            `Chunk ${Math.floor(i / chunkSize) + 1} failed: ${
+              result.message || "Unknown error"
+            }`
+          );
+          addNotification(
+            `Chunk ${Math.floor(i / chunkSize) + 1} failed`,
+            "Manage product"
+          );
+        }
+      } catch (err) {
+        showToast(
+          "error",
+          `Error uploading chunk ${Math.floor(i / chunkSize) + 1}: ${
+            err.message
+          }`
+        );
+        addNotification(
+          `Upload error in chunk ${Math.floor(i / chunkSize) + 1}`,
+          "Manage product"
+        );
+      }
+
+      // Delay between chunks
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
-    setIsUploading(false);
-  };
+    // ----------- UPLOAD DONE -----------
+    showToast(
+      "success",
+      `Excel "${selectedFile.name}" uploaded successfully (${totalChunks} chunks)`
+    );
+    addNotification(`Upload complete: "${selectedFile.name}"`, "Manage product");
+  } catch (error) {
+    showToast("error", "Excel file parsing failed: " + error.message);
+  }
+
+  setIsUploading(false);
+  setSelectedFile(null);
+};
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -518,7 +596,7 @@ const Dashboard = () => {
   //     await Promise.all(
   //       selectedProducts.map(async (id) => {
   //         const response = await fetch(
-  //           `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
+  //           `http://localhost:5000/product/deleteProduct/${id}`,
   //           {
   //             method: "DELETE",
   //             headers: {
@@ -558,7 +636,7 @@ const Dashboard = () => {
           const product = filteredProducts.find((p) => p._id === id);
 
           const response = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
+            `http://localhost:5000/product/deleteProduct/${id}`,
             {
               method: "DELETE",
               headers: {
@@ -606,7 +684,7 @@ const Dashboard = () => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "draft") {
             const response = await fetch(
-              ` https://multi-vendor-marketplace.vercel.app/product/publishedProduct/${id}`,
+              ` http://localhost:5000/product/publishedProduct/${id}`,
               {
                 method: "PUT",
                 body: JSON.stringify({ userId }),
@@ -645,7 +723,7 @@ const Dashboard = () => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "active") {
             const response = await fetch(
-              ` https://multi-vendor-marketplace.vercel.app/product/unpublished/${id}`,
+              ` http://localhost:5000/product/unpublished/${id}`,
               {
                 method: "PUT",
                 headers: {
@@ -717,8 +795,8 @@ const Dashboard = () => {
   //       const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
 
   //       const url = isAdmin
-  //         ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
-  //         : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
+  //         ? `http://localhost:5000/product/getAllProducts/?page=${page}&limit=${limit}`
+  //         : `http://localhost:5000/product/getProduct/${id}?page=${page}&limit=${limit}`;
 
   //       const response = await fetch(url, {
   //         method: "GET",
@@ -792,7 +870,7 @@ const Dashboard = () => {
         queryParams.append("productIds", selectedProducts.join(","));
       }
 
-      const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvEportFile/?${queryParams.toString()}`;
+      const exportUrl = `http://localhost:5000/product/csvEportFile/?${queryParams.toString()}`;
 
       const response = await fetch(exportUrl);
 

@@ -30,7 +30,7 @@
 //       const userId = localStorage.getItem("userid");
 
 //       const res = await axios.get(
-//         `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`
+//         `http://localhost:5000/size-chart/all/${userId}`
 //       );
 
 //       setCharts(res.data.data); 
@@ -51,7 +51,7 @@
 //     try {
 //       setLoadingDelete(true);
 
-//       await axios.delete(`https://multi-vendor-marketplace.vercel.app/size-chart/delete/${deleteId}`);
+//       await axios.delete(`http://localhost:5000/size-chart/delete/${deleteId}`);
 
 //       showToast("success", "Size chart deleted successfully");
 //       setShowModal(false);
@@ -295,9 +295,9 @@ const ManageSizeChart = () => {
       let url = "";
 
       if (role === "Dev Admin" || role === "Master Admin") {
-        url = "https://multi-vendor-marketplace.vercel.app/size-chart/admin/all";
+        url = "http://localhost:5000/size-chart/admin/all";
       } else {
-        url = `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`;
+        url = `http://localhost:5000/size-chart/all/${userId}`;
       }
 
       const res = await axios.get(url);
@@ -318,7 +318,7 @@ const ManageSizeChart = () => {
       setLoadingDelete(true);
 
       await axios.delete(
-        `https://multi-vendor-marketplace.vercel.app/size-chart/delete/${deleteId}`
+        `http://localhost:5000/size-chart/delete/${deleteId}`
       );
 
       showToast("success", "Size chart deleted successfully");

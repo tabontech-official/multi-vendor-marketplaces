@@ -1852,7 +1852,7 @@ const Dashboard = () => {
                 />
                 CSV for Excel, Numbers, or other spreadsheet programs
               </label>
-              <label className="flex items-center gap-2">
+              {/* <label className="flex items-center gap-2">
                 <input
                   type="radio"
                   name="exportAs"
@@ -1861,7 +1861,7 @@ const Dashboard = () => {
                   onChange={() => setExportAs("plain")}
                 />
                 Plain CSV file
-              </label>
+              </label> */}
             </div>
 
             <div className="flex justify-end gap-2 border-t border-gray-300">

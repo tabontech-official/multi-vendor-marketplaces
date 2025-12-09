@@ -93,16 +93,14 @@ const CategorySelector = () => {
         if (!res.ok) throw new Error("Failed to fetch user active profiles");
 
         const data = await res.json();
-        console.log("📦 Active Profiles:", data);
 
-        // ✅ Only use user’s actual shipping profiles
         if (Array.isArray(data)) {
           setShippingPlans(data);
         } else {
           setShippingPlans([]);
         }
       } catch (err) {
-        console.error("❌ Error fetching user active shipping profiles:", err);
+        console.error("Error fetching user active shipping profiles:", err);
       }
     };
 

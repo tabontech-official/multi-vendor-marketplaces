@@ -577,6 +577,7 @@ const Dashboard = () => {
               "Manage product"
             );
           }
+          window.location.reload()
         })
       );
 

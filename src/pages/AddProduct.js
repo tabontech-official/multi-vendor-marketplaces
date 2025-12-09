@@ -237,7 +237,7 @@ const CategorySelector = () => {
 
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/category/getCategory",
+          "https://multi-vendor-marketplace.vercel.app/category/getCategoryForProduct",
           {
             method: "GET",
             headers: {

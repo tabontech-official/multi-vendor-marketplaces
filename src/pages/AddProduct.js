@@ -297,32 +297,31 @@ const CategorySelector = () => {
       setDropdownWidth(inputRef.current.offsetWidth);
     }
   }, [searchTerm]);
-const normalizeLevel = (level) => level.replace(" ", "").toLowerCase();
+  const normalizeLevel = (level) => level.replace(" ", "").toLowerCase();
 
   const buildCategoryPath = (cat) => {
-  if (!cat) return "";
+    if (!cat) return "";
 
-  const level = normalizeLevel(cat.level);
+    const level = normalizeLevel(cat.level);
 
-  if (level === "level1") {
+    if (level === "level1") {
+      return cat.title;
+    }
+
+    if (level === "level2") {
+      const parent = categories.find((c) => c.catNo === cat.parentCatNo);
+      return `${parent?.title} > ${cat.title}`;
+    }
+
+    if (level === "level3") {
+      const level2 = categories.find((c) => c.catNo === cat.parentCatNo);
+      const level1 = categories.find((c) => c.catNo === level2?.parentCatNo);
+
+      return `${level1?.title} > ${level2?.title} > ${cat.title}`;
+    }
+
     return cat.title;
-  }
-
-  if (level === "level2") {
-    const parent = categories.find((c) => c.catNo === cat.parentCatNo);
-    return `${parent?.title} > ${cat.title}`;
-  }
-
-  if (level === "level3") {
-    const level2 = categories.find((c) => c.catNo === cat.parentCatNo);
-    const level1 = categories.find((c) => c.catNo === level2?.parentCatNo);
-
-    return `${level1?.title} > ${level2?.title} > ${cat.title}`;
-  }
-
-  return cat.title;
-};
-
+  };
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
@@ -379,45 +378,40 @@ const normalizeLevel = (level) => level.replace(" ", "").toLowerCase();
     }
   };
 
- const handleCategorySelect = (cat) => {
-  const level = normalizeLevel(cat.level);
+  const handleCategorySelect = (cat) => {
+    const level = normalizeLevel(cat.level);
 
-  let hierarchy = [];
+    let hierarchy = [];
 
-  if (level === "level1") {
-    hierarchy = [cat];
-  } 
+    if (level === "level1") {
+      hierarchy = [cat];
+    } else if (level === "level2") {
+      const parent = categories.find((c) => c.catNo === cat.parentCatNo);
+      hierarchy = [parent, cat];
+    } else if (level === "level3") {
+      const parent2 = categories.find((c) => c.catNo === cat.parentCatNo);
+      const parent1 = categories.find((c) => c.catNo === parent2?.parentCatNo);
+      hierarchy = [parent1, parent2, cat];
+    }
 
-  else if (level === "level2") {
-    const parent = categories.find(c => c.catNo === cat.parentCatNo);
-    hierarchy = [parent, cat];
-  }
+    // ✔ set visible categories
+    setSelectedVisibleCategories(hierarchy.map((c) => c.catNo));
 
-  else if (level === "level3") {
-    const parent2 = categories.find(c => c.catNo === cat.parentCatNo);
-    const parent1 = categories.find(c => c.catNo === parent2?.parentCatNo);
-    hierarchy = [parent1, parent2, cat];
-  }
+    // ✔ set payload data
+    setFinalCategoryPayload(
+      hierarchy.map((c) => ({
+        catNo: c.catNo,
+        title: buildCategoryPath(c),
+      }))
+    );
 
-  // ✔ set visible categories
-  setSelectedVisibleCategories(hierarchy.map((c) => c.catNo));
+    // ✔ exportTitle (complete path)
+    setSelectedExportTitle(buildCategoryPath(cat));
 
-  // ✔ set payload data
-  setFinalCategoryPayload(
-    hierarchy.map((c) => ({
-      catNo: c.catNo,
-      title: buildCategoryPath(c),
-    }))
-  );
-
-  // ✔ exportTitle (complete path)
-  setSelectedExportTitle(buildCategoryPath(cat));
-
-  // Close dropdown
-  setSearchTerm("");
-  setFilteredCategories([]);
-};
-
+    // Close dropdown
+    setSearchTerm("");
+    setFilteredCategories([]);
+  };
 
   const removeCategory = (catNoToRemove) => {
     setSelectedVisibleCategories((prev) =>
@@ -781,33 +775,6 @@ const normalizeLevel = (level) => level.replace(" ", "").toLowerCase();
     setKeywordsList(tagsArray);
   }, [product, categories]);
 
-  // useEffect(() => {
-  //   const userId = localStorage.getItem("userid");
-  //   const apiKey = localStorage.getItem("apiKey");
-  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
-  //   const productId = product?.id || "null";
-
-  //   if (isPopupVisible && userId) {
-  //     fetch(
-  //       `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-  //       {
-  //         method: "GET",
-  //         headers: {
-  //           "x-api-key": apiKey,
-  //           "x-api-secret": apiSecretKey,
-
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     )
-  //       .then((res) => res.json())
-  //       .then((data) => {
-  //         const allImages = data.flatMap((item) => item.images);
-  //         setGalleryImages(allImages);
-  //       })
-  //       .catch((err) => console.error("Failed to fetch images:", err));
-  //   }
-  // }, [isPopupVisible, product]);
   const [showGallery, setShowGallery] = useState(false);
 
   useEffect(() => {
@@ -818,17 +785,14 @@ const normalizeLevel = (level) => level.replace(" ", "").toLowerCase();
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -1126,12 +1090,37 @@ const normalizeLevel = (level) => level.replace(" ", "").toLowerCase();
       setVendor(product.vendor);
       setProductType(product.product_type);
 
+      // setOptions(
+      //   product.options?.map((option) => ({
+      //     id: option.id || "No ID",
+      //     name: option.name || "Unnamed Option",
+      //     values: option.values || [],
+      //   })) || []
+      // );
       setOptions(
-        product.options?.map((option) => ({
-          id: option.id || "No ID",
-          name: option.name || "Unnamed Option",
-          values: option.values || [],
-        })) || []
+        product.options?.map((option) => {
+          const normalizedName = option.name?.toLowerCase().trim();
+
+          // Find DB option match
+          const dbMatch = dbOptions.find((db) =>
+            db.optionName.some((n) => n.toLowerCase().trim() === normalizedName)
+          );
+
+          return {
+            id: option.id,
+            name: option.name,
+            values: option.values || [],
+
+            // ⭐ Correct detection
+            isFromDB: !!dbMatch,
+
+            // ⭐ Correct db values
+            dbValues: dbMatch?.optionValues || [],
+
+            // ⭐ Detect custom option (Other)
+            isCustom: option.name === "Other",
+          };
+        }) || []
       );
 
       setVariants(formattedVariants);
@@ -1218,22 +1207,19 @@ const normalizeLevel = (level) => level.replace(" ", "").toLowerCase();
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1306,19 +1292,16 @@ const normalizeLevel = (level) => level.replace(" ", "").toLowerCase();
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "x-api-key": apiKey,
-                  "x-api-secret": apiSecretKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId, images: [data.secure_url] }),
-              }
-            );
+            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            });
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1418,10 +1401,10 @@ const normalizeLevel = (level) => level.replace(" ", "").toLowerCase();
     //   ...keywordsList,
     // ].join(", ");
     // Build category tags from full hierarchy
-const categoryTags = finalCategoryPayload.map(c => c.catNo)
+    const categoryTags = finalCategoryPayload.map((c) => c.catNo);
 
-// Final keywords for Shopify TAGS + Search filter
-const combinedKeywords = [...categoryTags, ...keywordsList].join(", ");
+    // Final keywords for Shopify TAGS + Search filter
+    const combinedKeywords = [...categoryTags, ...keywordsList].join(", ");
 
     // const selectedShippingData =
     //   shippingPlans.find((p) => p.profileId === selectedShippingPlan) || null;
@@ -1466,7 +1449,7 @@ const combinedKeywords = [...categoryTags, ...keywordsList].join(", ");
       variantCompareAtPrices: prepareVariantCompareAtPrices(),
       variantQuantites: prepareVariantQuantities(),
       variantSku: prepareVariantSku(),
-categories: finalCategoryPayload.map(c => c.title), // full hierarchy for DB
+      categories: finalCategoryPayload.map((c) => c.title), // full hierarchy for DB
       shippingProfileData: selectedShippingData,
     };
     if (enableMetafields) {
@@ -2433,40 +2416,36 @@ categories: finalCategoryPayload.map(c => c.title), // full hierarchy for DB
                       {editingOptionIndex === optionIndex && (
                         <div className="mt-2 space-y-2">
                           {newOption.values.map((value, i) => {
-                            // 🔍 Match option name with API
-                            const matchedDbOption = dbOptions.find((opt) =>
-                              Array.isArray(opt.optionName)
-                                ? opt.optionName.some(
-                                    (name) =>
-                                      name.toLowerCase().trim() ===
-                                      newOption.name.toLowerCase().trim()
-                                  )
-                                : opt.optionName.toLowerCase().trim() ===
-                                  newOption.name.toLowerCase().trim()
-                            );
+                            const dbOptionValues = newOption.dbValues || [];
 
-                            const possibleValues =
-                              matchedDbOption?.optionValues || [];
+                            const valueMatchesDB =
+                              dbOptionValues.includes(value);
+
+                            const isCustomValue = !valueMatchesDB;
 
                             return (
                               <div key={i} className="flex gap-2 items-center">
-                                {possibleValues.length > 0 ? (
+                                {valueMatchesDB && !isCustomValue ? (
                                   <select
                                     value={value}
                                     onChange={(e) => {
-                                      handleEditOptionValueChange(
-                                        i,
-                                        e.target.value
-                                      );
+                                      if (e.target.value === "Other") {
+                                        handleEditOptionValueChange(i, "");
+                                      } else {
+                                        handleEditOptionValueChange(
+                                          i,
+                                          e.target.value
+                                        );
+                                      }
                                     }}
                                     className="w-full border border-gray-300 rounded-md p-1 text-sm"
                                   >
-                                    <option value="">Select value</option>
-                                    {possibleValues.map((val, idx) => (
+                                    {dbOptionValues.map((val, idx) => (
                                       <option key={idx} value={val}>
                                         {val}
                                       </option>
                                     ))}
+                                    <option value="Other">Other</option>
                                   </select>
                                 ) : (
                                   <input
@@ -2478,7 +2457,7 @@ categories: finalCategoryPayload.map(c => c.title), // full hierarchy for DB
                                         e.target.value
                                       )
                                     }
-                                    placeholder="Enter value"
+                                    placeholder="Enter custom value"
                                     className="w-full border border-gray-300 rounded-md p-1 text-sm"
                                   />
                                 )}

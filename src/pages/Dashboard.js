@@ -1759,7 +1759,7 @@ const handleUploadAndPreview = async () => {
           >
             <div className="border-b px-4 py-3 flex justify-between items-center">
               <h2 className="text-sm font-semibold text-blue-700">
-                Import products by CSV
+                Import products by Excel
               </h2>
               <button
                 onClick={closePopup}
@@ -1786,11 +1786,11 @@ const handleUploadAndPreview = async () => {
                 )}
               </div>
               <a
-                href="/sample-product.csv"
+                href="/sample-product.xlsx"
                 download
                 className="text-sm text-blue-600 underline cursor-pointer mb-4 inline-block"
               >
-                Download sample CSV
+                Download sample Excel file
               </a>
               <div className="flex justify-end gap-2">
                 <button
@@ -1873,7 +1873,7 @@ const handleUploadAndPreview = async () => {
               This CSV file can update all product information. To update just
               inventory quantities use the{" "}
               <a href="#" className="text-blue-600 underline">
-                CSV file for inventory
+                 file for inventory
               </a>
               .
             </p>

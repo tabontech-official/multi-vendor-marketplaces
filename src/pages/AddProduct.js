@@ -33,6 +33,9 @@ const CategorySelector = () => {
   const [sizeCharts, setSizeCharts] = useState([]);
   const [selectedSizeChart, setSelectedSizeChart] = useState("");
   const [shippingPlans, setShippingPlans] = useState([]);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkPrice, setBulkPrice] = useState("");
+  const [bulkCompareAtPrice, setBulkCompareAtPrice] = useState("");
   const [chartData, setChartData] = useState({
     image: "",
     loading: false,
@@ -821,14 +824,17 @@ const CategorySelector = () => {
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
-        },
-      })
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -1243,19 +1249,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
+            }
+          );
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1328,16 +1337,19 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            });
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
+              }
+            );
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -2356,7 +2368,18 @@ const CategorySelector = () => {
           </div>
 
           <div className="border rounded-2xl p-3 mt-3 bg-white border-gray-300 w-full">
-            <h2 className="text-sm font-medium text-gray-800">Variants</h2>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-medium text-gray-800">Variants</h2>
+
+              {combinations.length > 0 && (
+                <button
+                  onClick={() => setShowBulkModal(true)}
+                  className="text-sm bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700"
+                >
+                  Bulk Update
+                </button>
+              )}
+            </div>
 
             {!showVariantForm && (
               <div className="flex gap-2 items-center mt-2">
@@ -4024,6 +4047,115 @@ const CategorySelector = () => {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+        {showBulkModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-scaleIn">
+              {/* Header */}
+              <div className="flex justify-between items-center border-b pb-3 mb-5">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Bulk Update Variants
+                </h2>
+                <button
+                  onClick={() => setShowBulkModal(false)}
+                  className="text-gray-400 hover:text-gray-600 text-xl"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Info */}
+              <p className="text-sm text-gray-500 mb-5">
+                Apply the same price values to{" "}
+                <span className="font-medium">all variants</span>. Leave a field
+                empty if you don’t want to update it.
+              </p>
+
+              {/* Price */}
+              <div className="mb-4">
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Price
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    value={bulkPrice}
+                    onChange={(e) => setBulkPrice(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
+                </div>
+              </div>
+
+              {/* Compare at Price */}
+              <div className="mb-6">
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Compare at Price
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    value={bulkCompareAtPrice}
+                    onChange={(e) => setBulkCompareAtPrice(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 border-t pt-4">
+                <button
+                  onClick={() => setShowBulkModal(false)}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={() => {
+                    const updatedPrices = {};
+                    const updatedComparePrices = {};
+
+                    combinations.forEach((combination, index) => {
+                      combination.children.forEach((child) => {
+                        const key = `${index}-${child}`;
+
+                        if (bulkPrice !== "") {
+                          updatedPrices[key] = parseFloat(bulkPrice);
+                        }
+
+                        if (bulkCompareAtPrice !== "") {
+                          updatedComparePrices[key] =
+                            parseFloat(bulkCompareAtPrice);
+                        }
+                      });
+                    });
+
+                    setVariantPrices((prev) => ({ ...prev, ...updatedPrices }));
+                    setVariantComparePrices((prev) => ({
+                      ...prev,
+                      ...updatedComparePrices,
+                    }));
+
+                    setIsChanged(true);
+                    setShowBulkModal(false);
+                    setBulkPrice("");
+                    setBulkCompareAtPrice("");
+                  }}
+                  className="px-5 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-md transition active:scale-95"
+                >
+                  Apply to All
+                </button>
               </div>
             </div>
           </div>

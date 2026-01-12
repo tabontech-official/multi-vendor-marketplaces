@@ -199,6 +199,42 @@ const CategorySelector = () => {
   );
   const [selectedShippingPlan, setSelectedShippingPlan] = useState("");
 
+  useEffect(() => {
+    const fetchVendor = async () => {
+      try {
+        const userId = localStorage.getItem("userid");
+        const apiKey = localStorage.getItem("apiKey");
+        const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+        if (!userId) return;
+
+        const res = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules
+/${userId}`,
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        if (res.ok) {
+          const fullName = `${data.firstName.trim()} ${data.lastName.trim()}`;
+          setVendor(fullName); // ✅ preselected vendor
+        }
+      } catch (error) {
+        console.error("Error fetching vendor:", error);
+      }
+    };
+
+    fetchVendor();
+  }, []);
+
   const onEditorStateChange = (newEditorState) => {
     setEditorState(newEditorState);
 
@@ -3393,13 +3429,15 @@ const CategorySelector = () => {
               <label htmlFor="vendor" className="block text-gray-600 text-sm">
                 Vendor
               </label>
-              <input
-                type="text"
+
+              <select
                 value={vendor}
                 onChange={(e) => setVendor(e.target.value)}
-                placeholder="Vendor"
-                className="w-full border border-gray-300 p-2 rounded-xl"
-              />
+                className="w-full border border-gray-300 p-2 rounded-xl bg-gray-50 "
+                disabled
+              >
+                <option value={vendor}>{vendor}</option>
+              </select>
 
               {/* <label htmlFor="keywords" className="block text-gray-600 text-sm">
                 Keywords

@@ -17,6 +17,8 @@ dayjs.extend(minMax);
 const Finance = () => {
   const { addNotification } = useNotification();
   const { userData } = UseFetchUserData();
+  const [commission, setCommission] = useState(0); // %
+
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState("");
   const [payouts, setPayouts] = useState([]);
@@ -77,6 +79,7 @@ const Finance = () => {
     const payload = {
       graceTime,
       payoutFrequency,
+      commission, // ✅ added
       firstDate: payoutFrequency !== "weekly" ? Number(firstPayoutDate) : null,
       secondDate: payoutFrequency === "twice" ? Number(secondPayoutDate) : null,
       weeklyDay: payoutFrequency === "weekly" ? weeklyDay : null,
@@ -93,7 +96,7 @@ const Finance = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       const result = await res.json();
@@ -111,54 +114,52 @@ const Finance = () => {
     }
   };
 
- useEffect(() => {
-  const fetchPayoutDates = async () => {
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+  useEffect(() => {
+    const fetchPayoutDates = async () => {
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-    if (!apiKey || !apiSecretKey) {
-      console.error("Missing API credentials");
-      return;
-    }
-
-    try {
-      const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates",
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!res.ok) {
-        console.error("Failed to fetch payout config:", res.statusText);
+      if (!apiKey || !apiSecretKey) {
+        console.error("Missing API credentials");
         return;
       }
 
-      const data = await res.json();
+      try {
+        const res = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+          },
+        );
 
-      if (data.firstDate)
-        setFirstPayoutDate(new Date(data.firstDate).getDate());
-      if (data.secondDate)
-        setSecondPayoutDate(new Date(data.secondDate).getDate());
-      if (data.payoutFrequency)
-        setPayoutFrequency(data.payoutFrequency);
-      if (data.graceTime !== undefined)
-        setGraceTime(data.graceTime);
-      if (data.weeklyDay)
-        setWeeklyDay(data.weeklyDay);
-    } catch (err) {
-      console.error("Error fetching payout dates:", err);
-    }
-  };
+        if (!res.ok) {
+          console.error("Failed to fetch payout config:", res.statusText);
+          return;
+        }
 
-  fetchPayoutDates();
-}, []);
+        const data = await res.json();
 
+        if (data.firstDate)
+          setFirstPayoutDate(new Date(data.firstDate).getDate());
+        if (data.secondDate)
+          setSecondPayoutDate(new Date(data.secondDate).getDate());
+        if (data.payoutFrequency) setPayoutFrequency(data.payoutFrequency);
+        if (data.graceTime !== undefined) setGraceTime(data.graceTime);
+        if (data.weeklyDay) setWeeklyDay(data.weeklyDay);
+        if (data.commission !== undefined)
+          setCommission(Number(data.commission));
+      } catch (err) {
+        console.error("Error fetching payout dates:", err);
+      }
+    };
+
+    fetchPayoutDates();
+  }, []);
 
   const isAdmin = () => {
     const token = localStorage.getItem("usertoken");
@@ -194,7 +195,7 @@ const Finance = () => {
 
       try {
         const res = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/auth/user/${userId}`
+          `https://multi-vendor-marketplace.vercel.app/auth/user/${userId}`,
         );
         const user = res.data;
         const role = user?.role;
@@ -226,7 +227,7 @@ const Finance = () => {
         {
           merchantId: userId,
           payPal: paypalAccountInput,
-        }
+        },
       );
 
       if (res.status === 200) {
@@ -282,66 +283,65 @@ const Finance = () => {
 
   //   fetchPayouts();
   // }, [userRole]);
-useEffect(() => {
-  const fetchPayouts = async () => {
-    if (!userRole) return;
+  useEffect(() => {
+    const fetchPayouts = async () => {
+      if (!userRole) return;
 
-    setLoading(true);
+      setLoading(true);
 
-    try {
-      const userId = localStorage.getItem("userid");
-      const apiKey = localStorage.getItem("apiKey");
-      const apiSecretKey = localStorage.getItem("apiSecretKey");
+      try {
+        const userId = localStorage.getItem("userid");
+        const apiKey = localStorage.getItem("apiKey");
+        const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-      if (!apiKey || !apiSecretKey) {
-        console.error("Missing API credentials");
-        return;
-      }
-
-      let url = "";
-
-      if (userRole === "Merchant") {
-        if (!userId) {
-          console.error("User ID not found in localStorage");
+        if (!apiKey || !apiSecretKey) {
+          console.error("Missing API credentials");
           return;
         }
-        url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=${userId}&limit=${limit}&page=${page}`;
-      } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
-        url = `https://multi-vendor-marketplace.vercel.app/order/getPayout?limit=${limit}&page=${page}`;
-      } else {
-        console.warn("Unhandled role:", userRole);
-        return;
-      }
 
-      const res = await fetch(url, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-           "Content-Type": "application/json",
-        },
-      });
+        let url = "";
 
-      const data = await res.json();
+        if (userRole === "Merchant") {
+          if (!userId) {
+            console.error("User ID not found in localStorage");
+            return;
+          }
+          url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=${userId}&limit=${limit}&page=${page}`;
+        } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
+          url = `https://multi-vendor-marketplace.vercel.app/order/getPayout?limit=${limit}&page=${page}`;
+        } else {
+          console.warn("Unhandled role:", userRole);
+          return;
+        }
 
-      if (data?.payouts?.length) {
-        setPayouts(data.payouts);
-        setTotalPages(Math.ceil(data.totalCount / limit));
-      } else {
+        const res = await fetch(url, {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await res.json();
+
+        if (data?.payouts?.length) {
+          setPayouts(data.payouts);
+          setTotalPages(Math.ceil(data.totalCount / limit));
+        } else {
+          setPayouts([]);
+          setTotalPages(1);
+        }
+      } catch (error) {
+        console.error("Failed to fetch payouts:", error);
         setPayouts([]);
-        setTotalPages(1);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to fetch payouts:", error);
-      setPayouts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  fetchPayouts();
-}, [userRole, page]);
-
+    fetchPayouts();
+  }, [userRole, page]);
 
   const handleSearch = () => {
     if (!searchVal.trim()) {
@@ -361,17 +361,17 @@ useEffect(() => {
             year: "numeric",
             month: "long",
             day: "numeric",
-          }
+          },
         );
 
         const filteredOrders = payout.orders
           ?.map((order) => {
             const matchingLineItems = order.lineItems?.filter((line) => {
               const nameMatch = regex.test(
-                (line.merchantName || "").toLowerCase()
+                (line.merchantName || "").toLowerCase(),
               );
               const emailMatch = regex.test(
-                (line.merchantEmail || "").toLowerCase()
+                (line.merchantEmail || "").toLowerCase(),
               );
               const refundMatch =
                 regex.test("refund") &&
@@ -441,7 +441,7 @@ useEffect(() => {
               }`}
               onClick={() => setActiveTab("Timelines")}
             >
-              Timelines
+              Timelines & Commission
             </button>
           )}
 
@@ -498,7 +498,7 @@ useEffect(() => {
                   {userRole === "Master Admin" || userRole === "Dev Admin"
                     ? filteredPayouts
                         .filter(
-                          (payout) => payout.status.toLowerCase() === "pending"
+                          (payout) => payout.status.toLowerCase() === "pending",
                         )
                         .flatMap((payout, index) => {
                           const merchantGroups = payout.orders.reduce(
@@ -534,7 +534,7 @@ useEffect(() => {
 
                               return acc;
                             },
-                            {}
+                            {},
                           );
 
                           return Object.values(merchantGroups).map(
@@ -556,10 +556,10 @@ useEffect(() => {
                                       });
                                       query.append(
                                         "merchantId",
-                                        merchantGroup.merchantId
+                                        merchantGroup.merchantId,
                                       );
                                       navigate(
-                                        `/payout-details?${query.toString()}`
+                                        `/payout-details?${query.toString()}`,
                                       );
                                     }}
                                   >
@@ -602,7 +602,7 @@ useEffect(() => {
                                   </td>
                                 </tr>
                               );
-                            }
+                            },
                           );
                         })
                     : filteredPayouts.map((item, index) => {
@@ -615,10 +615,10 @@ useEffect(() => {
                               onClick={() =>
                                 navigate(
                                   `/payout-details?payoutDate=${encodeURIComponent(
-                                    item.payoutDate
+                                    item.payoutDate,
                                   )}&status=${
                                     item.status
-                                  }&merchantId=${merchantId}`
+                                  }&merchantId=${merchantId}`,
                                 )
                               }
                             >
@@ -631,8 +631,8 @@ useEffect(() => {
                                   item.status === "Pending"
                                     ? "bg-blue-100 text-blue-700"
                                     : item.status === "Deposited"
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-gray-100 text-gray-600"
+                                      ? "bg-green-100 text-green-700"
+                                      : "bg-gray-100 text-gray-600"
                                 }`}
                               >
                                 {item.status}
@@ -647,9 +647,10 @@ useEffect(() => {
                                     parseFloat(
                                       String(item.amount).replace(
                                         /[^0-9.]/g,
-                                        ""
-                                      )
-                                    ) * 0.9
+                                        "",
+                                      ),
+                                    ) *
+                                    (1 - commission / 100)
                                   ).toFixed(2)}`
                                 : "$0.00"}
                             </td>
@@ -1100,7 +1101,7 @@ useEffect(() => {
                   {userRole === "Master Admin" || userRole === "Dev Admin"
                     ? filteredPayouts
                         .filter(
-                          (payout) => payout.status.toLowerCase() === "pending"
+                          (payout) => payout.status.toLowerCase() === "pending",
                         )
                         .flatMap((payout, index) => {
                           console.log("Filtered payout:", payout);
@@ -1130,7 +1131,7 @@ useEffect(() => {
                               });
                               return acc;
                             },
-                            {}
+                            {},
                           );
 
                           console.log("Grouped line items:", groupedLineItems);
@@ -1154,10 +1155,10 @@ useEffect(() => {
                                       });
                                       query.append(
                                         "merchantId",
-                                        merchantGroup.merchantId
+                                        merchantGroup.merchantId,
                                       );
                                       navigate(
-                                        `/payout-details?${query.toString()}`
+                                        `/payout-details?${query.toString()}`,
                                       );
                                     }}
                                   >
@@ -1191,27 +1192,27 @@ useEffect(() => {
                                   </td>
                                 </tr>
                               );
-                            }
+                            },
                           );
                         })
                     : filteredPayouts
                         .filter(
-                          (item) => item.status.toLowerCase() === "pending"
+                          (item) => item.status.toLowerCase() === "pending",
                         )
                         .map((item, index) => {
                           const lineItems = item.orders.flatMap(
-                            (order) => order.lineItems || []
+                            (order) => order.lineItems || [],
                           );
                           const totalAmount = lineItems.reduce((sum, line) => {
                             return (
                               sum +
                               (Number(line.price) || 0) *
                                 Number(
-                                  line.quantity || line.current_quantity || 1
+                                  line.quantity || line.current_quantity || 1,
                                 )
                             );
                           }, 0);
-                          const fee = totalAmount * 0.1;
+                          const fee = totalAmount * (commission / 100);
                           const net = totalAmount - fee;
                           const merchantId = localStorage.getItem("userid");
 
@@ -1225,10 +1226,10 @@ useEffect(() => {
                                 onClick={() =>
                                   navigate(
                                     `/payout-details?payoutDate=${encodeURIComponent(
-                                      item.payoutDate
+                                      item.payoutDate,
                                     )}&status=${
                                       item.status
-                                    }&merchantId=${merchantId}`
+                                    }&merchantId=${merchantId}`,
                                   )
                                 }
                               >
@@ -1240,8 +1241,8 @@ useEffect(() => {
                                     item.status === "Pending"
                                       ? "bg-blue-100 text-blue-700"
                                       : item.status === "Deposited"
-                                      ? "bg-green-100 text-green-700"
-                                      : "bg-gray-100 text-gray-600"
+                                        ? "bg-green-100 text-green-700"
+                                        : "bg-gray-100 text-gray-600"
                                   }`}
                                 >
                                   {item.status}
@@ -1285,6 +1286,29 @@ useEffect(() => {
                 value={graceTime}
                 onChange={(e) => setGraceTime(Number(e.target.value))}
               />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Commission (%)
+              </label>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={commission}
+                  onChange={(e) => setCommission(Number(e.target.value))}
+                  className="border px-3 py-2 rounded-md text-sm w-40 no-spinner"
+                  placeholder="e.g. 10"
+                />
+                <span className="text-sm text-gray-600">%</span>
+              </div>
+
+              <p className="text-xs text-gray-500 mt-1">
+                Platform fee deducted from merchant payouts
+              </p>
             </div>
 
             <div className="mb-4">

@@ -59,7 +59,7 @@ const SubNavbar = () => {
     const fetchUserModules = async () => {
       try {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules/${userId}`
+          `https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules/${userId}`,
         );
 
         if (!response.ok) {
@@ -143,7 +143,7 @@ const SubNavbar = () => {
     },
   ];
   return (
-    <div className="flex items-center bg-white border border-gray-300 px-4 py-2 shadow-sm relative">
+    <div className="flex items-center bg-white border border-gray-300 px-4 py-2 shadow-sm relative ">
       <ul className="flex space-x-6 text-sm text-gray-700">
         {modulesList.map((module) => {
           if (!allowedModules.includes(module.name)) return null;
@@ -159,10 +159,10 @@ const SubNavbar = () => {
               <Link to={module.path}>{module.name}</Link>
 
               {module.subModules && openDropdown === module.name && (
-                <div className="absolute top-full left-0 bg-gray-600 text-white py-2 px-4 w-48 shadow-lg">
+                <div className="absolute top-full left-0 bg-gray-600 text-white py-2 px-4 w-48 shadow-lg z-50">
                   {module.subModules
                     .filter((subModule) =>
-                      allowedModules.includes(subModule.name)
+                      allowedModules.includes(subModule.name),
                     )
                     .map((subModule) => (
                       <Link

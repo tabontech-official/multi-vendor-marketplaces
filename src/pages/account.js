@@ -80,7 +80,7 @@ const AccountPage = () => {
 
       try {
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getCollcetion/${userId}`
+          `https://multi-vendor-marketplace.vercel.app/auth/getCollcetion/${userId}`,
         );
         const data = await res.json();
         if (res.ok) {
@@ -117,7 +117,7 @@ const AccountPage = () => {
 
       try {
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getBrandAssets/${userId}`
+          `https://multi-vendor-marketplace.vercel.app/auth/getBrandAssets/${userId}`,
         );
         const json = await res.json();
 
@@ -164,7 +164,7 @@ const AccountPage = () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       setMessage("Collection updated successfully!");
@@ -194,7 +194,7 @@ const AccountPage = () => {
           `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
           {
             method: "GET",
-          }
+          },
         );
 
         if (response.ok) {
@@ -289,7 +289,7 @@ const AccountPage = () => {
         {
           method: "PUT",
           body: form,
-        }
+        },
       );
 
       if (response.ok) {
@@ -338,7 +338,7 @@ const AccountPage = () => {
     setSelectedModules((prev) =>
       prev.includes(moduleName)
         ? prev.filter((m) => m !== moduleName)
-        : [...prev, moduleName]
+        : [...prev, moduleName],
     );
   };
 
@@ -352,7 +352,7 @@ const AccountPage = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ status }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -406,7 +406,7 @@ const AccountPage = () => {
             role,
             modules: selectedModules,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -1152,7 +1152,7 @@ const AccountPage = () => {
                     className="flex-1 p-2 border border-blue-300 rounded-md text-sm text-blue-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
-                {(userRole === "Dev Admin" || userRole === "Master Admin") && (
+                {/* {(userRole === "Dev Admin" || userRole === "Master Admin") && (
                   <div className="flex items-center gap-4 mt-4">
                     <label className="w-28 flex items-center text-sm font-semibold text-blue-900">
                       <FaPercentage className="mr-1 text-lg text-blue-700" />{" "}
@@ -1203,7 +1203,7 @@ const AccountPage = () => {
                       </button>
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
 
               {/* <div className="flex justify-end mt-6">

@@ -51,7 +51,7 @@ const Variants = () => {
 
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         setProduct(response.data);
@@ -84,7 +84,7 @@ const Variants = () => {
               "x-api-secret": apiSecretKey,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         setVariantData(response.data);
@@ -149,7 +149,7 @@ const Variants = () => {
             "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       toast.success("Variant updated successfully!");
@@ -162,10 +162,10 @@ const Variants = () => {
             "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
-      navigate("/add-product", {
+      navigate(`/edit-product/${productId}`, {
         state: { product: refreshedProduct.data },
       });
     } catch (error) {
@@ -223,16 +223,16 @@ const Variants = () => {
             if (variant.image_id) {
               matchedImage =
                 product?.variantImages?.find(
-                  (img) => String(img.id) === String(variant.image_id)
+                  (img) => String(img.id) === String(variant.image_id),
                 ) ||
                 product?.images?.find(
-                  (img) => String(img.id) === String(variant.image_id)
+                  (img) => String(img.id) === String(variant.image_id),
                 );
             }
 
             if (!matchedImage && product?.variantImages?.length > 0) {
               matchedImage = product.variantImages.find((img) =>
-                normalizeString(img.alt || "").includes(titleKey)
+                normalizeString(img.alt || "").includes(titleKey),
               );
             }
 

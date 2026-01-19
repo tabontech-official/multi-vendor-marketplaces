@@ -575,14 +575,26 @@ const handleUploadAndPreview = async () => {
     setOpenDropdown(openDropdown === index ? null : index);
   };
 
-  const OnEdit = (product) => {
-    console.log(product);
-    console.log("clicking");
+  // const OnEdit = (product) => {
+  //   console.log(product);
+  //   console.log("clicking");
 
-    let formPage = "/add-product";
+  //   let formPage = "/add-product";
 
-    navigate(formPage, { state: { product } });
-  };
+  //   navigate(formPage, { state: { product } });
+  // };
+
+const OnEdit = (product) => {
+  if (!product?.id && !product?._id) return;
+
+  // Shopify id ya DB id jo tum use karte ho
+  const productId = product.id || product._id;
+
+  navigate(`/edit-product/${productId}`, {
+    state: { product },
+  });
+};
+
 
   const onDeleteSelected = () => {
     setIsPopupOpen(true);

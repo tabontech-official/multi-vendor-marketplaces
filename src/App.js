@@ -159,6 +159,8 @@ const App = () => {
               path="/collection/:id"
               element={<PrivateRoute element={<Collection />} />}
             />
+            <Route path="/edit-product/:id" element={<CategorySelector />} />
+
             <Route
               path="/add/option"
               element={<PrivateRoute element={<AddVariantOption />} />}

@@ -10,6 +10,7 @@ import { Editor } from "react-draft-wysiwyg";
 import draftToHtml from "draftjs-to-html";
 import htmlToDraft from "html-to-draftjs";
 import { RxCross1 } from "react-icons/rx";
+import { useParams } from "react-router-dom";
 
 import {
   convertToRaw,
@@ -19,6 +20,9 @@ import {
 } from "draft-js";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 const CategorySelector = () => {
+  const { id } = useParams();
+  const isEditing = Boolean(id);
+
   const stripHtml = (html) => {
     const div = document.createElement("div");
     div.innerHTML = html;
@@ -49,7 +53,7 @@ const CategorySelector = () => {
         if (!userId) return;
 
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`
+          `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`,
         );
         const data = await res.json();
 
@@ -90,7 +94,7 @@ const CategorySelector = () => {
               "x-api-secret": apiSecretKey,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         if (!res.ok) throw new Error("Failed to fetch user active profiles");
@@ -114,7 +118,7 @@ const CategorySelector = () => {
     const fetchDbOptions = async () => {
       try {
         const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
+          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions",
         );
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -130,6 +134,7 @@ const CategorySelector = () => {
 
   const locationData = useLocation();
   const { product } = locationData.state || {};
+
   const [editing, setEditing] = useState(false);
   const [mongooseProductId, setMongooseProductId] = useState();
   const [title, setTitle] = useState("");
@@ -137,7 +142,7 @@ const CategorySelector = () => {
   const [price, setPrice] = useState("");
   const [productType, setProductType] = useState([]);
   const [seoHandle, setSeoHandle] = useState(
-    `https://www.aydiactive.com/products/${product?.title || ""} `
+    `https://www.aydiactive.com/products/${product?.title || ""} `,
   );
   const [isChanged, setIsChanged] = useState(false);
   const [popupMode, setPopupMode] = useState("variant");
@@ -167,7 +172,7 @@ const CategorySelector = () => {
   const [images, setImages] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
   const [checkedImages, setCheckedImages] = useState({});
-  const [isEditing, setIsEditing] = useState(false);
+  // const [isEditing, setIsEditing] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [expandedParents, setExpandedParents] = useState([]);
@@ -181,7 +186,7 @@ const CategorySelector = () => {
   const [isSeoEditing, setIsSeoEditing] = useState(false);
   const [seoTitle, setSeoTitle] = useState(product?.title || "");
   const [seoDescription, setSeoDescription] = useState(
-    stripHtml(product?.body_html || "")
+    stripHtml(product?.body_html || ""),
   );
   const [seoPrice, setSeoPrice] = useState(product?.variants?.[0]?.price || "");
   const [handle, setHandle] = useState(product?.handle || "");
@@ -198,7 +203,7 @@ const CategorySelector = () => {
   const [selectedOptionName, setSelectedOptionName] = useState("");
   const [isCustomOption, setIsCustomOption] = useState(false);
   const [editorState, setEditorState] = useState(() =>
-    EditorState.createEmpty()
+    EditorState.createEmpty(),
   );
   const [selectedShippingPlan, setSelectedShippingPlan] = useState("");
 
@@ -221,14 +226,14 @@ const CategorySelector = () => {
               "x-api-secret": apiSecretKey,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         const data = await res.json();
 
         if (res.ok) {
           const fullName = `${data.firstName.trim()} ${data.lastName.trim()}`;
-          setVendor(fullName); // ✅ preselected vendor
+          // setVendor(fullName); // ✅ preselected vendor
         }
       } catch (error) {
         console.error("Error fetching vendor:", error);
@@ -252,7 +257,7 @@ const CategorySelector = () => {
     setExpandedParents((prev) =>
       prev.includes(parentIndex)
         ? prev.filter((index) => index !== parentIndex)
-        : [...prev, parentIndex]
+        : [...prev, parentIndex],
     );
   };
   const [variantEditModalVisible, setVariantEditModalVisible] = useState(false);
@@ -282,7 +287,7 @@ const CategorySelector = () => {
               "x-api-secret": apiSecretKey,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         const data = await response.json();
@@ -307,7 +312,7 @@ const CategorySelector = () => {
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const [highestLevelSelected, setHighestLevelSelected] = useState(null);
   const [selectedVisibleCategories, setSelectedVisibleCategories] = useState(
-    []
+    [],
   );
   const [finalCategoryPayload, setFinalCategoryPayload] = useState([]);
   const [selectedExportTitle, setSelectedExportTitle] = useState("");
@@ -405,11 +410,11 @@ const CategorySelector = () => {
 
     if (e.key === "ArrowDown") {
       setHighlightIndex((prev) =>
-        prev < filteredCategories.length - 1 ? prev + 1 : 0
+        prev < filteredCategories.length - 1 ? prev + 1 : 0,
       );
     } else if (e.key === "ArrowUp") {
       setHighlightIndex((prev) =>
-        prev > 0 ? prev - 1 : filteredCategories.length - 1
+        prev > 0 ? prev - 1 : filteredCategories.length - 1,
       );
     } else if (e.key === "Enter" && highlightIndex >= 0) {
       e.preventDefault();
@@ -441,7 +446,7 @@ const CategorySelector = () => {
       hierarchy.map((c) => ({
         catNo: c.catNo,
         title: buildCategoryPath(c),
-      }))
+      })),
     );
 
     // ✔ exportTitle (complete path)
@@ -454,10 +459,10 @@ const CategorySelector = () => {
 
   const removeCategory = (catNoToRemove) => {
     setSelectedVisibleCategories((prev) =>
-      prev.filter((catNo) => catNo !== catNoToRemove)
+      prev.filter((catNo) => catNo !== catNoToRemove),
     );
     setSelectedCategories((prev) =>
-      prev.filter((catNo) => catNo !== catNoToRemove)
+      prev.filter((catNo) => catNo !== catNoToRemove),
     );
   };
   const [isFocused, setIsFocused] = useState(false);
@@ -491,12 +496,12 @@ const CategorySelector = () => {
     setKeywordsList(newKeywords);
 
     const categoryToRemove = categories.find(
-      (cat) => cat.title === removedTitle
+      (cat) => cat.title === removedTitle,
     );
 
     if (categoryToRemove) {
       const newSelectedCategories = selectedCategories.filter(
-        (catNo) => catNo !== categoryToRemove.catNo
+        (catNo) => catNo !== categoryToRemove.catNo,
       );
       setSelectedCategories(newSelectedCategories);
     }
@@ -578,7 +583,7 @@ const CategorySelector = () => {
         let updatedOptions = prevOptions.map((opt) => ({
           ...opt,
           values: opt.values.filter(
-            (val) => val.trim().toLowerCase() !== pureChildValue
+            (val) => val.trim().toLowerCase() !== pureChildValue,
           ),
         }));
         updatedOptions = updatedOptions.filter((opt) => opt.values.length > 0);
@@ -593,7 +598,7 @@ const CategorySelector = () => {
     if (!options || options.length === 0) return [];
 
     const validOptions = options.filter(
-      (opt) => opt.values && opt.values.some((val) => val.trim() !== "")
+      (opt) => opt.values && opt.values.some((val) => val.trim() !== ""),
     );
 
     if (validOptions.length === 0) return [];
@@ -664,8 +669,8 @@ const CategorySelector = () => {
     // Match DB option
     const found = dbOptions.find((opt) =>
       opt.optionName.some(
-        (name) => name.toLowerCase().trim() === value.toLowerCase().trim()
-      )
+        (name) => name.toLowerCase().trim() === value.toLowerCase().trim(),
+      ),
     );
 
     if (found) {
@@ -687,7 +692,7 @@ const CategorySelector = () => {
     // Prevent duplicate values in the same option (case-insensitive)
     const isDuplicate = newOption.values.some(
       (v, i) =>
-        i !== index && v.trim().toLowerCase() === trimmedValue.toLowerCase()
+        i !== index && v.trim().toLowerCase() === trimmedValue.toLowerCase(),
     );
 
     if (isDuplicate) {
@@ -728,7 +733,7 @@ const CategorySelector = () => {
 
     const existingOptionIndex = options.findIndex(
       (opt) =>
-        opt.name.toLowerCase().trim() === newOption.name.toLowerCase().trim()
+        opt.name.toLowerCase().trim() === newOption.name.toLowerCase().trim(),
     );
 
     let updatedOptions;
@@ -736,11 +741,11 @@ const CategorySelector = () => {
     if (existingOptionIndex !== -1) {
       const existingOption = options[existingOptionIndex];
       const mergedValues = Array.from(
-        new Set([...existingOption.values, ...cleanedValues])
+        new Set([...existingOption.values, ...cleanedValues]),
       );
 
       updatedOptions = options.map((opt, i) =>
-        i === existingOptionIndex ? { ...opt, values: mergedValues } : opt
+        i === existingOptionIndex ? { ...opt, values: mergedValues } : opt,
       );
     } else {
       updatedOptions = [...options, { ...newOption, values: cleanedValues }];
@@ -769,16 +774,16 @@ const CategorySelector = () => {
         if (variant.subVariants && variant.subVariants.length > 0) {
           const totalPrice = variant.subVariants.reduce(
             (sum, v) => sum + Number(v.price || 0),
-            0
+            0,
           );
           const totalQuantity = variant.subVariants.reduce(
             (sum, v) => sum + Number(v.quantity || 0),
-            0
+            0,
           );
           return { ...variant, price: totalPrice, quantity: totalQuantity };
         }
         return variant;
-      })
+      }),
     );
   }, [variants]);
 
@@ -792,7 +797,7 @@ const CategorySelector = () => {
         const match = categories.find(
           (cat) =>
             buildCategoryPath(cat).trim().toLowerCase() ===
-            title.trim().toLowerCase()
+            title.trim().toLowerCase(),
         );
         return match ? match.catNo : null;
       })
@@ -807,7 +812,7 @@ const CategorySelector = () => {
     const tagsArray = allTags.filter((tag) => {
       if (tag.startsWith("cat_")) return false;
       return !categoryTitlesFromDB.some(
-        (title) => title.trim().toLowerCase() === tag.trim().toLowerCase()
+        (title) => title.trim().toLowerCase() === tag.trim().toLowerCase(),
       );
     });
 
@@ -824,17 +829,14 @@ const CategorySelector = () => {
 
     // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data); // ✅ For debugging
@@ -890,80 +892,12 @@ const CategorySelector = () => {
         return acc;
       }, {});
 
-      // const formattedVariants = Object.keys(groupedVariants).map(
-      //   (key, index) => ({
-      //     ...groupedVariants[key].parent,
-      //     group: `parent-${index}`,
-      //     subVariants: groupedVariants[key].children,
-      //   })
-      // );
-
-      // const hydratedVariantImages = {};
-
-      // product.variants.forEach((variant, idx) => {
-      //   const titleKey = normalizeString(variant.title || "");
-      //   let matchedImages = [];
-
-      //   if (product.variantImages?.length) {
-      //     matchedImages = product.variantImages.filter((img) => {
-      //       const alt = normalizeString(img.alt || "");
-      //       return (
-      //         alt.includes(titleKey.toLowerCase()) ||
-      //         alt.includes(titleKey.replace(/\s*\/\s*/g, "-").toLowerCase())
-      //       );
-      //     });
-      //   }
-
-      //   if (!matchedImages.length && variant.image_id) {
-      //     const found = product.images?.find(
-      //       (img) => String(img.id) === String(variant.image_id)
-      //     );
-      //     if (found) matchedImages = [found];
-      //   }
-
-      //   const combinationAlt = titleKey.replace(/\s*\/\s*/g, "-").toLowerCase();
-
-      //   if (matchedImages.length) {
-      //     hydratedVariantImages[titleKey] = matchedImages.map((img) => ({
-      //       preview: img.src,
-      //       alt: combinationAlt,
-      //       loading: false,
-      //     }));
-      //   }
-      // });
-
-      // if (Object.keys(hydratedVariantImages).length > 0) {
-      //   const normalizedVariantImages = Object.fromEntries(
-      //     Object.entries(hydratedVariantImages).map(([key, value]) => [
-      //       key,
-      //       Array.isArray(value)
-      //         ? value.map((img) => ({
-      //             preview: img.preview || img.src,
-      //             alt: img.alt || key.replace(/\s*\/\s*/g, "-").toLowerCase(),
-      //             loading: false,
-      //           }))
-      //         : [
-      //             {
-      //               preview: value.preview || value.src,
-      //               alt:
-      //                 value.alt || key.replace(/\s*\/\s*/g, "-").toLowerCase(),
-      //               loading: false,
-      //             },
-      //           ],
-      //     ])
-      //   );
-
-      //   setVariantImages(normalizedVariantImages);
-      // } else {
-      //   console.log("No variant images found for this product");
-      // }
-
       const formattedVariants = Object.keys(groupedVariants).map(
         (key, index) => ({
           ...groupedVariants[key].parent,
           group: `parent-${index}`,
           subVariants: groupedVariants[key].children,
-        })
+        }),
       );
 
       const hydratedVariantImages = {};
@@ -972,7 +906,6 @@ const CategorySelector = () => {
         const titleKey = normalizeString(variant.title || "");
         let matchedImages = [];
 
-        // 🧩 1️⃣ Try matching alt text from variantImages
         if (product.variantImages?.length) {
           matchedImages = product.variantImages.filter((img) => {
             const alt = normalizeString(img.alt || "").toLowerCase();
@@ -983,26 +916,22 @@ const CategorySelector = () => {
           });
         }
 
-        // 🧩 2️⃣ Fallback to Shopify variant.image_id match
         if (!matchedImages.length && variant.image_id) {
           const found = product.images?.find(
-            (img) => String(img.id) === String(variant.image_id)
+            (img) => String(img.id) === String(variant.image_id),
           );
           if (found) matchedImages = [found];
         }
 
-        // 🧩 3️⃣ FINAL fallback — use first product image if variant has none
         if (!matchedImages.length && product.images?.length > 0) {
           matchedImages = [product.images[0]];
         }
 
-        // 🧩 Normalize the alt for consistency
         const combinationAlt = titleKey
           .replace(/\s*\/\s*/g, "-")
           .replace(/\s+/g, "-")
           .toLowerCase();
 
-        // 🧩 Store hydrated images
         hydratedVariantImages[titleKey] = matchedImages.map((img) => ({
           preview: img.src,
           alt: combinationAlt,
@@ -1010,7 +939,6 @@ const CategorySelector = () => {
         }));
       });
 
-      // 🧩 Normalize & set final variant image state
       if (Object.keys(hydratedVariantImages).length > 0) {
         const normalizedVariantImages = Object.fromEntries(
           Object.entries(hydratedVariantImages).map(([key, value]) => [
@@ -1029,17 +957,17 @@ const CategorySelector = () => {
                     loading: false,
                   },
                 ],
-          ])
+          ]),
         );
 
         setVariantImages(normalizedVariantImages);
       } else {
         console.log(
-          "⚠️ No variant images found, and no fallback images available."
+          " No variant images found, and no fallback images available.",
         );
       }
 
-      setIsEditing(true);
+      // setIsEditing(true);
       setTitle(product.title || "");
       setPrice(product.variants[0]?.price || "");
       setCompareAtPrice(product.variants[0]?.compare_at_price || "");
@@ -1058,10 +986,9 @@ const CategorySelector = () => {
         const { freeShipping = false, profile = null } = product.shipping;
 
         if (freeShipping) {
-          // ✅ Case 1: Free Shipping
           setEnableFreeShipping(true);
           setEnableShippingPlans(false);
-          setSelectedShippingPlan(""); // clear any previous plan
+          setSelectedShippingPlan("");
         } else if (profile && profile.profileId) {
           setEnableShippingPlans(true);
           setEnableFreeShipping(false);
@@ -1080,18 +1007,16 @@ const CategorySelector = () => {
       if (product.metafields && product.metafields.length > 0) {
         setEnableMetafields(true);
 
-        // ✅ Only include metafields that have at least one non-empty value
         const validMetafields = product.metafields.filter(
-          (m) => m.label?.trim() !== "" || m.value?.trim() !== ""
+          (m) => m.label?.trim() !== "" || m.value?.trim() !== "",
         );
 
-        // ✅ Limit to 4 max
         const limitedMetafields = validMetafields.slice(0, 4);
 
         setMetafields(
           limitedMetafields.length > 0
             ? limitedMetafields
-            : [{ label: "", value: "" }]
+            : [{ label: "", value: "" }],
         );
       } else {
         setEnableMetafields(false);
@@ -1145,7 +1070,9 @@ const CategorySelector = () => {
 
           // Find DB option match
           const dbMatch = dbOptions.find((db) =>
-            db.optionName.some((n) => n.toLowerCase().trim() === normalizedName)
+            db.optionName.some(
+              (n) => n.toLowerCase().trim() === normalizedName,
+            ),
           );
 
           return {
@@ -1162,13 +1089,13 @@ const CategorySelector = () => {
             // ⭐ Detect custom option (Other)
             isCustom: option.name === "Other",
           };
-        }) || []
+        }) || [],
       );
 
       setVariants(formattedVariants);
       setVariantPrices(product.variants.map((v) => v.price || ""));
       setVariantQuantities(
-        product.variants.map((v) => v.inventory_quantity || 0)
+        product.variants.map((v) => v.inventory_quantity || 0),
       );
       setVariantSku(product.variants.map((v) => v.sku || ""));
       setImages(product.images || []);
@@ -1182,7 +1109,7 @@ const CategorySelector = () => {
         const contentBlock = htmlToDraft(rawDescription);
         if (contentBlock) {
           const contentState = ContentState.createFromBlockArray(
-            contentBlock.contentBlocks
+            contentBlock.contentBlocks,
           );
           setEditorState(EditorState.createWithContent(contentState));
         } else {
@@ -1244,34 +1171,31 @@ const CategorySelector = () => {
           {
             method: "POST",
             body: formData,
-          }
+          },
         );
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
-            }
-          );
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setVariantImages((prev) => ({
             ...prev,
             [normalizedKey]: prev[normalizedKey].map((img) =>
               img.preview === previews[index].preview
                 ? { ...img, preview: data.secure_url, loading: false }
-                : img
+                : img,
             ),
           }));
 
@@ -1287,7 +1211,7 @@ const CategorySelector = () => {
         setVariantImages((prev) => ({
           ...prev,
           [normalizedKey]: prev[normalizedKey].filter(
-            (img) => img.preview !== previews[index].preview
+            (img) => img.preview !== previews[index].preview,
           ),
         }));
       }
@@ -1332,31 +1256,28 @@ const CategorySelector = () => {
         try {
           const res = await fetch(
             "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-            { method: "POST", body: formData }
+            { method: "POST", body: formData },
           );
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "x-api-key": apiKey,
-                  "x-api-secret": apiSecretKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId, images: [data.secure_url] }),
-              }
-            );
+            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            });
 
             setSelectedImages((prev) =>
               prev.map((img) =>
                 img.id === preview.id
                   ? { ...img, cloudUrl: data.secure_url, loading: false }
-                  : img
-              )
+                  : img,
+              ),
             );
           }
         } catch (error) {
@@ -1365,11 +1286,11 @@ const CategorySelector = () => {
 
           setSelectedImages((prev) =>
             prev.map((img) =>
-              img.id === preview.id ? { ...img, loading: false } : img
-            )
+              img.id === preview.id ? { ...img, loading: false } : img,
+            ),
           );
         }
-      })
+      }),
     );
 
     event.target.value = "";
@@ -1391,7 +1312,7 @@ const CategorySelector = () => {
     // 🧩 Validate metafields before submitting
     if (enableMetafields) {
       const invalid = metafields.some(
-        (m) => !m.label.trim() || !m.value.trim()
+        (m) => !m.label.trim() || !m.value.trim(),
       );
     }
 
@@ -1413,7 +1334,7 @@ const CategorySelector = () => {
         combination.children.map((child) => {
           const key = `${index}-${child}`;
           return variantPrices[key] ?? null;
-        })
+        }),
       );
 
     const prepareVariantCompareAtPrices = () =>
@@ -1421,7 +1342,7 @@ const CategorySelector = () => {
         combination.children.map((child) => {
           const key = `${index}-${child}`;
           return variantCompareAtPrices[key] ?? null;
-        })
+        }),
       );
 
     const defaultQuantity = parseFloat(quantity) || 0;
@@ -1431,7 +1352,7 @@ const CategorySelector = () => {
           const key = `${index}-${child}`;
           const val = parseFloat(variantQuantities[key]);
           return !isNaN(val) && val > 0 ? val : defaultQuantity;
-        })
+        }),
       );
 
     const prepareVariantSku = () =>
@@ -1439,7 +1360,7 @@ const CategorySelector = () => {
         combination.children.map((child) => {
           const key = `${index}-${child}`;
           return variantSku[key] ?? null;
-        })
+        }),
       );
 
     // const categoryIds = finalCategoryPayload.map((c) => c.catNo.toString());
@@ -1468,7 +1389,7 @@ const CategorySelector = () => {
       };
     } else if (enableShippingPlans && selectedShippingPlan) {
       selectedShippingData = shippingPlans.find(
-        (p) => p.profileId === selectedShippingPlan
+        (p) => p.profileId === selectedShippingPlan,
       );
     }
 
@@ -1502,7 +1423,7 @@ const CategorySelector = () => {
     };
     if (enableMetafields) {
       payload.metafields = metafields.filter(
-        (m) => m.label.trim() !== "" && m.value.trim() !== ""
+        (m) => m.label.trim() !== "" && m.value.trim() !== "",
       );
     }
     if (enableSizeChart && selectedSizeChart) {
@@ -1551,7 +1472,8 @@ const CategorySelector = () => {
           combination.children.map((child) => {
             const key = `${index}-${child}`;
             const matchingVariant = data.product?.variants?.find(
-              (v) => v.title.trim().toLowerCase() === child.trim().toLowerCase()
+              (v) =>
+                v.title.trim().toLowerCase() === child.trim().toLowerCase(),
             );
 
             return {
@@ -1565,7 +1487,7 @@ const CategorySelector = () => {
               option2: matchingVariant?.option2 || null,
               option3: matchingVariant?.option3 || null,
             };
-          })
+          }),
         );
 
         console.log("🧩 Updating each variant via /updateVariant API");
@@ -1584,7 +1506,7 @@ const CategorySelector = () => {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({ variant }),
-            }
+            },
           );
         }
       }
@@ -1603,8 +1525,8 @@ const CategorySelector = () => {
           const safeImages = Array.isArray(images)
             ? images
             : images
-            ? [images]
-            : [];
+              ? [images]
+              : [];
 
           // ✅ Force consistent alt for all images
           return safeImages.map((img) => ({
@@ -1612,7 +1534,7 @@ const CategorySelector = () => {
             url: img.preview || img.src,
             alt: combinationAlt, // ✅ override any "Variant Image Modern" alt
           }));
-        }
+        },
       );
 
       const imageSaveResponse = await fetch(
@@ -1628,7 +1550,7 @@ const CategorySelector = () => {
             images: cloudinaryURLs,
             variantImages: uploadedVariantImages,
           }),
-        }
+        },
       );
 
       const imageSaveJson = await imageSaveResponse.json();
@@ -1727,7 +1649,7 @@ const CategorySelector = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
           },
-        }
+        },
       );
 
       const data = await response.json();
@@ -1774,7 +1696,7 @@ const CategorySelector = () => {
         e.preventDefault();
         showToast(
           "error",
-          "You have unsaved changes! Please update the product before leaving."
+          "You have unsaved changes! Please update the product before leaving.",
         );
 
         window.history.forward();
@@ -1810,7 +1732,7 @@ const CategorySelector = () => {
 
     const isDuplicate = newOption.values.some(
       (v, i) =>
-        i !== index && v.trim().toLowerCase() === trimmedValue.toLowerCase()
+        i !== index && v.trim().toLowerCase() === trimmedValue.toLowerCase(),
     );
 
     if (isDuplicate) {
@@ -1836,7 +1758,7 @@ const CategorySelector = () => {
     const cleanedValues = newOption.values.filter((v) => v.trim() !== "");
 
     const updated = options.map((opt, i) =>
-      i === optionIndex ? { ...opt, values: cleanedValues } : opt
+      i === optionIndex ? { ...opt, values: cleanedValues } : opt,
     );
 
     setOptions(updated);
@@ -2322,19 +2244,19 @@ const CategorySelector = () => {
                         <span className="font-semibold">
                           {
                             shippingPlans.find(
-                              (p) => p.profileId === selectedShippingPlan
+                              (p) => p.profileId === selectedShippingPlan,
                             )?.profileName
                           }{" "}
                           (
                           {
                             shippingPlans.find(
-                              (p) => p.profileId === selectedShippingPlan
+                              (p) => p.profileId === selectedShippingPlan,
                             )?.rateName
                           }{" "}
                           - $
                           {
                             shippingPlans.find(
-                              (p) => p.profileId === selectedShippingPlan
+                              (p) => p.profileId === selectedShippingPlan,
                             )?.ratePrice
                           }
                           )
@@ -2413,9 +2335,18 @@ const CategorySelector = () => {
                       onClick={() => {
                         if (editingOptionIndex !== optionIndex) {
                           setEditingOptionIndex(optionIndex);
+                          const dbMatch = dbOptions.find((db) =>
+                            db.optionName.some(
+                              (n) =>
+                                n.toLowerCase().trim() ===
+                                option.name.toLowerCase().trim(),
+                            ),
+                          );
+
                           setNewOption({
                             name: option.name,
                             values: [...option.values],
+                            dbValues: dbMatch ? dbMatch.optionValues : [], // ✅ yahin se aa raha hai
                           });
                         }
                       }}
@@ -2475,62 +2406,73 @@ const CategorySelector = () => {
                       {editingOptionIndex === optionIndex && (
                         <div className="mt-2 space-y-2">
                           {newOption.values.map((value, i) => {
-                            const dbOptionValues = newOption.dbValues || [];
+                            const hasDBValues = newOption.dbValues?.length > 0;
 
-                            const valueMatchesDB =
-                              dbOptionValues.includes(value);
-
-                            const isCustomValue = !valueMatchesDB;
+                            const isCustomValue =
+                              value === "__OTHER__" ||
+                              (value !== "" &&
+                                !newOption.dbValues.some(
+                                  (v) =>
+                                    v.toLowerCase() === value.toLowerCase(),
+                                ));
 
                             return (
                               <div key={i} className="flex gap-2 items-center">
-                                {valueMatchesDB && !isCustomValue ? (
+                                {hasDBValues && !isCustomValue ? (
                                   <select
-                                    value={value}
+                                    value={value === "" ? "" : value}
                                     onChange={(e) => {
+                                      console.log(
+                                        "Dropdown selected:",
+                                        e.target.value,
+                                      );
+
                                       if (e.target.value === "Other") {
-                                        handleEditOptionValueChange(i, "");
+                                        console.log(
+                                          "👉 Switching to INPUT mode",
+                                        );
+                                        handleEditOptionValueChange(
+                                          i,
+                                          "__OTHER__",
+                                        ); // ✅ IMPORTANT
                                       } else {
                                         handleEditOptionValueChange(
                                           i,
-                                          e.target.value
+                                          e.target.value,
                                         );
                                       }
                                     }}
                                     className="w-full border border-gray-300 rounded-md p-1 text-sm"
                                   >
-                                    {dbOptionValues.map((val, idx) => (
-                                      <option key={idx} value={val}>
+                                    <option value="" disabled>
+                                      Select value
+                                    </option>
+
+                                    {newOption.dbValues.map((val) => (
+                                      <option key={val} value={val}>
                                         {val}
                                       </option>
                                     ))}
+
                                     <option value="Other">Other</option>
                                   </select>
                                 ) : (
                                   <input
                                     type="text"
-                                    value={value}
-                                    onChange={(e) =>
+                                    value={value === "__OTHER__" ? "" : value}
+                                    onChange={(e) => {
+                                      console.log(
+                                        "Typing custom value:",
+                                        e.target.value,
+                                      );
                                       handleEditOptionValueChange(
                                         i,
-                                        e.target.value
-                                      )
-                                    }
+                                        e.target.value,
+                                      );
+                                    }}
                                     placeholder="Enter custom value"
                                     className="w-full border border-gray-300 rounded-md p-1 text-sm"
                                   />
-                                )}
-
-                                {newOption.values.length > 1 && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteEditedValue(i);
-                                    }}
-                                    className="text-red-600 border p-1 rounded-md hover:bg-red-100"
-                                  >
-                                    <FaTrash />
-                                  </button>
                                 )}
                               </div>
                             );
@@ -2623,7 +2565,7 @@ const CategorySelector = () => {
                                     product?.variants?.find(
                                       (variant) =>
                                         normalizeString(variant.title) ===
-                                        normalizedKey
+                                        normalizedKey,
                                     );
                                   const variantId = matchingVariant?.id;
 
@@ -2686,7 +2628,7 @@ const CategorySelector = () => {
                                       <span
                                         className="text-sm font-medium text-gray-500 hover:text-blue-800 transition cursor-pointer whitespace-nowrap"
                                         onClick={() => {
-                                          if (isEditing) {
+                                          if (isEditing && variantId) {
                                             setIsChanged(true);
                                             navigate(
                                               `/product/${product.id}/variants/${variantId}`,
@@ -2695,12 +2637,12 @@ const CategorySelector = () => {
                                                   productId: product.id,
                                                   variantId,
                                                 },
-                                              }
+                                              },
                                             );
                                           } else {
                                             handleVariantEditModal(
                                               index,
-                                              child
+                                              child,
                                             );
                                           }
                                         }}
@@ -2711,7 +2653,7 @@ const CategorySelector = () => {
                                       <div
                                         className="relative w-20 cursor-pointer"
                                         onClick={() => {
-                                          if (isEditing) {
+                                          if (isEditing && variantId) {
                                             navigate(
                                               `/product/${product.id}/variants/${variantId}`,
                                               {
@@ -2719,12 +2661,12 @@ const CategorySelector = () => {
                                                   productId: product.id,
                                                   variantId,
                                                 },
-                                              }
+                                              },
                                             );
                                           } else {
                                             handleVariantEditModal(
                                               index,
-                                              child
+                                              child,
                                             );
                                           }
                                         }}
@@ -2742,7 +2684,7 @@ const CategorySelector = () => {
                                       <div
                                         className="relative w-20 cursor-pointer"
                                         onClick={() => {
-                                          if (isEditing) {
+                                          if (isEditing && variantId) {
                                             navigate(
                                               `/product/${product.id}/variants/${variantId}`,
                                               {
@@ -2750,12 +2692,12 @@ const CategorySelector = () => {
                                                   productId: product.id,
                                                   variantId,
                                                 },
-                                              }
+                                              },
                                             );
                                           } else {
                                             handleVariantEditModal(
                                               index,
-                                              child
+                                              child,
                                             );
                                           }
                                         }}
@@ -2775,7 +2717,7 @@ const CategorySelector = () => {
                                       <span
                                         className="w-20 p-1 text-sm cursor-pointer"
                                         onClick={() => {
-                                          if (isEditing) {
+                                          if (isEditing && variantId) {
                                             navigate(
                                               `/product/${product.id}/variants/${variantId}`,
                                               {
@@ -2783,12 +2725,12 @@ const CategorySelector = () => {
                                                   productId: product.id,
                                                   variantId,
                                                 },
-                                              }
+                                              },
                                             );
                                           } else {
                                             handleVariantEditModal(
                                               index,
-                                              child
+                                              child,
                                             );
                                           }
                                         }}
@@ -2815,7 +2757,7 @@ const CategorySelector = () => {
                                       </button>
                                     </li>
                                   );
-                                }
+                                },
                               )}
                             </ul>
                           </div>
@@ -2843,7 +2785,7 @@ const CategorySelector = () => {
                                     if (deleteTarget) {
                                       handleDeleteCombination(
                                         deleteTarget.index,
-                                        deleteTarget.childIndex
+                                        deleteTarget.childIndex,
                                       );
                                     }
                                     setIsDeleteModalOpen(false);
@@ -2901,8 +2843,8 @@ const CategorySelector = () => {
                           opt.optionName.some(
                             (name) =>
                               name.toLowerCase().trim() ===
-                              value.toLowerCase().trim()
-                          )
+                              value.toLowerCase().trim(),
+                          ),
                         );
 
                         if (found) {
@@ -2920,7 +2862,7 @@ const CategorySelector = () => {
                         <option key={`${i}-${j}`} value={name}>
                           {name}
                         </option>
-                      ))
+                      )),
                     )}
                     <option value="Other">Other</option>
                   </select>
@@ -3168,7 +3110,7 @@ const CategorySelector = () => {
                             handleMetafieldChange(
                               index,
                               "label",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           placeholder="Enter label (e.g., Fabric Type)"
@@ -3186,7 +3128,7 @@ const CategorySelector = () => {
                             handleMetafieldChange(
                               index,
                               "value",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           placeholder="Enter value (e.g., Cotton)"
@@ -3337,8 +3279,8 @@ const CategorySelector = () => {
               {loading
                 ? "Submitting..."
                 : isEditing
-                ? "Update Product"
-                : "Add Product"}
+                  ? "Update Product"
+                  : "Add Product"}
             </button>
 
             {isEditing && (
@@ -3412,7 +3354,7 @@ const CategorySelector = () => {
                   <div className="flex flex-wrap gap-2 mt-2">
                     {selectedVisibleCategories.map((catNo, index) => {
                       const category = categories.find(
-                        (cat) => cat.catNo === catNo
+                        (cat) => cat.catNo === catNo,
                       );
                       if (!category) return null;
 
@@ -3453,14 +3395,16 @@ const CategorySelector = () => {
                 Vendor
               </label>
 
-              <select
+              <input
+                type="text"
                 value={vendor}
-                onChange={(e) => setVendor(e.target.value)}
-                className="w-full border border-gray-300 p-2 rounded-xl bg-gray-50 "
-                disabled
-              >
-                <option value={vendor}>{vendor}</option>
-              </select>
+                onChange={(e) => {
+                  setVendor(e.target.value);
+                  setIsChanged(true); // optional but recommended
+                }}
+                placeholder="Enter vendor name"
+                className="w-full border border-gray-300 p-2 rounded-xl"
+              />
 
               {/* <label htmlFor="keywords" className="block text-gray-600 text-sm">
                 Keywords
@@ -3509,6 +3453,283 @@ const CategorySelector = () => {
             </div>
           </div>
         </div>
+        {isPopupVisible && (
+          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
+            <div className="bg-white w-full max-w-5xl h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden">
+              {/* HEADER */}
+              <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Select Image for Variant
+                </h2>
+                <button
+                  onClick={() => setIsPopupVisible(false)}
+                  className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700"
+                >
+                  Done
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                {/* UPLOAD NEW IMAGE */}
+                <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center bg-white">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                    className="hidden"
+                    id="variantUpload"
+                  />
+                  <label
+                    htmlFor="variantUpload"
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
+                  >
+                    Add New Images
+                  </label>
+                </div>
+
+                {/* ASSIGNED IMAGES */}
+                <div className="mt-8 bg-white border rounded-lg p-5">
+                  <h3 className="text-sm font-semibold mb-3 text-gray-700">
+                    Assigned Images
+                  </h3>
+
+                  {(() => {
+                    const parent = combinations[currentVariant?.index]?.parent;
+                    const key =
+                      options.length === 1
+                        ? currentVariant?.child
+                        : `${parent} / ${currentVariant?.child}`;
+                    const normalizedKey = key?.replace(/['"]/g, "").trim();
+                    const assigned = variantImages[normalizedKey] || [];
+
+                    return (
+                      <div className="flex flex-wrap gap-3">
+                        {assigned.length ? (
+                          assigned.map((img, i) => (
+                            <div key={img.preview} className="relative">
+                              <img
+                                src={img.preview}
+                                className="w-28 h-28 object-cover rounded border"
+                              />
+                              <button
+                                onClick={() =>
+                                  setVariantImages((prev) => ({
+                                    ...prev,
+                                    [normalizedKey]: prev[normalizedKey].filter(
+                                      (_, x) => x !== i,
+                                    ),
+                                  }))
+                                }
+                                className="absolute top-1 right-1 bg-white rounded-full p-1"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-gray-400 italic">
+                            No images assigned
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* PRODUCT MEDIA IMAGES */}
+                <div className="mt-8 bg-white border rounded-lg p-5">
+                  <h3 className="text-sm font-semibold mb-3 text-gray-700">
+                    Product Media Images
+                  </h3>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {selectedImages.map((img) => {
+                      const imageUrl = img.cloudUrl || img.localUrl;
+
+                      return (
+                        <div
+                          key={imageUrl}
+                          className="border rounded-lg p-2 cursor-pointer hover:border-blue-500"
+                          onClick={() => {
+                            const parent =
+                              combinations[currentVariant?.index]?.parent;
+                            const key =
+                              options.length === 1
+                                ? currentVariant?.child
+                                : `${parent} / ${currentVariant?.child}`;
+                            const normalizedKey = key
+                              .replace(/['"]/g, "")
+                              .trim();
+
+                            console.log("🟦 VARIANT IMAGE CLICK:", imageUrl);
+
+                            setVariantImages((prev) => {
+                              const existing = prev[normalizedKey] || [];
+
+                              if (
+                                existing.some((i) => i.preview === imageUrl)
+                              ) {
+                                console.warn(
+                                  "⛔ DUPLICATE VARIANT IMAGE SKIPPED",
+                                );
+                                return prev;
+                              }
+
+                              console.log("✅ VARIANT IMAGE ADDED");
+
+                              return {
+                                ...prev,
+                                [normalizedKey]: [
+                                  {
+                                    preview: imageUrl,
+                                    alt: normalizedKey
+                                      .replace(/\s*\/\s*/g, "-")
+                                      .toLowerCase(),
+                                    loading: false,
+                                  },
+                                  ...existing,
+                                ],
+                              };
+                            });
+                          }}
+                        >
+                          <img
+                            src={imageUrl}
+                            className="w-full h-28 object-cover rounded-md"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isMediaModalVisible && (
+          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
+            <div className="bg-white w-full max-w-6xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
+              {/* HEADER */}
+              <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                  Manage Product Media
+                </h2>
+                <button
+                  onClick={() => setIsMediaModalVisible(false)}
+                  className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700"
+                >
+                  Done
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                {/* UPLOAD + BROWSE */}
+                <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center bg-white">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleMediaUpload}
+                    className="hidden"
+                    id="productUpload"
+                  />
+
+                  <div className="flex gap-4">
+                    <label
+                      htmlFor="productUpload"
+                      className="px-6 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
+                    >
+                      Add New Images
+                    </label>
+
+                    <button
+                      onClick={() => setShowGallery(true)}
+                      className="px-6 py-2 bg-gray-600 text-white rounded-lg"
+                    >
+                      Browse
+                    </button>
+                  </div>
+                </div>
+
+                {/* PRODUCT IMAGES */}
+                <div className="mt-8 bg-white border rounded-lg p-5">
+                  <h3 className="text-sm font-semibold mb-3">Product Images</h3>
+
+                  <div className="flex flex-wrap gap-3">
+                    {selectedImages.map((img) => {
+                      const imageUrl = img.cloudUrl || img.localUrl;
+
+                      return (
+                        <div
+                          key={imageUrl}
+                          className="relative border rounded-lg overflow-hidden"
+                        >
+                          <img
+                            src={imageUrl}
+                            className="w-28 h-28 object-cover"
+                          />
+
+                          {img.loading && (
+                            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                              <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* GALLERY */}
+                {showGallery && galleryImages.length > 0 && (
+                  <div className="mt-8 bg-white border rounded-lg p-5">
+                    <h3 className="text-sm font-semibold mb-3">
+                      Gallery Images
+                    </h3>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {galleryImages.map((file) => (
+                        <div
+                          key={file.src}
+                          className="border rounded-lg p-2 cursor-pointer"
+                          onClick={() => {
+                            console.log("🟢 BROWSE IMAGE CLICK:", file.src);
+
+                            const exists = selectedImages.some(
+                              (img) =>
+                                (img.cloudUrl || img.localUrl) === file.src,
+                            );
+
+                            if (exists) {
+                              console.warn(
+                                "⛔ DUPLICATE PRODUCT IMAGE SKIPPED",
+                              );
+                              return;
+                            }
+
+                            console.log("✅ PRODUCT IMAGE ADDED");
+
+                            setSelectedImages((prev) => [
+                              { cloudUrl: file.src, loading: false },
+                              ...prev,
+                            ]);
+                          }}
+                        >
+                          <img
+                            src={file.src}
+                            className="w-full h-28 object-cover rounded-md"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {variantEditModalVisible && currentVariant && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fadeIn">
@@ -3542,7 +3763,7 @@ const CategorySelector = () => {
                       handlePriceChange(
                         currentVariant.index,
                         currentVariant.child,
-                        e.target.value
+                        e.target.value,
                       )
                     }
                     className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
@@ -3566,7 +3787,7 @@ const CategorySelector = () => {
                       handleVariantComparePriceChange(
                         currentVariant.index,
                         currentVariant.child,
-                        e.target.value
+                        e.target.value,
                       )
                     }
                     className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
@@ -3589,7 +3810,7 @@ const CategorySelector = () => {
                       handleVariantSkuChange(
                         currentVariant.index,
                         currentVariant.child,
-                        e.target.value
+                        e.target.value,
                       )
                     }
                     className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
@@ -3612,7 +3833,7 @@ const CategorySelector = () => {
                       handleQuantityChange(
                         currentVariant.index,
                         currentVariant.child,
-                        e.target.value
+                        e.target.value,
                       )
                     }
                     className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
@@ -3642,231 +3863,6 @@ const CategorySelector = () => {
           </div>
         )}
 
-        {isPopupVisible && (
-          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
-            <div className="bg-white w-full max-w-5xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
-              <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-                  Select Image for Variant
-                </h2>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setIsPopupVisible(false)}
-                    className="bg-blue-600 text-white px-5 py-2 rounded-md font-medium shadow-sm hover:bg-blue-700 active:scale-95 transition-transform duration-150"
-                  >
-                    Done
-                  </button>
-                  <button
-                    onClick={() => setIsPopupVisible(false)}
-                    className="text-gray-500 hover:text-gray-700 transition"
-                  >
-                    <RxCross1 size={18} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-                <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center text-gray-500 bg-white shadow-sm transition hover:shadow-md">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageChange}
-                    className="hidden"
-                    id="fileUpload"
-                  />
-
-                  <div className="flex gap-4 flex-wrap justify-center">
-                    <label
-                      htmlFor="fileUpload"
-                      className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-md cursor-pointer hover:bg-blue-700 active:scale-95 transition-transform duration-150"
-                    >
-                      Add Images
-                    </label>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowGallery(true)}
-                      className="px-6 py-2.5 bg-gray-600 text-white font-medium rounded-lg shadow-md cursor-pointer hover:bg-gray-700 active:scale-95 transition-transform duration-150"
-                    >
-                      Browse
-                    </button>
-                  </div>
-
-                  <p className="text-sm mt-3 text-gray-500">
-                    or drag & drop images here
-                  </p>
-                </div>
-
-                <div className="sticky top-6 mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm z-10">
-                  {" "}
-                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                    Assign Multiple Images to Variant{" "}
-                    <span className="ml-2 text-blue-600 font-medium">
-                      {currentVariant?.child
-                        ? `${
-                            combinations[currentVariant?.index]?.parent || ""
-                          } / ${currentVariant?.child}`
-                        : "N/A"}
-                    </span>
-                  </h3>
-                  {(() => {
-                    const parentValue =
-                      combinations[currentVariant?.index]?.parent;
-                    const combinationKey =
-                      options.length === 1
-                        ? currentVariant?.child
-                        : `${parentValue} / ${currentVariant?.child}`;
-                    const normalizedKey = combinationKey
-                      ?.replace(/['"]/g, "")
-                      .trim();
-
-                    const assigned = Array.isArray(variantImages[normalizedKey])
-                      ? variantImages[normalizedKey]
-                      : [];
-
-                    return (
-                      <div className="flex flex-wrap gap-3 max-h-[300px] overflow-y-auto">
-                        {assigned.length > 0 ? (
-                          assigned.map((img, i) => (
-                            <div
-                              key={i}
-                              className={`relative border border-gray-300 rounded-lg overflow-hidden group cursor-pointer transition-all duration-150 ${
-                                i === 0
-                                  ? "ring-2 ring-blue-500 shadow-md scale-105"
-                                  : "hover:ring-2 hover:ring-gray-400"
-                              }`}
-                              onClick={() => {
-                                if (i === 0) return;
-                                setVariantImages((prev) => {
-                                  const current = [...prev[normalizedKey]];
-                                  const [clicked] = current.splice(i, 1);
-                                  current.unshift(clicked);
-                                  return { ...prev, [normalizedKey]: current };
-                                });
-                              }}
-                              title={
-                                i === 0
-                                  ? "Featured image"
-                                  : "Click to make this the main image"
-                              }
-                            >
-                              <img
-                                src={img.preview}
-                                alt={img.alt}
-                                className="w-24 h-24 sm:w-28 sm:h-28 object-cover"
-                              />
-
-                              {img.loading && (
-                                <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                                  <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
-                                </div>
-                              )}
-
-                              {i === 0 && (
-                                <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-[1px] rounded">
-                                  Featured
-                                </div>
-                              )}
-
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setVariantImages((prev) => ({
-                                    ...prev,
-                                    [normalizedKey]: prev[normalizedKey].filter(
-                                      (_, idx) => idx !== i
-                                    ),
-                                  }));
-                                }}
-                                className="absolute top-1 right-1 bg-white/80 rounded-full p-1 hover:bg-red-100 transition"
-                              >
-                                <RxCross1 className="text-red-500 text-sm" />
-                              </button>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-gray-500 text-sm italic">
-                            No images assigned yet.
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-
-                {showGallery && galleryImages.length > 0 && (
-                  <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                      Gallery Images
-                    </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {galleryImages.map((file) => {
-                        const parentValue =
-                          combinations[currentVariant?.index]?.parent;
-                        const combinationKey =
-                          options.length === 1
-                            ? currentVariant?.child
-                            : `${parentValue} / ${currentVariant?.child}`;
-                        const normalizedKey = combinationKey
-                          .replace(/['"]/g, "")
-                          .trim();
-
-                        return (
-                          <div
-                            key={file.id || file.src}
-                            className="border rounded-lg p-2 bg-white hover:border-blue-400 hover:shadow-md transition cursor-pointer relative"
-                            onClick={() => {
-                              setVariantImages((prev) => {
-                                const existing = Array.isArray(
-                                  prev[normalizedKey]
-                                )
-                                  ? [...prev[normalizedKey]]
-                                  : [];
-                                const newImage = {
-                                  preview: file.src,
-                                  alt: normalizedKey
-                                    .replace(/\s*\/\s*/g, "-")
-                                    .toLowerCase(),
-                                  loading: true,
-                                };
-
-                                const updated = [newImage, ...existing];
-
-                                setTimeout(() => {
-                                  setVariantImages((prev2) => ({
-                                    ...prev2,
-                                    [normalizedKey]: prev2[normalizedKey].map(
-                                      (img) =>
-                                        img.preview === file.src
-                                          ? { ...img, loading: false }
-                                          : img
-                                    ),
-                                  }));
-                                }, 1000);
-
-                                return { ...prev, [normalizedKey]: updated };
-                              });
-                            }}
-                          >
-                            <img
-                              src={file.src}
-                              alt={file.name || "Image"}
-                              className="w-full h-28 object-cover rounded-md"
-                            />
-                            <p className="text-xs text-center mt-1 truncate text-gray-700">
-                              {file.name || "Image"}
-                            </p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
         {showDeleteOptionModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
             <div className="bg-white rounded-xl shadow-xl p-6 w-[400px] animate-fadeIn">
@@ -3907,150 +3903,6 @@ const CategorySelector = () => {
           </div>
         )}
 
-        {isMediaModalVisible && (
-          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
-            <div className="bg-white w-full max-w-6xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
-              <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-                  Manage Product Media
-                </h2>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setIsMediaModalVisible(false)}
-                    className="bg-blue-600 text-white px-5 py-2 rounded-md font-medium shadow-sm hover:bg-blue-700 active:scale-95 transition-transform duration-150"
-                  >
-                    Done
-                  </button>
-                  <button
-                    onClick={() => setIsMediaModalVisible(false)}
-                    className="text-gray-500 hover:text-gray-700 transition"
-                    title="Close"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-                <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center text-gray-500 bg-white shadow-sm transition hover:shadow-md">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleMediaUpload}
-                    className="hidden"
-                    id="mediaFileUpload"
-                  />
-
-                  <div className="flex gap-4 flex-wrap justify-center">
-                    <label
-                      htmlFor="mediaFileUpload"
-                      className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-md cursor-pointer 
-                         hover:bg-blue-700 active:scale-95 transition-transform duration-150"
-                    >
-                      Add New Images
-                    </label>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowGallery(true)}
-                      className="px-6 py-2.5 bg-gray-600 text-white font-medium rounded-lg shadow-md cursor-pointer 
-                         hover:bg-gray-700 active:scale-95 transition-transform duration-150"
-                    >
-                      Browse
-                    </button>
-                  </div>
-
-                  <p className="text-sm mt-3 text-gray-500">
-                    or drag & drop images here
-                  </p>
-                </div>
-
-                <div className="sticky top-6 mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm z-10">
-                  {" "}
-                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                    Product Images
-                  </h3>
-                  <div className="flex flex-wrap gap-3 max-h-[300px] overflow-y-auto">
-                    {selectedImages.length > 0 ? (
-                      selectedImages.map((img, i) => (
-                        <div
-                          key={i}
-                          className="relative border border-gray-300 rounded-lg overflow-hidden group hover:shadow-md transition"
-                        >
-                          <img
-                            src={img.cloudUrl || img.localUrl}
-                            alt={`Image ${i}`}
-                            className="w-24 h-24 sm:w-28 sm:h-28 object-cover"
-                          />
-                          {img.loading && (
-                            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                              <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
-                            </div>
-                          )}
-                          <button
-                            onClick={() => {
-                              const updated = [...selectedImages];
-                              updated.splice(i, 1);
-                              setSelectedImages(updated);
-                              setIsChanged(true);
-                            }}
-                            className="absolute top-1 right-1 bg-white/80 rounded-full p-1 hover:bg-red-100 transition"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-gray-500 italic text-sm">
-                        No product images yet.
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {showGallery && galleryImages.length > 0 && (
-                  <div className="mt-8 border border-gray-200 rounded-lg bg-white p-5 shadow-sm">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                      Gallery Images
-                    </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {galleryImages.map((file) => (
-                        <div
-                          key={file.id || file.src}
-                          className="border rounded-lg p-2 bg-white hover:border-blue-400 hover:shadow-md transition cursor-pointer"
-                          onClick={() => {
-                            if (
-                              !selectedImages.some(
-                                (img) => img.cloudUrl === file.src
-                              )
-                            ) {
-                              setSelectedImages((prev) => [
-                                { cloudUrl: file.src, loading: false },
-                                ...prev,
-                              ]);
-                              setIsChanged(true);
-                            }
-                          }}
-                        >
-                          <img
-                            src={file.src}
-                            alt={file.name || "Gallery Image"}
-                            className="w-full h-28 object-cover rounded-md"
-                          />
-                          <p className="text-xs text-center mt-1 truncate text-gray-700">
-                            {file.name || "Image"}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
         {showBulkModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-scaleIn">

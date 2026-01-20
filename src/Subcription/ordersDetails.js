@@ -12,7 +12,9 @@ const OrdersDetails = () => {
   const { order, productName, sku, index, merchantId } = location.state || {};
   const navigate = useNavigate();
   const { orderId } = useParams();
-  const [orderData, setOrderData] = useState(null);
+  // const [orderData, setOrderData] = useState(null);
+const [orderData, setOrderData] = useState(order || null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
   const [lineItems, setLineItems] = useState([]);
@@ -75,11 +77,13 @@ const OrdersDetails = () => {
         ? merchantIdFromParams
         : userIdFromStorage;
 
+ 
+
       if (!finalUserId || !orderId) return;
 
       try {
         const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${orderId}/${finalUserId}`,
+          `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${orderId}/${finalUserId}`
         );
         setOrderData(response.data?.data);
         setIsLoading(false);
@@ -126,7 +130,7 @@ const OrdersDetails = () => {
         year: "numeric",
       })}`,
       500,
-      75,
+      75
     );
 
     // === SHIP TO & BILL TO ===
@@ -239,21 +243,34 @@ const OrdersDetails = () => {
       })
     : "N/A";
 
-  useEffect(() => {
-    if (!order) return;
+  // useEffect(() => {
+  //   if (!order) return;
 
-    if (order.lineItemsByMerchant && merchantId) {
-      const merchantItems = order.lineItemsByMerchant[merchantId];
-      if (Array.isArray(merchantItems)) {
-        setLineItems(merchantItems);
-      }
-    } else if (Array.isArray(order.lineItems)) {
-      setLineItems(order.lineItems);
-    } else {
-      console.warn("No line items found.");
+  //   if (order.lineItemsByMerchant && merchantId) {
+  //     const merchantItems = order.lineItemsByMerchant[merchantId];
+  //     if (Array.isArray(merchantItems)) {
+  //       setLineItems(merchantItems);
+  //     }
+  //   } else if (Array.isArray(order.lineItems)) {
+  //     setLineItems(order.lineItems);
+  //   } else {
+  //     console.warn("No line items found.");
+  //   }
+  // }, [order, merchantId]);
+
+useEffect(() => {
+  if (!orderData) return;
+
+  if (orderData.lineItemsByMerchant && merchantId) {
+    const merchantItems = orderData.lineItemsByMerchant[merchantId];
+    if (Array.isArray(merchantItems)) {
+      setLineItems(merchantItems);
     }
-  }, [order, merchantId]);
-
+  } else if (Array.isArray(orderData.lineItems)) {
+    setLineItems(orderData.lineItems);
+  }
+}, [orderData, merchantId]);
+  
   const [openMenu, setOpenMenu] = useState(null);
   const [showTrackingModal, setShowTrackingModal] = useState(false);
   const [selectedFulfillment, setSelectedFulfillment] = useState(null);
@@ -302,7 +319,7 @@ const OrdersDetails = () => {
             tracking_number: trackingNumber,
             tracking_company: shippingCarrier,
           }),
-        },
+        }
       );
 
       setShowTrackingModal(false);
@@ -357,7 +374,7 @@ const OrdersDetails = () => {
             reason: "customer",
             lineItemIds,
           }),
-        },
+        }
       );
 
       const result = await response.json();
@@ -392,7 +409,7 @@ const OrdersDetails = () => {
     const fetchLineItemCount = async () => {
       try {
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/order/lineItemCount/${orderId}`,
+          `https://multi-vendor-marketplace.vercel.app/order/lineItemCount/${orderId}`
         );
         const data = await res.json();
 
@@ -418,7 +435,7 @@ const OrdersDetails = () => {
           <div class="flex space-x-8">
             <div>
               <span class="text-gray-900 font-semibold block">
-                Orderno: #{order?.serialNumber || order?.serialNo}
+Orderno: #{orderData?.serialNumber || orderData?.serialNo}
               </span>
               <span class="text-gray-900 font-semibold block mt-1">
                 {formattedDate} from Online store
@@ -447,7 +464,7 @@ const OrdersDetails = () => {
             lineItems.some(
               (i) =>
                 i.fulfillment_status === null ||
-                i.fulfillment_status === "cancelled",
+                i.fulfillment_status === "cancelled"
             ) && (
               <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
                 <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
@@ -482,7 +499,7 @@ const OrdersDetails = () => {
                       .filter(
                         (item) =>
                           item.fulfillment_status === null ||
-                          item.fulfillment_status === "cancelled",
+                          item.fulfillment_status === "cancelled"
                       )
                       .map((item, index) => (
                         <div
@@ -537,7 +554,7 @@ const OrdersDetails = () => {
                   </div>
 
                   {!lineItems.some(
-                    (i) => i.fulfillment_status === "cancelled",
+                    (i) => i.fulfillment_status === "cancelled"
                   ) && (
                     <div className="flex space-x-2 justify-end">
                       <button
@@ -575,7 +592,7 @@ const OrdersDetails = () => {
             )}
 
           {/* fullfill box */}
-
+ 
           {orderData?.fulfillments?.map((fulfillment, index) => (
             <div
               key={index}
@@ -629,7 +646,7 @@ const OrdersDetails = () => {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
-                    },
+                    }
                   )}
                 </p>
                 <p>
@@ -983,7 +1000,7 @@ const OrdersDetails = () => {
                             email,
                             lineItemIds: lineItems.map((i) => i.id),
                           }),
-                        },
+                        }
                       );
 
                       const result = await response.json();

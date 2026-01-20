@@ -13,7 +13,7 @@ const OrdersDetails = () => {
   const navigate = useNavigate();
   const { orderId } = useParams();
   // const [orderData, setOrderData] = useState(null);
-const [orderData, setOrderData] = useState(order || null);
+  const [orderData, setOrderData] = useState(order || null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
@@ -77,13 +77,11 @@ const [orderData, setOrderData] = useState(order || null);
         ? merchantIdFromParams
         : userIdFromStorage;
 
- 
-
       if (!finalUserId || !orderId) return;
 
       try {
         const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${orderId}/${finalUserId}`
+          `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${orderId}/${finalUserId}`,
         );
         setOrderData(response.data?.data);
         setIsLoading(false);
@@ -130,7 +128,7 @@ const [orderData, setOrderData] = useState(order || null);
         year: "numeric",
       })}`,
       500,
-      75
+      75,
     );
 
     // === SHIP TO & BILL TO ===
@@ -258,19 +256,19 @@ const [orderData, setOrderData] = useState(order || null);
   //   }
   // }, [order, merchantId]);
 
-useEffect(() => {
-  if (!orderData) return;
+  useEffect(() => {
+    if (!orderData) return;
 
-  if (orderData.lineItemsByMerchant && merchantId) {
-    const merchantItems = orderData.lineItemsByMerchant[merchantId];
-    if (Array.isArray(merchantItems)) {
-      setLineItems(merchantItems);
+    if (orderData.lineItemsByMerchant && merchantId) {
+      const merchantItems = orderData.lineItemsByMerchant[merchantId];
+      if (Array.isArray(merchantItems)) {
+        setLineItems(merchantItems);
+      }
+    } else if (Array.isArray(orderData.lineItems)) {
+      setLineItems(orderData.lineItems);
     }
-  } else if (Array.isArray(orderData.lineItems)) {
-    setLineItems(orderData.lineItems);
-  }
-}, [orderData, merchantId]);
-  
+  }, [orderData, merchantId]);
+
   const [openMenu, setOpenMenu] = useState(null);
   const [showTrackingModal, setShowTrackingModal] = useState(false);
   const [selectedFulfillment, setSelectedFulfillment] = useState(null);
@@ -319,7 +317,7 @@ useEffect(() => {
             tracking_number: trackingNumber,
             tracking_company: shippingCarrier,
           }),
-        }
+        },
       );
 
       setShowTrackingModal(false);
@@ -374,7 +372,7 @@ useEffect(() => {
             reason: "customer",
             lineItemIds,
           }),
-        }
+        },
       );
 
       const result = await response.json();
@@ -393,6 +391,26 @@ useEffect(() => {
       showToast("error", "An error occurred while canceling the order.");
     }
   };
+const getFulfilledItemImage = (fulfillmentItem) => {
+  if (!orderData) return null;
+
+  const allItems =
+    orderData.lineItems ||
+    orderData.line_items ||
+    orderData.lineItemsByMerchant?.[merchantId] ||
+    [];
+
+  // ✅ YOUR DATA USES id DIRECTLY
+  const orderLineItemId = fulfillmentItem.id;
+
+  const matchedItem = allItems.find(
+    (li) => String(li.id) === String(orderLineItemId)
+  );
+
+  return matchedItem?.image?.src || null;
+};
+
+
 
   const [lineItemCount, setLineItemCount] = useState(0);
   useEffect(() => {
@@ -409,7 +427,7 @@ useEffect(() => {
     const fetchLineItemCount = async () => {
       try {
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/order/lineItemCount/${orderId}`
+          `https://multi-vendor-marketplace.vercel.app/order/lineItemCount/${orderId}`,
         );
         const data = await res.json();
 
@@ -435,7 +453,7 @@ useEffect(() => {
           <div class="flex space-x-8">
             <div>
               <span class="text-gray-900 font-semibold block">
-Orderno: #{orderData?.serialNumber || orderData?.serialNo}
+                Orderno: #{orderData?.serialNumber || orderData?.serialNo}
               </span>
               <span class="text-gray-900 font-semibold block mt-1">
                 {formattedDate} from Online store
@@ -464,7 +482,7 @@ Orderno: #{orderData?.serialNumber || orderData?.serialNo}
             lineItems.some(
               (i) =>
                 i.fulfillment_status === null ||
-                i.fulfillment_status === "cancelled"
+                i.fulfillment_status === "cancelled",
             ) && (
               <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
                 <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
@@ -499,7 +517,7 @@ Orderno: #{orderData?.serialNumber || orderData?.serialNo}
                       .filter(
                         (item) =>
                           item.fulfillment_status === null ||
-                          item.fulfillment_status === "cancelled"
+                          item.fulfillment_status === "cancelled",
                       )
                       .map((item, index) => (
                         <div
@@ -554,7 +572,7 @@ Orderno: #{orderData?.serialNumber || orderData?.serialNo}
                   </div>
 
                   {!lineItems.some(
-                    (i) => i.fulfillment_status === "cancelled"
+                    (i) => i.fulfillment_status === "cancelled",
                   ) && (
                     <div className="flex space-x-2 justify-end">
                       <button
@@ -592,7 +610,7 @@ Orderno: #{orderData?.serialNumber || orderData?.serialNo}
             )}
 
           {/* fullfill box */}
- 
+
           {orderData?.fulfillments?.map((fulfillment, index) => (
             <div
               key={index}
@@ -646,7 +664,7 @@ Orderno: #{orderData?.serialNumber || orderData?.serialNo}
                       year: "numeric",
                       month: "long",
                       day: "numeric",
-                    }
+                    },
                   )}
                 </p>
                 <p>
@@ -661,12 +679,35 @@ Orderno: #{orderData?.serialNumber || orderData?.serialNo}
                   className="flex items-center justify-between px-4 py-3 border-t last:border-b"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
-                      <span className="text-gray-400 text-xs">No Image</span>
-                    </div>
+    <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
+  {getFulfilledItemImage(item) ? (
+    <img
+      src={getFulfilledItemImage(item)}
+      alt={item.name}
+      className="w-full h-full object-contain"
+    />
+  ) : (
+    <span className="text-gray-400 text-xs">No Image</span>
+  )}
+</div>
+
+
                     <div className="text-sm">
-                      <p className="font-medium text-gray-800">{item.title}</p>
-                      {item.variant_title && (
+                      {/* <p className="font-medium text-gray-800">{item.title}</p> */}
+                      <div>
+                        <p className="text-sm font-medium text-gray-800">
+                          {item.name}
+                        </p>
+                        {item.variant_title && (
+                          <span className="inline-block text-[10px] px-2 py-1 bg-gray-200 text-gray-600 rounded mt-1">
+                            {item.variant_title}
+                          </span>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          SKU: {item.sku || "N/A"}
+                        </p>
+                      </div>
+                      {/* {item.variant_title && (
                         <div className="flex gap-1 flex-wrap mt-1 text-[10px]">
                           {item.variant_title.split(" / ").map((opt, i) => (
                             <span
@@ -680,7 +721,7 @@ Orderno: #{orderData?.serialNumber || orderData?.serialNo}
                       )}
                       <p className="text-xs text-gray-500 mt-1">
                         SKU: {item.sku || "N/A"}
-                      </p>
+                      </p> */}
                     </div>
                   </div>
 
@@ -1000,7 +1041,7 @@ Orderno: #{orderData?.serialNumber || orderData?.serialNo}
                             email,
                             lineItemIds: lineItems.map((i) => i.id),
                           }),
-                        }
+                        },
                       );
 
                       const result = await response.json();

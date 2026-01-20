@@ -391,26 +391,24 @@ const OrdersDetails = () => {
       showToast("error", "An error occurred while canceling the order.");
     }
   };
-const getFulfilledItemImage = (fulfillmentItem) => {
-  if (!orderData) return null;
+  const getFulfilledItemImage = (fulfillmentItem) => {
+    if (!orderData) return null;
 
-  const allItems =
-    orderData.lineItems ||
-    orderData.line_items ||
-    orderData.lineItemsByMerchant?.[merchantId] ||
-    [];
+    const allItems =
+      orderData.lineItems ||
+      orderData.line_items ||
+      orderData.lineItemsByMerchant?.[merchantId] ||
+      [];
 
-  // ✅ YOUR DATA USES id DIRECTLY
-  const orderLineItemId = fulfillmentItem.id;
+    // ✅ YOUR DATA USES id DIRECTLY
+    const orderLineItemId = fulfillmentItem.id;
 
-  const matchedItem = allItems.find(
-    (li) => String(li.id) === String(orderLineItemId)
-  );
+    const matchedItem = allItems.find(
+      (li) => String(li.id) === String(orderLineItemId),
+    );
 
-  return matchedItem?.image?.src || null;
-};
-
-
+    return matchedItem?.image?.src || null;
+  };
 
   const [lineItemCount, setLineItemCount] = useState(0);
   useEffect(() => {
@@ -679,18 +677,17 @@ const getFulfilledItemImage = (fulfillmentItem) => {
                   className="flex items-center justify-between px-4 py-3 border-t last:border-b"
                 >
                   <div className="flex items-center gap-3">
-    <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
-  {getFulfilledItemImage(item) ? (
-    <img
-      src={getFulfilledItemImage(item)}
-      alt={item.name}
-      className="w-full h-full object-contain"
-    />
-  ) : (
-    <span className="text-gray-400 text-xs">No Image</span>
-  )}
-</div>
-
+                    <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
+                      {getFulfilledItemImage(item) ? (
+                        <img
+                          src={getFulfilledItemImage(item)}
+                          alt={item.name}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <span className="text-gray-400 text-xs">No Image</span>
+                      )}
+                    </div>
 
                     <div className="text-sm">
                       {/* <p className="font-medium text-gray-800">{item.title}</p> */}

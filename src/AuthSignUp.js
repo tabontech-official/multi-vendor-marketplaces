@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useAuthContext } from "./Hooks/useAuthContext";
 import Dashboard from "./pages/Dashboard";
+import { toast } from "react-toastify";
 
 const AuthSignUp = () => {
   const location = useLocation();
@@ -22,6 +23,30 @@ const AuthSignUp = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [agreedToPolicies, setAgreedToPolicies] = useState(false);
+  const handleSellerNameChange = (e) => {
+    const value = e.target.value;
+
+    // Capital letters check
+    if (/[A-Z]/.test(value)) {
+      toast.error("Seller name must be in lowercase only");
+      return;
+    }
+
+    // Space check
+    if (/\s/.test(value)) {
+      toast.error("Spaces are not allowed in seller name");
+      return;
+    }
+
+    // Special character check
+    if (!/^[a-z0-9]*$/.test(value)) {
+      toast.error("Special characters are not allowed");
+      return;
+    }
+
+    setSellerName(value);
+  };
+
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
@@ -54,30 +79,33 @@ const AuthSignUp = () => {
     }
 
     try {
-      const response = await fetch("https://multi-vendor-marketplace.vercel.app/auth/signUp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          email,
-          sellerName,
-          password,
-          zip,
-          country,
-          state,
-          phoneNumber,
-          city,
-        }),
-      });
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/auth/signUp",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firstName,
+            lastName,
+            email,
+            sellerName,
+            password,
+            zip,
+            country,
+            state,
+            phoneNumber,
+            city,
+          }),
+        },
+      );
 
       const json = await response.json();
 
       if (response.ok) {
-        setSuccess("Registration successful! Please log in.");
+        toast.success("Registration successful! Please log in.");
         navigate("/Login");
       } else {
-        setError(json.error || "An error occurred during registration.");
+        toast.error(json.error || "An error occurred during registration.");
       }
     } catch (error) {
       setError("An error occurred. Please try again.");
@@ -138,9 +166,9 @@ const AuthSignUp = () => {
               <input
                 type="text"
                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
-                placeholder="Seller Name*"
+                placeholder="Seller Name* (lowercase only)"
                 value={sellerName}
-                onChange={(e) => setSellerName(e.target.value)}
+                onChange={handleSellerNameChange}
                 required
               />
             </div>

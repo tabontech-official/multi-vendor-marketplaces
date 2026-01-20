@@ -35,7 +35,7 @@ const AccountPage = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [previewUrl, setPreviewUrl] = useState(null);
-
+const [imageError, setImageError] = useState("");
   const [role, setRole] = useState("");
   const [activeButton, setActiveButton] = useState("");
   const [userRole, setUserRole] = useState(null);
@@ -47,6 +47,7 @@ const AccountPage = () => {
   const [sellerNameInput, setSellerNameInput] = useState("");
   const [collectionId, setCollectionId] = useState("");
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
+const [collectionTitle, setCollectionTitle] = useState(sellerName || "");
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -67,48 +68,52 @@ const AccountPage = () => {
     sellerGst: "",
     gstRegistered: "",
   });
-
+useEffect(() => {
+  setCollectionTitle(sellerName || "");
+}, [sellerName]);
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
 
-  useEffect(() => {
-    const fetchBrandAssetData = async () => {
-      const userId = localStorage.getItem("userid");
-      if (!userId) return;
+ useEffect(() => {
+  const fetchBrandAsset = async () => {
+    const userId = localStorage.getItem("userid");
+    if (!userId) return;
 
-      try {
-        const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getCollcetion/${userId}`,
-        );
-        const data = await res.json();
-        if (res.ok) {
-          setSellerName(data.sellerName);
-          setSellerNameInput(data.sellerName);
-          setCollectionId(data.shopifyCollectionId);
-          setDescription(data.description);
-          setImagePreview(data.image);
-        } else {
-          console.error("Error fetching brand asset:", data.error);
-        }
-      } catch (err) {
-        console.error("API error:", err);
+    try {
+      const res = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/auth/getBrandAssets/${userId}`
+      );
+      const json = await res.json();
+
+      console.log("📦 Brand Asset API Response:", json);
+
+      if (res.ok && json.data) {
+        setCollectionTitle(json.data.sellerName || "");
+        setSellerName(json.data.sellerName || "");
+        setDescription(json.data.description || "");
+        setImagePreview(json.data.images || null);
       }
-    };
+    } catch (err) {
+      console.error("❌ Brand asset fetch error:", err);
+    }
+  };
 
-    fetchBrandAssetData();
-  }, []);
+  fetchBrandAsset();
+}, []);
+
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const handleImageChange = (e) => {
+const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImagePreview(URL.createObjectURL(file));
       setImageFile(file);
     }
   };
+
 
   useEffect(() => {
     const fetchBrandAssetData = async () => {
@@ -140,10 +145,7 @@ const AccountPage = () => {
 
   const handleSubmit2 = async () => {
     const userId = localStorage.getItem("userid");
-    if (!userId || !collectionId || !description) {
-      setMessage("User ID, Collection ID, and Description are required");
-      return;
-    }
+    
 
     try {
       setLoading(true);
@@ -153,6 +155,8 @@ const AccountPage = () => {
       formData.append("userId", userId);
       formData.append("collectionId", collectionId);
       formData.append("description", description);
+      formData.append("title", collectionTitle);
+
       if (imageFile) {
         formData.append("images", imageFile);
       }
@@ -190,12 +194,9 @@ const AccountPage = () => {
       }
 
       try {
-        const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
-          {
-            method: "GET",
-          },
-        );
+        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
+          method: "GET",
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -267,11 +268,13 @@ const AccountPage = () => {
     form.append("lastName", formData.lastName);
     form.append("email", formData.email);
     form.append("password", formData.password);
-    form.append("phoneNumber", formData.phone);
     form.append("address", formData.address);
+    form.append("phoneNumber", formData.phone);
+    form.append("city", formData.city);
+    form.append("state", formData.state);
     form.append("zip", formData.zip);
     form.append("country", formData.country);
-    form.append("city", formData.city);
+
     form.append("gstRegistered", formData.gstRegistered);
     form.append("sellerGst", formData.sellerGst);
     form.append("dispatchzip", formData.dispatchzip);
@@ -344,16 +347,13 @@ const AccountPage = () => {
 
   const updateAllProductsStatus = async (status) => {
     try {
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/holiday",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status }),
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/product/holiday", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({ status }),
+      });
 
       const data = await response.json();
       if (response.ok) {
@@ -752,7 +752,7 @@ const AccountPage = () => {
                 </div>
 
                 {/* Email */}
-                <div className="flex flex-col">
+                {/* <div className="flex flex-col">
                   <label
                     htmlFor="email"
                     className="text-sm font-medium text-gray-700"
@@ -768,7 +768,7 @@ const AccountPage = () => {
                     required
                     className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
                   />
-                </div>
+                </div> */}
 
                 {/* Address */}
                 <div className="flex flex-col">
@@ -786,6 +786,71 @@ const AccountPage = () => {
                     onChange={handleChange}
                     required
                     className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700">
+                    Phone Number *
+                  </label>
+                  <input
+                    type="text"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 border rounded-md"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700">
+                    City *
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 border rounded-md"
+                  />
+                </div>
+                {/* <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700">
+                    State *
+                  </label>
+                  <input
+                    type="text"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 border rounded-md"
+                  />
+                </div> */}
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700">
+                    Zip *
+                  </label>
+                  <input
+                    type="number"
+                    name="zip"
+                    value={formData.zip}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 border rounded-md"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700">
+                    Country *
+                  </label>
+                  <input
+                    type="text"
+                    name="country"
+                    value={formData.country}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 border rounded-md"
                   />
                 </div>
 
@@ -885,7 +950,7 @@ const AccountPage = () => {
                 </div>
 
                 {/* Dispatch Zip */}
-                <div className="flex flex-col">
+                {/* <div className="flex flex-col">
                   <label
                     htmlFor="dispatchzip"
                     className="text-sm font-medium text-gray-700"
@@ -901,7 +966,7 @@ const AccountPage = () => {
                     required
                     className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
                   />
-                </div>
+                </div> */}
               </div>
 
               {/* Save Button */}
@@ -916,83 +981,7 @@ const AccountPage = () => {
             </div>
           )}
 
-          {/* {activeTab === "brandassets" && (
-            <div className=" p-6 rounded-lg text-blue-900">
-              <div className="flex justify-between">
-                <h2 className="text-xl font-semibold text-blue-900">
-                  Seller Name
-                </h2>
-              </div>
-
-              <div>
-                <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300 text-center">
-                  <p className="text-blue-500">
-                    Maximum size for a file is 5MB, format: .jpg, .jpeg
-                  </p>
-                  <p className="text-blue-600">
-                    Recommended image size: 1180×290px
-                  </p>
-                  <div className="mt-4 h-32 border-2 border-dashed border-blue-500 flex justify-center items-center relative">
-                    {imagePreview ? (
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="object-cover h-full w-full"
-                      />
-                    ) : (
-                      <span className="text-blue-500 z-10">
-                        Upload Cover Photo
-                      </span>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/jpg"
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                      onChange={handleImageChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <label className="block text-blue-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    className="w-full p-2 bg-blue-200 text-blue-900 border border-blue-400 rounded-md"
-                    placeholder="Minimum 160 and maximum 900 characters"
-                    rows="4"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6 bg-blue-200 p-4 rounded-lg border border-blue-300">
-                <h3 className="text-lg font-semibold text-blue-900">Photo</h3>
-                <ul className="text-blue-600 text-sm mt-2 space-y-1">
-                  <li>✔ Your photo will be posted:</li>
-                  <li>- On the business page</li>
-                  <li>- On the ad page (if you have an ad package)</li>
-                  <li>- In job search results (if using premium ads)</li>
-                </ul>
-              </div>
-              <div className="mt-4 text-center">
-                <button
-                  className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700"
-                  onClick={handleSubmit2}
-                  disabled={loading}
-                >
-                  {loading ? "Creating..." : "Create Collection"}
-                </button>
-              </div>
-
-              {message && (
-                <p className="mt-4 text-center text-blue-700 font-medium">
-                  {message}
-                </p>
-              )}
-            </div>
-          )} */}
+        
           {activeTab === "brandassets" && (
             <div className="p-6 bg-gradient-to-br from-blue-50 via-white to-blue-100 rounded-xl shadow-md space-y-8 text-blue-900">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -1018,7 +1007,19 @@ const AccountPage = () => {
                   {loading ? "Updating..." : "Update Collection"}
                 </button>
               </div>
-
+<div>
+  <label className="block text-sm font-semibold mb-2 text-blue-800">
+    Collection Title *
+  </label>
+  <input
+    type="text"
+    value={collectionTitle}
+    onChange={(e) => setCollectionTitle(e.target.value)}
+    placeholder="Enter collection title"
+    className="w-full border border-gray-300 text-blue-900 rounded-md p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+    required
+  />
+</div>
               <div className="rounded-lg border border-blue-200 bg-white shadow-inner p-6">
                 <p className="text-sm text-blue-600 mb-2">
                   Upload a banner image for your collection (Max 5MB, .jpg/.jpeg

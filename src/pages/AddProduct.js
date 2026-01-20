@@ -19,6 +19,7 @@ import {
   convertFromRaw,
 } from "draft-js";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
+import { jwtDecode } from "jwt-decode";
 const CategorySelector = () => {
   const { id } = useParams();
   const isEditing = Boolean(id);
@@ -46,27 +47,60 @@ const CategorySelector = () => {
   });
 
   const isFetched = useRef(false);
-  useEffect(() => {
-    const fetchSizeCharts = async () => {
-      try {
-        const userId = localStorage.getItem("userid");
+  // useEffect(() => {
+  //   const fetchSizeCharts = async () => {
+  //     try {
+  //       const userId = localStorage.getItem("userid");
+  //       if (!userId) return;
+
+  //       const res = await fetch(
+  //         `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`,
+  //       );
+  //       const data = await res.json();
+
+  //       if (Array.isArray(data.data)) {
+  //         setSizeCharts(data.data);
+  //       }
+  //     } catch (err) {
+  //       console.error("Error loading size charts:", err);
+  //     }
+  //   };
+
+  //   fetchSizeCharts();
+  // }, []);
+useEffect(() => {
+  const fetchSizeCharts = async () => {
+    try {
+      const token = localStorage.getItem("usertoken");
+      const userId = localStorage.getItem("userid");
+
+      if (!token) return;
+
+      const decoded = jwtDecode(token);
+      const role = decoded?.payLoad?.role;
+
+      let url = "";
+
+      if (role === "Dev Admin" || role === "Master Admin") {
+        url = "https://multi-vendor-marketplace.vercel.app/size-chart/all";
+      } else {
         if (!userId) return;
-
-        const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`,
-        );
-        const data = await res.json();
-
-        if (Array.isArray(data.data)) {
-          setSizeCharts(data.data);
-        }
-      } catch (err) {
-        console.error("Error loading size charts:", err);
+        url = `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`;
       }
-    };
 
-    fetchSizeCharts();
-  }, []);
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (Array.isArray(data.data)) {
+        setSizeCharts(data.data);
+      }
+    } catch (err) {
+      console.error("Error loading size charts:", err);
+    }
+  };
+
+  fetchSizeCharts();
+}, []);
 
   useEffect(() => {
     const fetchShippingProfiles = async () => {

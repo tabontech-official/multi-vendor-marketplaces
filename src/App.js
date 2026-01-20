@@ -59,6 +59,7 @@ import ManageShippingProfiles from "./pages/ManageShippingProfiles";
 import InvoicePreview from "./pages/InvoicePreview";
 import ManageSizeChart from "./pages/ManageSizeChart";
 import CreateSizeChart from "./pages/CreateSizeChart";
+import { ToastContainer } from "react-toastify";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -110,6 +111,8 @@ const App = () => {
   return (
     <NotificationProvider>
       <Router>
+              <ToastContainer position="top-right" autoClose={3000} />
+
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route

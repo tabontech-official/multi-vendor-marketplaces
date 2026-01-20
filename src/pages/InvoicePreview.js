@@ -237,7 +237,9 @@ const PackagingSlip = () => {
         <h1 style={styles.logo}>AYDI ACTIVE</h1>
 
         <div style={styles.orderInfo}>
-          <div><strong>Order #{order.shopifyOrderNo}</strong></div>
+          <div>
+            <strong>Order #{order.shopifyOrderNo}</strong>
+          </div>
           <div>{new Date(order.createdAt).toLocaleDateString("en-GB")}</div>
         </div>
       </div>
@@ -247,9 +249,12 @@ const PackagingSlip = () => {
         <div>
           <h4 style={styles.sectionTitle}>SHIP TO</h4>
           <p style={styles.text}>
-            {address.first_name} {address.last_name}<br />
-            {address.address1}<br />
-            {address.city} {address.province} {address.zip}<br />
+            {address.first_name} {address.last_name}
+            <br />
+            {address.address1}
+            <br />
+            {address.city} {address.province} {address.zip}
+            <br />
             {address.country}
           </p>
         </div>
@@ -257,9 +262,12 @@ const PackagingSlip = () => {
         <div>
           <h4 style={styles.sectionTitle}>BILL TO</h4>
           <p style={styles.text}>
-            {address.first_name} {address.last_name}<br />
-            {address.address1}<br />
-            {address.city} {address.province} {address.zip}<br />
+            {address.first_name} {address.last_name}
+            <br />
+            {address.address1}
+            <br />
+            {address.city} {address.province} {address.zip}
+            <br />
             {address.country}
           </p>
         </div>
@@ -283,7 +291,9 @@ const PackagingSlip = () => {
             <div style={styles.muted}>{item.sku}</div>
           </div>
 
-          <div>{item.quantity} of {item.quantity}</div>
+          <div>
+            {item.quantity} of {item.quantity}
+          </div>
         </div>
       ))}
 
@@ -294,9 +304,12 @@ const PackagingSlip = () => {
         <p>Thank you for shopping with us!</p>
 
         <p>
-          Aydi Active<br />
-          PO Box 241, Doncaster Heights VIC 3109, Australia<br />
-          contact@aydiactive.com<br />
+          Aydi Active
+          <br />
+          PO Box 241, Doncaster Heights VIC 3109, Australia
+          <br />
+          contact@aydiactive.com
+          <br />
           www.aydiactive.com
         </p>
 
@@ -307,7 +320,7 @@ const PackagingSlip = () => {
 
       {/* PRINT */}
       <style>
-{`
+        {`
   @media print {
 
     /* NAVBAR HIDE */
@@ -340,8 +353,7 @@ const PackagingSlip = () => {
     }
   }
 `}
-</style>
-
+      </style>
     </div>
   );
 };

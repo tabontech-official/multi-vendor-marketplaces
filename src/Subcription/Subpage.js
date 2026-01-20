@@ -132,7 +132,7 @@ const SubscriptionHistory = () => {
       if (res.ok) {
         const json = await res.json();
         const sortedSubscriptions = json.data.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
         setSubscriptions(sortedSubscriptions);
         setFilteredSubscriptions(sortedSubscriptions);
@@ -248,7 +248,7 @@ const SubscriptionHistory = () => {
       const role = decoded?.payLoad?.role;
       const isTokenValid = decoded.exp * 1000 > Date.now();
       setIsAdmin(
-        isTokenValid && (role === "Master Admin" || role === "Dev Admin")
+        isTokenValid && (role === "Master Admin" || role === "Dev Admin"),
       );
     }
   }, []);
@@ -277,15 +277,15 @@ const SubscriptionHistory = () => {
         regexSafe.test(subscription.serialNo?.toString());
 
       const merchantMatch = subscription.merchants?.some((merchant) =>
-        regexSafe.test(merchant.info?.name || "")
+        regexSafe.test(merchant.info?.name || ""),
       );
 
       const merchantEmailMatch = subscription.merchants?.some((merchant) =>
-        regexSafe.test(merchant.info?.email || "")
+        regexSafe.test(merchant.info?.email || ""),
       );
 
       const statusMatch = Object.values(
-        subscription.lineItemsByMerchant || {}
+        subscription.lineItemsByMerchant || {},
       ).some((items) =>
         items.some((item) => {
           const status = item.fulfillment_status;
@@ -295,11 +295,11 @@ const SubscriptionHistory = () => {
           if (value === "cancelled") return status === "cancelled";
 
           return regexSafe.test(status || "unfulfilled");
-        })
+        }),
       );
 
       const dateMatchFromLineItems = Object.values(
-        subscription.lineItemsByMerchant || {}
+        subscription.lineItemsByMerchant || {},
       ).some((items) =>
         items.some((item) => {
           const date = item?.customer?.[0]?.created_at;
@@ -314,13 +314,13 @@ const SubscriptionHistory = () => {
             formattedDate &&
             formattedDate.toLowerCase().includes(value.toLowerCase())
           );
-        })
+        }),
       );
 
       const dateMatchUserSide = (() => {
         if (!subscription.createdAt) return false;
         const formattedDate = new Date(
-          subscription.createdAt
+          subscription.createdAt,
         ).toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
@@ -403,9 +403,9 @@ const SubscriptionHistory = () => {
                       <th scope="col" className="p-3">
                         #
                       </th>
-                      <th scope="col" className="p-3">
+                      {/* <th scope="col" className="p-3">
                         Image
-                      </th>
+                      </th> */}
                       <th scope="col" className="p-3">
                         Date Purchased
                       </th>
@@ -450,7 +450,7 @@ const SubscriptionHistory = () => {
                                 merchantItems[0]?.fulfillment_status;
                               const totalQuantity = merchantItems.reduce(
                                 (sum, item) => sum + (item.quantity || 0),
-                                0
+                                0,
                               );
 
                               const totalPrice = merchantItems.reduce(
@@ -459,7 +459,7 @@ const SubscriptionHistory = () => {
                                   const qty = parseInt(item.quantity || 0);
                                   return sum + price * qty;
                                 },
-                                0
+                                0,
                               );
 
                               return (
@@ -489,7 +489,7 @@ const SubscriptionHistory = () => {
                                   >
                                     #{orderId}
                                   </td>
-                                  <td className="p-3">
+                                  {/* <td className="p-3">
                                     {merchantItems[0]?.image?.src ? (
                                       <img
                                         src={merchantItems[0].image.src}
@@ -504,7 +504,7 @@ const SubscriptionHistory = () => {
                                         No Image
                                       </span>
                                     )}
-                                  </td>
+                                  </td> */}
                                   <td className="p-3">
                                     {orderDate ? formatDate(orderDate) : "N/A"}
                                   </td>
@@ -520,15 +520,15 @@ const SubscriptionHistory = () => {
                                         fulfillment_status === "fulfilled"
                                           ? "bg-green-200 text-green-800"
                                           : fulfillment_status === "cancelled"
-                                          ? "bg-red-200 text-red-800"
-                                          : "bg-yellow-200 text-yellow-800"
+                                            ? "bg-red-200 text-red-800"
+                                            : "bg-yellow-200 text-yellow-800"
                                       }`}
                                     >
                                       {fulfillment_status === "fulfilled"
                                         ? "Fulfilled"
                                         : fulfillment_status === "cancelled"
-                                        ? "Cancelled"
-                                        : "Unfulfilled"}
+                                          ? "Cancelled"
+                                          : "Unfulfilled"}
                                     </span>
                                   </td>
 
@@ -537,7 +537,7 @@ const SubscriptionHistory = () => {
                                   </td>
                                 </tr>
                               );
-                            }
+                            },
                           );
                         })
                       : filteredSubscriptions.map((subscription, index) => {
@@ -556,13 +556,13 @@ const SubscriptionHistory = () => {
                               <td
                                 className="p-3 text-blue-600 hover:underline cursor-pointer"
                                 onClick={() => {
-                                  console.log("Navigating with data:", {
-                                    order: subscription,
-                                    productName: firstItem.name,
-                                    sku: firstItem.sku,
-                                    index: 101 + index,
-                                    serialNumber: subscription.orderId,
-                                  });
+                                  // console.log("Navigating with data:", {
+                                  //   order: subscription,
+                                  //   productName: firstItem.name,
+                                  //   sku: firstItem.sku,
+                                  //   index: 101 + index,
+                                  //   serialNumber: subscription.orderId,
+                                  // });
 
                                   navigate(`/order/${subscription.orderId}`, {
                                     state: {
@@ -577,7 +577,7 @@ const SubscriptionHistory = () => {
                               >
                                 #{subscription.shopifyOrderNo}
                               </td>
-                              <td className="p-3">
+                              {/* <td className="p-3">
                                 {firstItem?.image?.src ? (
                                   <img
                                     src={firstItem.image.src}
@@ -589,7 +589,7 @@ const SubscriptionHistory = () => {
                                     No Image
                                   </span>
                                 )}
-                              </td>
+                              </td> */}
                               <td className="p-3">
                                 {formatDate(subscription.createdAt)}
                               </td>
@@ -610,18 +610,18 @@ const SubscriptionHistory = () => {
                                       ?.fulfillment_status === "fulfilled"
                                       ? "bg-green-200 text-green-800"
                                       : subscription?.lineItems[0]
-                                          ?.fulfillment_status === "cancelled"
-                                      ? "bg-red-200 text-red-800"
-                                      : "bg-yellow-200 text-yellow-800"
+                                            ?.fulfillment_status === "cancelled"
+                                        ? "bg-red-200 text-red-800"
+                                        : "bg-yellow-200 text-yellow-800"
                                   }`}
                                 >
                                   {subscription?.lineItems[0]
                                     ?.fulfillment_status === "fulfilled"
                                     ? "Fulfilled"
                                     : subscription?.lineItems[0]
-                                        ?.fulfillment_status === "cancelled"
-                                    ? "Cancelled"
-                                    : "Unfulfilled"}
+                                          ?.fulfillment_status === "cancelled"
+                                      ? "Cancelled"
+                                      : "Unfulfilled"}
                                 </span>
                               </td>
                               {/* <td className="p-3">

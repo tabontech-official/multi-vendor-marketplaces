@@ -594,9 +594,13 @@ const OrdersDetails = () => {
                       </button>
 
                       <button
-                        onClick={() =>
-                          navigate("/invoice-preview", { state: { order } })
-                        }
+                        onClick={() => {
+                          console.log("Packing slip order data:", order);
+
+                          navigate("/invoice-preview", {
+                            state: { order },
+                          });
+                        }}
                         className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition"
                       >
                         Print packing slip

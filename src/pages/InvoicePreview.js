@@ -1,14 +1,12 @@
 // import React from "react";
 // import { useLocation } from "react-router-dom";
 
-// const InvoicePreview = () => {
+// const PackagingSlip = () => {
 //   const location = useLocation();
 //   const order = location.state?.order;
 
 //   if (!order) {
-//     return (
-//       <div className="p-10 text-center text-red-500">No order data found.</div>
-//     );
+//     return <div style={{ padding: 40 }}>No order data found.</div>;
 //   }
 
 //   const customer = order.customer || {};
@@ -16,205 +14,197 @@
 //   const lineItems = order.lineItems || [];
 
 //   return (
-//     <div
-//       className="invoice-page"
-//       style={{
-//         fontFamily: "Arial, sans-serif",
-//         padding: "40px",
-//         maxWidth: "800px",
-//         margin: "0 auto",
-//         color: "#222",
-//         backgroundColor: "white",
-//       }}
-//     >
+//     <div style={styles.page} className="packing-slip">
 //       {/* HEADER */}
-//       <div
-//         style={{
-//           display: "flex",
-//           justifyContent: "space-between",
-//           alignItems: "center",
-//           marginBottom: "40px",
-//         }}
-//       >
-//         <h1 style={{ fontSize: "24px", fontWeight: "bold" }}>AYDI ACTIVE</h1>
-//         <div style={{ textAlign: "right" }}>
-//           <p style={{ margin: 0, fontSize: "12px" }}>
-//             Order #{order.shopifyOrderNo || "N/A"}
-//           </p>
-//           <p style={{ margin: 0, fontSize: "12px" }}>
-//             {new Date(order.createdAt).toLocaleDateString("en-GB", {
-//               day: "2-digit",
-//               month: "long",
-//               year: "numeric",
-//             })}
-//           </p>
+//       <div style={styles.header}>
+//         <h1 style={styles.logo}>AYDI ACTIVE</h1>
+
+//         <div style={styles.orderInfo}>
+//           <div>
+//             <strong>Order #{order.shopifyOrderNo}</strong>
+//           </div>
+//           <div>{new Date(order.createdAt).toLocaleDateString("en-GB")}</div>
 //         </div>
 //       </div>
 
-//       {/* ADDRESS SECTION */}
-//       <div
-//         style={{
-//           display: "flex",
-//           justifyContent: "space-between",
-//           marginBottom: "30px",
-//         }}
-//       >
+//       {/* ADDRESSES */}
+//       <div style={styles.addressRow}>
 //         <div>
-//           <h3 style={{ fontSize: "14px", marginBottom: "5px" }}>SHIP TO</h3>
-//           <p style={{ fontSize: "12px", lineHeight: "1.4" }}>
-//             {address.first_name || customer.first_name || ""}{" "}
-//             {address.last_name || customer.last_name || ""}
+//           <h4 style={styles.sectionTitle}>SHIP TO</h4>
+//           <p style={styles.text}>
+//             {address.first_name} {address.last_name}
 //             <br />
-//             {address.address1 || ""}
+//             {address.address1}
 //             <br />
-//             {address.city || ""} {address.province || ""} {address.zip || ""}
+//             {address.city} {address.province} {address.zip}
 //             <br />
-//             {address.country || ""}
+//             {address.country}
 //           </p>
 //         </div>
 
 //         <div>
-//           <h3 style={{ fontSize: "14px", marginBottom: "5px" }}>BILL TO</h3>
-//           <p style={{ fontSize: "12px", lineHeight: "1.4" }}>
-//             {address.first_name || customer.first_name || ""}{" "}
-//             {address.last_name || customer.last_name || ""}
+//           <h4 style={styles.sectionTitle}>BILL TO</h4>
+//           <p style={styles.text}>
+//             {address.first_name} {address.last_name}
 //             <br />
-//             {address.address1 || ""}
+//             {address.address1}
 //             <br />
-//             {address.city || ""} {address.province || ""} {address.zip || ""}
+//             {address.city} {address.province} {address.zip}
 //             <br />
-//             {address.country || ""}
+//             {address.country}
 //           </p>
 //         </div>
 //       </div>
 
-//       {/* LINE ITEMS */}
-//       <table
-//         style={{
-//           width: "100%",
-//           borderCollapse: "collapse",
-//           marginBottom: "30px",
-//         }}
-//       >
-//         <thead>
-//           <tr style={{ background: "#f4f4f4" }}>
-//             <th
-//               style={{
-//                 textAlign: "left",
-//                 padding: "8px",
-//                 borderBottom: "1px solid #ccc",
-//               }}
-//             >
-//               IMAGE
-//             </th>
-//             <th
-//               style={{
-//                 textAlign: "left",
-//                 padding: "8px",
-//                 borderBottom: "1px solid #ccc",
-//               }}
-//             >
-//               PRODUCT
-//             </th>
-//             <th
-//               style={{
-//                 textAlign: "right",
-//                 padding: "8px",
-//                 borderBottom: "1px solid #ccc",
-//               }}
-//             >
-//               QUANTITY
-//             </th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {lineItems.map((item, index) => (
-//             <tr key={index}>
-//               <td style={{ padding: "8px" }}>
-//                 {item.image?.src ? (
-//                   <img
-//                     src={item.image.src}
-//                     alt={item.name}
-//                     style={{
-//                       width: "60px",
-//                       height: "60px",
-//                       objectFit: "contain",
-//                       borderRadius: "4px",
-//                     }}
-//                   />
-//                 ) : (
-//                   <span style={{ fontSize: "12px", color: "#777" }}>
-//                     No image
-//                   </span>
-//                 )}
-//               </td>
-//               <td style={{ padding: "8px", fontSize: "12px" }}>{item.name}</td>
-//               <td
-//                 style={{
-//                   padding: "8px",
-//                   textAlign: "right",
-//                   fontSize: "12px",
-//                 }}
-//               >
-//                 {item.quantity || 1}
-//               </td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
+//       <hr />
+
+//       {/* ITEMS */}
+//       <div style={styles.itemsHeader}>
+//         <strong>ITEMS</strong>
+//         <strong>QUANTITY</strong>
+//       </div>
+
+//       {lineItems.map((item, i) => (
+//         <div key={i} style={styles.itemRow}>
+//           <div>
+//             <div>{item.name}</div>
+//             {item.variant_title && (
+//               <div style={styles.muted}>{item.variant_title}</div>
+//             )}
+//             <div style={styles.muted}>{item.sku}</div>
+//           </div>
+
+//           <div>
+//             {item.quantity} of {item.quantity}
+//           </div>
+//         </div>
+//       ))}
+
+//       <hr />
 
 //       {/* FOOTER */}
-//       <div style={{ textAlign: "center", fontSize: "12px", marginTop: "40px" }}>
+//       <div style={styles.footer}>
 //         <p>Thank you for shopping with us!</p>
+
 //         <p>
-//           Aydi Active <br />
-//           PO Box 241, Doncaster Heights VIC 3109, Australia <br />
-//           contact@aydiactive.com | www.aydiactive.com
+//           Aydi Active
+//           <br />
+//           PO Box 241, Doncaster Heights VIC 3109, Australia
+//           <br />
+//           contact@aydiactive.com
+//           <br />
+//           www.aydiactive.com
 //         </p>
-//         <button
-//           onClick={() => window.print()}
-//           style={{
-//             marginTop: "20px",
-//             padding: "8px 16px",
-//             backgroundColor: "black",
-//             color: "white",
-//             border: "none",
-//             borderRadius: "5px",
-//             cursor: "pointer",
-//           }}
-//         >
-//           🖨️ Print Invoice
+
+//         <button onClick={() => window.print()} style={styles.printBtn}>
+//           Print
 //         </button>
 //       </div>
 
-//       {/* ✅ Print-only CSS */}
+//       {/* PRINT */}
 //       <style>
 //         {`
-//           @media print {
-//             body * {
-//               visibility: hidden !important;
-//             }
-//             .invoice-page, .invoice-page * {
-//               visibility: visible !important;
-//             }
-//             .invoice-page {
-//               position: absolute;
-//               left: 0;
-//               top: 0;
-//               width: 100%;
-//               background: white;
-//             }
-//             button {
-//               display: none !important;
-//             }
-//           }
-//         `}
+//   @media print {
+
+//     /* NAVBAR HIDE */
+//     .navbar,
+//     .topbar,
+//     header,
+//     nav {
+//       display: none !important;
+//     }
+
+//     /* Sirf packing slip visible */
+//     body * {
+//       visibility: hidden;
+//     }
+
+//     .packing-slip,
+//     .packing-slip * {
+//       visibility: visible;
+//     }
+
+//     .packing-slip {
+//       position: absolute;
+//       left: 0;
+//       top: 0;
+//       width: 100%;
+//     }
+
+//     button {
+//       display: none !important;
+//     }
+//   }
+// `}
 //       </style>
 //     </div>
 //   );
 // };
 
-// export default InvoicePreview;
+// const styles = {
+//   page: {
+//     maxWidth: 800,
+//     margin: "auto",
+//     padding: 40,
+//     fontFamily: "Arial, sans-serif",
+//     color: "#000",
+//     background: "#fff",
+//     fontSize: 12,
+//   },
+//   header: {
+//     display: "flex",
+//     justifyContent: "space-between",
+//     marginBottom: 30,
+//   },
+//   logo: {
+//     fontSize: 22,
+//     margin: 0,
+//   },
+//   orderInfo: {
+//     textAlign: "right",
+//   },
+//   addressRow: {
+//     display: "flex",
+//     justifyContent: "space-between",
+//     marginBottom: 30,
+//   },
+//   sectionTitle: {
+//     fontSize: 12,
+//     marginBottom: 6,
+//   },
+//   text: {
+//     lineHeight: 1.5,
+//   },
+//   itemsHeader: {
+//     display: "flex",
+//     justifyContent: "space-between",
+//     marginTop: 20,
+//     marginBottom: 10,
+//   },
+//   itemRow: {
+//     display: "flex",
+//     justifyContent: "space-between",
+//     padding: "8px 0",
+//   },
+//   muted: {
+//     color: "#555",
+//     fontSize: 11,
+//   },
+//   footer: {
+//     marginTop: 40,
+//     textAlign: "center",
+//   },
+//   printBtn: {
+//     marginTop: 20,
+//     padding: "8px 16px",
+//     background: "#000",
+//     color: "#fff",
+//     border: "none",
+//     cursor: "pointer",
+//   },
+// };
+
+// export default PackagingSlip;
 import React from "react";
 import { useLocation } from "react-router-dom";
 
@@ -226,56 +216,102 @@ const PackagingSlip = () => {
     return <div style={{ padding: 40 }}>No order data found.</div>;
   }
 
-  const customer = order.customer || {};
-  const address = customer.default_address || {};
-  const lineItems = order.lineItems || [];
+  /* =====================================================
+     AUTO MERCHANT KEY (merchantId aaye ya na aaye)
+  ====================================================== */
+  const merchantKey =
+    location.state?.merchantId ||
+    (order.lineItemsByMerchant
+      ? Object.keys(order.lineItemsByMerchant)[0]
+      : null);
+
+  /* =====================================================
+     CUSTOMER + ADDRESS (BOTH STRUCTURES)
+  ====================================================== */
+  let customer = {};
+  let address = {};
+
+  // Normal order
+  if (order.customer?.default_address) {
+    customer = order.customer;
+    address = order.customer.default_address;
+  }
+  // Merchant based order
+  else if (
+    order.lineItemsByMerchant &&
+    merchantKey &&
+    order.lineItemsByMerchant[merchantKey]?.[0]?.customer?.[0]
+  ) {
+    customer = order.lineItemsByMerchant[merchantKey][0].customer[0];
+    address = customer.default_address || {};
+  }
+
+  /* =====================================================
+     LINE ITEMS (BOTH STRUCTURES)
+  ====================================================== */
+  let lineItems = [];
+
+  if (Array.isArray(order.lineItems)) {
+    lineItems = order.lineItems;
+  } else if (
+    order.lineItemsByMerchant &&
+    merchantKey &&
+    Array.isArray(order.lineItemsByMerchant[merchantKey])
+  ) {
+    lineItems = order.lineItemsByMerchant[merchantKey];
+  }
 
   return (
     <div style={styles.page} className="packing-slip">
-      {/* HEADER */}
+      {/* ================= HEADER ================= */}
       <div style={styles.header}>
         <h1 style={styles.logo}>AYDI ACTIVE</h1>
 
         <div style={styles.orderInfo}>
+          <strong>
+            Order #
+            {order.shopifyOrderNo || order.name || order.serialNo || "N/A"}
+          </strong>
           <div>
-            <strong>Order #{order.shopifyOrderNo}</strong>
+            {order.createdAt
+              ? new Date(order.createdAt).toLocaleDateString("en-GB")
+              : "N/A"}
           </div>
-          <div>{new Date(order.createdAt).toLocaleDateString("en-GB")}</div>
         </div>
       </div>
 
-      {/* ADDRESSES */}
+      {/* ================= ADDRESSES ================= */}
       <div style={styles.addressRow}>
         <div>
           <h4 style={styles.sectionTitle}>SHIP TO</h4>
           <p style={styles.text}>
-            {address.first_name} {address.last_name}
+            {address.first_name || ""} {address.last_name || ""}
             <br />
-            {address.address1}
+            {address.address1 || ""}
             <br />
-            {address.city} {address.province} {address.zip}
+            {address.city || ""} {address.province || ""} {address.zip || ""}
             <br />
-            {address.country}
+            {address.country || ""}
           </p>
         </div>
 
         <div>
           <h4 style={styles.sectionTitle}>BILL TO</h4>
           <p style={styles.text}>
-            {address.first_name} {address.last_name}
+            {address.first_name || ""} {address.last_name || ""}
             <br />
-            {address.address1}
+            {address.address1 || ""}
             <br />
-            {address.city} {address.province} {address.zip}
+            {address.city || ""} {address.province || ""} {address.zip || ""}
             <br />
-            {address.country}
+            {address.country || ""}
           </p>
         </div>
       </div>
 
       <hr />
 
-      {/* ITEMS */}
+      {/* ================= ITEMS ================= */}
       <div style={styles.itemsHeader}>
         <strong>ITEMS</strong>
         <strong>QUANTITY</strong>
@@ -284,11 +320,13 @@ const PackagingSlip = () => {
       {lineItems.map((item, i) => (
         <div key={i} style={styles.itemRow}>
           <div>
-            <div>{item.name}</div>
+            <div>{item.name || item.title}</div>
+
             {item.variant_title && (
               <div style={styles.muted}>{item.variant_title}</div>
             )}
-            <div style={styles.muted}>{item.sku}</div>
+
+            <div style={styles.muted}>SKU: {item.sku || "N/A"}</div>
           </div>
 
           <div>
@@ -299,7 +337,7 @@ const PackagingSlip = () => {
 
       <hr />
 
-      {/* FOOTER */}
+      {/* ================= FOOTER ================= */}
       <div style={styles.footer}>
         <p>Thank you for shopping with us!</p>
 
@@ -318,46 +356,44 @@ const PackagingSlip = () => {
         </button>
       </div>
 
-      {/* PRINT */}
+      {/* ================= PRINT STYLES ================= */}
       <style>
         {`
-  @media print {
+          @media print {
+            .navbar,
+            .topbar,
+            header,
+            nav {
+              display: none !important;
+            }
 
-    /* NAVBAR HIDE */
-    .navbar,
-    .topbar,
-    header,
-    nav {
-      display: none !important;
-    }
+            body * {
+              visibility: hidden;
+            }
 
-    /* Sirf packing slip visible */
-    body * {
-      visibility: hidden;
-    }
+            .packing-slip,
+            .packing-slip * {
+              visibility: visible;
+            }
 
-    .packing-slip,
-    .packing-slip * {
-      visibility: visible;
-    }
+            .packing-slip {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+            }
 
-    .packing-slip {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-    }
-
-    button {
-      display: none !important;
-    }
-  }
-`}
+            button {
+              display: none !important;
+            }
+          }
+        `}
       </style>
     </div>
   );
 };
 
+/* ================= STYLES ================= */
 const styles = {
   page: {
     maxWidth: 800,

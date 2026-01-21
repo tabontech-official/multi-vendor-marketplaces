@@ -215,7 +215,8 @@ const Promotion = () => {
       const apiSecretKey = localStorage.getItem("apiSecretKey");
 
       if (userRole === "Merchant" || userRole === "Merchant Staff") {
-        url = "https://multi-vendor-marketplace.vercel.app/promo/fetchAllPromotions";
+        url =
+          "https://multi-vendor-marketplace.vercel.app/promo/fetchAllPromotions";
       } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
         url = "https://multi-vendor-marketplace.vercel.app/promo";
       }
@@ -308,9 +309,12 @@ const Promotion = () => {
     try {
       await Promise.all(
         selectedProducts.map(async (id) => {
-          const response = await fetch(`https://multi-vendor-marketplace.vercel.app/promo/${id}`, {
-            method: "DELETE",
-          });
+          const response = await fetch(
+            `https://multi-vendor-marketplace.vercel.app/promo/${id}`,
+            {
+              method: "DELETE",
+            },
+          );
           if (!response.ok) throw new Error("Failed to delete product");
         }),
       );

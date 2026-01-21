@@ -1516,9 +1516,30 @@ const CategorySelector = () => {
       );
 
       // 🔹 4. Prepare variant images payload
+      // const uploadedVariantImages = Object.entries(variantImages).flatMap(
+      //   ([key, images]) => {
+      //     const combinationAlt = key.replace(/\s*\/\s*/g, "-").toLowerCase();
+
+      //     const safeImages = Array.isArray(images)
+      //       ? images
+      //       : images
+      //         ? [images]
+      //         : [];
+
+      //     return safeImages.map((img) => ({
+      //       key,
+      //       url: img.preview || img.src,
+      //       alt: combinationAlt,
+      //     }));
+      //   },
+      // );
       const uploadedVariantImages = Object.entries(variantImages).flatMap(
         ([key, images]) => {
-          const combinationAlt = key.replace(/\s*\/\s*/g, "-").toLowerCase();
+          const parts = key.split("/").map((p) => p.trim());
+
+          // 👇 first option always primary (Shopify standard)
+          const optionName = options[0]?.name || "option";
+          const optionValue = parts[0];
 
           const safeImages = Array.isArray(images)
             ? images
@@ -1529,10 +1550,14 @@ const CategorySelector = () => {
           return safeImages.map((img) => ({
             key,
             url: img.preview || img.src,
-            alt: combinationAlt,
+
+            // ✅ NEW FIELDS
+            optionName,
+            optionValue,
           }));
         },
       );
+
       const hasVariantImages = uploadedVariantImages.length > 0;
 
       const imageSaveResponse = await fetch(
@@ -3560,9 +3585,13 @@ const CategorySelector = () => {
                                 [normalizedKey]: [
                                   {
                                     preview: imageUrl,
-                                    alt: normalizedKey
-                                      .replace(/\s*\/\s*/g, "-")
+                                    // alt: normalizedKey
+                                    //   .replace(/\s*\/\s*/g, "-")
+                                    //   .toLowerCase(),
+                                    alt: `t4option${options[0]?.name}_${normalizedKey.split("/")[0]}`
+                                      .replace(/\s+/g, "")
                                       .toLowerCase(),
+
                                     loading: false,
                                   },
                                   ...existing,

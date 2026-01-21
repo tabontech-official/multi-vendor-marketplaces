@@ -3631,7 +3631,6 @@ const CategorySelector = () => {
               </div>
 
               <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-                {/* UPLOAD + BROWSE */}
                 <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center bg-white">
                   <input
                     type="file"

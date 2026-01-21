@@ -19,6 +19,7 @@ const Promotion = () => {
     }
     return false;
   };
+  const [isSavingPromo, setIsSavingPromo] = useState(false);
 
   admin = isAdmin();
   const limit = 20;
@@ -107,14 +108,14 @@ const Promotion = () => {
             "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.ok) {
         const data = await response.json();
 
         const sortedProducts = data.products.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
 
         setProducts(sortedProducts);
@@ -122,7 +123,7 @@ const Promotion = () => {
           ...prev,
           ...sortedProducts.filter(
             (newProduct) =>
-              !prev.some((prevProduct) => prevProduct.id === newProduct.id)
+              !prev.some((prevProduct) => prevProduct.id === newProduct.id),
           ),
         ]);
 
@@ -164,48 +165,84 @@ const Promotion = () => {
 
   //   fetchPromotions();
   // }, []);
-  useEffect(() => {
-    const fetchPromotions = async () => {
-      try {
-        let url = "";
-        const apiKey = localStorage.getItem("apiKey");
-        const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-        if (userRole === "Merchant" || userRole === "Merchant Staff") {
-          url = "https://multi-vendor-marketplace.vercel.app/promo/fetchAllPromotions";
-        } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
-          url = "https://multi-vendor-marketplace.vercel.app/promo";
-        }
+  // useEffect(() => {
+  //   const fetchPromotions = async () => {
+  //     try {
+  //       let url = "";
+  //       const apiKey = localStorage.getItem("apiKey");
+  //       const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-        if (!url) return;
+  //       if (userRole === "Merchant" || userRole === "Merchant Staff") {
+  //         url = "https://multi-vendor-marketplace.vercel.app/promo/fetchAllPromotions";
+  //       } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
+  //         url = "https://multi-vendor-marketplace.vercel.app/promo";
+  //       }
 
-        const res = await fetch(url, {
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-        });
+  //       if (!url) return;
 
-        const data = await res.json();
+  //       const res = await fetch(url, {
+  //         headers: {
+  //           "x-api-key": apiKey,
+  //           "x-api-secret": apiSecretKey,
+  //           "Content-Type": "application/json",
+  //         },
+  //       });
 
-        if (Array.isArray(data)) {
-          setPromotions(data);
-        } else if (data) {
-          setPromotions((prev) => {
-            const exists = prev.some((p) => p._id === data._id);
-            return exists ? prev : [...prev, data];
-          });
-        }
-      } catch (err) {
-        console.error("Failed to fetch promotions:", err);
-        setPromotions([]);
+  //       const data = await res.json();
+
+  //       if (Array.isArray(data)) {
+  //         setPromotions(data);
+  //       } else if (data) {
+  //         setPromotions((prev) => {
+  //           const exists = prev.some((p) => p._id === data._id);
+  //           return exists ? prev : [...prev, data];
+  //         });
+  //       }
+  //     } catch (err) {
+  //       console.error("Failed to fetch promotions:", err);
+  //       setPromotions([]);
+  //     }
+  //   };
+
+  //   fetchPromotions();
+  // }, [userRole]);
+
+  const fetchPromotions = async () => {
+    try {
+      let url = "";
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+      if (userRole === "Merchant" || userRole === "Merchant Staff") {
+        url = "https://multi-vendor-marketplace.vercel.app/promo/fetchAllPromotions";
+      } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
+        url = "https://multi-vendor-marketplace.vercel.app/promo";
       }
-    };
 
+      if (!url) return;
+
+      const res = await fetch(url, {
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        setPromotions(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch promotions:", err);
+      setPromotions([]);
+    }
+  };
+  useEffect(() => {
     fetchPromotions();
   }, [userRole]);
-
   const [selectedProduct, setSelectedProduct] = useState(null);
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
@@ -222,6 +259,7 @@ const Promotion = () => {
     }
 
     try {
+      setIsSavingPromo(true);
       const res = await axios.post(
         `https://multi-vendor-marketplace.vercel.app/promo/${selectedVariant.id}`,
         {
@@ -235,17 +273,20 @@ const Promotion = () => {
             "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       showToast("success", "Promotion created successfully!");
       setModalOpen(false);
       setModalStartDate("");
       setModalEndDate("");
+      fetchPromotions();
       // window.location.reload();
     } catch (error) {
       console.error("Error adding promotion:", error);
       showToast("error", "Failed to add promotion.");
+    } finally {
+      setIsSavingPromo(false); // 🔥 STOP LOADER
     }
   };
 
@@ -260,7 +301,7 @@ const Promotion = () => {
 
   const onDeleteSelected = async () => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete the selected listings?"
+      "Are you sure you want to delete the selected listings?",
     );
     if (!confirmDelete) return;
 
@@ -271,12 +312,12 @@ const Promotion = () => {
             method: "DELETE",
           });
           if (!response.ok) throw new Error("Failed to delete product");
-        })
+        }),
       );
 
       setProducts(products.filter((p) => !selectedProducts.includes(p._id)));
       setPromotions(
-        promotions.filter((p) => !selectedProducts.includes(p._id))
+        promotions.filter((p) => !selectedProducts.includes(p._id)),
       );
       setSelectedProducts([]);
     } catch (error) {
@@ -325,7 +366,7 @@ const Promotion = () => {
             "x-api-secret": apiSecretKey,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       const data = await response.json();
@@ -334,7 +375,7 @@ const Promotion = () => {
 
       // ✅ Remove ended promotion from UI
       setPromotions((prev) =>
-        prev.filter((promo) => promo._id !== promotionToEnd)
+        prev.filter((promo) => promo._id !== promotionToEnd),
       );
 
       setPromotionToEnd(null);
@@ -386,7 +427,7 @@ const Promotion = () => {
               >
                 {tab}
               </button>
-            )
+            ),
           )}
         </div>
       </div>
@@ -709,7 +750,7 @@ const Promotion = () => {
                             setSelectedProducts((prev) =>
                               prev.includes(product._id)
                                 ? prev.filter((id) => id !== product._id)
-                                : [...prev, product._id]
+                                : [...prev, product._id],
                             )
                           }
                         />
@@ -829,10 +870,24 @@ const Promotion = () => {
                 Cancel
               </button>
               <button
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-500"
                 onClick={handleSubmitPromotion}
+                disabled={isSavingPromo}
+                className={`px-4 py-2 text-sm rounded text-white flex items-center justify-center gap-2
+    ${
+      isSavingPromo
+        ? "bg-blue-400 cursor-not-allowed"
+        : "bg-blue-600 hover:bg-blue-500"
+    }
+  `}
               >
-                Save
+                {isSavingPromo ? (
+                  <>
+                    <HiOutlineRefresh className="animate-spin text-lg" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save"
+                )}
               </button>
             </div>
           </div>
@@ -867,7 +922,7 @@ const CountdownTimer = ({ startDate, endDate }) => {
         setCountdown({
           days: Math.floor(distance / (1000 * 60 * 60 * 24)),
           hours: Math.floor(
-            (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+            (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
           ),
           minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
           seconds: Math.floor((distance % (1000 * 60)) / 1000),
@@ -878,7 +933,7 @@ const CountdownTimer = ({ startDate, endDate }) => {
         setCountdown({
           days: Math.floor(distance / (1000 * 60 * 60 * 24)),
           hours: Math.floor(
-            (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+            (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
           ),
           minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
           seconds: Math.floor((distance % (1000 * 60)) / 1000),

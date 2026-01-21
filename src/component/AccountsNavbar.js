@@ -77,7 +77,7 @@ const AccountsNavbar = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`,
+        `http://localhost:5000/auth/editProfile/${userId}`,
         {
           method: "PUT",
           body: form,
@@ -165,7 +165,7 @@ const AccountsNavbar = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+        "http://localhost:5000/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {
@@ -281,9 +281,7 @@ const AccountsNavbar = () => {
           </nav>
         </div>
 
-        <button className="w-full py-2 bg-yellow-500 text-black font-semibold rounded-md hover:bg-yellow-600">
-          Promote
-        </button>
+       
       </aside>
       {/* Popup */}
       {isOpen && (

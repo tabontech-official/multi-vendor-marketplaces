@@ -25,7 +25,7 @@ const ApiCredentials = () => {
       const userId = localStorage.getItem("userid");
 
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/generateAcessKeys/generate-keys",
+        "http://localhost:5000/generateAcessKeys/generate-keys",
         {
           method: "POST",
           headers: {
@@ -59,7 +59,7 @@ const ApiCredentials = () => {
 
       try {
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/generateAcessKeys/getApiCredentialByUserId/${userId}`
+          `http://localhost:5000/generateAcessKeys/getApiCredentialByUserId/${userId}`
         );
 
         if (!res.ok) {
@@ -198,9 +198,7 @@ const ApiCredentials = () => {
           </div>
   
           {/* Bottom: Promote Button */}
-          <button className="w-full mt-6 py-2 bg-yellow-400 text-blue-900 font-semibold rounded-md hover:bg-yellow-500 transition-all duration-150">
-            🚀 Promote
-          </button>
+         
         </aside>
 
 

@@ -83,7 +83,7 @@ useEffect(() => {
 
     try {
       const res = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/getBrandAssets/${userId}`
+        `http://localhost:5000/auth/getBrandAssets/${userId}`
       );
       const json = await res.json();
 
@@ -122,7 +122,7 @@ const handleImageChange = (e) => {
 
       try {
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getBrandAssets/${userId}`,
+          `http://localhost:5000/auth/getBrandAssets/${userId}`,
         );
         const json = await res.json();
 
@@ -162,7 +162,7 @@ const handleImageChange = (e) => {
       }
 
       const response = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/auth/addBrandAsset",
+        "http://localhost:5000/auth/addBrandAsset",
         formData,
         {
           headers: {
@@ -194,7 +194,7 @@ const handleImageChange = (e) => {
       }
 
       try {
-        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
+        const response = await fetch(`http://localhost:5000/auth/user/${id}`, {
           method: "GET",
         });
 
@@ -288,7 +288,7 @@ const handleImageChange = (e) => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`,
+        `http://localhost:5000/auth/editProfile/${userId}`,
         {
           method: "PUT",
           body: form,
@@ -347,7 +347,7 @@ const handleImageChange = (e) => {
 
   const updateAllProductsStatus = async (status) => {
     try {
-      const response = await fetch("https://multi-vendor-marketplace.vercel.app/product/holiday", {
+      const response = await fetch("http://localhost:5000/product/holiday", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -395,7 +395,7 @@ const handleImageChange = (e) => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+        "http://localhost:5000/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {
@@ -548,9 +548,7 @@ const handleImageChange = (e) => {
         </div>
 
         {/* Bottom: Promote Button */}
-        <button className="w-full mt-6 py-2 bg-yellow-400 text-blue-900 font-semibold rounded-md hover:bg-yellow-500 transition-all duration-150">
-          🚀 Promote
-        </button>
+      
       </aside>
 
       {isOpen && (
@@ -1182,7 +1180,7 @@ const handleImageChange = (e) => {
 
                           try {
                             const res = await axios.post(
-                              "https://multi-vendor-marketplace.vercel.app/order/addCommision",
+                              "http://localhost:5000/order/addCommision",
                               { comission: commission }
                             );
 

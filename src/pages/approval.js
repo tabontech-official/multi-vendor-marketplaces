@@ -22,7 +22,7 @@ const ApprovalSetting = () => {
       try {
         const apiKey = localStorage.getItem("apiKey");
         const apiSecretKey = localStorage.getItem("apiSecretKey");
-        const res = await fetch("https://multi-vendor-marketplace.vercel.app/approval/getApproval", {
+        const res = await fetch("http://localhost:5000/approval/getApproval", {
           headers: {
             "x-api-key": apiKey,
             "x-api-secret": apiSecretKey,
@@ -50,7 +50,7 @@ const ApprovalSetting = () => {
     try {
       const apiKey = localStorage.getItem("apiKey");
       const apiSecretKey = localStorage.getItem("apiSecretKey");
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/approval/add-approval", {
+      const res = await fetch("http://localhost:5000/approval/add-approval", {
         method: "POST",
         headers: {
           "x-api-key": apiKey,
@@ -185,9 +185,7 @@ const ApprovalSetting = () => {
           </div>
 
           {/* Bottom: Promote Button */}
-          <button className="w-full mt-6 py-2 bg-yellow-400 text-blue-900 font-semibold rounded-md hover:bg-yellow-500 transition-all duration-150">
-            🚀 Promote
-          </button>
+          
         </aside>
 
         <main className="flex-1 flex justify-center items-start p-10">

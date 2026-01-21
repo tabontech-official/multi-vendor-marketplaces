@@ -80,7 +80,7 @@ const AuthSignUp = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/signUp",
+        "http://localhost:5000/auth/signUp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

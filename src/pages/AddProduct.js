@@ -62,10 +62,10 @@ const CategorySelector = () => {
         let url = "";
 
         if (role === "Dev Admin" || role === "Master Admin") {
-          url = "https://multi-vendor-marketplace.vercel.app/size-chart/all";
+          url = "http://localhost:5000/size-chart/all";
         } else {
           if (!userId) return;
-          url = `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`;
+          url = `http://localhost:5000/size-chart/all/${userId}`;
         }
 
         const res = await fetch(url);
@@ -100,7 +100,7 @@ const CategorySelector = () => {
         console.log("👤 Fetching active shipping profiles for user:", userId);
 
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`,
+          `http://localhost:5000/shippingProfile/${userId}`,
           {
             method: "GET",
             headers: {
@@ -132,7 +132,7 @@ const CategorySelector = () => {
     const fetchDbOptions = async () => {
       try {
         const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions",
+          "http://localhost:5000/variantOption/getOptions",
         );
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -231,7 +231,7 @@ const CategorySelector = () => {
         if (!userId) return;
 
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules
+          `http://localhost:5000/auth/getUserWithModules
 /${userId}`,
           {
             method: "GET",
@@ -292,7 +292,7 @@ const CategorySelector = () => {
 
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/category/getCategoryForProduct",
+          "http://localhost:5000/category/getCategoryForProduct",
           {
             method: "GET",
             headers: {
@@ -816,7 +816,7 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+      fetch(`http://localhost:5000/product/getImageGallery/${productId}`, {
         method: "GET",
         headers: {
           "x-api-key": apiKey,
@@ -1152,7 +1152,7 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+          await fetch("http://localhost:5000/product/addImageGallery", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -1237,7 +1237,7 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            await fetch("http://localhost:5000/product/addImageGallery", {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -1398,8 +1398,8 @@ const CategorySelector = () => {
 
     try {
       const url = isEditing
-        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
-        : `https://multi-vendor-marketplace.vercel.app/product/createProduct`;
+        ? `http://localhost:5000/product/updateProducts/${mongooseProductId}`
+        : `http://localhost:5000/product/createProduct`;
 
       const method = isEditing ? "PATCH" : "POST";
 
@@ -1452,7 +1452,7 @@ const CategorySelector = () => {
           if (!variant.variantId) continue;
 
           await fetch(
-            `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variant.variantId}`,
+            `http://localhost:5000/product/updateVariant/${productId}/${variant.variantId}`,
             {
               method: "PUT",
               headers: {
@@ -1467,10 +1467,55 @@ const CategorySelector = () => {
         }
       }
 
-      const cloudinaryURLs = selectedImages
+      // const cloudinaryURLs = selectedImages
+      //   .filter((img) => img.cloudUrl)
+      //   .map((img) => img.cloudUrl);
+
+      // const uploadedVariantImages = Object.entries(variantImages).flatMap(
+      //   ([key, images]) => {
+      //     const combinationAlt = key.replace(/\s*\/\s*/g, "-").toLowerCase();
+
+      //     const safeImages = Array.isArray(images)
+      //       ? images
+      //       : images
+      //         ? [images]
+      //         : [];
+
+      //     return safeImages.map((img) => ({
+      //       key,
+      //       url: img.preview || img.src,
+      //       alt: combinationAlt,
+      //     }));
+      //   },
+      // );
+      /* ================= IMAGE LOGIC START ================= */
+
+      // 🔹 1. Collect all variant image URLs
+      const usedVariantImageUrls = new Set();
+
+      Object.values(variantImages).forEach((imgs) => {
+        if (Array.isArray(imgs)) {
+          imgs.forEach((img) => {
+            if (img.preview) {
+              usedVariantImageUrls.add(img.preview);
+            }
+          });
+        }
+      });
+
+      // 🔹 2. Collect media (product) image URLs
+      const mediaImageUrls = selectedImages
         .filter((img) => img.cloudUrl)
         .map((img) => img.cloudUrl);
 
+      // 🔹 3. Decide if product images should be sent
+      // 👉 Agar koi bhi variant image exist karti hai → product images EMPTY
+      // 🔹 Remove variant-used images from product images
+      const finalProductImages = mediaImageUrls.filter(
+        (url) => !usedVariantImageUrls.has(url),
+      );
+
+      // 🔹 4. Prepare variant images payload
       const uploadedVariantImages = Object.entries(variantImages).flatMap(
         ([key, images]) => {
           const combinationAlt = key.replace(/\s*\/\s*/g, "-").toLowerCase();
@@ -1488,9 +1533,10 @@ const CategorySelector = () => {
           }));
         },
       );
+      const hasVariantImages = uploadedVariantImages.length > 0;
 
       const imageSaveResponse = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
+        `http://localhost:5000/product/updateImages/${productId}`,
         {
           method: "PUT",
           headers: {
@@ -1499,8 +1545,8 @@ const CategorySelector = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            images: cloudinaryURLs,
-            variantImages: uploadedVariantImages,
+            images: finalProductImages,
+            ...(hasVariantImages && { variantImages: uploadedVariantImages }),
           }),
         },
       );
@@ -1591,7 +1637,7 @@ const CategorySelector = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/duplicateProduct/${product.shopifyId}`,
+        `http://localhost:5000/product/duplicateProduct/${product.shopifyId}`,
         {
           method: "POST",
           headers: {
@@ -3376,56 +3422,11 @@ const CategorySelector = () => {
                 value={vendor}
                 onChange={(e) => {
                   setVendor(e.target.value);
-                  setIsChanged(true); // optional but recommended
+                  setIsChanged(true);
                 }}
                 placeholder="Enter vendor name"
                 className="w-full border border-gray-300 p-2 rounded-xl"
               />
-
-              {/* <label htmlFor="keywords" className="block text-gray-600 text-sm">
-                Keywords
-              </label>
-              <input
-                type="text"
-                placeholder="Key Words"
-                value={keyWord}
-                onKeyDown={handleKeyDownForKeyWords}
-                onChange={(e) => setKeyWord(e.target.value)}
-                className="w-full border border-gray-300 p-2 rounded-xl"
-              />
-              <div className="flex flex-wrap gap-2 mt-2">
-                {keywordsList.filter(
-                  (word) =>
-                    word.trim() !== "" &&
-                    !word.toLowerCase().startsWith("user_") &&
-                    !word.toLowerCase().startsWith("vendor_")
-                ).length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {keywordsList
-                      .filter(
-                        (word) =>
-                          word.trim() !== "" &&
-                          !word.toLowerCase().startsWith("user_") &&
-                          !word.toLowerCase().startsWith("vendor_")
-                      )
-                      .map((word, index) => (
-                        <span
-                          key={index}
-                          className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
-                        >
-                          {word}
-                          <button
-                            type="button"
-                            className="ml-2 text-red-500"
-                            onClick={() => removeKeyword(index)}
-                          >
-                            &times;
-                          </button>
-                        </span>
-                      ))}
-                  </div>
-                )}
-              </div> */}
             </div>
           </div>
         </div>

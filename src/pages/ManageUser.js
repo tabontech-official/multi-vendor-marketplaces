@@ -57,7 +57,7 @@ const showToast = (type = "info", message = "") => {
         }
 
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getUserByRole/${id}`
+          `http://localhost:5000/auth/getUserByRole/${id}`
         );
 
         if (!response.ok) {
@@ -139,7 +139,7 @@ const showToast = (type = "info", message = "") => {
 
   //   try {
   //     const response = await fetch(
-  //       "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+  //       "http://localhost:5000/auth/createUserTagsModule",
   //       {
   //         method: "POST",
   //         headers: {
@@ -199,7 +199,7 @@ const showToast = (type = "info", message = "") => {
       }
 
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+        "http://localhost:5000/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {
@@ -290,7 +290,7 @@ const showToast = (type = "info", message = "") => {
       (userRole === "Dev Admin" || userRole === "Master Admin") &&
       role === "Merchant Staff"
     ) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/auth/getAllMerchant`)
+      fetch(`http://localhost:5000/auth/getAllMerchant`)
         .then((res) => res.json())
         .then((data) => setMerchantList(data))
         .catch((err) => console.error("Failed to load merchants", err));
@@ -430,10 +430,7 @@ const showToast = (type = "info", message = "") => {
           </nav>
         </div>
 
-        {/* Bottom: Promote Button */}
-        <button className="w-full mt-6 py-2 bg-yellow-400 text-blue-900 font-semibold rounded-md hover:bg-yellow-500 transition-all duration-150">
-          🚀 Promote
-        </button>
+        
       </aside>
 
       <div className="flex-1 p-6">

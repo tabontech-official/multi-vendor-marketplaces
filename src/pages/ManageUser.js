@@ -4,9 +4,22 @@ import { FaUser, FaTimes, FaArrowRight } from "react-icons/fa";
 import { MdManageAccounts } from "react-icons/md";
 import { IoSettings } from "react-icons/io5";
 import { jwtDecode } from "jwt-decode";
-import { HiPlus } from "react-icons/hi";
+import { HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineXCircle, HiPlus } from "react-icons/hi";
 const ManageUser = () => {
   const [selectedModule, setSelectedModule] = useState("Manage User");
+  const [toast, setToast] = useState({
+  show: false,
+  type: "", // success | error | warning | info
+  message: "",
+});
+const showToast = (type = "info", message = "") => {
+  setToast({ show: true, type, message });
+
+  setTimeout(() => {
+    setToast({ show: false, type: "", message: "" });
+  }, 3000);
+};
+
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -161,7 +174,7 @@ const ManageUser = () => {
 
   const handleUpdateTags = async () => {
     if (!email) {
-      alert("Email is required!");
+      showToast("error","Email is required!");
       return;
     }
 
@@ -179,7 +192,7 @@ const ManageUser = () => {
         (userRole === "Dev Admin" || userRole === "Master Admin")
       ) {
         if (!selectedMerchantId) {
-          alert("Please select a merchant for this Merchant Staff.");
+          showToast("error","Please select a merchant for this Merchant Staff.");
           return;
         }
         creatorIdToSend = selectedMerchantId;
@@ -207,7 +220,7 @@ const ManageUser = () => {
         throw new Error(data.error || "Failed to update user");
       }
 
-      alert("User updated successfully!");
+   showToast("success","User updated successfully!");
       setIsOpen(false);
       setName("");
       setEmail("");
@@ -215,7 +228,7 @@ const ManageUser = () => {
       setIsDropdownOpen(false);
     } catch (error) {
       console.error("Error updating user:", error);
-      alert("Error updating user: " + error.message);
+      showToast("error","Error updating user: " + error.message);
     }
   };
 
@@ -288,6 +301,32 @@ const ManageUser = () => {
 
   return (
     <div className="flex">
+      {toast.show && (
+  <div
+    className={`fixed top-16 right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg transition-all
+      ${
+        toast.type === "success"
+          ? "bg-green-500"
+          : toast.type === "error"
+          ? "bg-red-500"
+          : toast.type === "warning"
+          ? "bg-yellow-500 text-black"
+          : "bg-blue-500"
+      } text-white`}
+  >
+    {toast.type === "success" && (
+      <HiOutlineCheckCircle className="w-6 h-6" />
+    )}
+    {toast.type === "error" && (
+      <HiOutlineXCircle className="w-6 h-6" />
+    )}
+    {toast.type === "warning" && (
+      <HiOutlineExclamationCircle className="w-6 h-6" />
+    )}
+
+    <span className="text-sm font-medium">{toast.message}</span>
+  </div>
+)}
       <aside className="w-56 mt-3 mb-3 ml-4 rounded-2xl bg-blue-900 p-5 flex flex-col justify-between min-h-screen shadow-lg">
         {/* Top: Profile */}
         <div>

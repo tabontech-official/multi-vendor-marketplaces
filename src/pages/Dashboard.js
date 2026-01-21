@@ -159,13 +159,13 @@ const Dashboard = () => {
 
         return predefinedRanges
           .filter((range) =>
-            prices.some((price) => price >= range.min && price <= range.max)
+            prices.some((price) => price >= range.min && price <= range.max),
           )
           .map(
             (range) =>
               `${formatCurrency(range.min)} - ${
                 range.max === Infinity ? "Above" : formatCurrency(range.max)
-              }`
+              }`,
           );
       }
 
@@ -265,7 +265,7 @@ const Dashboard = () => {
     setSelectedProducts((prevSelected) =>
       prevSelected.includes(productId)
         ? prevSelected.filter((id) => id !== productId)
-        : [...prevSelected, productId]
+        : [...prevSelected, productId],
     );
   };
 
@@ -317,7 +317,7 @@ const Dashboard = () => {
         const data = await response.json();
 
         const sortedProducts = data.products.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
 
         setProducts(sortedProducts);
@@ -444,118 +444,120 @@ const Dashboard = () => {
   //     },
   //   });
   // };
- 
-const handleUploadAndPreview = async () => {
-  if (!selectedFile) return;
 
-  setIsUploading(true);
-  closePopup();
+  const handleUploadAndPreview = async () => {
+    if (!selectedFile) return;
 
-  const userId = localStorage.getItem("userid");
-  const apiKey = localStorage.getItem("apiKey");
-  const apiSecretKey = localStorage.getItem("apiSecretKey");
+    setIsUploading(true);
+    closePopup();
 
-  showToast("success", `Uploading "${selectedFile.name}" in background...`);
-  addNotification(
-    `Excel upload started for "${selectedFile.name}"`,
-    "Manage product"
-  );
+    const userId = localStorage.getItem("userid");
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-  try {
-    // ----------- READ EXCEL FILE -----------
-    const fileBuffer = await selectedFile.arrayBuffer();
-    const workbook = XLSX.read(fileBuffer, { type: "array" });
+    showToast("success", `Uploading "${selectedFile.name}" in background...`);
+    addNotification(
+      `Excel upload started for "${selectedFile.name}"`,
+      "Manage product",
+    );
 
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
+    try {
+      // ----------- READ EXCEL FILE -----------
+      const fileBuffer = await selectedFile.arrayBuffer();
+      const workbook = XLSX.read(fileBuffer, { type: "array" });
 
-    const allRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-    const chunkSize = 25;
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
 
-    const totalChunks = Math.ceil(allRows.length / chunkSize);
+      const allRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      const chunkSize = 25;
 
-    // ----------- PROCESS CHUNKS -----------
-    for (let i = 0; i < allRows.length; i += chunkSize) {
-      const chunk = allRows.slice(i, i + chunkSize);
+      const totalChunks = Math.ceil(allRows.length / chunkSize);
 
-      // Convert JSON → CSV because your backend expects CSV
-      const csvData = Papa.unparse(chunk);
-      const chunkBlob = new Blob([csvData], { type: "text/csv" });
+      // ----------- PROCESS CHUNKS -----------
+      for (let i = 0; i < allRows.length; i += chunkSize) {
+        const chunk = allRows.slice(i, i + chunkSize);
 
-      const formData = new FormData();
-      formData.append(
-        "file",
-        chunkBlob,
-        `excel_chunk_${Math.floor(i / chunkSize) + 1}.csv`
-      );
+        // Convert JSON → CSV because your backend expects CSV
+        const csvData = Papa.unparse(chunk);
+        const chunkBlob = new Blob([csvData], { type: "text/csv" });
 
-      try {
-        const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
-          {
-            method: "POST",
-            headers: {
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-            },
-            body: formData,
-          }
+        const formData = new FormData();
+        formData.append(
+          "file",
+          chunkBlob,
+          `excel_chunk_${Math.floor(i / chunkSize) + 1}.csv`,
         );
 
-        const result = await response.json();
+        try {
+          const response = await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
+            {
+              method: "POST",
+              headers: {
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+              },
+              body: formData,
+            },
+          );
 
-        if (response.ok) {
-          showToast(
-            "success",
-            `Chunk ${Math.floor(i / chunkSize) + 1} uploaded successfully`
-          );
-          addNotification(
-            `Chunk ${Math.floor(i / chunkSize) + 1} uploaded`,
-            "Manage product"
-          );
-        } else {
+          const result = await response.json();
+
+          if (response.ok) {
+            showToast(
+              "success",
+              `Chunk ${Math.floor(i / chunkSize) + 1} uploaded successfully`,
+            );
+            addNotification(
+              `Chunk ${Math.floor(i / chunkSize) + 1} uploaded`,
+              "Manage product",
+            );
+          } else {
+            showToast(
+              "error",
+              `Chunk ${Math.floor(i / chunkSize) + 1} failed: ${
+                result.message || "Unknown error"
+              }`,
+            );
+            addNotification(
+              `Chunk ${Math.floor(i / chunkSize) + 1} failed`,
+              "Manage product",
+            );
+          }
+        } catch (err) {
           showToast(
             "error",
-            `Chunk ${Math.floor(i / chunkSize) + 1} failed: ${
-              result.message || "Unknown error"
-            }`
+            `Error uploading chunk ${Math.floor(i / chunkSize) + 1}: ${
+              err.message
+            }`,
           );
           addNotification(
-            `Chunk ${Math.floor(i / chunkSize) + 1} failed`,
-            "Manage product"
+            `Upload error in chunk ${Math.floor(i / chunkSize) + 1}`,
+            "Manage product",
           );
         }
-      } catch (err) {
-        showToast(
-          "error",
-          `Error uploading chunk ${Math.floor(i / chunkSize) + 1}: ${
-            err.message
-          }`
-        );
-        addNotification(
-          `Upload error in chunk ${Math.floor(i / chunkSize) + 1}`,
-          "Manage product"
-        );
+
+        // Delay between chunks
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
-      // Delay between chunks
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // ----------- UPLOAD DONE -----------
+      showToast(
+        "success",
+        `Excel "${selectedFile.name}" uploaded successfully (${totalChunks} chunks)`,
+      );
+      addNotification(
+        `Upload complete: "${selectedFile.name}"`,
+        "Manage product",
+      );
+    } catch (error) {
+      showToast("error", "Excel file parsing failed: " + error.message);
     }
 
-    // ----------- UPLOAD DONE -----------
-    showToast(
-      "success",
-      `Excel "${selectedFile.name}" uploaded successfully (${totalChunks} chunks)`
-    );
-    addNotification(`Upload complete: "${selectedFile.name}"`, "Manage product");
-  } catch (error) {
-    showToast("error", "Excel file parsing failed: " + error.message);
-  }
-
-  setIsUploading(false);
-  setSelectedFile(null);
-};
-
+    setIsUploading(false);
+    setSelectedFile(null);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -584,17 +586,16 @@ const handleUploadAndPreview = async () => {
   //   navigate(formPage, { state: { product } });
   // };
 
-const OnEdit = (product) => {
-  if (!product?.id && !product?._id) return;
+  const OnEdit = (product) => {
+    if (!product?.id && !product?._id) return;
 
-  // Shopify id ya DB id jo tum use karte ho
-  const productId = product.id || product._id;
+    // Shopify id ya DB id jo tum use karte ho
+    const productId = product.id || product._id;
 
-  navigate(`/edit-product/${productId}`, {
-    state: { product },
-  });
-};
-
+    navigate(`/edit-product/${productId}`, {
+      state: { product },
+    });
+  };
 
   const onDeleteSelected = () => {
     setIsPopupOpen(true);
@@ -656,7 +657,7 @@ const OnEdit = (product) => {
                 "x-api-secret": apiSecretKey,
                 "Content-Type": "application/json",
               },
-            }
+            },
           );
 
           if (!response.ok) throw new Error("Failed to delete product");
@@ -664,16 +665,16 @@ const OnEdit = (product) => {
           if (product) {
             addNotification(
               `${product.title} deleted successfully!`,
-              "Manage product"
+              "Manage product",
             );
           }
           window.location.reload();
-        })
+        }),
       );
 
       setProducts(products.filter((p) => !selectedProducts.includes(p._id)));
       setFilteredProducts(
-        filteredProducts.filter((p) => !selectedProducts.includes(p._id))
+        filteredProducts.filter((p) => !selectedProducts.includes(p._id)),
       );
       setSelectedProducts([]);
     } catch (error) {
@@ -705,15 +706,15 @@ const OnEdit = (product) => {
                   "x-api-secret": apiSecretKey,
                   "Content-Type": "application/json",
                 },
-              }
+              },
             );
             if (!response.ok) throw new Error("Failed to publish product");
             addNotification(
               `${product.title} published successfully!`,
-              "Manage product"
+              "Manage product",
             );
           }
-        })
+        }),
       );
 
       showToast("success", "Selected products published successfully!");
@@ -743,15 +744,15 @@ const OnEdit = (product) => {
                   "x-api-secret": apiSecretKey,
                   "Content-Type": "application/json",
                 },
-              }
+              },
             );
             if (!response.ok) throw new Error("Failed to unpublish product");
             addNotification(
               `${product.title} unpublished successfully!`,
-              "Manage product"
+              "Manage product",
             );
           }
-        })
+        }),
       );
 
       showToast("success", "Selected products unpublished successfully!");
@@ -760,7 +761,7 @@ const OnEdit = (product) => {
     } catch (error) {
       showToast(
         "Failed",
-        error.message || "Error occurred while unpublishing."
+        error.message || "Error occurred while unpublishing.",
       );
     }
   };
@@ -778,7 +779,7 @@ const OnEdit = (product) => {
               .includes(searchVal.toLowerCase());
 
             const skuMatch = product.variants?.some((variant) =>
-              variant.sku?.toLowerCase().includes(searchVal.toLowerCase())
+              variant.sku?.toLowerCase().includes(searchVal.toLowerCase()),
             );
 
             return titleMatch || typeMatch || skuMatch;
@@ -899,7 +900,7 @@ const OnEdit = (product) => {
       link.href = url;
       link.setAttribute(
         "download",
-        `products-${exportOption}-${Date.now()}.xlsx`
+        `products-${exportOption}-${Date.now()}.xlsx`,
       );
 
       document.body.appendChild(link);
@@ -1057,7 +1058,7 @@ const OnEdit = (product) => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
+        {/* <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
           <div className="flex flex-col gap-4 items-center w-full justify-end">
             <div className="flex gap-4 items-center justify-end w-full">
               <button
@@ -1116,8 +1117,67 @@ const OnEdit = (product) => {
               </div>
             )}
           </div>
-        </div>
+        </div> */}
+        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
+          <div className="flex flex-col gap-4 items-center w-full justify-end">
+            {/* Top Row: Import & Export */}
+            <div className="flex gap-4 items-center justify-end w-full">
+              <button
+                onClick={openPopup}
+                className="bg-blue-500 hover:bg-blue-400 text-white w-32 h-10 rounded-md transition duration-300 ease-in-out flex items-center justify-center gap-2"
+              >
+                <CiImport className="w-5 h-5" />
+                <span>Import</span>
+              </button>
 
+              <button
+                onClick={togglePopup}
+                className="bg-blue-500 hover:bg-blue-400 text-white w-32 h-10 rounded-md transition duration-300 ease-in-out flex items-center justify-center gap-2"
+              >
+                <FaFileImport className="w-5 h-5" />
+                <span>Export</span>
+              </button>
+            </div>
+
+            {/* Bottom Row: Conditional Actions */}
+            {selectedProducts.length > 0 && (
+              <div className="flex gap-4 items-center justify-end w-full">
+                {filteredProducts.some(
+                  (product) =>
+                    selectedProducts.includes(product._id) &&
+                    product.status === "draft",
+                ) && (
+                  <button
+                    onClick={handlePublishSelected}
+                    className="bg-blue-500 hover:bg-blue-400 text-white w-32 h-10 rounded-md transition duration-300 ease-in-out flex items-center justify-center"
+                  >
+                    Publish
+                  </button>
+                )}
+
+                {filteredProducts.some(
+                  (product) =>
+                    selectedProducts.includes(product._id) &&
+                    product.status === "active",
+                ) && (
+                  <button
+                    onClick={handleUnpublishSelected}
+                    className="bg-red-500 hover:bg-red-400 text-white w-32 h-10 rounded-md transition duration-300 ease-in-out flex items-center justify-center"
+                  >
+                    Unpublish
+                  </button>
+                )}
+
+                <button
+                  onClick={onDeleteSelected}
+                  className="bg-red-500 hover:bg-red-400 text-white w-32 h-10 rounded-md transition duration-300 ease-in-out flex items-center justify-center"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
         {toast.show && (
           <div
             className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
@@ -1619,10 +1679,10 @@ const OnEdit = (product) => {
                               product.approvalStatus === "pending"
                                 ? "bg-yellow-200 text-yellow-800"
                                 : product.approvalStatus === "approved"
-                                ? "bg-green-200 text-green-800"
-                                : product.approvalStatus === "rejected"
-                                ? "bg-red-200 text-red-800"
-                                : "bg-gray-200 text-gray-700"
+                                  ? "bg-green-200 text-green-800"
+                                  : product.approvalStatus === "rejected"
+                                    ? "bg-red-200 text-red-800"
+                                    : "bg-gray-200 text-gray-700"
                             }`}
                           >
                             {product.approvalStatus}
@@ -1648,7 +1708,7 @@ const OnEdit = (product) => {
                           const totalQuantity = product.variants?.reduce(
                             (sum, v) =>
                               sum + (parseFloat(v.inventory_quantity) || 0),
-                            0
+                            0,
                           );
                           const variantCount = product.variants?.length || 0;
                           return `${totalQuantity} total (${variantCount} variant${
@@ -1721,7 +1781,7 @@ const OnEdit = (product) => {
                       >
                         {p}
                       </button>
-                    )
+                    ),
                   )}
 
                   <button
@@ -1885,7 +1945,7 @@ const OnEdit = (product) => {
               This CSV file can update all product information. To update just
               inventory quantities use the{" "}
               <a href="#" className="text-blue-600 underline">
-                 file for inventory
+                file for inventory
               </a>
               .
             </p>

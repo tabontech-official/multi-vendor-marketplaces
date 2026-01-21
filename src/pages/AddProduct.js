@@ -4,7 +4,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import "react-quill/dist/quill.snow.css";
 import { IoIosArrowUp } from "react-icons/io";
 import { MdEdit, MdOutlineKeyboardArrowDown } from "react-icons/md";
-import { RiDeleteBin5Fill } from "react-icons/ri";
+import { RiDeleteBin5Fill, RiDeleteBin6Line } from "react-icons/ri";
 import RTC from "../component/editor";
 import { Editor } from "react-draft-wysiwyg";
 import draftToHtml from "draftjs-to-html";
@@ -47,60 +47,40 @@ const CategorySelector = () => {
   });
 
   const isFetched = useRef(false);
-  // useEffect(() => {
-  //   const fetchSizeCharts = async () => {
-  //     try {
-  //       const userId = localStorage.getItem("userid");
-  //       if (!userId) return;
 
-  //       const res = await fetch(
-  //         `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`,
-  //       );
-  //       const data = await res.json();
+  useEffect(() => {
+    const fetchSizeCharts = async () => {
+      try {
+        const token = localStorage.getItem("usertoken");
+        const userId = localStorage.getItem("userid");
 
-  //       if (Array.isArray(data.data)) {
-  //         setSizeCharts(data.data);
-  //       }
-  //     } catch (err) {
-  //       console.error("Error loading size charts:", err);
-  //     }
-  //   };
+        if (!token) return;
 
-  //   fetchSizeCharts();
-  // }, []);
-useEffect(() => {
-  const fetchSizeCharts = async () => {
-    try {
-      const token = localStorage.getItem("usertoken");
-      const userId = localStorage.getItem("userid");
+        const decoded = jwtDecode(token);
+        const role = decoded?.payLoad?.role;
 
-      if (!token) return;
+        let url = "";
 
-      const decoded = jwtDecode(token);
-      const role = decoded?.payLoad?.role;
+        if (role === "Dev Admin" || role === "Master Admin") {
+          url = "https://multi-vendor-marketplace.vercel.app/size-chart/all";
+        } else {
+          if (!userId) return;
+          url = `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`;
+        }
 
-      let url = "";
+        const res = await fetch(url);
+        const data = await res.json();
 
-      if (role === "Dev Admin" || role === "Master Admin") {
-        url = "https://multi-vendor-marketplace.vercel.app/size-chart/all";
-      } else {
-        if (!userId) return;
-        url = `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`;
+        if (Array.isArray(data.data)) {
+          setSizeCharts(data.data);
+        }
+      } catch (err) {
+        console.error("Error loading size charts:", err);
       }
+    };
 
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (Array.isArray(data.data)) {
-        setSizeCharts(data.data);
-      }
-    } catch (err) {
-      console.error("Error loading size charts:", err);
-    }
-  };
-
-  fetchSizeCharts();
-}, []);
+    fetchSizeCharts();
+  }, []);
 
   useEffect(() => {
     const fetchShippingProfiles = async () => {
@@ -267,7 +247,6 @@ useEffect(() => {
 
         if (res.ok) {
           const fullName = `${data.firstName.trim()} ${data.lastName.trim()}`;
-          // setVendor(fullName); // ✅ preselected vendor
         }
       } catch (error) {
         console.error("Error fetching vendor:", error);
@@ -472,10 +451,8 @@ useEffect(() => {
       hierarchy = [parent1, parent2, cat];
     }
 
-    // ✔ set visible categories
     setSelectedVisibleCategories(hierarchy.map((c) => c.catNo));
 
-    // ✔ set payload data
     setFinalCategoryPayload(
       hierarchy.map((c) => ({
         catNo: c.catNo,
@@ -483,10 +460,8 @@ useEffect(() => {
       })),
     );
 
-    // ✔ exportTitle (complete path)
     setSelectedExportTitle(buildCategoryPath(cat));
 
-    // Close dropdown
     setSearchTerm("");
     setFilteredCategories([]);
   };
@@ -512,35 +487,6 @@ useEffect(() => {
     }
   }, [newOption.values.length]);
 
-  const handleKeyDownForKeyWords = (e) => {
-    if (e.key === "Enter" && keyWord.trim() !== "") {
-      e.preventDefault();
-      if (!keywordsList.includes(keyWord.trim())) {
-        setKeywordsList([...keywordsList, keyWord.trim()]);
-        setKeyWord("");
-      }
-    }
-  };
-
-  const removeKeyword = (index) => {
-    const removedTitle = keywordsList[index];
-
-    const newKeywords = [...keywordsList];
-    newKeywords.splice(index, 1);
-    setKeywordsList(newKeywords);
-
-    const categoryToRemove = categories.find(
-      (cat) => cat.title === removedTitle,
-    );
-
-    if (categoryToRemove) {
-      const newSelectedCategories = selectedCategories.filter(
-        (catNo) => catNo !== categoryToRemove.catNo,
-      );
-      setSelectedCategories(newSelectedCategories);
-    }
-  };
-
   const toggleImageSelection = (index) => {
     setCheckedImages((prev) => ({
       ...prev,
@@ -556,42 +502,6 @@ useEffect(() => {
     setIsChanged(true);
   };
 
-  // const handleDeleteCombination = (parentIndex, childIndex) => {
-  //   setCombinations((prevCombinations) => {
-  //     const updatedCombinations = [...prevCombinations];
-  //     const updatedChildren = [...updatedCombinations[parentIndex].children];
-  //     updatedChildren.splice(childIndex, 1);
-
-  //     if (updatedChildren.length === 0) {
-  //       updatedCombinations.splice(parentIndex, 1);
-  //     } else {
-  //       updatedCombinations[parentIndex] = {
-  //         ...updatedCombinations[parentIndex],
-  //         children: updatedChildren,
-  //       };
-  //     }
-
-  //     return updatedCombinations;
-  //   });
-
-  //   setOptions((prevOptions) => {
-  //     const updated = prevOptions.map((option) => {
-  //       const updatedValues = option.values.filter((val) => {
-  //         const parent = combinations[parentIndex]?.parent || "";
-  //         const child = combinations[parentIndex]?.children?.[childIndex] || "";
-
-  //         return val !== child;
-  //       });
-
-  //       return {
-  //         ...option,
-  //         values: updatedValues,
-  //       };
-  //     });
-
-  //     return updated;
-  //   });
-  // };
   const handleDeleteCombination = (parentIndex, childIndex) => {
     setCombinations((prevCombinations) => {
       const updatedCombinations = prevCombinations.map((comb) => ({
@@ -621,10 +531,10 @@ useEffect(() => {
           ),
         }));
         updatedOptions = updatedOptions.filter((opt) => opt.values.length > 0);
-        return [...updatedOptions]; // ✅ ensure new array reference
+        return [...updatedOptions];
       });
 
-      return [...nextCombinations]; // ✅ ensure new array reference
+      return [...nextCombinations];
     });
   };
 
@@ -679,11 +589,73 @@ useEffect(() => {
 
     return combinations;
   };
+  const regenerateVariants = (opts) => {
+    const validOptions = opts
+      .map((opt) => ({
+        ...opt,
+        values: opt.values.filter((v) => v.trim() !== ""),
+      }))
+      .filter((opt) => opt.values.length > 0);
+
+    console.log("🧠 Generating variants from:", validOptions);
+
+    if (validOptions.length === 0) {
+      setVariants([]);
+      return;
+    }
+
+    const cartesian = (arr) =>
+      arr.reduce(
+        (a, b) => a.flatMap((x) => b.values.map((y) => [...x, y])),
+        [[]],
+      );
+
+    const combos = cartesian(validOptions);
+
+    const newVariants = combos.map((combo) => ({
+      options: combo.map((value, i) => ({
+        name: validOptions[i].name,
+        value,
+      })),
+    }));
+
+    setVariants(newVariants);
+  };
 
   const [combinations, setCombinations] = useState(generateVariants());
   useEffect(() => {
     setCombinations(generateVariants());
   }, [options]);
+  const handleRemoveOptionValue = (optionIndex, valueIndex) => {
+    const valueToRemove = newOption.values[valueIndex];
+
+    console.log("🗑️ Removing option value:", valueToRemove);
+
+    const updatedValues = newOption.values.filter((_, i) => i !== valueIndex);
+
+    setNewOption((prev) => ({
+      ...prev,
+      values: updatedValues,
+    }));
+
+    setVariants((prevVariants) => {
+      const filtered = prevVariants.filter(
+        (variant) =>
+          !variant.options?.some(
+            (opt) =>
+              opt.name === newOption.name &&
+              opt.value?.toLowerCase() === valueToRemove.toLowerCase(),
+          ),
+      );
+
+      console.log(
+        `🧹 Variants removed for value "${valueToRemove}":`,
+        prevVariants.length - filtered.length,
+      );
+
+      return filtered;
+    });
+  };
 
   const handleOpenForm = () => {
     if (options.length >= 3) {
@@ -694,9 +666,6 @@ useEffect(() => {
     setShowVariantForm(true);
   };
 
-  // const handleNewOptionNameChange = (value) => {
-  //   setNewOption({ ...newOption, name: value });
-  // };
   const handleNewOptionNameChange = (value) => {
     setNewOption({ ...newOption, name: value });
 
@@ -714,16 +683,9 @@ useEffect(() => {
     }
   };
 
-  // const handleNewOptionValueChange = (index, value) => {
-  //   let updatedValues = [...newOption.values];
-  //   updatedValues[index] = value;
-  //   setNewOption({ ...newOption, values: updatedValues });
-  // };
-
   const handleNewOptionValueChange = (index, value) => {
     const trimmedValue = value.trim();
 
-    // Prevent duplicate values in the same option (case-insensitive)
     const isDuplicate = newOption.values.some(
       (v, i) =>
         i !== index && v.trim().toLowerCase() === trimmedValue.toLowerCase(),
@@ -747,14 +709,6 @@ useEffect(() => {
     let updatedValues = newOption.values.filter((_, i) => i !== index);
     setNewOption({ ...newOption, values: updatedValues });
   };
-
-  // const handleDone = () => {
-  //   if (newOption.name.trim() === "" || newOption.values.length === 0) return;
-
-  //   const updatedOptions = [...options, { ...newOption }];
-  //   setOptions(updatedOptions);
-  //   setShowVariantForm(false);
-  // };
 
   const handleDone = () => {
     const hasValidValues = newOption.values.some((val) => val.trim() !== "");
@@ -861,7 +815,6 @@ useEffect(() => {
     const apiSecretKey = localStorage.getItem("apiSecretKey");
     const productId = product?.id || "null";
 
-    // Run only if any modal that uses gallery is open
     if ((isPopupVisible || isMediaModalVisible) && userId) {
       fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
         method: "GET",
@@ -873,7 +826,7 @@ useEffect(() => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("📸 Gallery data fetched:", data); // ✅ For debugging
+          console.log("📸 Gallery data fetched:", data);
           const allImages = Array.isArray(data)
             ? data.flatMap((item) => item.images)
             : [];
@@ -957,9 +910,9 @@ useEffect(() => {
           if (found) matchedImages = [found];
         }
 
-        if (!matchedImages.length && product.images?.length > 0) {
-          matchedImages = [product.images[0]];
-        }
+        // if (!matchedImages.length && product.images?.length > 0) {
+        //   matchedImages = [product.images[0]];
+        // }
 
         const combinationAlt = titleKey
           .replace(/\s*\/\s*/g, "-")
@@ -1091,18 +1044,10 @@ useEffect(() => {
       setVendor(product.vendor);
       setProductType(product.product_type);
 
-      // setOptions(
-      //   product.options?.map((option) => ({
-      //     id: option.id || "No ID",
-      //     name: option.name || "Unnamed Option",
-      //     values: option.values || [],
-      //   })) || []
-      // );
       setOptions(
         product.options?.map((option) => {
           const normalizedName = option.name?.toLowerCase().trim();
 
-          // Find DB option match
           const dbMatch = dbOptions.find((db) =>
             db.optionName.some(
               (n) => n.toLowerCase().trim() === normalizedName,
@@ -1114,13 +1059,10 @@ useEffect(() => {
             name: option.name,
             values: option.values || [],
 
-            // ⭐ Correct detection
             isFromDB: !!dbMatch,
 
-            // ⭐ Correct db values
             dbValues: dbMatch?.optionValues || [],
 
-            // ⭐ Detect custom option (Other)
             isCustom: option.name === "Other",
           };
         }) || [],
@@ -1343,7 +1285,6 @@ useEffect(() => {
       });
       return;
     }
-    // 🧩 Validate metafields before submitting
     if (enableMetafields) {
       const invalid = metafields.some(
         (m) => !m.label.trim() || !m.value.trim(),
@@ -1353,7 +1294,6 @@ useEffect(() => {
     setLoading(true);
     setMessage(null);
 
-    // 🧩 Convert editor content
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
     const modifiedContent = htmlContent
@@ -1362,7 +1302,6 @@ useEffect(() => {
       .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
       .replace(/&nbsp;/g, " ");
 
-    // 🧩 Prepare variant-specific arrays
     const prepareVariantPrices = () =>
       combinations.flatMap((combination, index) =>
         combination.children.map((child) => {
@@ -1397,24 +1336,12 @@ useEffect(() => {
         }),
       );
 
-    // const categoryIds = finalCategoryPayload.map((c) => c.catNo.toString());
-    // const combinedKeywords = [
-    //   selectedExportTitle,
-    //   ...categoryIds,
-    //   ...keywordsList,
-    // ].join(", ");
-    // Build category tags from full hierarchy
     const categoryTags = finalCategoryPayload.map((c) => c.catNo);
 
-    // Final keywords for Shopify TAGS + Search filter
     const combinedKeywords = [...categoryTags, ...keywordsList].join(", ");
-
-    // const selectedShippingData =
-    //   shippingPlans.find((p) => p.profileId === selectedShippingPlan) || null;
 
     let selectedShippingData = null;
 
-    // 🧠 Free shipping should work even if Shipping Options are OFF
     if (enableFreeShipping) {
       selectedShippingData = {
         profileName: "Free Shipping",
@@ -1452,7 +1379,7 @@ useEffect(() => {
       variantCompareAtPrices: prepareVariantCompareAtPrices(),
       variantQuantites: prepareVariantQuantities(),
       variantSku: prepareVariantSku(),
-      categories: finalCategoryPayload.map((c) => c.title), // full hierarchy for DB
+      categories: finalCategoryPayload.map((c) => c.title),
       shippingProfileData: selectedShippingData,
     };
     if (enableMetafields) {
@@ -1470,7 +1397,6 @@ useEffect(() => {
     console.log("📦 Payload being sent:", payload);
 
     try {
-      // 🧩 Decide if creating or updating
       const url = isEditing
         ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
         : `https://multi-vendor-marketplace.vercel.app/product/createProduct`;
@@ -1498,9 +1424,7 @@ useEffect(() => {
       }
 
       const productId = data.product?.id;
-      console.log("✅ Product created/updated:", productId);
 
-      // 🧩 If it's a NEW product → update variants after IDs exist
       if (!isEditing && productId) {
         const variantUpdates = combinations.flatMap((combination, index) =>
           combination.children.map((child) => {
@@ -1511,7 +1435,7 @@ useEffect(() => {
             );
 
             return {
-              variantId: matchingVariant?.id, // Shopify variant ID
+              variantId: matchingVariant?.id,
               price: variantPrices[key] || price || 0,
               compare_at_price:
                 variantCompareAtPrices[key] || compareAtPrice || 0,
@@ -1523,8 +1447,6 @@ useEffect(() => {
             };
           }),
         );
-
-        console.log("🧩 Updating each variant via /updateVariant API");
 
         for (const variant of variantUpdates) {
           if (!variant.variantId) continue;
@@ -1545,28 +1467,24 @@ useEffect(() => {
         }
       }
 
-      // 🧩 Upload image URLs to product
       const cloudinaryURLs = selectedImages
         .filter((img) => img.cloudUrl)
         .map((img) => img.cloudUrl);
 
       const uploadedVariantImages = Object.entries(variantImages).flatMap(
         ([key, images]) => {
-          // ✅ Generate a clean alt handle like "style-classic"
           const combinationAlt = key.replace(/\s*\/\s*/g, "-").toLowerCase();
 
-          // ✅ Ensure images is always an array
           const safeImages = Array.isArray(images)
             ? images
             : images
               ? [images]
               : [];
 
-          // ✅ Force consistent alt for all images
           return safeImages.map((img) => ({
             key,
             url: img.preview || img.src,
-            alt: combinationAlt, // ✅ override any "Variant Image Modern" alt
+            alt: combinationAlt,
           }));
         },
       );
@@ -1597,7 +1515,6 @@ useEffect(() => {
         return;
       }
 
-      // 🧩 Reset form after success
       setTitle("");
       setDescription("");
       setProductType("");
@@ -1708,7 +1625,6 @@ useEffect(() => {
     }
   };
 
-  // For delete confirmation modal
   const [showDeleteOptionModal, setShowDeleteOptionModal] = useState(false);
   const [deleteOptionTarget, setDeleteOptionTarget] = useState(null);
 
@@ -1756,11 +1672,6 @@ useEffect(() => {
       window.__blockerActive = false;
     };
   }, [isChanged]);
-  // const handleEditOptionValueChange = (index, value) => {
-  //   const updatedValues = [...newOption.values];
-  //   updatedValues[index] = value;
-  //   setNewOption({ ...newOption, values: updatedValues });
-  // };
   const handleEditOptionValueChange = (index, value) => {
     const trimmedValue = value.trim();
 
@@ -1789,17 +1700,32 @@ useEffect(() => {
   };
 
   const handleSaveEditedOption = (optionIndex) => {
-    const cleanedValues = newOption.values.filter((v) => v.trim() !== "");
+    const cleanedValues = newOption.values
+      .map((v) => (v === "__OTHER__" ? "" : v))
+      .map((v) => v.trim())
+      .filter((v) => v !== "");
 
-    const updated = options.map((opt, i) =>
-      i === optionIndex ? { ...opt, values: cleanedValues } : opt,
-    );
+    console.log("✅ Cleaned option values:", cleanedValues);
+
+    const updated = [...options];
+
+    if (cleanedValues.length === 0) {
+      console.log("🧹 No values left, removing option:", newOption.name);
+      updated.splice(optionIndex, 1);
+    } else {
+      updated[optionIndex] = {
+        ...updated[optionIndex],
+        name: newOption.name.trim(),
+        values: cleanedValues,
+      };
+    }
 
     setOptions(updated);
     setEditingOptionIndex(null);
-    setNewOption({ name: "", values: [""] });
-    setIsChanged(true);
+
+    regenerateVariants(updated);
   };
+
   const [enableMetafields, setEnableMetafields] = useState(false);
   const [metafields, setMetafields] = useState([{ label: "", value: "" }]);
 
@@ -1819,7 +1745,24 @@ useEffect(() => {
     const updated = metafields.filter((_, i) => i !== index);
     setMetafields(updated);
   };
+  useEffect(() => {
+    if (product && isEditing) {
+      localStorage.setItem("edit_product_backup", JSON.stringify(product));
+    }
+  }, [product, isEditing]);
 
+  useEffect(() => {
+    if (!locationData.state?.product && isEditing) {
+      const cachedProduct = localStorage.getItem("edit_product_backup");
+
+      if (cachedProduct) {
+        navigate(locationData.pathname, {
+          replace: true,
+          state: { product: JSON.parse(cachedProduct) },
+        });
+      }
+    }
+  }, [locationData, isEditing, navigate]);
   return (
     <main className="flex justify-center bg-gray-100 p-6">
       {toast.show && (
@@ -1935,14 +1878,12 @@ useEffect(() => {
                         }`}
                       />
 
-                      {/* Hover Overlay */}
                       <div
                         className={`absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 ${
                           isChecked ? "opacity-100" : ""
                         }`}
                       ></div>
 
-                      {/* Checkbox (Top Left) */}
                       <div className="absolute top-2 left-2 opacity-0 hover:opacity-100 transition-opacity duration-200 group-hover:opacity-100">
                         <input
                           type="checkbox"
@@ -1953,7 +1894,6 @@ useEffect(() => {
                         />
                       </div>
 
-                      {/* Drag Handle Icon (Top Right) */}
                       <div className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity duration-200 group-hover:opacity-100 text-gray-200">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -1965,7 +1905,6 @@ useEffect(() => {
                         </svg>
                       </div>
 
-                      {/* Loading Spinner */}
                       {img.loading && (
                         <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
                           <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
@@ -1975,7 +1914,6 @@ useEffect(() => {
                   );
                 })}
 
-                {/* + More Tile */}
                 {selectedImages.length > 6 && (
                   <div
                     onClick={() => setIsMediaModalVisible(true)}
@@ -1985,7 +1923,6 @@ useEffect(() => {
                   </div>
                 )}
 
-                {/* Add Tile */}
                 <div
                   onClick={() => setIsMediaModalVisible(true)}
                   className="aspect-square flex items-center justify-center rounded-md border border-dashed border-gray-300 text-gray-500 text-3xl cursor-pointer hover:bg-gray-50 transition"
@@ -2040,7 +1977,7 @@ useEffect(() => {
                     value={compareAtPrice}
                     onChange={(e) => {
                       setCompareAtPrice(e.target.value);
-                      setIsChanged(true); // ✅ This now runs correctly
+                      setIsChanged(true);
                     }}
                     placeholder=" 0.00"
                     className="w-full pl-7 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
@@ -2058,7 +1995,7 @@ useEffect(() => {
           </div>
 
           <div className="border rounded-2xl p-4 bg-white mb-4 border-gray-500">
-            <h2 className="font-semibold text-gray-700">Inventory</h2>
+            <h2 className="font-medium text-gray-700">Inventory</h2>
 
             <div className="flex items-center mt-3">
               <input
@@ -2140,7 +2077,7 @@ useEffect(() => {
                   value={barcode}
                   onChange={(e) => {
                     setBarcode(e.target.value);
-                    setIsChanged(true); // ✅ Mark as changed
+                    setIsChanged(true);
                   }}
                   className="w-full border p-2 rounded-md"
                 />
@@ -2156,7 +2093,7 @@ useEffect(() => {
                 checked={trackShipping}
                 onChange={() => {
                   setTrackShipping(!trackShipping);
-                  setIsChanged(true); // ✅ mark as changed
+                  setIsChanged(true);
                 }}
                 className="h-4 w-4 text-blue-500"
               />
@@ -2181,7 +2118,7 @@ useEffect(() => {
                       value={weight}
                       onChange={(e) => {
                         handleChange(e);
-                        setIsChanged(true); // ✅ mark as changed when typing weight
+                        setIsChanged(true);
                       }}
                       className="w-20 text-center py-1 border-0 focus:ring-0"
                       placeholder="0.00"
@@ -2192,7 +2129,7 @@ useEffect(() => {
                     value={unit}
                     onChange={(e) => {
                       setUnit(e.target.value);
-                      setIsChanged(true); // ✅ mark as changed when changing unit
+                      setIsChanged(true);
                     }}
                     className="border px-2 py-1 rounded-md"
                   >
@@ -2205,9 +2142,7 @@ useEffect(() => {
               </div>
             )}
           </div>
-          {/* === Shipping Plans Section === */}
           <div className="border rounded-2xl p-4 bg-white border-gray-500 mt-4">
-            {/* Enable Shipping Options */}
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -2227,7 +2162,6 @@ useEffect(() => {
               </label>
             </div>
 
-            {/* Enable Free Shipping */}
             <div className="flex items-center mt-2">
               <input
                 type="checkbox"
@@ -2275,7 +2209,7 @@ useEffect(() => {
                     {selectedShippingPlan && (
                       <div className="mt-3 text-sm text-gray-700">
                         Selected plan:{" "}
-                        <span className="font-semibold">
+                        <span className="font-medium">
                           {
                             shippingPlans.find(
                               (p) => p.profileId === selectedShippingPlan,
@@ -2325,7 +2259,7 @@ useEffect(() => {
 
           <div className="border rounded-2xl p-3 mt-3 bg-white border-gray-300 w-full">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-medium text-gray-800">Variants</h2>
+              <h2 className="text-sm font-medium text-gray-700">Variants</h2>
 
               {combinations.length > 0 && (
                 <button
@@ -2380,7 +2314,7 @@ useEffect(() => {
                           setNewOption({
                             name: option.name,
                             values: [...option.values],
-                            dbValues: dbMatch ? dbMatch.optionValues : [], // ✅ yahin se aa raha hai
+                            dbValues: dbMatch ? dbMatch.optionValues : [],
                           });
                         }
                       }}
@@ -2391,13 +2325,12 @@ useEffect(() => {
                       }`}
                     >
                       <div className="flex justify-between items-center">
-                        <h3 className="text-sm font-medium text-gray-800">
+                        <h3 className="text-sm font-medium text-gray-700">
                           {option.name}
                         </h3>
 
                         {editingOptionIndex === optionIndex && (
                           <div className="flex gap-2">
-                            {/* Save changes */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -2408,7 +2341,6 @@ useEffect(() => {
                               Done
                             </button>
 
-                            {/* Delete entire option */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -2468,7 +2400,7 @@ useEffect(() => {
                                         handleEditOptionValueChange(
                                           i,
                                           "__OTHER__",
-                                        ); // ✅ IMPORTANT
+                                        );
                                       } else {
                                         handleEditOptionValueChange(
                                           i,
@@ -2508,6 +2440,17 @@ useEffect(() => {
                                     className="w-full border border-gray-300 rounded-md p-1 text-sm"
                                   />
                                 )}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveOptionValue(optionIndex, i);
+                                  }}
+                                  className="text-red-500 hover:text-red-700 transition text-lg"
+                                  title="Remove value & variants"
+                                >
+                                  <RiDeleteBin6Line />
+                                </button>
                               </div>
                             );
                           })}
@@ -2785,9 +2728,9 @@ useEffect(() => {
                                           setIsDeleteModalOpen(true);
                                           setIsChanged(true);
                                         }}
-                                        className="text-red-600"
+                                        className="text-red-500 hover:text-red-700 "
                                       >
-                                        <FaTrash />
+                                        <RiDeleteBin6Line />
                                       </button>
                                     </li>
                                   );
@@ -3022,7 +2965,7 @@ useEffect(() => {
           </div>
           <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium text-gray-800">Size Chart</h2>
+              <h2 className="text-sm font-medium text-gray-700">Size Chart</h2>
 
               <div className="flex items-center space-x-2">
                 <input
@@ -3091,7 +3034,7 @@ useEffect(() => {
 
           <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium text-gray-800">
+              <h2 className="text-sm font-medium text-gray-700">
                 Custom Fields
               </h2>
               <div className="flex items-center space-x-2">
@@ -3186,7 +3129,7 @@ useEffect(() => {
           </div>
 
           <div className="border rounded-lg p-4 shadow-sm bg-white mt-3">
-            <h2 className="text-md font-medium text-gray-800 mb-3">
+            <h2 className="text-md font-medium text-gray-700 mb-3">
               Search engine listing
             </h2>
 
@@ -3281,14 +3224,13 @@ useEffect(() => {
           </div>
 
           {loading && (
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-80 flex flex-col justify-center items-center z-50">
-              <img
-                src="https://i.gifer.com/4V0b.gif"
-                alt="Loading..."
-                className="w-16 h-16"
-              />
-              <p className="mt-4 text-white font-semibold">
-                Please wait, images are being uploaded...{" "}
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60">
+              {/* Spinner */}
+              <div className="w-14 h-14 border-4 border-white border-t-transparent rounded-full animate-spin" />
+
+              {/* Text */}
+              <p className="mt-5 text-white text-sm font-medium tracking-wide">
+                Uploading images, please wait...
               </p>
             </div>
           )}

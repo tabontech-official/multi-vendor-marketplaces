@@ -876,14 +876,17 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
         },
-      })
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data);
@@ -1218,19 +1221,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
             },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          );
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1303,16 +1309,19 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
               },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            });
+            );
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -2135,7 +2144,6 @@ const CategorySelector = () => {
         `}
                         onClick={() => setIsMediaModalVisible(true)}
                       >
-                        {/* Image */}
                         <img
                           src={img.cloudUrl || img.localUrl}
                           alt={`Uploaded ${index}`}
@@ -2848,7 +2856,6 @@ const CategorySelector = () => {
                                                   className="w-full h-full object-cover rounded-md"
                                                 />
 
-                                                {/* ✅ Overlay counter if multiple images exist */}
                                                 {variantImages[normalizedKey]
                                                   .length > 1 && (
                                                   <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
@@ -3424,7 +3431,6 @@ const CategorySelector = () => {
 
               <div className="border rounded-lg p-4 bg-gray-50">
                 <div className="flex justify-between items-start mb-2">
-                  {/* <span className="text-sm text-gray-600">Aydi Active</span> */}
                   <button onClick={() => setEditing(true)}>
                     <MdEdit className="text-gray-500 hover:text-blue-500" />
                   </button>
@@ -3516,10 +3522,8 @@ const CategorySelector = () => {
 
             {loading && (
               <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60">
-                {/* Spinner */}
                 <div className="w-14 h-14 border-4 border-white border-t-transparent rounded-full animate-spin" />
 
-                {/* Text */}
                 <p className="mt-5 text-white text-sm font-medium tracking-wide">
                   Uploading images, please wait...
                 </p>
@@ -3795,7 +3799,7 @@ const CategorySelector = () => {
                                 .replace(/['"]/g, "")
                                 .trim();
 
-                              console.log("🟦 VARIANT IMAGE CLICK:", imageUrl);
+                              console.log(" VARIANT IMAGE CLICK:", imageUrl);
 
                               setVariantImages((prev) => {
                                 const existing = prev[normalizedKey] || [];
@@ -3804,12 +3808,12 @@ const CategorySelector = () => {
                                   existing.some((i) => i.preview === imageUrl)
                                 ) {
                                   console.warn(
-                                    "⛔ DUPLICATE VARIANT IMAGE SKIPPED",
+                                    " DUPLICATE VARIANT IMAGE SKIPPED",
                                   );
                                   return prev;
                                 }
 
-                                console.log("✅ VARIANT IMAGE ADDED");
+                                console.log("VARIANT IMAGE ADDED");
 
                                 return {
                                   ...prev,
@@ -3848,7 +3852,6 @@ const CategorySelector = () => {
           {isMediaModalVisible && (
             <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
               <div className="bg-white w-full max-w-6xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
-                {/* HEADER */}
                 <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
                   <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
                     Manage Product Media
@@ -3889,7 +3892,6 @@ const CategorySelector = () => {
                     </div>
                   </div>
 
-                  {/* PRODUCT IMAGES */}
                   <div className="mt-8 bg-white border rounded-lg p-5">
                     <h3 className="text-sm font-semibold mb-3">
                       Product Images
@@ -3919,13 +3921,11 @@ const CategorySelector = () => {
                             key={imageUrl}
                             className="relative border rounded-lg overflow-hidden group"
                           >
-                            {/* IMAGE */}
                             <img
                               src={imageUrl}
                               className="w-28 h-28 object-cover"
                             />
 
-                            {/* REMOVE BUTTON */}
                             <button
                               onClick={() => handleRemoveProductImage(imageUrl)}
                               className="absolute top-1 right-1 bg-black/70 text-white rounded-full w-6 h-6 
@@ -3947,7 +3947,6 @@ const CategorySelector = () => {
                     </div>
                   </div>
 
-                  {/* GALLERY */}
                   {showGallery && galleryImages.length > 0 && (
                     <div className="mt-8 bg-white border rounded-lg p-5">
                       <h3 className="text-sm font-semibold mb-3">
@@ -3997,36 +3996,44 @@ const CategorySelector = () => {
           )}
 
           {showDuplicateModal && (
-            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-              <div className="bg-white rounded-xl p-6 w-[420px] shadow-xl">
-                <h2 className="text-lg font-semibold text-gray-800 mb-3">
-                  Duplicate Product
-                </h2>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div
+                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+                onClick={() => setShowDuplicateModal(false)}
+              />
 
-                <p className="text-sm text-gray-600 mb-4">
-                  The product will be duplicated with the title below. You can
-                  edit it before creating the copy.
-                </p>
-
-                {/* TITLE INPUT */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Product title
-                  </label>
-                  <input
-                    type="text"
-                    value={duplicateTitle}
-                    onChange={(e) => setDuplicateTitle(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md p-2"
-                    placeholder="Enter product title"
-                  />
+              <div className="relative w-full max-w-[440px] overflow-hidden rounded-xl bg-white shadow-2xl border border-slate-200">
+                <div className="px-6 py-4 border-b border-slate-100">
+                  <h2 className="text-lg font-bold text-slate-900">
+                    Duplicate Product
+                  </h2>
                 </div>
 
-                {/* ACTIONS */}
-                <div className="flex justify-end gap-3 mt-6">
+                <div className="p-6">
+                  <p className="text-sm leading-relaxed text-slate-500 mb-6">
+                    A new draft will be created with the details of the current
+                    product. Please specify a new title below.
+                  </p>
+
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                      Product Title
+                    </label>
+                    <input
+                      type="text"
+                      autoFocus
+                      value={duplicateTitle}
+                      onChange={(e) => setDuplicateTitle(e.target.value)}
+                      placeholder="Enter new title..."
+                      className="w-full rounded-lg border-2 border-slate-100 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 transition-all outline-none focus:border-blue-500 focus:ring-0"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50/80 px-6 py-4">
                   <button
                     onClick={() => setShowDuplicateModal(false)}
-                    className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100"
+                    className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100"
                   >
                     Cancel
                   </button>
@@ -4037,9 +4044,9 @@ const CategorySelector = () => {
                       setShowDuplicateModal(false);
                     }}
                     disabled={!duplicateTitle.trim()}
-                    className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 disabled:opacity-50"
+                    className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-40 disabled:hover:bg-blue-600 disabled:active:scale-100"
                   >
-                    Duplicate
+                    Duplicate Product
                   </button>
                 </div>
               </div>
@@ -4223,7 +4230,6 @@ const CategorySelector = () => {
           {showBulkModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
               <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-scaleIn">
-                {/* Header */}
                 <div className="flex justify-between items-center border-b pb-3 mb-5">
                   <h2 className="text-lg font-semibold text-gray-800">
                     Bulk Update Variants
@@ -4236,14 +4242,12 @@ const CategorySelector = () => {
                   </button>
                 </div>
 
-                {/* Info */}
                 <p className="text-sm text-gray-500 mb-5">
                   Apply the same price values to{" "}
                   <span className="font-medium">all variants</span>. Leave a
                   field empty if you don’t want to update it.
                 </p>
 
-                {/* Price */}
                 <div className="mb-4">
                   <label className="text-sm font-medium text-gray-700 mb-1 block">
                     Price
@@ -4262,7 +4266,6 @@ const CategorySelector = () => {
                   </div>
                 </div>
 
-                {/* Compare at Price */}
                 <div className="mb-6">
                   <label className="text-sm font-medium text-gray-700 mb-1 block">
                     Compare at Price
@@ -4281,7 +4284,6 @@ const CategorySelector = () => {
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex justify-end gap-3 border-t pt-4">
                   <button
                     onClick={() => setShowBulkModal(false)}

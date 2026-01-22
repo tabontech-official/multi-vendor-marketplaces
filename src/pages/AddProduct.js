@@ -23,6 +23,9 @@ import { jwtDecode } from "jwt-decode";
 const CategorySelector = () => {
   const { id } = useParams();
   const isEditing = Boolean(id);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicateMode, setDuplicateMode] = useState("copy"); // copy | change
+  const [duplicateTitle, setDuplicateTitle] = useState("");
   const handleDiscard = () => {
     if (isChanged) {
       const confirmDiscard = window.confirm(
@@ -873,17 +876,14 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
         },
-      )
+      })
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data);
@@ -1218,22 +1218,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
             },
-          );
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1306,19 +1303,16 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "x-api-key": apiKey,
-                  "x-api-secret": apiSecretKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId, images: [data.secure_url] }),
+            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
               },
-            );
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            });
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1727,7 +1721,7 @@ const CategorySelector = () => {
     setVariantSku((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleDuplicate = async () => {
+  const handleDuplicate = async (newTitle) => {
     if (isChanged) {
       showToast("error", "Please update the product first, then duplicate.");
       return;
@@ -1752,6 +1746,9 @@ const CategorySelector = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
           },
+          body: JSON.stringify({
+            title: newTitle, // ✅ CORRECT PLACE
+          }),
         },
       );
 
@@ -3563,8 +3560,12 @@ const CategorySelector = () => {
               )}
               {isEditing && (
                 <button
-                  onClick={handleDuplicate}
                   type="button"
+                  onClick={() => {
+                    setDuplicateMode("copy");
+                    setDuplicateTitle(`Copy of ${title} `);
+                    setShowDuplicateModal(true);
+                  }}
                   className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
                 >
                   Duplicate Product
@@ -3752,9 +3753,10 @@ const CategorySelector = () => {
                                       ].filter((_, x) => x !== i),
                                     }))
                                   }
-className="absolute -top-2 -right-2 w-6 h-6 rounded-full 
+                                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full 
              bg-black/70 text-white flex items-center justify-center 
-             text-sm hover:bg-red-600 transition shadow-md"                                >
+             text-sm hover:bg-red-600 transition shadow-md"
+                                >
                                   ✕
                                 </button>
                               </div>
@@ -3989,6 +3991,56 @@ className="absolute -top-2 -right-2 w-6 h-6 rounded-full
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showDuplicateModal && (
+            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 w-[420px] shadow-xl">
+                <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                  Duplicate Product
+                </h2>
+
+                <p className="text-sm text-gray-600 mb-4">
+                  The product will be duplicated with the title below. You can
+                  edit it before creating the copy.
+                </p>
+
+                {/* TITLE INPUT */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Product title
+                  </label>
+                  <input
+                    type="text"
+                    value={duplicateTitle}
+                    onChange={(e) => setDuplicateTitle(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md p-2"
+                    placeholder="Enter product title"
+                  />
+                </div>
+
+                {/* ACTIONS */}
+                <div className="flex justify-end gap-3 mt-6">
+                  <button
+                    onClick={() => setShowDuplicateModal(false)}
+                    className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handleDuplicate(duplicateTitle.trim());
+                      setShowDuplicateModal(false);
+                    }}
+                    disabled={!duplicateTitle.trim()}
+                    className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 disabled:opacity-50"
+                  >
+                    Duplicate
+                  </button>
                 </div>
               </div>
             </div>

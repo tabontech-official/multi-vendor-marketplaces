@@ -39,14 +39,17 @@ const Notification = () => {
                 <p className="text-sm text-gray-700 mt-1">{note.description}</p>
               )}
 
-              <div className="flex space-x-2 mt-2">
-                <span className="bg-teal-100 text-teal-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                  {note.source || "Feature"}
-                </span>
-                <span className="text-xs text-gray-500 font-medium">
-                  {`${note.firstName} ${note.lastName}` || "Admin"}
-                </span>
-              </div>
+            <div className="inline-flex items-center space-x-2 mt-2">
+  <span className="bg-teal-100 text-teal-800 text-xs font-medium px-2 py-0.5 rounded-full">
+    {note.source || "Feature"}
+  </span>
+  <span className="text-xs text-gray-500 font-medium">
+    {note.firstName || note.lastName
+      ? `${note.firstName} ${note.lastName}`
+      : "Admin"}
+  </span>
+</div>
+
             </div>
           ))}
         </div>

@@ -361,12 +361,12 @@ useEffect(() => {
               {summary.unfulfilledOrders || 0}
             </div>
           </div>
-          <div className="border-t border-gray-300 pt-2 mt-3">
+          {/* <div className="border-t border-gray-300 pt-2 mt-3">
             <p className="text-xs text-green-500 flex items-center gap-1">
               <FaArrowTrendDown className="text-sm" />
               29% vs $303.3K last year
             </p>
-          </div>
+          </div> */}
         </div>
 
         <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
@@ -399,12 +399,12 @@ useEffect(() => {
               {productInActiveCount || 0}
             </div>
           </div>
-          <div className="border-t border-gray-300 pt-2 mt-2">
+          {/* <div className="border-t border-gray-300 pt-2 mt-2">
             <p className="text-xs text-green-500 flex items-center gap-1">
               <FaArrowTrendUp />
               41% vs 320,583 last year
             </p>
-          </div>
+          </div> */}
         </div>
 
         <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
@@ -430,11 +430,11 @@ useEffect(() => {
             <div className="w-[1px] bg-gray-200 mx-1" />
             <div className="w-1/3 text-blue-600">{perDayCount || 0}</div>
           </div>
-          <div className="border-t-2 border-gray-300 pt-2 mt-3">
+          {/* <div className="border-t-2 border-gray-300 pt-2 mt-3">
             <p className="text-xs text-red-500 flex items-center gap-1">
               <FaArrowTrendDown className="text-sm" />▼ 17% vs 3.3M last year
             </p>
-          </div>
+          </div> */}
         </div>
 
         <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
@@ -467,12 +467,12 @@ useEffect(() => {
               ${summary.unpaidIncome || 0}
             </div>
           </div>
-          <div className="border-t border-gray-300 pt-2 mt-3">
+          {/* <div className="border-t border-gray-300 pt-2 mt-3">
             <p className="text-xs text-red-500 flex items-center gap-1">
               <FaArrowTrendDown className="text-sm" />
               29% vs $303.3K last year
             </p>
-          </div>
+          </div> */}
         </div>
 
         {/* <div className="bg-gray-100 rounded-xl p-4 shadow-sm">

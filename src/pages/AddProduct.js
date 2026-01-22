@@ -3199,7 +3199,7 @@ const CategorySelector = () => {
             )}
           </div>
 
-          <div className="border rounded-lg p-4 shadow-sm bg-white mt-3">
+          {/* <div className="border rounded-lg p-4 shadow-sm bg-white mt-3">
             <h2 className="text-md font-medium text-gray-700 mb-3">
               Search engine listing
             </h2>
@@ -3292,7 +3292,7 @@ const CategorySelector = () => {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
           {loading && (
             <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60">

@@ -127,17 +127,18 @@ const AuthSignUp = () => {
             className="w-64 h-64 object-cover"
           />
           <p className="mt-4 text-center text-sm opacity-90">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis at
-            velit maximus, molestie est a, tempor magna.
+            Join Aydi-Active Marketplace and start selling your products online.
+            Create your vendor account, manage orders, and grow your business
+            with our powerful multi-vendor platform.
           </p>
         </div>
 
         <div className="w-full md:w-1/2 p-8  h-[65vh] overflow-y-auto">
           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
-            Welcome Back
+            Create Your Vendor Account
           </h2>
           <p className="text-sm text-gray-600 text-center mb-6">
-            Login to your account
+            Register as a seller on Aydi-Active Marketplace
           </p>
 
           <form onSubmit={handleSignup} className="space-y-4 ">

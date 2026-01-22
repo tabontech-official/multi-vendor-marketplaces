@@ -121,7 +121,7 @@ const SubNavbar = () => {
       path: "#",
       subModules: [
         { name: "Catalog Performance", path: "/catalog-performance" },
-        { name: "eCommerce Consultation", path: "/consultation" },
+        { name: "Consultation", path: "/consultation" },
         { name: "Seller Rating", path: "#" },
       ],
     },

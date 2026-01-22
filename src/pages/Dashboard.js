@@ -2151,7 +2151,11 @@ const Dashboard = () => {
             <p className="text-sm mb-3 mt-3">
               This CSV file can update all product information. To update just
               inventory quantities use the{" "}
-              <a href="#" className="text-blue-600 underline">
+              <a
+                href="/sample-inventory.csv"
+                download
+                className="text-blue-600 underline"
+              >
                 file for inventory
               </a>
               .

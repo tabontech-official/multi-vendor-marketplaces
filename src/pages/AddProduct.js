@@ -873,14 +873,17 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
         },
-      })
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data);
@@ -1020,13 +1023,12 @@ const CategorySelector = () => {
       setContinueSelling(product.inventory?.continue_selling || false);
       setHasSKU(product.inventory?.has_sku || false);
       setSKU(product.inventory?.sku || "");
-          // ✅ SEO STATES SET
-    setSeoTitle(product?.seo?.title || product.title || "");
-    setSeoDescription(
-      product?.seo?.description ||
-      stripHtml(product.body_html || "")
-    );
-    setSeoHandle(product?.seo?.handle || "");
+      // ✅ SEO STATES SET
+      setSeoTitle(product?.seo?.title || product.title || "");
+      setSeoDescription(
+        product?.seo?.description || stripHtml(product.body_html || ""),
+      );
+      setSeoHandle(product?.seo?.handle || "");
       setBarcode(product.inventory?.barcode || "");
       setTrackShipping(product.shipping?.track_shipping || false);
       setWeight(product.shipping?.weight || "");
@@ -1216,19 +1218,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
             },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          );
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1301,16 +1306,19 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
               },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            });
+            );
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1417,13 +1425,13 @@ const CategorySelector = () => {
         (p) => p.profileId === selectedShippingPlan,
       );
     }
-const cleanHandle = seoHandle
-  .replace(/^https?:\/\/[^/]+\/products\//, '')
-  .trim();
-  const autoHandle = title
-  .toLowerCase()
-  .replace(/[^a-z0-9]+/g, '-')
-  .replace(/(^-|-$)/g, '');
+    const cleanHandle = seoHandle
+      .replace(/^https?:\/\/[^/]+\/products\//, "")
+      .trim();
+    const autoHandle = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
     const payload = {
       keyWord: combinedKeywords,
       title,
@@ -1445,7 +1453,7 @@ const cleanHandle = seoHandle
       vendor,
       seoTitle,
       seoDescription,
-seoHandle: seoHandle ? cleanHandle : autoHandle,
+      seoHandle: seoHandle ? cleanHandle : autoHandle,
       options,
       variants,
       variantPrices: prepareVariantPrices(),
@@ -1762,90 +1770,90 @@ seoHandle: seoHandle ? cleanHandle : autoHandle,
       //   });
       // }
       if (response.ok) {
-  setMessage({
-    type: "success",
-    // text: "Product duplicated successfully!",
-  });
+        setMessage({
+          type: "success",
+          // text: "Product duplicated successfully!",
+        });
 
-  const duplicatedProduct = data.product;
-  const duplicatedProductId = duplicatedProduct.id || duplicatedProduct.shopifyId;
+        const duplicatedProduct = data.product;
+        const duplicatedProductId =
+          duplicatedProduct.id || duplicatedProduct.shopifyId;
 
-  /* ================= IMAGE LOGIC (SAME AS ADD / UPDATE) ================= */
+        /* ================= IMAGE LOGIC (SAME AS ADD / UPDATE) ================= */
 
-  // 🔹 1. Collect all variant image URLs
-  const usedVariantImageUrls = new Set();
+        // 🔹 1. Collect all variant image URLs
+        const usedVariantImageUrls = new Set();
 
-  Object.values(variantImages).forEach((imgs) => {
-    if (Array.isArray(imgs)) {
-      imgs.forEach((img) => {
-        if (img.preview) {
-          usedVariantImageUrls.add(img.preview);
-        }
-      });
-    }
-  });
+        Object.values(variantImages).forEach((imgs) => {
+          if (Array.isArray(imgs)) {
+            imgs.forEach((img) => {
+              if (img.preview) {
+                usedVariantImageUrls.add(img.preview);
+              }
+            });
+          }
+        });
 
-  // 🔹 2. Collect product images
-  const mediaImageUrls = selectedImages
-    .filter((img) => img.cloudUrl)
-    .map((img) => img.cloudUrl);
+        // 🔹 2. Collect product images
+        const mediaImageUrls = selectedImages
+          .filter((img) => img.cloudUrl)
+          .map((img) => img.cloudUrl);
 
-  // 🔹 3. Remove variant-used images from product images
-  const finalProductImages = mediaImageUrls.filter(
-    (url) => !usedVariantImageUrls.has(url)
-  );
+        // 🔹 3. Remove variant-used images from product images
+        const finalProductImages = mediaImageUrls.filter(
+          (url) => !usedVariantImageUrls.has(url),
+        );
 
-  // 🔹 4. Prepare variant images payload (Shopify compatible)
-  const uploadedVariantImages = Object.entries(variantImages).flatMap(
-    ([key, images]) => {
-      const parts = key.split("/").map((p) => p.trim());
+        // 🔹 4. Prepare variant images payload (Shopify compatible)
+        const uploadedVariantImages = Object.entries(variantImages).flatMap(
+          ([key, images]) => {
+            const parts = key.split("/").map((p) => p.trim());
 
-      const optionName = options[0]?.name || "option";
-      const optionValue = parts[0];
+            const optionName = options[0]?.name || "option";
+            const optionValue = parts[0];
 
-      const safeImages = Array.isArray(images)
-        ? images
-        : images
-        ? [images]
-        : [];
+            const safeImages = Array.isArray(images)
+              ? images
+              : images
+                ? [images]
+                : [];
 
-      return safeImages.map((img) => ({
-        key,
-        url: img.preview || img.src,
-        optionName,
-        optionValue,
-      }));
-    }
-  );
+            return safeImages.map((img) => ({
+              key,
+              url: img.preview || img.src,
+              optionName,
+              optionValue,
+            }));
+          },
+        );
 
-  const hasVariantImages = uploadedVariantImages.length > 0;
+        const hasVariantImages = uploadedVariantImages.length > 0;
 
-  // 🔹 5. SAME IMAGE UPDATE API CALL
-  await fetch(
-    `https://multi-vendor-marketplace.vercel.app/product/updateImages/${duplicatedProductId}`,
-    {
-      method: "PUT",
-      headers: {
-        "x-api-key": localStorage.getItem("apiKey"),
-        "x-api-secret": localStorage.getItem("apiSecretKey"),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        images: finalProductImages,
-        ...(hasVariantImages && { variantImages: uploadedVariantImages }),
-      }),
-    }
-  );
+        // 🔹 5. SAME IMAGE UPDATE API CALL
+        await fetch(
+          `https://multi-vendor-marketplace.vercel.app/product/updateImages/${duplicatedProductId}`,
+          {
+            method: "PUT",
+            headers: {
+              "x-api-key": localStorage.getItem("apiKey"),
+              "x-api-secret": localStorage.getItem("apiSecretKey"),
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              images: finalProductImages,
+              ...(hasVariantImages && { variantImages: uploadedVariantImages }),
+            }),
+          },
+        );
 
-  /* ================= IMAGE LOGIC END ================= */
+        /* ================= IMAGE LOGIC END ================= */
 
-  // ✅ Open EDIT page of duplicated product
-  navigate(`/manage-product`, {
-    state: { product: duplicatedProduct },
-    replace: true,
-  });
-}
-
+        // ✅ Open EDIT page of duplicated product
+        navigate(`/manage-product`, {
+          state: { product: duplicatedProduct },
+          replace: true,
+        });
+      }
     } catch (err) {
       console.error("Error duplicating product:", err);
       setMessage({ type: "error", text: "Server error while duplicating." });
@@ -1992,2197 +2000,2287 @@ seoHandle: seoHandle ? cleanHandle : autoHandle,
       }
     }
   }, [locationData, isEditing, navigate]);
-  return (
-    <main className="flex justify-center bg-gray-100 p-6">
-      {toast.show && (
-        <div
-          className={`fixed top-16 z-30 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
-            toast.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
-        >
-          {toast.type === "success" ? (
-            <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
-          ) : (
-            <HiOutlineXCircle className="w-6 h-6 mr-2" />
-          )}
-          <span>{toast.message}</span>
-        </div>
-      )}
-      <div className="w-full max-w-7xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 bg-white p-6 border border-gray-300 rounded-2xl">
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Title
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                setIsChanged(true);
-              }}
-              placeholder="Enter product title"
-              className="mt-1 block w-full border border-gray-500 p-2 rounded-xl"
-            />
-          </div>
+  const handleRemoveProductImage = (imageUrl) => {
+    setSelectedImages((prev) =>
+      prev.filter((img) => (img.cloudUrl || img.localUrl) !== imageUrl),
+    );
 
-          <div className="mb-4 ">
-            <label className="block  text-sm font-medium text-gray-700 ">
-              Description
-            </label>
-            <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-auto">
-              <Editor
-                editorState={editorState}
-                onEditorStateChange={(newEditorState) => {
-                  onEditorStateChange(newEditorState);
+    setIsChanged(true);
+  };
+  const handleBack = () => {
+    // if (isChanged) {
+    //   const confirmLeave = window.confirm(
+    //     "You have unsaved changes. Are you sure you want to go back?"
+    //   );
+    //   if (!confirmLeave) return;
+    // }
+
+    navigate("/manage-product");
+  };
+
+  return (
+    <main className="bg-gray-100 p-6">
+      <div className="max-w-7xl mx-auto w-full">
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={handleBack}
+            className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-200 transition"
+          >
+            <IoIosArrowUp className="-rotate-90 text-xl text-gray-700" />
+          </button>
+
+          <h1 className="text-lg font-semibold text-gray-800">
+            {isEditing ? "Edit Product" : "Add Product"}
+          </h1>
+        </div>
+
+        {toast.show && (
+          <div
+            className={`fixed top-16 z-30 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+              toast.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
+          >
+            {toast.type === "success" ? (
+              <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+            ) : (
+              <HiOutlineXCircle className="w-6 h-6 mr-2" />
+            )}
+            <span>{toast.message}</span>
+          </div>
+        )}
+        <div className="w-full max-w-7xl shadow-lg p-6 rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 bg-white p-6 border border-gray-300 rounded-2xl">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Title
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
                   setIsChanged(true);
                 }}
-                wrapperClassName="border-none"
-                editorClassName="min-h-[200px] bg-white p-2"
+                placeholder="Enter product title"
+                className="mt-1 block w-full border border-gray-500 p-2 rounded-xl"
               />
             </div>
-          </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Media
-            </label>
-
-            {Object.values(checkedImages).some(Boolean) && (
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-sm text-gray-700">
-                  {Object.values(checkedImages).filter(Boolean).length} file
-                  selected
-                </p>
-                <button
-                  onClick={handleRemoveSelected}
-                  className="text-red-500 text-sm font-medium hover:underline"
-                >
-                  Remove
-                </button>
-              </div>
-            )}
-
-            {selectedImages.length === 0 ? (
-              <div
-                onClick={() => setIsMediaModalVisible(true)}
-                className="border border-dashed border-gray-400 p-6 text-center rounded-xl cursor-pointer hover:bg-gray-50"
-              >
-                <label
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsMediaModalVisible(true);
+            <div className="mb-4 ">
+              <label className="block  text-sm font-medium text-gray-700 ">
+                Description
+              </label>
+              <div className="block border border-gray-200 shadow-sm max-h-[300px] overflow-auto">
+                <Editor
+                  editorState={editorState}
+                  onEditorStateChange={(newEditorState) => {
+                    onEditorStateChange(newEditorState);
+                    setIsChanged(true);
                   }}
-                >
-                  Upload new
-                </label>
-                <p className="text-gray-500 text-sm mt-2">
-                  Accepts images only
-                </p>
+                  wrapperClassName="border-none"
+                  editorClassName="min-h-[200px] bg-white p-2"
+                />
               </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                {selectedImages.slice(0, 6).map((img, index) => {
-                  const isChecked = checkedImages[index] || false;
+            </div>
 
-                  return (
-                    <div
-                      key={index}
-                      className={`relative aspect-square rounded-md overflow-hidden cursor-pointer border transition
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Media
+              </label>
+
+              {Object.values(checkedImages).some(Boolean) && (
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-sm text-gray-700">
+                    {Object.values(checkedImages).filter(Boolean).length} file
+                    selected
+                  </p>
+                  <button
+                    onClick={handleRemoveSelected}
+                    className="text-red-500 text-sm font-medium hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+
+              {selectedImages.length === 0 ? (
+                <div
+                  onClick={() => setIsMediaModalVisible(true)}
+                  className="border border-dashed border-gray-400 p-6 text-center rounded-xl cursor-pointer hover:bg-gray-50"
+                >
+                  <label
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMediaModalVisible(true);
+                    }}
+                  >
+                    Upload new
+                  </label>
+                  <p className="text-gray-500 text-sm mt-2">
+                    Accepts images only
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                  {selectedImages.slice(0, 6).map((img, index) => {
+                    const isChecked = checkedImages[index] || false;
+
+                    return (
+                      <div
+                        key={index}
+                        className={`relative aspect-square rounded-md overflow-hidden cursor-pointer border transition
           ${
             isChecked
               ? "ring-2 ring-blue-500 border-blue-400"
               : "border-gray-200 hover:shadow-md"
           }
         `}
-                      onClick={() => setIsMediaModalVisible(true)}
-                    >
-                      {/* Image */}
-                      <img
-                        src={img.cloudUrl || img.localUrl}
-                        alt={`Uploaded ${index}`}
-                        className={`w-full h-full object-cover transition duration-300 ${
-                          isChecked ? "opacity-60" : "opacity-100"
-                        }`}
-                      />
-
-                      <div
-                        className={`absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 ${
-                          isChecked ? "opacity-100" : ""
-                        }`}
-                      ></div>
-
-                      <div className="absolute top-2 left-2 opacity-0 hover:opacity-100 transition-opacity duration-200 group-hover:opacity-100">
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleImageSelection(index)}
-                          onClick={(e) => e.stopPropagation()}
-                          className="w-5 h-5 accent-blue-600 cursor-pointer bg-white border border-gray-300 rounded"
+                        onClick={() => setIsMediaModalVisible(true)}
+                      >
+                        {/* Image */}
+                        <img
+                          src={img.cloudUrl || img.localUrl}
+                          alt={`Uploaded ${index}`}
+                          className={`w-full h-full object-cover transition duration-300 ${
+                            isChecked ? "opacity-60" : "opacity-100"
+                          }`}
                         />
-                      </div>
 
-                      <div className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity duration-200 group-hover:opacity-100 text-gray-200">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                          className="w-4 h-4"
-                        >
-                          <path d="M8 6h2V4H8v2zm0 7h2v-2H8v2zm0 7h2v-2H8v2zm6-14h2V4h-2v2zm0 7h2v-2h-2v2zm0 7h2v-2h-2v2z" />
-                        </svg>
-                      </div>
+                        <div
+                          className={`absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 ${
+                            isChecked ? "opacity-100" : ""
+                          }`}
+                        ></div>
 
-                      {img.loading && (
-                        <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                          <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                        <div className="absolute top-2 left-2 opacity-0 hover:opacity-100 transition-opacity duration-200 group-hover:opacity-100">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggleImageSelection(index)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-5 h-5 accent-blue-600 cursor-pointer bg-white border border-gray-300 rounded"
+                          />
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
 
-                {selectedImages.length > 6 && (
-                  <div
-                    onClick={() => setIsMediaModalVisible(true)}
-                    className="aspect-square flex items-center justify-center rounded-md border border-gray-200 bg-gray-100 text-gray-700 font-medium text-lg cursor-pointer hover:bg-gray-200 transition"
-                  >
-                    +{selectedImages.length - 6}
-                  </div>
-                )}
+                        <div className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity duration-200 group-hover:opacity-100 text-gray-200">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                            className="w-4 h-4"
+                          >
+                            <path d="M8 6h2V4H8v2zm0 7h2v-2H8v2zm0 7h2v-2H8v2zm6-14h2V4h-2v2zm0 7h2v-2h-2v2zm0 7h2v-2h-2v2z" />
+                          </svg>
+                        </div>
 
-                <div
-                  onClick={() => setIsMediaModalVisible(true)}
-                  className="aspect-square flex items-center justify-center rounded-md border border-dashed border-gray-300 text-gray-500 text-3xl cursor-pointer hover:bg-gray-50 transition"
-                >
-                  +
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Pricing
-            </label>
-            <div className="grid grid-cols-2 gap-4 mt-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Price
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    placeholder="0.00"
-                    value={price}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^\d*\.?\d{0,2}$/.test(value)) {
-                        setPrice(value);
-                        setIsChanged(true);
-                      }
-                    }}
-                    className="w-full pl-7 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Compare at Price
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    value={compareAtPrice}
-                    onChange={(e) => {
-                      setCompareAtPrice(e.target.value);
-                      setIsChanged(true);
-                    }}
-                    placeholder=" 0.00"
-                    className="w-full pl-7 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-2">
-              <input type="checkbox" id="charge-tax" className="mr-2" />
-              <label htmlFor="charge-tax" className="text-gray-600">
-                Charge tax on this product
-              </label>
-            </div>
-          </div>
-
-          <div className="border rounded-2xl p-4 bg-white mb-4 border-gray-500">
-            <h2 className="font-medium text-gray-700">Inventory</h2>
-
-            <div className="flex items-center mt-3">
-              <input
-                type="checkbox"
-                id="trackQuantity"
-                checked={trackQuantity}
-                onChange={() => {
-                  setTrackQuantity(!trackQuantity);
-                  setIsChanged(true);
-                }}
-                className="h-4 w-4 text-blue-500"
-              />
-              <label
-                htmlFor="trackQuantity"
-                className="ml-2 text-sm text-gray-700"
-              >
-                Track quantity
-              </label>
-            </div>
-
-            {trackQuantity && (
-              <div className="mt-4 border-b border-gray-300">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm text-gray-700 block">
-                    Quantity
-                  </label>
-
-                  {isEditing ? (
-                    <span className="w-full text-sm text-red-500 italic text-right mb-3">
-                      You can update quantities inside the variants section
-                      below.
-                    </span>
-                  ) : (
-                    <input
-                      type="number"
-                      value={quantity}
-                      onChange={(e) => {
-                        setQuantity(e.target.value);
-                        setIsChanged(true);
-                      }}
-                      className="w-20 border px-3 py-1 rounded-md text-center mb-3 no-spinner"
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-center mt-3">
-              <input
-                type="checkbox"
-                id="hasSKU"
-                checked={hasSKU}
-                onChange={() => {
-                  setHasSKU(!hasSKU);
-                  setIsChanged(true);
-                }}
-                className="h-4 w-4 text-blue-500"
-              />
-              <label htmlFor="hasSKU" className="ml-2 text-sm text-gray-700">
-                This product has a SKU or barcode
-              </label>
-            </div>
-
-            {hasSKU && (
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  placeholder="SKU"
-                  value={sku}
-                  onChange={(e) => {
-                    setSKU(e.target.value);
-                    setIsChanged(true);
-                  }}
-                  className="w-full border p-2 rounded-md"
-                />
-                <input
-                  type="text"
-                  placeholder="Barcode"
-                  value={barcode}
-                  onChange={(e) => {
-                    setBarcode(e.target.value);
-                    setIsChanged(true);
-                  }}
-                  className="w-full border p-2 rounded-md"
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="border rounded-2xl p-4 bg-white border-gray-500">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="trackShipping"
-                checked={trackShipping}
-                onChange={() => {
-                  setTrackShipping(!trackShipping);
-                  setIsChanged(true);
-                }}
-                className="h-4 w-4 text-blue-500"
-              />
-              <label
-                htmlFor="trackShipping"
-                className="ml-2 text-sm text-gray-700"
-              >
-                This is a physical product
-              </label>
-            </div>
-
-            {trackShipping && (
-              <div className="mt-4">
-                <label className="text-sm text-gray-700 border-b border-gray-300 pb-2 block">
-                  Weight
-                </label>
-
-                <div className="flex items-center space-x-2 mt-2">
-                  <div className="flex items-center border border-gray-300 rounded-md">
-                    <input
-                      type="text"
-                      value={weight}
-                      onChange={(e) => {
-                        handleChange(e);
-                        setIsChanged(true);
-                      }}
-                      className="w-20 text-center py-1 border-0 focus:ring-0"
-                      placeholder="0.00"
-                    />
-                  </div>
-
-                  <select
-                    value={unit}
-                    onChange={(e) => {
-                      setUnit(e.target.value);
-                      setIsChanged(true);
-                    }}
-                    className="border px-2 py-1 rounded-md"
-                  >
-                    <option value="kg">kg</option>
-                    <option value="lb">lb</option>
-                    <option value="oz">oz</option>
-                    <option value="g">g</option>
-                  </select>
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="border rounded-2xl p-4 bg-white border-gray-500 mt-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="enableShippingPlans"
-                checked={enableShippingPlans}
-                onChange={() => {
-                  setEnableShippingPlans(!enableShippingPlans);
-                  setIsChanged(true);
-                }}
-                className="h-4 w-4 text-blue-500"
-              />
-              <label
-                htmlFor="enableShippingPlans"
-                className="ml-2 text-sm text-gray-700"
-              >
-                Shipping Options
-              </label>
-            </div>
-
-            <div className="flex items-center mt-2">
-              <input
-                type="checkbox"
-                id="enableFreeShipping"
-                checked={enableFreeShipping}
-                onChange={() => {
-                  setEnableFreeShipping(!enableFreeShipping);
-                  setIsChanged(true);
-                }}
-                className="h-4 w-4 text-blue-500"
-              />
-              <label
-                htmlFor="enableFreeShipping"
-                className="ml-2 text-sm text-gray-700"
-              >
-                Free Shipping
-              </label>
-            </div>
-
-            {enableShippingPlans && !enableFreeShipping && (
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Shipping Profile
-                </label>
-
-                {shippingPlans.length > 0 ? (
-                  <>
-                    <select
-                      value={selectedShippingPlan}
-                      onChange={(e) => {
-                        setSelectedShippingPlan(e.target.value);
-                        setIsChanged(true);
-                      }}
-                      className="w-full border border-gray-300 p-2 rounded-md"
-                    >
-                      <option value="">Select a plan</option>
-                      {shippingPlans.map((plan) => (
-                        <option key={plan._id} value={plan.profileId}>
-                          {plan.profileName.toUpperCase()} — {plan.rateName} ($
-                          {plan.ratePrice})
-                        </option>
-                      ))}
-                    </select>
-
-                    {selectedShippingPlan && (
-                      <div className="mt-3 text-sm text-gray-700">
-                        Selected plan:{" "}
-                        <span className="font-medium">
-                          {
-                            shippingPlans.find(
-                              (p) => p.profileId === selectedShippingPlan,
-                            )?.profileName
-                          }{" "}
-                          (
-                          {
-                            shippingPlans.find(
-                              (p) => p.profileId === selectedShippingPlan,
-                            )?.rateName
-                          }{" "}
-                          - $
-                          {
-                            shippingPlans.find(
-                              (p) => p.profileId === selectedShippingPlan,
-                            )?.ratePrice
-                          }
-                          )
-                        </span>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-sm text-gray-700 bg-yellow-50 border border-yellow-300 rounded-md p-3">
-                    No active shipping profiles found.{" "}
-                    <button
-                      onClick={() => navigate("/manage-shipping")}
-                      className="text-blue-600 underline hover:text-blue-800 font-medium ml-1"
-                    >
-                      Click here to manage shipping.
-                    </button>
-                    <p className="mt-2 text-gray-600">
-                      Once you activate a profile, it will appear here. Until
-                      then, products will default to Free Shipping.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {enableShippingPlans && enableFreeShipping && (
-              <div className="mt-4 text-sm text-green-600 font-medium">
-                Free shipping is enabled — no need to select a plan.
-              </div>
-            )}
-          </div>
-
-          <div className="border rounded-2xl p-3 mt-3 bg-white border-gray-300 w-full">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-medium text-gray-700">Variants</h2>
-
-              {combinations.length > 0 && (
-                <button
-                  onClick={() => setShowBulkModal(true)}
-                  className="text-sm bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700"
-                >
-                  Bulk Update
-                </button>
-              )}
-            </div>
-
-            {!showVariantForm && (
-              <div className="flex gap-2 items-center mt-2">
-                <button
-                  onClick={() => {
-                    if (options.length >= 3) {
-                      showToast("warning", "You can only add up to 3 options.");
-                      return;
-                    }
-                    handleOpenForm();
-                    setIsChanged(true);
-                  }}
-                  className={`text-sm text-gray-700 px-3 py-1 rounded-lg border transition ${
-                    options.length >= 3
-                      ? "bg-gray-200  text-gray-400"
-                      : "bg-gray-100 hover:bg-gray-200"
-                  }`}
-                >
-                  Add option like size or color
-                </button>
-              </div>
-            )}
-
-            {options.length > 0 && (
-              <div className="mt-3">
-                {options
-                  .filter((opt) => opt.values.some((v) => v.trim() !== ""))
-                  .map((option, optionIndex) => (
-                    <div
-                      key={optionIndex}
-                      onClick={() => {
-                        if (editingOptionIndex !== optionIndex) {
-                          setEditingOptionIndex(optionIndex);
-                          const dbMatch = dbOptions.find((db) =>
-                            db.optionName.some(
-                              (n) =>
-                                n.toLowerCase().trim() ===
-                                option.name.toLowerCase().trim(),
-                            ),
-                          );
-
-                          setNewOption({
-                            name: option.name,
-                            values: [...option.values],
-                            dbValues: dbMatch ? dbMatch.optionValues : [],
-                          });
-                        }
-                      }}
-                      className={`border p-3 rounded-lg mt-2 transition-all duration-200 cursor-pointer ${
-                        editingOptionIndex === optionIndex
-                          ? "bg-gray-100 border-blue-400 shadow-inner"
-                          : "bg-gray-50 hover:bg-gray-100 border-gray-300"
-                      }`}
-                    >
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-sm font-medium text-gray-700">
-                          {option.name}
-                        </h3>
-
-                        {editingOptionIndex === optionIndex && (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSaveEditedOption(optionIndex);
-                              }}
-                              className="text-xs text-white bg-blue-600 px-3 py-1 rounded-md hover:bg-blue-700"
-                            >
-                              Done
-                            </button>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteOption(optionIndex);
-                              }}
-                              className="text-xs text-red-600 border border-red-400 px-3 py-1 rounded-md hover:bg-red-100"
-                            >
-                              Delete
-                            </button>
+                        {img.loading && (
+                          <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                            <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
                           </div>
                         )}
                       </div>
+                    );
+                  })}
 
-                      {editingOptionIndex !== optionIndex && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {option.values
-                            .filter((v) => v.trim() !== "")
-                            .map((value, valueIndex) => (
-                              <span
-                                key={valueIndex}
-                                className="text-sm bg-gray-200 px-2 py-1 rounded-md"
-                              >
-                                {value}
-                              </span>
-                            ))}
+                  {selectedImages.length > 6 && (
+                    <div
+                      onClick={() => setIsMediaModalVisible(true)}
+                      className="aspect-square flex items-center justify-center rounded-md border border-gray-200 bg-gray-100 text-gray-700 font-medium text-lg cursor-pointer hover:bg-gray-200 transition"
+                    >
+                      +{selectedImages.length - 6}
+                    </div>
+                  )}
+
+                  <div
+                    onClick={() => setIsMediaModalVisible(true)}
+                    className="aspect-square flex items-center justify-center rounded-md border border-dashed border-gray-300 text-gray-500 text-3xl cursor-pointer hover:bg-gray-50 transition"
+                  >
+                    +
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Pricing
+              </label>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Price
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                      $
+                    </span>
+                    <input
+                      type="number"
+                      placeholder="0.00"
+                      value={price}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d*\.?\d{0,2}$/.test(value)) {
+                          setPrice(value);
+                          setIsChanged(true);
+                        }
+                      }}
+                      className="w-full pl-7 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Compare at Price
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                      $
+                    </span>
+                    <input
+                      type="number"
+                      value={compareAtPrice}
+                      onChange={(e) => {
+                        setCompareAtPrice(e.target.value);
+                        setIsChanged(true);
+                      }}
+                      placeholder=" 0.00"
+                      className="w-full pl-7 pr-3 py-2 rounded-2xl border border-gray-500 no-spinner"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-2">
+                <input type="checkbox" id="charge-tax" className="mr-2" />
+                <label htmlFor="charge-tax" className="text-gray-600">
+                  Charge tax on this product
+                </label>
+              </div>
+            </div>
+
+            <div className="border rounded-2xl p-4 bg-white mb-4 border-gray-500">
+              <h2 className="font-medium text-gray-700">Inventory</h2>
+
+              <div className="flex items-center mt-3">
+                <input
+                  type="checkbox"
+                  id="trackQuantity"
+                  checked={trackQuantity}
+                  onChange={() => {
+                    setTrackQuantity(!trackQuantity);
+                    setIsChanged(true);
+                  }}
+                  className="h-4 w-4 text-blue-500"
+                />
+                <label
+                  htmlFor="trackQuantity"
+                  className="ml-2 text-sm text-gray-700"
+                >
+                  Track quantity
+                </label>
+              </div>
+
+              {trackQuantity && (
+                <div className="mt-4 border-b border-gray-300">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-700 block">
+                      Quantity
+                    </label>
+
+                    {isEditing ? (
+                      <span className="w-full text-sm text-red-500 italic text-right mb-3">
+                        You can update quantities inside the variants section
+                        below.
+                      </span>
+                    ) : (
+                      <input
+                        type="number"
+                        value={quantity}
+                        onChange={(e) => {
+                          setQuantity(e.target.value);
+                          setIsChanged(true);
+                        }}
+                        className="w-20 border px-3 py-1 rounded-md text-center mb-3 no-spinner"
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center mt-3">
+                <input
+                  type="checkbox"
+                  id="hasSKU"
+                  checked={hasSKU}
+                  onChange={() => {
+                    setHasSKU(!hasSKU);
+                    setIsChanged(true);
+                  }}
+                  className="h-4 w-4 text-blue-500"
+                />
+                <label htmlFor="hasSKU" className="ml-2 text-sm text-gray-700">
+                  This product has a SKU or barcode
+                </label>
+              </div>
+
+              {hasSKU && (
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    placeholder="SKU"
+                    value={sku}
+                    onChange={(e) => {
+                      setSKU(e.target.value);
+                      setIsChanged(true);
+                    }}
+                    className="w-full border p-2 rounded-md"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Barcode"
+                    value={barcode}
+                    onChange={(e) => {
+                      setBarcode(e.target.value);
+                      setIsChanged(true);
+                    }}
+                    className="w-full border p-2 rounded-md"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="border rounded-2xl p-4 bg-white border-gray-500">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="trackShipping"
+                  checked={trackShipping}
+                  onChange={() => {
+                    setTrackShipping(!trackShipping);
+                    setIsChanged(true);
+                  }}
+                  className="h-4 w-4 text-blue-500"
+                />
+                <label
+                  htmlFor="trackShipping"
+                  className="ml-2 text-sm text-gray-700"
+                >
+                  This is a physical product
+                </label>
+              </div>
+
+              {trackShipping && (
+                <div className="mt-4">
+                  <label className="text-sm text-gray-700 border-b border-gray-300 pb-2 block">
+                    Weight
+                  </label>
+
+                  <div className="flex items-center space-x-2 mt-2">
+                    <div className="flex items-center border border-gray-300 rounded-md">
+                      <input
+                        type="text"
+                        value={weight}
+                        onChange={(e) => {
+                          handleChange(e);
+                          setIsChanged(true);
+                        }}
+                        className="w-20 text-center py-1 border-0 focus:ring-0"
+                        placeholder="0.00"
+                      />
+                    </div>
+
+                    <select
+                      value={unit}
+                      onChange={(e) => {
+                        setUnit(e.target.value);
+                        setIsChanged(true);
+                      }}
+                      className="border px-2 py-1 rounded-md"
+                    >
+                      <option value="kg">kg</option>
+                      <option value="lb">lb</option>
+                      <option value="oz">oz</option>
+                      <option value="g">g</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="border rounded-2xl p-4 bg-white border-gray-500 mt-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="enableShippingPlans"
+                  checked={enableShippingPlans}
+                  onChange={() => {
+                    setEnableShippingPlans(!enableShippingPlans);
+                    setIsChanged(true);
+                  }}
+                  className="h-4 w-4 text-blue-500"
+                />
+                <label
+                  htmlFor="enableShippingPlans"
+                  className="ml-2 text-sm text-gray-700"
+                >
+                  Shipping Options
+                </label>
+              </div>
+
+              <div className="flex items-center mt-2">
+                <input
+                  type="checkbox"
+                  id="enableFreeShipping"
+                  checked={enableFreeShipping}
+                  onChange={() => {
+                    setEnableFreeShipping(!enableFreeShipping);
+                    setIsChanged(true);
+                  }}
+                  className="h-4 w-4 text-blue-500"
+                />
+                <label
+                  htmlFor="enableFreeShipping"
+                  className="ml-2 text-sm text-gray-700"
+                >
+                  Free Shipping
+                </label>
+              </div>
+
+              {enableShippingPlans && !enableFreeShipping && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Shipping Profile
+                  </label>
+
+                  {shippingPlans.length > 0 ? (
+                    <>
+                      <select
+                        value={selectedShippingPlan}
+                        onChange={(e) => {
+                          setSelectedShippingPlan(e.target.value);
+                          setIsChanged(true);
+                        }}
+                        className="w-full border border-gray-300 p-2 rounded-md"
+                      >
+                        <option value="">Select a plan</option>
+                        {shippingPlans.map((plan) => (
+                          <option key={plan._id} value={plan.profileId}>
+                            {plan.profileName.toUpperCase()} — {plan.rateName}{" "}
+                            ($
+                            {plan.ratePrice})
+                          </option>
+                        ))}
+                      </select>
+
+                      {selectedShippingPlan && (
+                        <div className="mt-3 text-sm text-gray-700">
+                          Selected plan:{" "}
+                          <span className="font-medium">
+                            {
+                              shippingPlans.find(
+                                (p) => p.profileId === selectedShippingPlan,
+                              )?.profileName
+                            }{" "}
+                            (
+                            {
+                              shippingPlans.find(
+                                (p) => p.profileId === selectedShippingPlan,
+                              )?.rateName
+                            }{" "}
+                            - $
+                            {
+                              shippingPlans.find(
+                                (p) => p.profileId === selectedShippingPlan,
+                              )?.ratePrice
+                            }
+                            )
+                          </span>
                         </div>
                       )}
+                    </>
+                  ) : (
+                    <div className="text-sm text-gray-700 bg-yellow-50 border border-yellow-300 rounded-md p-3">
+                      No active shipping profiles found.{" "}
+                      <button
+                        onClick={() => navigate("/manage-shipping")}
+                        className="text-blue-600 underline hover:text-blue-800 font-medium ml-1"
+                      >
+                        Click here to manage shipping.
+                      </button>
+                      <p className="mt-2 text-gray-600">
+                        Once you activate a profile, it will appear here. Until
+                        then, products will default to Free Shipping.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
 
-                      {editingOptionIndex === optionIndex && (
-                        <div className="mt-2 space-y-2">
-                          {newOption.values.map((value, i) => {
-                            const hasDBValues = newOption.dbValues?.length > 0;
+              {enableShippingPlans && enableFreeShipping && (
+                <div className="mt-4 text-sm text-green-600 font-medium">
+                  Free shipping is enabled — no need to select a plan.
+                </div>
+              )}
+            </div>
 
-                            const isCustomValue =
-                              value === "__OTHER__" ||
-                              (value !== "" &&
-                                !newOption.dbValues.some(
-                                  (v) =>
-                                    v.toLowerCase() === value.toLowerCase(),
-                                ));
+            <div className="border rounded-2xl p-3 mt-3 bg-white border-gray-300 w-full">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-sm font-medium text-gray-700">Variants</h2>
 
-                            return (
-                              <div key={i} className="flex gap-2 items-center">
-                                {hasDBValues && !isCustomValue ? (
-                                  <select
-                                    value={value === "" ? "" : value}
-                                    onChange={(e) => {
-                                      console.log(
-                                        "Dropdown selected:",
-                                        e.target.value,
-                                      );
+                {combinations.length > 0 && (
+                  <button
+                    onClick={() => setShowBulkModal(true)}
+                    className="text-sm bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700"
+                  >
+                    Bulk Update
+                  </button>
+                )}
+              </div>
 
-                                      if (e.target.value === "Other") {
+              {!showVariantForm && (
+                <div className="flex gap-2 items-center mt-2">
+                  <button
+                    onClick={() => {
+                      if (options.length >= 3) {
+                        showToast(
+                          "warning",
+                          "You can only add up to 3 options.",
+                        );
+                        return;
+                      }
+                      handleOpenForm();
+                      setIsChanged(true);
+                    }}
+                    className={`text-sm text-gray-700 px-3 py-1 rounded-lg border transition ${
+                      options.length >= 3
+                        ? "bg-gray-200  text-gray-400"
+                        : "bg-gray-100 hover:bg-gray-200"
+                    }`}
+                  >
+                    Add option like size or color
+                  </button>
+                </div>
+              )}
+
+              {options.length > 0 && (
+                <div className="mt-3">
+                  {options
+                    .filter((opt) => opt.values.some((v) => v.trim() !== ""))
+                    .map((option, optionIndex) => (
+                      <div
+                        key={optionIndex}
+                        onClick={() => {
+                          if (editingOptionIndex !== optionIndex) {
+                            setEditingOptionIndex(optionIndex);
+                            const dbMatch = dbOptions.find((db) =>
+                              db.optionName.some(
+                                (n) =>
+                                  n.toLowerCase().trim() ===
+                                  option.name.toLowerCase().trim(),
+                              ),
+                            );
+
+                            setNewOption({
+                              name: option.name,
+                              values: [...option.values],
+                              dbValues: dbMatch ? dbMatch.optionValues : [],
+                            });
+                          }
+                        }}
+                        className={`border p-3 rounded-lg mt-2 transition-all duration-200 cursor-pointer ${
+                          editingOptionIndex === optionIndex
+                            ? "bg-gray-100 border-blue-400 shadow-inner"
+                            : "bg-gray-50 hover:bg-gray-100 border-gray-300"
+                        }`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-sm font-medium text-gray-700">
+                            {option.name}
+                          </h3>
+
+                          {editingOptionIndex === optionIndex && (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSaveEditedOption(optionIndex);
+                                }}
+                                className="text-xs text-white bg-blue-600 px-3 py-1 rounded-md hover:bg-blue-700"
+                              >
+                                Done
+                              </button>
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteOption(optionIndex);
+                                }}
+                                className="text-xs text-red-600 border border-red-400 px-3 py-1 rounded-md hover:bg-red-100"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {editingOptionIndex !== optionIndex && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {option.values
+                              .filter((v) => v.trim() !== "")
+                              .map((value, valueIndex) => (
+                                <span
+                                  key={valueIndex}
+                                  className="text-sm bg-gray-200 px-2 py-1 rounded-md"
+                                >
+                                  {value}
+                                </span>
+                              ))}
+                          </div>
+                        )}
+
+                        {editingOptionIndex === optionIndex && (
+                          <div className="mt-2 space-y-2">
+                            {newOption.values.map((value, i) => {
+                              const hasDBValues =
+                                newOption.dbValues?.length > 0;
+
+                              const isCustomValue =
+                                value === "__OTHER__" ||
+                                (value !== "" &&
+                                  !newOption.dbValues.some(
+                                    (v) =>
+                                      v.toLowerCase() === value.toLowerCase(),
+                                  ));
+
+                              return (
+                                <div
+                                  key={i}
+                                  className="flex gap-2 items-center"
+                                >
+                                  {hasDBValues && !isCustomValue ? (
+                                    <select
+                                      value={value === "" ? "" : value}
+                                      onChange={(e) => {
                                         console.log(
-                                          "👉 Switching to INPUT mode",
+                                          "Dropdown selected:",
+                                          e.target.value,
                                         );
-                                        handleEditOptionValueChange(
-                                          i,
-                                          "__OTHER__",
+
+                                        if (e.target.value === "Other") {
+                                          console.log(
+                                            "👉 Switching to INPUT mode",
+                                          );
+                                          handleEditOptionValueChange(
+                                            i,
+                                            "__OTHER__",
+                                          );
+                                        } else {
+                                          handleEditOptionValueChange(
+                                            i,
+                                            e.target.value,
+                                          );
+                                        }
+                                      }}
+                                      className="w-full border border-gray-300 rounded-md p-1 text-sm"
+                                    >
+                                      <option value="" disabled>
+                                        Select value
+                                      </option>
+
+                                      {newOption.dbValues.map((val) => (
+                                        <option key={val} value={val}>
+                                          {val}
+                                        </option>
+                                      ))}
+
+                                      <option value="Other">Other</option>
+                                    </select>
+                                  ) : (
+                                    <input
+                                      type="text"
+                                      value={value === "__OTHER__" ? "" : value}
+                                      onChange={(e) => {
+                                        console.log(
+                                          "Typing custom value:",
+                                          e.target.value,
                                         );
-                                      } else {
                                         handleEditOptionValueChange(
                                           i,
                                           e.target.value,
                                         );
-                                      }
+                                      }}
+                                      placeholder="Enter custom value"
+                                      className="w-full border border-gray-300 rounded-md p-1 text-sm"
+                                    />
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveOptionValue(optionIndex, i);
                                     }}
-                                    className="w-full border border-gray-300 rounded-md p-1 text-sm"
+                                    className="text-red-500 hover:text-red-700 transition text-lg"
+                                    title="Remove value & variants"
                                   >
-                                    <option value="" disabled>
-                                      Select value
-                                    </option>
+                                    <RiDeleteBin6Line />
+                                  </button>
+                                </div>
+                              );
+                            })}
 
-                                    {newOption.dbValues.map((val) => (
-                                      <option key={val} value={val}>
-                                        {val}
-                                      </option>
-                                    ))}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddEditedValue();
+                              }}
+                              className="text-xs text-blue-600 hover:underline mt-1"
+                            >
+                              + Add another value
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
 
-                                    <option value="Other">Other</option>
-                                  </select>
-                                ) : (
-                                  <input
-                                    type="text"
-                                    value={value === "__OTHER__" ? "" : value}
-                                    onChange={(e) => {
-                                      console.log(
-                                        "Typing custom value:",
-                                        e.target.value,
-                                      );
-                                      handleEditOptionValueChange(
-                                        i,
-                                        e.target.value,
-                                      );
-                                    }}
-                                    placeholder="Enter custom value"
-                                    className="w-full border border-gray-300 rounded-md p-1 text-sm"
-                                  />
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRemoveOptionValue(optionIndex, i);
-                                  }}
-                                  className="text-red-500 hover:text-red-700 transition text-lg"
-                                  title="Remove value & variants"
-                                >
-                                  <RiDeleteBin6Line />
-                                </button>
-                              </div>
-                            );
-                          })}
+                  <div className="mt-3">
+                    <div className="grid grid-cols-6 items-center gap-20 mb-2 p-3">
+                      <h3 className="font-semibold text-xs text-gray-800">
+                        IMG
+                      </h3>
+                      <h3 className="font-semibold text-xs text-gray-800">
+                        VARIANT
+                      </h3>
+                      <h3 className="font-semibold text-xs text-gray-800">
+                        PRICE
+                      </h3>
+                      <h3 className="font-semibold text-xs text-gray-800">
+                        COMPARE
+                      </h3>
+                      <h3 className="font-semibold text-xs text-gray-800">
+                        QTY
+                      </h3>
+                      <h3 className="font-semibold text-xs text-gray-800">
+                        ACTION
+                      </h3>
+                    </div>
 
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddEditedValue();
-                            }}
-                            className="text-xs text-blue-600 hover:underline mt-1"
+                    {generateVariants().length > 0 ? (
+                      generateVariants().map((combination, index) => (
+                        <div
+                          key={index}
+                          className="bg-gray-100 p-4 rounded-md mt-2"
+                        >
+                          <div
+                            className="flex items-center justify-between gap-6 cursor-pointer"
+                            onClick={() => toggleChildOptions(index)}
                           >
-                            + Add another value
-                          </button>
+                            <div className="font-medium text-gray-700">
+                              {combination.parent}
+                            </div>
+
+                            <div
+                              className="flex items-center justify-between gap-6 cursor-pointer"
+                              onClick={() => toggleChildOptions(index)} // ✅ Only one click handler
+                            >
+                              <button
+                                type="button"
+                                className="text-gray-500 hover:text-gray-700 transition"
+                                onClick={(e) => {
+                                  e.stopPropagation(); // ✅ Prevent parent click from firing twice
+                                  toggleChildOptions(index);
+                                }}
+                              >
+                                {expandedParents.includes(index) ? (
+                                  <IoIosArrowUp className="text-xl transition-transform duration-200" />
+                                ) : (
+                                  <MdOutlineKeyboardArrowDown className="text-2xl transition-transform duration-200" />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+
+                          {expandedParents.includes(index) && (
+                            <div className="mt-2">
+                              <ul className="space-y-2">
+                                {combinations[index]?.children?.map(
+                                  (child, childIndex) => {
+                                    const parentValue =
+                                      combinations[index]?.parent;
+                                    const combinationString =
+                                      options.length === 1
+                                        ? child
+                                        : `${parentValue} / ${child}`;
+                                    const normalizedKey = combinationString
+                                      .replace(/['"]/g, "")
+                                      .trim();
+
+                                    const image = variantImages[normalizedKey];
+                                    const matchingVariant =
+                                      product?.variants?.find(
+                                        (variant) =>
+                                          normalizeString(variant.title) ===
+                                          normalizedKey,
+                                      );
+                                    const variantId = matchingVariant?.id;
+
+                                    return (
+                                      <li
+                                        key={childIndex}
+                                        className="grid grid-cols-6 items-center gap-20"
+                                      >
+                                        <div className="relative w-14 h-14">
+                                          <label className="flex items-center justify-center w-full h-full border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden bg-gray-50">
+                                            {variantImages[normalizedKey]
+                                              ?.length > 0 ? (
+                                              <>
+                                                <img
+                                                  src={
+                                                    variantImages[
+                                                      normalizedKey
+                                                    ][0].preview
+                                                  }
+                                                  alt={
+                                                    variantImages[
+                                                      normalizedKey
+                                                    ][0].alt || "variant"
+                                                  }
+                                                  className="w-full h-full object-cover rounded-md"
+                                                />
+
+                                                {/* ✅ Overlay counter if multiple images exist */}
+                                                {variantImages[normalizedKey]
+                                                  .length > 1 && (
+                                                  <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                                                    +
+                                                    {variantImages[
+                                                      normalizedKey
+                                                    ].length - 1}
+                                                  </div>
+                                                )}
+                                              </>
+                                            ) : (
+                                              <span className="text-gray-400 text-xl">
+                                                +
+                                              </span>
+                                            )}
+
+                                            <input
+                                              multiple
+                                              className="absolute inset-0 opacity-0 cursor-pointer"
+                                              onClick={() => {
+                                                setCurrentVariant({
+                                                  index,
+                                                  child,
+                                                });
+                                                setIsPopupVisible(true);
+                                                setIsChanged(true);
+                                                setPopupMode("variant");
+                                              }}
+                                            />
+                                          </label>
+                                        </div>
+
+                                        <span
+                                          className="text-sm font-medium text-gray-500 hover:text-blue-800 transition cursor-pointer whitespace-nowrap"
+                                          onClick={() => {
+                                            if (isEditing && variantId) {
+                                              setIsChanged(true);
+                                              navigate(
+                                                `/product/${product.id}/variants/${variantId}`,
+                                                {
+                                                  state: {
+                                                    productId: product.id,
+                                                    variantId,
+                                                  },
+                                                },
+                                              );
+                                            } else {
+                                              handleVariantEditModal(
+                                                index,
+                                                child,
+                                              );
+                                            }
+                                          }}
+                                        >
+                                          {child}
+                                        </span>
+
+                                        <div
+                                          className="relative w-20 cursor-pointer"
+                                          onClick={() => {
+                                            if (isEditing && variantId) {
+                                              navigate(
+                                                `/product/${product.id}/variants/${variantId}`,
+                                                {
+                                                  state: {
+                                                    productId: product.id,
+                                                    variantId,
+                                                  },
+                                                },
+                                              );
+                                            } else {
+                                              handleVariantEditModal(
+                                                index,
+                                                child,
+                                              );
+                                            }
+                                          }}
+                                        >
+                                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                            $
+                                          </span>
+                                          <span className="w-20 p-1 pl-6 text-sm">
+                                            {variantPrices[
+                                              `${index}-${child}`
+                                            ] ??
+                                              matchingVariant?.price ??
+                                              "0.00"}
+                                          </span>
+                                        </div>
+
+                                        <div
+                                          className="relative w-20 cursor-pointer"
+                                          onClick={() => {
+                                            if (isEditing && variantId) {
+                                              navigate(
+                                                `/product/${product.id}/variants/${variantId}`,
+                                                {
+                                                  state: {
+                                                    productId: product.id,
+                                                    variantId,
+                                                  },
+                                                },
+                                              );
+                                            } else {
+                                              handleVariantEditModal(
+                                                index,
+                                                child,
+                                              );
+                                            }
+                                          }}
+                                        >
+                                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
+                                            $
+                                          </span>
+                                          <span className="w-20 p-1 pl-6 text-sm">
+                                            {variantCompareAtPrices[
+                                              `${index}-${child}`
+                                            ] ??
+                                              matchingVariant?.compare_at_price ??
+                                              "0.00"}
+                                          </span>
+                                        </div>
+
+                                        <span
+                                          className="w-20 p-1 text-sm cursor-pointer"
+                                          onClick={() => {
+                                            if (isEditing && variantId) {
+                                              navigate(
+                                                `/product/${product.id}/variants/${variantId}`,
+                                                {
+                                                  state: {
+                                                    productId: product.id,
+                                                    variantId,
+                                                  },
+                                                },
+                                              );
+                                            } else {
+                                              handleVariantEditModal(
+                                                index,
+                                                child,
+                                              );
+                                            }
+                                          }}
+                                        >
+                                          {variantQuantities[
+                                            `${index}-${child}`
+                                          ] ??
+                                            matchingVariant?.inventory_quantity ??
+                                            "0"}
+                                        </span>
+
+                                        <button
+                                          onClick={() => {
+                                            setDeleteTarget({
+                                              index,
+                                              childIndex,
+                                            });
+                                            setIsDeleteModalOpen(true);
+                                            setIsChanged(true);
+                                          }}
+                                          className="text-red-500 hover:text-red-700 "
+                                        >
+                                          <RiDeleteBin6Line />
+                                        </button>
+                                      </li>
+                                    );
+                                  },
+                                )}
+                              </ul>
+                            </div>
+                          )}
+
+                          {isDeleteModalOpen && (
+                            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                              <div className="bg-white rounded-lg shadow-lg p-6 w-[400px]">
+                                <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                                  Confirm Delete
+                                </h2>
+                                <p className="text-gray-600 mb-6">
+                                  Are you sure you want to delete this variant?
+                                  This action cannot be undone.
+                                </p>
+                                <div className="flex justify-end gap-3">
+                                  <button
+                                    onClick={() => setIsDeleteModalOpen(false)}
+                                    className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      if (deleteTarget) {
+                                        handleDeleteCombination(
+                                          deleteTarget.index,
+                                          deleteTarget.childIndex,
+                                        );
+                                      }
+                                      setIsDeleteModalOpen(false);
+                                    }}
+                                    className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-600"></p>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      handleOpenForm();
+                      setIsChanged(true);
+                    }}
+                    className="flex gap-2 items-center text-sm text-blue-600 mt-2 hover:underline"
+                  >
+                    Add another option
+                  </button>
+                </div>
+              )}
+
+              {showVariantForm && (
+                <div className="mt-3 border border-gray-300 rounded-lg p-4 bg-gray-50">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Option name
+                  </label>
+
+                  {!isCustomOption ? (
+                    <select
+                      value={selectedOptionName}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setSelectedOptionName(value);
+                        setIsChanged(true);
+
+                        if (value === "Other") {
+                          setIsCustomOption(true);
+                          setNewOption({ name: "", values: [""] });
+                          setMatchedOptionValues([]);
+                        } else {
+                          setIsCustomOption(false);
+                          setNewOption({ ...newOption, name: value });
+
+                          const found = dbOptions.find((opt) =>
+                            opt.optionName.some(
+                              (name) =>
+                                name.toLowerCase().trim() ===
+                                value.toLowerCase().trim(),
+                            ),
+                          );
+
+                          if (found) {
+                            setMatchedOptionValues(found.optionValues || []);
+                          } else {
+                            setMatchedOptionValues([]);
+                          }
+                        }
+                      }}
+                      className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
+                    >
+                      <option value="">Select option name</option>
+                      {dbOptions.map((opt, i) =>
+                        opt.optionName.map((name, j) => (
+                          <option key={`${i}-${j}`} value={name}>
+                            {name}
+                          </option>
+                        )),
                       )}
+                      <option value="Other">Other</option>
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={newOption.name}
+                      onChange={(e) => {
+                        handleNewOptionNameChange(e.target.value);
+                        setIsChanged(true);
+                      }}
+                      placeholder="Enter option name (e.g., Material)"
+                      className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
+                    />
+                  )}
+
+                  <label className="block text-sm font-medium text-gray-700 mt-3">
+                    Option values
+                  </label>
+
+                  {!isCustomOption && matchedOptionValues.length > 0 ? (
+                    <>
+                      {newOption.values.map((value, index) => (
+                        <div
+                          key={index}
+                          className="flex gap-2 items-center mt-2"
+                        >
+                          <select
+                            value={value}
+                            onChange={(e) =>
+                              handleNewOptionValueChange(index, e.target.value)
+                            }
+                            className="w-full border-gray-300 rounded-md p-2"
+                          >
+                            <option value="">Select value</option>
+                            {matchedOptionValues.map((val, i) => (
+                              <option key={i} value={val}>
+                                {val}
+                              </option>
+                            ))}
+                          </select>
+
+                          {newOption.values.length > 1 && (
+                            <button
+                              onClick={() => handleDeleteNewValue(index)}
+                              className="text-red-600 text-sm border rounded-md p-1 hover:bg-red-100"
+                            >
+                              <FaTrash />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      {newOption.values.map((value, index) => (
+                        <div
+                          key={index}
+                          className="flex gap-2 items-center mt-2"
+                        >
+                          <input
+                            type="text"
+                            value={value}
+                            ref={(el) => (inputRefs.current[index] = el)}
+                            onChange={(e) =>
+                              handleNewOptionValueChange(index, e.target.value)
+                            }
+                            placeholder="Enter value"
+                            className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleAddNewValue();
+                              }
+                            }}
+                          />
+                          {newOption.values.length > 1 && (
+                            <button
+                              onClick={() => handleDeleteNewValue(index)}
+                              className="text-red-600 text-sm border rounded-md p-1 hover:bg-red-100"
+                            >
+                              <FaTrash />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      handleAddNewValue();
+                      setIsChanged(true);
+                    }}
+                    className="text-sm text-blue-600 mt-2 hover:underline"
+                  >
+                    + Add another value
+                  </button>
+
+                  <div className="flex justify-between mt-4">
+                    <button
+                      onClick={() => {
+                        setShowVariantForm(false);
+                        setIsChanged(true);
+                        setIsCustomOption(false);
+                        setSelectedOptionName("");
+                      }}
+                      className="text-sm text-red-600 border border-red-400 px-3 py-1 rounded-lg hover:bg-red-100"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleDone();
+                        setIsChanged(true);
+
+                        setSelectedOptionName("");
+                        setIsCustomOption(false);
+                        setNewOption({ name: "", values: [""] });
+                        setMatchedOptionValues([]);
+                      }}
+                      className="text-sm text-white bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-900"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-medium text-gray-700">
+                  Size Chart
+                </h2>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="enableSizeChart"
+                    checked={enableSizeChart}
+                    onChange={() => setEnableSizeChart(!enableSizeChart)}
+                    className="w-4 h-4 text-blue-600 rounded"
+                  />
+                  <label
+                    htmlFor="enableSizeChart"
+                    className="text-sm text-gray-700"
+                  >
+                    Add Size Chart
+                  </label>
+                </div>
+              </div>
+
+              {enableSizeChart && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Size Chart
+                  </label>
+
+                  {sizeCharts.length > 0 ? (
+                    <select
+                      value={selectedSizeChart}
+                      onChange={(e) => setSelectedSizeChart(e.target.value)}
+                      className="w-full border border-gray-300 p-2 rounded-md"
+                    >
+                      <option value="">Choose Size Chart</option>
+
+                      {sizeCharts.map((chart) => (
+                        <option key={chart._id} value={chart._id}>
+                          {chart.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="text-sm text-gray-600 bg-yellow-50 border border-yellow-300 p-3 rounded-md">
+                      No size charts found.
+                      <button
+                        className="text-blue-600 underline ml-1"
+                        onClick={() => navigate("/create-size-chart")}
+                      >
+                        Create one
+                      </button>
+                    </div>
+                  )}
+
+                  {selectedSizeChart && (
+                    <div className="mt-3">
+                      <img
+                        src={
+                          sizeCharts.find((c) => c._id === selectedSizeChart)
+                            ?.image
+                        }
+                        alt="Size Chart Preview"
+                        className="w-40 h-40 border rounded object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-medium text-gray-700">
+                  Custom Fields
+                </h2>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="enableMetafields"
+                    checked={enableMetafields}
+                    onChange={() => setEnableMetafields((prev) => !prev)}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor="enableMetafields"
+                    className="text-sm text-gray-700"
+                  >
+                    Create Custom Fields
+                  </label>
+                </div>
+              </div>
+
+              {enableMetafields && (
+                <div className="mt-4 space-y-4">
+                  {metafields.map((field, index) => (
+                    <div
+                      key={index}
+                      className="border border-gray-200 rounded-xl p-4 bg-gray-50"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-semibold text-gray-800">
+                          Custom Field {index + 1}
+                        </h3>
+                        {metafields.length > 1 && (
+                          <button
+                            onClick={() => handleRemoveMetafield(index)}
+                            className="text-xs text-red-600 hover:underline"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-gray-600 mb-1 block">
+                            Label
+                          </label>
+                          <input
+                            type="text"
+                            value={field.label}
+                            onChange={(e) =>
+                              handleMetafieldChange(
+                                index,
+                                "label",
+                                e.target.value,
+                              )
+                            }
+                            placeholder="Enter label (e.g., Fabric Type)"
+                            className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring focus:ring-blue-200 focus:border-blue-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-gray-600 mb-1 block">
+                            Value
+                          </label>
+                          <input
+                            type="text"
+                            value={field.value}
+                            onChange={(e) =>
+                              handleMetafieldChange(
+                                index,
+                                "value",
+                                e.target.value,
+                              )
+                            }
+                            placeholder="Enter value (e.g., Cotton)"
+                            className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring focus:ring-blue-200 focus:border-blue-400"
+                          />
+                        </div>
+                      </div>
                     </div>
                   ))}
 
-                <div className="mt-3">
-                  <div className="grid grid-cols-6 items-center gap-20 mb-2 p-3">
-                    <h3 className="font-semibold text-xs text-gray-800">IMG</h3>
-                    <h3 className="font-semibold text-xs text-gray-800">
-                      VARIANT
-                    </h3>
-                    <h3 className="font-semibold text-xs text-gray-800">
-                      PRICE
-                    </h3>
-                    <h3 className="font-semibold text-xs text-gray-800">
-                      COMPARE
-                    </h3>
-                    <h3 className="font-semibold text-xs text-gray-800">QTY</h3>
-                    <h3 className="font-semibold text-xs text-gray-800">
-                      ACTION
-                    </h3>
-                  </div>
-
-                  {generateVariants().length > 0 ? (
-                    generateVariants().map((combination, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-100 p-4 rounded-md mt-2"
-                      >
-                        <div
-                          className="flex items-center justify-between gap-6 cursor-pointer"
-                          onClick={() => toggleChildOptions(index)}
-                        >
-                          <div className="font-medium text-gray-700">
-                            {combination.parent}
-                          </div>
-
-                          <div
-                            className="flex items-center justify-between gap-6 cursor-pointer"
-                            onClick={() => toggleChildOptions(index)} // ✅ Only one click handler
-                          >
-                            <button
-                              type="button"
-                              className="text-gray-500 hover:text-gray-700 transition"
-                              onClick={(e) => {
-                                e.stopPropagation(); // ✅ Prevent parent click from firing twice
-                                toggleChildOptions(index);
-                              }}
-                            >
-                              {expandedParents.includes(index) ? (
-                                <IoIosArrowUp className="text-xl transition-transform duration-200" />
-                              ) : (
-                                <MdOutlineKeyboardArrowDown className="text-2xl transition-transform duration-200" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-
-                        {expandedParents.includes(index) && (
-                          <div className="mt-2">
-                            <ul className="space-y-2">
-                              {combinations[index]?.children?.map(
-                                (child, childIndex) => {
-                                  const parentValue =
-                                    combinations[index]?.parent;
-                                  const combinationString =
-                                    options.length === 1
-                                      ? child
-                                      : `${parentValue} / ${child}`;
-                                  const normalizedKey = combinationString
-                                    .replace(/['"]/g, "")
-                                    .trim();
-
-                                  const image = variantImages[normalizedKey];
-                                  const matchingVariant =
-                                    product?.variants?.find(
-                                      (variant) =>
-                                        normalizeString(variant.title) ===
-                                        normalizedKey,
-                                    );
-                                  const variantId = matchingVariant?.id;
-
-                                  return (
-                                    <li
-                                      key={childIndex}
-                                      className="grid grid-cols-6 items-center gap-20"
-                                    >
-                                      <div className="relative w-14 h-14">
-                                        <label className="flex items-center justify-center w-full h-full border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-blue-400 transition overflow-hidden bg-gray-50">
-                                          {variantImages[normalizedKey]
-                                            ?.length > 0 ? (
-                                            <>
-                                              <img
-                                                src={
-                                                  variantImages[
-                                                    normalizedKey
-                                                  ][0].preview
-                                                }
-                                                alt={
-                                                  variantImages[
-                                                    normalizedKey
-                                                  ][0].alt || "variant"
-                                                }
-                                                className="w-full h-full object-cover rounded-md"
-                                              />
-
-                                              {/* ✅ Overlay counter if multiple images exist */}
-                                              {variantImages[normalizedKey]
-                                                .length > 1 && (
-                                                <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
-                                                  +
-                                                  {variantImages[normalizedKey]
-                                                    .length - 1}
-                                                </div>
-                                              )}
-                                            </>
-                                          ) : (
-                                            <span className="text-gray-400 text-xl">
-                                              +
-                                            </span>
-                                          )}
-
-                                          <input
-                                            multiple
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onClick={() => {
-                                              setCurrentVariant({
-                                                index,
-                                                child,
-                                              });
-                                              setIsPopupVisible(true);
-                                              setIsChanged(true);
-                                              setPopupMode("variant");
-                                            }}
-                                          />
-                                        </label>
-                                      </div>
-
-                                      <span
-                                        className="text-sm font-medium text-gray-500 hover:text-blue-800 transition cursor-pointer whitespace-nowrap"
-                                        onClick={() => {
-                                          if (isEditing && variantId) {
-                                            setIsChanged(true);
-                                            navigate(
-                                              `/product/${product.id}/variants/${variantId}`,
-                                              {
-                                                state: {
-                                                  productId: product.id,
-                                                  variantId,
-                                                },
-                                              },
-                                            );
-                                          } else {
-                                            handleVariantEditModal(
-                                              index,
-                                              child,
-                                            );
-                                          }
-                                        }}
-                                      >
-                                        {child}
-                                      </span>
-
-                                      <div
-                                        className="relative w-20 cursor-pointer"
-                                        onClick={() => {
-                                          if (isEditing && variantId) {
-                                            navigate(
-                                              `/product/${product.id}/variants/${variantId}`,
-                                              {
-                                                state: {
-                                                  productId: product.id,
-                                                  variantId,
-                                                },
-                                              },
-                                            );
-                                          } else {
-                                            handleVariantEditModal(
-                                              index,
-                                              child,
-                                            );
-                                          }
-                                        }}
-                                      >
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <span className="w-20 p-1 pl-6 text-sm">
-                                          {variantPrices[`${index}-${child}`] ??
-                                            matchingVariant?.price ??
-                                            "0.00"}
-                                        </span>
-                                      </div>
-
-                                      <div
-                                        className="relative w-20 cursor-pointer"
-                                        onClick={() => {
-                                          if (isEditing && variantId) {
-                                            navigate(
-                                              `/product/${product.id}/variants/${variantId}`,
-                                              {
-                                                state: {
-                                                  productId: product.id,
-                                                  variantId,
-                                                },
-                                              },
-                                            );
-                                          } else {
-                                            handleVariantEditModal(
-                                              index,
-                                              child,
-                                            );
-                                          }
-                                        }}
-                                      >
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700">
-                                          $
-                                        </span>
-                                        <span className="w-20 p-1 pl-6 text-sm">
-                                          {variantCompareAtPrices[
-                                            `${index}-${child}`
-                                          ] ??
-                                            matchingVariant?.compare_at_price ??
-                                            "0.00"}
-                                        </span>
-                                      </div>
-
-                                      <span
-                                        className="w-20 p-1 text-sm cursor-pointer"
-                                        onClick={() => {
-                                          if (isEditing && variantId) {
-                                            navigate(
-                                              `/product/${product.id}/variants/${variantId}`,
-                                              {
-                                                state: {
-                                                  productId: product.id,
-                                                  variantId,
-                                                },
-                                              },
-                                            );
-                                          } else {
-                                            handleVariantEditModal(
-                                              index,
-                                              child,
-                                            );
-                                          }
-                                        }}
-                                      >
-                                        {variantQuantities[
-                                          `${index}-${child}`
-                                        ] ??
-                                          matchingVariant?.inventory_quantity ??
-                                          "0"}
-                                      </span>
-
-                                      <button
-                                        onClick={() => {
-                                          setDeleteTarget({
-                                            index,
-                                            childIndex,
-                                          });
-                                          setIsDeleteModalOpen(true);
-                                          setIsChanged(true);
-                                        }}
-                                        className="text-red-500 hover:text-red-700 "
-                                      >
-                                        <RiDeleteBin6Line />
-                                      </button>
-                                    </li>
-                                  );
-                                },
-                              )}
-                            </ul>
-                          </div>
-                        )}
-
-                        {isDeleteModalOpen && (
-                          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                            <div className="bg-white rounded-lg shadow-lg p-6 w-[400px]">
-                              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                                Confirm Delete
-                              </h2>
-                              <p className="text-gray-600 mb-6">
-                                Are you sure you want to delete this variant?
-                                This action cannot be undone.
-                              </p>
-                              <div className="flex justify-end gap-3">
-                                <button
-                                  onClick={() => setIsDeleteModalOpen(false)}
-                                  className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
-                                >
-                                  Cancel
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (deleteTarget) {
-                                      handleDeleteCombination(
-                                        deleteTarget.index,
-                                        deleteTarget.childIndex,
-                                      );
-                                    }
-                                    setIsDeleteModalOpen(false);
-                                  }}
-                                  className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-600"></p>
+                  {metafields.length < 4 && (
+                    <button
+                      onClick={handleAddMetafield}
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      + Add Field
+                    </button>
                   )}
                 </div>
+              )}
+            </div>
 
-                <button
-                  onClick={() => {
-                    handleOpenForm();
-                    setIsChanged(true);
-                  }}
-                  className="flex gap-2 items-center text-sm text-blue-600 mt-2 hover:underline"
-                >
-                  Add another option
-                </button>
+            <div className="border rounded-lg p-4 shadow-sm bg-white mt-3">
+              <h2 className="text-md font-medium text-gray-700 mb-3">
+                Search engine listing
+              </h2>
+
+              <div className="border rounded-lg p-4 bg-gray-50">
+                <div className="flex justify-between items-start mb-2">
+                  {/* <span className="text-sm text-gray-600">Aydi Active</span> */}
+                  <button onClick={() => setEditing(true)}>
+                    <MdEdit className="text-gray-500 hover:text-blue-500" />
+                  </button>
+                </div>
+                <div className="text-sm text-blue-700 truncate">
+                  {seoHandle}
+                </div>
+                <div className="text-lg text-blue-800 font-semibold mt-1">
+                  {seoTitle}
+                </div>
+                <div className="text-sm text-gray-700 mt-1 leading-snug">
+                  {seoDescription.length > 120
+                    ? `${seoDescription.slice(0, 120)}...`
+                    : seoDescription}
+                </div>
+                <div className="text-sm text-gray-700 font-medium mt-1">
+                  ${product?.variants?.[0]?.price} AUD
+                </div>
+              </div>
+
+              {editing && (
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-1">
+                      Page title
+                    </label>
+                    <input
+                      type="text"
+                      value={seoTitle}
+                      maxLength={70}
+                      onChange={(e) => setSeoTitle(e.target.value)}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      {seoTitle.length} of 70 characters used
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-1">
+                      Meta description
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={seoDescription}
+                      maxLength={160}
+                      onChange={(e) => setSeoDescription(e.target.value)}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      {seoDescription.length} of 160 characters used
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-1">
+                      URL handle
+                    </label>
+                    <input
+                      type="text"
+                      value={seoHandle}
+                      onChange={(e) => setSeoHandle(e.target.value)}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      https://www.aydiactive.com/products/{seoTitle}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end gap-2">
+                    <button
+                      className="px-4 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
+                      onClick={() => setEditing(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="px-4 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded"
+                      onClick={() => {
+                        setEditing(false);
+                      }}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {loading && (
+              <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60">
+                {/* Spinner */}
+                <div className="w-14 h-14 border-4 border-white border-t-transparent rounded-full animate-spin" />
+
+                {/* Text */}
+                <p className="mt-5 text-white text-sm font-medium tracking-wide">
+                  Uploading images, please wait...
+                </p>
               </div>
             )}
 
-            {showVariantForm && (
-              <div className="mt-3 border border-gray-300 rounded-lg p-4 bg-gray-50">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Option name
-                </label>
-
-                {!isCustomOption ? (
-                  <select
-                    value={selectedOptionName}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setSelectedOptionName(value);
-                      setIsChanged(true);
-
-                      if (value === "Other") {
-                        setIsCustomOption(true);
-                        setNewOption({ name: "", values: [""] });
-                        setMatchedOptionValues([]);
-                      } else {
-                        setIsCustomOption(false);
-                        setNewOption({ ...newOption, name: value });
-
-                        const found = dbOptions.find((opt) =>
-                          opt.optionName.some(
-                            (name) =>
-                              name.toLowerCase().trim() ===
-                              value.toLowerCase().trim(),
-                          ),
-                        );
-
-                        if (found) {
-                          setMatchedOptionValues(found.optionValues || []);
-                        } else {
-                          setMatchedOptionValues([]);
-                        }
-                      }
-                    }}
-                    className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
-                  >
-                    <option value="">Select option name</option>
-                    {dbOptions.map((opt, i) =>
-                      opt.optionName.map((name, j) => (
-                        <option key={`${i}-${j}`} value={name}>
-                          {name}
-                        </option>
-                      )),
-                    )}
-                    <option value="Other">Other</option>
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    value={newOption.name}
-                    onChange={(e) => {
-                      handleNewOptionNameChange(e.target.value);
-                      setIsChanged(true);
-                    }}
-                    placeholder="Enter option name (e.g., Material)"
-                    className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
-                  />
-                )}
-
-                <label className="block text-sm font-medium text-gray-700 mt-3">
-                  Option values
-                </label>
-
-                {!isCustomOption && matchedOptionValues.length > 0 ? (
-                  <>
-                    {newOption.values.map((value, index) => (
-                      <div key={index} className="flex gap-2 items-center mt-2">
-                        <select
-                          value={value}
-                          onChange={(e) =>
-                            handleNewOptionValueChange(index, e.target.value)
-                          }
-                          className="w-full border-gray-300 rounded-md p-2"
-                        >
-                          <option value="">Select value</option>
-                          {matchedOptionValues.map((val, i) => (
-                            <option key={i} value={val}>
-                              {val}
-                            </option>
-                          ))}
-                        </select>
-
-                        {newOption.values.length > 1 && (
-                          <button
-                            onClick={() => handleDeleteNewValue(index)}
-                            className="text-red-600 text-sm border rounded-md p-1 hover:bg-red-100"
-                          >
-                            <FaTrash />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    {newOption.values.map((value, index) => (
-                      <div key={index} className="flex gap-2 items-center mt-2">
-                        <input
-                          type="text"
-                          value={value}
-                          ref={(el) => (inputRefs.current[index] = el)}
-                          onChange={(e) =>
-                            handleNewOptionValueChange(index, e.target.value)
-                          }
-                          placeholder="Enter value"
-                          className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleAddNewValue();
-                            }
-                          }}
-                        />
-                        {newOption.values.length > 1 && (
-                          <button
-                            onClick={() => handleDeleteNewValue(index)}
-                            className="text-red-600 text-sm border rounded-md p-1 hover:bg-red-100"
-                          >
-                            <FaTrash />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </>
-                )}
-
+            {message && (
+              <p
+                className={`mt-2 text-${
+                  message.type === "error" ? "red" : "green"
+                }-500`}
+              >
+                {message.text}
+              </p>
+            )}
+          </div>
+          <div className="space-y-6 md:sticky md:top-6 self-start h-fit">
+            <div className="flex gap-4 mb-4">
+              <button
+                onClick={handleSubmit}
+                type="submit"
+                className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+              >
+                {loading
+                  ? "Submitting..."
+                  : isEditing
+                    ? "Update Product"
+                    : "Save"}
+              </button>
+              {!isEditing && (
                 <button
-                  onClick={() => {
-                    handleAddNewValue();
+                  type="button"
+                  onClick={handleDiscard}
+                  className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                >
+                  Discard
+                </button>
+              )}
+              {isEditing && (
+                <button
+                  onClick={handleDuplicate}
+                  type="button"
+                  className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                >
+                  Duplicate Product
+                </button>
+              )}
+            </div>
+
+            <div className="bg-white p-4 border border-gray-300 rounded-xl">
+              <label className="block text-sm font-medium text-gray-700">
+                Status
+              </label>
+              <select
+                className="mt-2 block w-full border border-gray-300 p-2 rounded-xl"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="publish">Publish</option>
+                <option value={"draft"}>Draft</option>
+              </select>
+            </div>
+
+            <div className="bg-white p-4 border border-gray-300 rounded-xl">
+              <label className="block text-sm font-medium text-gray-700">
+                Product organization
+              </label>
+              <div className="mt-2 space-y-2">
+                <div ref={containerRef} className="relative w-full">
+                  <label className="block text-sm text-gray-600 mb-1">
+                    Category
+                  </label>
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    onKeyDown={handleKeyDown}
+                    onFocus={() => {
+                      setIsFocused(true);
+                      setFilteredCategories(categories);
+                    }}
+                    onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                    placeholder="Search category..."
+                    className="w-full border border-gray-300 p-2 rounded-xl"
+                  />
+
+                  {isFocused && filteredCategories.length > 0 && (
+                    <ul
+                      className="absolute z-10 bg-white border border-gray-300 rounded-xl mt-1 max-h-60 overflow-y-auto shadow-lg"
+                      style={{ width: `${dropdownWidth}px` }}
+                    >
+                      {filteredCategories.map((category, index) => (
+                        <li
+                          key={category.catNo}
+                          onClick={() => handleCategorySelect(category)}
+                          className={`p-2 cursor-pointer hover:bg-gray-100 ${
+                            index === highlightIndex ? "bg-gray-200" : ""
+                          }`}
+                        >
+                          {buildCategoryPath(category)}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {selectedVisibleCategories.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {selectedVisibleCategories.map((catNo, index) => {
+                        const category = categories.find(
+                          (cat) => cat.catNo === catNo,
+                        );
+                        if (!category) return null;
+
+                        return (
+                          <span
+                            key={index}
+                            className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
+                          >
+                            {buildCategoryPath(category)}
+                            <button
+                              type="button"
+                              className="ml-2 text-red-500"
+                              onClick={() => removeCategory(catNo)}
+                            >
+                              &times;
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                <label
+                  htmlFor="productType"
+                  className="block text-gray-600 text-sm"
+                >
+                  Product Type
+                </label>
+                <input
+                  type="text"
+                  placeholder="Type"
+                  value={productType}
+                  onChange={(e) => setProductType(e.target.value)}
+                  className="w-full border border-gray-300 p-2 rounded-xl"
+                />
+
+                <label htmlFor="vendor" className="block text-gray-600 text-sm">
+                  Vendor
+                </label>
+
+                <input
+                  type="text"
+                  value={vendor}
+                  onChange={(e) => {
+                    setVendor(e.target.value);
                     setIsChanged(true);
                   }}
-                  className="text-sm text-blue-600 mt-2 hover:underline"
-                >
-                  + Add another value
-                </button>
-
-                <div className="flex justify-between mt-4">
+                  placeholder="Enter vendor name"
+                  className="w-full border border-gray-300 p-2 rounded-xl"
+                />
+              </div>
+            </div>
+          </div>
+          {isPopupVisible && (
+            <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
+              <div className="bg-white w-full max-w-5xl h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden">
+                <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    Select Image for Variant
+                  </h2>
                   <button
-                    onClick={() => {
-                      setShowVariantForm(false);
-                      setIsChanged(true);
-                      setIsCustomOption(false);
-                      setSelectedOptionName("");
-                    }}
-                    className="text-sm text-red-600 border border-red-400 px-3 py-1 rounded-lg hover:bg-red-100"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleDone();
-                      setIsChanged(true);
-
-                      setSelectedOptionName("");
-                      setIsCustomOption(false);
-                      setNewOption({ name: "", values: [""] });
-                      setMatchedOptionValues([]);
-                    }}
-                    className="text-sm text-white bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-900"
+                    onClick={() => setIsPopupVisible(false)}
+                    className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700"
                   >
                     Done
                   </button>
                 </div>
-              </div>
-            )}
-          </div>
-          <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium text-gray-700">Size Chart</h2>
 
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="enableSizeChart"
-                  checked={enableSizeChart}
-                  onChange={() => setEnableSizeChart(!enableSizeChart)}
-                  className="w-4 h-4 text-blue-600 rounded"
-                />
-                <label
-                  htmlFor="enableSizeChart"
-                  className="text-sm text-gray-700"
-                >
-                  Add Size Chart
-                </label>
-              </div>
-            </div>
-
-            {enableSizeChart && (
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Size Chart
-                </label>
-
-                {sizeCharts.length > 0 ? (
-                  <select
-                    value={selectedSizeChart}
-                    onChange={(e) => setSelectedSizeChart(e.target.value)}
-                    className="w-full border border-gray-300 p-2 rounded-md"
-                  >
-                    <option value="">Choose Size Chart</option>
-
-                    {sizeCharts.map((chart) => (
-                      <option key={chart._id} value={chart._id}>
-                        {chart.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <div className="text-sm text-gray-600 bg-yellow-50 border border-yellow-300 p-3 rounded-md">
-                    No size charts found.
-                    <button
-                      className="text-blue-600 underline ml-1"
-                      onClick={() => navigate("/create-size-chart")}
-                    >
-                      Create one
-                    </button>
-                  </div>
-                )}
-
-                {selectedSizeChart && (
-                  <div className="mt-3">
-                    <img
-                      src={
-                        sizeCharts.find((c) => c._id === selectedSizeChart)
-                          ?.image
-                      }
-                      alt="Size Chart Preview"
-                      className="w-40 h-40 border rounded object-cover"
+                <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                  <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center bg-white">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageChange}
+                      className="hidden"
+                      id="variantUpload"
                     />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="border rounded-2xl p-4 bg-white border-gray-300 mt-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium text-gray-700">
-                Custom Fields
-              </h2>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="enableMetafields"
-                  checked={enableMetafields}
-                  onChange={() => setEnableMetafields((prev) => !prev)}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <label
-                  htmlFor="enableMetafields"
-                  className="text-sm text-gray-700"
-                >
-                  Create Custom Fields
-                </label>
-              </div>
-            </div>
-
-            {enableMetafields && (
-              <div className="mt-4 space-y-4">
-                {metafields.map((field, index) => (
-                  <div
-                    key={index}
-                    className="border border-gray-200 rounded-xl p-4 bg-gray-50"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-semibold text-gray-800">
-                        Custom Field {index + 1}
-                      </h3>
-                      {metafields.length > 1 && (
-                        <button
-                          onClick={() => handleRemoveMetafield(index)}
-                          className="text-xs text-red-600 hover:underline"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-xs text-gray-600 mb-1 block">
-                          Label
-                        </label>
-                        <input
-                          type="text"
-                          value={field.label}
-                          onChange={(e) =>
-                            handleMetafieldChange(
-                              index,
-                              "label",
-                              e.target.value,
-                            )
-                          }
-                          placeholder="Enter label (e.g., Fabric Type)"
-                          className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring focus:ring-blue-200 focus:border-blue-400"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-gray-600 mb-1 block">
-                          Value
-                        </label>
-                        <input
-                          type="text"
-                          value={field.value}
-                          onChange={(e) =>
-                            handleMetafieldChange(
-                              index,
-                              "value",
-                              e.target.value,
-                            )
-                          }
-                          placeholder="Enter value (e.g., Cotton)"
-                          className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring focus:ring-blue-200 focus:border-blue-400"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {metafields.length < 4 && (
-                  <button
-                    onClick={handleAddMetafield}
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    + Add Field
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="border rounded-lg p-4 shadow-sm bg-white mt-3">
-            <h2 className="text-md font-medium text-gray-700 mb-3">
-              Search engine listing
-            </h2>
-
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <div className="flex justify-between items-start mb-2">
-                {/* <span className="text-sm text-gray-600">Aydi Active</span> */}
-                <button onClick={() => setEditing(true)}>
-                  <MdEdit className="text-gray-500 hover:text-blue-500" />
-                </button>
-              </div>
-              <div className="text-sm text-blue-700 truncate">{seoHandle}</div>
-              <div className="text-lg text-blue-800 font-semibold mt-1">
-                {seoTitle}
-              </div>
-              <div className="text-sm text-gray-700 mt-1 leading-snug">
-                {seoDescription.length > 120
-                  ? `${seoDescription.slice(0, 120)}...`
-                  : seoDescription}
-              </div>
-              <div className="text-sm text-gray-700 font-medium mt-1">
-                ${product?.variants?.[0]?.price} AUD
-              </div>
-            </div>
-
-            {editing && (
-              <div className="mt-6 space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">
-                    Page title
-                  </label>
-                  <input
-                    type="text"
-                    value={seoTitle}
-                    maxLength={70}
-                    onChange={(e) => setSeoTitle(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    {seoTitle.length} of 70 characters used
-                  </p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">
-                    Meta description
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={seoDescription}
-                    maxLength={160}
-                    onChange={(e) => setSeoDescription(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    {seoDescription.length} of 160 characters used
-                  </p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">
-                    URL handle
-                  </label>
-                  <input
-                    type="text"
-                    value={seoHandle}
-                    onChange={(e) => setSeoHandle(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    https://www.aydiactive.com/products/{seoTitle}
-                  </p>
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <button
-                    className="px-4 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
-                    onClick={() => setEditing(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="px-4 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded"
-                    onClick={() => {
-                      setEditing(false);
-                    }}
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {loading && (
-            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60">
-              {/* Spinner */}
-              <div className="w-14 h-14 border-4 border-white border-t-transparent rounded-full animate-spin" />
-
-              {/* Text */}
-              <p className="mt-5 text-white text-sm font-medium tracking-wide">
-                Uploading images, please wait...
-              </p>
-            </div>
-          )}
-
-          {message && (
-            <p
-              className={`mt-2 text-${
-                message.type === "error" ? "red" : "green"
-              }-500`}
-            >
-              {message.text}
-            </p>
-          )}
-        </div>
-        <div className="space-y-6 md:sticky md:top-6 self-start h-fit">
-          <div className="flex gap-4 mb-4">
-            <button
-              onClick={handleSubmit}
-              type="submit"
-              className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
-            >
-              {loading
-                ? "Submitting..."
-                : isEditing
-                  ? "Update Product"
-                  : "Save"}
-            </button>
-            {!isEditing && (
-              <button
-                type="button"
-                onClick={handleDiscard}
-                className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
-              >
-                Discard
-              </button>
-            )}
-            {isEditing && (
-              <button
-                onClick={handleDuplicate}
-                type="button"
-                className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
-              >
-                Duplicate Product
-              </button>
-            )}
-          </div>
-
-          <div className="bg-white p-4 border border-gray-300 rounded-xl">
-            <label className="block text-sm font-medium text-gray-700">
-              Status
-            </label>
-            <select
-              className="mt-2 block w-full border border-gray-300 p-2 rounded-xl"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="publish">Publish</option>
-              <option value={"draft"}>Draft</option>
-            </select>
-          </div>
-
-          <div className="bg-white p-4 border border-gray-300 rounded-xl">
-            <label className="block text-sm font-medium text-gray-700">
-              Product organization
-            </label>
-            <div className="mt-2 space-y-2">
-              <div ref={containerRef} className="relative w-full">
-                <label className="block text-sm text-gray-600 mb-1">
-                  Category
-                </label>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  onKeyDown={handleKeyDown}
-                  onFocus={() => {
-                    setIsFocused(true);
-                    setFilteredCategories(categories);
-                  }}
-                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                  placeholder="Search category..."
-                  className="w-full border border-gray-300 p-2 rounded-xl"
-                />
-
-                {isFocused && filteredCategories.length > 0 && (
-                  <ul
-                    className="absolute z-10 bg-white border border-gray-300 rounded-xl mt-1 max-h-60 overflow-y-auto shadow-lg"
-                    style={{ width: `${dropdownWidth}px` }}
-                  >
-                    {filteredCategories.map((category, index) => (
-                      <li
-                        key={category.catNo}
-                        onClick={() => handleCategorySelect(category)}
-                        className={`p-2 cursor-pointer hover:bg-gray-100 ${
-                          index === highlightIndex ? "bg-gray-200" : ""
-                        }`}
-                      >
-                        {buildCategoryPath(category)}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {selectedVisibleCategories.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {selectedVisibleCategories.map((catNo, index) => {
-                      const category = categories.find(
-                        (cat) => cat.catNo === catNo,
-                      );
-                      if (!category) return null;
-
-                      return (
-                        <span
-                          key={index}
-                          className="bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center"
-                        >
-                          {buildCategoryPath(category)}
-                          <button
-                            type="button"
-                            className="ml-2 text-red-500"
-                            onClick={() => removeCategory(catNo)}
-                          >
-                            &times;
-                          </button>
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-              <label
-                htmlFor="productType"
-                className="block text-gray-600 text-sm"
-              >
-                Product Type
-              </label>
-              <input
-                type="text"
-                placeholder="Type"
-                value={productType}
-                onChange={(e) => setProductType(e.target.value)}
-                className="w-full border border-gray-300 p-2 rounded-xl"
-              />
-
-              <label htmlFor="vendor" className="block text-gray-600 text-sm">
-                Vendor
-              </label>
-
-              <input
-                type="text"
-                value={vendor}
-                onChange={(e) => {
-                  setVendor(e.target.value);
-                  setIsChanged(true);
-                }}
-                placeholder="Enter vendor name"
-                className="w-full border border-gray-300 p-2 rounded-xl"
-              />
-            </div>
-          </div>
-        </div>
-        {isPopupVisible && (
-          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
-            <div className="bg-white w-full max-w-5xl h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden">
-              {/* HEADER */}
-              <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  Select Image for Variant
-                </h2>
-                <button
-                  onClick={() => setIsPopupVisible(false)}
-                  className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700"
-                >
-                  Done
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-                {/* UPLOAD NEW IMAGE */}
-                <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center bg-white">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageChange}
-                    className="hidden"
-                    id="variantUpload"
-                  />
-                  <label
-                    htmlFor="variantUpload"
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
-                  >
-                    Add New Images
-                  </label>
-                </div>
-
-                {/* ASSIGNED IMAGES */}
-                <div className="mt-8 bg-white border rounded-lg p-5">
-                  <h3 className="text-sm font-semibold mb-3 text-gray-700">
-                    Assigned Images
-                  </h3>
-
-                  {(() => {
-                    const parent = combinations[currentVariant?.index]?.parent;
-                    const key =
-                      options.length === 1
-                        ? currentVariant?.child
-                        : `${parent} / ${currentVariant?.child}`;
-                    const normalizedKey = key?.replace(/['"]/g, "").trim();
-                    const assigned = variantImages[normalizedKey] || [];
-
-                    return (
-                      <div className="flex flex-wrap gap-3">
-                        {assigned.length ? (
-                          assigned.map((img, i) => (
-                            <div key={img.preview} className="relative">
-                              <img
-                                src={img.preview}
-                                className="w-28 h-28 object-cover rounded border"
-                              />
-                              <button
-                                onClick={() =>
-                                  setVariantImages((prev) => ({
-                                    ...prev,
-                                    [normalizedKey]: prev[normalizedKey].filter(
-                                      (_, x) => x !== i,
-                                    ),
-                                  }))
-                                }
-                                className="absolute top-1 right-1 bg-white rounded-full p-1"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-sm text-gray-400 italic">
-                            No images assigned
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-
-                {/* PRODUCT MEDIA IMAGES */}
-                <div className="mt-8 bg-white border rounded-lg p-5">
-                  <h3 className="text-sm font-semibold mb-3 text-gray-700">
-                    Product Media Images
-                  </h3>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {selectedImages.map((img) => {
-                      const imageUrl = img.cloudUrl || img.localUrl;
-
-                      return (
-                        <div
-                          key={imageUrl}
-                          className="border rounded-lg p-2 cursor-pointer hover:border-blue-500"
-                          onClick={() => {
-                            const parent =
-                              combinations[currentVariant?.index]?.parent;
-                            const key =
-                              options.length === 1
-                                ? currentVariant?.child
-                                : `${parent} / ${currentVariant?.child}`;
-                            const normalizedKey = key
-                              .replace(/['"]/g, "")
-                              .trim();
-
-                            console.log("🟦 VARIANT IMAGE CLICK:", imageUrl);
-
-                            setVariantImages((prev) => {
-                              const existing = prev[normalizedKey] || [];
-
-                              if (
-                                existing.some((i) => i.preview === imageUrl)
-                              ) {
-                                console.warn(
-                                  "⛔ DUPLICATE VARIANT IMAGE SKIPPED",
-                                );
-                                return prev;
-                              }
-
-                              console.log("✅ VARIANT IMAGE ADDED");
-
-                              return {
-                                ...prev,
-                                [normalizedKey]: [
-                                  {
-                                    preview: imageUrl,
-                                    // alt: normalizedKey
-                                    //   .replace(/\s*\/\s*/g, "-")
-                                    //   .toLowerCase(),
-                                    alt: `t4option${options[0]?.name}_${normalizedKey.split("/")[0]}`
-                                      .replace(/\s+/g, "")
-                                      .toLowerCase(),
-
-                                    loading: false,
-                                  },
-                                  ...existing,
-                                ],
-                              };
-                            });
-                          }}
-                        >
-                          <img
-                            src={imageUrl}
-                            className="w-full h-28 object-cover rounded-md"
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isMediaModalVisible && (
-          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
-            <div className="bg-white w-full max-w-6xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
-              {/* HEADER */}
-              <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-                  Manage Product Media
-                </h2>
-                <button
-                  onClick={() => setIsMediaModalVisible(false)}
-                  className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700"
-                >
-                  Done
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-                <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center bg-white">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleMediaUpload}
-                    className="hidden"
-                    id="productUpload"
-                  />
-
-                  <div className="flex gap-4">
                     <label
-                      htmlFor="productUpload"
+                      htmlFor="variantUpload"
                       className="px-6 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
                     >
                       Add New Images
                     </label>
-
-                    <button
-                      onClick={() => setShowGallery(true)}
-                      className="px-6 py-2 bg-gray-600 text-white rounded-lg"
-                    >
-                      Browse
-                    </button>
                   </div>
-                </div>
 
-                {/* PRODUCT IMAGES */}
-                <div className="mt-8 bg-white border rounded-lg p-5">
-                  <h3 className="text-sm font-semibold mb-3">Product Images</h3>
+                  <div className="mt-8 bg-white border rounded-lg p-5">
+                    <h3 className="text-sm font-semibold mb-3 text-gray-700">
+                      Assigned Images
+                    </h3>
 
-                  <div className="flex flex-wrap gap-3">
-                    {selectedImages.map((img) => {
-                      const imageUrl = img.cloudUrl || img.localUrl;
+                    {(() => {
+                      const parent =
+                        combinations[currentVariant?.index]?.parent;
+                      const key =
+                        options.length === 1
+                          ? currentVariant?.child
+                          : `${parent} / ${currentVariant?.child}`;
+                      const normalizedKey = key?.replace(/['"]/g, "").trim();
+                      const assigned = variantImages[normalizedKey] || [];
 
                       return (
-                        <div
-                          key={imageUrl}
-                          className="relative border rounded-lg overflow-hidden"
-                        >
-                          <img
-                            src={imageUrl}
-                            className="w-28 h-28 object-cover"
-                          />
-
-                          {img.loading && (
-                            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                              <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
-                            </div>
+                        <div className="flex flex-wrap gap-3">
+                          {assigned.length ? (
+                            assigned.map((img, i) => (
+                              <div key={img.preview} className="relative">
+                                <img
+                                  src={img.preview}
+                                  className="w-28 h-28 object-cover rounded border"
+                                />
+                                <button
+                                  onClick={() =>
+                                    setVariantImages((prev) => ({
+                                      ...prev,
+                                      [normalizedKey]: prev[
+                                        normalizedKey
+                                      ].filter((_, x) => x !== i),
+                                    }))
+                                  }
+className="absolute -top-2 -right-2 w-6 h-6 rounded-full 
+             bg-black/70 text-white flex items-center justify-center 
+             text-sm hover:bg-red-600 transition shadow-md"                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-sm text-gray-400 italic">
+                              No images assigned
+                            </p>
                           )}
                         </div>
                       );
-                    })}
+                    })()}
                   </div>
-                </div>
 
-                {/* GALLERY */}
-                {showGallery && galleryImages.length > 0 && (
                   <div className="mt-8 bg-white border rounded-lg p-5">
-                    <h3 className="text-sm font-semibold mb-3">
-                      Gallery Images
+                    <h3 className="text-sm font-semibold mb-3 text-gray-700">
+                      Product Media Images
                     </h3>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {galleryImages.map((file) => (
-                        <div
-                          key={file.src}
-                          className="border rounded-lg p-2 cursor-pointer"
-                          onClick={() => {
-                            console.log("🟢 BROWSE IMAGE CLICK:", file.src);
+                      {selectedImages.map((img) => {
+                        const imageUrl = img.cloudUrl || img.localUrl;
 
-                            const exists = selectedImages.some(
-                              (img) =>
-                                (img.cloudUrl || img.localUrl) === file.src,
-                            );
+                        return (
+                          <div
+                            key={imageUrl}
+                            className="border rounded-lg p-2 cursor-pointer hover:border-blue-500"
+                            onClick={() => {
+                              const parent =
+                                combinations[currentVariant?.index]?.parent;
+                              const key =
+                                options.length === 1
+                                  ? currentVariant?.child
+                                  : `${parent} / ${currentVariant?.child}`;
+                              const normalizedKey = key
+                                .replace(/['"]/g, "")
+                                .trim();
 
-                            if (exists) {
-                              console.warn(
-                                "⛔ DUPLICATE PRODUCT IMAGE SKIPPED",
-                              );
-                              return;
-                            }
+                              console.log("🟦 VARIANT IMAGE CLICK:", imageUrl);
 
-                            console.log("✅ PRODUCT IMAGE ADDED");
+                              setVariantImages((prev) => {
+                                const existing = prev[normalizedKey] || [];
 
-                            setSelectedImages((prev) => [
-                              { cloudUrl: file.src, loading: false },
-                              ...prev,
-                            ]);
-                          }}
-                        >
-                          <img
-                            src={file.src}
-                            className="w-full h-28 object-cover rounded-md"
-                          />
-                        </div>
-                      ))}
+                                if (
+                                  existing.some((i) => i.preview === imageUrl)
+                                ) {
+                                  console.warn(
+                                    "⛔ DUPLICATE VARIANT IMAGE SKIPPED",
+                                  );
+                                  return prev;
+                                }
+
+                                console.log("✅ VARIANT IMAGE ADDED");
+
+                                return {
+                                  ...prev,
+                                  [normalizedKey]: [
+                                    {
+                                      preview: imageUrl,
+                                      // alt: normalizedKey
+                                      //   .replace(/\s*\/\s*/g, "-")
+                                      //   .toLowerCase(),
+                                      alt: `t4option${options[0]?.name}_${normalizedKey.split("/")[0]}`
+                                        .replace(/\s+/g, "")
+                                        .toLowerCase(),
+
+                                      loading: false,
+                                    },
+                                    ...existing,
+                                  ],
+                                };
+                              });
+                            }}
+                          >
+                            <img
+                              src={imageUrl}
+                              className="w-full h-28 object-cover rounded-md"
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {variantEditModalVisible && currentVariant && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-white rounded-2xl shadow-2xl w-[420px] p-6 relative transform transition-all duration-300 scale-100 animate-slideUp">
-              <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  Edit Variant –{" "}
-                  <span className="text-blue-600">{currentVariant.child}</span>
+          {isMediaModalVisible && (
+            <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
+              <div className="bg-white w-full max-w-6xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
+                {/* HEADER */}
+                <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                    Manage Product Media
+                  </h2>
+                  <button
+                    onClick={() => setIsMediaModalVisible(false)}
+                    className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700"
+                  >
+                    Done
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                  <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center bg-white">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleMediaUpload}
+                      className="hidden"
+                      id="productUpload"
+                    />
+
+                    <div className="flex gap-4">
+                      <label
+                        htmlFor="productUpload"
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
+                      >
+                        Add New Images
+                      </label>
+
+                      <button
+                        onClick={() => setShowGallery(true)}
+                        className="px-6 py-2 bg-gray-600 text-white rounded-lg"
+                      >
+                        Browse
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* PRODUCT IMAGES */}
+                  <div className="mt-8 bg-white border rounded-lg p-5">
+                    <h3 className="text-sm font-semibold mb-3">
+                      Product Images
+                    </h3>
+
+                    <div className="flex flex-wrap gap-3">
+                      {selectedImages.map((img) => {
+                        const imageUrl = img.cloudUrl || img.localUrl;
+
+                        return (
+                          // <div
+                          //   key={imageUrl}
+                          //   className="relative border rounded-lg overflow-hidden"
+                          // >
+                          //   <img
+                          //     src={imageUrl}
+                          //     className="w-28 h-28 object-cover"
+                          //   />
+
+                          //   {img.loading && (
+                          //     <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                          //       <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                          //     </div>
+                          //   )}
+                          // </div>
+                          <div
+                            key={imageUrl}
+                            className="relative border rounded-lg overflow-hidden group"
+                          >
+                            {/* IMAGE */}
+                            <img
+                              src={imageUrl}
+                              className="w-28 h-28 object-cover"
+                            />
+
+                            {/* REMOVE BUTTON */}
+                            <button
+                              onClick={() => handleRemoveProductImage(imageUrl)}
+                              className="absolute top-1 right-1 bg-black/70 text-white rounded-full w-6 h-6 
+               flex items-center justify-center opacity-0 group-hover:opacity-100 
+               transition hover:bg-red-600"
+                              title="Remove image"
+                            >
+                              ✕
+                            </button>
+
+                            {img.loading && (
+                              <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                                <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* GALLERY */}
+                  {showGallery && galleryImages.length > 0 && (
+                    <div className="mt-8 bg-white border rounded-lg p-5">
+                      <h3 className="text-sm font-semibold mb-3">
+                        Gallery Images
+                      </h3>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {galleryImages.map((file) => (
+                          <div
+                            key={file.src}
+                            className="border rounded-lg p-2 cursor-pointer"
+                            onClick={() => {
+                              console.log("🟢 BROWSE IMAGE CLICK:", file.src);
+
+                              const exists = selectedImages.some(
+                                (img) =>
+                                  (img.cloudUrl || img.localUrl) === file.src,
+                              );
+
+                              if (exists) {
+                                console.warn(
+                                  "⛔ DUPLICATE PRODUCT IMAGE SKIPPED",
+                                );
+                                return;
+                              }
+
+                              console.log("✅ PRODUCT IMAGE ADDED");
+
+                              setSelectedImages((prev) => [
+                                { cloudUrl: file.src, loading: false },
+                                ...prev,
+                              ]);
+                            }}
+                          >
+                            <img
+                              src={file.src}
+                              className="w-full h-28 object-cover rounded-md"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {variantEditModalVisible && currentVariant && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fadeIn">
+              <div className="bg-white rounded-2xl shadow-2xl w-[420px] p-6 relative transform transition-all duration-300 scale-100 animate-slideUp">
+                <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    Edit Variant –{" "}
+                    <span className="text-blue-600">
+                      {currentVariant.child}
+                    </span>
+                  </h2>
+                  <button
+                    onClick={() => setVariantEditModalVisible(false)}
+                    className="text-gray-400 hover:text-gray-600 transition"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Price <span className="text-gray-400 text-xs">(AUD)</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={
+                        variantPrices[
+                          `${currentVariant.index}-${currentVariant.child}`
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handlePriceChange(
+                          currentVariant.index,
+                          currentVariant.child,
+                          e.target.value,
+                        )
+                      }
+                      className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
+                      placeholder="Enter price"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Compare at Price{" "}
+                      <span className="text-gray-400 text-xs">(AUD)</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={
+                        variantCompareAtPrices[
+                          `${currentVariant.index}-${currentVariant.child}`
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleVariantComparePriceChange(
+                          currentVariant.index,
+                          currentVariant.child,
+                          e.target.value,
+                        )
+                      }
+                      className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
+                      placeholder="Enter compare-at price"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      SKU
+                    </label>
+                    <input
+                      type="text"
+                      value={
+                        variantSku[
+                          `${currentVariant.index}-${currentVariant.child}`
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleVariantSkuChange(
+                          currentVariant.index,
+                          currentVariant.child,
+                          e.target.value,
+                        )
+                      }
+                      className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
+                      placeholder="Enter SKU"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Quantity
+                    </label>
+                    <input
+                      type="number"
+                      value={
+                        variantQuantities[
+                          `${currentVariant.index}-${currentVariant.child}`
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleQuantityChange(
+                          currentVariant.index,
+                          currentVariant.child,
+                          e.target.value,
+                        )
+                      }
+                      className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
+                      placeholder="Enter quantity"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-6 border-t pt-4">
+                  <button
+                    onClick={() => setVariantEditModalVisible(false)}
+                    className="px-4 py-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 transition font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setVariantEditModalVisible(false);
+                      setIsChanged(true);
+                    }}
+                    className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition font-medium"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showDeleteOptionModal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+              <div className="bg-white rounded-xl shadow-xl p-6 w-[400px] animate-fadeIn">
+                <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                  Delete Option
                 </h2>
-                <button
-                  onClick={() => setVariantEditModalVisible(false)}
-                  className="text-gray-400 hover:text-gray-600 transition"
-                >
-                  ✕
-                </button>
-              </div>
+                <p className="text-gray-600 text-sm mb-6">
+                  Are you sure you want to delete the option{" "}
+                  <span className="font-semibold text-gray-800">
+                    "{options[deleteOptionTarget]?.name}"
+                  </span>
+                  ? <br /> This will remove all its values and related variants.
+                </p>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Price <span className="text-gray-400 text-xs">(AUD)</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={
-                      variantPrices[
-                        `${currentVariant.index}-${currentVariant.child}`
-                      ] || ""
-                    }
-                    onChange={(e) =>
-                      handlePriceChange(
-                        currentVariant.index,
-                        currentVariant.child,
-                        e.target.value,
-                      )
-                    }
-                    className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
-                    placeholder="Enter price"
-                  />
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowDeleteOptionModal(false)}
+                    className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      const updated = [...options];
+                      updated.splice(deleteOptionTarget, 1);
+                      setOptions(updated);
+                      setCombinations(generateVariants(updated));
+                      setEditingOptionIndex(null);
+                      setIsChanged(true);
+                      setShowDeleteOptionModal(false);
+                    }}
+                    className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+                  >
+                    Delete
+                  </button>
                 </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Compare at Price{" "}
-                    <span className="text-gray-400 text-xs">(AUD)</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={
-                      variantCompareAtPrices[
-                        `${currentVariant.index}-${currentVariant.child}`
-                      ] || ""
-                    }
-                    onChange={(e) =>
-                      handleVariantComparePriceChange(
-                        currentVariant.index,
-                        currentVariant.child,
-                        e.target.value,
-                      )
-                    }
-                    className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
-                    placeholder="Enter compare-at price"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    SKU
-                  </label>
-                  <input
-                    type="text"
-                    value={
-                      variantSku[
-                        `${currentVariant.index}-${currentVariant.child}`
-                      ] || ""
-                    }
-                    onChange={(e) =>
-                      handleVariantSkuChange(
-                        currentVariant.index,
-                        currentVariant.child,
-                        e.target.value,
-                      )
-                    }
-                    className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
-                    placeholder="Enter SKU"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Quantity
-                  </label>
-                  <input
-                    type="number"
-                    value={
-                      variantQuantities[
-                        `${currentVariant.index}-${currentVariant.child}`
-                      ] || ""
-                    }
-                    onChange={(e) =>
-                      handleQuantityChange(
-                        currentVariant.index,
-                        currentVariant.child,
-                        e.target.value,
-                      )
-                    }
-                    className="border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 w-full p-2 rounded-md text-sm transition"
-                    placeholder="Enter quantity"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 mt-6 border-t pt-4">
-                <button
-                  onClick={() => setVariantEditModalVisible(false)}
-                  className="px-4 py-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 transition font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    setVariantEditModalVisible(false);
-                    setIsChanged(true);
-                  }}
-                  className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition font-medium"
-                >
-                  Save Changes
-                </button>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {showDeleteOptionModal && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-            <div className="bg-white rounded-xl shadow-xl p-6 w-[400px] animate-fadeIn">
-              <h2 className="text-lg font-semibold text-gray-800 mb-3">
-                Delete Option
-              </h2>
-              <p className="text-gray-600 text-sm mb-6">
-                Are you sure you want to delete the option{" "}
-                <span className="font-semibold text-gray-800">
-                  "{options[deleteOptionTarget]?.name}"
-                </span>
-                ? <br /> This will remove all its values and related variants.
-              </p>
-
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => setShowDeleteOptionModal(false)}
-                  className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    const updated = [...options];
-                    updated.splice(deleteOptionTarget, 1);
-                    setOptions(updated);
-                    setCombinations(generateVariants(updated));
-                    setEditingOptionIndex(null);
-                    setIsChanged(true);
-                    setShowDeleteOptionModal(false);
-                  }}
-                  className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showBulkModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-scaleIn">
-              {/* Header */}
-              <div className="flex justify-between items-center border-b pb-3 mb-5">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  Bulk Update Variants
-                </h2>
-                <button
-                  onClick={() => setShowBulkModal(false)}
-                  className="text-gray-400 hover:text-gray-600 text-xl"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Info */}
-              <p className="text-sm text-gray-500 mb-5">
-                Apply the same price values to{" "}
-                <span className="font-medium">all variants</span>. Leave a field
-                empty if you don’t want to update it.
-              </p>
-
-              {/* Price */}
-              <div className="mb-4">
-                <label className="text-sm font-medium text-gray-700 mb-1 block">
-                  Price
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    value={bulkPrice}
-                    onChange={(e) => setBulkPrice(e.target.value)}
-                    placeholder="0.00"
-                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  />
+          {showBulkModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+              <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-scaleIn">
+                {/* Header */}
+                <div className="flex justify-between items-center border-b pb-3 mb-5">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    Bulk Update Variants
+                  </h2>
+                  <button
+                    onClick={() => setShowBulkModal(false)}
+                    className="text-gray-400 hover:text-gray-600 text-xl"
+                  >
+                    ✕
+                  </button>
                 </div>
-              </div>
 
-              {/* Compare at Price */}
-              <div className="mb-6">
-                <label className="text-sm font-medium text-gray-700 mb-1 block">
-                  Compare at Price
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    value={bulkCompareAtPrice}
-                    onChange={(e) => setBulkCompareAtPrice(e.target.value)}
-                    placeholder="0.00"
-                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  />
+                {/* Info */}
+                <p className="text-sm text-gray-500 mb-5">
+                  Apply the same price values to{" "}
+                  <span className="font-medium">all variants</span>. Leave a
+                  field empty if you don’t want to update it.
+                </p>
+
+                {/* Price */}
+                <div className="mb-4">
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Price
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      $
+                    </span>
+                    <input
+                      type="number"
+                      value={bulkPrice}
+                      onChange={(e) => setBulkPrice(e.target.value)}
+                      placeholder="0.00"
+                      className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Actions */}
-              <div className="flex justify-end gap-3 border-t pt-4">
-                <button
-                  onClick={() => setShowBulkModal(false)}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition"
-                >
-                  Cancel
-                </button>
+                {/* Compare at Price */}
+                <div className="mb-6">
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Compare at Price
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      $
+                    </span>
+                    <input
+                      type="number"
+                      value={bulkCompareAtPrice}
+                      onChange={(e) => setBulkCompareAtPrice(e.target.value)}
+                      placeholder="0.00"
+                      className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    />
+                  </div>
+                </div>
 
-                <button
-                  onClick={() => {
-                    const updatedPrices = {};
-                    const updatedComparePrices = {};
+                {/* Actions */}
+                <div className="flex justify-end gap-3 border-t pt-4">
+                  <button
+                    onClick={() => setShowBulkModal(false)}
+                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition"
+                  >
+                    Cancel
+                  </button>
 
-                    combinations.forEach((combination, index) => {
-                      combination.children.forEach((child) => {
-                        const key = `${index}-${child}`;
+                  <button
+                    onClick={() => {
+                      const updatedPrices = {};
+                      const updatedComparePrices = {};
 
-                        if (bulkPrice !== "") {
-                          updatedPrices[key] = parseFloat(bulkPrice);
-                        }
+                      combinations.forEach((combination, index) => {
+                        combination.children.forEach((child) => {
+                          const key = `${index}-${child}`;
 
-                        if (bulkCompareAtPrice !== "") {
-                          updatedComparePrices[key] =
-                            parseFloat(bulkCompareAtPrice);
-                        }
+                          if (bulkPrice !== "") {
+                            updatedPrices[key] = parseFloat(bulkPrice);
+                          }
+
+                          if (bulkCompareAtPrice !== "") {
+                            updatedComparePrices[key] =
+                              parseFloat(bulkCompareAtPrice);
+                          }
+                        });
                       });
-                    });
 
-                    setVariantPrices((prev) => ({ ...prev, ...updatedPrices }));
-                    setVariantComparePrices((prev) => ({
-                      ...prev,
-                      ...updatedComparePrices,
-                    }));
+                      setVariantPrices((prev) => ({
+                        ...prev,
+                        ...updatedPrices,
+                      }));
+                      setVariantComparePrices((prev) => ({
+                        ...prev,
+                        ...updatedComparePrices,
+                      }));
 
-                    setIsChanged(true);
-                    setShowBulkModal(false);
-                    setBulkPrice("");
-                    setBulkCompareAtPrice("");
-                  }}
-                  className="px-5 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-md transition active:scale-95"
-                >
-                  Apply to All
-                </button>
+                      setIsChanged(true);
+                      setShowBulkModal(false);
+                      setBulkPrice("");
+                      setBulkCompareAtPrice("");
+                    }}
+                    className="px-5 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-md transition active:scale-95"
+                  >
+                    Apply to All
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </main>
   );

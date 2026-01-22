@@ -1556,7 +1556,7 @@ const Dashboard = () => {
           //   )}
           // </div>
           <div className="w-full overflow-x-auto border rounded-lg bg-white shadow-sm">
-            <table className="min-w-full border-collapse text-sm">
+            {/* <table className="min-w-full border-collapse text-sm">
               <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0">
                 <tr>
                   <th className="p-3">
@@ -1727,6 +1727,213 @@ const Dashboard = () => {
                       <td className="p-3">
                         <button
                           className="flex items-center text-blue-500 hover:text-blue-700 transition"
+                          onClick={() => OnEdit(product)}
+                        >
+                          <MdEdit className="mr-1" />
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="100%"
+                      className="py-10 text-center text-gray-500"
+                    >
+                      No products available.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table> */}
+            <table className="min-w-full border-collapse text-sm">
+              <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0">
+                <tr>
+                  <th className="p-3 text-left">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 cursor-pointer align-middle"
+                      checked={selectAll}
+                      onChange={() => handleSelectAll()}
+                    />
+                  </th>
+                  <th className="p-3 whitespace-nowrap text-left">Status</th>
+                  <th className="p-3 whitespace-nowrap text-left">Image</th>
+                  <th
+                    className="p-3 cursor-pointer whitespace-nowrap text-left"
+                    onClick={() => {
+                      let nextOrder = "asc";
+                      if (sortField === "title" && sortOrder === "asc")
+                        nextOrder = "desc";
+                      handleSort("title", nextOrder);
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium">Listing Name</span>
+                      {sortField === "title" ? (
+                        sortOrder === "asc" ? (
+                          <FaArrowUp className="text-blue-500" />
+                        ) : (
+                          <FaArrowDown className="text-blue-500" />
+                        )
+                      ) : (
+                        <FaArrowUp className="text-gray-400" />
+                      )}
+                    </div>
+                  </th>
+
+                  {(userRole === "Dev Admin" ||
+                    userRole === "Master Admin") && (
+                    <th className="p-3 whitespace-nowrap text-left">
+                      Publisher
+                    </th>
+                  )}
+                  <th className="p-3 whitespace-nowrap text-left">Approval</th>
+                  <th className="p-3 whitespace-nowrap text-left">SKU</th>
+                  <th className="p-3 whitespace-nowrap text-left">Price</th>
+                  <th className="p-3 whitespace-nowrap text-left">Compare</th>
+                  <th className="p-3 whitespace-nowrap text-left">Type</th>
+                  <th className="p-3 whitespace-nowrap text-left">Inventory</th>
+                  <th className="p-3 whitespace-nowrap text-left">Vendor</th>
+                  {admin && (
+                    <th className="p-3 whitespace-nowrap text-left">
+                      Publisher ID
+                    </th>
+                  )}
+                  <th className="p-3 whitespace-nowrap text-left">Edit</th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-gray-200">
+                {Loading ? (
+                  <tr>
+                    <td
+                      colSpan="100%"
+                      className="py-10 text-center text-gray-500"
+                    >
+                      Loading...
+                    </td>
+                  </tr>
+                ) : filteredProducts.length > 0 ? (
+                  filteredProducts.map((product) => (
+                    <tr
+                      key={product._id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="p-3">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 cursor-pointer align-middle"
+                          checked={selectedProducts.includes(product._id)}
+                          onChange={() => toggleSelection(product._id)}
+                        />
+                      </td>
+
+                      <td className="p-3 whitespace-nowrap">
+                        <span
+                          className={`inline-block w-3 h-3 rounded-full ${
+                            product.status === "active"
+                              ? "bg-green-500"
+                              : "bg-red-500"
+                          }`}
+                        ></span>
+                      </td>
+
+                      <td className="p-3 whitespace-nowrap">
+                        {product.images?.[0] ? (
+                          <img
+                            src={product.images[0].src}
+                            alt={product.images[0].alt || "Product image"}
+                            className="w-10 h-10 object-cover rounded border"
+                          />
+                        ) : (
+                          <span className="text-gray-400 text-xs">
+                            No Image
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="p-3 font-medium text-gray-800 whitespace-nowrap">
+                        {product.title !== "Job Listing"
+                          ? product.title
+                          : "Job Search Listing"}
+                      </td>
+
+                      {(userRole === "Dev Admin" ||
+                        userRole === "Master Admin") && (
+                        <td className="p-3 text-gray-700 whitespace-nowrap">
+                          {product?.username}
+                        </td>
+                      )}
+
+                      <td className="p-3 whitespace-nowrap">
+                        {product?.approvalStatus ? (
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${
+                              product.approvalStatus === "pending"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : product.approvalStatus === "approved"
+                                  ? "bg-green-100 text-green-700"
+                                  : product.approvalStatus === "rejected"
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {product.approvalStatus}
+                          </span>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+
+                      <td className="p-3 text-gray-600 whitespace-nowrap">
+                        {product.variants?.[0]?.sku || "N/A"}
+                      </td>
+
+                      <td className="p-3 font-semibold whitespace-nowrap">
+                        $
+                        {parseFloat(product.variants?.[0]?.price || 0).toFixed(
+                          2,
+                        )}
+                      </td>
+
+                      <td className="p-3 text-gray-500 whitespace-nowrap">
+                        $
+                        {parseFloat(
+                          product.variants?.[0]?.compare_at_price || 0,
+                        ).toFixed(2)}
+                      </td>
+
+                      <td className="p-3 whitespace-nowrap">
+                        {product.product_type || "N/A"}
+                      </td>
+
+                      <td className="p-3 text-gray-700 whitespace-nowrap">
+                        {(() => {
+                          const totalQuantity = product.variants?.reduce(
+                            (sum, v) =>
+                              sum + (parseFloat(v.inventory_quantity) || 0),
+                            0,
+                          );
+                          const variantCount = product.variants?.length || 0;
+                          return `${totalQuantity} (${variantCount} Var)`;
+                        })()}
+                      </td>
+
+                      <td className="p-3 whitespace-nowrap">
+                        {product.vendor || "N/A"}
+                      </td>
+
+                      {admin && (
+                        <td className="p-3 text-gray-600 whitespace-nowrap font-mono text-xs">
+                          #{product.shopifyId}
+                        </td>
+                      )}
+
+                      <td className="p-3 whitespace-nowrap">
+                        <button
+                          className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition"
                           onClick={() => OnEdit(product)}
                         >
                           <MdEdit className="mr-1" />

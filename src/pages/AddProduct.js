@@ -23,6 +23,63 @@ import { jwtDecode } from "jwt-decode";
 const CategorySelector = () => {
   const { id } = useParams();
   const isEditing = Boolean(id);
+  const handleDiscard = () => {
+    if (isChanged) {
+      const confirmDiscard = window.confirm(
+        "Are you sure? All unsaved changes will be lost.",
+      );
+      if (!confirmDiscard) return;
+    }
+
+    // 🔄 Reset all form states
+    setTitle("");
+    setEditorState(EditorState.createEmpty());
+    setDescription("");
+
+    setPrice("");
+    setCompareAtPrice("");
+
+    setTrackQuantity(false);
+    setQuantity(0);
+    setContinueSelling(false);
+
+    setHasSKU(false);
+    setSKU("");
+    setBarcode("");
+
+    setTrackShipping(false);
+    setWeight("");
+    setUnit("kg");
+
+    setOptions([]);
+    setVariants([]);
+    setCombinations([]);
+
+    setSelectedImages([]);
+    setVariantImages({});
+    setGalleryImages([]);
+
+    setSelectedVisibleCategories([]);
+    setFinalCategoryPayload([]);
+    setKeywordsList([]);
+
+    setEnableShippingPlans(false);
+    setEnableFreeShipping(false);
+    setSelectedShippingPlan("");
+
+    setEnableSizeChart(false);
+    setSelectedSizeChart("");
+    setChartData({ image: "", loading: false });
+
+    setEnableMetafields(false);
+    setMetafields([{ label: "", value: "" }]);
+
+    setStatus("draft");
+    setVendor("");
+    setProductType("");
+
+    setIsChanged(false);
+  };
 
   const stripHtml = (html) => {
     const div = document.createElement("div");
@@ -963,6 +1020,13 @@ const CategorySelector = () => {
       setContinueSelling(product.inventory?.continue_selling || false);
       setHasSKU(product.inventory?.has_sku || false);
       setSKU(product.inventory?.sku || "");
+          // ✅ SEO STATES SET
+    setSeoTitle(product?.seo?.title || product.title || "");
+    setSeoDescription(
+      product?.seo?.description ||
+      stripHtml(product.body_html || "")
+    );
+    setSeoHandle(product?.seo?.handle || "");
       setBarcode(product.inventory?.barcode || "");
       setTrackShipping(product.shipping?.track_shipping || false);
       setWeight(product.shipping?.weight || "");
@@ -1353,7 +1417,13 @@ const CategorySelector = () => {
         (p) => p.profileId === selectedShippingPlan,
       );
     }
-
+const cleanHandle = seoHandle
+  .replace(/^https?:\/\/[^/]+\/products\//, '')
+  .trim();
+  const autoHandle = title
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/(^-|-$)/g, '');
     const payload = {
       keyWord: combinedKeywords,
       title,
@@ -1373,6 +1443,9 @@ const CategorySelector = () => {
       status,
       userId,
       vendor,
+      seoTitle,
+      seoDescription,
+seoHandle: seoHandle ? cleanHandle : autoHandle,
       options,
       variants,
       variantPrices: prepareVariantPrices(),
@@ -3199,14 +3272,14 @@ const CategorySelector = () => {
             )}
           </div>
 
-          {/* <div className="border rounded-lg p-4 shadow-sm bg-white mt-3">
+          <div className="border rounded-lg p-4 shadow-sm bg-white mt-3">
             <h2 className="text-md font-medium text-gray-700 mb-3">
               Search engine listing
             </h2>
 
             <div className="border rounded-lg p-4 bg-gray-50">
               <div className="flex justify-between items-start mb-2">
-                <span className="text-sm text-gray-600">Aydi Active</span>
+                {/* <span className="text-sm text-gray-600">Aydi Active</span> */}
                 <button onClick={() => setEditing(true)}>
                   <MdEdit className="text-gray-500 hover:text-blue-500" />
                 </button>
@@ -3292,7 +3365,7 @@ const CategorySelector = () => {
                 </div>
               </div>
             )}
-          </div> */}
+          </div>
 
           {loading && (
             <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60">
@@ -3327,9 +3400,17 @@ const CategorySelector = () => {
                 ? "Submitting..."
                 : isEditing
                   ? "Update Product"
-                  : "Add Product"}
+                  : "Save"}
             </button>
-
+            {!isEditing && (
+              <button
+                type="button"
+                onClick={handleDiscard}
+                className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+              >
+                Discard
+              </button>
+            )}
             {isEditing && (
               <button
                 onClick={handleDuplicate}

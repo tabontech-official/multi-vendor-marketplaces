@@ -287,7 +287,7 @@ const Promotion = () => {
       console.error("Error adding promotion:", error);
       showToast("error", "Failed to add promotion.");
     } finally {
-      setIsSavingPromo(false); 
+      setIsSavingPromo(false);
     }
   };
 
@@ -295,7 +295,7 @@ const Promotion = () => {
     console.log(product);
 
     setSelectedProduct(product);
-    setSelectedVariant(variant); 
+    setSelectedVariant(variant);
 
     setModalOpen(true);
   };
@@ -488,22 +488,24 @@ const Promotion = () => {
                 //   }
                 // })
                 .filter((product) => {
-  // ✅ Dev & Master Admin → see ALL promotions
-  if (userRole === "Dev Admin" || userRole === "Master Admin") {
-    return true;
-  }
+                  // ✅ Dev & Master Admin → see ALL promotions
+                  if (userRole === "Dev Admin" || userRole === "Master Admin") {
+                    return true;
+                  }
 
-  // ✅ Merchants → only their promotions
-  if (userRole === "Merchant" || userRole === "Merchant Staff") {
-    return (
-      product.createdRole === "Merchant" ||
-      product.createdRole === "Merchant Staff"
-    );
-  }
+                  // ✅ Merchants → only their promotions
+                  if (
+                    userRole === "Merchant" ||
+                    userRole === "Merchant Staff"
+                  ) {
+                    return (
+                      product.createdRole === "Merchant" ||
+                      product.createdRole === "Merchant Staff"
+                    );
+                  }
 
-  return false;
-})
-
+                  return false;
+                })
 
                 .map((product) => (
                   <div

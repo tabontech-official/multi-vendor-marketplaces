@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { HiOutlineRefresh } from "react-icons/hi";
+import { FaFileImport } from "react-icons/fa";
 const ManageCategory = () => {
   const navigate = useNavigate();
   const [allCategories, setAllCategories] = useState([]);
@@ -338,9 +339,11 @@ const filteredCategories = categories.filter((cat) => {
 
           <button
             onClick={handleExport}
-            className="bg-green-400 text-white px-4 py-1 border rounded-md hover:bg-green-500"
+                className="bg-blue-500 hover:bg-blue-400 text-white w-32 h-10 rounded-md transition duration-300 ease-in-out flex items-center justify-center gap-2"
           >
-            Export
+                            <FaFileImport className="w-5 h-5" />
+            
+                <span>Export</span>
           </button>
           {(role === "Master Admin" || role === "Dev Admin") && (
             <button

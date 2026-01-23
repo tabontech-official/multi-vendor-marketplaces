@@ -2115,7 +2115,7 @@ const CategorySelector = () => {
                   className="border border-dashed border-gray-400 p-6 text-center rounded-xl cursor-pointer hover:bg-gray-50"
                 >
                   <label
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer"
+                    className=" bg-black text-white px-4 py-2 rounded-md cursor-pointer hover:bg-gray-800"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsMediaModalVisible(true);
@@ -2539,7 +2539,7 @@ const CategorySelector = () => {
                 {combinations.length > 0 && (
                   <button
                     onClick={() => setShowBulkModal(true)}
-                    className="text-sm bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700"
+                    className="text-sm bg-black text-white px-3 py-1 rounded-md hover:bg-gray-800"
                   >
                     Bulk Update
                   </button>
@@ -3508,7 +3508,7 @@ const CategorySelector = () => {
                       Cancel
                     </button>
                     <button
-                      className="px-4 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded"
+                      className="px-4 py-1 text-sm bg-black hover:bg-gray-800 text-white rounded"
                       onClick={() => {
                         setEditing(false);
                       }}
@@ -3700,7 +3700,7 @@ const CategorySelector = () => {
                   </h2>
                   <button
                     onClick={() => setIsPopupVisible(false)}
-                    className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700"
+                    className="bg-black text-white px-5 py-2 rounded-md hover:bg-gray-800"
                   >
                     Done
                   </button>
@@ -3718,7 +3718,7 @@ const CategorySelector = () => {
                     />
                     <label
                       htmlFor="variantUpload"
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
+                      className="px-6 py-2 bg-black hover:bg-gray-800 text-white rounded-lg cursor-pointer"
                     >
                       Add New Images
                     </label>
@@ -3858,7 +3858,7 @@ const CategorySelector = () => {
                   </h2>
                   <button
                     onClick={() => setIsMediaModalVisible(false)}
-                    className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700"
+                    className="bg-black text-white px-5 py-2 rounded-md hover:bg-gray-800"
                   >
                     Done
                   </button>
@@ -3878,14 +3878,14 @@ const CategorySelector = () => {
                     <div className="flex gap-4">
                       <label
                         htmlFor="productUpload"
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
+                        className="px-6 py-2 bg-black text-white rounded-lg cursor-pointer hover:bg-gray-800"
                       >
                         Add New Images
                       </label>
 
                       <button
                         onClick={() => setShowGallery(true)}
-                        className="px-6 py-2 bg-gray-600 text-white rounded-lg"
+                        className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-700"
                       >
                         Browse
                       </button>
@@ -4025,7 +4025,7 @@ const CategorySelector = () => {
                       value={duplicateTitle}
                       onChange={(e) => setDuplicateTitle(e.target.value)}
                       placeholder="Enter new title..."
-                      className="w-full rounded-lg border-2 border-slate-100 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 transition-all outline-none focus:border-blue-500 focus:ring-0"
+                      className="w-full rounded-lg border-2 border-slate-100 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 transition-all outline-none focus:border-gray-500 focus:ring-0"
                     />
                   </div>
                 </div>
@@ -4044,7 +4044,7 @@ const CategorySelector = () => {
                       setShowDuplicateModal(false);
                     }}
                     disabled={!duplicateTitle.trim()}
-                    className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-40 disabled:hover:bg-blue-600 disabled:active:scale-100"
+                    className="rounded-lg bg-black px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gray-700 active:scale-[0.98] disabled:opacity-40 disabled:hover:bg-blue-600 disabled:active:scale-100"
                   >
                     Duplicate Product
                   </button>

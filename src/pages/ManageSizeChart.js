@@ -366,7 +366,7 @@ const ManageSizeChart = () => {
 
         <button
           onClick={() => navigate("/create-size-chart")}
-          className="bg-blue-600 text-white px-5 py-2.5 rounded-md shadow hover:bg-blue-700 transition"
+          className="bg-blue-500 text-white px-5 py-2.5 rounded-md shadow hover:bg-blue-600 transition"
         >
           + Create Size Chart
         </button>

@@ -425,7 +425,7 @@ const Promotion = () => {
                 }}
                 className={`px-4 py-2 text-sm rounded-lg ${
                   activeTab === tab
-                    ? "bg-green-600 text-white"
+                    ? "bg-blue-600 text-white"
                     : "bg-gray-200 text-gray-700"
                 }`}
               >

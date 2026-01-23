@@ -208,7 +208,7 @@ const CategorySelector = () => {
 
   const locationData = useLocation();
   const { product } = locationData.state || {};
-
+console.log("fetching product",product)
   const [editing, setEditing] = useState(false);
   const [mongooseProductId, setMongooseProductId] = useState();
   const [title, setTitle] = useState("");

@@ -475,46 +475,86 @@ useEffect(() => {
           <Bar data={chartData} options={options} />
         </div>
 
-        <div className="bg-cyan-600 text-white p-6 rounded-xl shadow-sm w-[35%]">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Selling Product</h2>
-            <button className="bg-cyan-700 text-sm px-3 py-1 rounded">
-              This Month
-            </button>
-          </div>
+      <div className="bg-gray-100 border border-slate-200 p-6 rounded-2xl shadow-sm w-[35%] min-w-[320px] font-sans text-slate-800">
+  
+  {/* Header */}
+  <div className="flex justify-between items-center mb-8">
+    <div>
+      <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700">Product Analytics</h2>
+      <p className="text-xs text-gray-700">Real-time performance</p>
+    </div>
+    <span className="bg-white border border-slate-200 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-lg shadow-sm">
+      This Month
+    </span>
+  </div>
 
-          <div className="flex flex-col items-center mb-4">
-            <div className="w-32 h-32 rounded-full border-[10px] border-white border-t-cyan-400 flex items-center justify-center text-2xl font-bold">
-              {productCount}
-            </div>
-            <p className="text-sm mt-1">Product</p>
-            <p className="text-xs text-red-300 mt-1">▼ 7% vs 3,000 Expected</p>
-          </div>
+  {/* Main Metric Section */}
+  <div className="flex items-center gap-6 mb-8">
+    <div className="relative flex items-center justify-center">
+      {/* Decorative Ring */}
+      <div className="w-24 h-24 rounded-full border-4 border-slate-100 flex items-center justify-center bg-white shadow-inner">
+        <span className="text-3xl font-black text-cyan-600">
+          {productCount}
+        </span>
+      </div>
+      {/* Small accent glow */}
+      <div className="absolute -z-10 w-24 h-24 bg-cyan-400/20 blur-xl rounded-full"></div>
+    </div>
 
-          <div className="mt-2 text-sm">
-            <p className="mb-2">
-              Visitor Growth <span className="text-red-300">▼ -12%</span>
-            </p>
-            <h4 className="text-xl font-semibold">24.9K</h4>
-            <p className="text-xs">Compare to 27K last month</p>
-          </div>
+    <div>
+      <p className="text-sm text-gray-700 font-medium">Total Inventory</p>
+      <p className="text-xs text-emerald-500 font-semibold">+12% from last month</p>
+    </div>
+  </div>
 
-          <div className="mt-4">
-            <p className="text-sm">Class A</p>
-            <p className="text-xs">13,028 / 15,000 user</p>
-            <div className="w-full h-2 bg-white bg-opacity-30 mt-1 rounded">
-              <div className="h-2 bg-white w-[87%] rounded"></div>
-            </div>
-          </div>
+  {/* Stats Breakdown */}
+  <div className="space-y-4 bg-white p-4 rounded-xl border border-slate-100">
+    <div className="space-y-2">
+      <div className="flex justify-between text-sm">
+        <span className="text-gray-700font-medium">Active Status</span>
+        <span className="text-gray-700 font-bold">{productActiveCount} <span className="text-gray-700 font-normal">/ {productCount}</span></span>
+      </div>
+      
+      {/* Modern Segmented Progress Bar */}
+      <div className="flex w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-cyan-500 transition-all duration-500"
+          style={{ width: `${productCount ? (productActiveCount / productCount) * 100 : 0}%` }}
+        />
+        <div
+            className="h-full bg-slate-300 transition-all duration-500"
+            style={{ width: `${productCount ? (productInActiveCount / productCount) * 100 : 0}%` }}
+        />
+      </div>
+    </div>
 
-          <div className="mt-3">
-            <p className="text-sm">Class B</p>
-            <p className="text-xs">11,912 / 15,000 user</p>
-            <div className="w-full h-2 bg-white bg-opacity-30 mt-1 rounded">
-              <div className="h-2 bg-white w-[79%] rounded"></div>
-            </div>
-          </div>
-        </div>
+    <div className="grid grid-cols-2 gap-4 pt-2">
+      <div className="flex flex-col">
+        <span className="text-[10px] uppercase text-gray-700 font-bold">Inactive</span>
+        <span className="text-sm font-semibold text-slate-700">{productInActiveCount}</span>
+      </div>
+      <div className="flex flex-col border-l pl-4 border-slate-100">
+        <span className="text-[10px] uppercase text-gray-700 font-bold">Conversion</span>
+        <span className="text-sm font-semibold text-slate-700">84%</span>
+      </div>
+    </div>
+  </div>
+
+  {/* Footer Card */}
+  <div className="mt-6 flex items-center justify-between px-2">
+    <div>
+        <p className="text-xs text-gray-700 font-medium">Total Engagement</p>
+        <p className="text-2xl font-bold text-slate-800 tracking-tight">{viewCount.toLocaleString()}</p>
+    </div>
+    <div className="h-10 w-10 bg-cyan-50 rounded-lg flex items-center justify-center">
+        <svg className="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+    </div>
+  </div>
+</div>
+
       </div>
     </main>
   );

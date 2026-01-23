@@ -39,7 +39,6 @@ const AddVariantOption = () => {
     fetchOptions();
   }, []);
 
-  // 🔹 Check if name already exists (case-insensitive)
   useEffect(() => {
     if (!name.trim()) {
       setExistingMatch(null);
@@ -80,7 +79,6 @@ const AddVariantOption = () => {
     try {
       let finalAliases = cleanAliases;
 
-      // 🧩 If Add-to-existing selected
       if (existingMatch && !replaceExisting) {
         const existingAliases = Array.isArray(existingMatch.optionName)
           ? existingMatch.optionName
@@ -109,7 +107,7 @@ const AddVariantOption = () => {
         setAliases("");
         setOptionValues("");
         setExistingMatch(null);
-        setTimeout(() => navigate("/manage-variant-options"), 1500);
+        setTimeout(() => navigate("/manage-options"), 1500);
       } else {
         showToast("error", data.message || "Failed to save option.");
       }
@@ -126,13 +124,12 @@ const AddVariantOption = () => {
     const existingAliases = Array.isArray(existingMatch.optionName)
       ? existingMatch.optionName.join(", ")
       : "";
-    setAliases(existingAliases); // populate existing aliases for editing
+    setAliases(existingAliases); 
     showToast("info", "Existing aliases loaded. Add more if needed.");
   };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex justify-center items-start p-6">
-      {/* ✅ Toast */}
       {toast.show && (
         <div
           className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all z-50 ${

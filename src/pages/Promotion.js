@@ -488,30 +488,22 @@ const Promotion = () => {
                 //   }
                 // })
                 .filter((product) => {
-                  // ✅ Merchants & Merchant Staff see all promotions (active or inactive)
-                  if (
-                    userRole === "Merchant" ||
-                    userRole === "Merchant Staff"
-                  ) {
-                    return true;
-                  }
+  // ✅ Dev & Master Admin → see ALL promotions
+  if (userRole === "Dev Admin" || userRole === "Master Admin") {
+    return true;
+  }
 
-                  // ✅ Admins only see active promotions
-                  if (product.status !== "active") return false;
+  // ✅ Merchants → only their promotions
+  if (userRole === "Merchant" || userRole === "Merchant Staff") {
+    return (
+      product.createdRole === "Merchant" ||
+      product.createdRole === "Merchant Staff"
+    );
+  }
 
-                  switch (userRole) {
-                    case "Dev Admin":
-                      return true;
-                    case "Master Admin":
-                      return (
-                        product.createdRole === "Master Admin" ||
-                        product.createdRole === "Merchant" ||
-                        product.createdRole === "Merchant Staff"
-                      );
-                    default:
-                      return false;
-                  }
-                })
+  return false;
+})
+
 
                 .map((product) => (
                   <div

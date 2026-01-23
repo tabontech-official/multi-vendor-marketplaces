@@ -282,12 +282,12 @@ const Promotion = () => {
       setModalStartDate("");
       setModalEndDate("");
       fetchPromotions();
-      // window.location.reload();
+      window.location.reload();
     } catch (error) {
       console.error("Error adding promotion:", error);
       showToast("error", "Failed to add promotion.");
     } finally {
-      setIsSavingPromo(false); // 🔥 STOP LOADER
+      setIsSavingPromo(false); 
     }
   };
 
@@ -295,7 +295,7 @@ const Promotion = () => {
     console.log(product);
 
     setSelectedProduct(product);
-    setSelectedVariant(variant); // Crucial: use this in handleSubmitPromotion
+    setSelectedVariant(variant); 
 
     setModalOpen(true);
   };
@@ -377,7 +377,6 @@ const Promotion = () => {
       if (!response.ok)
         throw new Error(data.message || "Failed to end promotion");
 
-      // ✅ Remove ended promotion from UI
       setPromotions((prev) =>
         prev.filter((promo) => promo._id !== promotionToEnd),
       );

@@ -49,9 +49,9 @@ const MainDashboard = () => {
 
       let apiUrl = "";
       if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
-        apiUrl = "http://localhost:5000/order/monthlyRevenue"; 
+        apiUrl = "https://multi-vendor-marketplace.vercel.app/order/monthlyRevenue"; 
       } else if (decodedRole === "Merchant" || decodedRole === "Merchant Staff") {
-        apiUrl = `http://localhost:5000/order/monthlyRevenue/${userId}`; 
+        apiUrl = `https://multi-vendor-marketplace.vercel.app/order/monthlyRevenue/${userId}`; 
       }
 
       const response = await fetch(apiUrl, {
@@ -158,10 +158,10 @@ const MainDashboard = () => {
 
         if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
           apiUrl =
-            "http://localhost:5000/product/getProductCount";
+            "https://multi-vendor-marketplace.vercel.app/product/getProductCount";
         } else if (decodedRole === "Merchant") {
           const userId = localStorage.getItem("userid");
-          apiUrl = `http://localhost:5000/product/getProductForCharts/${userId}`;
+          apiUrl = `https://multi-vendor-marketplace.vercel.app/product/getProductForCharts/${userId}`;
         }
 
         if (apiUrl) {
@@ -212,10 +212,10 @@ const MainDashboard = () => {
 
         if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
           apiUrl =
-            "http://localhost:5000/order/recurringFinance";
+            "https://multi-vendor-marketplace.vercel.app/order/recurringFinance";
         } else if (decodedRole === "Merchant") {
           const userId = localStorage.getItem("userid");
-          apiUrl = `http://localhost:5000/order/getFinanceSummaryForUser/${userId}`;
+          apiUrl = `https://multi-vendor-marketplace.vercel.app/order/getFinanceSummaryForUser/${userId}`;
         }
 
         if (apiUrl) {
@@ -241,7 +241,7 @@ const MainDashboard = () => {
   //   const fetchUserViewCount = async () => {
   //     try {
   //       const response = await fetch(
-  //         `http://localhost:5000/product/trackingViews/${userId}`
+  //         `https://multi-vendor-marketplace.vercel.app/product/trackingViews/${userId}`
   //       );
   //       if (response.ok) {
   //         const data = await response.json();
@@ -274,9 +274,9 @@ useEffect(() => {
       let url = "";
 
       if (role === "Merchant" || role === "Merchant Staff") {
-        url = `http://localhost:5000/product/trackingViews/${userId}`;
+        url = `https://multi-vendor-marketplace.vercel.app/product/trackingViews/${userId}`;
       } else if (role === "Master Admin" || role === "Dev Admin") {
-        url = `http://localhost:5000/product/trackingViews`;
+        url = `https://multi-vendor-marketplace.vercel.app/product/trackingViews`;
       }
 
       if (!url) return;

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
+import { FaShoppingBasket } from "react-icons/fa";
 
 const ManageSizeChart = () => {
   const navigate = useNavigate();
@@ -52,10 +53,9 @@ const ManageSizeChart = () => {
       let url = "";
 
       if (role === "Dev Admin" || role === "Master Admin") {
-        url =
-          "https://multi-vendor-marketplace.vercel.app/size-chart/admin/all";
+        url = "http://localhost:5000/size-chart/admin/all";
       } else {
-        url = `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`;
+        url = `http://localhost:5000/size-chart/all/${userId}`;
       }
 
       const res = await axios.get(url);
@@ -75,9 +75,7 @@ const ManageSizeChart = () => {
     try {
       setLoadingDelete(true);
 
-      await axios.delete(
-        `https://multi-vendor-marketplace.vercel.app/size-chart/delete/${deleteId}`,
-      );
+      await axios.delete(`http://localhost:5000/size-chart/delete/${deleteId}`);
 
       showToast("success", "Size chart deleted successfully");
       setShowModal(false);
@@ -111,38 +109,37 @@ const ManageSizeChart = () => {
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-6">
-        <div>
+      <div className="flex justify-between items-center pb-4 border-b">
+        <div className="flex items-center gap-2">
+          <FaShoppingBasket className="text-gray-700" size={24} />
           <h1 className="text-2xl font-semibold text-gray-800">
-            Size Chart Management
+            Manage Size Charts
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Manage all your product size charts in one place.
-          </p>
         </div>
 
         <button
           onClick={() => navigate("/create-size-chart")}
-          className="bg-blue-500 text-white px-5 py-2.5 rounded-md shadow hover:bg-blue-600 transition"
+          className="h-10 min-w-[160px] bg-blue-500 text-white px-4 rounded-md hover:bg-blue-600"
         >
           + Create Size Chart
         </button>
       </div>
 
       <div className="bg-white shadow-md rounded-xl p-5">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-700">
-            Total Size Charts: {charts.length}
-          </h2>
+        <div className="flex justify-between items-center mt-4 mb-4">
+          <div className="text-sm font-medium text-gray-600">
+            Total Size Charts:{" "}
+            <span className="text-gray-900 font-semibold">{charts.length}</span>
+          </div>
 
           <input
             type="text"
-            placeholder="Search..."
-            className="border px-3 py-2 rounded-md text-sm w-64 focus:ring-2 focus:ring-blue-500 outline-none"
+            placeholder="Search size charts..."
+            className="w-64 border border-gray-300 px-4 py-2 rounded-md focus:ring focus:ring-blue-100"
           />
         </div>
 
-        <div className="overflow-hidden rounded-lg border">
+        {/* <div className="overflow-hidden rounded-lg border">
           <table className="w-full text-sm">
             <thead className="bg-gray-100 text-gray-600">
               <tr>
@@ -215,10 +212,89 @@ const ManageSizeChart = () => {
               )}
             </tbody>
           </table>
+        </div> */}
+        <div className="overflow-auto border rounded-lg bg-white shadow-sm">
+          <table className="w-full">
+            <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+              <tr>
+                <th className="p-3">Image</th>
+                <th className="p-3">Name</th>
+
+                {(role === "Dev Admin" || role === "Master Admin") && (
+                  <th className="p-3">Publisher</th>
+                )}
+
+                <th className="p-3">Published</th>
+                <th className="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {charts.length ? (
+                charts.map((chart, i) => (
+                  <tr
+                    key={chart._id}
+                    className={`border-b ${
+                      i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } hover:bg-gray-100`}
+                  >
+                    <td className="p-3">
+                      <img
+                        src={chart.image}
+                        alt="size chart"
+                        className="w-14 h-14 object-cover rounded-md border"
+                      />
+                    </td>
+
+                    <td className="p-3 text-sm font-medium text-gray-800">
+                      {chart.name}
+                    </td>
+
+                    {(role === "Dev Admin" || role === "Master Admin") && (
+                      <td className="p-3 text-sm text-gray-700">
+                        {chart.userName || "—"}
+                      </td>
+                    )}
+
+                    <td className="p-3 text-sm text-gray-600">
+                      {new Date(chart.createdAt).toLocaleDateString()}
+                    </td>
+
+                    <td className="p-3 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => editChart(chart)}
+                          className="h-9 min-w-[80px] bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() => confirmDelete(chart._id)}
+                          className="h-9 min-w-[80px] bg-red-500 text-white rounded-md text-sm hover:bg-red-600"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="text-center py-6 text-sm text-gray-500"
+                  >
+                    No size charts found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {showModal && (
+      {/* {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-40">
           <div className="bg-white p-6 rounded-lg shadow-xl w-96">
             <h3 className="text-lg font-semibold mb-3 text-gray-800">
@@ -250,7 +326,37 @@ const ManageSizeChart = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
+{showModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+      <h3 className="text-lg font-semibold text-gray-800 mb-2">
+        Delete Size Chart
+      </h3>
+
+      <p className="text-gray-600 mb-6">
+        This action cannot be undone. Are you sure?
+      </p>
+
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setShowModal(false)}
+          className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={deleteChart}
+          disabled={loadingDelete}
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+        >
+          {loadingDelete ? "Deleting..." : "Delete"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       <style>
         {`

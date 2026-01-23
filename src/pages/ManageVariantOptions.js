@@ -21,7 +21,7 @@ const ManageVariantOptions = () => {
     const fetchOptions = async () => {
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
+          "http://localhost:5000/variantOption/getOptions"
         );
         const data = await response.json();
         if (response.ok) setOptions(data);
@@ -44,7 +44,7 @@ const ManageVariantOptions = () => {
   const handleExport = async () => {
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/variantOption/getCsvForOptions"
+        "http://localhost:5000/variantOption/getCsvForOptions"
       );
       if (response.ok) {
         const blob = await response.blob();
@@ -70,7 +70,7 @@ const ManageVariantOptions = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/variantOption/importOptions",
+        "http://localhost:5000/variantOption/importOptions",
         { method: "POST", body: formData }
       );
 
@@ -81,7 +81,7 @@ const ManageVariantOptions = () => {
         setFile(null);
 
         const updated = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
+          "http://localhost:5000/variantOption/getOptions"
         );
         setOptions(await updated.json());
       } else {
@@ -101,7 +101,7 @@ const ManageVariantOptions = () => {
 
     try {
       await axios.delete(
-        "https://multi-vendor-marketplace.vercel.app/variantOption/deleteOptions",
+        "http://localhost:5000/variantOption/deleteOptions",
         {
           data: { optionIds: selectedOptionIds },
         }
@@ -117,30 +117,78 @@ const ManageVariantOptions = () => {
     }
   };
 
- const handleEditSave = async () => {
+//  const handleEditSave = async () => {
+//   const { option } = editModal;
+
+//   // Convert text → array (comma separated)
+//   const finalOptionValues = editOptionValuesText
+//     .split(",")
+//     .map((v) => v.trim())
+//     .filter(Boolean);
+
+//   const finalOptionNames = editOptionNameText
+//     .split(",")
+//     .map((v) => v.trim())
+//     .filter(Boolean);
+
+//   // Validation
+//   if (!option.name || finalOptionValues.length === 0) {
+//     return showToast("error", "Please fill all fields correctly.");
+//   }
+
+//   // Prepare updated option
+//   const updatedOption = {
+//     ...option,
+//     optionValues: finalOptionValues,
+//     optionName: finalOptionNames,
+//   };
+
+//   try {
+//     const response = await axios.put(
+//       "http://localhost:5000/variantOption/updateOption",
+//       updatedOption
+//     );
+
+//     if (response.status === 200) {
+//       showToast("success", "Option updated successfully!");
+
+//       // Update UI
+//       setOptions((prev) =>
+//         prev.map((opt) =>
+//           opt._id === updatedOption._id ? updatedOption : opt
+//         )
+//       );
+
+//       setEditModal({ show: false, option: null });
+//     }
+//   } catch (error) {
+//     console.error("Update Error:", error);
+//     showToast("error", "Failed to update option.");
+//   }
+// };
+
+const handleEditSave = async () => {
   const { option } = editModal;
 
-  // Convert text → array (comma separated)
   const finalOptionValues = editOptionValuesText
     .split(",")
-    .map((v) => v.trim())
+    .map(v => v.trim())
     .filter(Boolean);
 
   const finalOptionNames = editOptionNameText
     .split(",")
-    .map((v) => v.trim())
+    .map(v => v.trim())
     .filter(Boolean);
 
-  // Validation
   if (!option.name || finalOptionValues.length === 0) {
     return showToast("error", "Please fill all fields correctly.");
   }
 
-  // Prepare updated option
   const updatedOption = {
-    ...option,
-    optionValues: finalOptionValues,
-    optionName: finalOptionNames,
+    _id: option._id,
+    name: option.name.trim(),
+    optionName: finalOptionNames,     // ✅ array always
+    optionValues: finalOptionValues,  // ✅ array always
   };
 
   try {
@@ -152,10 +200,9 @@ const ManageVariantOptions = () => {
     if (response.status === 200) {
       showToast("success", "Option updated successfully!");
 
-      // Update UI
-      setOptions((prev) =>
-        prev.map((opt) =>
-          opt._id === updatedOption._id ? updatedOption : opt
+      setOptions(prev =>
+        prev.map(opt =>
+          opt._id === option._id ? response.data.data : opt
         )
       );
 
@@ -194,7 +241,7 @@ const [editOptionValuesText, setEditOptionValuesText] = useState("");
           </h1>
         </div>
 
-        <div className="flex space-x-2">
+        {/* <div className="flex space-x-2">
           {selectedOptionIds.length > 0 && (
             <button
               onClick={handleDeleteOptions}
@@ -217,11 +264,43 @@ const [editOptionValuesText, setEditOptionValuesText] = useState("");
           </button>
           <button
             onClick={() => navigate("/add/option")}
-            className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
           >
             Add Option
           </button>
-        </div>
+        </div> */}
+        <div className="flex space-x-2">
+  {selectedOptionIds.length > 0 && (
+    <button
+      onClick={handleDeleteOptions}
+      className="h-10 min-w-[120px] bg-red-500 text-white px-4 rounded-md hover:bg-red-600"
+    >
+      Delete
+    </button>
+  )}
+
+  <button
+    onClick={handleExport}
+    className="h-10 min-w-[120px] bg-blue-500 text-white px-4 rounded-md hover:bg-blue-600"
+  >
+    Export
+  </button>
+
+  <button
+    onClick={() => setShowModal(true)}
+    className="h-10 min-w-[120px] bg-blue-500 text-white px-4 rounded-md hover:bg-blue-600"
+  >
+    Import CSV
+  </button>
+
+  <button
+    onClick={() => navigate("/add/option")}
+    className="h-10 min-w-[120px] bg-blue-500 text-white px-4 rounded-md hover:bg-blue-600"
+  >
+    Add Option
+  </button>
+</div>
+
       </div>
 
       {error && <div className="text-red-500 mt-3">{error}</div>}
@@ -427,7 +506,7 @@ const [editOptionValuesText, setEditOptionValuesText] = useState("");
                 />
               </label>
 
-              <label className="block mb-4">
+              {/* <label className="block mb-4">
                 <span className="text-gray-700 font-medium">
                   Aliases (comma separated)
                 </span>
@@ -453,8 +532,21 @@ const [editOptionValuesText, setEditOptionValuesText] = useState("");
                   placeholder="e.g. Kolour, Hue, Tone"
                   className="w-full border border-gray-300 px-3 py-2 rounded-md mt-1 focus:ring focus:ring-blue-100"
                 />
-              </label>
+              </label> */}
 
+<label className="block mb-4">
+  <span className="text-gray-700 font-medium">
+    Aliases (comma separated)
+  </span>
+
+  <input
+    type="text"
+    value={editOptionNameText}
+    onChange={(e) => setEditOptionNameText(e.target.value)}
+    placeholder="e.g. Kolour, Hue, Tone"
+    className="w-full border border-gray-300 px-3 py-2 rounded-md mt-1 focus:ring focus:ring-blue-100"
+  />
+</label>
               <label className="block mb-4">
                 <span className="text-gray-700 font-medium">
                   Option Values (comma separated)

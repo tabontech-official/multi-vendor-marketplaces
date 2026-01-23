@@ -100,7 +100,7 @@ const CreateCategory = () => {
 
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/category/getCategory",
+          "http://localhost:5000/category/getCategory",
           {
             method: "GET",
             headers: {
@@ -187,7 +187,7 @@ const CreateCategory = () => {
 
   //   try {
   //     const response = await fetch(
-  //       "https://multi-vendor-marketplace.vercel.app/category/createCategory",
+  //       "http://localhost:5000/category/createCategory",
   //       {
   //         method: "POST",
   //         headers: {
@@ -271,7 +271,7 @@ const CreateCategory = () => {
       setSaving(true);
 
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/category/createCategory",
+        "http://localhost:5000/category/createCategory",
         {
           method: "POST",
           headers: {

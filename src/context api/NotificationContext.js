@@ -21,7 +21,7 @@
 //         ...prev.slice(0, 2),
 //       ]);
 
-//       await axios.post("https://multi-vendor-marketplace.vercel.app/notifications/addNotofication", {
+//       await axios.post("http://localhost:5000/notifications/addNotofication", {
 //         userId,
 //         message,
 //         source,
@@ -35,7 +35,7 @@
 //       const userId = localStorage.getItem("userid");
 //       if (!userId) return;
 
-//       const res = await axios.get(`https://multi-vendor-marketplace.vercel.app/notifications/getNotificationByUserId/${userId}`);
+//       const res = await axios.get(`http://localhost:5000/notifications/getNotificationByUserId/${userId}`);
 //       setNotifications(res.data);
 //     } catch (err) {
 //       console.error("Failed to fetch notifications:", err);
@@ -67,7 +67,7 @@ export const NotificationProvider = ({ children }) => {
     if (!userId) return;
     try {
       const res = await axios.get(
-        `https://multi-vendor-marketplace.vercel.app/notifications/getNotificationByUserId/${userId}`
+        `http://localhost:5000/notifications/getNotificationByUserId/${userId}`
       );
       setNotifications(res.data || []);
       console.log(res.data)
@@ -90,7 +90,7 @@ export const NotificationProvider = ({ children }) => {
 
       setNotifications((prev) => [newNotification, ...prev.slice(0, 9)]);
 
-      await axios.post("https://multi-vendor-marketplace.vercel.app/notifications/addNotofication", {
+      await axios.post("http://localhost:5000/notifications/addNotofication", {
         userId,
         message,
         source,
@@ -108,7 +108,7 @@ export const NotificationProvider = ({ children }) => {
       setNotifications(updated);
       setHasUnseenNotifications(false);
 
-      await axios.put(`https://multi-vendor-marketplace.vercel.app/notifications/markAllSeen/${userId}`);
+      await axios.put(`http://localhost:5000/notifications/markAllSeen/${userId}`);
     } catch (err) {
       console.error("Failed to mark notifications as seen:", err);
     }

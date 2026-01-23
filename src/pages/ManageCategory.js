@@ -135,10 +135,10 @@ const filteredCategories = categories.filter((cat) => {
         const data = await response.json();
 
         if (response.ok) {
-          setCategories(data.categories || []); // ✔ FIXED
-          setTotalPages(data.totalPages || 1); // ✔ FIXED
+          setCategories(data.categories || []); 
+          setTotalPages(data.totalPages || 1);
           
-          setTotalCategories(data.totalCategories || 0); // ✔ FIXED
+          setTotalCategories(data.totalCategories || 0);
         } else {
           setError(data.message || "Failed to fetch categories.");
         }
@@ -269,7 +269,7 @@ const filteredCategories = categories.filter((cat) => {
       setShowDeleteModal(false);
       setShowReplaceModal(true);
     } else {
-      performDelete(); // normal delete
+      performDelete(); 
     }
   };
   const handleImportCsv = async () => {
@@ -279,7 +279,7 @@ const filteredCategories = categories.filter((cat) => {
     }
 
     const formData = new FormData();
-    formData.append("file", importFile); // ✅ MATCHES multer.single("file")
+    formData.append("file", importFile); 
 
     try {
       setIsImporting(true);
@@ -309,8 +309,8 @@ const filteredCategories = categories.filter((cat) => {
   };
 
   const [importLevel, setImportLevel] = useState("");
-  const [importParentCat1, setImportParentCat1] = useState(""); // for level 2
-  const [importParentCat2, setImportParentCat2] = useState(""); // for level 3
+  const [importParentCat1, setImportParentCat1] = useState(""); 
+  const [importParentCat2, setImportParentCat2] = useState(""); 
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showReplaceModal, setShowReplaceModal] = useState(false);

@@ -67,10 +67,9 @@ const MainDashboard = () => {
 
       const data = await response.json();
 
-      // 👇 Agar API "revenue object" bhej rahi hai
       const revenueObj = data.revenue || {};
-      const labels = Object.keys(revenueObj); // ["2025-01", "2025-02", ...]
-      const incomeData = Object.values(revenueObj); // [1200.5, 800, ...]
+      const labels = Object.keys(revenueObj);
+      const incomeData = Object.values(revenueObj); 
 
       setChartData({
         labels,
@@ -291,7 +290,6 @@ useEffect(() => {
           setPerDayCount(data.weeklyViews);
           setHourCount(data.monthlyViews);
         } else {
-          // Admin case → aggregated data
           setViewCount(data.totalViews);
           setPerDayCount(data.weeklyViews);
           setHourCount(data.monthlyViews);
@@ -317,23 +315,8 @@ useEffect(() => {
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0"></div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-        {/* <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="bg-cyan-500 text-white px-4 py-2 rounded-full">
-              $
-            </div>
-            <p className="text-sm text-gray-600">Net Profit</p>
-          </div>
-          <h2 className="text-2xl font-semibold mt-2">${summary.netProfit}</h2>
-          <div className="border-t-2 border-gray-300 pt-2 mt-2">
-            <p className="text-xs text-red-500 flex items-center gap-1">
-              <FaArrowTrendDown className="text-sm" />
-              29% vs $303.3K last year
-            </p>
-          </div>
-        </div> */}
+        
         <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
-          {/* Icon + Heading */}
           <div className="flex items-center gap-2 mb-3">
             <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-300">
               <RiStore3Line className="text-black text-lg" />
@@ -343,13 +326,12 @@ useEffect(() => {
 
           <div className="flex justify-between text-xs text-gray-700 font-medium text-center mb-1">
             <div className="w-1/3">Orders</div>
-            <div className="w-[1px] bg-gray-300 mx-1" /> {/* Separator */}
+            <div className="w-[1px] bg-gray-300 mx-1" />
             <div className="w-1/3">Fulfilled</div>
-            <div className="w-[1px] bg-gray-300 mx-1" /> {/* Separator */}
+            <div className="w-[1px] bg-gray-300 mx-1" /> 
             <div className="w-1/3">Unfulfilled</div>
           </div>
 
-          {/* Stats Values Row */}
           <div className="flex justify-between text-center text-base font-semibold">
             <div className="w-1/3">{summary.totalOrdersInDb || 0}</div>
             <div className="w-[1px] bg-gray-200 mx-1" />
@@ -370,7 +352,6 @@ useEffect(() => {
         </div>
 
         <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
-          {/* Icon + Heading */}
           <div className="flex items-center gap-3 mb-3">
             <div className="bg-gray-300 text-black px-3 py-3 rounded-full">
               <MdOutlineProductionQuantityLimits />
@@ -378,7 +359,6 @@ useEffect(() => {
             <p className="text-sm text-gray-600 font-medium">Product</p>
           </div>
 
-          {/* Stats Header Row */}
           <div className="flex justify-between text-xs text-gray-700 font-medium text-center mb-1">
             <div className="w-1/3">Total</div>
             <div className="w-[1px] bg-gray-300 mx-1" />
@@ -387,7 +367,6 @@ useEffect(() => {
             <div className="w-1/3">Inactive</div>
           </div>
 
-          {/* Stats Values Row */}
           <div className="flex justify-between text-center text-base font-semibold">
             <div className="w-1/3">{productCount || 0}</div>
             <div className="w-[1px] bg-gray-200 mx-1" />
@@ -438,7 +417,6 @@ useEffect(() => {
         </div>
 
         <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
-          {/* Icon + Heading */}
           <div className="flex items-center gap-3 mb-3">
             <div className="bg-cyan-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
               $
@@ -446,7 +424,6 @@ useEffect(() => {
             <p className="text-sm text-gray-600 font-medium">Net Profit</p>
           </div>
 
-          {/* Stats Header Row */}
           <div className="flex justify-between text-xs text-gray-700 font-medium text-center mb-1">
             <div className="w-1/3">Total</div>
             <div className="w-[1px] bg-gray-300 mx-1" />
@@ -455,7 +432,6 @@ useEffect(() => {
             <div className="w-1/3">Unpaid</div>
           </div>
 
-          {/* Stats Values Row */}
           <div className="flex justify-between text-center text-base font-semibold">
             <div className="w-1/3 text-gray-800">${summary.netProfit || 0}</div>
             <div className="w-[1px] bg-gray-200 mx-1" />
@@ -467,62 +443,12 @@ useEffect(() => {
               ${summary.unpaidIncome || 0}
             </div>
           </div>
-          {/* <div className="border-t border-gray-300 pt-2 mt-3">
-            <p className="text-xs text-red-500 flex items-center gap-1">
-              <FaArrowTrendDown className="text-sm" />
-              29% vs $303.3K last year
-            </p>
-          </div> */}
+          
         </div>
 
-        {/* <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="bg-gray-300 text-white px-3 py-3 rounded-full">
-              <RiStore3Line className="text-black" />
-            </div>
-            <p className="text-sm text-gray-600">Orders</p>
-          </div>
-          <h2 className="text-2xl font-semibold mt-2">
-            {summary.totalOrdersInDb || "0"}
-          </h2>
-          <div className="border-t-2 border-gray-300 pt-2 mt-2">
-            <p className="text-xs text-green-500 flex items-center gap-1">
-              <FaArrowTrendDown className="text-sm" />
-              29% vs $303.3K last year
-            </p>
-          </div>
-        </div> */}
+      
 
-        {/* <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="bg-gray-300 text-black px-3 py-3 rounded-full">
-              <MdOutlineProductionQuantityLimits />
-            </div>
-            <p className="text-sm text-gray-600">Product</p>
-          </div>
-          <h2 className="text-2xl font-semibold mt-2">{productCount}</h2>
-          <div className="border-t-2 border-gray-300 pt-2 mt-2">
-            <p className="text-xs text-green-500 flex items-center gap-1">
-              <FaArrowTrendUp />
-              41% vs 320,583 last year
-            </p>
-          </div>
-        </div> */}
-
-        {/* <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="bg-gray-300 text-black px-3 py-3 rounded-full">
-              <MdPreview />
-            </div>
-            <p className="text-sm text-gray-600">Visitor</p>
-          </div>
-          <h2 className="text-2xl font-semibold mt-2">{viewCount}</h2>
-          <div className="border-t-2 border-gray-300 pt-2 mt-2">
-            <p className="text-xs text-red-500 flex items-center gap-1">
-              <FaArrowTrendDown className="text-sm" />▼ 17% vs 3.3M last year
-            </p>
-          </div>
-        </div> */}
+     
       </div>
 
       <div className="flex gap-6 mt-6">
@@ -540,21 +466,10 @@ useEffect(() => {
               <h3 className="text-2xl font-semibold text-cyan-600">
                 ${summary.totalIncome}
               </h3>
-              {/* <p className="text-xs text-green-500">
-                ▲ {summary.incomeGrowth}% vs ${summary.lastYearIncome} last year
-              </p> */}
+             
             </div>
 
-            {/* <div className="w-1/2 pl-4">
-              <p className="text-sm text-gray-500">Spend</p>
-              <h3 className="text-2xl font-semibold text-gray-700">
-                ${summary.spend || "80,112.02"}
-              </h3>
-              <p className="text-xs text-green-500">
-                ▲ {summary.spendGrowth || "2"}% vs $
-                {summary.lastYearSpend || "77,000.02"} last year
-              </p>
-            </div> */}
+          
           </div>
 
           <Bar data={chartData} options={options} />
@@ -576,7 +491,6 @@ useEffect(() => {
             <p className="text-xs text-red-300 mt-1">▼ 7% vs 3,000 Expected</p>
           </div>
 
-          {/* Visitor Growth */}
           <div className="mt-2 text-sm">
             <p className="mb-2">
               Visitor Growth <span className="text-red-300">▼ -12%</span>
@@ -585,7 +499,6 @@ useEffect(() => {
             <p className="text-xs">Compare to 27K last month</p>
           </div>
 
-          {/* Class A Progress */}
           <div className="mt-4">
             <p className="text-sm">Class A</p>
             <p className="text-xs">13,028 / 15,000 user</p>
@@ -594,7 +507,6 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Class B Progress */}
           <div className="mt-3">
             <p className="text-sm">Class B</p>
             <p className="text-xs">11,912 / 15,000 user</p>

@@ -176,25 +176,7 @@ const Inventory = () => {
     fetchProductData();
   }, [page]);
 
-  // const handleSearch = () => {
-  //   let filtered =
-  //     searchVal === ""
-  //       ? products
-  //       : products.filter((product) => {
-  //           const val = searchVal.toLowerCase();
-
-  //           return (
-  //             product.title?.toLowerCase()?.includes(val) ||
-  //             product.product_type?.toLowerCase()?.includes(val) ||
-  //             product.sku?.toLowerCase()?.includes(val) ||
-  //             product.price?.toString()?.includes(val) ||
-  //             product.compare_at_price?.toString()?.includes(val) ||
-  //             product.inventory_quantity?.toString()?.includes(val)
-  //           );
-  //         });
-
-  //   setFilteredProducts(filtered);
-  // };
+  
 
   const handleSearch = () => {
     let filtered =
@@ -227,21 +209,7 @@ const Inventory = () => {
 
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // const handleScroll = useCallback(() => {
-  //   if (
-  //     window.innerHeight + document.documentElement.scrollTop + 400 >=
-  //     document.documentElement.scrollHeight
-  //   ) {
-  //     if (hasMore && !loading) {
-  //       setPage((prevPage) => prevPage + 1);
-  //     }
-  //   }
-  // }, [hasMore, loading]);
-
-  // useEffect(() => {
-  //   window.addEventListener("scroll", handleScroll);
-  //   return () => window.removeEventListener("scroll", handleScroll);
-  // }, [handleScroll]);
+ 
 
   const handleSubmit = async (e) => {
     const apiKey = localStorage.getItem("apiKey");
@@ -602,7 +570,6 @@ const Inventory = () => {
 
                   setFilteredProducts(updated);
 
-                  // ✅ Uncheck all selected checkboxes after update
                   setSelectedProducts([]);
                 }}
                 className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
@@ -733,7 +700,6 @@ const Inventory = () => {
                           key={variant.id}
                           className="border-b hover:bg-gray-50"
                         >
-                          {/* ✅ Checkbox */}
                           <td className="p-3">
                             <input
                               type="checkbox"
@@ -744,7 +710,6 @@ const Inventory = () => {
                             />
                           </td>
 
-                          {/* ✅ Status */}
                           <td className="p-3">
                             <div
                               className={`w-2 h-2 rounded-full ${
@@ -756,7 +721,6 @@ const Inventory = () => {
                             />
                           </td>
 
-                          {/* ✅ Image (uses backend finalImage only) */}
                           <td className="p-3 text-center">
                             {variant.finalImage?.src ? (
                               <img
@@ -775,14 +739,12 @@ const Inventory = () => {
                             )}
                           </td>
 
-                          {/* ✅ Listing Name */}
                           <td className="p-3">
                             <span className="text-sm font-medium text-gray-800">
                               {variant.productTitle}
                             </span>
                           </td>
 
-                          {/* ✅ Created Date */}
                           <td className="p-3 text-sm text-gray-600">
                             {new Date(
                               variant.productCreatedAt,
@@ -793,10 +755,8 @@ const Inventory = () => {
                             })}
                           </td>
 
-                          {/* ✅ SKU */}
                           <td className="p-3">{variant.sku || "N/A"}</td>
 
-                          {/* ✅ Price */}
                           <td className="p-3">
                             <div className="relative w-36 flex items-center">
                               <input
@@ -891,7 +851,6 @@ const Inventory = () => {
                             </div>
                           </td>
 
-                          {/* ✅ Compare at price */}
                           <td className="p-3">
                             <div className="relative w-36 flex items-center">
                               <input
@@ -1010,13 +969,11 @@ const Inventory = () => {
 
               {totalPages > 1 && (
                 <div className="flex flex-col md:flex-row justify-between items-center px-4 py-3 bg-gray-50 border border-gray-200">
-                  {/* Left: Total Variants */}
                   <div className="text-sm text-gray-700 mb-2 md:mb-0">
                     Total Variants{" "}
                     <span className="font-medium">{totalVariants}</span>
                   </div>
 
-                  {/* Center: Page Numbers */}
                   <div className="flex items-center space-x-2 mb-2 md:mb-0">
                     <button
                       disabled={page === 1}
@@ -1059,7 +1016,6 @@ const Inventory = () => {
                     </button>
                   </div>
 
-                  {/* Right: Limit Selector */}
                   <div className="flex items-center space-x-2">
                     <label className="text-sm font-medium text-gray-700">
                       Variants per page:
@@ -1069,7 +1025,7 @@ const Inventory = () => {
                       value={limit}
                       onChange={(e) => {
                         setLimit(Number(e.target.value));
-                        setPage(1); // reset page
+                        setPage(1);
                       }}
                     >
                       <option value={50}>50</option>
@@ -1080,13 +1036,7 @@ const Inventory = () => {
                 </div>
               )}
 
-              {/* 👇 Loader below table instead of replacing it */}
-              {/* {Loading && (
-                <div className="flex justify-center items-center py-4">
-                  <HiOutlineRefresh className="animate-spin text-xl text-gray-500 mr-2" />
-                  <span className="text-gray-500 text-sm">Loading more...</span>
-                </div>
-              )} */}
+           
 
               {!hasMore && (
                 <div className="text-center text-gray-400 text-sm py-4">
@@ -1164,7 +1114,6 @@ const Inventory = () => {
                             key={variant.id}
                             className="border-b hover:bg-gray-50"
                           >
-                            {/* ✅ Selection checkbox */}
                             <td className="p-3">
                               <input
                                 type="checkbox"
@@ -1175,7 +1124,6 @@ const Inventory = () => {
                               />
                             </td>
 
-                            {/* ✅ Status */}
                             <td className="p-3">
                               <div
                                 className={`w-2 h-2 rounded-full ${
@@ -1187,7 +1135,6 @@ const Inventory = () => {
                               />
                             </td>
 
-                            {/* ✅ Image (only backend finalImage) */}
                             <td className="p-3 text-center">
                               {variant.finalImage?.src ? (
                                 <img
@@ -1206,14 +1153,12 @@ const Inventory = () => {
                               )}
                             </td>
 
-                            {/* ✅ Product title */}
                             <td className="p-3">
                               <span className="text-sm font-medium text-gray-800">
                                 {variant.productTitle}
                               </span>
                             </td>
 
-                            {/* ✅ Created date */}
                             <td className="p-3 text-sm text-gray-600">
                               {new Date(
                                 variant.productCreatedAt,
@@ -1224,10 +1169,8 @@ const Inventory = () => {
                               })}
                             </td>
 
-                            {/* ✅ SKU */}
                             <td className="p-3">{variant.sku || "N/A"}</td>
 
-                            {/* ✅ Quantity input & actions */}
                             <td className="p-3">
                               <div className="relative w-36 flex items-center">
                                 <input
@@ -1330,7 +1273,6 @@ const Inventory = () => {
                               </div>
                             </td>
 
-                            {/* ✅ Shopify ID (admin only) */}
                             {admin && (
                               <td className="p-3 text-xs">
                                 #{variant.shopifyId}
@@ -1352,16 +1294,13 @@ const Inventory = () => {
                   </tbody>
                 </table>
 
-                {/* ✅ Pagination footer */}
                 {totalPages > 1 && (
                   <div className="flex flex-col md:flex-row justify-between items-center px-4 py-3 bg-gray-50 border border-gray-200">
-                    {/* Left: Total variants */}
                     <div className="text-sm text-gray-700 mb-2 md:mb-0">
                       Total Variants{" "}
                       <span className="font-medium">{totalVariants}</span>
                     </div>
 
-                    {/* Center: Pagination buttons */}
                     <div className="flex items-center space-x-2 mb-2 md:mb-0">
                       <button
                         disabled={page === 1}
@@ -1404,7 +1343,6 @@ const Inventory = () => {
                       </button>
                     </div>
 
-                    {/* Right: Limit selector */}
                     <div className="flex items-center space-x-2">
                       <label className="text-sm font-medium text-gray-700">
                         Variants per page:

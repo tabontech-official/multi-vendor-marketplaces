@@ -24,8 +24,25 @@ const CategorySelector = () => {
   const { id } = useParams();
   const isEditing = Boolean(id);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
-  const [duplicateMode, setDuplicateMode] = useState("copy"); // copy | change
+  const [duplicateMode, setDuplicateMode] = useState("copy"); 
   const [duplicateTitle, setDuplicateTitle] = useState("");
+  const uploadShopifyImageToCloudinary = async (shopifyUrl) => {
+  const formData = new FormData();
+  formData.append("file", shopifyUrl);
+  formData.append("upload_preset", "images");
+
+  const res = await fetch(
+    "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  const data = await res.json();
+  return data.secure_url;
+};
+
   const handleDiscard = () => {
     if (isChanged) {
       const confirmDiscard = window.confirm(
@@ -208,7 +225,6 @@ const CategorySelector = () => {
 
   const locationData = useLocation();
   const { product } = locationData.state || {};
-console.log("fetching product",product)
   const [editing, setEditing] = useState(false);
   const [mongooseProductId, setMongooseProductId] = useState();
   const [title, setTitle] = useState("");
@@ -876,17 +892,14 @@ console.log("fetching product",product)
     const productId = product?.id || "null";
 
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
         },
-      )
+      })
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data);
@@ -1221,22 +1234,19 @@ console.log("fetching product",product)
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
             },
-          );
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1309,19 +1319,16 @@ console.log("fetching product",product)
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "x-api-key": apiKey,
-                  "x-api-secret": apiSecretKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId, images: [data.secure_url] }),
+            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
               },
-            );
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            });
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1352,7 +1359,12 @@ console.log("fetching product",product)
     const userId = localStorage.getItem("userid");
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
-
+console.log("🧠 DEBUG PAYLOAD", {
+  isEditing,
+  loggedInUserId: userId,
+  productOwnerId: product?.userId,
+  finalUserIdSent: isEditing ? product?.userId : userId,
+});
     if (!userId) {
       setMessage({
         type: "error",
@@ -1452,7 +1464,9 @@ console.log("fetching product",product)
       weight: trackShipping && weight ? parseFloat(weight) : undefined,
       weight_unit: trackShipping && unit ? unit : undefined,
       status,
-      userId,
+      // userId,
+      userId: isEditing ? product?.userId : userId,
+
       vendor,
       seoTitle,
       seoDescription,
@@ -1850,7 +1864,6 @@ console.log("fetching product",product)
       //       }),
       //     },
       //   );
-
 
       //   navigate(`/manage-product`, {
       //     state: { product: duplicatedProduct },
@@ -3688,163 +3701,177 @@ console.log("fetching product",product)
               </div>
             </div>
           </div>
-          {isPopupVisible && (
-            <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
-              <div className="bg-white w-full max-w-5xl h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden">
-                <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    Select Image for Variant
-                  </h2>
-                  <button
-                    onClick={() => setIsPopupVisible(false)}
-                    className="bg-black text-white px-5 py-2 rounded-md hover:bg-gray-800"
-                  >
-                    Done
-                  </button>
-                </div>
+         {isPopupVisible && (
+  <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
+    <div className="bg-white w-full max-w-5xl h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden">
+      <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Select Image for Variant
+        </h2>
+        <button
+          onClick={() => setIsPopupVisible(false)}
+          className="bg-black text-white px-5 py-2 rounded-md hover:bg-gray-800"
+        >
+          Done
+        </button>
+      </div>
 
-                <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-                  <div className="border-2 border-dashed rounded-lg h-40 flex flex-col justify-center items-center bg-white">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImageChange}
-                      className="hidden"
-                      id="variantUpload"
-                    />
-                    <label
-                      htmlFor="variantUpload"
-                      className="px-6 py-2 bg-black hover:bg-gray-800 text-white rounded-lg cursor-pointer"
-                    >
-                      Add New Images
-                    </label>
-                  </div>
+      <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
 
-                  <div className="mt-8 bg-white border rounded-lg p-5">
-                    <h3 className="text-sm font-semibold mb-3 text-gray-700">
-                      Assigned Images
-                    </h3>
+        {/* ASSIGNED IMAGES */}
+        <div className="mt-4 bg-white border rounded-lg p-5">
+          <h3 className="text-sm font-semibold mb-3 text-gray-700">
+            Assigned Images
+          </h3>
 
-                    {(() => {
-                      const parent =
-                        combinations[currentVariant?.index]?.parent;
-                      const key =
-                        options.length === 1
-                          ? currentVariant?.child
-                          : `${parent} / ${currentVariant?.child}`;
-                      const normalizedKey = key?.replace(/['"]/g, "").trim();
-                      const assigned = variantImages[normalizedKey] || [];
+          {(() => {
+            const parent = combinations[currentVariant?.index]?.parent;
+            const key =
+              options.length === 1
+                ? currentVariant?.child
+                : `${parent} / ${currentVariant?.child}`;
+            const normalizedKey = key?.replace(/['"]/g, "").trim();
+            const assigned = variantImages[normalizedKey] || [];
 
-                      return (
-                        <div className="flex flex-wrap gap-3">
-                          {assigned.length ? (
-                            assigned.map((img, i) => (
-                              <div key={img.preview} className="relative">
-                                <img
-                                  src={img.preview}
-                                  className="w-28 h-28 object-cover rounded border"
-                                />
-                                <button
-                                  onClick={() =>
-                                    setVariantImages((prev) => ({
-                                      ...prev,
-                                      [normalizedKey]: prev[
-                                        normalizedKey
-                                      ].filter((_, x) => x !== i),
-                                    }))
-                                  }
-                                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full 
-             bg-black/70 text-white flex items-center justify-center 
-             text-sm hover:bg-red-600 transition shadow-md"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="text-sm text-gray-400 italic">
-                              No images assigned
-                            </p>
-                          )}
+            return (
+              <div className="flex flex-wrap gap-3">
+                {assigned.length ? (
+                  assigned.map((img, i) => (
+                    <div key={img.preview} className="relative">
+                      <img
+                        src={img.preview}
+                        className="w-28 h-28 object-cover rounded border"
+                      />
+
+                      {img.loading && (
+                        <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                          <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin" />
                         </div>
-                      );
-                    })()}
-                  </div>
+                      )}
 
-                  <div className="mt-8 bg-white border rounded-lg p-5">
-                    <h3 className="text-sm font-semibold mb-3 text-gray-700">
-                      Product Media Images
-                    </h3>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {selectedImages.map((img) => {
-                        const imageUrl = img.cloudUrl || img.localUrl;
-
-                        return (
-                          <div
-                            key={imageUrl}
-                            className="border rounded-lg p-2 cursor-pointer hover:border-blue-500"
-                            onClick={() => {
-                              const parent =
-                                combinations[currentVariant?.index]?.parent;
-                              const key =
-                                options.length === 1
-                                  ? currentVariant?.child
-                                  : `${parent} / ${currentVariant?.child}`;
-                              const normalizedKey = key
-                                .replace(/['"]/g, "")
-                                .trim();
-
-                              console.log(" VARIANT IMAGE CLICK:", imageUrl);
-
-                              setVariantImages((prev) => {
-                                const existing = prev[normalizedKey] || [];
-
-                                if (
-                                  existing.some((i) => i.preview === imageUrl)
-                                ) {
-                                  console.warn(
-                                    " DUPLICATE VARIANT IMAGE SKIPPED",
-                                  );
-                                  return prev;
-                                }
-
-                                console.log("VARIANT IMAGE ADDED");
-
-                                return {
-                                  ...prev,
-                                  [normalizedKey]: [
-                                    {
-                                      preview: imageUrl,
-                                      // alt: normalizedKey
-                                      //   .replace(/\s*\/\s*/g, "-")
-                                      //   .toLowerCase(),
-                                      alt: `t4option${options[0]?.name}_${normalizedKey.split("/")[0]}`
-                                        .replace(/\s+/g, "")
-                                        .toLowerCase(),
-
-                                      loading: false,
-                                    },
-                                    ...existing,
-                                  ],
-                                };
-                              });
-                            }}
-                          >
-                            <img
-                              src={imageUrl}
-                              className="w-full h-28 object-cover rounded-md"
-                            />
-                          </div>
-                        );
-                      })}
+                      <button
+                        onClick={() =>
+                          setVariantImages((prev) => ({
+                            ...prev,
+                            [normalizedKey]: prev[normalizedKey].filter(
+                              (_, x) => x !== i
+                            ),
+                          }))
+                        }
+                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full 
+                        bg-black/70 text-white flex items-center justify-center 
+                        text-sm hover:bg-red-600 transition"
+                      >
+                        ✕
+                      </button>
                     </div>
-                  </div>
-                </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-400 italic">
+                    No images assigned
+                  </p>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
+        </div>
+
+        {/* PRODUCT MEDIA IMAGES */}
+        <div className="mt-8 bg-white border rounded-lg p-5">
+          <h3 className="text-sm font-semibold mb-3 text-gray-700">
+            Product Media Images
+          </h3>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {selectedImages.map((img) => {
+              const imageUrl = img.cloudUrl || img.localUrl;
+
+              return (
+                <div
+                  key={imageUrl}
+                  className="border rounded-lg p-2 cursor-pointer hover:border-blue-500"
+                  onClick={async () => {
+                    const parent =
+                      combinations[currentVariant?.index]?.parent;
+                    const key =
+                      options.length === 1
+                        ? currentVariant?.child
+                        : `${parent} / ${currentVariant?.child}`;
+                    const normalizedKey = key
+                      .replace(/['"]/g, "")
+                      .trim();
+
+                    const existing =
+                      variantImages[normalizedKey] || [];
+
+                    if (
+                      existing.some(
+                        (i) => i.preview === imageUrl
+                      )
+                    ) {
+                      console.warn("Duplicate skipped");
+                      return;
+                    }
+
+                    // ⏳ add loader
+                    setVariantImages((prev) => ({
+                      ...prev,
+                      [normalizedKey]: [
+                        { preview: imageUrl, loading: true },
+                        ...(prev[normalizedKey] || []),
+                      ],
+                    }));
+
+                    let finalUrl = imageUrl;
+
+                    if (imageUrl.includes("cdn.shopify.com")) {
+                      try {
+                        finalUrl =
+                          await uploadShopifyImageToCloudinary(
+                            imageUrl
+                          );
+                      } catch (err) {
+                        console.error("Upload failed", err);
+                        return;
+                      }
+                    }
+
+                    // ✅ replace loader with final image
+                    setVariantImages((prev) => {
+                      const filtered =
+                        prev[normalizedKey].filter(
+                          (i) => i.preview !== imageUrl
+                        );
+
+                      return {
+                        ...prev,
+                        [normalizedKey]: [
+                          {
+                            preview: finalUrl,
+                            alt: `t4option${options[0]?.name}_${normalizedKey
+                              .split("/")[0]}`.replace(/\s+/g, "").toLowerCase(),
+                            loading: false,
+                          },
+                          ...filtered,
+                        ],
+                      };
+                    });
+                  }}
+                >
+                  <img
+                    src={imageUrl}
+                    className="w-full h-28 object-cover rounded-md"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
 
           {isMediaModalVisible && (
             <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">

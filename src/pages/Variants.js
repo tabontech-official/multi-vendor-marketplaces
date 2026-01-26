@@ -291,16 +291,11 @@ const Variants = () => {
             )}
           </button>
         </div> */}
-        <div className="flex justify-end items-center sticky top-0  z-50 py-3 ">
-          {/* <FaArrowLeft
-    onClick={() => {
-      console.log("Navigating with product:", product);
-      navigate("/add-product", {
-        state: { product: product },
-      });
-    }}
-    className="text-gray-500 hover:text-gray-600 cursor-pointer text-xl"
-  /> */}
+        <div className="flex justify-between items-center sticky top-0 z-50 py-3 bg-gray-100">
+          <FaArrowLeft
+            onClick={() => navigate(-1)}
+            className="text-gray-600 hover:text-black cursor-pointer text-xl"
+          />
 
           <button
             onClick={handleSave}
@@ -309,11 +304,7 @@ const Variants = () => {
             }`}
             disabled={isLoading}
           >
-            {isLoading ? (
-              <div className="spinner-border animate-spin w-5 h-5 border-t-2 border-b-2 border-white rounded-full"></div>
-            ) : (
-              "Update"
-            )}
+            {isLoading ? "Saving..." : "Update"}
           </button>
         </div>
 

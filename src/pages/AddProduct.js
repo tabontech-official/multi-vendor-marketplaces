@@ -1763,103 +1763,100 @@ console.log("fetching product",product)
 
       const data = await response.json();
 
-      // if (response.ok) {
-      //   setMessage({
-      //     type: "success",
-      //     text: "Product duplicated successfully!",
-      //   });
-      //   navigate(`/manage-product`);
-      // } else {
-      //   setMessage({
-      //     type: "error",
-      //     text: data.error || "Failed to duplicate product.",
-      //   });
-      // }
       if (response.ok) {
         setMessage({
           type: "success",
-          // text: "Product duplicated successfully!",
+          text: "Product duplicated successfully!",
         });
-
-        const duplicatedProduct = data.product;
-        const duplicatedProductId =
-          duplicatedProduct.id || duplicatedProduct.shopifyId;
-
-        /* ================= IMAGE LOGIC (SAME AS ADD / UPDATE) ================= */
-
-        // 🔹 1. Collect all variant image URLs
-        const usedVariantImageUrls = new Set();
-
-        Object.values(variantImages).forEach((imgs) => {
-          if (Array.isArray(imgs)) {
-            imgs.forEach((img) => {
-              if (img.preview) {
-                usedVariantImageUrls.add(img.preview);
-              }
-            });
-          }
-        });
-
-        // 🔹 2. Collect product images
-        const mediaImageUrls = selectedImages
-          .filter((img) => img.cloudUrl)
-          .map((img) => img.cloudUrl);
-
-        // 🔹 3. Remove variant-used images from product images
-        const finalProductImages = mediaImageUrls.filter(
-          (url) => !usedVariantImageUrls.has(url),
-        );
-
-        // 🔹 4. Prepare variant images payload (Shopify compatible)
-        const uploadedVariantImages = Object.entries(variantImages).flatMap(
-          ([key, images]) => {
-            const parts = key.split("/").map((p) => p.trim());
-
-            const optionName = options[0]?.name || "option";
-            const optionValue = parts[0];
-
-            const safeImages = Array.isArray(images)
-              ? images
-              : images
-                ? [images]
-                : [];
-
-            return safeImages.map((img) => ({
-              key,
-              url: img.preview || img.src,
-              optionName,
-              optionValue,
-            }));
-          },
-        );
-
-        const hasVariantImages = uploadedVariantImages.length > 0;
-
-        // 🔹 5. SAME IMAGE UPDATE API CALL
-        await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/updateImages/${duplicatedProductId}`,
-          {
-            method: "PUT",
-            headers: {
-              "x-api-key": localStorage.getItem("apiKey"),
-              "x-api-secret": localStorage.getItem("apiSecretKey"),
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              images: finalProductImages,
-              ...(hasVariantImages && { variantImages: uploadedVariantImages }),
-            }),
-          },
-        );
-
-        /* ================= IMAGE LOGIC END ================= */
-
-        // ✅ Open EDIT page of duplicated product
-        navigate(`/manage-product`, {
-          state: { product: duplicatedProduct },
-          replace: true,
+        navigate(`/manage-product`);
+      } else {
+        setMessage({
+          type: "error",
+          text: data.error || "Failed to duplicate product.",
         });
       }
+      // if (response.ok) {
+      //   setMessage({
+      //     type: "success",
+      //     // text: "Product duplicated successfully!",
+      //   });
+
+      //   const duplicatedProduct = data.product;
+      //   const duplicatedProductId =
+      //     duplicatedProduct.id || duplicatedProduct.shopifyId;
+
+      //   /* ================= IMAGE LOGIC (SAME AS ADD / UPDATE) ================= */
+
+      //   // 🔹 1. Collect all variant image URLs
+      //   const usedVariantImageUrls = new Set();
+
+      //   Object.values(variantImages).forEach((imgs) => {
+      //     if (Array.isArray(imgs)) {
+      //       imgs.forEach((img) => {
+      //         if (img.preview) {
+      //           usedVariantImageUrls.add(img.preview);
+      //         }
+      //       });
+      //     }
+      //   });
+
+      //   // 🔹 2. Collect product images
+      //   const mediaImageUrls = selectedImages
+      //     .filter((img) => img.cloudUrl)
+      //     .map((img) => img.cloudUrl);
+
+      //   // 🔹 3. Remove variant-used images from product images
+      //   const finalProductImages = mediaImageUrls.filter(
+      //     (url) => !usedVariantImageUrls.has(url),
+      //   );
+
+      //   // 🔹 4. Prepare variant images payload (Shopify compatible)
+      //   const uploadedVariantImages = Object.entries(variantImages).flatMap(
+      //     ([key, images]) => {
+      //       const parts = key.split("/").map((p) => p.trim());
+
+      //       const optionName = options[0]?.name || "option";
+      //       const optionValue = parts[0];
+
+      //       const safeImages = Array.isArray(images)
+      //         ? images
+      //         : images
+      //           ? [images]
+      //           : [];
+
+      //       return safeImages.map((img) => ({
+      //         key,
+      //         url: img.preview || img.src,
+      //         optionName,
+      //         optionValue,
+      //       }));
+      //     },
+      //   );
+
+      //   const hasVariantImages = uploadedVariantImages.length > 0;
+
+      //   await fetch(
+      //     `https://multi-vendor-marketplace.vercel.app/product/updateImages/${duplicatedProductId}`,
+      //     {
+      //       method: "PUT",
+      //       headers: {
+      //         "x-api-key": localStorage.getItem("apiKey"),
+      //         "x-api-secret": localStorage.getItem("apiSecretKey"),
+      //         "Content-Type": "application/json",
+      //       },
+      //       body: JSON.stringify({
+      //         images: finalProductImages,
+      //         ...(hasVariantImages && { variantImages: uploadedVariantImages }),
+      //       }),
+      //     },
+      //   );
+
+
+      //   navigate(`/manage-product`, {
+      //     state: { product: duplicatedProduct },
+      //     replace: true,
+      //   });
+      // }
     } catch (err) {
       console.error("Error duplicating product:", err);
       setMessage({ type: "error", text: "Server error while duplicating." });

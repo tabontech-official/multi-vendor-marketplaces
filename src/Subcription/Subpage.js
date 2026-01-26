@@ -345,6 +345,24 @@ const SubscriptionHistory = () => {
     handleSearch();
   }, [searchVal]);
 
+const getOrderStatus = (items) => {
+  if (!items || !items.length) return "Unfulfilled";
+
+  const statuses = items.map((i) => i.fulfillment_status);
+
+  if (statuses.includes("cancelled")) return "Cancelled";
+
+  const fulfilledCount = statuses.filter((s) => s === "fulfilled").length;
+  const unfulfilledCount = statuses.filter((s) => s === null).length;
+
+  if (fulfilledCount > 0 && unfulfilledCount > 0) return "Partial";
+  if (fulfilledCount === statuses.length) return "Fulfilled";
+
+  return "Unfulfilled";
+};
+
+
+
   return (
     <div
       className={`flex flex-col bg-gray-50 px-3 py-6 ${
@@ -446,8 +464,10 @@ const SubscriptionHistory = () => {
                               const customer = merchantItems[0]?.customer?.[0];
                               const orderDate = customer?.created_at;
                               const shopifyOrderId = merchantItems[0]?.orderId;
-                              const fulfillment_status =
-                                merchantItems[0]?.fulfillment_status;
+                              // const fulfillment_status =
+                              //   merchantItems[0]?.fulfillment_status;
+                              const orderStatus = getOrderStatus(merchantItems);
+
                               const totalQuantity = merchantItems.reduce(
                                 (sum, item) => sum + (item.quantity || 0),
                                 0,
@@ -514,7 +534,7 @@ const SubscriptionHistory = () => {
                                   </td>
                                   <td className="p-3">{totalQuantity} items</td>
 
-                                  <td className="p-3">
+                                  {/* <td className="p-3">
                                     <span
                                       className={`px-2 py-1 rounded text-xs font-medium ${
                                         fulfillment_status === "fulfilled"
@@ -530,7 +550,22 @@ const SubscriptionHistory = () => {
                                           ? "Cancelled"
                                           : "Unfulfilled"}
                                     </span>
-                                  </td>
+                                  </td> */}
+<td className="p-3">
+  <span
+    className={`px-2 py-1 rounded text-xs font-medium ${
+      orderStatus === "Fulfilled"
+        ? "bg-green-200 text-green-800"
+        : orderStatus === "Cancelled"
+        ? "bg-red-200 text-red-800"
+        : orderStatus === "Partial"
+        ? "bg-blue-200 text-blue-800"
+        : "bg-yellow-200 text-yellow-800"
+    }`}
+  >
+    {orderStatus}
+  </span>
+</td>
 
                                   <td className="p-3">
                                     ${totalPrice.toFixed(2)}
@@ -545,6 +580,7 @@ const SubscriptionHistory = () => {
                             subscription.customer?.default_address;
                           const firstItem = subscription.lineItems?.[0];
                           if (!firstItem) return null;
+const orderStatus = getOrderStatus(subscription.lineItems);
 
                           return (
                             <tr
@@ -603,7 +639,7 @@ const SubscriptionHistory = () => {
                                 </div>
                               </td>
 
-                              <td className="p-3">
+                              {/* <td className="p-3">
                                 <span
                                   className={`px-2 py-1 rounded text-xs font-medium ${
                                     subscription?.lineItems[0]
@@ -623,7 +659,23 @@ const SubscriptionHistory = () => {
                                       ? "Cancelled"
                                       : "Unfulfilled"}
                                 </span>
-                              </td>
+                              </td> */}
+                              <td className="p-3">
+  <span
+    className={`px-2 py-1 rounded text-xs font-medium ${
+      orderStatus === "Fulfilled"
+        ? "bg-green-200 text-green-800"
+        : orderStatus === "Cancelled"
+        ? "bg-red-200 text-red-800"
+        : orderStatus === "Partial"
+        ? "bg-blue-200 text-blue-800"
+        : "bg-yellow-200 text-yellow-800"
+    }`}
+  >
+    {orderStatus}
+  </span>
+</td>
+
                               {/* <td className="p-3">
                                 $
                                 {(

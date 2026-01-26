@@ -391,6 +391,15 @@ const Promotion = () => {
       setLoading(false);
     }
   };
+const getPromotionStatus = (startDate, endDate) => {
+  const now = Date.now();
+  const start = new Date(startDate).getTime();
+  const end = new Date(endDate).getTime();
+
+  if (now < start) return "upcoming";
+  if (now >= start && now <= end) return "running";
+  return "expired";
+};
 
   return user ? (
     <main className="w-full p-4 md:p-8">
@@ -506,6 +515,18 @@ const Promotion = () => {
 
                   return false;
                 })
+                 .sort((a, b) => {
+    const priority = {
+      running: 1,
+      upcoming: 2,
+      expired: 3,
+    };
+
+    const statusA = getPromotionStatus(a.startDate, a.endDate);
+    const statusB = getPromotionStatus(b.startDate, b.endDate);
+
+    return priority[statusA] - priority[statusB];
+  })
 
                 .map((product) => (
                   <div

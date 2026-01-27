@@ -1961,7 +1961,7 @@ const Dashboard = () => {
             className="bg-white rounded-xl shadow-2xl w-full max-w-lg relative transform scale-95 animate-zoomIn transition-all duration-300"
           >
             <div className="border-b px-4 py-3 flex justify-between items-center">
-              <h2 className="text-sm font-semibold text-blue-700">
+              <h2 className="text-sm font-semibold text-gray-800">
                 Import products by Excel
               </h2>
               <button
@@ -1979,7 +1979,7 @@ const Dashboard = () => {
                   onChange={handleCSVUpload}
                   className="absolute w-full h-full opacity-0 cursor-pointer"
                 />
-                <span className="px-4 py-2 text-sm text-white bg-blue-600 border border-gray-300 rounded hover:bg-blue-700">
+                <span className="px-4 py-2 text-sm text-white font-semibold bg-[#18181b] border border-gray-300 rounded-lg hover:bg-blue-700">
                   Add file
                 </span>
                 {selectedFile && (
@@ -1991,24 +1991,24 @@ const Dashboard = () => {
               <a
                 href="/sample-product.xlsx"
                 download
-                className="text-sm text-blue-600 underline cursor-pointer mb-4 inline-block"
+                className="text-sm text-gray-800 underline cursor-pointer mb-4 inline-block"
               >
                 Download sample Excel file
               </a>
               <div className="flex justify-end gap-2">
                 <button
                   onClick={closePopup}
-                  className="px-4 py-1 text-sm border text-white bg-red-500 border-gray-300 rounded hover:bg-red-600"
+                  className="px-4 py-1 text-sm border font-semibold text-white  bg-red-600 border-gray-300 rounded-lg hover:bg-red-700"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleUploadAndPreview}
                   disabled={!selectedFile || isUploading}
-                  className={`px-4 py-2 text-sm rounded transition ${
+                  className={`px-4 py-2 text-sm rounded-lg transition ${
                     selectedFile && !isUploading
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      ? "bg-[#18181b] text-white hover:bg-gray-900 font-semibold"
+                      : "bg-gray-400 text-white cursor-not-allowed"
                   }`}
                 >
                   {isUploading ? "Uploading..." : "Upload and preview"}
@@ -2152,15 +2152,15 @@ const Dashboard = () => {
             <div className="flex justify-end gap-2 border-t border-gray-300">
               <button
                 onClick={() => setIsexportOpen(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded mt-2"
+                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg mt-2"
               >
                 Cancel
               </button>
               <button
                 onClick={handleExport}
                 disabled={isExporting}
-                className={`px-4 py-2 rounded mt-2 flex items-center gap-2 ${
-                  isExporting ? "bg-gray-500" : "bg-gray-800"
+                className={`px-4 py-2 rounded-lg mt-2 flex items-center gap-2 ${
+                  isExporting ? "bg-[#18181b]" : "bg-[#18181b]"
                 } text-white`}
               >
                 {isExporting ? (

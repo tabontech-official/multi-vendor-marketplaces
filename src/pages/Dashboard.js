@@ -989,209 +989,131 @@ const Dashboard = () => {
 
     setFilteredProducts(sortedProducts);
   };
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   return user ? (
-    <main className="w-full p-4 md:p-8">
-      <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
+    <main className="w-full p-4 ">
+      {toast.show && (
+        <div
+          className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+            toast.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
+        >
+          {toast.type === "success" ? (
+            <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+          ) : (
+            <HiOutlineXCircle className="w-6 h-6 mr-2" />
+          )}
+          <span>{toast.message}</span>
+        </div>
+      )}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 pb-4 gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold mb-1">Manage products</h1>
-          <p className="text-gray-600 mb-4">Manage your products here.</p>
-
-          <div className="flex flex-col md:flex-row md:items-center md:space-x-4 gap-3">
-            {/* Search Bar */}
-            <div className="w-full md:w-1/3">
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchVal}
-                onChange={(e) => setSearchVal(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* <div className="w-full md:w-1/4">
-              <select
-                value={sortBy}
-                onChange={(e) => {
-                  setSortBy(e.target.value);
-                  setSortValue(""); 
-                }}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Sort By</option>
-                <option value="approval">Approval</option>
-                <option value="price">Price</option>
-                <option value="product_type">Product Type</option>
-                <option value="vendor">Vendor</option>
-
-                {(userRole === "Dev Admin" || userRole === "Master Admin") && (
-                  <option value="published_by">Published By</option>
-                )}
-              </select>
-            </div>
-
-            {sortBy && (
-              <div className="w-full md:w-1/4">
-                <select
-                  value={sortValue}
-                  onChange={(e) => setSortValue(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select {sortBy.replace("_", " ")}</option>
-
-                  {sortBy === "published_by"
-                    ? [...new Set(products.map((p) => p.username))].map(
-                        (publisher) => (
-                          <option key={publisher} value={publisher}>
-                            {publisher}
-                          </option>
-                        )
-                      )
-                    : getUniqueOptions(sortBy).map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                </select>
-              </div>
-            )} */}
-          </div>
+          <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
+            Manage products
+          </h1>
+          <p className="text-sm text-gray-500">Manage your products here.</p>
         </div>
 
-        {/* <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
-          <div className="flex flex-col gap-4 items-center w-full justify-end">
-            <div className="flex gap-4 items-center justify-end w-full">
+        <div className="flex-1 w-full max-w-sm mx-auto">
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchVal}
+            onChange={(e) => setSearchVal(e.target.value)}
+            className="w-full p-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+          />
+        </div>
+
+        <div className="flex-1 flex flex-wrap items-center justify-end gap-2 w-full">
+          {selectedProducts.length > 0 && (
+            <div className="relative" ref={dropdownRef}>
               <button
-                onClick={openPopup}
-                className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              >
-                <CiImport className="w-5 h-5" />
-                Import
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                // className="bg-[#1A1A1A] hover:bg-gray-900 text-white px-3 h-8 text-sm font-medium rounded-md transition duration-200 flex items-center gap-1.5"
+            className="bg-gray-800 hover:bg-gray-900 text-white px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
+
+>
+                <span>More actions</span>
+                <svg
+                  className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
               </button>
 
-              <button
-                onClick={togglePopup}
-                className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-              >
-                <FaFileImport className="w-5 h-5" />
-                Export
-              </button>
-            </div>
-
-            {selectedProducts.length > 0 && (
-              <div className="flex gap-4 items-center justify-end w-full">
-                <div className="flex gap-4 items-center justify-end w-full">
-                  {filteredProducts.some(
-                    (product) =>
-                      selectedProducts.includes(product._id) &&
-                      product.status === "draft"
-                  ) && (
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-1.5 w-32 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden">
+                  <div className="py-1">
                     <button
-                      onClick={handlePublishSelected}
-                      className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+                      onClick={() => {
+                        handlePublishSelected();
+                        setIsDropdownOpen(false);
+                      }}
+                      className="block w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
                     >
-                      Publish
+                      Published
                     </button>
-                  )}
-
-                  {filteredProducts.some(
-                    (product) =>
-                      selectedProducts.includes(product._id) &&
-                      product.status === "active"
-                  ) && (
                     <button
-                      onClick={handleUnpublishSelected}
-                      className="bg-red-500 hover:bg-red-400 text-white py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
+                      onClick={() => {
+                        handleUnpublishSelected();
+                        setIsDropdownOpen(false);
+                      }}
+                      className="block w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
                     >
-                      Unpublish
+                      Unpublished
                     </button>
-                  )}
-
-                  <button
-                    onClick={onDeleteSelected}
-                    className="bg-red-500 hover:bg-red-400 text-white py-2 px-9 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-                  >
-                    Delete
-                  </button>
+                    <div className="border-t border-gray-100 my-1"></div>
+                    <button
+                      onClick={() => {
+                        onDeleteSelected();
+                        setIsDropdownOpen(false);
+                      }}
+                      className="block w-full text-left px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </div> */}
-        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
-          <div className="flex flex-col gap-4 items-center w-full justify-end">
-            {/* Top Row: Import & Export */}
-            <div className="flex gap-4 items-center justify-end w-full">
-              <button
-                onClick={openPopup}
-                className="bg-blue-500 hover:bg-blue-400 text-white w-32 h-10 rounded-md transition duration-300 ease-in-out flex items-center justify-center gap-2"
-              >
-                <CiImport className="w-5 h-5" />
-                <span>Import</span>
-              </button>
-
-              <button
-                onClick={togglePopup}
-                className="bg-blue-500 hover:bg-blue-400 text-white w-32 h-10 rounded-md transition duration-300 ease-in-out flex items-center justify-center gap-2"
-              >
-                <FaFileImport className="w-5 h-5" />
-                <span>Export</span>
-              </button>
+              )}
             </div>
+          )}
 
-            {/* Bottom Row: Conditional Actions */}
-            {selectedProducts.length > 0 && (
-              <div className="flex gap-4 items-center justify-end w-full">
-                {filteredProducts.some(
-                  (product) =>
-                    selectedProducts.includes(product._id) &&
-                    product.status === "draft",
-                ) && (
-                  <button
-                    onClick={handlePublishSelected}
-                    className="bg-blue-500 hover:bg-blue-400 text-white w-32 h-10 rounded-md transition duration-300 ease-in-out flex items-center justify-center"
-                  >
-                    Publish
-                  </button>
-                )}
-
-                {filteredProducts.some(
-                  (product) =>
-                    selectedProducts.includes(product._id) &&
-                    product.status === "active",
-                ) && (
-                  <button
-                    onClick={handleUnpublishSelected}
-                    className="bg-red-500 hover:bg-red-400 text-white w-32 h-10 rounded-md transition duration-300 ease-in-out flex items-center justify-center"
-                  >
-                    Unpublish
-                  </button>
-                )}
-
-                <button
-                  onClick={onDeleteSelected}
-                  className="bg-red-500 hover:bg-red-400 text-white w-32 h-10 rounded-md transition duration-300 ease-in-out flex items-center justify-center"
-                >
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-        {toast.show && (
-          <div
-            className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
-              toast.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          <button
+            onClick={openPopup}
+            className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
           >
-            {toast.type === "success" ? (
-              <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
-            ) : (
-              <HiOutlineXCircle className="w-6 h-6 mr-2" />
-            )}
-            <span>{toast.message}</span>
-          </div>
-        )}
+            <CiImport className="w-4 h-4" />
+            <span>Import</span>
+          </button>
+
+          <button
+            onClick={togglePopup}
+            className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
+          >
+            <FaFileImport className="w-4 h-4" />
+            <span>Export</span>
+          </button>
+        </div>
       </div>
 
       <div className="p-4">
@@ -1759,7 +1681,9 @@ const Dashboard = () => {
                     />
                   </th>
                   <th className="p-3 whitespace-nowrap text-left">Status</th>
-                  <th className="p-3 whitespace-nowrap text-left">Image</th>
+                  {/* <th className="p-3 whitespace-nowrap text-left">Image</th> */}
+                  <th className="p-3 whitespace-nowrap text-left"></th>
+
                   <th
                     className="p-3 cursor-pointer whitespace-nowrap text-left"
                     onClick={() => {
@@ -1786,13 +1710,13 @@ const Dashboard = () => {
                   {(userRole === "Dev Admin" ||
                     userRole === "Master Admin") && (
                     <th className="p-3 whitespace-nowrap text-left">
-                      Publisher
+                      Merchant
                     </th>
                   )}
                   <th className="p-3 whitespace-nowrap text-left">Approval</th>
-                  <th className="p-3 whitespace-nowrap text-left">SKU</th>
-                  <th className="p-3 whitespace-nowrap text-left">Price</th>
-                  <th className="p-3 whitespace-nowrap text-left">Compare</th>
+                  {/* <th className="p-3 whitespace-nowrap text-left">SKU</th> */}
+                  {/* <th className="p-3 whitespace-nowrap text-left">Price</th> */}
+                  {/* <th className="p-3 whitespace-nowrap text-left">Compare</th> */}
                   <th className="p-3 whitespace-nowrap text-left">Type</th>
                   <th className="p-3 whitespace-nowrap text-left">Inventory</th>
                   <th className="p-3 whitespace-nowrap text-left">Vendor</th>
@@ -1887,23 +1811,23 @@ const Dashboard = () => {
                         )}
                       </td>
 
-                      <td className="p-3 text-gray-600 whitespace-nowrap">
+                      {/* <td className="p-3 text-gray-600 whitespace-nowrap">
                         {product.variants?.[0]?.sku || "N/A"}
-                      </td>
+                      </td> */}
 
-                      <td className="p-3 font-semibold whitespace-nowrap">
+                      {/* <td className="p-3 font-semibold whitespace-nowrap">
                         $
                         {parseFloat(product.variants?.[0]?.price || 0).toFixed(
                           2,
                         )}
-                      </td>
+                      </td> */}
 
-                      <td className="p-3 text-gray-500 whitespace-nowrap">
+                      {/* <td className="p-3 text-gray-500 whitespace-nowrap">
                         $
                         {parseFloat(
                           product.variants?.[0]?.compare_at_price || 0,
                         ).toFixed(2)}
-                      </td>
+                      </td> */}
 
                       <td className="p-3 whitespace-nowrap">
                         {product.product_type || "N/A"}

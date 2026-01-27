@@ -172,6 +172,7 @@ const Inventory = () => {
       setLoading(false);
     }
   };
+  
   useEffect(() => {
     fetchProductData();
   }, [page]);

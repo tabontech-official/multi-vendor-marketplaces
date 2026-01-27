@@ -24,24 +24,24 @@ const CategorySelector = () => {
   const { id } = useParams();
   const isEditing = Boolean(id);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
-  const [duplicateMode, setDuplicateMode] = useState("copy"); 
+  const [duplicateMode, setDuplicateMode] = useState("copy");
   const [duplicateTitle, setDuplicateTitle] = useState("");
   const uploadShopifyImageToCloudinary = async (shopifyUrl) => {
-  const formData = new FormData();
-  formData.append("file", shopifyUrl);
-  formData.append("upload_preset", "images");
+    const formData = new FormData();
+    formData.append("file", shopifyUrl);
+    formData.append("upload_preset", "images");
 
-  const res = await fetch(
-    "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
 
-  const data = await res.json();
-  return data.secure_url;
-};
+    const data = await res.json();
+    return data.secure_url;
+  };
 
   const handleDiscard = () => {
     if (isChanged) {
@@ -892,14 +892,17 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
         },
-      })
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data);
@@ -1234,19 +1237,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
             },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          );
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1319,16 +1325,19 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
               },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            });
+            );
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1359,12 +1368,12 @@ const CategorySelector = () => {
     const userId = localStorage.getItem("userid");
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
-console.log("🧠 DEBUG PAYLOAD", {
-  isEditing,
-  loggedInUserId: userId,
-  productOwnerId: product?.userId,
-  finalUserIdSent: isEditing ? product?.userId : userId,
-});
+    console.log("🧠 DEBUG PAYLOAD", {
+      isEditing,
+      loggedInUserId: userId,
+      productOwnerId: product?.userId,
+      finalUserIdSent: isEditing ? product?.userId : userId,
+    });
     if (!userId) {
       setMessage({
         type: "error",
@@ -1899,7 +1908,7 @@ console.log("🧠 DEBUG PAYLOAD", {
         e.preventDefault();
         showToast(
           "error",
-          "You have unsaved changes! Please update the product before leaving.",
+          "You have unsaved changes! Please save the product before leaving.",
         );
 
         window.history.forward();
@@ -2125,7 +2134,7 @@ console.log("🧠 DEBUG PAYLOAD", {
                   className="border border-dashed border-gray-400 p-6 text-center rounded-xl cursor-pointer hover:bg-gray-50"
                 >
                   <label
-                    className=" bg-black text-white px-4 py-2 rounded-md cursor-pointer hover:bg-gray-800"
+                    className="w-full bg-[#18181b] text-white px-3 cursor-pointer py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsMediaModalVisible(true);
@@ -2549,7 +2558,7 @@ console.log("🧠 DEBUG PAYLOAD", {
                 {combinations.length > 0 && (
                   <button
                     onClick={() => setShowBulkModal(true)}
-                    className="text-sm bg-black text-white px-3 py-1 rounded-md hover:bg-gray-800"
+                    className="text-sm bg-[#18181b] font-medium text-white px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
                   >
                     Bulk Update
                   </button>
@@ -3039,36 +3048,58 @@ console.log("🧠 DEBUG PAYLOAD", {
                           )}
 
                           {isDeleteModalOpen && (
-                            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                              <div className="bg-white rounded-lg shadow-lg p-6 w-[400px]">
-                                <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                                  Confirm Delete
-                                </h2>
-                                <p className="text-gray-600 mb-6">
-                                  Are you sure you want to delete this variant?
-                                  This action cannot be undone.
-                                </p>
-                                <div className="flex justify-end gap-3">
-                                  <button
-                                    onClick={() => setIsDeleteModalOpen(false)}
-                                    className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
-                                  >
-                                    Cancel
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      if (deleteTarget) {
-                                        handleDeleteCombination(
-                                          deleteTarget.index,
-                                          deleteTarget.childIndex,
-                                        );
+                            <div className="fixed inset-0 flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm z-[100]">
+                              <div className="bg-white rounded-xl shadow-2xl w-[90%] max-w-[400px] overflow-hidden border border-gray-200 transform transition-all">
+                                {/* Top Accent Bar */}
+                                <div className="h-1.5 bg-red-500 w-full" />
+
+                                <div className="p-6">
+                                  <h2 className="text-xl font-bold text-[#18181b] mb-2">
+                                    Confirm Deletion
+                                  </h2>
+
+                                  <p className="text-sm text-gray-500 leading-relaxed mb-6">
+                                    Are you sure you want to delete this
+                                    variant? This action is
+                                    <span className="text-red-600 font-semibold">
+                                      {" "}
+                                      permanent
+                                    </span>{" "}
+                                    and cannot be undone.
+                                  </p>
+
+                                  <div className="flex items-center gap-3">
+                                    <button
+                                      onClick={() =>
+                                        setIsDeleteModalOpen(false)
                                       }
-                                      setIsDeleteModalOpen(false);
-                                    }}
-                                    className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
-                                  >
-                                    Delete
-                                  </button>
+                                      className="flex-1 bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#F3F4F6] transition-all active:scale-95"
+                                    >
+                                      Cancel
+                                    </button>
+
+                                    <button
+                                      onClick={() => {
+                                        if (deleteTarget) {
+                                          handleDeleteCombination(
+                                            deleteTarget.index,
+                                            deleteTarget.childIndex,
+                                          );
+                                        }
+                                        setIsDeleteModalOpen(false);
+                                      }}
+                                      className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 shadow-md shadow-red-200 transition-all active:scale-95"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Optional Footer Background for theming */}
+                                <div className="bg-[#F3F4F6] px-6 py-3 border-t border-gray-100">
+                                  <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+                                    System Action Security
+                                  </p>
                                 </div>
                               </div>
                             </div>
@@ -3259,7 +3290,7 @@ console.log("🧠 DEBUG PAYLOAD", {
                         setNewOption({ name: "", values: [""] });
                         setMatchedOptionValues([]);
                       }}
-                      className="text-sm text-white bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-900"
+                      className="text-sm text-white bg-[#18181b] font-medium px-3 py-1.5 rounded-lg hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
                     >
                       Done
                     </button>
@@ -3555,7 +3586,8 @@ console.log("🧠 DEBUG PAYLOAD", {
               <button
                 onClick={handleSubmit}
                 type="submit"
-                className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                // className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                className="w-full bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
               >
                 {loading
                   ? "Submitting..."
@@ -3567,7 +3599,8 @@ console.log("🧠 DEBUG PAYLOAD", {
                 <button
                   type="button"
                   onClick={handleDiscard}
-                  className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                  // className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                  className="w-full bg-gray-400  border-gray-300 hover:bg-gray-500 text-gray-800 border px-3 py-1.5 rounded-lg text-sm font-medium  transition-colors shadow-sm"
                 >
                   Discard
                 </button>
@@ -3580,7 +3613,8 @@ console.log("🧠 DEBUG PAYLOAD", {
                     setDuplicateTitle(`Copy of ${title} `);
                     setShowDuplicateModal(true);
                   }}
-                  className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                  className="w-full bg-white text-gray-700 border border-gray-300 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm"
+                  // className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
                 >
                   Duplicate Product
                 </button>
@@ -3701,188 +3735,187 @@ console.log("🧠 DEBUG PAYLOAD", {
               </div>
             </div>
           </div>
-         {isPopupVisible && (
-  <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
-    <div className="bg-white w-full max-w-5xl h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden">
-      <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Select Image for Variant
-        </h2>
-        <button
-          onClick={() => setIsPopupVisible(false)}
-          className="bg-black text-white px-5 py-2 rounded-md hover:bg-gray-800"
-        >
-          Done
-        </button>
-      </div>
+          {isPopupVisible && (
+            <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
+              <div className="bg-white w-full max-w-5xl h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden">
+                <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    Select Image for Variant
+                  </h2>
+                  <button
+                    onClick={() => setIsPopupVisible(false)}
+                    className="bg-black text-white px-5 py-2 rounded-md hover:bg-gray-800"
+                  >
+                    Done
+                  </button>
+                </div>
 
-      <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                  {/* ASSIGNED IMAGES */}
+                  <div className="mt-4 bg-white border rounded-lg p-5">
+                    <h3 className="text-sm font-semibold mb-3 text-gray-700">
+                      Assigned Images
+                    </h3>
 
-        {/* ASSIGNED IMAGES */}
-        <div className="mt-4 bg-white border rounded-lg p-5">
-          <h3 className="text-sm font-semibold mb-3 text-gray-700">
-            Assigned Images
-          </h3>
+                    {(() => {
+                      const parent =
+                        combinations[currentVariant?.index]?.parent;
+                      const key =
+                        options.length === 1
+                          ? currentVariant?.child
+                          : `${parent} / ${currentVariant?.child}`;
+                      const normalizedKey = key?.replace(/['"]/g, "").trim();
+                      const assigned = variantImages[normalizedKey] || [];
 
-          {(() => {
-            const parent = combinations[currentVariant?.index]?.parent;
-            const key =
-              options.length === 1
-                ? currentVariant?.child
-                : `${parent} / ${currentVariant?.child}`;
-            const normalizedKey = key?.replace(/['"]/g, "").trim();
-            const assigned = variantImages[normalizedKey] || [];
+                      return (
+                        <div className="flex flex-wrap gap-3">
+                          {assigned.length ? (
+                            assigned.map((img, i) => (
+                              <div key={img.preview} className="relative">
+                                <img
+                                  src={img.preview}
+                                  className="w-28 h-28 object-cover rounded border"
+                                />
 
-            return (
-              <div className="flex flex-wrap gap-3">
-                {assigned.length ? (
-                  assigned.map((img, i) => (
-                    <div key={img.preview} className="relative">
-                      <img
-                        src={img.preview}
-                        className="w-28 h-28 object-cover rounded border"
-                      />
+                                {img.loading && (
+                                  <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                                    <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin" />
+                                  </div>
+                                )}
 
-                      {img.loading && (
-                        <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                          <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin" />
-                        </div>
-                      )}
-
-                      <button
-                        onClick={() =>
-                          setVariantImages((prev) => ({
-                            ...prev,
-                            [normalizedKey]: prev[normalizedKey].filter(
-                              (_, x) => x !== i
-                            ),
-                          }))
-                        }
-                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full 
+                                <button
+                                  onClick={() =>
+                                    setVariantImages((prev) => ({
+                                      ...prev,
+                                      [normalizedKey]: prev[
+                                        normalizedKey
+                                      ].filter((_, x) => x !== i),
+                                    }))
+                                  }
+                                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full 
                         bg-black/70 text-white flex items-center justify-center 
                         text-sm hover:bg-red-600 transition"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-gray-400 italic">
-                    No images assigned
-                  </p>
-                )}
-              </div>
-            );
-          })()}
-        </div>
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-sm text-gray-400 italic">
+                              No images assigned
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
 
-        {/* PRODUCT MEDIA IMAGES */}
-        <div className="mt-8 bg-white border rounded-lg p-5">
-          <h3 className="text-sm font-semibold mb-3 text-gray-700">
-            Product Media Images
-          </h3>
+                  {/* PRODUCT MEDIA IMAGES */}
+                  <div className="mt-8 bg-white border rounded-lg p-5">
+                    <h3 className="text-sm font-semibold mb-3 text-gray-700">
+                      Product Media Images
+                    </h3>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {selectedImages.map((img) => {
-              const imageUrl = img.cloudUrl || img.localUrl;
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {selectedImages.map((img) => {
+                        const imageUrl = img.cloudUrl || img.localUrl;
 
-              return (
-                <div
-                  key={imageUrl}
-                  className="border rounded-lg p-2 cursor-pointer hover:border-blue-500"
-                  onClick={async () => {
-                    const parent =
-                      combinations[currentVariant?.index]?.parent;
-                    const key =
-                      options.length === 1
-                        ? currentVariant?.child
-                        : `${parent} / ${currentVariant?.child}`;
-                    const normalizedKey = key
-                      .replace(/['"]/g, "")
-                      .trim();
+                        return (
+                          <div
+                            key={imageUrl}
+                            className="border rounded-lg p-2 cursor-pointer hover:border-blue-500"
+                            onClick={async () => {
+                              const parent =
+                                combinations[currentVariant?.index]?.parent;
+                              const key =
+                                options.length === 1
+                                  ? currentVariant?.child
+                                  : `${parent} / ${currentVariant?.child}`;
+                              const normalizedKey = key
+                                .replace(/['"]/g, "")
+                                .trim();
 
-                    const existing =
-                      variantImages[normalizedKey] || [];
+                              const existing =
+                                variantImages[normalizedKey] || [];
 
-                    if (
-                      existing.some(
-                        (i) => i.preview === imageUrl
-                      )
-                    ) {
-                      console.warn("Duplicate skipped");
-                      return;
-                    }
+                              if (
+                                existing.some((i) => i.preview === imageUrl)
+                              ) {
+                                console.warn("Duplicate skipped");
+                                return;
+                              }
 
-                    // ⏳ add loader
-                    setVariantImages((prev) => ({
-                      ...prev,
-                      [normalizedKey]: [
-                        { preview: imageUrl, loading: true },
-                        ...(prev[normalizedKey] || []),
-                      ],
-                    }));
+                              // ⏳ add loader
+                              setVariantImages((prev) => ({
+                                ...prev,
+                                [normalizedKey]: [
+                                  { preview: imageUrl, loading: true },
+                                  ...(prev[normalizedKey] || []),
+                                ],
+                              }));
 
-                    let finalUrl = imageUrl;
+                              let finalUrl = imageUrl;
 
-                    if (imageUrl.includes("cdn.shopify.com")) {
-                      try {
-                        finalUrl =
-                          await uploadShopifyImageToCloudinary(
-                            imageUrl
-                          );
-                      } catch (err) {
-                        console.error("Upload failed", err);
-                        return;
-                      }
-                    }
+                              if (imageUrl.includes("cdn.shopify.com")) {
+                                try {
+                                  finalUrl =
+                                    await uploadShopifyImageToCloudinary(
+                                      imageUrl,
+                                    );
+                                } catch (err) {
+                                  console.error("Upload failed", err);
+                                  return;
+                                }
+                              }
 
-                    // ✅ replace loader with final image
-                    setVariantImages((prev) => {
-                      const filtered =
-                        prev[normalizedKey].filter(
-                          (i) => i.preview !== imageUrl
+                              // ✅ replace loader with final image
+                              setVariantImages((prev) => {
+                                const filtered = prev[normalizedKey].filter(
+                                  (i) => i.preview !== imageUrl,
+                                );
+
+                                return {
+                                  ...prev,
+                                  [normalizedKey]: [
+                                    {
+                                      preview: finalUrl,
+                                      alt: `t4option${options[0]?.name}_${
+                                        normalizedKey.split("/")[0]
+                                      }`
+                                        .replace(/\s+/g, "")
+                                        .toLowerCase(),
+                                      loading: false,
+                                    },
+                                    ...filtered,
+                                  ],
+                                };
+                              });
+                            }}
+                          >
+                            <img
+                              src={imageUrl}
+                              className="w-full h-28 object-cover rounded-md"
+                            />
+                          </div>
                         );
-
-                      return {
-                        ...prev,
-                        [normalizedKey]: [
-                          {
-                            preview: finalUrl,
-                            alt: `t4option${options[0]?.name}_${normalizedKey
-                              .split("/")[0]}`.replace(/\s+/g, "").toLowerCase(),
-                            loading: false,
-                          },
-                          ...filtered,
-                        ],
-                      };
-                    });
-                  }}
-                >
-                  <img
-                    src={imageUrl}
-                    className="w-full h-28 object-cover rounded-md"
-                  />
+                      })}
+                    </div>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-
+              </div>
+            </div>
+          )}
 
           {isMediaModalVisible && (
             <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
               <div className="bg-white w-full max-w-6xl h-[90vh] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden">
                 <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
-                  <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                  <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
                     Manage Product Media
-                  </h2>
+                  </h1>
                   <button
                     onClick={() => setIsMediaModalVisible(false)}
-                    className="bg-black text-white px-5 py-2 rounded-md hover:bg-gray-800"
+                    className=" bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
                   >
                     Done
                   </button>
@@ -3902,14 +3935,14 @@ console.log("🧠 DEBUG PAYLOAD", {
                     <div className="flex gap-4">
                       <label
                         htmlFor="productUpload"
-                        className="px-6 py-2 bg-black text-white rounded-lg cursor-pointer hover:bg-gray-800"
+                        className="w-full bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
                       >
-                        Add New Images
+                        upload
                       </label>
 
                       <button
                         onClick={() => setShowGallery(true)}
-                        className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-700"
+                        className="w-full bg-gray-400 px-3 py-1.5  border-gray-300 hover:bg-gray-500 text-gray-800 border  rounded-lg text-sm font-medium  transition-colors shadow-sm"
                       >
                         Browse
                       </button>

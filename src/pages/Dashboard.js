@@ -1042,9 +1042,8 @@ const Dashboard = () => {
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 // className="bg-[#1A1A1A] hover:bg-gray-900 text-white px-3 h-8 text-sm font-medium rounded-md transition duration-200 flex items-center gap-1.5"
-            className="bg-gray-800 hover:bg-gray-900 text-white px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
-
->
+                className="bg-gray-800 hover:bg-gray-900 text-white px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
+              >
                 <span>More actions</span>
                 <svg
                   className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}

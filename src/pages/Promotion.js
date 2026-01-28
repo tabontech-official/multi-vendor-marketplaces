@@ -405,8 +405,9 @@ const Promotion = () => {
     <main className="w-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold mb-1">Promotions</h1>
-          <p className="text-gray-600">Auto-updates in 2 min.</p>
+                    <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
+Promotions</h1>
+          <p className="text-sm text-gray-500">Auto-updates in 2 min.</p>
           <div className="w-2/4 max-sm:w-full mt-2"></div>
         </div>
 
@@ -433,7 +434,7 @@ const Promotion = () => {
                 }}
                 className={`px-4 py-2 text-sm rounded-lg ${
                   activeTab === tab
-                    ? "bg-blue-600 text-white"
+                    ? "bg-[#18181b] text-white"
                     : "bg-gray-200 text-gray-700"
                 }`}
               >
@@ -588,13 +589,13 @@ const Promotion = () => {
           {activeTab === "Add Promotions" && (
             <div className="max-sm:overflow-auto border rounded-lg">
               <table className="w-full border-collapse bg-white">
-                <thead className="bg-gray-100 text-left text-gray-600 text-xs">
+              <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0 text-left">
                   <tr>
-                    <th className="p-3">LISTING NAME</th>
-                    <th className="p-3">SELLER_SKU</th>
-                    <th className="p-3">ORIGINAL_PRICE</th>
-                    <th className="p-3">PROMO_PRICE</th>
-                    <th className="p-3">ADD PROMOTION</th>
+                    <th className="p-3">Listing Name</th>
+                    <th className="p-3">Seller Sku</th>
+                    <th className="p-3">Original Price</th>
+                    <th className="p-3">Promo Price</th>
+                    <th className="p-3">Add Promotion</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -689,14 +690,14 @@ const Promotion = () => {
 
           {activeTab === "Submitted Promotions" && (
             <table className="w-full border-collapse bg-white">
-              <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+              <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0 text-left">
                 <tr>
-                  <th className="p-3">ACTION</th>
-                  <th className="p-3">LISTING NAME</th>
-                  <th className="p-3">SELLER_SKU</th>
-                  <th className="p-3">ORIGINAL_PRICE</th>
-                  <th className="p-3">PROMO_PRICE</th>
-                  <th className="p-3">CURRENT_STOCK</th>
+                  <th className="p-3">Action</th>
+                  <th className="p-3">Listing Name</th>
+                  <th className="p-3">Seller Sku</th>
+                  <th className="p-3">Original Price</th>
+                  <th className="p-3">Promo Price</th>
+                  <th className="p-3">Current Stock</th>
                   {/* <th className="p-3">EDIT</th> */}
                 </tr>
               </thead>

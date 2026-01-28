@@ -1,3 +1,4 @@
+
 // import React, { useState } from "react";
 // import { useNavigate } from "react-router-dom";
 // import { useAuthContext } from "./Hooks/useAuthContext";
@@ -6,69 +7,15 @@
 // const Auth = () => {
 //   const navigate = useNavigate();
 //   const { dispatch, user } = useAuthContext();
+
 //   const [email, setEmail] = useState("");
 //   const [password, setPassword] = useState("");
 //   const [error, setError] = useState("");
 //   const [loading, setLoading] = useState(false);
-//   const [success, setSuccess] = useState("");
-
-//   // const handleLogin = async (e) => {
-//   //   e.preventDefault();
-//   //   setError("");
-//   //   setSuccess("");
-//   //   setLoading(true);
-
-//   //   if (!email || !password) {
-//   //     setError("All fields are required.");
-//   //     setLoading(false);
-//   //     return;
-//   //   }
-
-//   //   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//   //   if (!emailPattern.test(email)) {
-//   //     setError("Please enter a valid email address.");
-//   //     setLoading(false);
-//   //     return;
-//   //   }
-
-//   //   try {
-//   //     const response = await fetch(
-//   //       "https://multi-vendor-marketplace.vercel.app/auth/signIn",
-//   //       {
-//   //         method: "POST",
-//   //         headers: { "Content-Type": "application/json" },
-//   //         body: JSON.stringify({ email, password }),
-//   //       }
-//   //     );
-
-//   //     const json = await response.json();
-//   //     const path = localStorage.getItem("path") || "/";
-
-//   //     if (response.ok) {
-//   //       if (json.token && json.user._id && json.user.email) {
-//   //         localStorage.setItem("usertoken", json.token);
-//   //         localStorage.setItem("userid", json.user._id);
-//   //         localStorage.setItem("email", json.user.email);
-//   //         dispatch({ type: "LOGIN", payload: json });
-//   //         setSuccess("Login successful!");
-//   //         // navigate(path);
-//   //         window.location.reload=path
-//   //         localStorage.removeItem("path");
-//   //       }
-//   //     } else {
-//   //       setError(json.error || "An error occurred during login.");
-//   //     }
-//   //   } catch (error) {
-//   //     setError("An error occurred. Please try again.");
-//   //   } finally {
-//   //     setLoading(false);
-//   //   }
-//   // };
 
 //   const handleLogin = async (e) => {
 //     e.preventDefault();
 //     setError("");
-//     setSuccess("");
 //     setLoading(true);
 
 //     if (!email || !password) {
@@ -97,30 +44,26 @@
 //       const json = await response.json();
 //       const path = localStorage.getItem("path") || "/";
 
-//       if (response.ok) {
-//         if (json.token && json.user && json.user._id && json.user.email) {
-//           localStorage.setItem("usertoken", json.token);
-//           localStorage.setItem("userid", json.user._id);
-//           localStorage.setItem("email", json.user.email);
-//           localStorage.setItem("showApprovalPopup", "true");
+//       if (response.ok && json.token && json.user) {
+//         localStorage.setItem("usertoken", json.token);
+//         localStorage.setItem("userid", json.user._id);
+//         localStorage.setItem("email", json.user.email);
+//         localStorage.setItem("showApprovalPopup", "true");
 
-//           if (json.apiKey && json.apiSecretKey) {
-//             localStorage.setItem("apiKey", json.apiKey);
-//             localStorage.setItem("apiSecretKey", json.apiSecretKey);
-//           }
-
-//           dispatch({ type: "LOGIN", payload: json });
-//           setSuccess("Login successful!");
-//           localStorage.removeItem("path");
-//           window.location.reload = path;
+//         if (json.apiKey && json.apiSecretKey) {
+//           localStorage.setItem("apiKey", json.apiKey);
+//           localStorage.setItem("apiSecretKey", json.apiSecretKey);
 //         }
+
+//         dispatch({ type: "LOGIN", payload: json });
+//         localStorage.removeItem("path");
+
+//         window.location.href = path;
 //       } else {
-//         setError(
-//           json.error || json.message || "An error occurred during login."
-//         );
+//         setError(json.error || json.message || "Login failed.");
 //       }
-//     } catch (error) {
-//       setError("An error occurred. Please try again.");
+//     } catch (err) {
+//       setError("Something went wrong. Please try again.");
 //     } finally {
 //       setLoading(false);
 //     }
@@ -131,36 +74,41 @@
 //   }
 
 //   return (
-//     <section className="h-[82vh] flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
-//       <div className="flex w-full  max-w-4xl bg-white rounded-lg shadow-lg mx-auto">
-//         <div className=" md:flex  flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white">
+//     <section className="h-[84vh] flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
+//       <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg mx-auto overflow-hidden">
+
+//         {/* LEFT SECTION */}
+//         <div className="hidden md:flex flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white">
 //           <img
 //             src="/png-logo.png"
-//             alt="Login"
-//             className="w-64 h-64 object-cover"
+//             alt="Aydi Active Marketplace"
+//             className="w-56 h-56 object-contain"
 //           />
-//           <p className="mt-4 text-center text-sm opacity-90">
-//             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis at
-//             velit maximus, molestie est a, tempor magna.
+//           <p className="mt-6 text-center text-sm opacity-90">
+//             Manage your products, track orders, connect with customers,
+//             and grow your business — all from one powerful Aydi-Active dashboard.
 //           </p>
 //         </div>
 
+//         {/* RIGHT SECTION */}
 //         <div className="w-full md:w-1/2 p-8">
-//           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
-//             Welcome Back
+//           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-2">
+//             Welcome to Aydi-Active Marketplace
 //           </h2>
 //           <p className="text-sm text-gray-600 text-center mb-6">
-//             Login to your account
+//             Sign in to access your dashboard
 //           </p>
 
 //           <form onSubmit={handleLogin} className="space-y-4">
+
+//             {/* EMAIL */}
 //             <div>
 //               <label className="block text-sm font-medium text-gray-700">
-//                 Email
+//                 Email Address
 //               </label>
 //               <input
 //                 type="email"
-//                 placeholder="Enter your email"
+//                 placeholder="Enter your registered email"
 //                 className="mt-1 w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
 //                 value={email}
 //                 onChange={(e) => setEmail(e.target.value)}
@@ -168,6 +116,7 @@
 //               />
 //             </div>
 
+//             {/* PASSWORD */}
 //             <div>
 //               <label className="block text-sm font-medium text-gray-700">
 //                 Password
@@ -182,29 +131,33 @@
 //               />
 //             </div>
 
+//             {/* ERROR */}
 //             {error && <p className="text-red-500 text-sm">{error}</p>}
 
+//             {/* BUTTON */}
 //             <button
 //               type="submit"
-//               className="w-full bg-indigo-500 text-white py-3 rounded-md hover:bg-indigo-600 transition"
 //               disabled={loading}
+//               className="w-full bg-indigo-500 text-white py-3 rounded-md hover:bg-indigo-600 transition disabled:opacity-60"
 //             >
-//               {loading ? "Logging in..." : "Login"}
+//               {loading ? "Signing in..." : "Sign In"}
 //             </button>
 //           </form>
 
+//           {/* LINKS */}
 //           <div className="mt-4 text-center text-sm">
 //             <a
 //               href="/ForgotPassword"
 //               className="text-indigo-500 hover:underline"
 //             >
-//               Forgot Password?
+//               Forgot your password?
 //             </a>
 //           </div>
+
 //           <div className="mt-2 text-center text-sm">
-//             <span className="text-gray-600">Don't have an account? </span>
+//             <span className="text-gray-600">New vendor here? </span>
 //             <a href="/signup" className="text-indigo-500 hover:underline">
-//               Create Account
+//               Create a vendor account
 //             </a>
 //           </div>
 //         </div>
@@ -289,91 +242,104 @@ const Auth = () => {
   }
 
   return (
-    <section className="h-[84vh] flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
-      <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg mx-auto overflow-hidden">
-
-        {/* LEFT SECTION */}
-        <div className="hidden md:flex flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white">
-          <img
-            src="/png-logo.png"
-            alt="Aydi Active Marketplace"
-            className="w-56 h-56 object-contain"
-          />
-          <p className="mt-6 text-center text-sm opacity-90">
-            Manage your products, track orders, connect with customers,
-            and grow your business — all from one powerful Aydi-Active dashboard.
+    <section className="h-[88vh] flex items-center justify-center bg-black p-4 font-sans">
+      {/* MAIN CONTAINER */}
+      <div className="flex w-full max-w-5xl bg-[#121212] rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] mx-auto overflow-hidden min-h-[600px] border border-white/5">
+        
+        {/* LEFT SECTION - JET BLACK GRADIENT */}
+        <div className="hidden md:flex flex-col w-7/12 bg-gradient-to-br from-[#1a1a1a] via-[#0a0a0a] to-black p-12 justify-between items-center text-white relative">
+          <div className="flex flex-col items-center justify-center flex-grow">
+            {/* Soft Glow Effect behind logo */}
+            <div className="absolute w-72 h-72 bg-white/5 rounded-full blur-[100px]"></div>
+            <img
+              src="/png-logo.png"
+              alt="Aydi Active Marketplace"
+              className="w-64 h-64 object-contain z-10 brightness-110"
+            />
+          </div>
+          
+          <p className="text-center text-xs tracking-widest uppercase opacity-40 max-w-sm leading-relaxed z-10">
+            Aydi Active Marketplace • Premium Vendor Portal
           </p>
         </div>
 
-        {/* RIGHT SECTION */}
-        <div className="w-full md:w-1/2 p-8">
-          <h2 className="text-2xl font-semibold text-gray-800 text-center mb-2">
-            Welcome to Aydi-Active Marketplace
-          </h2>
-          <p className="text-sm text-gray-600 text-center mb-6">
-            Sign in to access your dashboard
-          </p>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-
-            {/* EMAIL */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email Address
-              </label>
-              <input
-                type="email"
-                placeholder="Enter your registered email"
-                className="mt-1 w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+        {/* RIGHT SECTION - DARK MODE FORM */}
+        <div className="w-full md:w-5/12 p-8 md:p-12 flex flex-col relative bg-[#181818]">
+          
+          {/* Top Pill Header - High Contrast White */}
+          <div className="absolute top-8 left-0">
+            <div className="bg-white text-black px-10 py-3 rounded-r-full shadow-lg shadow-white/10">
+              <span className="text-lg font-bold tracking-tight">Welcome back</span>
             </div>
-
-            {/* PASSWORD */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                type="password"
-                placeholder="Enter your password"
-                className="mt-1 w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {/* ERROR */}
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-
-            {/* BUTTON */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-indigo-500 text-white py-3 rounded-md hover:bg-indigo-600 transition disabled:opacity-60"
-            >
-              {loading ? "Signing in..." : "Sign In"}
-            </button>
-          </form>
-
-          {/* LINKS */}
-          <div className="mt-4 text-center text-sm">
-            <a
-              href="/ForgotPassword"
-              className="text-indigo-500 hover:underline"
-            >
-              Forgot your password?
-            </a>
           </div>
 
-          <div className="mt-2 text-center text-sm">
-            <span className="text-gray-600">New vendor here? </span>
-            <a href="/signup" className="text-indigo-500 hover:underline">
-              Create a vendor account
-            </a>
+          <div className="mt-28 flex flex-col flex-grow">
+            <h2 className="text-2xl font-light text-white mb-12">
+              Login your account
+            </h2>
+
+         <form onSubmit={handleLogin} className="space-y-12">
+  {/* EMAIL */}
+  <div className="relative border-b border-white/20 focus-within:border-white transition-all duration-300">
+    <label className="block text-[13px] font-medium text-slate-300 mb-1">
+      Username or Email Address
+    </label>
+    <input
+      type="email"
+      placeholder="name@example.com"
+      className="w-full py-2 bg-transparent focus:outline-none text-white placeholder:text-gray-600"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      required
+    />
+  </div>
+
+  {/* PASSWORD */}
+  <div className="relative border-b border-white/20 focus-within:border-white transition-all duration-300">
+    <label className="block text-[13px] font-medium text-slate-300 mb-1">
+      Password
+    </label>
+    <input
+      type="password"
+      placeholder="••••••••"
+      className="w-full py-2 bg-transparent focus:outline-none text-white placeholder:text-gray-600 font-mono"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      required
+    />
+  </div>
+
+  {/* ERROR */}
+  {error && (
+    <p className="text-red-400 text-xs bg-red-400/10 p-3 rounded border border-red-400/20">
+      {error}
+    </p>
+  )}
+
+  {/* BUTTON */}
+  <div className="flex justify-center pt-4">
+    <button
+      type="submit"
+      disabled={loading}
+      className="w-52 bg-white text-black py-3 rounded-full hover:bg-slate-200 transition-all shadow-xl shadow-white/5 disabled:opacity-40 font-bold text-sm active:scale-95"
+    >
+      {loading ? "Processing..." : "Login"}
+    </button>
+  </div>
+</form>
+
+            {/* BOTTOM LINKS */}
+            <div className="mt-auto flex flex-col items-center space-y-5 pt-12">
+              <a href="/signup" className="text-gray-400 hover:text-white text-xs font-semibold tracking-wide transition-colors">
+                DON'T HAVE AN ACCOUNT? <span className="text-white ml-1">CREATE</span>
+              </a>
+              <a
+                href="/ForgotPassword"
+                className="text-gray-600 hover:text-gray-400 text-[11px] border-b border-gray-800 pb-1"
+              >
+                Forgot Password?
+              </a>
+            </div>
           </div>
         </div>
       </div>

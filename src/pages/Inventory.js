@@ -737,7 +737,7 @@ const Inventory = () => {
           ) : (
             <>
               <table className="w-full border-collapse bg-white">
-                  <thead className="bg-gray-100 text-gray-600 text-left uppercase sticky top-0 text-xs">
+                  <thead className="bg-gray-100 text-gray-600 text-left  sticky top-0 text-sm">
                   <tr>
                     <th className="p-3">Action</th>
                     <th className="p-3">Status</th>

@@ -70,7 +70,7 @@ const OnBoard = () => {
       setSelectedUserId(id);
 
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/getSingleUser/${id}`
+        `https://multi-vendor-marketplace.vercel.app/auth/getSingleUser/${id}`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch user details");
@@ -89,7 +89,7 @@ const OnBoard = () => {
         if (!id) return;
 
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getAllOnboardUsers/${id}`
+          `https://multi-vendor-marketplace.vercel.app/auth/getAllOnboardUsers/${id}`,
         );
         const data = await response.json();
 
@@ -139,7 +139,7 @@ const OnBoard = () => {
           });
 
           const merchantGroups = Object.values(merchantMap).filter(
-            (group) => group.merchant !== null
+            (group) => group.merchant !== null,
           );
           setUsers({
             type: "dev",
@@ -184,7 +184,7 @@ const OnBoard = () => {
     setExpandedMerchants((prev) =>
       prev.includes(merchantId)
         ? prev.filter((id) => id !== merchantId)
-        : [...prev, merchantId]
+        : [...prev, merchantId],
     );
   };
 
@@ -274,7 +274,7 @@ const OnBoard = () => {
             modules: selectedModules,
             creatorId: creatorIdToSend,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -332,7 +332,7 @@ const OnBoard = () => {
     setSelectedModules((prev) =>
       prev.includes(moduleName)
         ? prev.filter((m) => m !== moduleName)
-        : [...prev, moduleName]
+        : [...prev, moduleName],
     );
   };
 
@@ -351,8 +351,8 @@ const OnBoard = () => {
 
         const matchedStaff = staff.filter((user) =>
           [user.email, user.name, user.id].some((field) =>
-            field?.toLowerCase().includes(searchTerm)
-          )
+            field?.toLowerCase().includes(searchTerm),
+          ),
         );
 
         if (merchantMatch || matchedStaff.length > 0) {
@@ -369,8 +369,8 @@ const OnBoard = () => {
     const filteredSupportStaff =
       users.supportStaff?.filter((user) =>
         [user.email, user.name, user.id].some((field) =>
-          field?.toLowerCase().includes(searchTerm)
-        )
+          field?.toLowerCase().includes(searchTerm),
+        ),
       ) || [];
 
     setFilteredUsers({
@@ -407,42 +407,38 @@ const OnBoard = () => {
   return (
     <div className="flex">
       <div className="flex-1 p-6">
-        <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 pb-4 gap-4">
+          {/* Left: Title */}
           <div className="flex-1">
-            <h1 className="text-2xl font-semibold mb-1">Manage user</h1>
-            <p className="text-gray-600">Here you can manage users.</p>
-            <div className="w-2/4 max-sm:w-full mt-2">
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchVal}
-                onChange={(e) => setSearchVal(e.target.value)}
-                className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
-            <div className="flex flex-col gap-4 items-center w-full justify-end">
-              <div className="flex gap-4 items-center justify-end w-full">
-                <button
-                  onClick={togglePopupForAddinOrganizations}
-                  className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-                >
-                  <HiPlus className="w-5 h-5" />
-                  New
-                </button>
-
-                {/* <button
-                        onClick={togglePopup}
-                        className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-                      >
-                        <FaFileImport className="w-5 h-5" />
-                        Export
-                      </button> */}
-              </div>
-            </div>
+            <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
+              Manage user
+            </h1>
+            <p className="text-sm text-gray-500">Here you can manage users.</p>
           </div>
 
+          {/* Center: Search (same as dashboard) */}
+          <div className="flex-1 w-full max-w-sm mx-auto">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchVal}
+              onChange={(e) => setSearchVal(e.target.value)}
+              className="w-full p-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+            />
+          </div>
+
+          {/* Right: Action */}
+          <div className="flex-1 flex justify-end">
+            <button
+              onClick={togglePopupForAddinOrganizations}
+              className="bg-gray-800 hover:bg-gray-900 text-white px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
+            >
+              <HiPlus className="w-4 h-4" />
+              <span>New</span>
+            </button>
+          </div>
+
+          {/* Toast */}
           {toast.show && (
             <div
               className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
@@ -458,52 +454,22 @@ const OnBoard = () => {
             </div>
           )}
         </div>
-        {/* {toast.show && (
-          <div
-            className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
-              toast.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
-          >
-            {toast.type === "success" ? (
-              <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
-            ) : (
-              <HiOutlineXCircle className="w-6 h-6 mr-2" />
-            )}
-            <span>{toast.message}</span>
-          </div>
-        )} */}
-        {/* <div className="flex justify-between items-center mb-4">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchVal}
-            onChange={(e) => setSearchVal(e.target.value)}
-            className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            onClick={togglePopupForAddinOrganizations}
-            className="bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-          >
-            <HiPlus className="w-5 h-5" />
-            New
-          </button>
-        </div> */}
 
         <div className="overflow-x-auto border rounded-lg mt-5">
           <table className="w-full table-fixed border-collapse bg-white">
-            <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-              <tr>
-                <th className="p-3">Name</th>
-                <th className="p-3">Email</th>
+           <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+  <tr>
+    <th className="p-3 font-medium">Name</th>
+    <th className="p-3 font-medium">Email</th>
+    <th className="p-3 font-medium">Status</th>
+    <th className="p-3 font-medium">Added On</th>
+    <th className="p-3 font-medium">Customer ID</th>
+    <th className="p-3 font-medium">Role</th>
+    <th className="p-3 font-medium">Details</th>
+    <th className="p-3 font-medium text-right">Action</th>
+  </tr>
+</thead>
 
-                <th className="p-3">Status</th>
-                <th className="p-3">Added on</th>
-                <th className="p-3">Customer_Id</th>
-                <th className="p-3">Roles</th>
-                <th className="p-3">Details</th>
-                <th className="p-3 text-right">Action</th>
-              </tr>
-            </thead>
             <tbody>
               {filteredUsers.merchantGroups?.map((group) => {
                 const merchant = group.merchant;
@@ -577,7 +543,10 @@ const OnBoard = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="p-3 text-xs text-gray-500"> {user.email}</td>
+                          <td className="p-3 text-xs text-gray-500">
+                            {" "}
+                            {user.email}
+                          </td>
 
                           <td className="p-3">{user.status}</td>
                           <td className="p-3">{user.addedOn}</td>
@@ -811,7 +780,7 @@ const OnBoard = () => {
                                   <input
                                     type="checkbox"
                                     checked={selectedModules.includes(
-                                      subModule
+                                      subModule,
                                     )}
                                     onChange={() =>
                                       handleModuleSelection(subModule)

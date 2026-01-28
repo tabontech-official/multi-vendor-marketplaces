@@ -377,7 +377,7 @@ const ManageCategory = () => {
       ) : (
         <>
           <table className="w-full border-collapse bg-white border rounded-2xl">
-            <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0 text-left">
+            <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0 text-left">
               <tr>
                 <th className="p-1">
                   <input

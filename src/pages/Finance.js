@@ -413,10 +413,12 @@ const Finance = () => {
 
   return user ? (
     <main className="w-full p-4 md:p-8">
-      <div className="flex flex-col md:flex-row md:justify-between items-start border-gray-200 pb-4">
-        <div className="flex-1">
-          <h1 className="text-2xl font-semibold mb-1">Finance</h1>
-        </div>
+      <div className="flex-1">
+        <h1 className="text-2xl font-semibold mb-1">Finance</h1>
+        <p className="text-sm text-gray-500">
+          Track payouts, commissions, and due amounts in one place to manage all
+          financial activities efficiently.
+        </p>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 border-b pb-2 gap-4">

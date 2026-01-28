@@ -142,7 +142,7 @@ const ManageSizeChart = () => {
 
         <div className="overflow-auto border rounded-lg bg-white shadow-sm">
           <table className="w-full">
-            <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0 text-left">
+            <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0 text-left">
               <tr>
                 <th className="p-3">Image</th>
                 <th className="p-3">Name</th>

@@ -113,7 +113,7 @@ const App = () => {
   return (
     <NotificationProvider>
       <Router>
-              <ToastContainer position="top-right" autoClose={3000} />
+        <ToastContainer position="top-right" autoClose={3000} />
 
         <Routes>
           <Route path="/" element={<Layout />}>
@@ -142,7 +142,7 @@ const App = () => {
               path="/manage-categories"
               element={<PrivateRoute element={<ManageCategory />} />}
             />
-              <Route
+            <Route
               path="/manage-size-chart"
               element={<PrivateRoute element={<ManageSizeChart />} />}
             />
@@ -150,13 +150,13 @@ const App = () => {
               path="/create-size-chart"
               element={<PrivateRoute element={<CreateSizeChart />} />}
             />
-              <Route
+            <Route
               path="/manage-options"
               element={<PrivateRoute element={<ManageVariantOptions />} />}
             />
-              <Route path="/invoice-preview" element={<InvoicePreview />} />
+            <Route path="/invoice-preview" element={<InvoicePreview />} />
 
-              <Route
+            <Route
               path="/manage-shipping"
               element={<PrivateRoute element={<ManageShippingProfiles />} />}
             />
@@ -170,11 +170,14 @@ const App = () => {
               path="/add/option"
               element={<PrivateRoute element={<AddVariantOption />} />}
             />
-             <Route
+            <Route
               path="/finance-setting"
               element={<PrivateRoute element={<FinanceSetting />} />}
             />
-            <Route path="/notification-setting" element={<NotificationSettings />} />
+            <Route
+              path="/notification-setting"
+              element={<NotificationSettings />}
+            />
 
             <Route
               path="/user-requests/:id"
@@ -234,8 +237,8 @@ const App = () => {
               path="/finance"
               element={<ProtectedForms element={<Finance />} />}
             />
-             <Route
-              path="/approval"
+            <Route
+              path="/manage-approvals"
               element={<ProtectedForms element={<ApprovalPage />} />}
             />
             <Route
@@ -259,10 +262,21 @@ const App = () => {
               path="/Order_Details"
               element={<ProtectedForms element={<SubscriptionHistory />} />}
             />
-             <Route
+            <Route
               path="/settings"
-              element={<ProtectedForms element={<Settings />} />}
+              element={
+                <ProtectedForms
+                  element={
+                    role === "Dev Admin" || role === "Master Admin" ? (
+                      <Navigate to="/notification-setting" replace />
+                    ) : (
+                      <Navigate to="/manage-user" replace />
+                    )
+                  }
+                />
+              }
             />
+
             <Route
               path="/approval-setting"
               element={<ProtectedForms element={<Approval />} />}

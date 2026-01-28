@@ -152,74 +152,74 @@
 //                   )}
 //                 </button>
 
-//                 {isNotificationOpen && (
-//                   <div className="absolute right-0 mt-3 w-96 bg-white rounded-lg shadow-lg border z-30 overflow-hidden">
-//                     <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 text-gray-800 font-semibold">
-//                       <div className="flex items-center gap-2">
-//                         <BsMegaphoneFill className="text-blue-600" />
-//                         <span>Latest Updates</span>
-//                       </div>
-//                       <a
-//                         href="/notifications"
-//                         className="text-blue-600 text-sm hover:underline"
-//                       >
-//                         Show all
-//                       </a>
-//                     </div>
+            //     {isNotificationOpen && (
+            //       <div className="absolute right-0 mt-3 w-96 bg-white rounded-lg shadow-lg border z-30 overflow-hidden">
+            //         <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 text-gray-800 font-semibold">
+            //           <div className="flex items-center gap-2">
+            //             <BsMegaphoneFill className="text-blue-600" />
+            //             <span>Latest Updates</span>
+            //           </div>
+            //           <a
+            //             href="/notifications"
+            //             className="text-blue-600 text-sm hover:underline"
+            //           >
+            //             Show all
+            //           </a>
+            //         </div>
 
-//                     <ul className="max-h-96 overflow-y-auto text-sm text-gray-700 divide-y">
-//                       {notifications
-//                         .sort(
-//                           (a, b) =>
-//                             new Date(b.createdAt) - new Date(a.createdAt)
-//                         )
-//                         .slice(0, 5)
-//                         .map((note) => {
-//                           return (
-//                             <li
-//                               key={note._id || note.id}
-//                               className="px-4 py-3 hover:bg-gray-50 transition"
-//                             >
-//                               <div className="flex gap-3 items-start">
-//                                 <div className="pt-1">
-//                                   <FaUserCircle
-//                                     className="text-blue-500"
-//                                     size={20}
-//                                   />
-//                                 </div>
-//                                 <div className="flex-1">
-//                                   <p className="text-xs text-gray-500">
-//                                     {new Date(
-//                                       note.createdAt
-//                                     ).toLocaleDateString("en-GB")}{" "}
-//                                     •{" "}
-//                                     <span className="capitalize">
-//                                       {note.firstName || "User"}{" "}
-//                                       {note.lastName || ""}
-//                                     </span>
-//                                   </p>
-//                                   <p className="text-sm mt-0.5">
-//                                     {note.message || "No message."}
-//                                   </p>
-//                                 </div>
-//                               </div>
-//                             </li>
-//                           );
-//                         })}
-//                     </ul>
+            //         <ul className="max-h-96 overflow-y-auto text-sm text-gray-700 divide-y">
+            //           {notifications
+            //             .sort(
+            //               (a, b) =>
+            //                 new Date(b.createdAt) - new Date(a.createdAt)
+            //             )
+            //             .slice(0, 5)
+            //             .map((note) => {
+            //               return (
+            //                 <li
+            //                   key={note._id || note.id}
+            //                   className="px-4 py-3 hover:bg-gray-50 transition"
+            //                 >
+            //                   <div className="flex gap-3 items-start">
+            //                     <div className="pt-1">
+            //                       <FaUserCircle
+            //                         className="text-blue-500"
+            //                         size={20}
+            //                       />
+            //                     </div>
+            //                     <div className="flex-1">
+            //                       <p className="text-xs text-gray-500">
+            //                         {new Date(
+            //                           note.createdAt
+            //                         ).toLocaleDateString("en-GB")}{" "}
+            //                         •{" "}
+            //                         <span className="capitalize">
+            //                           {note.firstName || "User"}{" "}
+            //                           {note.lastName || ""}
+            //                         </span>
+            //                       </p>
+            //                       <p className="text-sm mt-0.5">
+            //                         {note.message || "No message."}
+            //                       </p>
+            //                     </div>
+            //                   </div>
+            //                 </li>
+            //               );
+            //             })}
+            //         </ul>
 
-//                     <div className="border-t px-4 py-3 text-center bg-gray-50">
-//                       <a
-//                         href="/notifications"
-//                         className="text-blue-600 text-sm font-medium hover:underline"
-//                       >
-//                         View full history →
-//                       </a>
-//                     </div>
-//                   </div>
-//                 )}
-//               </li>
-//             )}
+            //         <div className="border-t px-4 py-3 text-center bg-gray-50">
+            //           <a
+            //             href="/notifications"
+            //             className="text-blue-600 text-sm font-medium hover:underline"
+            //           >
+            //             View full history →
+            //           </a>
+            //         </div>
+            //       </div>
+            //     )}
+            //   </li>
+            // )}
 //             {isLoggedIn && role === "Dev Admin" && (
 //               <li>
 //                 <Link
@@ -451,16 +451,70 @@ const Navbar = () => {
                   )}
                 </button>
 
-                {isNotificationOpen && (
-                  <div className="absolute right-0 mt-4 w-80 md:w-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-[60] overflow-hidden text-left">
-                    {/* ... (Your notification content remains same) */}
-                    <div className="flex items-center justify-between px-4 py-2 border-b bg-[#F3F4F6] text-gray-800 font-semibold">
-                       <div className="flex items-center gap-2">
-                         <BsMegaphoneFill className="text-zinc-800" />
-                         <span className="text-xs uppercase tracking-wider">Updates</span>
-                       </div>
+                              {isNotificationOpen && (
+                  <div className="absolute right-0 mt-3 w-96 bg-white rounded-lg shadow-lg border z-30 overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 text-gray-800 font-semibold">
+                      <div className="flex items-center gap-2">
+                        <BsMegaphoneFill className="text-blue-600" />
+                        <span>Latest Updates</span>
+                      </div>
+                      <a
+                        href="/notifications"
+                        className="text-blue-600 text-sm hover:underline"
+                      >
+                        Show all
+                      </a>
                     </div>
-                    {/* Notification list mapping logic here */}
+
+                    <ul className="max-h-96 overflow-y-auto text-sm text-gray-700 divide-y">
+                      {notifications
+                        .sort(
+                          (a, b) =>
+                            new Date(b.createdAt) - new Date(a.createdAt)
+                        )
+                        .slice(0, 5)
+                        .map((note) => {
+                          return (
+                            <li
+                              key={note._id || note.id}
+                              className="px-4 py-3 hover:bg-gray-50 transition"
+                            >
+                              <div className="flex gap-3 items-start">
+                                <div className="pt-1">
+                                  <FaUserCircle
+                                    className="text-blue-500"
+                                    size={20}
+                                  />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-xs text-gray-500">
+                                    {new Date(
+                                      note.createdAt
+                                    ).toLocaleDateString("en-GB")}{" "}
+                                    •{" "}
+                                    <span className="capitalize">
+                                      {note.firstName || "User"}{" "}
+                                      {note.lastName || ""}
+                                    </span>
+                                  </p>
+                                  <p className="text-sm mt-0.5">
+                                    {note.message || "No message."}
+                                  </p>
+                                </div>
+                              </div>
+                            </li>
+                          );
+                        })}
+                    </ul>
+
+                    <div className="border-t px-4 py-3 text-center bg-gray-50">
+                      <a
+                        href="/notifications"
+                        className="text-blue-600 text-sm font-medium hover:underline"
+                      >
+                        View full history →
+                      </a>
+                    </div>
                   </div>
                 )}
               </li>

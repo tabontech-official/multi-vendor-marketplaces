@@ -245,30 +245,44 @@ const ManageRequests = () => {
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="flex justify-between items-center pb-4 border-b">
-        <div className="flex items-center gap-2">
-          <FaShoppingBasket className="text-gray-700" size={24} />
-          <h1 className="text-2xl font-semibold text-gray-800">
-            Cancellation Requests
-          </h1>
-        </div>
+     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 pb-4 gap-4">
 
-        <div className="h-10 min-w-[180px] bg-blue-100 text-blue-700 px-4 flex items-center justify-center rounded-md font-medium">
-          Total Requests: {totalRequests}
-        </div>
-      </div>
+  {/* Left: Title */}
+  <div className="flex-1 flex items-center gap-2">
+    <FaShoppingBasket className="text-gray-700" size={20} />
+    <div>
+      <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
+        Cancellation Requests
+      </h1>
+      <p className="text-sm text-gray-500">
+        Manage cancellation requests here.
+      </p>
+    </div>
+  </div>
+
+  {/* Center: Search (same as dashboard) */}
+  <div className="flex-1 w-full max-w-sm mx-auto">
+    <input
+      type="text"
+      placeholder="Search by Order No, Name, or Email"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-full p-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+    />
+  </div>
+
+  {/* Right: Total Requests */}
+  <div className="flex-1 flex justify-end">
+    <div className="bg-blue-100 text-blue-700 px-3 h-8 text-sm font-medium rounded-md flex items-center shadow-sm">
+      Total Requests: {totalRequests}
+    </div>
+  </div>
+
+</div>
+
 
       {/* Search */}
-      <div className="mt-4 mb-4">
-        <input
-          type="text"
-          placeholder="Search by Order No, Name, or Email"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          className="w-full md:w-1/2 border border-gray-300 px-4 py-2 rounded-md focus:ring focus:ring-blue-100"
-        />
-      </div>
-
+    
       {/* Table */}
       {isLoading ? (
         <div className="flex justify-center items-center py-10 text-gray-500">
@@ -278,7 +292,7 @@ const ManageRequests = () => {
       ) : (
         <div className="overflow-auto border rounded-lg bg-white shadow-sm">
           <table className="w-full">
-            <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+              <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0 text-left">
               <tr>
                 <th className="p-3">Order No</th>
                 <th className="p-3">Placed On</th>

@@ -75,31 +75,35 @@ const Layout = () => {
         <Outlet />
       </div>
       <ApprovalPopup />
-      <footer className="text-white py-4 bg-gradient-to-r h-[10vh] from-blue-600 to-[#18262f] left-0 bottom-0 w-full">
-        <div className="container mx-auto flex flex-col items-center justify-center">
-          <p className="text-center text-sm">
-            © Copyright 2020-2024{" "}
-            <span className="font-semibold">AYDI Marketplace</span>, All rights
-            reserved.
-          </p>
-          <div className="mt-2 text-center text-xs">
-            <a
-              href="/policy"
-              className="hover:text-gray-300 transition duration-300"
-            >
-              Privacy Policy
-            </a>{" "}
-            |
-            <a
-              href="/policy"
-              className="hover:text-gray-300 transition duration-300"
-            >
-              {" "}
-              Terms of Service
-            </a>
-          </div>
-        </div>
-      </footer>
+     <footer className="text-gray-400 py-4 bg-black border-t border-white/5 w-full flex items-center">
+  <div className="container mx-auto flex flex-col items-center justify-center">
+    <p className="text-center text-xs opacity-80 font-normal">
+      © Copyright 2020–2026{" "}
+      <span className="font-semibold text-white">
+        AYDI Marketplace
+      </span>, All Rights Reserved.
+    </p>
+
+    <div className="mt-2 text-center text-xs flex items-center space-x-3 font-normal">
+      <a
+        href="/policy"
+        className="hover:text-white transition-colors duration-300"
+      >
+        Privacy Policy
+      </a>
+
+      <span className="text-gray-700">|</span>
+
+      <a
+        href="/policy"
+        className="hover:text-white transition-colors duration-300"
+      >
+        Terms of Service
+      </a>
+    </div>
+  </div>
+</footer>
+
     </div>
   );
 };

@@ -1124,8 +1124,8 @@ const Dashboard = () => {
        
           <div className="w-full overflow-x-auto border rounded-lg bg-white shadow-sm">
             
-            <table className="min-w-full border-collapse text-sm">
-              <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0">
+            <table className="min-w-full border-collapse text-medium">
+              <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0">
                 <tr>
                   <th className="p-3 text-left">
                     <input

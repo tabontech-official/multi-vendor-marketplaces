@@ -335,7 +335,7 @@ const ManageShippingProfiles = () => {
 
         <div className="overflow-x-auto">
           <table className="min-w-full border border-gray-200 divide-y divide-gray-200">
-              <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0">
+              <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0">
               <tr>
                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
                   Profile Name

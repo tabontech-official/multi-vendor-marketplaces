@@ -24,6 +24,7 @@ const CategorySelector = () => {
   const { id } = useParams();
   const isEditing = Boolean(id);
   const [dragIndex, setDragIndex] = useState(null);
+  const [bulkQuantity, setBulkQuantity] = useState("");
 
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateMode, setDuplicateMode] = useState("copy");
@@ -4460,6 +4461,21 @@ const CategorySelector = () => {
                     />
                   </div>
                 </div>
+                <div className="mb-6">
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Quantity
+                  </label>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={bulkQuantity}
+                    onChange={(e) => setBulkQuantity(e.target.value)}
+                    placeholder="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg
+      focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
+                </div>
 
                 <div className="flex justify-end gap-3 border-t pt-4">
                   <button
@@ -4473,6 +4489,7 @@ const CategorySelector = () => {
                     onClick={() => {
                       const updatedPrices = {};
                       const updatedComparePrices = {};
+                      const updatedQuantities = {};
 
                       combinations.forEach((combination, index) => {
                         combination.children.forEach((child) => {
@@ -4486,6 +4503,9 @@ const CategorySelector = () => {
                             updatedComparePrices[key] =
                               parseFloat(bulkCompareAtPrice);
                           }
+                          if (bulkQuantity !== "") {
+                            updatedQuantities[key] = parseInt(bulkQuantity, 10);
+                          }
                         });
                       });
 
@@ -4497,11 +4517,16 @@ const CategorySelector = () => {
                         ...prev,
                         ...updatedComparePrices,
                       }));
+                      setVariantQuantities((prev) => ({
+                        ...prev,
+                        ...updatedQuantities,
+                      }));
 
                       setIsChanged(true);
                       setShowBulkModal(false);
                       setBulkPrice("");
                       setBulkCompareAtPrice("");
+                      setBulkQuantity("");
                     }}
                     className="px-5 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-md transition active:scale-95"
                   >

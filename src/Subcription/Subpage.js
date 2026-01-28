@@ -345,23 +345,21 @@ const SubscriptionHistory = () => {
     handleSearch();
   }, [searchVal]);
 
-const getOrderStatus = (items) => {
-  if (!items || !items.length) return "Unfulfilled";
+  const getOrderStatus = (items) => {
+    if (!items || !items.length) return "Unfulfilled";
 
-  const statuses = items.map((i) => i.fulfillment_status);
+    const statuses = items.map((i) => i.fulfillment_status);
 
-  if (statuses.includes("cancelled")) return "Cancelled";
+    if (statuses.includes("cancelled")) return "Cancelled";
 
-  const fulfilledCount = statuses.filter((s) => s === "fulfilled").length;
-  const unfulfilledCount = statuses.filter((s) => s === null).length;
+    const fulfilledCount = statuses.filter((s) => s === "fulfilled").length;
+    const unfulfilledCount = statuses.filter((s) => s === null).length;
 
-  if (fulfilledCount > 0 && unfulfilledCount > 0) return "Partial";
-  if (fulfilledCount === statuses.length) return "Fulfilled";
+    if (fulfilledCount > 0 && unfulfilledCount > 0) return "Partial";
+    if (fulfilledCount === statuses.length) return "Fulfilled";
 
-  return "Unfulfilled";
-};
-
-
+    return "Unfulfilled";
+  };
 
   return (
     <div
@@ -371,39 +369,40 @@ const getOrderStatus = (items) => {
     >
       <div className="flex">
         <div className="pt-4 min-w-full px-3 bg-white  rounded-lg">
-          <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 pb-4 gap-4">
+            {/* LEFT: Title */}
             <div className="flex-1">
-              <h1 className="text-2xl font-semibold mb-1">Manage orders</h1>
-              <p className="text-gray-600">Here you can manage orders.</p>
-              <div className="w-2/4 max-sm:w-full mt-2">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchVal}
-                  onChange={(e) => setSearchVal(e.target.value)}
-                  className="md:w-2/4 p-2 max-sm:w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
+                Manage orders
+              </h1>
+              <p className="text-sm text-gray-500">
+                Here you can manage orders.
+              </p>
             </div>
-            <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
-              <div className="flex flex-col gap-4 items-center w-full justify-end">
-                <div className="flex gap-4 items-center justify-end w-full">
-                  <button
-                    onClick={togglePopup}
-                    className="bg-blue-500 hover:bg-blue-400 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-                  >
-                    <FaFileImport className="w-5 h-5" />
-                    Export
-                  </button>
 
-                  {/* <button
-                    onClick={() => console.log("Manage Shipping clicked")}
-                    className="bg-green-600 hover:bg-green-500 text-white gap-2 py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center space-x-2"
-                  >
-                    Manage Shipping
-                  </button> */}
-                </div>
-              </div>
+            {/* CENTER: Search */}
+            <div className="flex-1 w-full max-w-sm mx-auto">
+              <input
+                type="text"
+                placeholder="Search orders..."
+                value={searchVal}
+                onChange={(e) => setSearchVal(e.target.value)}
+                className="w-full p-1.5 text-sm border border-gray-300 rounded-md
+        focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+              />
+            </div>
+
+            {/* RIGHT: Actions */}
+            <div className="flex-1 flex items-center justify-end gap-2 w-full">
+              <button
+                onClick={togglePopup}
+                className="bg-gray-400 border border-gray-300 hover:bg-gray-500
+        text-gray-800 px-3 h-8 text-sm font-medium rounded-md
+        flex items-center gap-1.5 shadow-sm"
+              >
+                <FaFileImport className="w-4 h-4" />
+                Export
+              </button>
             </div>
           </div>
 
@@ -416,7 +415,7 @@ const getOrderStatus = (items) => {
             ) : (
               <div className="max-sm:overflow-auto border rounded-lg">
                 <table className="w-full border-collapse bg-white">
-                  <thead className="bg-gray-100 text-left text-gray-600 text-xs">
+              <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0 text-left">
                     <tr>
                       <th scope="col" className="p-3">
                         #
@@ -551,21 +550,21 @@ const getOrderStatus = (items) => {
                                           : "Unfulfilled"}
                                     </span>
                                   </td> */}
-<td className="p-3">
-  <span
-    className={`px-2 py-1 rounded text-xs font-medium ${
-      orderStatus === "Fulfilled"
-        ? "bg-green-200 text-green-800"
-        : orderStatus === "Cancelled"
-        ? "bg-red-200 text-red-800"
-        : orderStatus === "Partial"
-        ? "bg-blue-200 text-blue-800"
-        : "bg-yellow-200 text-yellow-800"
-    }`}
-  >
-    {orderStatus}
-  </span>
-</td>
+                                  <td className="p-3">
+                                    <span
+                                      className={`px-2 py-1 rounded text-xs font-medium ${
+                                        orderStatus === "Fulfilled"
+                                          ? "bg-green-200 text-green-800"
+                                          : orderStatus === "Cancelled"
+                                            ? "bg-red-200 text-red-800"
+                                            : orderStatus === "Partial"
+                                              ? "bg-blue-200 text-blue-800"
+                                              : "bg-yellow-200 text-yellow-800"
+                                      }`}
+                                    >
+                                      {orderStatus}
+                                    </span>
+                                  </td>
 
                                   <td className="p-3">
                                     ${totalPrice.toFixed(2)}
@@ -580,7 +579,9 @@ const getOrderStatus = (items) => {
                             subscription.customer?.default_address;
                           const firstItem = subscription.lineItems?.[0];
                           if (!firstItem) return null;
-const orderStatus = getOrderStatus(subscription.lineItems);
+                          const orderStatus = getOrderStatus(
+                            subscription.lineItems,
+                          );
 
                           return (
                             <tr
@@ -661,20 +662,20 @@ const orderStatus = getOrderStatus(subscription.lineItems);
                                 </span>
                               </td> */}
                               <td className="p-3">
-  <span
-    className={`px-2 py-1 rounded text-xs font-medium ${
-      orderStatus === "Fulfilled"
-        ? "bg-green-200 text-green-800"
-        : orderStatus === "Cancelled"
-        ? "bg-red-200 text-red-800"
-        : orderStatus === "Partial"
-        ? "bg-blue-200 text-blue-800"
-        : "bg-yellow-200 text-yellow-800"
-    }`}
-  >
-    {orderStatus}
-  </span>
-</td>
+                                <span
+                                  className={`px-2 py-1 rounded text-xs font-medium ${
+                                    orderStatus === "Fulfilled"
+                                      ? "bg-green-200 text-green-800"
+                                      : orderStatus === "Cancelled"
+                                        ? "bg-red-200 text-red-800"
+                                        : orderStatus === "Partial"
+                                          ? "bg-blue-200 text-blue-800"
+                                          : "bg-yellow-200 text-yellow-800"
+                                  }`}
+                                >
+                                  {orderStatus}
+                                </span>
+                              </td>
 
                               {/* <td className="p-3">
                                 $
@@ -736,7 +737,7 @@ const orderStatus = getOrderStatus(subscription.lineItems);
               >
                 <div className="flex justify-between border-b border-gray-200">
                   <h2 className="text-md text-gray-600 font-semibold mb-2">
-                    Export products
+                    Export orders
                   </h2>
                   <RxCross1
                     onClick={() => setIsexportOpen(false)}
@@ -746,9 +747,9 @@ const orderStatus = getOrderStatus(subscription.lineItems);
 
                 <p className="text-sm mb-3 mt-3">
                   This CSV file can export all order information.
-                  <a href="#" className="text-blue-600 underline">
+                  {/* <a href="#" className="text-blue-600 underline">
                     CSV file for orders
-                  </a>
+                  </a> */}
                   .
                 </p>
 

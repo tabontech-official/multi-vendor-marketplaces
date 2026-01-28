@@ -266,7 +266,9 @@ const CreateCategory = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           <div className="bg-white border border-gray-300 rounded-xl shadow-sm p-4">
-            <label className="text-sm text-gray-600 font-medium mb-1 block">Title</label>
+            <label className="text-sm text-gray-600 font-medium mb-1 block">
+              Title
+            </label>
             <input
               type="text"
               placeholder="e.g. Summer collection, Under $100, Staff picks"
@@ -371,8 +373,9 @@ const CreateCategory = () => {
 
         <div className="space-y-6">
           <div className="bg-white border border-gray-300 rounded-xl shadow-sm p-4">
-                            <label className="text-sm text-gray-600 font-medium mb-1 block">
-Image</label>
+            <label className="text-sm text-gray-600 font-medium mb-1 block">
+              Image
+            </label>
             {image ? (
               <div className="relative">
                 <img

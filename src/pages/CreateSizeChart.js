@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
+import { FaArrowLeft } from "react-icons/fa";
 
 const CreateSizeChart = () => {
   const navigate = useNavigate();
@@ -56,15 +57,19 @@ const CreateSizeChart = () => {
         await axios.put(
           `https://multi-vendor-marketplace.vercel.app/size-chart/update/${editData._id}`,
           formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
+          { headers: { "Content-Type": "multipart/form-data" } },
         );
 
         showToast("success", "Size chart updated!");
       } else {
         // CREATE
-        await axios.post("https://multi-vendor-marketplace.vercel.app/size-chart/create", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await axios.post(
+          "https://multi-vendor-marketplace.vercel.app/size-chart/create",
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          },
+        );
 
         showToast("success", "Size chart created!");
       }
@@ -97,13 +102,35 @@ const CreateSizeChart = () => {
       )}
 
       <div className="p-6 mt-10 w-[600px] mx-auto border rounded-lg shadow-sm bg-white">
-        <h1 className="text-xl font-semibold mb-4">
+        <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gray-200">
+  <button
+    onClick={() => navigate(-1)}
+    className="p-2 rounded-md hover:bg-gray-100 transition"
+  >
+    <FaArrowLeft className="text-gray-700" />
+  </button>
+
+  <div>
+    <h1 className="text-lg font-semibold text-gray-900">
+      {editData ? "Edit Size Chart" : "Create Size Chart"}
+    </h1>
+    <p className="text-xs text-gray-500">
+      {editData
+        ? "Update existing size chart"
+        : "Create a new size chart for products"}
+    </p>
+  </div>
+</div>
+
+        {/* <h1 className="text-xl font-semibold text-gray-900 mb-4">
           {editData ? "Edit Size Chart" : "Create Size Chart"}
-        </h1>
+        </h1> */}
 
         {/* Title */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Title</label>
+          <label className="text-sm text-gray-600 font-medium mb-2 block ">
+            Title
+          </label>
           <input
             type="text"
             placeholder="Enter chart title"
@@ -115,12 +142,15 @@ const CreateSizeChart = () => {
 
         {/* Media */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Media</label>
+          <label className="text-sm text-gray-600 font-medium mb-2 block ">
+            Media
+          </label>
 
           <div className="border border-dashed p-6 rounded-md flex flex-col items-center justify-center text-center">
             {!preview ? (
               <>
-                <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                <label  className="bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
+>
                   Upload new
                   <input
                     type="file"
@@ -140,7 +170,7 @@ const CreateSizeChart = () => {
                   className="w-40 h-40 object-cover border rounded mb-3"
                 />
 
-                <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <label className="cursor-pointer  bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50">
                   Replace Image
                   <input
                     type="file"
@@ -157,7 +187,7 @@ const CreateSizeChart = () => {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="bg-blue-600 w-full text-white py-2 rounded-md hover:bg-blue-700 flex items-center justify-center"
+          className="w-full bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
         >
           {loading ? (
             <span className="loader-white"></span>

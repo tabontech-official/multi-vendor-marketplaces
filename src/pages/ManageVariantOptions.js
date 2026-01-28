@@ -233,75 +233,57 @@ const [editOptionValuesText, setEditOptionValuesText] = useState("");
         </div>
       )}
 
-      <div className="flex justify-between items-center pb-4 border-b">
-        <div className="flex items-center space-x-2">
-          <IoOptionsOutline size={26} className="text-gray-700" />
-          <h1 className="font-semibold text-2xl text-gray-800">
-            Manage Variant Options
-          </h1>
-        </div>
+     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 pb-4 gap-4">
+  {/* LEFT: Title */}
+  <div className="flex items-center gap-2">
+    <IoOptionsOutline size={22} className="text-gray-600" />
+    <div>
+      <h1 className="font-semibold text-xl text-gray-900">
+        Manage Variant Options
+      </h1>
+      <p className="text-sm text-gray-500">
+        Create and manage product variant options
+      </p>
+    </div>
+  </div>
 
-        {/* <div className="flex space-x-2">
-          {selectedOptionIds.length > 0 && (
-            <button
-              onClick={handleDeleteOptions}
-              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-            >
-              Delete
-            </button>
-          )}
-          <button
-            onClick={handleExport}
-            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-          >
-            Export
-          </button>
-          <button
-            onClick={() => setShowModal(true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-          >
-            Import CSV
-          </button>
-          <button
-            onClick={() => navigate("/add/option")}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-          >
-            Add Option
-          </button>
-        </div> */}
-        <div className="flex space-x-2">
-  {selectedOptionIds.length > 0 && (
+  {/* RIGHT: Actions */}
+  <div className="flex flex-wrap items-center justify-end gap-2">
+    {selectedOptionIds.length > 0 && (
+      <button
+        onClick={handleDeleteOptions}
+        className="h-8 px-3 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-md shadow-sm"
+      >
+        Delete
+      </button>
+    )}
+
     <button
-      onClick={handleDeleteOptions}
-      className="h-10 min-w-[120px] bg-red-500 text-white px-4 rounded-md hover:bg-red-600"
+      onClick={handleExport}
+      className="h-8 px-3 bg-gray-400 border border-gray-300 hover:bg-gray-500
+        text-gray-800 text-sm font-medium rounded-md shadow-sm"
     >
-      Delete
+      Export
     </button>
-  )}
 
-  <button
-    onClick={handleExport}
-    className="h-10 min-w-[120px] bg-blue-500 text-white px-4 rounded-md hover:bg-blue-600"
-  >
-    Export
-  </button>
+    <button
+      onClick={() => setShowModal(true)}
+      className="h-8 px-3 bg-gray-400 border border-gray-300 hover:bg-gray-500
+        text-gray-800 text-sm font-medium rounded-md shadow-sm"
+    >
+      Import CSV
+    </button>
 
-  <button
-    onClick={() => setShowModal(true)}
-    className="h-10 min-w-[120px] bg-blue-500 text-white px-4 rounded-md hover:bg-blue-600"
-  >
-    Import CSV
-  </button>
-
-  <button
-    onClick={() => navigate("/add/option")}
-    className="h-10 min-w-[120px] bg-blue-500 text-white px-4 rounded-md hover:bg-blue-600"
-  >
-    Add Option
-  </button>
+    <button
+      onClick={() => navigate("/add/option")}
+      className="h-8 px-3 bg-gray-800 hover:bg-gray-900
+        text-white text-sm font-medium rounded-md shadow-sm"
+    >
+      Add Option
+    </button>
+  </div>
 </div>
 
-      </div>
 
       {error && <div className="text-red-500 mt-3">{error}</div>}
 
@@ -398,78 +380,100 @@ const [editOptionValuesText, setEditOptionValuesText] = useState("");
         </table>
       )}
 
-      <AnimatePresence>
-        {showModal && (
-          <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+     <AnimatePresence>
+  {showModal && (
+    <motion.div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative border border-gray-200"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+      >
+        {/* HEADER */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Import Variant Options
+          </h2>
+          <button
+            onClick={() => setShowModal(false)}
+            className="text-gray-400 hover:text-gray-700 transition"
           >
-            <motion.div
-              className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-            >
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">
-                Import Variant Options
-              </h2>
+            ✕
+          </button>
+        </div>
 
-              <div
-                className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 transition"
-                onClick={() => document.getElementById("csvInput").click()}
-              >
-                <input
-                  id="csvInput"
-                  type="file"
-                  accept=".csv"
-                  onChange={(e) => setFile(e.target.files[0])}
-                  className="hidden"
-                />
-                {file ? (
-                  <p className="text-gray-700">📄 {file.name}</p>
-                ) : (
-                  <p className="text-gray-500">
-                    Drag & drop or click to choose a CSV file
-                  </p>
-                )}
-              </div>
+        {/* UPLOAD BOX */}
+        <div
+          className="border-2 border-dashed border-gray-300 rounded-lg p-6
+            text-center cursor-pointer hover:border-gray-500
+            transition bg-gray-50"
+          onClick={() => document.getElementById("csvInput").click()}
+        >
+          <input
+            id="csvInput"
+            type="file"
+            accept=".csv"
+            onChange={(e) => setFile(e.target.files[0])}
+            className="hidden"
+          />
 
-              <div className="mt-4 text-sm text-gray-600 flex items-center justify-between">
-                <p>Need help with formatting?</p>
-                <a
-                  href="/variant_options_sample.csv"
-                  download
-                  className="text-blue-500 font-medium hover:underline"
-                >
-                  Download sample CSV
-                </a>
-              </div>
+          {file ? (
+            <p className="text-sm text-gray-800 font-medium">
+              📄 {file.name}
+            </p>
+          ) : (
+            <p className="text-sm text-gray-500">
+              Drag & drop or click to upload CSV
+            </p>
+          )}
+        </div>
 
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleImport}
-                  disabled={isImporting}
-                  className={`px-4 py-2 rounded-md text-white ${
-                    isImporting
-                      ? "bg-gray-400"
-                      : "bg-blue-500 hover:bg-blue-600"
-                  }`}
-                >
-                  {isImporting ? "Importing..." : "Upload"}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* HELP */}
+        <div className="mt-4 text-xs text-gray-500 flex items-center justify-between">
+          <span>Need help with formatting?</span>
+          <a
+            href="/variant_options_sample.csv"
+            download
+            className="text-gray-800 font-medium hover:underline"
+          >
+            Download sample CSV
+          </a>
+        </div>
+
+        {/* ACTIONS */}
+        <div className="flex justify-end gap-2 mt-6">
+          <button
+            onClick={() => setShowModal(false)}
+            className="h-8 px-3 text-sm text-gray-600
+              border border-gray-300 rounded-md
+              hover:bg-gray-100 transition"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={handleImport}
+            disabled={isImporting}
+            className={`h-8 px-4 rounded-md text-sm font-medium text-white shadow-sm transition
+              ${
+                isImporting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gray-800 hover:bg-gray-900"
+              }`}
+          >
+            {isImporting ? "Importing..." : "Upload"}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
 
       <AnimatePresence>
         {editModal.show && (
@@ -485,12 +489,12 @@ const [editOptionValuesText, setEditOptionValuesText] = useState("");
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
             >
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
-                <IoOptionsOutline className="text-blue-500" size={22} />
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <IoOptionsOutline className="text-gray-500" size={22} />
                 Edit Variant Option
               </h2>
 
-              <label className="block mb-4">
+            <label className="text-sm text-gray-600 font-medium mb-4 block ">
                 <span className="text-gray-700 font-medium">Option Name</span>
                 <input
                   type="text"
@@ -534,7 +538,7 @@ const [editOptionValuesText, setEditOptionValuesText] = useState("");
                 />
               </label> */}
 
-<label className="block mb-4">
+            <label className="text-sm text-gray-600 font-medium mb-4 block">
   <span className="text-gray-700 font-medium">
     Aliases (comma separated)
   </span>
@@ -547,7 +551,7 @@ const [editOptionValuesText, setEditOptionValuesText] = useState("");
     className="w-full border border-gray-300 px-3 py-2 rounded-md mt-1 focus:ring focus:ring-blue-100"
   />
 </label>
-              <label className="block mb-4">
+            <label className="text-sm text-gray-600 font-medium mb-4 block">
                 <span className="text-gray-700 font-medium">
                   Option Values (comma separated)
                 </span>
@@ -564,13 +568,13 @@ const [editOptionValuesText, setEditOptionValuesText] = useState("");
               <div className="flex justify-end space-x-3 mt-6 border-t border-gray-100 pt-4">
                 <button
                   onClick={() => setEditModal({ show: false, option: null })}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100"
+              className="px-3 py-1.5 text-gray-800 font-medium border bg-gray-400 border-gray-300 hover:bg-gray-500 rounded-md flex items-center"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleEditSave}
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium"
+                  className="bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
                 >
                   Save Changes
                 </button>

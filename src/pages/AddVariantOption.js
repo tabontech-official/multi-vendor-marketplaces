@@ -26,7 +26,7 @@ const AddVariantOption = () => {
     const fetchOptions = async () => {
       try {
         const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
+          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions",
         );
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -46,7 +46,7 @@ const AddVariantOption = () => {
     }
 
     const match = existingOptions.find(
-      (opt) => opt.name?.toLowerCase() === name.trim().toLowerCase()
+      (opt) => opt.name?.toLowerCase() === name.trim().toLowerCase(),
     );
 
     setExistingMatch(match || null);
@@ -96,7 +96,7 @@ const AddVariantOption = () => {
             aliases: finalAliases,
             optionValues: cleanValues,
           }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -124,7 +124,7 @@ const AddVariantOption = () => {
     const existingAliases = Array.isArray(existingMatch.optionName)
       ? existingMatch.optionName.join(", ")
       : "";
-    setAliases(existingAliases); 
+    setAliases(existingAliases);
     showToast("info", "Existing aliases loaded. Add more if needed.");
   };
 
@@ -136,8 +136,8 @@ const AddVariantOption = () => {
             toast.type === "success"
               ? "bg-green-500"
               : toast.type === "info"
-              ? "bg-blue-500"
-              : "bg-red-500"
+                ? "bg-blue-500"
+                : "bg-red-500"
           } text-white`}
         >
           {toast.type === "success" ? (
@@ -152,14 +152,14 @@ const AddVariantOption = () => {
       <div className="w-full max-w-lg bg-white shadow-lg rounded-2xl p-10 border border-gray-200 relative">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <IoOptionsOutline className="text-blue-600" size={30} />
-            <h1 className="text-2xl font-semibold text-gray-800">
+            <IoOptionsOutline className="text-gray-900" size={30} />
+            <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
               Add Variant Option
             </h1>
           </div>
           <button
             onClick={() => navigate("/manage-variant-options")}
-            className="flex items-center text-gray-600 hover:text-gray-900 text-sm"
+            className="flex items-center font-medium text-gray-600 hover:text-gray-900 text-sm"
           >
             <HiOutlineArrowLeft className="mr-1" /> Back
           </button>
@@ -183,7 +183,7 @@ const AddVariantOption = () => {
         >
           {/* Option Name */}
           <div>
-            <label className="block text-gray-700 mb-2 text-sm font-medium">
+            <label className="text-sm text-gray-600 font-medium mb-1 block">
               Option Name
             </label>
             <input
@@ -236,7 +236,7 @@ const AddVariantOption = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2 text-sm font-medium">
+            <label className="text-sm text-gray-600 font-medium mb-1 block">
               Aliases (comma-separated)
             </label>
             <input
@@ -250,7 +250,7 @@ const AddVariantOption = () => {
 
           {/* Option Values */}
           <div>
-            <label className="block text-gray-700 mb-2 text-sm font-medium">
+            <label className="text-sm text-gray-600 font-medium mb-1 block">
               Option Values (comma-separated)
             </label>
             <input
@@ -266,18 +266,18 @@ const AddVariantOption = () => {
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
             <button
               type="button"
-              onClick={() => navigate("/manage-variant-options")}
-              className="px-5 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 flex items-center"
+              onClick={() => navigate("/manage-options")}
+              className="px-3 py-1.5 text-gray-800 font-medium border bg-gray-400 border-gray-300 hover:bg-gray-500 rounded-md flex items-center"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className={`px-5 py-2 rounded-md text-white font-medium flex items-center ${
+              className={`px-3 py-1.5 rounded-md text-white font-medium flex items-center ${
                 loading
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
+                  : "bg-[#18181b] text-white  rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
               }`}
             >
               {loading ? "Saving..." : "Save Option"}

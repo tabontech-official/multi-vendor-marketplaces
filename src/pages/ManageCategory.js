@@ -12,8 +12,6 @@ const ManageCategory = () => {
   const [filterLevel, setFilterLevel] = useState("");
   const [filterParent, setFilterParent] = useState("");
 
-
-
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
   const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
@@ -31,21 +29,20 @@ const ManageCategory = () => {
       loading...
     </div>
   );
-const filteredCategories = categories.filter((cat) => {
-  const matchesSearch =
-    cat.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cat.catNo.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredCategories = categories.filter((cat) => {
+    const matchesSearch =
+      cat.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cat.catNo.toLowerCase().includes(searchTerm.toLowerCase());
 
-  const matchesLevel =
-    filterLevel === "" ||
-    cat.level.toLowerCase() === filterLevel.toLowerCase();
+    const matchesLevel =
+      filterLevel === "" ||
+      cat.level.toLowerCase() === filterLevel.toLowerCase();
 
-  const matchesParent =
-    filterParent === "" || cat.parentCatNo === filterParent;
+    const matchesParent =
+      filterParent === "" || cat.parentCatNo === filterParent;
 
-  return matchesSearch && matchesLevel && matchesParent;
-});
-
+    return matchesSearch && matchesLevel && matchesParent;
+  });
 
   const handleReplaceMulti = async () => {
     for (let cat of conflictCategories) {
@@ -63,7 +60,7 @@ const filteredCategories = categories.filter((cat) => {
     try {
       await axios.put(
         "https://multi-vendor-marketplace.vercel.app/category/replaceAndDeleteCategory",
-        { replaceData }
+        { replaceData },
       );
 
       alert("Products moved & Categories deleted!");
@@ -108,7 +105,7 @@ const filteredCategories = categories.filter((cat) => {
 
     return Array.from(
       { length: endPage - startPage + 1 },
-      (_, i) => startPage + i
+      (_, i) => startPage + i,
     );
   };
 
@@ -129,15 +126,15 @@ const filteredCategories = categories.filter((cat) => {
               "x-api-secret": apiSecretKey,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         const data = await response.json();
 
         if (response.ok) {
-          setCategories(data.categories || []); 
+          setCategories(data.categories || []);
           setTotalPages(data.totalPages || 1);
-          
+
           setTotalCategories(data.totalCategories || 0);
         } else {
           setError(data.message || "Failed to fetch categories.");
@@ -154,22 +151,21 @@ const filteredCategories = categories.filter((cat) => {
   }, [page, limit]);
 
   const getHierarchy = (cat) => {
-  if (!cat.parentCatNo) return cat.title;
+    if (!cat.parentCatNo) return cat.title;
 
-  const parent = categories.find((c) => c.catNo === cat.parentCatNo);
-  if (!parent) return cat.title;
+    const parent = categories.find((c) => c.catNo === cat.parentCatNo);
+    if (!parent) return cat.title;
 
-  if (!parent.parentCatNo) {
-    return `${parent.title} > ${cat.title}`;
-  }
+    if (!parent.parentCatNo) {
+      return `${parent.title} > ${cat.title}`;
+    }
 
-  const grandParent = categories.find((c) => c.catNo === parent.parentCatNo);
+    const grandParent = categories.find((c) => c.catNo === parent.parentCatNo);
 
-  if (!grandParent) return `${parent.title} > ${cat.title}`;
+    if (!grandParent) return `${parent.title} > ${cat.title}`;
 
-  return `${grandParent.title} > ${parent.title} > ${cat.title}`;
-};
-
+    return `${grandParent.title} > ${parent.title} > ${cat.title}`;
+  };
 
   const handleButtonClick = () => {
     navigate("/create-categories");
@@ -180,7 +176,7 @@ const filteredCategories = categories.filter((cat) => {
         "https://multi-vendor-marketplace.vercel.app/category/getCsvForCategories",
         {
           method: "GET",
-        }
+        },
       );
 
       if (response.ok) {
@@ -213,16 +209,19 @@ const filteredCategories = categories.filter((cat) => {
     const apiSecretKey = localStorage.getItem("apiSecretKey");
 
     try {
-      await axios.delete("https://multi-vendor-marketplace.vercel.app/category/deleteCategory", {
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
+      await axios.delete(
+        "https://multi-vendor-marketplace.vercel.app/category/deleteCategory",
+        {
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+          data: {
+            categoryIds: selectedCategoryIds,
+          },
         },
-        data: {
-          categoryIds: selectedCategoryIds,
-        },
-      });
+      );
 
       alert("Selected categories deleted successfully!");
 
@@ -246,7 +245,7 @@ const filteredCategories = categories.filter((cat) => {
         {
           conflictCategoryIds: conflictCategories.map((c) => c._id),
           newName: replaceName,
-        }
+        },
       );
 
       alert("Collection updated successfully");
@@ -261,7 +260,7 @@ const filteredCategories = categories.filter((cat) => {
 
   const checkCategoryProductsBeforeDelete = () => {
     const conflicts = categories.filter(
-      (cat) => selectedCategoryIds.includes(cat._id) && cat.productCount > 0
+      (cat) => selectedCategoryIds.includes(cat._id) && cat.productCount > 0,
     );
 
     if (conflicts.length > 0) {
@@ -269,7 +268,7 @@ const filteredCategories = categories.filter((cat) => {
       setShowDeleteModal(false);
       setShowReplaceModal(true);
     } else {
-      performDelete(); 
+      performDelete();
     }
   };
   const handleImportCsv = async () => {
@@ -279,7 +278,7 @@ const filteredCategories = categories.filter((cat) => {
     }
 
     const formData = new FormData();
-    formData.append("file", importFile); 
+    formData.append("file", importFile);
 
     try {
       setIsImporting(true);
@@ -291,7 +290,7 @@ const filteredCategories = categories.filter((cat) => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       alert("CSV Imported Successfully!");
@@ -309,8 +308,8 @@ const filteredCategories = categories.filter((cat) => {
   };
 
   const [importLevel, setImportLevel] = useState("");
-  const [importParentCat1, setImportParentCat1] = useState(""); 
-  const [importParentCat2, setImportParentCat2] = useState(""); 
+  const [importParentCat1, setImportParentCat1] = useState("");
+  const [importParentCat2, setImportParentCat2] = useState("");
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showReplaceModal, setShowReplaceModal] = useState(false);
@@ -321,17 +320,33 @@ const filteredCategories = categories.filter((cat) => {
   const [isImporting, setIsImporting] = useState(false);
   return (
     <div className="p-4">
-      <div className="flex justify-between items-center p-4 border-b">
-        <div className="flex items-center space-x-2">
-          <IoPricetagsOutline size={24} className="text-gray-600" />
-          <h1 className="font-semibold text-xl">Collections</h1>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 p-4 gap-4">
+        {/* LEFT: Title */}
+        <div className="flex-1 flex items-center gap-2">
+          <IoPricetagsOutline size={22} className="text-gray-600" />
+          <div>
+            <h1 className="font-semibold text-xl text-gray-900">Collections</h1>
+          </div>
         </div>
 
-        <div className="flex space-x-2 mt-4">
+        {/* CENTER: Search */}
+        <div className="flex-1 w-full max-w-sm mx-auto">
+          <input
+            type="text"
+            placeholder="Search by title or ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full p-1.5 text-sm border border-gray-300 rounded-md
+        focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+          />
+        </div>
+
+        {/* RIGHT: Actions */}
+        <div className="flex-1 flex flex-wrap items-center justify-end gap-2 w-full">
           {selectedCategoryIds.length > 0 && (
             <button
-              className="bg-red-500 text-white px-4 py-1 border rounded-md"
               onClick={handleDeleteCategories}
+              className="bg-red-500 hover:bg-red-600 text-white px-3 h-8 text-sm font-medium rounded-md shadow-sm"
             >
               Delete Collection
             </button>
@@ -339,26 +354,20 @@ const filteredCategories = categories.filter((cat) => {
 
           <button
             onClick={handleExport}
-                className="bg-blue-500 hover:bg-blue-400 text-white w-32 h-10 rounded-md transition duration-300 ease-in-out flex items-center justify-center gap-2"
+            className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
           >
-                            <FaFileImport className="w-5 h-5" />
-            
-                <span>Export</span>
+            <FaFileImport className="w-4 h-4" />
+            <span>Export</span>
           </button>
+
           {(role === "Master Admin" || role === "Dev Admin") && (
             <button
               onClick={handleButtonClick}
-              className="bg-gray-800 text-white px-3 py-1 border rounded-md hover:bg-gray-900"
+              className="bg-gray-800 hover:bg-gray-900 text-white px-3 h-8 text-sm font-medium rounded-md shadow-sm"
             >
               Create Collection
             </button>
           )}
-          {/* <button
-            onClick={() => setShowImportModal(true)}
-            className="bg-blue-500 text-white px-4 py-1 border rounded-md hover:bg-blue-600"
-          >
-            Import CSV
-          </button> */}
         </div>
       </div>
 
@@ -367,22 +376,10 @@ const filteredCategories = categories.filter((cat) => {
         <Loader />
       ) : (
         <>
-          <div className="flex flex-wrap gap-4 p-4 bg-gray-100 rounded-md mb-4">
-            {/* SEARCH BOX */}
-            <input
-              type="text"
-              placeholder="Search by title or ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="border p-2 rounded w-64"
-            />
-
-           
-          </div>
           <table className="w-full border-collapse bg-white border rounded-2xl">
-            <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+            <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0 text-left">
               <tr>
-                <th className="p-3">
+                <th className="p-1">
                   <input
                     type="checkbox"
                     checked={
@@ -392,7 +389,7 @@ const filteredCategories = categories.filter((cat) => {
                     onChange={(e) => {
                       if (e.target.checked) {
                         setSelectedCategoryIds(
-                          categories.map((cat) => cat._id)
+                          categories.map((cat) => cat._id),
                         );
                       } else {
                         setSelectedCategoryIds([]);
@@ -400,16 +397,16 @@ const filteredCategories = categories.filter((cat) => {
                     }}
                   />
                 </th>
-                <th className="p-3">Hierarchy</th>
+                <th className="p-1">Hierarchy</th>
 
-                <th className="p-3">Id</th>
-                <th className="p-3">Level</th>
-                <th className="p-3">Title</th>
+                <th className="p-1">Id</th>
+                <th className="p-1">Level</th>
+                <th className="p-1">Title</th>
                 {(role === "Master Admin" || role === "Dev Admin") && (
-                  <th className="p-3">Products</th>
+                  <th className="p-1">Products</th>
                 )}
                 {(role === "Master Admin" || role === "Dev Admin") && (
-                  <th className="p-3">Published</th>
+                  <th className="p-1">Published</th>
                 )}
               </tr>
             </thead>
@@ -426,7 +423,7 @@ const filteredCategories = categories.filter((cat) => {
                           setSelectedCategoryIds((prev) => [...prev, cat._id]);
                         } else {
                           setSelectedCategoryIds((prev) =>
-                            prev.filter((id) => id !== cat._id)
+                            prev.filter((id) => id !== cat._id),
                           );
                         }
                       }}

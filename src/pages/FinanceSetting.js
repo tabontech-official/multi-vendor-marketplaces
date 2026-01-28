@@ -5,6 +5,7 @@ import { IoSettings } from "react-icons/io5";
 import { MdManageAccounts } from "react-icons/md";
 import { jwtDecode } from "jwt-decode";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
+import SettingsSidebar from "../component/SettingsSidebar";
 
 const FinanceSetting = () => {
   const [userRole, setUserRole] = useState(null);
@@ -180,45 +181,10 @@ const FinanceSetting = () => {
         </div>
       )}
 
-      <aside className="w-56 mt-3 mb-3 ml-4 rounded-2xl bg-blue-900 p-5 flex flex-col justify-between min-h-screen shadow-lg">
-        <div>
-          <div className="flex flex-col items-center border-b border-blue-700 pb-4">
-            <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center shadow-md">
-              <FaUser className="text-yellow-400 w-8 h-8" />
-            </div>
-            <h2 className="text-lg font-semibold text-white mt-3">
-              Business Account
-            </h2>
-          </div>
-
-          <nav className="mt-6 space-y-3">
-            {userRole === "Merchant" && (
-              <NavLink
-                to="/manage-user"
-                className="flex items-center px-3 py-2 rounded-md text-blue-200 hover:bg-blue-800"
-              >
-                <MdManageAccounts className="mr-2 text-lg" />
-                Manage User
-              </NavLink>
-            )}
-            <NavLink
-              to="/edit-account"
-              className="flex items-center px-3 py-2 rounded-md text-blue-200 hover:bg-blue-800"
-            >
-              <IoSettings className="mr-2 text-lg" /> Settings
-            </NavLink>
-            <NavLink
-              to="/finance-setting"
-              className="flex items-center px-3 py-2 rounded-md bg-yellow-400 text-blue-900"
-            >
-              <IoSettings className="mr-2 text-lg" /> Finance Settings
-            </NavLink>
-          </nav>
-        </div>
-      </aside>
+<SettingsSidebar/>
 
       <div className="flex-1 p-6 bg-white rounded-xl shadow-md m-4">
-        <h1 className="text-2xl font-bold text-blue-800 mb-6 flex items-center gap-2">
+        <h1 className=" text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
           <IoSettings /> Finance Settings
         </h1>
 
@@ -297,7 +263,7 @@ const FinanceSetting = () => {
               <button
                 onClick={() => handleSaveMerchantAccountDetails("paypal")}
                 disabled={loading}
-                className="px-6 py-2 bg-blue-700 text-white rounded-md hover:bg-blue-800"
+                className="bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
               >
                 {loading ? "Saving..." : "Save PayPal Details"}
               </button>
@@ -307,7 +273,7 @@ const FinanceSetting = () => {
 
         {activeTab === "bank" && (
           <div className="bg-gray-50 rounded-xl p-6 shadow-inner">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Bank Details
             </h2>
 
@@ -357,7 +323,7 @@ const FinanceSetting = () => {
               <button
                 onClick={() => handleSaveMerchantAccountDetails("bank")}
                 disabled={loading}
-                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                className="bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
               >
                 {loading ? "Saving..." : "Save Bank Details"}
               </button>

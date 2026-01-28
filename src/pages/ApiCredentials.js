@@ -5,6 +5,7 @@ import { MdManageAccounts } from "react-icons/md";
 import { IoSettings } from "react-icons/io5";
 import { jwtDecode } from "jwt-decode";
 import { HiPlus } from "react-icons/hi";
+import SettingsSidebar from "../component/SettingsSidebar";
 const ApiCredentials = () => {
   const [selectedModule, setSelectedModule] = useState("Api credentials");
   const [apiKey, setApiKey] = useState("");
@@ -94,121 +95,16 @@ const ApiCredentials = () => {
 
   return (
     <div className="flex">
-  <aside className="w-56 mt-3 mb-3 ml-4 rounded-2xl bg-blue-900 p-5 flex flex-col justify-between min-h-screen shadow-lg">
-          {/* Top: Profile */}
-          <div>
-            <div className="flex flex-col items-center border-b border-blue-700 pb-4">
-              <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center shadow-md">
-                <FaUser className="text-yellow-400 w-8 h-8" />
-              </div>
-  
-              <h2 className="text-lg font-semibold text-white mt-3">
-                Business Account
-              </h2>
-  
-              <div className="flex items-center mt-1 space-x-1">
-                <span className="text-yellow-400 font-semibold text-sm">6.0</span>
-                <div className="flex space-x-0.5">
-                  {[...Array(5)].map((_, index) => (
-                    <span key={index} className="text-yellow-400 text-sm">
-                      ★
-                    </span>
-                  ))}
-                </div>
-              </div>
-  
-              <p className="text-green-400 text-xs mt-1">
-                Profile is 75% complete
-              </p>
-            </div>
-  
-            {/* Navigation Links */}
-            <nav className="mt-6 space-y-3">
-              {userRole === "Merchant" && (
-                <NavLink
-                  to="/manage-user"
-                  className={({ isActive }) =>
-                    `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                      isActive
-                        ? "bg-yellow-400 text-blue-900"
-                        : "text-blue-200 hover:bg-blue-800"
-                    }`
-                  }
-                >
-                  <MdManageAccounts className="mr-2 text-lg" />
-                  <span className="text-sm font-medium">Manage User</span>
-                </NavLink>
-              )}
-              <NavLink
-                to="/edit-account"
-                className={({ isActive }) =>
-                  `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                    isActive
-                      ? "bg-yellow-400 text-blue-900"
-                      : "text-blue-200 hover:bg-blue-800"
-                  }`
-                }
-              >
-                <IoSettings className="mr-2 text-lg" />
-                <span className="text-sm font-medium">Settings</span>
-              </NavLink>
-  
-              <NavLink
-                to="/api-credentials"
-                className={({ isActive }) =>
-                  `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                    isActive
-                      ? "bg-yellow-400 text-blue-900"
-                      : "text-blue-200 hover:bg-blue-800"
-                  }`
-                }
-              >
-                <IoSettings className="mr-2 text-lg" />
-                <span className="text-sm font-medium">API Credentials</span>
-              </NavLink>
-                <NavLink
-                to="/finance-setting"
-                className={({ isActive }) =>
-                  `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                    isActive
-                      ? "bg-yellow-400 text-blue-900"
-                      : "text-blue-200 hover:bg-blue-800"
-                  }`
-                }
-              >
-                <IoSettings className="mr-2 text-lg" />
-                <span className="text-sm font-medium">Finance Settings</span>
-              </NavLink>
-              {(userRole === "Master Admin" || userRole === "Dev Admin") && (
-                <NavLink
-                  to="/approval-setting"
-                  className={({ isActive }) =>
-                    `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                      isActive
-                        ? "bg-yellow-400 text-blue-900"
-                        : "text-blue-200 hover:bg-blue-800"
-                    }`
-                  }
-                >
-                  <MdManageAccounts className="mr-2 text-lg" />
-                  <span className="text-sm font-medium">Approval Settings</span>
-                </NavLink>
-              )}
-            </nav>
-          </div>
-  
-          {/* Bottom: Promote Button */}
-         
-        </aside>
+<SettingsSidebar/>
 
 
       <div className="p-8 bg-gray-50 min-h-screen">
         <div className="max-w-3xl mx-auto space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
               API Credentials
             </h1>
-            <p className="text-gray-600 text-sm">
+            <p className="text-sm text-gray-500">
               Use these credentials to authenticate your app securely.
             </p>
             <a
@@ -223,7 +119,7 @@ const ApiCredentials = () => {
 
           <div className="bg-white border border-gray-200 rounded-lg shadow p-6 space-y-6">
             <div>
-              <label className="text-sm text-gray-600 mb-1 block">
+              <label className="text-sm text-gray-600 font-medium mb-1 block">
                 API Key
               </label>
               <div className="relative">
@@ -243,7 +139,7 @@ const ApiCredentials = () => {
             </div>
 
             <div>
-              <label className="text-sm text-gray-600 mb-1 block">
+              <label className="text-sm text-gray-600 font-medium mb-1 block">
                 API Secret Key
               </label>
               <div className="relative">
@@ -266,17 +162,17 @@ const ApiCredentials = () => {
                   {copiedSecret ? "Copied!" : "Copy"}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 mt-1">
                 Created about 20 hours ago
               </p>
             </div>
           </div>
 
           <div className="bg-white border border-gray-200 rounded-lg shadow p-6">
-            <h3 className="text-base font-medium text-gray-800 mb-2">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Rotate App Credentials
             </h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-500 mb-4">
               Generate a new secret key or refresh token without causing
               downtime for merchants. Always generate new tokens before deleting
               old ones.
@@ -284,13 +180,13 @@ const ApiCredentials = () => {
             <div className="flex flex-wrap gap-4">
               <button
                 onClick={generateCredentials}
-                className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
+                className=" bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
               >
                 Generate new secret key
               </button>
               <button
                 onClick={generateCredentials}
-                className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
+                className=" bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
               >
                 Generate new refresh token
               </button>

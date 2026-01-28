@@ -60,6 +60,8 @@ import InvoicePreview from "./pages/InvoicePreview";
 import ManageSizeChart from "./pages/ManageSizeChart";
 import CreateSizeChart from "./pages/CreateSizeChart";
 import { ToastContainer } from "react-toastify";
+import Settings from "./pages/settings";
+import NotificationSettings from "./pages/NotificationSettings";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -172,6 +174,8 @@ const App = () => {
               path="/finance-setting"
               element={<PrivateRoute element={<FinanceSetting />} />}
             />
+            <Route path="/notification-setting" element={<NotificationSettings />} />
+
             <Route
               path="/user-requests/:id"
               element={<PrivateRoute element={<UserRequest />} />}
@@ -254,6 +258,10 @@ const App = () => {
             <Route
               path="/Order_Details"
               element={<ProtectedForms element={<SubscriptionHistory />} />}
+            />
+             <Route
+              path="/settings"
+              element={<ProtectedForms element={<Settings />} />}
             />
             <Route
               path="/approval-setting"

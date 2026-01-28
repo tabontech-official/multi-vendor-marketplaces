@@ -35,7 +35,7 @@ const AccountPage = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [previewUrl, setPreviewUrl] = useState(null);
-const [imageError, setImageError] = useState("");
+  const [imageError, setImageError] = useState("");
   const [role, setRole] = useState("");
   const [activeButton, setActiveButton] = useState("");
   const [userRole, setUserRole] = useState(null);
@@ -47,7 +47,7 @@ const [imageError, setImageError] = useState("");
   const [sellerNameInput, setSellerNameInput] = useState("");
   const [collectionId, setCollectionId] = useState("");
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
-const [collectionTitle, setCollectionTitle] = useState(sellerName || "");
+  const [collectionTitle, setCollectionTitle] = useState(sellerName || "");
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -68,52 +68,50 @@ const [collectionTitle, setCollectionTitle] = useState(sellerName || "");
     sellerGst: "",
     gstRegistered: "",
   });
-useEffect(() => {
-  setCollectionTitle(sellerName || "");
-}, [sellerName]);
+  useEffect(() => {
+    setCollectionTitle(sellerName || "");
+  }, [sellerName]);
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
 
- useEffect(() => {
-  const fetchBrandAsset = async () => {
-    const userId = localStorage.getItem("userid");
-    if (!userId) return;
+  useEffect(() => {
+    const fetchBrandAsset = async () => {
+      const userId = localStorage.getItem("userid");
+      if (!userId) return;
 
-    try {
-      const res = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/getBrandAssets/${userId}`
-      );
-      const json = await res.json();
+      try {
+        const res = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/getBrandAssets/${userId}`,
+        );
+        const json = await res.json();
 
-      console.log("📦 Brand Asset API Response:", json);
+        console.log("📦 Brand Asset API Response:", json);
 
-      if (res.ok && json.data) {
-        setCollectionTitle(json.data.sellerName || "");
-        setSellerName(json.data.sellerName || "");
-        setDescription(json.data.description || "");
-        setImagePreview(json.data.images || null);
+        if (res.ok && json.data) {
+          setCollectionTitle(json.data.sellerName || "");
+          setSellerName(json.data.sellerName || "");
+          setDescription(json.data.description || "");
+          setImagePreview(json.data.images || null);
+        }
+      } catch (err) {
+        console.error("❌ Brand asset fetch error:", err);
       }
-    } catch (err) {
-      console.error("❌ Brand asset fetch error:", err);
-    }
-  };
+    };
 
-  fetchBrandAsset();
-}, []);
-
+    fetchBrandAsset();
+  }, []);
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-const handleImageChange = (e) => {
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImagePreview(URL.createObjectURL(file));
       setImageFile(file);
     }
   };
-
 
   useEffect(() => {
     const fetchBrandAssetData = async () => {
@@ -145,7 +143,6 @@ const handleImageChange = (e) => {
 
   const handleSubmit2 = async () => {
     const userId = localStorage.getItem("userid");
-    
 
     try {
       setLoading(true);
@@ -194,9 +191,12 @@ const handleImageChange = (e) => {
       }
 
       try {
-        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/user/${id}`, {
-          method: "GET",
-        });
+        const response = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
+          {
+            method: "GET",
+          },
+        );
 
         if (response.ok) {
           const data = await response.json();
@@ -346,14 +346,23 @@ const handleImageChange = (e) => {
   };
 
   const updateAllProductsStatus = async (status) => {
+    const apiKey = localStorage.getItem("apiKey");
+    const token = localStorage.getItem("usertoken");
+
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
     try {
-      const response = await fetch("https://multi-vendor-marketplace.vercel.app/product/holiday", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/product/holiday",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status }),
         },
-        body: JSON.stringify({ status }),
-      });
+      );
 
       const data = await response.json();
       if (response.ok) {
@@ -428,7 +437,7 @@ const handleImageChange = (e) => {
   };
 
   return (
-    <div className="flex bg-blue-50 min-h-screen text-blue-900">
+    <div className="flex min-h-screen bg-gray-100 text-gray-800">
       {toast.show && (
         <div
           className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
@@ -443,113 +452,6 @@ const handleImageChange = (e) => {
           <span>{toast.message}</span>
         </div>
       )}
-
-      <aside className="w-56 mt-3 mb-3 ml-4 rounded-2xl bg-blue-900 p-5 flex flex-col justify-between min-h-screen shadow-lg">
-        {/* Top: Profile */}
-        <div>
-          <div className="flex flex-col items-center border-b border-blue-700 pb-4">
-            <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center shadow-md">
-              <FaUser className="text-yellow-400 w-8 h-8" />
-            </div>
-
-            <h2 className="text-lg font-semibold text-white mt-3">
-              Business Account
-            </h2>
-
-            <div className="flex items-center mt-1 space-x-1">
-              <span className="text-yellow-400 font-semibold text-sm">6.0</span>
-              <div className="flex space-x-0.5">
-                {[...Array(5)].map((_, index) => (
-                  <span key={index} className="text-yellow-400 text-sm">
-                    ★
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <p className="text-green-400 text-xs mt-1">
-              Profile is 75% complete
-            </p>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="mt-6 space-y-3">
-            {userRole === "Merchant" && (
-              <NavLink
-                to="/manage-user"
-                className={({ isActive }) =>
-                  `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                    isActive
-                      ? "bg-yellow-400 text-blue-900"
-                      : "text-blue-200 hover:bg-blue-800"
-                  }`
-                }
-              >
-                <MdManageAccounts className="mr-2 text-lg" />
-                <span className="text-sm font-medium">Manage User</span>
-              </NavLink>
-            )}
-            <NavLink
-              to="/edit-account"
-              className={({ isActive }) =>
-                `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                  isActive
-                    ? "bg-yellow-400 text-blue-900"
-                    : "text-blue-200 hover:bg-blue-800"
-                }`
-              }
-            >
-              <IoSettings className="mr-2 text-lg" />
-              <span className="text-sm font-medium">Settings</span>
-            </NavLink>
-
-            <NavLink
-              to="/api-credentials"
-              className={({ isActive }) =>
-                `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                  isActive
-                    ? "bg-yellow-400 text-blue-900"
-                    : "text-blue-200 hover:bg-blue-800"
-                }`
-              }
-            >
-              <IoSettings className="mr-2 text-lg" />
-              <span className="text-sm font-medium">API Credentials</span>
-            </NavLink>
-            <NavLink
-              to="/finance-setting"
-              className={({ isActive }) =>
-                `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                  isActive
-                    ? "bg-yellow-400 text-blue-900"
-                    : "text-blue-200 hover:bg-blue-800"
-                }`
-              }
-            >
-              <IoSettings className="mr-2 text-lg" />
-              <span className="text-sm font-medium">Finance Settings</span>
-            </NavLink>
-            {(userRole === "Master Admin" || userRole === "Dev Admin") && (
-              <NavLink
-                to="/approval-setting"
-                className={({ isActive }) =>
-                  `flex items-center px-3 py-2 rounded-md transition-all duration-150 ${
-                    isActive
-                      ? "bg-yellow-400 text-blue-900"
-                      : "text-blue-200 hover:bg-blue-800"
-                  }`
-                }
-              >
-                <MdManageAccounts className="mr-2 text-lg" />
-                <span className="text-sm font-medium">Approval Settings</span>
-              </NavLink>
-            )}
-          </nav>
-        </div>
-
-        {/* Bottom: Promote Button */}
-      
-      </aside>
 
       {isOpen && (
         <div
@@ -613,7 +515,7 @@ const handleImageChange = (e) => {
                           type="checkbox"
                           checked={selectedModules.includes(module.name)}
                           onChange={() => handleModuleSelection(module.name)}
-                          className="form-checkbox text-blue-500"
+                          className="form-checkbox text-gray-600"
                         />
                         <span className="text-sm font-semibold">
                           {module.name}
@@ -634,7 +536,7 @@ const handleImageChange = (e) => {
                                   onChange={() =>
                                     handleModuleSelection(subModule)
                                   }
-                                  className="form-checkbox text-blue-500"
+                                  className="form-checkbox text-gray-600"
                                 />
                                 <span className="text-sm">{subModule}</span>
                               </label>
@@ -658,19 +560,19 @@ const handleImageChange = (e) => {
 
       <div className="flex-1 p-6 bg-white">
         <Link to={"/"}>
-          <button className="flex items-center text-blue-700 hover:text-blue-500 mb-4">
+          <button className="flex items-center font-semibold text-gray-900 mb-4">
             <FaArrowLeft className="mr-2" /> Back
           </button>
         </Link>
-        <h1 className="text-2xl font-semibold text-blue-800">
+        <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
           Account Settings
         </h1>
-        <div className="flex justify-between border-b border-blue-700 mt-4 text-blue-600">
+        <div className="flex justify-between border-b border-gray-300 mt-4 text-gray-600">
           <button
             className={`pb-2 flex items-center space-x-2 ${
               activeTab === "contactDetails"
-                ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
-                : "text-blue-500 hover:text-blue-700"
+                ? "border-b-2 border-gray-800 text-gray-900 font-semibold"
+                : "text-gray-500 hover:text-gray-800"
             }`}
             onClick={() => setActiveTab("contactDetails")}
           >
@@ -681,8 +583,8 @@ const handleImageChange = (e) => {
           <button
             className={`pb-2 flex items-center space-x-2 ${
               activeTab === "brandassets"
-                ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
-                : "text-blue-500 hover:text-blue-700"
+                ? "border-b-2 border-gray-800 text-gray-900 font-semibold"
+                : "text-gray-500 hover:text-gray-800"
             }`}
             onClick={() => setActiveTab("brandassets")}
           >
@@ -693,8 +595,8 @@ const handleImageChange = (e) => {
           <button
             className={`pb-2 flex items-center space-x-2 ${
               activeTab === "holiday"
-                ? "border-b-2 border-blue-600 text-blue-700 font-semibold"
-                : "text-blue-500 hover:text-blue-700"
+                ? "border-b-2 border-gray-800 text-gray-900 font-semibold"
+                : "text-gray-500 hover:text-gray-800"
             }`}
             onClick={() => setActiveTab("holiday")}
           >
@@ -705,18 +607,15 @@ const handleImageChange = (e) => {
 
         <div className="mt-6 p-6 bg-white rounded-lg">
           {activeTab === "contactDetails" && (
-            <div className="bg-white p-6 rounded-xl shadow-xl mt-6">
-              <h2 className="text-2xl font-bold text-blue-800 mb-6">
+            <div className="bg-gray-100 p-6 rounded-xl shadow-sm border border-gray-200 mt-6">
+              <h1 className="text-xl font-semibold text-gray-900 mb-6">
                 Edit Profile
-              </h2>
+              </h1>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* First Name */}
                 <div className="flex flex-col">
-                  <label
-                    htmlFor="firstName"
-                    className="text-sm font-medium text-gray-700"
-                  >
+                  <label className="text-sm text-gray-600 font-medium mb-1 block">
                     First Name *
                   </label>
                   <input
@@ -726,7 +625,7 @@ const handleImageChange = (e) => {
                     value={formData.firstName}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                    className="mt-1 p-2 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800"
                   />
                 </div>
 
@@ -734,7 +633,7 @@ const handleImageChange = (e) => {
                 <div className="flex flex-col">
                   <label
                     htmlFor="lastName"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm text-gray-600 font-medium mb-1 block"
                   >
                     Last Name *
                   </label>
@@ -745,7 +644,7 @@ const handleImageChange = (e) => {
                     value={formData.lastName}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                    className="mt-1 p-2 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800"
                   />
                 </div>
 
@@ -753,7 +652,7 @@ const handleImageChange = (e) => {
                 {/* <div className="flex flex-col">
                   <label
                     htmlFor="email"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm text-gray-600 font-medium mb-1 block"
                   >
                     Email *
                   </label>
@@ -764,7 +663,7 @@ const handleImageChange = (e) => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                    className="mt-1 p-2 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800"
                   />
                 </div> */}
 
@@ -772,7 +671,7 @@ const handleImageChange = (e) => {
                 <div className="flex flex-col">
                   <label
                     htmlFor="address"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm text-gray-600 font-medium mb-1 block"
                   >
                     Address *
                   </label>
@@ -783,11 +682,11 @@ const handleImageChange = (e) => {
                     value={formData.address}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                    className="mt-1 p-2 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800"
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm text-gray-600 font-medium mb-1 block">
                     Phone Number *
                   </label>
                   <input
@@ -796,11 +695,11 @@ const handleImageChange = (e) => {
                     value={formData.phone}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 border rounded-md"
+                    className="mt-1 p-2 bg-gray-200 border rounded-md"
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm text-gray-600 font-medium mb-1 block">
                     City *
                   </label>
                   <input
@@ -809,11 +708,11 @@ const handleImageChange = (e) => {
                     value={formData.city}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 border rounded-md"
+                    className="mt-1 p-2 bg-gray-200 border rounded-md"
                   />
                 </div>
                 {/* <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm text-gray-600 font-medium mb-1 block">
                     State *
                   </label>
                   <input
@@ -826,7 +725,7 @@ const handleImageChange = (e) => {
                   />
                 </div> */}
                 <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm text-gray-600 font-medium mb-1 block">
                     Zip *
                   </label>
                   <input
@@ -835,11 +734,11 @@ const handleImageChange = (e) => {
                     value={formData.zip}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 border rounded-md"
+                    className="mt-1 p-2 bg-gray-200 border rounded-md"
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm text-gray-600 font-medium mb-1 block">
                     Country *
                   </label>
                   <input
@@ -848,7 +747,7 @@ const handleImageChange = (e) => {
                     value={formData.country}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 border rounded-md"
+                    className="mt-1 p-2 bg-gray-200 border rounded-md"
                   />
                 </div>
 
@@ -856,7 +755,7 @@ const handleImageChange = (e) => {
                 <div className="flex flex-col">
                   <label
                     htmlFor="sellerGst"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm text-gray-600 font-medium mb-1 block"
                   >
                     Seller GST *
                   </label>
@@ -867,7 +766,7 @@ const handleImageChange = (e) => {
                     value={formData.sellerGst}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                    className="mt-1 p-2 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800"
                   />
                 </div>
 
@@ -875,7 +774,7 @@ const handleImageChange = (e) => {
                 <div className="flex flex-col">
                   <label
                     htmlFor="gstRegistered"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm text-gray-600 font-medium mb-1 block"
                   >
                     GST Registered *
                   </label>
@@ -886,7 +785,7 @@ const handleImageChange = (e) => {
                     value={formData.gstRegistered}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                    className="mt-1 p-2 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800"
                   />
                 </div>
 
@@ -894,7 +793,7 @@ const handleImageChange = (e) => {
                 <div className="flex flex-col">
                   <label
                     htmlFor="dispatchAddress"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm text-gray-600 font-medium mb-1 block"
                   >
                     Dispatch Address *
                   </label>
@@ -905,7 +804,7 @@ const handleImageChange = (e) => {
                     value={formData.dispatchAddress}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                    className="mt-1 p-2 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800"
                   />
                 </div>
 
@@ -913,7 +812,7 @@ const handleImageChange = (e) => {
                 <div className="flex flex-col">
                   <label
                     htmlFor="dispatchCity"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm text-gray-600 font-medium mb-1 block"
                   >
                     Dispatch City *
                   </label>
@@ -924,7 +823,7 @@ const handleImageChange = (e) => {
                     value={formData.dispatchCity}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                    className="mt-1 p-2 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800"
                   />
                 </div>
 
@@ -932,7 +831,7 @@ const handleImageChange = (e) => {
                 <div className="flex flex-col">
                   <label
                     htmlFor="dispatchCountry"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm text-gray-600 font-medium mb-1 block"
                   >
                     Dispatch Country *
                   </label>
@@ -943,7 +842,7 @@ const handleImageChange = (e) => {
                     value={formData.dispatchCountry}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                    className="mt-1 p-2 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800"
                   />
                 </div>
 
@@ -951,7 +850,7 @@ const handleImageChange = (e) => {
                 {/* <div className="flex flex-col">
                   <label
                     htmlFor="dispatchzip"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm text-gray-600 font-medium mb-1 block"
                   >
                     Dispatch Zip *
                   </label>
@@ -962,7 +861,7 @@ const handleImageChange = (e) => {
                     value={formData.dispatchzip}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+                    className="mt-1 p-2 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800"
                   />
                 </div> */}
               </div>
@@ -971,7 +870,7 @@ const handleImageChange = (e) => {
               <div className="flex justify-end mt-8">
                 <button
                   onClick={handleSubmit}
-                  className="px-6 py-2 bg-blue-700 text-white font-medium rounded-md hover:bg-blue-800 transition"
+                  className="bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
                 >
                   Save
                 </button>
@@ -979,51 +878,50 @@ const handleImageChange = (e) => {
             </div>
           )}
 
-        
           {activeTab === "brandassets" && (
-            <div className="p-6 bg-gradient-to-br from-blue-50 via-white to-blue-100 rounded-xl shadow-md space-y-8 text-blue-900">
+            <div className="bg-gray-100 p-6 rounded-xl shadow-sm border border-gray-200 space-y-8 ">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-blue-900 mb-1">
+                  <h1 className="text-xl font-semibold text-gray-900 mb-1">
                     Your Collection
-                  </h2>
+                  </h1>
                   <a
                     href={`https://www.aydiactive.com/collections/${sellerName}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-700 hover:underline hover:text-blue-900"
+                    className="text-sm text-blue-700 hover:underline hover:text-gray-600"
                   >
-                    🔗 https://www.aydiactive.com/collections/{sellerName}
+                    seller profile
                   </a>
                 </div>
 
                 <button
-                  className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-2 rounded-lg text-sm shadow hover:scale-105 transition-transform duration-200 disabled:opacity-60"
+                  className="bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
                   onClick={handleSubmit2}
                   disabled={loading}
                 >
                   {loading ? "Updating..." : "Update Collection"}
                 </button>
               </div>
-<div>
-  <label className="block text-sm font-semibold mb-2 text-blue-800">
-    Collection Title *
-  </label>
-  <input
-    type="text"
-    value={collectionTitle}
-    onChange={(e) => setCollectionTitle(e.target.value)}
-    placeholder="Enter collection title"
-    className="w-full border border-gray-300 text-blue-900 rounded-md p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-    required
-  />
-</div>
-              <div className="rounded-lg border border-blue-200 bg-white shadow-inner p-6">
-                <p className="text-sm text-blue-600 mb-2">
+              <div>
+                <label className="text-sm text-gray-600 font-medium mb-1 block">
+                  Collection Title *
+                </label>
+                <input
+                  type="text"
+                  value={collectionTitle}
+                  onChange={(e) => setCollectionTitle(e.target.value)}
+                  placeholder="Enter collection title"
+                  className="w-full border border-gray-300 text-gray-600 rounded-md p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  required
+                />
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white shadow-inner p-6">
+                <p className="text-sm text-gray-600 mb-2">
                   Upload a banner image for your collection (Max 5MB, .jpg/.jpeg
                   only)
                 </p>
-                <p className="text-sm text-blue-500 mb-4">
+                <p className="text-sm text-gray-600 mb-4">
                   Recommended: 1180×290px
                 </p>
 
@@ -1035,7 +933,7 @@ const handleImageChange = (e) => {
                       className="object-cover w-full h-full"
                     />
                   ) : (
-                    <span className="text-blue-400 font-medium">
+                    <span className="text-gray-600 font-medium">
                       {" "}
                       Upload Cover Photo
                     </span>
@@ -1051,12 +949,12 @@ const handleImageChange = (e) => {
 
               {/* Description Box */}
               <div>
-                <label className="block text-sm font-semibold mb-2 text-blue-800">
+                <label className="text-sm text-gray-600 font-medium mb-1 block">
                   Description{" "}
                   <span className="text-gray-500">(160–900 characters)</span>
                 </label>
                 <textarea
-                  className="w-full border border-gray-300 text-blue-900 rounded-md p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  className="w-full border border-gray-300 text-gray-600 rounded-md p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
                   rows="4"
                   placeholder="Describe your collection..."
                   value={description}
@@ -1065,11 +963,11 @@ const handleImageChange = (e) => {
               </div>
 
               {/* Where Photo Appears */}
-              <div className="bg-white p-5 border border-blue-200 rounded-lg">
-                <h3 className="text-lg font-semibold text-blue-900 mb-2">
+              <div className="bg-white p-5 border border-gray-200 rounded-lg">
+          <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
                   Where your photo appears
-                </h3>
-                <ul className="list-disc text-sm text-blue-700 space-y-1 pl-5">
+                </h1>
+                <ul className="list-disc text-sm text-gray-600 space-y-1 pl-5">
                   <li>On the business profile page</li>
                   <li>In your collection ads (if applicable)</li>
                   <li>On premium job search results</li>
@@ -1086,11 +984,11 @@ const handleImageChange = (e) => {
           )}
 
           {activeTab === "holiday" && (
-            <div className="bg-white rounded-xl p-6 shadow-lg">
-              <h2 className="text-2xl font-bold text-blue-800 tracking-wide">
-                Holiday Mode Settings 🎉
-              </h2>
-              <p className="text-sm text-blue-600 mt-2 leading-relaxed">
+            <div className="bg-gray-100 p-6 rounded-xl shadow-sm border border-gray-200 space-y-8 ">
+          <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
+                Holiday Mode Settings 
+              </h1>
+              <p className="text-sm text-gray-600 mt-2 leading-relaxed">
                 While holiday mode is on, all your products will be hidden, but
                 you can still access and fulfill existing orders. <br />
                 <span className="font-medium">Note:</span> Your start and end
@@ -1129,90 +1027,29 @@ const handleImageChange = (e) => {
                 </button>
               </div>
 
-              <div className="mt-6 bg-white border border-blue-200 rounded-lg shadow-sm p-5">
+              <div className="mt-6 bg-gray-200 border border-gray-200 rounded-lg shadow-sm p-5">
                 <div className="flex items-center gap-4 mb-4">
-                  <label className="w-28 flex items-center text-sm font-semibold text-blue-900">
+                  <label className="w-28 flex items-center text-sm font-semibold text-gray-600">
                     <CiCalendarDate className="mr-1 text-lg" />
                     Start Date
                   </label>
                   <input
                     type="date"
-                    className="flex-1 p-2 border border-blue-300 rounded-md text-sm text-blue-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="flex-1 p-2 border border-gray-300 rounded-md text-sm text-gray-800 bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
                   />
                 </div>
 
                 <div className="flex items-center gap-4 mb-4">
-                  <label className="w-28 flex items-center text-sm font-semibold text-blue-900">
+                  <label className="w-28 flex items-center text-sm font-semibold text-gray-600">
                     <CiCalendarDate className="mr-1 text-lg" />
                     End Date
                   </label>
                   <input
                     type="date"
-                    className="flex-1 p-2 border border-blue-300 rounded-md text-sm text-blue-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="flex-1 p-2 border border-gray-300 rounded-md text-sm text-gray-800 bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
                   />
                 </div>
-                {/* {(userRole === "Dev Admin" || userRole === "Master Admin") && (
-                  <div className="flex items-center gap-4 mt-4">
-                    <label className="w-28 flex items-center text-sm font-semibold text-blue-900">
-                      <FaPercentage className="mr-1 text-lg text-blue-700" />{" "}
-                      Commission
-                    </label>
-
-                    <div className="relative flex-1">
-                      <input
-                        type="number"
-                        min={0}
-                        max={100}
-                        placeholder="Enter %"
-                        value={commission}
-                        onChange={(e) => setCommission(e.target.value)}
-                        className="w-full p-2 pr-20 border border-blue-300 rounded-md text-sm text-blue-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      />
-                      <button
-                        onClick={async () => {
-                          if (!commission) {
-                            showToast(
-                              "error",
-                              "Please enter a commission percentage"
-                            );
-                            return;
-                          }
-
-                          try {
-                            const res = await axios.post(
-                              "https://multi-vendor-marketplace.vercel.app/order/addCommision",
-                              { comission: commission }
-                            );
-
-                            if (res.status === 200) {
-                              showToast(
-                                "sucess",
-                                "Commission updated successfully "
-                              );
-                            } else {
-                              showToast("error", "Failed to update commission");
-                            }
-                          } catch (err) {
-                            console.error("Commission update error:", err);
-                          }
-                        }}
-                        className="absolute right-1 top-1 bottom-1 px-4 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md transition"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  </div>
-                )} */}
               </div>
-
-              {/* <div className="flex justify-end mt-6">
-      <button
-        // onClick={handleSaveHolidayMode}
-        className="px-6 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md text-sm font-semibold shadow transition"
-      >
-        Save Changes
-      </button>
-    </div> */}
             </div>
           )}
         </div>

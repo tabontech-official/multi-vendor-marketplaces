@@ -118,7 +118,7 @@ const AuthSignUp = () => {
     return <Dashboard />;
   }
   return (
-    <section className="h-[82vh] flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
+    <section className="h-[84vh] flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
       <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg">
         <div className=" md:flex  flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white ">
           <img

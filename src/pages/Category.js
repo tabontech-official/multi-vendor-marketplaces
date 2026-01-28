@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { HiOutlineCheckCircle, HiOutlineXCircle, HiPlus } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 
 const CreateCategory = () => {
   const [title, setTitle] = useState("");
@@ -36,7 +37,7 @@ const CreateCategory = () => {
 
     if (level === "level1") {
       setFilteredCategories(
-        categories.filter((category) => category.level === "level1")
+        categories.filter((category) => category.level === "level1"),
       );
       setLevel2Categories([]);
       setSelectedLevel1Category("");
@@ -44,17 +45,17 @@ const CreateCategory = () => {
       setSelectedLevel3Category("");
     } else if (level === "level2") {
       setFilteredCategories(
-        categories.filter((category) => category.level === "level1")
+        categories.filter((category) => category.level === "level1"),
       );
       setLevel2Categories(
-        categories.filter((category) => category.level === "level2")
+        categories.filter((category) => category.level === "level2"),
       );
       setSelectedLevel1Category("");
       setSelectedLevel2Category("");
       setSelectedLevel3Category("");
     } else if (level === "level3") {
       setFilteredCategories(
-        categories.filter((category) => category.level === "level2")
+        categories.filter((category) => category.level === "level2"),
       );
       setSelectedLevel2Category("");
       setSelectedLevel3Category("");
@@ -66,8 +67,9 @@ const CreateCategory = () => {
     setFilteredCategories(
       categories.filter(
         (category) =>
-          category.level === "level2" && category.parentCatNo === e.target.value
-      )
+          category.level === "level2" &&
+          category.parentCatNo === e.target.value,
+      ),
     );
     setSelectedLevel3Category("");
   };
@@ -77,8 +79,9 @@ const CreateCategory = () => {
     setFilteredCategories(
       categories.filter(
         (category) =>
-          category.level === "level3" && category.parentCatNo === e.target.value
-      )
+          category.level === "level3" &&
+          category.parentCatNo === e.target.value,
+      ),
     );
     setSelectedLevel3Category("");
   };
@@ -108,7 +111,7 @@ const CreateCategory = () => {
               "x-api-secret": apiSecretKey,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         const data = await response.json();
@@ -116,7 +119,7 @@ const CreateCategory = () => {
         if (response.ok) {
           setCategories(data);
           setLevel1Categories(
-            data.filter((category) => category.level === "level1")
+            data.filter((category) => category.level === "level1"),
           );
         } else {
           setError(data.message || "Failed to fetch categories.");
@@ -136,96 +139,11 @@ const CreateCategory = () => {
 
   const checkHandleExists = (handle) => {
     const handleExists = categories.some(
-      (category) => category.title.toLowerCase() === handle.toLowerCase()
+      (category) => category.title.toLowerCase() === handle.toLowerCase(),
     );
 
     return handleExists;
   };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   console.log("Form Submitted");
-
-  //   if (checkHandleExists(handle)) {
-  //     showToast(
-  //       "error",
-  //       "This handle already exists! Please choose a different one."
-  //     );
-  //     return;
-  //   }
-
-  //   console.log("Handle is valid, submitting form...");
-
-  //   const userId = localStorage.getItem("userid");
-  //   const apiKey = localStorage.getItem("apiKey");
-  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
-
-  //   const categoriesToSubmit = [];
-
-  //   if (selectedLevel === "level1") {
-  //     categoriesToSubmit.push({
-  //       title,
-  //       description,
-  //       level: selectedLevel,
-  //       parentCatNo: "",
-  //     });
-  //   } else if (selectedLevel === "level2") {
-  //     categoriesToSubmit.push({
-  //       title,
-  //       description,
-  //       level: selectedLevel,
-  //       parentCatNo: selectedLevel1Category,
-  //     });
-  //   } else if (selectedLevel === "level3") {
-  //     categoriesToSubmit.push({
-  //       title,
-  //       description,
-  //       level: selectedLevel,
-  //       parentCatNo: selectedLevel2Category,
-  //     });
-  //   }
-
-  //   try {
-  //     const response = await fetch(
-  //       "https://multi-vendor-marketplace.vercel.app/category/createCategory",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "x-api-key": apiKey,
-  //           "x-api-secret": apiSecretKey,
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           title,
-  //           description,
-  //           categories: categoriesToSubmit,
-  //           userId,
-  //           handle,
-  //         }),
-  //       }
-  //     );
-
-  //     const result = await response.json();
-
-  //     if (response.ok) {
-  //       console.log("Category saved successfully:", result);
-  //       showToast("success", "Categories saved successfully!");
-  //       setTitle("");
-  //       setDescription("");
-  //       setImage(null);
-  //       setSelectedLevel("");
-  //       setSelectedLevel1Category("");
-  //       setSelectedLevel2Category("");
-  //       setSelectedLevel3Category("");
-  //       setFilteredCategories([]);
-  //     } else {
-  //       showToast("error", "Something went wrong");
-  //     }
-  //   } catch (err) {
-  //     console.error("Submission failed:", err);
-  //     showToast("error", "Failed to save categories.");
-  //   }
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -233,7 +151,7 @@ const CreateCategory = () => {
     if (checkHandleExists(handle)) {
       showToast(
         "error",
-        "This handle already exists! Please choose a different one."
+        "This handle already exists! Please choose a different one.",
       );
       return;
     }
@@ -286,7 +204,7 @@ const CreateCategory = () => {
             userId,
             handle,
           }),
-        }
+        },
       );
 
       const result = await response.json();
@@ -310,6 +228,27 @@ const CreateCategory = () => {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-5xl mx-auto p-6">
+      <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="p-2 rounded-md hover:bg-gray-100 transition"
+          >
+            <FaArrowLeft className="text-gray-700" />
+          </button>
+
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900 ">
+              Create Category
+            </h1>
+            <p className="text-sm text-gray-500">
+              {" "}
+              Add and organize product categories
+            </p>
+          </div>
+        </div>
+      </div>
       {toast.show && (
         <div
           className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
@@ -327,7 +266,7 @@ const CreateCategory = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           <div className="bg-white border border-gray-300 rounded-xl shadow-sm p-4">
-            <label className="block text-sm font-semibold mb-2">Title</label>
+            <label className="text-sm text-gray-600 font-medium mb-1 block">Title</label>
             <input
               type="text"
               placeholder="e.g. Summer collection, Under $100, Staff picks"
@@ -338,7 +277,7 @@ const CreateCategory = () => {
           </div>
 
           <div className="bg-white border border-gray-300 rounded-xl shadow-sm p-4">
-            <label className="block text-sm font-semibold mb-2">
+            <label className="text-sm text-gray-600 font-medium mb-1 block">
               Description
             </label>
             <textarea
@@ -350,7 +289,7 @@ const CreateCategory = () => {
           </div>
 
           <div className="bg-white border border-gray-300 rounded-xl shadow-sm p-4">
-            <label className="block text-sm font-semibold mb-2">
+            <label className="text-sm text-gray-600 font-medium mb-1 block">
               Select Level
             </label>
             <select
@@ -385,7 +324,7 @@ const CreateCategory = () => {
 
             {selectedLevel === "level3" && (
               <div className=" shadow-sm ">
-                <label className="block text-sm font-semibold mb-2">
+                <label className="text-sm text-gray-600 font-medium mb-1 block">
                   Select Level 2
                 </label>
                 <select
@@ -405,7 +344,7 @@ const CreateCategory = () => {
           </div>
           <div className="bg-white border border-gray-300 rounded-xl shadow-sm p-4">
             <div className="flex justify-between">
-              <label className="block text-sm font-semibold mb-2">
+              <label className="text-sm text-gray-600 font-medium mb-1 block">
                 Search Engine Listing
               </label>
               <MdModeEdit onClick={toggleEdit} style={{ cursor: "pointer" }} />
@@ -432,7 +371,8 @@ const CreateCategory = () => {
 
         <div className="space-y-6">
           <div className="bg-white border border-gray-300 rounded-xl shadow-sm p-4">
-            <h3 className="font-semibold mb-2">Image</h3>
+                            <label className="text-sm text-gray-600 font-medium mb-1 block">
+Image</label>
             {image ? (
               <div className="relative">
                 <img
@@ -452,7 +392,7 @@ const CreateCategory = () => {
                 htmlFor="image-upload"
                 className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 p-6 rounded cursor-pointer hover:bg-gray-50 text-center"
               >
-                <span className="bg-gray-200 text-gray-700 py-1 px-3 rounded text-sm font-medium mb-2">
+                <span className=" text-gray-600  py-1 px-3 rounded text-sm font-medium mb-2">
                   Add image
                 </span>
                 <span className="text-xs text-gray-500">
@@ -477,11 +417,11 @@ const CreateCategory = () => {
         <button
           type="submit"
           disabled={saving}
-          className={`py-2 px-6 rounded text-white 
+          className={` px-3 py-1.5 rounded text-white 
       ${
         saving
           ? "bg-gray-400 cursor-not-allowed"
-          : "bg-blue-600 hover:bg-blue-700"
+          : "bg-[#18181b] text-white rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
       }`}
         >
           {saving ? "Saving..." : "Save"}

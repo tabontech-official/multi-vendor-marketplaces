@@ -172,12 +172,10 @@ const Inventory = () => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchProductData();
   }, [page]);
-
-  
 
   const handleSearch = () => {
     let filtered =
@@ -209,8 +207,6 @@ const Inventory = () => {
   }, []);
 
   const [selectedProduct, setSelectedProduct] = useState(null);
-
- 
 
   const handleSubmit = async (e) => {
     const apiKey = localStorage.getItem("apiKey");
@@ -509,10 +505,13 @@ const Inventory = () => {
 
   return user ? (
     <main className="w-full p-4 md:p-8">
-      <div className="flex flex-col md:flex-row md:justify-between items-start border-gray-200 pb-4">
+      {/* <div className="flex flex-col md:flex-row md:justify-between items-start border-gray-200 pb-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold mb-1">Inventory</h1>
-          <p className="text-gray-600">
+          <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
+            Inventory
+          </h1>
+          <p className="text-sm text-gray-500">
+            {" "}
             Here is your total Collection in Inventory.
           </p>
           <div className="w-2/4 max-sm:w-full mt-2">
@@ -611,7 +610,100 @@ const Inventory = () => {
             <span>{toast.message}</span>
           </div>
         )}
-      </div>
+      </div> */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between  pb-4 gap-4">
+  {/* LEFT: Title */}
+  <div className="flex-1">
+    <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
+      Inventory
+    </h1>
+    <p className="text-sm text-gray-500">
+      Here is your total collection in inventory.
+    </p>
+  </div>
+
+  {/* CENTER: Search */}
+  <div className="flex-1 w-full max-w-sm mx-auto">
+    <input
+      type="text"
+      placeholder="Search..."
+      value={searchVal}
+      onChange={(e) => setSearchVal(e.target.value)}
+      className="w-full p-1.5 text-sm border border-gray-300 rounded-md
+        focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+    />
+  </div>
+
+  {/* RIGHT: Actions */}
+  <div className="flex-1 flex flex-wrap items-center justify-end gap-2 w-full">
+    {filteredProducts.some((v) => v.isEditable) && (
+      <button
+        onClick={() => {
+          const editableVariants = filteredProducts.filter(
+            (v) => v.isEditable,
+          );
+
+          if (editableVariants.length === 0) {
+            alert("Please edit at least one variant first.");
+            return;
+          }
+
+          const updated = [...filteredProducts];
+
+          editableVariants.forEach((editableVariant) => {
+            const index = updated.findIndex(
+              (v) => v.id === editableVariant.id,
+            );
+            if (index !== -1) {
+              if (activeTab === "price") {
+                updated[index].price = editableVariant.price;
+                updated[index].compare_at_price =
+                  editableVariant.compare_at_price;
+              } else if (activeTab === "quantity") {
+                updated[index].inventory_quantity =
+                  editableVariant.inventory_quantity;
+              }
+            }
+          });
+
+          editableVariants.forEach((editableVariant, i) => {
+            setTimeout(() => {
+              if (activeTab === "price") {
+                handlePriceUpdate(editableVariant.id);
+              } else {
+                handleQuantityUpdate(editableVariant.id);
+              }
+            }, i * 100);
+          });
+
+          editableVariants.forEach((v) => (v.isEditable = false));
+          setFilteredProducts(updated);
+          setSelectedProducts([]);
+        }}
+        className="bg-gray-800 hover:bg-gray-900 text-white px-3 h-8 text-sm font-medium rounded-md shadow-sm"
+      >
+        Update All
+      </button>
+    )}
+
+    <button
+      onClick={openPopupImport}
+      className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
+    >
+      <CiImport className="w-4 h-4" />
+      Import
+    </button>
+
+    <button
+      onClick={togglePopup}
+      className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
+    >
+      <FaFileImport className="w-4 h-4" />
+      Export
+    </button>
+  </div>
+</div>
+
       <div className="flex items-center space-x-6 border-b border-gray-300 mb-4">
         <button
           onClick={() => setActiveTab("price")}
@@ -645,11 +737,11 @@ const Inventory = () => {
           ) : (
             <>
               <table className="w-full border-collapse bg-white">
-                <thead className="bg-gray-100 text-left text-gray-600 text-xs">
+                  <thead className="bg-gray-100 text-gray-600 text-left uppercase sticky top-0 text-xs">
                   <tr>
                     <th className="p-3">Action</th>
                     <th className="p-3">Status</th>
-                    <th className="p-3">Image</th>
+                    <th className="p-3"></th>
                     <th className="p-3">Listing name</th>
                     <th className="p-3">Created on</th>
                     <th className="p-3">SKU</th>
@@ -1037,8 +1129,6 @@ const Inventory = () => {
                 </div>
               )}
 
-           
-
               {!hasMore && (
                 <div className="text-center text-gray-400 text-sm py-4">
                   No more variants to load.
@@ -1059,11 +1149,11 @@ const Inventory = () => {
             <>
               <div className="max-sm:overflow-auto border rounded-lg">
                 <table className="w-full border-collapse bg-white">
-                  <thead className="bg-gray-100 text-left text-gray-600 text-xs">
+                  <thead className="bg-gray-100 text-gray-600 text-left uppercase sticky top-0 text-xs">
                     <tr>
                       <th className="p-3">Action</th>
                       <th className="p-3">Status</th>
-                      <th className="p-3">Image</th>
+                      <th className="p-3"></th>
                       <th className="p-3">Listing name</th>
                       <th className="p-3">Created on</th>
                       <th className="p-3">SKU</th>

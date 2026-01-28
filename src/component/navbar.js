@@ -494,6 +494,11 @@ const Navbar = () => {
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 bg-white divide-y divide-gray-100 rounded-md shadow-xl w-24 z-[60] border border-gray-200">
                     <ul className="py-1 text-xs text-gray-700">
+                       <li>
+                        <Link to="/settings" className="block px-4 py-2 hover:bg-[#F3F4F6]" onClick={() => setIsOpen(false)}>
+                          Settings
+                        </Link>
+                      </li>
                       <li>
                         <Link to="/edit-account" className="block px-4 py-2 hover:bg-[#F3F4F6]" onClick={() => setIsOpen(false)}>
                           My Profile

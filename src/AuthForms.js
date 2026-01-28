@@ -289,7 +289,7 @@ const Auth = () => {
   }
 
   return (
-    <section className="h-[82vh] flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
+    <section className="h-[84vh] flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
       <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg mx-auto overflow-hidden">
 
         {/* LEFT SECTION */}

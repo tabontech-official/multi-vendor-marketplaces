@@ -310,22 +310,22 @@ const ManageShippingProfiles = () => {
       )}
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="flex items-center text-2xl font-semibold text-gray-800">
-            <FaShippingFast className="text-blue-600 mr-3" />
+          <h1 className="flex items-center text-xl font-semibold text-gray-900 mb-0.5">
+            <FaShippingFast className="text-gray-600 mr-3" />
             Manage Shipping Profiles
-          </h2>
+          </h1>
           <div className="flex gap-2">
             {isAdmin && (
               <button
                 onClick={() => setAddingProfile(true)}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+              className="flex items-center gap-2 bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
               >
                 <FaPlus /> Add New
               </button>
             )}
             <button
               onClick={fetchProfiles}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+              className="flex items-center gap-2 bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
             >
               <FaSyncAlt className={loading ? "animate-spin" : ""} />
               Refresh
@@ -335,7 +335,7 @@ const ManageShippingProfiles = () => {
 
         <div className="overflow-x-auto">
           <table className="min-w-full border border-gray-200 divide-y divide-gray-200">
-            <thead className="bg-gray-100">
+              <thead className="bg-gray-100 text-gray-600 text-xs uppercase sticky top-0">
               <tr>
                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
                   Profile Name
@@ -454,7 +454,7 @@ const ManageShippingProfiles = () => {
                 onClick={() => goToPage(i + 1)}
                 className={`px-3 py-1 border rounded-md text-sm ${
                   currentPage === i + 1
-                    ? "bg-blue-600 text-white border-blue-600"
+                    ? "bg-[#18181b] text-white border-gray-600"
                     : "border-gray-300 text-gray-700 hover:bg-gray-100"
                 }`}
               >

@@ -23,9 +23,25 @@ import { jwtDecode } from "jwt-decode";
 const CategorySelector = () => {
   const { id } = useParams();
   const isEditing = Boolean(id);
+  const [dragIndex, setDragIndex] = useState(null);
+
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateMode, setDuplicateMode] = useState("copy");
   const [duplicateTitle, setDuplicateTitle] = useState("");
+
+  const moveImageToFront = (fromIndex) => {
+    if (fromIndex === 0) return;
+
+    setSelectedImages((prev) => {
+      const updated = [...prev];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.unshift(moved);
+      return updated;
+    });
+
+    setIsChanged(true);
+  };
+
   const uploadShopifyImageToCloudinary = async (shopifyUrl) => {
     const formData = new FormData();
     formData.append("file", shopifyUrl);
@@ -1886,6 +1902,84 @@ const CategorySelector = () => {
       setLoading(false);
     }
   };
+  const handleVariantImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length || !currentVariant) return;
+
+    const parent = combinations[currentVariant.index]?.parent;
+    const key =
+      options.length === 1
+        ? currentVariant.child
+        : `${parent} / ${currentVariant.child}`;
+
+    const normalizedKey = key.replace(/['"]/g, "").trim();
+
+    for (const file of files) {
+      // 1️⃣ Local preview (loader)
+      const tempPreview = URL.createObjectURL(file);
+
+      setVariantImages((prev) => ({
+        ...prev,
+        [normalizedKey]: [
+          { preview: tempPreview, loading: true },
+          ...(prev[normalizedKey] || []),
+        ],
+      }));
+
+      try {
+        // 2️⃣ Upload to Cloudinary
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", "images");
+
+        const res = await fetch(
+          "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
+
+        const data = await res.json();
+        if (!data.secure_url) throw new Error("Upload failed");
+
+        const finalUrl = data.secure_url;
+
+        // 3️⃣ Add to PRODUCT MEDIA
+        setSelectedImages((prev) => [
+          { cloudUrl: finalUrl, loading: false },
+          ...prev,
+        ]);
+
+        // 4️⃣ Assign ONLY to this variant
+        setVariantImages((prev) => ({
+          ...prev,
+          [normalizedKey]: [
+            {
+              preview: finalUrl,
+              alt: normalizedKey.replace(/\s*\/\s*/g, "-").toLowerCase(),
+              loading: false,
+            },
+            ...(prev[normalizedKey] || []).filter(
+              (img) => img.preview !== tempPreview,
+            ),
+          ],
+        }));
+      } catch (err) {
+        console.error("Variant image upload failed", err);
+
+        // remove failed preview
+        setVariantImages((prev) => ({
+          ...prev,
+          [normalizedKey]: prev[normalizedKey].filter(
+            (img) => img.preview !== tempPreview,
+          ),
+        }));
+      }
+    }
+
+    e.target.value = "";
+  };
 
   const [showDeleteOptionModal, setShowDeleteOptionModal] = useState(false);
   const [deleteOptionTarget, setDeleteOptionTarget] = useState(null);
@@ -2147,20 +2241,30 @@ const CategorySelector = () => {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 auto-rows-[120px] gap-2 sm:gap-3">
                   {selectedImages.slice(0, 6).map((img, index) => {
                     const isChecked = checkedImages[index] || false;
 
                     return (
                       <div
                         key={index}
-                        className={`relative aspect-square rounded-md overflow-hidden cursor-pointer border transition
-          ${
-            isChecked
-              ? "ring-2 ring-blue-500 border-blue-400"
-              : "border-gray-200 hover:shadow-md"
-          }
-        `}
+                        draggable
+                        onDragStart={() => setDragIndex(index)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => {
+                          if (dragIndex !== null) {
+                            moveImageToFront(dragIndex);
+                            setDragIndex(null);
+                          }
+                        }}
+                        className={`group relative rounded-md overflow-hidden cursor-pointer border transition
+    ${index === 0 ? "col-span-2 row-span-2" : ""}
+    ${
+      isChecked
+        ? "ring-2 ring-blue-500 border-blue-400"
+        : "border-gray-200 hover:shadow-md"
+    }
+  `}
                         onClick={() => setIsMediaModalVisible(true)}
                       >
                         <img
@@ -2171,13 +2275,18 @@ const CategorySelector = () => {
                           }`}
                         />
 
-                        <div
-                          className={`absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 ${
-                            isChecked ? "opacity-100" : ""
-                          }`}
-                        ></div>
+                        {/* FEATURED BADGE */}
+                        {index === 0 && (
+                          <span className="absolute bottom-2 left-2 bg-black/80 text-white text-[11px] px-2 py-0.5 rounded">
+                            Featured
+                          </span>
+                        )}
 
-                        <div className="absolute top-2 left-2 opacity-0 hover:opacity-100 transition-opacity duration-200 group-hover:opacity-100">
+                        {/* DARK OVERLAY ON HOVER */}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+                        {/* CHECKBOX – SHOW ON IMAGE HOVER */}
+                        <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition">
                           <input
                             type="checkbox"
                             checked={isChecked}
@@ -2187,17 +2296,7 @@ const CategorySelector = () => {
                           />
                         </div>
 
-                        <div className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity duration-200 group-hover:opacity-100 text-gray-200">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                            className="w-4 h-4"
-                          >
-                            <path d="M8 6h2V4H8v2zm0 7h2v-2H8v2zm0 7h2v-2H8v2zm6-14h2V4h-2v2zm0 7h2v-2h-2v2zm0 7h2v-2h-2v2z" />
-                          </svg>
-                        </div>
-
+                        {/* LOADER */}
                         {img.loading && (
                           <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
                             <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
@@ -3749,8 +3848,29 @@ const CategorySelector = () => {
                     Done
                   </button>
                 </div>
+                {/* VARIANT IMAGE UPLOAD */}
 
                 <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                  <div className="bg-white border-b px-6 py-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      id="variantUpload"
+                      className="hidden"
+                      onChange={handleVariantImageUpload}
+                    />
+
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg h-40 flex items-center justify-center bg-gray-50">
+                      <label
+                        htmlFor="variantUpload"
+                        className="bg-black text-white px-5 py-2 rounded-md text-sm font-medium cursor-pointer hover:bg-gray-800 transition"
+                      >
+                        upload
+                      </label>
+                    </div>
+                  </div>
+
                   {/* ASSIGNED IMAGES */}
                   <div className="mt-4 bg-white border rounded-lg p-5">
                     <h3 className="text-sm font-semibold mb-3 text-gray-700">

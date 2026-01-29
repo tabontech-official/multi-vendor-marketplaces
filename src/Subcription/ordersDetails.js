@@ -9,7 +9,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 const OrdersDetails = () => {
   const location = useLocation();
-  const { order, productName, sku, index, merchantId } = location.state || {};
+  const { order, productName, sku, index, merchantId,fulfilledItems } = location.state || {};
+  console.log("fullfil item ",fulfilledItems)
   const navigate = useNavigate();
   const { orderId } = useParams();
   // const [orderData, setOrderData] = useState(null);
@@ -510,7 +511,7 @@ const OrdersDetails = () => {
 
                   <hr className="border-gray-200" />
 
-                  <div className="divide-y border rounded mb-4">
+                  {/* <div className="divide-y border rounded mb-4">
                     {lineItems
                       .filter(
                         (item) =>
@@ -567,7 +568,73 @@ const OrdersDetails = () => {
                           </div>
                         </div>
                       ))}
-                  </div>
+                  </div> */}
+<div className="divide-y border rounded mb-4">
+  {lineItems
+    .filter(
+      (item) =>
+        item.fulfillment_status === null ||
+        item.fulfillment_status === "cancelled",
+    )
+    .map((item, index) => {
+      const pendingQty =
+        item.quantity - (item.fulfilled_quantity || 0);
+
+      const displayQty =
+        item.fulfilled_quantity > 0
+          ? item.fulfilled_quantity
+          : pendingQty;
+
+      return (
+        <div
+          key={index}
+          className="flex items-center justify-between p-3"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+              {item.image?.src ? (
+                <img
+                  src={item.image.src}
+                  alt={item.image.alt || "Product image"}
+                  className="w-full h-full object-contain rounded"
+                />
+              ) : (
+                <span className="text-gray-400 text-xs font-semibold">
+                  No Image
+                </span>
+              )}
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-gray-800">
+                {item.name}
+              </p>
+
+              {item.variant_title && (
+                <span className="inline-block text-[10px] px-2 py-1 bg-gray-200 text-gray-600 rounded mt-1">
+                  {item.variant_title}
+                </span>
+              )}
+
+              <p className="text-xs text-gray-500 mt-1">
+                SKU: {item.sku || "N/A"}
+              </p>
+            </div>
+          </div>
+
+          <div className="text-right">
+            <p className="text-sm text-gray-800 font-medium">
+              ${parseFloat(item.price).toFixed(2)} × {displayQty}
+            </p>
+
+            <p className="text-sm font-semibold text-gray-900">
+              ${(parseFloat(item.price) * displayQty).toFixed(2)}
+            </p>
+          </div>
+        </div>
+      );
+    })}
+</div>
 
                   {!lineItems.some(
                     (i) => i.fulfillment_status === "cancelled",

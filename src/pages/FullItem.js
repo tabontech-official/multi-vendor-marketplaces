@@ -108,7 +108,7 @@ const FullItem = () => {
     refresh: true,
 
     // 👇 NEW
-    fulfilledItems: itemsToFulfill,
+    fulfilledItems: itemsToFulfill[0]?.quantity || 0,
   },
 });
 

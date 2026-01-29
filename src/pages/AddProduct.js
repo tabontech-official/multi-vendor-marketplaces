@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { FaTrash, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import "react-quill/dist/quill.snow.css";
-import { IoIosArrowUp } from "react-icons/io";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { MdEdit, MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { RiDeleteBin5Fill, RiDeleteBin6Line } from "react-icons/ri";
 import RTC from "../component/editor";
@@ -2786,6 +2786,8 @@ const CategorySelector = () => {
                                   className="flex gap-2 items-center"
                                 >
                                   {hasDBValues && !isCustomValue ? (
+                                        <div className="relative w-full">
+
                                     <select
                                       value={value === "" ? "" : value}
                                       onChange={(e) => {
@@ -2809,7 +2811,7 @@ const CategorySelector = () => {
                                           );
                                         }
                                       }}
-                                      className="w-full border border-gray-300 rounded-md p-1 text-sm"
+                                      className="w-full  border-gray-300 rounded-md p-1 text-sm appearance-none border"
                                     >
                                       <option value="" disabled>
                                         Select value
@@ -2823,6 +2825,16 @@ const CategorySelector = () => {
 
                                       <option value="Other">Other</option>
                                     </select>
+                                     <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+        <svg
+          className="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" />
+        </svg>
+      </div>
+                                    </div>
                                   ) : (
                                     <input
                                       type="text"
@@ -2873,22 +2885,22 @@ const CategorySelector = () => {
                   <div className="mt-3">
                     <div className="grid grid-cols-6 items-center gap-20 mb-2 p-3">
                       <h3 className="font-semibold text-xs text-gray-800">
-                        IMG
+                        Image
                       </h3>
                       <h3 className="font-semibold text-xs text-gray-800">
-                        VARIANT
+                        Variant
                       </h3>
                       <h3 className="font-semibold text-xs text-gray-800">
-                        PRICE
+                        Price
                       </h3>
                       <h3 className="font-semibold text-xs text-gray-800">
-                        COMPARE
+                        Compare
                       </h3>
                       <h3 className="font-semibold text-xs text-gray-800">
-                        QTY
+                        Qty
                       </h3>
                       <h3 className="font-semibold text-xs text-gray-800">
-                        ACTION
+                        Action
                       </h3>
                     </div>
 
@@ -2908,21 +2920,26 @@ const CategorySelector = () => {
 
                             <div
                               className="flex items-center justify-between gap-6 cursor-pointer"
-                              onClick={() => toggleChildOptions(index)} // ✅ Only one click handler
+                              onClick={() => toggleChildOptions(index)} 
                             >
                               <button
                                 type="button"
                                 className="text-gray-500 hover:text-gray-700 transition"
                                 onClick={(e) => {
-                                  e.stopPropagation(); // ✅ Prevent parent click from firing twice
+                                  e.stopPropagation(); 
                                   toggleChildOptions(index);
                                 }}
                               >
                                 {expandedParents.includes(index) ? (
-                                  <IoIosArrowUp className="text-xl transition-transform duration-200" />
+<IoIosArrowDown
+  className="h-5 w-5 text-gray-500 transition-transform duration-200 rotate-180"
+/>
                                 ) : (
-                                  <MdOutlineKeyboardArrowDown className="text-2xl transition-transform duration-200" />
-                                )}
+<IoIosArrowDown
+  className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${
+    expandedParents.includes(index) ? "rotate-180" : ""
+  }`}
+/>                                )}
                               </button>
                             </div>
                           </div>
@@ -3230,6 +3247,8 @@ const CategorySelector = () => {
                   </label>
 
                   {!isCustomOption ? (
+                    <div className="relative">
+
                     <select
                       value={selectedOptionName}
                       onChange={(e) => {
@@ -3260,7 +3279,7 @@ const CategorySelector = () => {
                           }
                         }
                       }}
-                      className="w-full border-gray-300 rounded-md p-2 focus:ring focus:ring-gray-400 focus:border-gray-500"
+                                      className="w-full  border-gray-300 rounded-md p-1 text-sm appearance-none border"
                     >
                       <option value="">Select option name</option>
                       {dbOptions.map((opt, i) =>
@@ -3272,6 +3291,12 @@ const CategorySelector = () => {
                       )}
                       <option value="Other">Other</option>
                     </select>
+                     <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" />
+    </svg>
+  </div>
+</div>
                   ) : (
                     <input
                       type="text"
@@ -3301,7 +3326,7 @@ const CategorySelector = () => {
                             onChange={(e) =>
                               handleNewOptionValueChange(index, e.target.value)
                             }
-                            className="w-full border-gray-300 rounded-md p-2"
+                                      className="w-full  border-gray-300 rounded-md p-1 text-sm appearance-none border"
                           >
                             <option value="">Select value</option>
                             {matchedOptionValues.map((val, i) => (
@@ -3721,19 +3746,39 @@ const CategorySelector = () => {
               )}
             </div>
 
-            <div className="bg-white p-4 border border-gray-300 rounded-xl">
-              <label className="block text-sm font-medium text-gray-700">
-                Status
-              </label>
-              <select
-                className="mt-2 block w-full border border-gray-300 p-2 rounded-xl"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option value="publish">Publish</option>
-                <option value={"draft"}>Draft</option>
-              </select>
-            </div>
+          <div className="bg-white p-4 border border-gray-300 rounded-xl">
+  <label className="block text-sm font-medium text-gray-700">
+    Status
+  </label>
+
+  <div className="relative mt-2">
+    <select
+      className="block w-full appearance-none border border-gray-300 rounded-xl px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      value={status}
+      onChange={(e) => setStatus(e.target.value)}
+    >
+      <option value="publish">Publish</option>
+      <option value="draft">Draft</option>
+    </select>
+
+    {/* Arrow */}
+    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+      <svg
+        className="h-5 w-5"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path
+          fillRule="evenodd"
+          d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+          clipRule="evenodd"
+        />
+      </svg>
+    </div>
+  </div>
+</div>
+
 
             <div className="bg-white p-4 border border-gray-300 rounded-xl">
               <label className="block text-sm font-medium text-gray-700">

@@ -1233,7 +1233,7 @@ const Dashboard = () => {
                         )}
                       </td>
 
-                      <td className="p-3 font-medium text-gray-800 whitespace-nowrap">
+                      <td className="p-3 whitespace-nowrap">
                         {product.title !== "Job Listing"
                           ? product.title
                           : "Job Search Listing"}

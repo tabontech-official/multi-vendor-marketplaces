@@ -99,15 +99,19 @@ const FullItem = () => {
 
       if (response.ok) {
         setMessage("Items fulfilled and inventory updated!");
-        console.log("NAVIGATE ORDER OBJECT 👉", order);
+        console.log("NAVIGATE ORDER OBJECT 👉", itemsToFulfill);
 
-        navigate(`/order/${orderId}`, {
-          state: {
-            order,
-            merchantId,
-            refresh: true,
-          },
-        });
+       navigate(`/order/${orderId}`, {
+  state: {
+    order,
+    merchantId,
+    refresh: true,
+
+    // 👇 NEW
+    fulfilledItems: itemsToFulfill,
+  },
+});
+
       } else {
         setMessage(`Error: ${result.error || "Unknown error"}`);
       }

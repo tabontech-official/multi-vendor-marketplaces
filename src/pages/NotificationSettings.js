@@ -1,224 +1,17 @@
-// import { useEffect, useState } from "react";
-// import { jwtDecode } from "jwt-decode";
-// import { MdNotificationsActive, MdEmail, MdClose, MdAdd } from "react-icons/md";
-// import { useNavigate } from "react-router-dom";
-// import SettingsSidebar from "../component/SettingsSidebar";
-
-// const NotificationSettings = () => {
-//   const navigate = useNavigate();
-//   const [allowed, setAllowed] = useState(false);
-  
-//   // New States for Email functionality
-//   const [staffEmail, setStaffEmail] = useState("");
-//   const [emailList, setEmailList] = useState([]);
-
-//   const [settings, setSettings] = useState({
-//     aiOrderAlerts: true,
-//     aiFraudAlerts: true,
-//     aiLowStockAlerts: false,
-//     aiPerformanceReports: true,
-//   });
-
-//   useEffect(() => {
-//     const token = localStorage.getItem("usertoken");
-//     if (!token) {
-//       navigate("/login");
-//       return;
-//     }
-
-//     try {
-//       const decoded = jwtDecode(token);
-//       const role = decoded?.payLoad?.role;
-
-//       if (role === "Dev Admin" || role === "Master Admin") {
-//         setAllowed(true);
-//       } else {
-//         navigate("/unauthorized");
-//       }
-//     } catch (err) {
-//       navigate("/login");
-//     }
-//   }, [navigate]);
-
-//   if (!allowed) return null;
-
-//   const toggle = (key) => {
-//     setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
-//   };
-
-//   // Add email to the list
-//   const handleAddEmail = (e) => {
-//     e.preventDefault();
-//     if (staffEmail && !emailList.includes(staffEmail)) {
-//       setEmailList([...emailList, staffEmail]);
-//       setStaffEmail(""); // Clear input
-//     }
-//   };
-
-//   // Remove email from the list
-//   const removeEmail = (emailToRemove) => {
-//     setEmailList(emailList.filter((email) => email !== emailToRemove));
-//   };
-
-//   const handleSave = () => {
-//     const finalData = {
-//       ...settings,
-//       recipientEmails: emailList,
-//     };
-//     console.log("🔔 Saving All Settings:", finalData);
-//     alert("Settings and Staff Emails saved successfully!");
-//     // 🔜 API call here: axios.post('/api/settings', finalData)
-//   };
-
-//   return (
-//     <div className="flex min-h-screen bg-gray-50">
-//       <SettingsSidebar />
-
-//       <div className="flex-1 p-6">
-//         <div className="max-w-3xl mx-auto">
-//           {/* Header */}
-//           <div className="flex items-center gap-3 mb-6">
-//             <div className="p-2 bg-gray-800 rounded-lg">
-//               <MdNotificationsActive className="text-xl text-white" />
-//             </div>
-//             <div>
-//               <h1 className="text-xl font-bold text-gray-800">
-//                 AI Notification Settings
-//               </h1>
-//               <p className="text-sm text-gray-500">
-//                 Configure alerts and add staff members to receive updates
-//               </p>
-//             </div>
-//           </div>
-
-//           {/* AI Toggles Card */}
-//           <div className="bg-white border border-gray-300 rounded-xl shadow-sm divide-y mb-6">
-//             <ToggleItem
-//               label="AI Order Alerts"
-//               desc="Get AI alerts for unusual or high-value orders"
-//               enabled={settings.aiOrderAlerts}
-//               onChange={() => toggle("aiOrderAlerts")}
-//             />
-//             <ToggleItem
-//               label="AI Fraud Detection Alerts"
-//               desc="Receive alerts when AI detects suspicious activity"
-//               enabled={settings.aiFraudAlerts}
-//               onChange={() => toggle("aiFraudAlerts")}
-//             />
-//             <ToggleItem
-//               label="Low Stock AI Alerts"
-//               desc="AI predicts low stock before it runs out"
-//               enabled={settings.aiLowStockAlerts}
-//               onChange={() => toggle("aiLowStockAlerts")}
-//             />
-//             <ToggleItem
-//               label="AI Performance Reports"
-//               desc="Weekly AI-generated system performance summary"
-//               enabled={settings.aiPerformanceReports}
-//               onChange={() => toggle("aiPerformanceReports")}
-//             />
-//           </div>
-
-//           {/* Staff Email Section */}
-//           <div className="bg-white border border-gray-300 rounded-xl shadow-sm p-6">
-//             <div className="flex items-center gap-2 mb-4 text-gray-800">
-//               <MdEmail className="text-lg" />
-//               <h2 className="font-bold">Staff Notifications</h2>
-//             </div>
-            
-//             <p className="text-xs text-gray-500 mb-4">
-//               Enter staff email addresses that should also receive these AI notifications.
-//             </p>
-
-//             <form onSubmit={handleAddEmail} className="flex gap-2 mb-4">
-//               <input
-//                 type="email"
-//                 placeholder="staff@company.com"
-//                 value={staffEmail}
-//                 onChange={(e) => setStaffEmail(e.target.value)}
-//                 className="flex-1 px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
-//               />
-//               <button
-//                 type="submit"
-//                 className="bg-gray-800 text-white px-4 py-2 rounded-lg flex items-center gap-1 text-sm hover:bg-gray-700"
-//               >
-//                 <MdAdd /> Add
-//               </button>
-//             </form>
-
-//             {/* Email Chips/Pills */}
-//             <div className="flex flex-wrap gap-2">
-//               {emailList.map((email) => (
-//                 <div 
-//                   key={email} 
-//                   className="flex items-center gap-2 bg-gray-100 border border-gray-300 px-3 py-1.5 rounded-full text-xs font-medium text-gray-700"
-//                 >
-//                   {email}
-//                   <button 
-//                     onClick={() => removeEmail(email)}
-//                     className="text-gray-400 hover:text-red-500 transition"
-//                   >
-//                     <MdClose size={14} />
-//                   </button>
-//                 </div>
-//               ))}
-//               {emailList.length === 0 && (
-//                 <p className="text-xs text-gray-400 italic">No staff emails added yet.</p>
-//               )}
-//             </div>
-//           </div>
-
-//           {/* Save Button */}
-//           <div className="flex justify-end mt-6">
-//             <button
-//               onClick={handleSave}
-//               className="bg-gray-800 text-white px-8 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-900 transition shadow-md"
-//             >
-//               Save Changes
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default NotificationSettings;
-
-// // Toggle Component
-// const ToggleItem = ({ label, desc, enabled, onChange }) => {
-//   return (
-//     <div className="flex items-center justify-between p-4">
-//       <div>
-//         <h3 className="text-sm font-semibold text-gray-800">{label}</h3>
-//         <p className="text-xs text-gray-500 mt-0.5">{desc}</p>
-//       </div>
-
-//       <button
-//         onClick={onChange}
-//         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-//           ${enabled ? "bg-gray-800" : "bg-gray-300"}`}
-//       >
-//         <span
-//           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-//             ${enabled ? "translate-x-6" : "translate-x-1"}`}
-//         />
-//       </button>
-//     </div>
-//   );
-// };
 
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { MdNotificationsActive, MdEmail, MdClose, MdAdd, MdArrowBack } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import SettingsSidebar from "../component/SettingsSidebar";
+import axios from "axios";
 
 const NotificationSettings = () => {
   const navigate = useNavigate();
   const [allowed, setAllowed] = useState(false);
   const [staffEmail, setStaffEmail] = useState("");
   const [emailList, setEmailList] = useState(["admin-audit@store.com"]);
+const API_BASE_URL = "https://multi-vendor-marketplace.vercel.app/notificationSettings";
 
   // Updated state for Approval Workflows
   const [settings, setSettings] = useState({
@@ -227,24 +20,52 @@ const NotificationSettings = () => {
     systemAlerts: false,
   });
 
-  useEffect(() => {
-    const token = localStorage.getItem("usertoken");
-    if (!token) {
-      navigate("/login");
-      return;
+useEffect(() => {
+  const token = localStorage.getItem("usertoken");
+  if (!token) {
+    navigate("/login");
+    return;
+  }
+
+  try {
+    const decoded = jwtDecode(token);
+    const role = decoded?.payLoad?.role;
+    const userId = localStorage.getItem("userid")
+
+    if (role === "Dev Admin" || role === "Master Admin") {
+      setAllowed(true);
+
+      // 🔥 GET notification settings
+      axios
+        .get(`${API_BASE_URL}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+       .then((res) => {
+  const data = res.data;
+
+  setSettings({
+    userRegistrationApproval: data.approvals?.userRegistrationApproval ?? true,
+    productListingApproval: data.approvals?.productListingApproval ?? true,
+    systemAlerts: data.approvals?.systemAlerts ?? false,
+  });
+
+  setEmailList(data.recipientEmails || []);
+})
+
+        .catch((err) => {
+          console.error("Failed to load notification settings", err);
+        });
+
+    } else {
+      navigate("/unauthorized");
     }
-    try {
-      const decoded = jwtDecode(token);
-      const role = decoded?.payLoad?.role;
-      if (role === "Dev Admin" || role === "Master Admin") {
-        setAllowed(true);
-      } else {
-        navigate("/unauthorized");
-      }
-    } catch (err) {
-      navigate("/login");
-    }
-  }, [navigate]);
+  } catch (err) {
+    navigate("/login");
+  }
+}, [navigate]);
+
 
   if (!allowed) return null;
 
@@ -264,11 +85,34 @@ const NotificationSettings = () => {
     setEmailList(emailList.filter((email) => email !== emailToRemove));
   };
 
-  const handleSave = () => {
-    const finalData = { ...settings, recipientEmails: emailList };
-    console.log("📩 Saving Approval Settings:", finalData);
-    alert("Notification settings updated successfully!");
-  };
+const handleSave = async () => {
+  try {
+    const token = localStorage.getItem("usertoken");
+    const decoded = jwtDecode(token);
+    const userId = localStorage.getItem("userid")
+
+    const finalData = {
+      ...settings,
+      recipientEmails: emailList,
+    };
+
+    await axios.post(
+      `${API_BASE_URL}`,
+      finalData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    alert("✅ Notification settings saved successfully!");
+  } catch (error) {
+    console.error("Save failed:", error);
+    alert("❌ Failed to save notification settings");
+  }
+};
+
 
   return (
     <div className="flex min-h-screen bg-[#f1f1f1] font-sans text-[#303030]">
@@ -285,7 +129,7 @@ const NotificationSettings = () => {
           </div>
           <button
             onClick={handleSave}
-            className="bg-[#18181b] hover:bg-[#006e52] text-white px-4 py-2 rounded-md font-semibold text-sm transition shadow-sm"
+            className="bg-[#18181b] hover:bg-gray-900 text-white px-4 py-2 rounded-md font-semibold text-sm transition shadow-sm"
           >
             Save
           </button>
@@ -375,7 +219,7 @@ const NotificationSettings = () => {
           <div className="flex justify-end pt-4 border-t border-gray-200">
              <button
               onClick={handleSave}
-              className="bg-[#18181b] hover:bg-[#006e52] text-white px-6 py-2 rounded-md font-semibold text-sm transition shadow-sm"
+              className="bg-[#18181b] hover:bg-gray-900 text-white px-6 py-2 rounded-md font-semibold text-sm transition shadow-sm"
             >
               Save
             </button>

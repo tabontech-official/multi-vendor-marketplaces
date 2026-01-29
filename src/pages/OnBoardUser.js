@@ -304,6 +304,9 @@ const OnBoard = () => {
         "Inventory",
         "Manage Categories",
         "Manage Shipping",
+        "Manage Approval",
+        "Manage Options",
+        "Manage Size Charts"
       ],
     },
     {

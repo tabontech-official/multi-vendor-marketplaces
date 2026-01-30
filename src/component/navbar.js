@@ -397,7 +397,8 @@ const Navbar = () => {
       await markAllAsSeen();
     }
   };
-
+const canViewProfile =
+  role !== "Dev Admin" && role !== "Master Admin";
  return (
     // Reduced height to 6vh and added a "blackish" gradient
     <nav className="bg-gradient-to-r from-[#09090b] via-[#27272a] to-[#27272a] flex items-center px-6 h-[6vh] relative shadow-xl border-b border-gray-800">
@@ -553,11 +554,14 @@ const Navbar = () => {
                           Settings
                         </Link>
                       </li>
-                      <li>
-                        <Link to="/edit-account" className="block px-4 py-2 hover:bg-[#F3F4F6]" onClick={() => setIsOpen(false)}>
-                          My Profile
-                        </Link>
-                      </li>
+                    {canViewProfile && (
+  <li>
+    <Link to="/edit-account" className="block px-4 py-2 hover:bg-[#F3F4F6]">
+      My Profile
+    </Link>
+  </li>
+)}
+
                       <li>
                         <button onClick={LogOut} className="block w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 font-medium">
                           Logout

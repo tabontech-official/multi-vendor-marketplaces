@@ -42,58 +42,7 @@ const SubscriptionHistory = () => {
 
   const togglePopup = () => setIsexportOpen(!isOpen);
 
-  // const fetchSubscriptions = async () => {
-  //   const userId = localStorage.getItem("userid");
-  //   const token = localStorage.getItem("usertoken");
-  //   const apiKey = localStorage.getItem("apiKey");
-  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
-  //   setIsLoading(true); // start loader
-
-  //   if (!userId || !token) {
-  //     console.error("User ID or token not found in localStorage.");
-  //     return;
-  //   }
-
-  //   try {
-  //     const decoded = jwtDecode(token);
-  //     const role = decoded.payLoad?.role;
-  //     const isTokenValid = decoded.exp * 1000 > Date.now();
-
-  //     const isAdminFlag =
-  //       isTokenValid && (role === "Master Admin" || role === "Dev Admin");
-
-  //     setIsAdmin(isAdminFlag);
-
-  //     const url = isAdminFlag
-  //       ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrder`
-  //       : `https://multi-vendor-marketplace.vercel.app/order/order`;
-
-  //     const res = await fetch(url, {
-  //       method: "GET",
-  //       headers: {
-  //         "x-api-key": apiKey,
-  //         "x-api-secret": apiSecretKey,
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
-
-  //     if (res.ok) {
-  //       const json = await res.json();
-  //       const sortedSubscriptions = json.data.sort(
-  //         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  //       );
-  //       setSubscriptions(sortedSubscriptions);
-  //       setFilteredSubscriptions(sortedSubscriptions);
-  //     } else {
-  //       console.error("Failed to fetch subscriptions:", res.status);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error decoding token or fetching subscriptions:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
+ 
   const fetchSubscriptions = async () => {
     const userId = localStorage.getItem("userid");
     const token = localStorage.getItem("usertoken");
@@ -494,7 +443,7 @@ const SubscriptionHistory = () => {
                                     className="p-3 cursor-pointer text-blue-600 hover:underline"
                                     onClick={() => {
                                       if (shopifyOrderId) {
-                                        navigate(`/order/${shopifyOrderId}`, {
+                                        navigate(`/order/${shopifyOrderId}/${merchantId}`, {
                                           state: {
                                             merchantId,
                                             shopifyOrderId,
@@ -592,25 +541,37 @@ const SubscriptionHistory = () => {
                             >
                               <td
                                 className="p-3 text-blue-600 hover:underline cursor-pointer"
-                                onClick={() => {
-                                  // console.log("Navigating with data:", {
-                                  //   order: subscription,
-                                  //   productName: firstItem.name,
-                                  //   sku: firstItem.sku,
-                                  //   index: 101 + index,
-                                  //   serialNumber: subscription.orderId,
-                                  // });
+                               onClick={() => {
+  const merchantId =
+    subscription.ProductSnapshot?.find(
+      (p) =>
+        String(p.variantId) === String(firstItem.variant_id)
+    )?.merchantId;
 
-                                  navigate(`/order/${subscription.orderId}`, {
-                                    state: {
-                                      order: subscription,
-                                      productName: firstItem.name,
-                                      sku: firstItem.sku,
-                                      index: 101 + index,
-                                      serialNumber: subscription.orderId,
-                                    },
-                                  });
-                                }}
+  console.log("Navigating with data:", {
+    order: subscription,
+    productName: firstItem.name,
+    sku: firstItem.sku,
+    index: 101 + index,
+    serialNumber: subscription.orderId,
+    merchantId,
+  });
+
+  navigate(
+    `/order/${subscription.orderId}/${merchantId}`,
+    {
+      state: {
+        order: subscription,
+        productName: firstItem.name,
+        sku: firstItem.sku,
+        index: 101 + index,
+        serialNumber: subscription.orderId,
+        merchantId,
+      },
+    }
+  );
+}}
+
                               >
                                 #{subscription.shopifyOrderNo}
                               </td>

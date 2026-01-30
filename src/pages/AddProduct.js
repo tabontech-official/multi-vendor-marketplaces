@@ -909,17 +909,14 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
         },
-      )
+      })
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data);
@@ -1254,22 +1251,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
             },
-          );
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1342,19 +1336,16 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "x-api-key": apiKey,
-                  "x-api-secret": apiSecretKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId, images: [data.secure_url] }),
+            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
               },
-            );
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            });
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1549,7 +1540,7 @@ const CategorySelector = () => {
 
       const productId = data.product?.id;
 
-      if (!isEditing && productId) {
+      if (productId) {
         const variantUpdates = combinations.flatMap((combination, index) =>
           combination.children.map((child) => {
             const key = `${index}-${child}`;
@@ -1572,6 +1563,23 @@ const CategorySelector = () => {
           }),
         );
 
+        // for (const variant of variantUpdates) {
+        //   if (!variant.variantId) continue;
+
+        //   await fetch(
+        //     `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variant.variantId}`,
+        //     {
+        //       method: "PUT",
+        //       headers: {
+        //         Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
+        //         "x-api-key": apiKey,
+        //         "x-api-secret": apiSecretKey,
+        //         "Content-Type": "application/json",
+        //       },
+        //       body: JSON.stringify({ variant }),
+        //     },
+        //   );
+        // }
         for (const variant of variantUpdates) {
           if (!variant.variantId) continue;
 
@@ -2786,54 +2794,53 @@ const CategorySelector = () => {
                                   className="flex gap-2 items-center"
                                 >
                                   {hasDBValues && !isCustomValue ? (
-                                        <div className="relative w-full">
-
-                                    <select
-                                      value={value === "" ? "" : value}
-                                      onChange={(e) => {
-                                        console.log(
-                                          "Dropdown selected:",
-                                          e.target.value,
-                                        );
-
-                                        if (e.target.value === "Other") {
+                                    <div className="relative w-full">
+                                      <select
+                                        value={value === "" ? "" : value}
+                                        onChange={(e) => {
                                           console.log(
-                                            "👉 Switching to INPUT mode",
-                                          );
-                                          handleEditOptionValueChange(
-                                            i,
-                                            "__OTHER__",
-                                          );
-                                        } else {
-                                          handleEditOptionValueChange(
-                                            i,
+                                            "Dropdown selected:",
                                             e.target.value,
                                           );
-                                        }
-                                      }}
-                                      className="w-full  border-gray-300 rounded-md p-1 text-sm appearance-none border"
-                                    >
-                                      <option value="" disabled>
-                                        Select value
-                                      </option>
 
-                                      {newOption.dbValues.map((val) => (
-                                        <option key={val} value={val}>
-                                          {val}
+                                          if (e.target.value === "Other") {
+                                            console.log(
+                                              "👉 Switching to INPUT mode",
+                                            );
+                                            handleEditOptionValueChange(
+                                              i,
+                                              "__OTHER__",
+                                            );
+                                          } else {
+                                            handleEditOptionValueChange(
+                                              i,
+                                              e.target.value,
+                                            );
+                                          }
+                                        }}
+                                        className="w-full  border-gray-300 rounded-md p-1 text-sm appearance-none border"
+                                      >
+                                        <option value="" disabled>
+                                          Select value
                                         </option>
-                                      ))}
 
-                                      <option value="Other">Other</option>
-                                    </select>
-                                     <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
-        <svg
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" />
-        </svg>
-      </div>
+                                        {newOption.dbValues.map((val) => (
+                                          <option key={val} value={val}>
+                                            {val}
+                                          </option>
+                                        ))}
+
+                                        <option value="Other">Other</option>
+                                      </select>
+                                      <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                                        <svg
+                                          className="h-5 w-5"
+                                          viewBox="0 0 20 20"
+                                          fill="currentColor"
+                                        >
+                                          <path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" />
+                                        </svg>
+                                      </div>
                                     </div>
                                   ) : (
                                     <input
@@ -2920,26 +2927,27 @@ const CategorySelector = () => {
 
                             <div
                               className="flex items-center justify-between gap-6 cursor-pointer"
-                              onClick={() => toggleChildOptions(index)} 
+                              onClick={() => toggleChildOptions(index)}
                             >
                               <button
                                 type="button"
                                 className="text-gray-500 hover:text-gray-700 transition"
                                 onClick={(e) => {
-                                  e.stopPropagation(); 
+                                  e.stopPropagation();
                                   toggleChildOptions(index);
                                 }}
                               >
                                 {expandedParents.includes(index) ? (
-<IoIosArrowDown
-  className="h-5 w-5 text-gray-500 transition-transform duration-200 rotate-180"
-/>
+                                  <IoIosArrowDown className="h-5 w-5 text-gray-500 transition-transform duration-200 rotate-180" />
                                 ) : (
-<IoIosArrowDown
-  className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${
-    expandedParents.includes(index) ? "rotate-180" : ""
-  }`}
-/>                                )}
+                                  <IoIosArrowDown
+                                    className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${
+                                      expandedParents.includes(index)
+                                        ? "rotate-180"
+                                        : ""
+                                    }`}
+                                  />
+                                )}
                               </button>
                             </div>
                           </div>
@@ -3248,55 +3256,58 @@ const CategorySelector = () => {
 
                   {!isCustomOption ? (
                     <div className="relative">
+                      <select
+                        value={selectedOptionName}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setSelectedOptionName(value);
+                          setIsChanged(true);
 
-                    <select
-                      value={selectedOptionName}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setSelectedOptionName(value);
-                        setIsChanged(true);
-
-                        if (value === "Other") {
-                          setIsCustomOption(true);
-                          setNewOption({ name: "", values: [""] });
-                          setMatchedOptionValues([]);
-                        } else {
-                          setIsCustomOption(false);
-                          setNewOption({ ...newOption, name: value });
-
-                          const found = dbOptions.find((opt) =>
-                            opt.optionName.some(
-                              (name) =>
-                                name.toLowerCase().trim() ===
-                                value.toLowerCase().trim(),
-                            ),
-                          );
-
-                          if (found) {
-                            setMatchedOptionValues(found.optionValues || []);
-                          } else {
+                          if (value === "Other") {
+                            setIsCustomOption(true);
+                            setNewOption({ name: "", values: [""] });
                             setMatchedOptionValues([]);
+                          } else {
+                            setIsCustomOption(false);
+                            setNewOption({ ...newOption, name: value });
+
+                            const found = dbOptions.find((opt) =>
+                              opt.optionName.some(
+                                (name) =>
+                                  name.toLowerCase().trim() ===
+                                  value.toLowerCase().trim(),
+                              ),
+                            );
+
+                            if (found) {
+                              setMatchedOptionValues(found.optionValues || []);
+                            } else {
+                              setMatchedOptionValues([]);
+                            }
                           }
-                        }
-                      }}
-                                      className="w-full  border-gray-300 rounded-md p-1 text-sm appearance-none border"
-                    >
-                      <option value="">Select option name</option>
-                      {dbOptions.map((opt, i) =>
-                        opt.optionName.map((name, j) => (
-                          <option key={`${i}-${j}`} value={name}>
-                            {name}
-                          </option>
-                        )),
-                      )}
-                      <option value="Other">Other</option>
-                    </select>
-                     <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
-    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-      <path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" />
-    </svg>
-  </div>
-</div>
+                        }}
+                        className="w-full  border-gray-300 rounded-md p-1 text-sm appearance-none border"
+                      >
+                        <option value="">Select option name</option>
+                        {dbOptions.map((opt, i) =>
+                          opt.optionName.map((name, j) => (
+                            <option key={`${i}-${j}`} value={name}>
+                              {name}
+                            </option>
+                          )),
+                        )}
+                        <option value="Other">Other</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                        <svg
+                          className="h-5 w-5"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" />
+                        </svg>
+                      </div>
+                    </div>
                   ) : (
                     <input
                       type="text"
@@ -3326,7 +3337,7 @@ const CategorySelector = () => {
                             onChange={(e) =>
                               handleNewOptionValueChange(index, e.target.value)
                             }
-                                      className="w-full  border-gray-300 rounded-md p-1 text-sm appearance-none border"
+                            className="w-full  border-gray-300 rounded-md p-1 text-sm appearance-none border"
                           >
                             <option value="">Select value</option>
                             {matchedOptionValues.map((val, i) => (
@@ -3746,39 +3757,38 @@ const CategorySelector = () => {
               )}
             </div>
 
-          <div className="bg-white p-4 border border-gray-300 rounded-xl">
-  <label className="block text-sm font-medium text-gray-700">
-    Status
-  </label>
+            <div className="bg-white p-4 border border-gray-300 rounded-xl">
+              <label className="block text-sm font-medium text-gray-700">
+                Status
+              </label>
 
-  <div className="relative mt-2">
-    <select
-      className="block w-full appearance-none border border-gray-300 rounded-xl px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      value={status}
-      onChange={(e) => setStatus(e.target.value)}
-    >
-      <option value="publish">Publish</option>
-      <option value="draft">Draft</option>
-    </select>
+              <div className="relative mt-2">
+                <select
+                  className="block w-full appearance-none border border-gray-300 rounded-xl px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <option value="publish">Publish</option>
+                  <option value="draft">Draft</option>
+                </select>
 
-    {/* Arrow */}
-    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
-      <svg
-        className="h-5 w-5"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <path
-          fillRule="evenodd"
-          d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-          clipRule="evenodd"
-        />
-      </svg>
-    </div>
-  </div>
-</div>
-
+                {/* Arrow */}
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                  <svg
+                    className="h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
 
             <div className="bg-white p-4 border border-gray-300 rounded-xl">
               <label className="block text-sm font-medium text-gray-700">
@@ -3990,72 +4000,105 @@ const CategorySelector = () => {
                           <div
                             key={imageUrl}
                             className="border rounded-lg p-2 cursor-pointer hover:border-blue-500"
-                            onClick={async () => {
+                            // onClick={async () => {
+                            //   const parent =
+                            //     combinations[currentVariant?.index]?.parent;
+                            //   const key =
+                            //     options.length === 1
+                            //       ? currentVariant?.child
+                            //       : `${parent} / ${currentVariant?.child}`;
+                            //   const normalizedKey = key
+                            //     .replace(/['"]/g, "")
+                            //     .trim();
+
+                            //   const existing =
+                            //     variantImages[normalizedKey] || [];
+
+                            //   if (
+                            //     existing.some((i) => i.preview === imageUrl)
+                            //   ) {
+                            //     console.warn("Duplicate skipped");
+                            //     return;
+                            //   }
+
+                            //   // ⏳ add loader
+                            //   setVariantImages((prev) => ({
+                            //     ...prev,
+                            //     [normalizedKey]: [
+                            //       { preview: imageUrl, loading: true },
+                            //       ...(prev[normalizedKey] || []),
+                            //     ],
+                            //   }));
+
+                            //   let finalUrl = imageUrl;
+
+                            //   if (imageUrl.includes("cdn.shopify.com")) {
+                            //     try {
+                            //       finalUrl =
+                            //         await uploadShopifyImageToCloudinary(
+                            //           imageUrl,
+                            //         );
+                            //     } catch (err) {
+                            //       console.error("Upload failed", err);
+                            //       return;
+                            //     }
+                            //   }
+
+                            //   // ✅ replace loader with final image
+                            //   setVariantImages((prev) => {
+                            //     const filtered = prev[normalizedKey].filter(
+                            //       (i) => i.preview !== imageUrl,
+                            //     );
+
+                            //     return {
+                            //       ...prev,
+                            //       [normalizedKey]: [
+                            //         {
+                            //           preview: finalUrl,
+                            //           alt: `t4option${options[0]?.name}_${
+                            //             normalizedKey.split("/")[0]
+                            //           }`
+                            //             .replace(/\s+/g, "")
+                            //             .toLowerCase(),
+                            //           loading: false,
+                            //         },
+                            //         ...filtered,
+                            //       ],
+                            //     };
+                            //   });
+                            // }}
+                            onClick={() => {
                               const parent =
                                 combinations[currentVariant?.index]?.parent;
                               const key =
                                 options.length === 1
                                   ? currentVariant?.child
                                   : `${parent} / ${currentVariant?.child}`;
+
                               const normalizedKey = key
                                 .replace(/['"]/g, "")
                                 .trim();
 
                               const existing =
                                 variantImages[normalizedKey] || [];
-
-                              if (
-                                existing.some((i) => i.preview === imageUrl)
-                              ) {
-                                console.warn("Duplicate skipped");
+                              if (existing.some((i) => i.preview === imageUrl))
                                 return;
-                              }
 
-                              // ⏳ add loader
                               setVariantImages((prev) => ({
                                 ...prev,
                                 [normalizedKey]: [
-                                  { preview: imageUrl, loading: true },
+                                  {
+                                    preview: imageUrl,
+                                    alt: normalizedKey
+                                      .replace(/\s*\/\s*/g, "-")
+                                      .toLowerCase(),
+                                    loading: false,
+                                  },
                                   ...(prev[normalizedKey] || []),
                                 ],
                               }));
 
-                              let finalUrl = imageUrl;
-
-                              if (imageUrl.includes("cdn.shopify.com")) {
-                                try {
-                                  finalUrl =
-                                    await uploadShopifyImageToCloudinary(
-                                      imageUrl,
-                                    );
-                                } catch (err) {
-                                  console.error("Upload failed", err);
-                                  return;
-                                }
-                              }
-
-                              // ✅ replace loader with final image
-                              setVariantImages((prev) => {
-                                const filtered = prev[normalizedKey].filter(
-                                  (i) => i.preview !== imageUrl,
-                                );
-
-                                return {
-                                  ...prev,
-                                  [normalizedKey]: [
-                                    {
-                                      preview: finalUrl,
-                                      alt: `t4option${options[0]?.name}_${
-                                        normalizedKey.split("/")[0]
-                                      }`
-                                        .replace(/\s+/g, "")
-                                        .toLowerCase(),
-                                      loading: false,
-                                    },
-                                    ...filtered,
-                                  ],
-                                };
-                              });
+                              setIsChanged(true);
                             }}
                           >
                             <img

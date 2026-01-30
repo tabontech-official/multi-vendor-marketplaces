@@ -242,7 +242,7 @@ const App = () => {
               element={<ProtectedForms element={<ApprovalPage />} />}
             />
             <Route
-              path="/order/:orderId"
+              path="/order/:orderId/:merchantId"
               element={<ProtectedForms element={<OrdersDetails />} />}
             />
             <Route

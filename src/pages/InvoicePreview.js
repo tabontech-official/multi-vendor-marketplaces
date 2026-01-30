@@ -10,116 +10,106 @@ const PackagingSlip = () => {
     return <div style={{ padding: 40 }}>No order data found.</div>;
   }
 
+  /* ================= CUSTOMER ================= */
+  const customer =
+    order.customers || order.customer || {};
 
-  const merchantKey =
-    location.state?.merchantId ||
-    (order.lineItemsByMerchant
-      ? Object.keys(order.lineItemsByMerchant)[0]
-      : null);
+  /* ================= SHIPPING ADDRESS ================= */
+  const shipping =
+    order.shipping_address?.address1
+      ? order.shipping_address
+      : customer.default_address || {};
 
+  /* ================= BILLING ADDRESS ================= */
+  const billing =
+    order.billing_address?.address1
+      ? order.billing_address
+      : customer.default_address || {};
 
-  let customer = {};
-  let address = {};
+  /* ================= LINE ITEMS ================= */
+  const lineItems = Array.isArray(order.products)
+    ? order.products
+    : [];
 
-  if (order.customer?.default_address) {
-    customer = order.customer;
-    address = order.customer.default_address;
-  }
-  else if (
-    order.lineItemsByMerchant &&
-    merchantKey &&
-    order.lineItemsByMerchant[merchantKey]?.[0]?.customer?.[0]
-  ) {
-    customer = order.lineItemsByMerchant[merchantKey][0].customer[0];
-    address = customer.default_address || {};
-  }
-
-
-  let lineItems = [];
-
-  if (Array.isArray(order.lineItems)) {
-    lineItems = order.lineItems;
-  } else if (
-    order.lineItemsByMerchant &&
-    merchantKey &&
-    Array.isArray(order.lineItemsByMerchant[merchantKey])
-  ) {
-    lineItems = order.lineItemsByMerchant[merchantKey];
-  }
+  const formattedDate = order.created_at
+    ? new Date(order.created_at).toLocaleDateString("en-GB")
+    : "N/A";
 
   return (
     <div style={styles.page} className="packing-slip">
+      {/* ================= HEADER ================= */}
       <div style={styles.header}>
         <h1 style={styles.logo}>AYDI ACTIVE</h1>
 
         <div style={styles.orderInfo}>
           <strong>
-            Order #
-            {order.shopifyOrderNo || order.name || order.serialNo || "N/A"}
+            Packing Slip – Order #
+            {order.shopifyOrderNo || order.serialNumber || "N/A"}
           </strong>
-          <div>
-            {order.createdAt
-              ? new Date(order.createdAt).toLocaleDateString("en-GB")
-              : "N/A"}
-          </div>
+          <div>{formattedDate}</div>
         </div>
       </div>
 
+      {/* ================= ADDRESSES ================= */}
       <div style={styles.addressRow}>
         <div>
           <h4 style={styles.sectionTitle}>SHIP TO</h4>
           <p style={styles.text}>
-            {address.first_name || ""} {address.last_name || ""}
+            {customer.first_name} {customer.last_name}
             <br />
-            {address.address1 || ""}
+            {shipping.address1}
+            {shipping.address2 && <>, {shipping.address2}</>}
             <br />
-            {address.city || ""} {address.province || ""} {address.zip || ""}
+            {shipping.city} {shipping.province} {shipping.zip}
             <br />
-            {address.country || ""}
+            {shipping.country}
           </p>
         </div>
 
         <div>
           <h4 style={styles.sectionTitle}>BILL TO</h4>
           <p style={styles.text}>
-            {address.first_name || ""} {address.last_name || ""}
+            {customer.first_name} {customer.last_name}
             <br />
-            {address.address1 || ""}
+            {billing.address1}
+            {billing.address2 && <>, {billing.address2}</>}
             <br />
-            {address.city || ""} {address.province || ""} {address.zip || ""}
+            {billing.city} {billing.province} {billing.zip}
             <br />
-            {address.country || ""}
+            {billing.country}
           </p>
         </div>
       </div>
 
       <hr />
 
+      {/* ================= PACKING ITEMS ================= */}
       <div style={styles.itemsHeader}>
-        <strong>ITEMS</strong>
-        <strong>QUANTITY</strong>
+        <span style={styles.sectionTitle}>ITEM</span>
+        <span style={styles.sectionTitle}>QTY</span>
       </div>
 
       {lineItems.map((item, i) => (
         <div key={i} style={styles.itemRow}>
           <div>
-            <div>{item.name || item.title}</div>
+            <div>{item.product?.title || "N/A"}</div>
 
-            {item.variant_title && (
-              <div style={styles.muted}>{item.variant_title}</div>
+            {item.variant?.title && (
+              <div style={styles.muted}>{item.variant.title}</div>
             )}
 
-            <div style={styles.muted}>SKU: {item.sku || "N/A"}</div>
+            <div style={styles.muted}>
+              SKU: {item.variant?.sku || "N/A"}
+            </div>
           </div>
 
-          <div>
-            {item.quantity} of {item.quantity}
-          </div>
+          <div>{item.quantity}</div>
         </div>
       ))}
 
       <hr />
 
+      {/* ================= FOOTER ================= */}
       <div style={styles.footer}>
         <p>Thank you for shopping with us!</p>
 
@@ -134,20 +124,14 @@ const PackagingSlip = () => {
         </p>
 
         <button onClick={() => window.print()} style={styles.printBtn}>
-          Print
+          Print Packing Slip
         </button>
       </div>
 
+      {/* ================= PRINT STYLES ================= */}
       <style>
         {`
           @media print {
-            .navbar,
-            .topbar,
-            header,
-            nav {
-              display: none !important;
-            }
-
             body * {
               visibility: hidden;
             }
@@ -181,8 +165,6 @@ const styles = {
     margin: "auto",
     padding: 40,
     fontFamily: "Arial, sans-serif",
-    color: "#000",
-    background: "#fff",
     fontSize: 12,
   },
   header: {
@@ -192,7 +174,6 @@ const styles = {
   },
   logo: {
     fontSize: 22,
-    margin: 0,
   },
   orderInfo: {
     textAlign: "right",
@@ -212,17 +193,17 @@ const styles = {
   itemsHeader: {
     display: "flex",
     justifyContent: "space-between",
-    marginTop: 20,
-    marginBottom: 10,
+    fontWeight: "bold",
+    marginBottom: 8,
   },
   itemRow: {
     display: "flex",
     justifyContent: "space-between",
-    padding: "8px 0",
+    padding: "6px 0",
   },
   muted: {
-    color: "#555",
     fontSize: 11,
+    color: "#555",
   },
   footer: {
     marginTop: 40,
@@ -239,3 +220,4 @@ const styles = {
 };
 
 export default PackagingSlip;
+

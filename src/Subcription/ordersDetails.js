@@ -8,13 +8,9 @@ import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 const OrdersDetails = () => {
-  const location = useLocation();
-  const { order, productName, sku, index, merchantId,fulfilledItems } = location.state || {};
-  console.log("fullfil item ",fulfilledItems)
   const navigate = useNavigate();
-  const { orderId } = useParams();
-  // const [orderData, setOrderData] = useState(null);
-  const [orderData, setOrderData] = useState(order || null);
+  const { orderId, merchantId } = useParams();
+  const [orderData, setOrderData] = useState(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
@@ -26,14 +22,17 @@ const OrdersDetails = () => {
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
 
   const [requestMessage, setRequestMessage] = useState("");
+  const customer = orderData?.customers || {};
 
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
+  console.log("PARAMS 👉", orderId, merchantId);
+
   // const lineItems =
-  //   order?.lineItems || order?.lineItemsByMerchant?.[merchantId] || [];
-  const [role, setRole] = useState(null); // Merchant / Admin
+  //   orderData?.lineItems || orderData?.lineItemsByMerchant?.[merchantId] || [];
+  const [role, setRole] = useState(null);
   const [showCancelButton, setShowCancelButton] = useState(false);
 
   useEffect(() => {
@@ -43,166 +42,79 @@ const OrdersDetails = () => {
       try {
         const decoded = jwtDecode(token);
         const userRole = decoded?.payLoad?.role;
-        setRole(userRole); // useState for role
+        setRole(userRole);
       } catch (err) {
         console.error("Failed to decode token", err);
       }
     }
   }, []);
-
   useEffect(() => {
     const fetchOrderData = async () => {
-      const token = localStorage.getItem("usertoken");
-
-      if (!token || typeof token !== "string") {
-        console.error(" No valid token found in localStorage");
-        return;
-      }
-
-      let decoded;
       try {
-        decoded = jwtDecode(token);
-      } catch (error) {
-        console.error(" Failed to decode token:", error);
-        return;
-      }
+        setIsLoading(true);
 
-      const role = decoded?.payLoad?.role;
-      const isTokenValid = decoded?.exp * 1000 > Date.now();
-      const isAdminFlag =
-        isTokenValid && (role === "Master Admin" || role === "Dev Admin");
+        const apiKey = localStorage.getItem("apiKey");
+        const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-      const userIdFromStorage = localStorage.getItem("userid");
-      const merchantIdFromParams = merchantId;
-      const finalUserId = isAdminFlag
-        ? merchantIdFromParams
-        : userIdFromStorage;
-
-      if (!finalUserId || !orderId) return;
-
-      try {
-        const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${orderId}/${finalUserId}`,
+        const res = await axios.get(
+          `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${orderId}/${merchantId}`,
+          {
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+            },
+          },
         );
-        setOrderData(response.data?.data);
-        setIsLoading(false);
-      } catch (err) {
-        console.error(" Error fetching order:", err);
-        setFetchError("Failed to load order");
+
+        setOrderData(res.data?.data || null);
+      } catch (error) {
+        console.error("❌ Failed to fetch orderData:", error);
+        setFetchError("Failed to load orderData");
+      } finally {
         setIsLoading(false);
       }
     };
 
-    fetchOrderData();
+    if (orderId && merchantId) {
+      fetchOrderData();
+    }
   }, [orderId, merchantId]);
-
-  const handleGenerateInvoice = () => {
-    const activeOrder = order; // coming from location.state.order
-
-    if (!activeOrder) {
-      alert("Order data missing!");
+  useEffect(() => {
+    if (!orderData?.products) {
+      setLineItems([]);
       return;
     }
 
-    const customer = activeOrder.customer || {};
-    const address = customer.default_address || {};
-    const lineItems = activeOrder.lineItems || [];
+    const mappedItems = orderData.products.map((p) => {
+      const variant = p.variant || {};
+      const product = p.product || {};
 
-    // Initialize PDF
-    const doc = new jsPDF({
-      unit: "pt",
-      format: "a4",
+      return {
+        id: p.lineItemId,
+        product_id: p.productId,
+        variant_id: p.variantId,
+
+        name: product.title || "N/A",
+        variant_title: variant.title || null,
+        sku: variant.sku || "N/A",
+
+        price: variant.price || "0",
+
+        quantity: p.quantity,
+        fulfilled_quantity: p.fulfilled_quantity || 0,
+        fulfillable_quantity: p.fulfillable_quantity || 0,
+        fulfillment_status: p.fulfillment_status,
+
+        image: {
+          src:
+            product.images?.[0]?.src || product.variantImages?.[0]?.src || null,
+          alt: product.title || "Product image",
+        },
+      };
     });
 
-    // === HEADER ===
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("AYDI ACTIVE", 50, 60);
-
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Order #${activeOrder.shopifyOrderNo || "N/A"}`, 500, 60);
-    doc.text(
-      `${new Date(activeOrder.createdAt).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })}`,
-      500,
-      75,
-    );
-
-    // === SHIP TO & BILL TO ===
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text("SHIP TO", 50, 110);
-    doc.text("BILL TO", 300, 110);
-
-    doc.setFont("helvetica", "normal");
-    const shipToY = 125;
-    const shipToLines = [
-      `${address.first_name || customer.first_name || ""} ${
-        address.last_name || customer.last_name || ""
-      }`,
-      `${address.address1 || ""}`,
-      `${address.city || ""} ${address.province || ""} ${address.zip || ""}`,
-      `${address.country || ""}`,
-    ];
-
-    let y = shipToY;
-    shipToLines.forEach((line) => {
-      doc.text(line, 50, y);
-      doc.text(line, 300, y); // Billing same
-      y += 14;
-    });
-
-    // === ITEMS TABLE ===
-    const itemsData = lineItems.map((item) => [
-      item.name || item.title || "Unnamed Item",
-      item.sku || "-",
-      `${item.quantity || 1}`,
-    ]);
-
-    // ✅ Correct way to use autoTable
-    autoTable(doc, {
-      head: [["ITEMS", "SKU", "QUANTITY"]],
-      body: itemsData,
-      startY: y + 25,
-      theme: "plain",
-      styles: { fontSize: 10, lineColor: [0, 0, 0], lineWidth: 0.2 },
-      headStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        fontStyle: "bold",
-        lineWidth: 0.5,
-      },
-    });
-
-    const finalY = doc.lastAutoTable.finalY + 30;
-
-    // === FOOTER ===
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text("Thank you for shopping with us!", 220, finalY, {
-      align: "center",
-    });
-
-    const footerText = [
-      "Aydi Active",
-      "PO Box 241, Doncaster Heights VIC 3109, Australia",
-      "contact@aydiactive.com",
-      "www.aydiactive.com",
-    ];
-
-    let footerY = finalY + 20;
-    footerText.forEach((line) => {
-      doc.text(line, 220, footerY, { align: "center" });
-      footerY += 14;
-    });
-
-    // === SAVE PDF ===
-    doc.save(`Invoice_${activeOrder.shopifyOrderNo || "Order"}.pdf`);
-  };
+    setLineItems(mappedItems);
+  }, [orderData]);
 
   const totalPrice = Array.isArray(lineItems)
     ? lineItems
@@ -213,67 +125,40 @@ const OrdersDetails = () => {
         }, 0)
         .toFixed(2)
     : "0.00";
+  let orderCreatedAt = null;
 
-  let customerCreatedAt = null;
-
-  if (order?.createdAt) {
-    customerCreatedAt = order.createdAt;
-  } else if (
-    order?.lineItemsByMerchant &&
+  // 1️⃣ Shopify order created date (BEST)
+  if (orderData?.created_at) {
+    orderCreatedAt = orderData.created_at;
+  }
+  // 2️⃣ DB fallback
+  else if (orderData?.dbCreatedAt) {
+    orderCreatedAt = orderData.dbCreatedAt;
+  }
+  // 3️⃣ Very old fallback (admin grouped structure)
+  else if (
+    orderData?.lineItemsByMerchant &&
     merchantId &&
-    Array.isArray(order.lineItemsByMerchant[merchantId]) &&
-    order.lineItemsByMerchant[merchantId][0]?.customer?.[0]?.created_at
+    Array.isArray(orderData.lineItemsByMerchant[merchantId]) &&
+    orderData.lineItemsByMerchant[merchantId][0]?.customer?.[0]?.created_at
   ) {
-    customerCreatedAt =
-      order.lineItemsByMerchant[merchantId][0].customer[0].created_at;
+    orderCreatedAt =
+      orderData.lineItemsByMerchant[merchantId][0].customer[0].created_at;
   }
-  let customer = null;
 
-  if (order?.customer?.default_address) {
-    customer = order.customer;
-  } else if (order?.lineItemsByMerchant?.[merchantId]?.[0]?.customer?.[0]) {
-    customer = order.lineItemsByMerchant[merchantId][0].customer[0];
-  }
-  const formattedDate = customerCreatedAt
-    ? new Date(customerCreatedAt).toLocaleDateString("en-US", {
+  const formattedDate = orderCreatedAt
+    ? new Date(orderCreatedAt).toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",
       })
     : "N/A";
 
-  // useEffect(() => {
-  //   if (!order) return;
-
-  //   if (order.lineItemsByMerchant && merchantId) {
-  //     const merchantItems = order.lineItemsByMerchant[merchantId];
-  //     if (Array.isArray(merchantItems)) {
-  //       setLineItems(merchantItems);
-  //     }
-  //   } else if (Array.isArray(order.lineItems)) {
-  //     setLineItems(order.lineItems);
-  //   } else {
-  //     console.warn("No line items found.");
-  //   }
-  // }, [order, merchantId]);
-
-  useEffect(() => {
-    if (!orderData) return;
-
-    if (orderData.lineItemsByMerchant && merchantId) {
-      const merchantItems = orderData.lineItemsByMerchant[merchantId];
-      if (Array.isArray(merchantItems)) {
-        setLineItems(merchantItems);
-      }
-    } else if (Array.isArray(orderData.lineItems)) {
-      setLineItems(orderData.lineItems);
-    }
-  }, [orderData, merchantId]);
-
   const [openMenu, setOpenMenu] = useState(null);
   const [showTrackingModal, setShowTrackingModal] = useState(false);
   const [selectedFulfillment, setSelectedFulfillment] = useState(null);
   const menuRefs = useRef([]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRefs.current.every((ref) => ref && !ref.contains(event.target))) {
@@ -308,18 +193,15 @@ const OrdersDetails = () => {
         }),
       });
 
-      await fetch(
-        `https://multi-vendor-marketplace.vercel.app/order/updatetrackingShopify`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fulfillmentId: selectedFulfillment.id,
-            tracking_number: trackingNumber,
-            tracking_company: shippingCarrier,
-          }),
-        },
-      );
+      await fetch(`https://multi-vendor-marketplace.vercel.app/order/updatetrackingShopify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fulfillmentId: selectedFulfillment.id,
+          tracking_number: trackingNumber,
+          tracking_company: shippingCarrier,
+        }),
+      });
 
       setShowTrackingModal(false);
     } catch (err) {
@@ -347,20 +229,20 @@ const OrdersDetails = () => {
       let lineItemIds = [];
 
       if (role === "Merchant") {
-        const lineItems = order?.lineItems || [];
+        const lineItems = orderData?.lineItems || [];
         lineItemIds = lineItems.map((item) => item.id);
       } else {
-        const lineItems = order?.lineItemsByMerchant?.[merchantId] || [];
+        const lineItems = orderData?.lineItemsByMerchant?.[merchantId] || [];
         lineItemIds = lineItems.map((item) => item.id);
       }
 
       if (!orderId || lineItemIds.length === 0) {
-        alert("Missing order details or line items to cancel.");
+        alert("Missing orderData details or line items to cancel.");
         return;
       }
 
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/cancelOrder",
+        "https://multi-vendor-marketplace.vercel.app/orderData/cancelOrder",
         {
           method: "POST",
           headers: {
@@ -380,16 +262,16 @@ const OrdersDetails = () => {
 
       if (!response.ok) {
         console.error(" Cancel Failed:", result);
-        showToast("error", "Failed to cancel the order.");
+        showToast("error", "Failed to cancel the orderData.");
 
         return;
       }
 
-      showToast("success", "Order cancelled successfully.");
+      showToast("success", "orderData cancelled successfully.");
       // window.location.reload();
     } catch (error) {
       console.error(" Cancel Error:", error);
-      showToast("error", "An error occurred while canceling the order.");
+      showToast("error", "An error occurred while canceling the orderData.");
     }
   };
   const getFulfilledItemImage = (fulfillmentItem) => {
@@ -426,7 +308,7 @@ const OrdersDetails = () => {
     const fetchLineItemCount = async () => {
       try {
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/order/lineItemCount/${orderId}`,
+          `https://multi-vendor-marketplace.vercel.app/orderData/lineItemCount/${orderId}`,
         );
         const data = await res.json();
 
@@ -444,6 +326,32 @@ const OrdersDetails = () => {
 
     if (orderId && lineItems.length) fetchLineItemCount();
   }, [orderId, lineItems]);
+  const hasUnfulfilledItems = lineItems.some((i) => i.fulfillable_quantity > 0);
+
+  const shipping = orderData?.shipping_address?.address1
+    ? orderData.shipping_address
+    : customer?.default_address || {};
+
+  const billing = orderData?.billing_address?.address1
+    ? orderData.billing_address
+    : customer?.default_address || {};
+  const merchantLineItemIds =
+    orderData?.products?.map((p) => String(p.lineItemId)) || [];
+  const getProductSnapshot = (fulfillmentItem) => {
+    return orderData?.products?.find(
+      (p) =>
+        String(p.productId) === String(fulfillmentItem.product_id) &&
+        String(p.variantId) === String(fulfillmentItem.variant_id),
+    );
+  };
+  const getValidFulfillmentItems = (fulfillment) => {
+    return (
+      fulfillment.line_items?.filter((item) => {
+        const snapshot = getProductSnapshot(item);
+        return snapshot && snapshot.product?.images?.length;
+      }) || []
+    );
+  };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
@@ -477,48 +385,52 @@ const OrdersDetails = () => {
             </div>
           )}
 
-          {Array.isArray(lineItems) &&
-            lineItems.some(
-              (i) =>
-                i.fulfillment_status === null ||
-                i.fulfillment_status === "cancelled",
-            ) && (
-              <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
-                <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
-                  <span>
-                    Unfulfilled (
-                    {
-                      lineItems.filter((i) => i.fulfillment_status === null)
-                        .length
-                    }
-                    )
-                  </span>
+          {hasUnfulfilledItems && (
+            <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
+              <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
+                <span>
+                  Unfulfilled (
+                  {
+                    lineItems.filter((i) => i.fulfillment_status === null)
+                      .length
+                  }
+                  )
+                </span>
+              </div>
+
+              <div className="border border-gray-200 rounded-lg p-4 space-y-4">
+                <div className="text-sm space-y-2">
+                  <div>
+                    <p className="text-gray-600 font-semibold">Location</p>
+                    <p className="text-gray-900">Shop location</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-semibold">
+                      Delivery method
+                    </p>
+                    <p className="text-gray-900">Standard</p>
+                  </div>
                 </div>
 
-                <div className="border border-gray-200 rounded-lg p-4 space-y-4">
-                  <div className="text-sm space-y-2">
-                    <div>
-                      <p className="text-gray-600 font-semibold">Location</p>
-                      <p className="text-gray-900">Shop location</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600 font-semibold">
-                        Delivery method
-                      </p>
-                      <p className="text-gray-900">Standard</p>
-                    </div>
-                  </div>
+                <hr className="border-gray-200" />
 
-                  <hr className="border-gray-200" />
+                <div className="divide-y border rounded mb-4">
+                  {lineItems
+                    .filter(
+                      (item) =>
+                        item.fulfillment_status === null ||
+                        item.fulfillment_status === "cancelled",
+                    )
+                    .map((item, index) => {
+                      const pendingQty =
+                        item.quantity - (item.fulfilled_quantity || 0);
 
-                  {/* <div className="divide-y border rounded mb-4">
-                    {lineItems
-                      .filter(
-                        (item) =>
-                          item.fulfillment_status === null ||
-                          item.fulfillment_status === "cancelled",
-                      )
-                      .map((item, index) => (
+                      const displayQty =
+                        item.fulfilled_quantity > 0
+                          ? item.fulfilled_quantity
+                          : pendingQty;
+
+                      return (
                         <div
                           key={index}
                           className="flex items-center justify-between p-3"
@@ -542,11 +454,13 @@ const OrdersDetails = () => {
                               <p className="text-sm font-medium text-gray-800">
                                 {item.name}
                               </p>
+
                               {item.variant_title && (
                                 <span className="inline-block text-[10px] px-2 py-1 bg-gray-200 text-gray-600 rounded mt-1">
                                   {item.variant_title}
                                 </span>
                               )}
+
                               <p className="text-xs text-gray-500 mt-1">
                                 SKU: {item.sku || "N/A"}
                               </p>
@@ -556,255 +470,165 @@ const OrdersDetails = () => {
                           <div className="text-right">
                             <p className="text-sm text-gray-800 font-medium">
                               ${parseFloat(item.price).toFixed(2)} ×{" "}
-                              {item.quantity - (item.fulfilled_quantity || 0)}
+                              {displayQty}
                             </p>
+
                             <p className="text-sm font-semibold text-gray-900">
                               $
-                              {(
-                                parseFloat(item.price) *
-                                (item.quantity - (item.fulfilled_quantity || 0))
-                              ).toFixed(2)}
+                              {(parseFloat(item.price) * displayQty).toFixed(2)}
                             </p>
                           </div>
                         </div>
-                      ))}
-                  </div> */}
-<div className="divide-y border rounded mb-4">
-  {lineItems
-    .filter(
-      (item) =>
-        item.fulfillment_status === null ||
-        item.fulfillment_status === "cancelled",
-    )
-    .map((item, index) => {
-      const pendingQty =
-        item.quantity - (item.fulfilled_quantity || 0);
-
-      const displayQty =
-        item.fulfilled_quantity > 0
-          ? item.fulfilled_quantity
-          : pendingQty;
-
-      return (
-        <div
-          key={index}
-          className="flex items-center justify-between p-3"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-              {item.image?.src ? (
-                <img
-                  src={item.image.src}
-                  alt={item.image.alt || "Product image"}
-                  className="w-full h-full object-contain rounded"
-                />
-              ) : (
-                <span className="text-gray-400 text-xs font-semibold">
-                  No Image
-                </span>
-              )}
-            </div>
-
-            <div>
-              <p className="text-sm font-medium text-gray-800">
-                {item.name}
-              </p>
-
-              {item.variant_title && (
-                <span className="inline-block text-[10px] px-2 py-1 bg-gray-200 text-gray-600 rounded mt-1">
-                  {item.variant_title}
-                </span>
-              )}
-
-              <p className="text-xs text-gray-500 mt-1">
-                SKU: {item.sku || "N/A"}
-              </p>
-            </div>
-          </div>
-
-          <div className="text-right">
-            <p className="text-sm text-gray-800 font-medium">
-              ${parseFloat(item.price).toFixed(2)} × {displayQty}
-            </p>
-
-            <p className="text-sm font-semibold text-gray-900">
-              ${(parseFloat(item.price) * displayQty).toFixed(2)}
-            </p>
-          </div>
-        </div>
-      );
-    })}
-</div>
-
-                  {!lineItems.some(
-                    (i) => i.fulfillment_status === "cancelled",
-                  ) && (
-                    <div className="flex space-x-2 justify-end">
-                      <button
-                        onClick={() => {
-                          navigate(`/order/${orderId}/fulfillment_orders`, {
-                            state: {
-                              order,
-                              orderId,
-                              merchantId,
-                              productName: lineItems[0]?.name || "",
-                              sku: lineItems[0]?.sku || "",
-                              fulfillable_quantity:
-                                lineItems[0]?.fulfillable_quantity || 0,
-                              index: 1,
-                            },
-                          });
-                        }}
-                        className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
-                      >
-                        Fulfill item
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          console.log("Packing slip order data:", order);
-
-                          navigate("/invoice-preview", {
-                            state: { order },
-                          });
-                        }}
-                        className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition"
-                      >
-                        Print packing slip
-                      </button>
-                    </div>
-                  )}
+                      );
+                    })}
                 </div>
+
+                {!lineItems.some(
+                  (i) => i.fulfillment_status === "cancelled",
+                ) && (
+                  <div className="flex space-x-2 justify-end">
+                    <button
+                      onClick={() => {
+                        console.log("✅ Fulfill button clicked");
+
+                        navigate(`/order/${orderId}/fulfillment_orders`, {
+                          state: {
+                            orderId,
+                            merchantId,
+                            order: orderData,
+                            index: 1,
+                          },
+                        });
+                      }}
+                      className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      Fulfill item
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        navigate("/invoice-preview", {
+                          state: { order: orderData },
+                        });
+                      }}
+                      className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition"
+                    >
+                      Print packing slip
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+          )}
 
-          {/* fullfill box */}
+          {orderData?.fulfillments?.map((fulfillment, index) => {
+            const validItems = getValidFulfillmentItems(fulfillment);
 
-          {orderData?.fulfillments?.map((fulfillment, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2 mb-4"
-            >
-              <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200">
-                <span className="flex items-center gap-2 text-green-700 text-sm font-semibold">
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-300 border rounded text-xs">
+            if (validItems.length === 0) return null;
+
+            return (
+              <div
+                key={fulfillment.id}
+                className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2 mb-4"
+              >
+                {/* ===== Header ===== */}
+                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200">
+                  <span className="inline-flex px-2 py-1 bg-green-300 border rounded text-xs font-semibold text-green-700">
                     Fulfilled
                   </span>
-                </span>
-                <div
-                  className="relative"
-                  ref={(el) => (menuRefs.current[index] = el)}
-                >
-                  <button
-                    onClick={() =>
-                      setOpenMenu(openMenu === index ? null : index)
-                    }
-                    className="text-lg text-gray-500 font-medium focus:outline-none"
+
+                  <div
+                    className="relative"
+                    ref={(el) => (menuRefs.current[index] = el)}
                   >
-                    <BsThreeDots />
-                  </button>
+                    <button
+                      onClick={() =>
+                        setOpenMenu(openMenu === index ? null : index)
+                      }
+                      className="text-lg text-gray-500"
+                    >
+                      <BsThreeDots />
+                    </button>
 
-                  {openMenu === index && (
-                    <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-md z-10">
-                      <button
-                        onClick={() => {
-                          setSelectedFulfillment(fulfillment);
-                          setShowTrackingModal(true);
-                          setOpenMenu(null);
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                      >
-                        Edit Tracking
-                      </button>
-                    </div>
-                  )}
+                    {openMenu === index && (
+                      <div className="absolute right-0 mt-1 w-40 bg-white border rounded shadow z-10">
+                        <button
+                          onClick={() => {
+                            setSelectedFulfillment(fulfillment);
+                            setShowTrackingModal(true);
+                            setOpenMenu(null);
+                          }}
+                          className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                        >
+                          Edit Tracking
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <div className="px-4 py-3 text-sm text-gray-700 space-y-1 border-b">
-                <p>
-                  <strong>Location:</strong> Shop location
-                </p>
-                <p>
-                  <strong>Fulfilled:</strong>{" "}
-                  {new Date(fulfillment?.created_at).toLocaleDateString(
-                    "en-US",
-                    {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    },
-                  )}
-                </p>
-                <p>
-                  <strong>Tracking number:</strong>{" "}
-                  {fulfillment.tracking_number || "N/A"}
-                </p>
-              </div>
+                {/* ===== Meta ===== */}
+                <div className="px-4 py-3 text-sm text-gray-700 border-b space-y-1">
+                  <p>
+                    <strong>Location:</strong> Shop location
+                  </p>
+                  <p>
+                    <strong>Fulfilled:</strong>{" "}
+                    {new Date(fulfillment.created_at).toLocaleDateString(
+                      "en-US",
+                    )}
+                  </p>
+                  <p>
+                    <strong>Tracking number:</strong>{" "}
+                    {fulfillment.tracking_number || "N/A"}
+                  </p>
+                </div>
 
-              {fulfillment.line_items?.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between px-4 py-3 border-t last:border-b"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
-                      {getFulfilledItemImage(item) ? (
-                        <img
-                          src={getFulfilledItemImage(item)}
-                          alt={item.name}
-                          className="w-full h-full object-contain"
-                        />
-                      ) : (
-                        <span className="text-gray-400 text-xs">No Image</span>
-                      )}
-                    </div>
+                {/* ===== Valid Line Items Only ===== */}
+                {validItems.map((item, idx) => {
+                  const snapshot = getProductSnapshot(item);
 
-                    <div className="text-sm">
-                      {/* <p className="font-medium text-gray-800">{item.title}</p> */}
-                      <div>
-                        <p className="text-sm font-medium text-gray-800">
-                          {item.name}
+                  return (
+                    <div
+                      key={`${fulfillment.id}-${idx}`}
+                      className="flex items-center justify-between px-4 py-3 border-t"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
+                          <img
+                            src={snapshot.product.images[0].src}
+                            alt={snapshot.product.title}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-medium text-gray-800">
+                            {snapshot.product.title}
+                          </p>
+
+                          {snapshot.variant?.title && (
+                            <span className="inline-block text-[10px] px-2 py-1 bg-gray-200 rounded mt-1">
+                              {snapshot.variant.title}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="text-right text-sm">
+                        <p>
+                          ${Number(item.price).toFixed(2)} × {item.quantity}
                         </p>
-                        {item.variant_title && (
-                          <span className="inline-block text-[10px] px-2 py-1 bg-gray-200 text-gray-600 rounded mt-1">
-                            {item.variant_title}
-                          </span>
-                        )}
-                        <p className="text-xs text-gray-500 mt-1">
-                          SKU: {item.sku || "N/A"}
+                        <p className="font-semibold">
+                          ${(Number(item.price) * item.quantity).toFixed(2)}
                         </p>
                       </div>
-                      {/* {item.variant_title && (
-                        <div className="flex gap-1 flex-wrap mt-1 text-[10px]">
-                          {item.variant_title.split(" / ").map((opt, i) => (
-                            <span
-                              key={i}
-                              className="bg-gray-200 text-gray-600 px-2 py-0.5 rounded"
-                            >
-                              {opt}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      <p className="text-xs text-gray-500 mt-1">
-                        SKU: {item.sku || "N/A"}
-                      </p> */}
                     </div>
-                  </div>
-
-                  <div className="text-right text-sm text-gray-800">
-                    <p>
-                      ${parseFloat(item.price).toFixed(2)} × {item.quantity}
-                    </p>
-                    <p className="font-semibold text-gray-900">
-                      ${(parseFloat(item.price) * item.quantity).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
+                  );
+                })}
+              </div>
+            );
+          })}
 
           {/* Paid box */}
           <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-4">
@@ -864,7 +688,7 @@ const OrdersDetails = () => {
                     className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
                     onClick={() => setShowCancelPopup(true)}
                   >
-                    Cancel Order
+                    Cancel orderData
                   </button>
                 ) : role === "Merchant" ? (
                   <div className="text-sm text-gray-300-600 font-medium">
@@ -872,7 +696,7 @@ const OrdersDetails = () => {
                       className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
                       onClick={() => setShowRequestPopup(true)}
                     >
-                      Cancel Order
+                      Cancel orderData
                     </button>
                   </div>
                 ) : null}
@@ -894,12 +718,6 @@ const OrdersDetails = () => {
 
           <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2 relative">
             <h3 className="font-semibold text-gray-900">Customer</h3>
-            <button
-              aria-label="Close"
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
-            >
-              ×
-            </button>
 
             <a
               href="#"
@@ -908,35 +726,41 @@ const OrdersDetails = () => {
               {customer?.first_name || "N/A"} {customer?.last_name || ""}
             </a>
 
-            <p className="text-gray-600 text-sm mb-2">No orders</p>
+            <h3 className="font-semibold text-gray-900 mt-3">
+              Contact information
+            </h3>
 
-            <h3 className="font-semibold text-gray-900">Contact information</h3>
             <a
               href={`mailto:${customer?.email || ""}`}
-              className="text-blue-600 hover:underline text-sm"
+              className="text-blue-600 hover:underline text-sm block"
             >
               {customer?.email || "N/A"}
             </a>
+
             <p className="text-gray-600 text-sm">
               {customer?.phone || "No phone number"}
             </p>
 
+            {/* ================= SHIPPING ================= */}
             <h3 className="font-semibold text-gray-900 mt-4 mb-2">
               Shipping address
             </h3>
 
             <address className="text-gray-900 not-italic text-sm leading-snug space-y-1">
               <p>
-                {customer?.first_name || ""} {customer?.last_name || ""}
+                {customer?.first_name} {customer?.last_name}
               </p>
-              <p>{customer?.address1 || customer?.default_address?.address1}</p>
+              <p>{shipping.address1}</p>
+              {shipping.address2 && <p>{shipping.address2}</p>}
               <p>
-                {customer?.country ||
-                  customer?.default_address?.country ||
-                  "N/A"}
+                {shipping.city} {shipping.province} {shipping.zip}
               </p>
+              <p>{shipping.country}</p>
+
               <a
-                href="https://maps.google.com"
+                href={`https://maps.google.com/?q=${encodeURIComponent(
+                  `${shipping.address1} ${shipping.city} ${shipping.country}`,
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline"
@@ -945,10 +769,22 @@ const OrdersDetails = () => {
               </a>
             </address>
 
+            {/* ================= BILLING ================= */}
             <h3 className="font-semibold text-gray-900 mt-4 mb-2">
               Billing address
             </h3>
-            <p className="text-gray-600 text-sm">Same as shipping address</p>
+
+            <address className="text-gray-900 not-italic text-sm leading-snug space-y-1">
+              <p>
+                {customer?.first_name} {customer?.last_name}
+              </p>
+              <p>{billing.address1}</p>
+              {billing.address2 && <p>{billing.address2}</p>}
+              <p>
+                {billing.city} {billing.province} {billing.zip}
+              </p>
+              <p>{billing.country}</p>
+            </address>
           </div>
         </div>
       </div>
@@ -1030,7 +866,7 @@ const OrdersDetails = () => {
                 Confirm Cancellation
               </h2>
               <p className="text-gray-600 mb-4">
-                Are you sure you want to cancel this order?
+                Are you sure you want to cancel this orderData?
               </p>
               <div className="flex justify-center gap-3">
                 <button

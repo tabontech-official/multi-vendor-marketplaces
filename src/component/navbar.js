@@ -152,74 +152,74 @@
 //                   )}
 //                 </button>
 
-            //     {isNotificationOpen && (
-            //       <div className="absolute right-0 mt-3 w-96 bg-white rounded-lg shadow-lg border z-30 overflow-hidden">
-            //         <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 text-gray-800 font-semibold">
-            //           <div className="flex items-center gap-2">
-            //             <BsMegaphoneFill className="text-blue-600" />
-            //             <span>Latest Updates</span>
-            //           </div>
-            //           <a
-            //             href="/notifications"
-            //             className="text-blue-600 text-sm hover:underline"
-            //           >
-            //             Show all
-            //           </a>
-            //         </div>
+//     {isNotificationOpen && (
+//       <div className="absolute right-0 mt-3 w-96 bg-white rounded-lg shadow-lg border z-30 overflow-hidden">
+//         <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 text-gray-800 font-semibold">
+//           <div className="flex items-center gap-2">
+//             <BsMegaphoneFill className="text-blue-600" />
+//             <span>Latest Updates</span>
+//           </div>
+//           <a
+//             href="/notifications"
+//             className="text-blue-600 text-sm hover:underline"
+//           >
+//             Show all
+//           </a>
+//         </div>
 
-            //         <ul className="max-h-96 overflow-y-auto text-sm text-gray-700 divide-y">
-            //           {notifications
-            //             .sort(
-            //               (a, b) =>
-            //                 new Date(b.createdAt) - new Date(a.createdAt)
-            //             )
-            //             .slice(0, 5)
-            //             .map((note) => {
-            //               return (
-            //                 <li
-            //                   key={note._id || note.id}
-            //                   className="px-4 py-3 hover:bg-gray-50 transition"
-            //                 >
-            //                   <div className="flex gap-3 items-start">
-            //                     <div className="pt-1">
-            //                       <FaUserCircle
-            //                         className="text-blue-500"
-            //                         size={20}
-            //                       />
-            //                     </div>
-            //                     <div className="flex-1">
-            //                       <p className="text-xs text-gray-500">
-            //                         {new Date(
-            //                           note.createdAt
-            //                         ).toLocaleDateString("en-GB")}{" "}
-            //                         •{" "}
-            //                         <span className="capitalize">
-            //                           {note.firstName || "User"}{" "}
-            //                           {note.lastName || ""}
-            //                         </span>
-            //                       </p>
-            //                       <p className="text-sm mt-0.5">
-            //                         {note.message || "No message."}
-            //                       </p>
-            //                     </div>
-            //                   </div>
-            //                 </li>
-            //               );
-            //             })}
-            //         </ul>
+//         <ul className="max-h-96 overflow-y-auto text-sm text-gray-700 divide-y">
+//           {notifications
+//             .sort(
+//               (a, b) =>
+//                 new Date(b.createdAt) - new Date(a.createdAt)
+//             )
+//             .slice(0, 5)
+//             .map((note) => {
+//               return (
+//                 <li
+//                   key={note._id || note.id}
+//                   className="px-4 py-3 hover:bg-gray-50 transition"
+//                 >
+//                   <div className="flex gap-3 items-start">
+//                     <div className="pt-1">
+//                       <FaUserCircle
+//                         className="text-blue-500"
+//                         size={20}
+//                       />
+//                     </div>
+//                     <div className="flex-1">
+//                       <p className="text-xs text-gray-500">
+//                         {new Date(
+//                           note.createdAt
+//                         ).toLocaleDateString("en-GB")}{" "}
+//                         •{" "}
+//                         <span className="capitalize">
+//                           {note.firstName || "User"}{" "}
+//                           {note.lastName || ""}
+//                         </span>
+//                       </p>
+//                       <p className="text-sm mt-0.5">
+//                         {note.message || "No message."}
+//                       </p>
+//                     </div>
+//                   </div>
+//                 </li>
+//               );
+//             })}
+//         </ul>
 
-            //         <div className="border-t px-4 py-3 text-center bg-gray-50">
-            //           <a
-            //             href="/notifications"
-            //             className="text-blue-600 text-sm font-medium hover:underline"
-            //           >
-            //             View full history →
-            //           </a>
-            //         </div>
-            //       </div>
-            //     )}
-            //   </li>
-            // )}
+//         <div className="border-t px-4 py-3 text-center bg-gray-50">
+//           <a
+//             href="/notifications"
+//             className="text-blue-600 text-sm font-medium hover:underline"
+//           >
+//             View full history →
+//           </a>
+//         </div>
+//       </div>
+//     )}
+//   </li>
+// )}
 //             {isLoggedIn && role === "Dev Admin" && (
 //               <li>
 //                 <Link
@@ -361,9 +361,12 @@ const Navbar = () => {
     try {
       const userid = localStorage.getItem("userid");
       if (userid) {
-        await fetch(`https://multi-vendor-marketplace.vercel.app/auth/logout/${userid}`, {
-          method: "POST",
-        });
+        await fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/logout/${userid}`,
+          {
+            method: "POST",
+          },
+        );
         dispatch({ type: "LOGOUT" });
         localStorage.clear();
         navigate("/login");
@@ -397,12 +400,10 @@ const Navbar = () => {
       await markAllAsSeen();
     }
   };
-const canViewProfile =
-  role !== "Dev Admin" && role !== "Master Admin";
- return (
+  const canViewProfile = role !== "Dev Admin" && role !== "Master Admin";
+  return (
     // Reduced height to 6vh and added a "blackish" gradient
     <nav className="bg-gradient-to-r from-[#09090b] via-[#27272a] to-[#27272a] flex items-center px-6 h-[6vh] relative shadow-xl border-b border-gray-800">
-      
       {/* LOGO SECTION */}
       <div className="flex-shrink-0">
         <Link to="/">
@@ -437,7 +438,6 @@ const canViewProfile =
           } md:block z-50`}
         >
           <ul className="flex flex-col md:flex-row md:space-x-6 space-y-4 items-center md:space-y-0 mt-20 md:mt-0">
-            
             {/* NOTIFICATIONS */}
             {isLoggedIn && (
               <li className="relative" ref={notificationRef}>
@@ -452,7 +452,7 @@ const canViewProfile =
                   )}
                 </button>
 
-                              {isNotificationOpen && (
+                {isNotificationOpen && (
                   <div className="absolute right-0 mt-3 w-96 bg-white rounded-lg shadow-lg border z-30 overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 text-gray-800 font-semibold">
                       <div className="flex items-center gap-2">
@@ -471,7 +471,7 @@ const canViewProfile =
                       {notifications
                         .sort(
                           (a, b) =>
-                            new Date(b.createdAt) - new Date(a.createdAt)
+                            new Date(b.createdAt) - new Date(a.createdAt),
                         )
                         .slice(0, 5)
                         .map((note) => {
@@ -490,7 +490,7 @@ const canViewProfile =
                                 <div className="flex-1">
                                   <p className="text-xs text-gray-500">
                                     {new Date(
-                                      note.createdAt
+                                      note.createdAt,
                                     ).toLocaleDateString("en-GB")}{" "}
                                     •{" "}
                                     <span className="capitalize">
@@ -542,28 +542,44 @@ const canViewProfile =
                 >
                   Settings
                   <svg className="w-2 h-2 ms-2" fill="none" viewBox="0 0 10 6">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 4 4 4-4"
+                    />
                   </svg>
                 </button>
-                
+
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 bg-white divide-y divide-gray-100 rounded-md shadow-xl w-24 z-[60] border border-gray-200">
                     <ul className="py-1 text-xs text-gray-700">
-                       <li>
-                        <Link to="/settings" className="block px-4 py-2 hover:bg-[#F3F4F6]" onClick={() => setIsOpen(false)}>
+                      <li>
+                        <Link
+                          to="/settings"
+                          className="block px-4 py-2 hover:bg-[#F3F4F6]"
+                          onClick={() => setIsOpen(false)}
+                        >
                           Settings
                         </Link>
                       </li>
-                    {canViewProfile && (
-  <li>
-    <Link to="/edit-account" className="block px-4 py-2 hover:bg-[#F3F4F6]">
-      My Profile
-    </Link>
-  </li>
-)}
+                      {canViewProfile && (
+                        <li>
+                          <Link
+                            to="/edit-account"
+                            className="block px-4 py-2 hover:bg-[#F3F4F6]"
+                          >
+                            My Profile
+                          </Link>
+                        </li>
+                      )}
 
                       <li>
-                        <button onClick={LogOut} className="block w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 font-medium">
+                        <button
+                          onClick={LogOut}
+                          className="block w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 font-medium"
+                        >
                           Logout
                         </button>
                       </li>

@@ -23,8 +23,16 @@ import { jwtDecode } from "jwt-decode";
 const CategorySelector = () => {
   const { id } = useParams();
   const isEditing = Boolean(id);
+  const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
+  const [selectedBulkVariants, setSelectedBulkVariants] = useState([]);
+  const [bulkUploadedImage, setBulkUploadedImage] = useState(null);
   const [dragIndex, setDragIndex] = useState(null);
   const [bulkQuantity, setBulkQuantity] = useState("");
+  const toggleBulkVariant = (key) => {
+    setSelectedBulkVariants((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
+  };
 
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateMode, setDuplicateMode] = useState("copy");
@@ -42,22 +50,51 @@ const CategorySelector = () => {
 
     setIsChanged(true);
   };
+  const getVariantKey = (parent, child) => {
+    return options.length === 1
+      ? child
+      : `${parent} / ${child}`.replace(/['"]/g, "").trim();
+  };
 
-  const uploadShopifyImageToCloudinary = async (shopifyUrl) => {
+  const handleBulkImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
     const formData = new FormData();
-    formData.append("file", shopifyUrl);
+    formData.append("file", file);
     formData.append("upload_preset", "images");
 
     const res = await fetch(
       "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-      {
-        method: "POST",
-        body: formData,
-      },
+      { method: "POST", body: formData },
     );
 
     const data = await res.json();
-    return data.secure_url;
+    setBulkUploadedImage(data.secure_url);
+  };
+  const applyBulkImage = () => {
+    if (!bulkUploadedImage || selectedBulkVariants.length === 0) return;
+
+    setVariantImages((prev) => {
+      const updated = { ...prev };
+
+      selectedBulkVariants.forEach((key) => {
+        updated[key] = [
+          {
+            preview: bulkUploadedImage,
+            alt: key.replace(/\s*\/\s*/g, "-").toLowerCase(),
+            loading: false,
+          },
+        ];
+      });
+
+      return updated;
+    });
+
+    setShowBulkUploadModal(false);
+    setSelectedBulkVariants([]);
+    setBulkUploadedImage(null);
+    setIsChanged(true);
   };
 
   const handleDiscard = () => {
@@ -909,14 +946,17 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
         },
-      })
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data);
@@ -1251,19 +1291,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
             },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          );
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1336,16 +1379,19 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
               },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            });
+            );
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1370,6 +1416,15 @@ const CategorySelector = () => {
 
     event.target.value = "";
   };
+const handleRemoveVariantImage = (variantKey) => {
+  setVariantImages((prev) => {
+    const updated = { ...prev };
+    delete updated[variantKey]; // 🔥 FULLY REMOVE
+    return updated;
+  });
+
+  setIsChanged(true);
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1563,23 +1618,7 @@ const CategorySelector = () => {
           }),
         );
 
-        // for (const variant of variantUpdates) {
-        //   if (!variant.variantId) continue;
-
-        //   await fetch(
-        //     `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variant.variantId}`,
-        //     {
-        //       method: "PUT",
-        //       headers: {
-        //         Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
-        //         "x-api-key": apiKey,
-        //         "x-api-secret": apiSecretKey,
-        //         "Content-Type": "application/json",
-        //       },
-        //       body: JSON.stringify({ variant }),
-        //     },
-        //   );
-        // }
+      
         for (const variant of variantUpdates) {
           if (!variant.variantId) continue;
 
@@ -1599,30 +1638,6 @@ const CategorySelector = () => {
         }
       }
 
-      // const cloudinaryURLs = selectedImages
-      //   .filter((img) => img.cloudUrl)
-      //   .map((img) => img.cloudUrl);
-
-      // const uploadedVariantImages = Object.entries(variantImages).flatMap(
-      //   ([key, images]) => {
-      //     const combinationAlt = key.replace(/\s*\/\s*/g, "-").toLowerCase();
-
-      //     const safeImages = Array.isArray(images)
-      //       ? images
-      //       : images
-      //         ? [images]
-      //         : [];
-
-      //     return safeImages.map((img) => ({
-      //       key,
-      //       url: img.preview || img.src,
-      //       alt: combinationAlt,
-      //     }));
-      //   },
-      // );
-      /* ================= IMAGE LOGIC START ================= */
-
-      // 🔹 1. Collect all variant image URLs
       const usedVariantImageUrls = new Set();
 
       Object.values(variantImages).forEach((imgs) => {
@@ -1635,22 +1650,23 @@ const CategorySelector = () => {
         }
       });
 
-      // 🔹 2. Collect media (product) image URLs
       const mediaImageUrls = selectedImages
         .filter((img) => img.cloudUrl)
         .map((img) => img.cloudUrl);
 
-      // 🔹 3. Decide if product images should be sent
-      // 👉 Agar koi bhi variant image exist karti hai → product images EMPTY
-      // 🔹 Remove variant-used images from product images
+
       const finalProductImages = mediaImageUrls.filter(
         (url) => !usedVariantImageUrls.has(url),
       );
 
-      // 🔹 4. Prepare variant images payload
+      
       // const uploadedVariantImages = Object.entries(variantImages).flatMap(
       //   ([key, images]) => {
-      //     const combinationAlt = key.replace(/\s*\/\s*/g, "-").toLowerCase();
+      //     const parts = key.split("/").map((p) => p.trim());
+
+      //     // 👇 first option always primary (Shopify standard)
+      //     const optionName = options[0]?.name || "option";
+      //     const optionValue = parts[0];
 
       //     const safeImages = Array.isArray(images)
       //       ? images
@@ -1661,34 +1677,24 @@ const CategorySelector = () => {
       //     return safeImages.map((img) => ({
       //       key,
       //       url: img.preview || img.src,
-      //       alt: combinationAlt,
+
+      //       // ✅ NEW FIELDS
+      //       optionName,
+      //       optionValue,
       //     }));
       //   },
       // );
+
       const uploadedVariantImages = Object.entries(variantImages).flatMap(
-        ([key, images]) => {
-          const parts = key.split("/").map((p) => p.trim());
+  ([key, images]) => {
+    if (!Array.isArray(images) || images.length === 0) return [];
 
-          // 👇 first option always primary (Shopify standard)
-          const optionName = options[0]?.name || "option";
-          const optionValue = parts[0];
-
-          const safeImages = Array.isArray(images)
-            ? images
-            : images
-              ? [images]
-              : [];
-
-          return safeImages.map((img) => ({
-            key,
-            url: img.preview || img.src,
-
-            // ✅ NEW FIELDS
-            optionName,
-            optionValue,
-          }));
-        },
-      );
+    return images.map((img) => ({
+      key,
+      url: img.preview || img.src,
+    }));
+  }
+);
 
       const hasVariantImages = uploadedVariantImages.length > 0;
 
@@ -2663,13 +2669,33 @@ const CategorySelector = () => {
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-sm font-medium text-gray-700">Variants</h2>
 
-                {combinations.length > 0 && (
+                {/* {combinations.length > 0 && (
                   <button
                     onClick={() => setShowBulkModal(true)}
                     className="text-sm bg-[#18181b] font-medium text-white px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
                   >
                     Bulk Update
                   </button>
+                  
+                )} */}
+                {combinations.length > 0 && (
+                  <div className="flex gap-2">
+                    {/* BULK UPDATE */}
+                    <button
+                      onClick={() => setShowBulkModal(true)}
+                      className="text-sm bg-[#18181b] font-medium text-white px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors shadow-sm"
+                    >
+                      Bulk Update
+                    </button>
+
+                    {/* BULK UPLOAD IMAGES */}
+                    <button
+                      onClick={() => setShowBulkUploadModal(true)}
+                      className="text-sm bg-[#18181b] font-medium text-white px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors shadow-sm"
+                    >
+                      Bulk Upload Images
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -3904,7 +3930,6 @@ const CategorySelector = () => {
                     Done
                   </button>
                 </div>
-                {/* VARIANT IMAGE UPLOAD */}
 
                 <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
                   <div className="bg-white border-b px-6 py-4">
@@ -3959,7 +3984,7 @@ const CategorySelector = () => {
                                   </div>
                                 )}
 
-                                <button
+                                {/* <button
                                   onClick={() =>
                                     setVariantImages((prev) => ({
                                       ...prev,
@@ -3973,7 +3998,17 @@ const CategorySelector = () => {
                         text-sm hover:bg-red-600 transition"
                                 >
                                   ✕
-                                </button>
+                                </button> */}
+                                <button
+  onClick={(e) => {
+    e.stopPropagation();
+    handleRemoveVariantImage(normalizedKey);
+  }}
+  className="absolute -top-2 -right-2 bg-red-600 text-white w-5 h-5 rounded-full"
+>
+  ✕
+</button>
+
                               </div>
                             ))
                           ) : (
@@ -4624,6 +4659,137 @@ const CategorySelector = () => {
               </div>
             </div>
           )}
+        {showBulkUploadModal && (
+  <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+    <div className="bg-white w-[960px] max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden">
+
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-6 py-4 border-b">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Bulk Variant Image Upload
+        </h2>
+        <button
+          onClick={() => setShowBulkUploadModal(false)}
+          className="text-gray-500 hover:text-gray-800 text-xl"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="flex h-[70vh]">
+
+        {/* LEFT — VARIANTS */}
+        <div className="w-1/2 border-r overflow-y-auto p-6">
+          <h3 className="text-sm font-semibold text-gray-700 mb-4">
+            Select Variants
+          </h3>
+
+          {combinations.map((combo, i) => (
+            <div key={i} className="mb-4">
+              <p className="text-sm font-medium text-gray-800 mb-2">
+                {combo.parent}
+              </p>
+
+              {combo.children.map((child, j) => {
+                const key = getVariantKey(combo.parent, child);
+                const image = variantImages[key]?.[0]?.preview;
+
+                return (
+                  <label
+                    key={j}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedBulkVariants.includes(key)}
+                      onChange={() => toggleBulkVariant(key)}
+                      className="accent-blue-600"
+                    />
+
+                    {/* IMAGE PREVIEW */}
+                    <div className="w-10 h-10 rounded-md border overflow-hidden bg-gray-50 flex items-center justify-center">
+                      {image ? (
+                        <img
+                          src={image}
+                          alt={key}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-xs text-gray-400">No Image</span>
+                      )}
+                    </div>
+
+                    <span className="text-sm text-gray-700">{key}</span>
+                  </label>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+
+        {/* RIGHT — UPLOAD */}
+        <div className="w-1/2 p-6 flex flex-col">
+          <h3 className="text-sm font-semibold text-gray-700 mb-4">
+            Upload Image
+          </h3>
+
+          {/* DROPZONE */}
+          <label className="flex-1 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer hover:border-blue-500 transition">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleBulkImageUpload}
+              className="hidden"
+            />
+
+            {bulkUploadedImage ? (
+              <img
+                src={bulkUploadedImage}
+                alt="Preview"
+                className="w-40 h-40 object-cover rounded-lg shadow"
+              />
+            ) : (
+              <>
+                <span className="text-3xl text-gray-400">+</span>
+                <p className="text-sm text-gray-600 mt-2">
+                  Click to upload image
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  JPG, PNG supported
+                </p>
+              </>
+            )}
+          </label>
+
+          {/* ACTIONS */}
+          <div className="flex justify-end gap-3 mt-6">
+            <button
+              onClick={() => setShowBulkUploadModal(false)}
+              className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-100"
+            >
+              Cancel
+            </button>
+
+            <button
+              onClick={applyBulkImage}
+              disabled={
+                !bulkUploadedImage || selectedBulkVariants.length === 0
+              }
+              className={`px-5 py-2 text-sm rounded-lg text-white transition ${
+                bulkUploadedImage && selectedBulkVariants.length > 0
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
+            >
+              Apply Image
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
         </div>
       </div>
     </main>

@@ -507,13 +507,24 @@ const OrdersDetails = () => {
 
                     <button
                       onClick={() => {
-                        navigate("/invoice-preview", {
+                        navigate("/packaging-slip", {
                           state: { order: orderData },
                         });
                       }}
                       className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition"
                     >
                       Print packing slip
+                    </button>
+                     <button
+                      onClick={() => {
+                        console.log(orderData)
+                        navigate("/invoice-preview", {
+                          state: { order: orderData },
+                        });
+                      }}
+                      className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition"
+                    >
+                      Print invoice
                     </button>
                   </div>
                 )}

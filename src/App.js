@@ -62,6 +62,7 @@ import CreateSizeChart from "./pages/CreateSizeChart";
 import { ToastContainer } from "react-toastify";
 import Settings from "./pages/settings";
 import NotificationSettings from "./pages/NotificationSettings";
+import InvoicePage from "./pages/invoice";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -154,7 +155,8 @@ const App = () => {
               path="/manage-options"
               element={<PrivateRoute element={<ManageVariantOptions />} />}
             />
-            <Route path="/invoice-preview" element={<InvoicePreview />} />
+            <Route path="/packaging-slip" element={<InvoicePreview />} />
+            <Route path="/invoice-preview" element={<InvoicePage />} />
 
             <Route
               path="/manage-shipping"

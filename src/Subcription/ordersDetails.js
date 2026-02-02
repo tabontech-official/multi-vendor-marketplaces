@@ -4,7 +4,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { BsThreeDots } from "react-icons/bs";
-import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
+import { HiArrowLeft, HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 const OrdersDetails = () => {
@@ -357,7 +357,16 @@ const OrdersDetails = () => {
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
       <div className="w-full max-w-6xl grid grid-cols-12 gap-6">
         <div className="col-span-8 space-y-6">
+   <button
+  onClick={() => navigate(-1)}
+  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition shadow-sm"
+>
+  <HiArrowLeft className="text-lg" />
+  Back
+</button>
+
           <div class="flex space-x-8">
+            
             <div>
               <span class="text-gray-900 font-semibold block">
                 Orderno: #{orderData?.serialNumber || orderData?.serialNo}

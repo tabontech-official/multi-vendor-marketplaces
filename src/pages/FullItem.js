@@ -411,6 +411,7 @@
 
 // export default FullItem;
 import React, { useState, useEffect, useMemo } from "react";
+import { HiArrowLeft } from "react-icons/hi";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const FullItem = () => {
@@ -434,33 +435,32 @@ const FullItem = () => {
   /* =========================
      NORMALIZE LINE ITEMS
      ========================= */
-const allLineItems = useMemo(() => {
-  return (rawOrder?.products || []).map((item, index) => ({
-    id: item.lineItemId || index,   // ✅ CORRECT
-    name: item.product?.title || "Product",
-    sku: item.variant?.sku || "N/A",
+  const allLineItems = useMemo(() => {
+    return (rawOrder?.products || []).map((item, index) => ({
+      id: item.lineItemId || index, // ✅ CORRECT
+      name: item.product?.title || "Product",
+      sku: item.variant?.sku || "N/A",
 
-    quantity: item.quantity,
-    fulfillable_quantity: item.fulfillable_quantity ?? item.quantity,
+      quantity: item.quantity,
+      fulfillable_quantity: item.fulfillable_quantity ?? item.quantity,
 
-    image: {
-      src: item.product?.images?.[0]?.src,
-      alt: item.product?.title,
-    },
+      image: {
+        src: item.product?.images?.[0]?.src,
+        alt: item.product?.title,
+      },
 
-    price: item.variant?.price,
-    variant_title: item.variant?.title,
-  }));
-}, [rawOrder?.products]);
+      price: item.variant?.price,
+      variant_title: item.variant?.title,
+    }));
+  }, [rawOrder?.products]);
 
-
-useEffect(() => {
-  const initial = {};
-  allLineItems.forEach((item) => {
-    initial[item.id] = item.fulfillable_quantity;
-  });
-  setQuantities(initial);
-}, [allLineItems]);
+  useEffect(() => {
+    const initial = {};
+    allLineItems.forEach((item) => {
+      initial[item.id] = item.fulfillable_quantity;
+    });
+    setQuantities(initial);
+  }, [allLineItems]);
 
   /* =========================
      STATE
@@ -517,11 +517,14 @@ useEffect(() => {
     };
 
     try {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/fullFillOrder", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/order/fullFillOrder",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
 
       const result = await res.json();
 
@@ -548,6 +551,14 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* HEADER */}
+      <button
+        onClick={() => navigate(-1)}
+        className="inline-flex mb-5 items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition shadow-sm"
+      >
+        <HiArrowLeft className="text-lg" />
+        Back
+      </button>
+
       <div className="mb-6">
         <div className="text-sm text-gray-500">
           #{displaySerialNo} ›{" "}

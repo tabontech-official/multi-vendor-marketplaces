@@ -1974,9 +1974,9 @@ if (product.variantImages?.length) {
       );
 
       const usedVariantUrls = new Set(uploadedVariantImages.map((v) => v.url));
-      const finalProductImages = mediaImageUrls.filter(
-        (url) => !usedVariantUrls.has(url),
-      );
+      // const finalProductImages = mediaImageUrls.filter(
+      //   (url) => !usedVariantUrls.has(url),
+      // );
 
       /* =======================
        7. UPDATE IMAGES API
@@ -1991,7 +1991,7 @@ if (product.variantImages?.length) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            images: finalProductImages,
+            images: mediaImageUrls,
             variantImages: uploadedVariantImages,
             groupImages,
           }),

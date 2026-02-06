@@ -1116,6 +1116,15 @@ product.variantImages?.forEach((variantBlock) => {
     loading: false,
   }));
 });
+if (product.variantImages?.length) {
+  const isGrouped = product.variantImages.some((variantBlock) =>
+    variantBlock.images?.some(
+      (img) => typeof img.alt === "string" && img.alt.startsWith("t4option")
+    )
+  );
+
+  setGroupImages(isGrouped);
+}
 
       if (Object.keys(hydratedVariantImages).length > 0) {
         const normalizedVariantImages = Object.fromEntries(

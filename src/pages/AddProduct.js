@@ -1058,44 +1058,64 @@ const CategorySelector = () => {
         }),
       );
 
-      const hydratedVariantImages = {};
+      // const hydratedVariantImages = {};
 
-      product.variants.forEach((variant, idx) => {
-        const titleKey = normalizeString(variant.title || "");
-        let matchedImages = [];
+      // product.variants.forEach((variant, idx) => {
+      //   const titleKey = normalizeString(variant.title || "");
+      //   let matchedImages = [];
 
-        if (product.variantImages?.length) {
-          matchedImages = product.variantImages.filter((img) => {
-            const alt = normalizeString(img.alt || "").toLowerCase();
-            return (
-              alt.includes(titleKey.toLowerCase()) ||
-              alt.includes(titleKey.replace(/\s*\/\s*/g, "-").toLowerCase())
-            );
-          });
-        }
+      //   if (product.variantImages?.length) {
+      //     matchedImages = product.variantImages.filter((img) => {
+      //       const alt = normalizeString(img.alt || "").toLowerCase();
+      //       return (
+      //         alt.includes(titleKey.toLowerCase()) ||
+      //         alt.includes(titleKey.replace(/\s*\/\s*/g, "-").toLowerCase())
+      //       );
+      //     });
+      //   }
 
-        if (!matchedImages.length && variant.image_id) {
-          const found = product.images?.find(
-            (img) => String(img.id) === String(variant.image_id),
-          );
-          if (found) matchedImages = [found];
-        }
+      //   if (!matchedImages.length && variant.image_id) {
+      //     const found = product.images?.find(
+      //       (img) => String(img.id) === String(variant.image_id),
+      //     );
+      //     if (found) matchedImages = [found];
+      //   }
 
-        // if (!matchedImages.length && product.images?.length > 0) {
-        //   matchedImages = [product.images[0]];
-        // }
+      //   // if (!matchedImages.length && product.images?.length > 0) {
+      //   //   matchedImages = [product.images[0]];
+      //   // }
 
-        const combinationAlt = titleKey
-          .replace(/\s*\/\s*/g, "-")
-          .replace(/\s+/g, "-")
-          .toLowerCase();
+      //   const combinationAlt = titleKey
+      //     .replace(/\s*\/\s*/g, "-")
+      //     .replace(/\s+/g, "-")
+      //     .toLowerCase();
 
-        hydratedVariantImages[titleKey] = matchedImages.map((img) => ({
-          preview: img.src,
-          alt: combinationAlt,
-          loading: false,
-        }));
-      });
+      //   hydratedVariantImages[titleKey] = matchedImages.map((img) => ({
+      //     preview: img.src,
+      //     alt: combinationAlt,
+      //     loading: false,
+      //   }));
+      // });
+const hydratedVariantImages = {};
+
+product.variantImages?.forEach((variantBlock) => {
+  const variantId = variantBlock.variantId;
+  const images = variantBlock.images || [];
+
+  const variant = product.variants.find(
+    (v) => String(v.id) === String(variantId)
+  );
+
+  if (!variant || !images.length) return;
+
+  const titleKey = normalizeString(variant.title || "");
+
+  hydratedVariantImages[titleKey] = images.map((img) => ({
+    preview: img.src,
+    alt: img.alt || titleKey.replace(/\s*\/\s*/g, "-").toLowerCase(),
+    loading: false,
+  }));
+});
 
       if (Object.keys(hydratedVariantImages).length > 0) {
         const normalizedVariantImages = Object.fromEntries(
@@ -1964,6 +1984,7 @@ const CategorySelector = () => {
           body: JSON.stringify({
             images: finalProductImages,
             variantImages: uploadedVariantImages,
+            groupImages,
           }),
         },
       );
@@ -2451,6 +2472,7 @@ const CategorySelector = () => {
 
     navigate("/manage-product");
   };
+  const [groupImages, setGroupImages] = useState(false);
 
   return (
     <main className="bg-gray-100 p-6">
@@ -2518,9 +2540,24 @@ const CategorySelector = () => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Media
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Media
+                </label>
+
+                <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={groupImages}
+                    onChange={(e) => {
+                      setGroupImages(e.target.checked);
+                      setIsChanged(true);
+                    }}
+                    className="w-4 h-4 accent-blue-600 cursor-pointer"
+                  />
+                  Group images
+                </label>
+              </div>
 
               {Object.values(checkedImages).some(Boolean) && (
                 <div className="flex justify-between items-center mb-2">

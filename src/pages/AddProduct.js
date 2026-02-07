@@ -680,19 +680,16 @@ const CategorySelector = () => {
     setIsChanged(true);
   };
   const handleRemoveSelected = () => {
-    // 🔹 URLs jo remove honi hain
     const removedUrls = selectedImages
       .filter((_, index) => checkedImages[index])
       .map((img) => img.cloudUrl || img.localUrl)
       .filter(Boolean);
 
-    // 1️⃣ MEDIA se remove
     const filteredMedia = selectedImages.filter(
       (_, index) => !checkedImages[index],
     );
     setSelectedImages(filteredMedia);
 
-    // 2️⃣ 🔥 VARIANTS se bhi remove
     setVariantImages((prev) => {
       const updated = {};
 
@@ -704,13 +701,11 @@ const CategorySelector = () => {
         if (remainingImages.length > 0) {
           updated[variantKey] = remainingImages;
         }
-        // 👆 agar empty ho gaya → variant se image fully removed
       });
 
       return updated;
     });
 
-    // 3️⃣ reset state
     setCheckedImages({});
     setIsChanged(true);
 
@@ -812,7 +807,7 @@ const CategorySelector = () => {
       }))
       .filter((opt) => opt.values.length > 0);
 
-    console.log("🧠 Generating variants from:", validOptions);
+    console.log(" Generating variants from:", validOptions);
 
     if (validOptions.length === 0) {
       setVariants([]);
@@ -864,7 +859,7 @@ const CategorySelector = () => {
       );
 
       console.log(
-        `🧹 Variants removed for value "${valueToRemove}":`,
+        ` Variants removed for value "${valueToRemove}":`,
         prevVariants.length - filtered.length,
       );
 
@@ -884,7 +879,6 @@ const CategorySelector = () => {
   const handleNewOptionNameChange = (value) => {
     setNewOption({ ...newOption, name: value });
 
-    // Match DB option
     const found = dbOptions.find((opt) =>
       opt.optionName.some(
         (name) => name.toLowerCase().trim() === value.toLowerCase().trim(),
@@ -1588,9 +1582,7 @@ const handleSubmit = async (e) => {
   setMessage(null);
 
   try {
-    /* =======================
-       1. DESCRIPTION
-    ======================= */
+
     const rawContentState = convertToRaw(editorState.getCurrentContent());
     const htmlContent = draftToHtml(rawContentState);
     const description = htmlContent
@@ -1599,9 +1591,7 @@ const handleSubmit = async (e) => {
       .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
       .replace(/&nbsp;/g, " ");
 
-    /* =======================
-       2. PAYLOAD
-    ======================= */
+
     const payload = {
       keyWord: [
         ...finalCategoryPayload.map((c) => c.catNo),
@@ -1638,9 +1628,6 @@ const handleSubmit = async (e) => {
       );
     }
 
-    /* =======================
-       3. CREATE / UPDATE PRODUCT
-    ======================= */
     const productRes = await fetch(
       isEditing
         ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
@@ -1662,9 +1649,6 @@ const handleSubmit = async (e) => {
     const productId = productData.product.id;
     const shopifyVariants = productData.product.variants;
 
-    /* =======================
-       4. UPDATE VARIANTS
-    ======================= */
     for (const v of shopifyVariants) {
       await fetch(
         `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
@@ -1681,9 +1665,6 @@ const handleSubmit = async (e) => {
       );
     }
 
-    /* =======================
-       5. PREPARE IMAGES DATA
-    ======================= */
     const mediaImageUrls = selectedImages
       .map((img) => img.cloudUrl || img.localUrl)
       .filter(Boolean);
@@ -1714,9 +1695,7 @@ const handleSubmit = async (e) => {
       ([url, variantIds]) => ({ url, variantIds })
     );
 
-    /* =======================
-       6. SUCCESS → REDIRECT FAST
-    ======================= */
+
     setMessage({
       type: "success",
       text: isEditing
@@ -1726,9 +1705,7 @@ const handleSubmit = async (e) => {
 
     navigate("/manage-product");
 
-    /* =======================
-       7. BACKGROUND IMAGE UPLOAD (NO AWAIT)
-    ======================= */
+
 uploadImagesInBackground({
   productId,
   apiKey,

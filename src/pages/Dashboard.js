@@ -19,6 +19,7 @@ const Dashboard = () => {
   let admin;
   const { addNotification } = useNotification();
   const location = useLocation();
+
   // const isAdmin = () => {
   //   const token = localStorage.getItem("usertoken");
   //   if (token) {
@@ -276,6 +277,25 @@ const Dashboard = () => {
   const [userRole, setUserRole] = useState(null);
   const [totalProducts, setTotalProducts] = useState(0);
   const totalPages = Math.ceil(totalProducts / limit);
+  useEffect(() => {
+    const errorData = sessionStorage.getItem("imageUploadError");
+
+    if (errorData) {
+      const { message, productTitle } = JSON.parse(errorData);
+
+      // showToast(
+      //   "Failed",
+      //   `Image upload failed for "${productTitle}": ${message}`,
+      //   {
+      //     position: "top-right",
+      //     autoClose: 6000,
+      //   }
+      // );
+
+      // 🔥 clear after showing
+      sessionStorage.removeItem("imageUploadError");
+    }
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
@@ -1002,6 +1022,25 @@ const Dashboard = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+  const getProductPreviewImage = (product) => {
+    // 1️⃣ Product media image
+    if (product.images?.length > 0) {
+      return product.images[0].src;
+    }
+
+    // 2️⃣ Variant images (first available)
+    if (product.variantImages?.length > 0) {
+      for (const variantBlock of product.variantImages) {
+        if (variantBlock.images?.length > 0) {
+          return variantBlock.images[0].src;
+        }
+      }
+    }
+
+    // 3️⃣ Nothing found
+    return null;
+  };
+
   return user ? (
     <main className="w-full p-4 ">
       {toast.show && (
@@ -1121,9 +1160,7 @@ const Dashboard = () => {
             <h2>No products available.</h2>
           </div>
         ) : (
-       
           <div className="w-full overflow-x-auto border rounded-lg bg-white shadow-sm">
-            
             <table className="min-w-full border-collapse text-medium">
               <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0">
                 <tr>
@@ -1220,17 +1257,21 @@ const Dashboard = () => {
                       </td>
 
                       <td className="p-3 whitespace-nowrap">
-                        {product.images?.[0] ? (
-                          <img
-                            src={product.images[0].src}
-                            alt={product.images[0].alt || "Product image"}
-                            className="w-10 h-10 object-cover rounded border"
-                          />
-                        ) : (
-                          <span className="text-gray-400 text-xs">
-                            No Image
-                          </span>
-                        )}
+                        {(() => {
+                          const previewImage = getProductPreviewImage(product);
+
+                          return previewImage ? (
+                            <img
+                              src={previewImage}
+                              alt="Product image"
+                              className="w-10 h-10 object-cover rounded border"
+                            />
+                          ) : (
+                            <span className="text-gray-400 text-xs">
+                              No Image
+                            </span>
+                          );
+                        })()}
                       </td>
 
                       <td className="p-3 whitespace-nowrap">

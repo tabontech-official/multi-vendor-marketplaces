@@ -20,9 +20,15 @@ import {
 } from "draft-js";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
+import { useNotification } from "../context api/NotificationContext";
+
 const CategorySelector = () => {
   const { id } = useParams();
+  const { addNotification } = useNotification();
+
   const isEditing = Boolean(id);
+  const [bulkUploading, setBulkUploading] = useState(false);
+
   const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
   const [selectedBulkVariants, setSelectedBulkVariants] = useState([]);
   const [bulkUploadedImage, setBulkUploadedImage] = useState(null);
@@ -37,30 +43,32 @@ const CategorySelector = () => {
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateMode, setDuplicateMode] = useState("copy");
   const [duplicateTitle, setDuplicateTitle] = useState("");
-  const assignImageToSelectedVariants = (imageUrl) => {
-    if (selectedBulkVariants.length === 0) return;
+  const assignImageToSelectedVariants = (imageUrl, isLoading = false) => {
+  if (selectedBulkVariants.length === 0) return;
 
-    setVariantImages((prev) => {
-      const updated = { ...prev };
+  setVariantImages((prev) => {
+    const updated = { ...prev };
 
-      selectedBulkVariants.forEach((key) => {
-        updated[key] = [
-          {
-            preview: imageUrl,
-            alt: key.replace(/\s*\/\s*/g, "-").toLowerCase(),
-            loading: false,
-          },
-        ];
-      });
+    selectedBulkVariants.forEach((key) => {
+      const normalizedKey = key.replace(/['"]/g, "").trim();
 
-      return updated;
+      updated[normalizedKey] = [
+        ...(updated[normalizedKey] || []),
+        {
+          preview: imageUrl,
+          alt: normalizedKey.replace(/\s*\/\s*/g, "-").toLowerCase(),
+          loading: isLoading,
+        },
+      ];
     });
 
-    // 🔄 RESET AFTER ASSIGN
-    setSelectedBulkVariants([]);
-    setBulkUploadedImage(null);
-    setIsChanged(true);
-  };
+    return updated;
+  });
+
+  setIsChanged(true);
+};
+
+
 
   const moveImageToFront = (fromIndex) => {
     if (fromIndex === 0) return;
@@ -80,26 +88,62 @@ const CategorySelector = () => {
       : `${parent} / ${child}`.replace(/['"]/g, "").trim();
   };
 
-  const handleBulkImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+ const handleBulkImageUpload = async (e) => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length || selectedBulkVariants.length === 0) return;
+
+  setBulkUploading(true);
+
+  for (const file of files) {
+    const tempPreview = URL.createObjectURL(file);
+
+    // 👇 show LOADING image in variants
+    assignImageToSelectedVariants(tempPreview, true);
 
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "images");
 
-    const res = await fetch(
-      "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-      { method: "POST", body: formData },
-    );
+    try {
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
+        { method: "POST", body: formData }
+      );
 
-    const data = await res.json();
-    if (data.secure_url) {
-      setBulkUploadedImage(data.secure_url);
+      const data = await res.json();
+
+      if (data.secure_url) {
+        // 🔁 replace temp preview with real image
+        setVariantImages((prev) => {
+          const updated = { ...prev };
+
+          selectedBulkVariants.forEach((key) => {
+            const normalizedKey = key.replace(/['"]/g, "").trim();
+
+            updated[normalizedKey] = updated[normalizedKey].map((img) =>
+              img.preview === tempPreview
+                ? {
+                    ...img,
+                    preview: data.secure_url,
+                    loading: false,
+                  }
+                : img
+            );
+          });
+
+          return updated;
+        });
+      }
+    } catch (err) {
+      console.error("Bulk upload failed:", err);
     }
+  }
 
-    e.target.value = "";
-  };
+  setBulkUploading(false);
+  e.target.value = "";
+};
+
+
 
   const applyBulkImage = () => {
     if (!bulkUploadedImage || selectedBulkVariants.length === 0) return;
@@ -1477,548 +1521,410 @@ if (product.variantImages?.length) {
 
     event.target.value = "";
   };
-  // const handleRemoveVariantImage = (variantKey, imageUrl) => {
-  //   setVariantImages((prev) => ({
-  //     ...prev,
-  //     [variantKey]: prev[variantKey].filter(
-  //       (img) => (img.preview || img.src) !== imageUrl
-  //     ),
-  //   }));
+ 
+const uploadImagesInBackground = async ({
+  productId,
+  apiKey,
+  apiSecretKey,
+  mediaImageUrls,
+  uploadedVariantImages,
+  groupImages,
+  addNotification,
+  productTitle,
+}) => {
+  try {
+    // 🔔 START notification
+    addNotification(
+      `Image upload started for "${productTitle}"`,
+      "/manage-product"
+    );
 
-  //   setIsChanged(true);
-  // };
+    await fetch(
+      `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
+      {
+        method: "PUT",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          images: mediaImageUrls,
+          variantImages: uploadedVariantImages,
+          groupImages,
+        }),
+      }
+    );
 
-  const handleRemoveVariantImage = (variantKey) => {
-    setVariantImages((prev) => {
-      const updated = { ...prev };
-      delete updated[variantKey];
-      return updated;
+    // ✅ SUCCESS notification
+    addNotification(
+      `Images uploaded successfully for "${productTitle}"`,
+      "/manage-product"
+    );
+  } catch (err) {
+    console.error("❌ Background image upload failed", err);
+
+    // ❌ ERROR notification
+    addNotification(
+      `Image upload failed for "${productTitle}"`,
+      "/manage-product"
+    );
+  }
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const userId = localStorage.getItem("userid");
+  const apiKey = localStorage.getItem("apiKey");
+  const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+  if (!userId) {
+    setMessage({ type: "error", text: "User ID missing" });
+    return;
+  }
+
+  setLoading(true);
+  setMessage(null);
+
+  try {
+    /* =======================
+       1. DESCRIPTION
+    ======================= */
+    const rawContentState = convertToRaw(editorState.getCurrentContent());
+    const htmlContent = draftToHtml(rawContentState);
+    const description = htmlContent
+      .replace(/<p>/g, "")
+      .replace(/<\/p>/g, "<br />")
+      .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
+      .replace(/&nbsp;/g, " ");
+
+    /* =======================
+       2. PAYLOAD
+    ======================= */
+    const payload = {
+      keyWord: [
+        ...finalCategoryPayload.map((c) => c.catNo),
+        ...keywordsList,
+      ].join(", "),
+      title,
+      description,
+      productType,
+      price: Number(price),
+      compare_at_price: compareAtPrice ? Number(compareAtPrice) : undefined,
+      track_quantity: trackQuantity,
+      quantity: trackQuantity ? Number(quantity) : 0,
+      continue_selling: continueSelling,
+      has_sku: hasSKU,
+      sku: hasSKU ? sku : undefined,
+      barcode: hasSKU ? barcode : undefined,
+      track_shipping: trackShipping,
+      weight: trackShipping ? Number(weight) : undefined,
+      weight_unit: trackShipping ? unit : undefined,
+      status,
+      userId: isEditing ? product?.userId : userId,
+      vendor,
+      seoTitle,
+      seoDescription,
+      seoHandle,
+      options,
+      variants,
+      categories: finalCategoryPayload.map((c) => c.title),
+    };
+
+    if (enableMetafields) {
+      payload.metafields = metafields.filter(
+        (m) => m.label.trim() && m.value.trim()
+      );
+    }
+
+    /* =======================
+       3. CREATE / UPDATE PRODUCT
+    ======================= */
+    const productRes = await fetch(
+      isEditing
+        ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
+        : `https://multi-vendor-marketplace.vercel.app/product/createProduct`,
+      {
+        method: isEditing ? "PATCH" : "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const productData = await productRes.json();
+    if (!productRes.ok) throw new Error(productData.error);
+
+    const productId = productData.product.id;
+    const shopifyVariants = productData.product.variants;
+
+    /* =======================
+       4. UPDATE VARIANTS
+    ======================= */
+    for (const v of shopifyVariants) {
+      await fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ variant: v }),
+        }
+      );
+    }
+
+    /* =======================
+       5. PREPARE IMAGES DATA
+    ======================= */
+    const mediaImageUrls = selectedImages
+      .map((img) => img.cloudUrl || img.localUrl)
+      .filter(Boolean);
+
+    const variantImageMap = {};
+
+    Object.entries(variantImages).forEach(([variantKey, images]) => {
+      if (!Array.isArray(images)) return;
+
+      const variant = shopifyVariants.find(
+        (v) =>
+          v.title.replace(/['"]/g, "").trim().toLowerCase() ===
+          variantKey.replace(/['"]/g, "").trim().toLowerCase()
+      );
+
+      if (!variant?.id) return;
+
+      images.forEach((img) => {
+        const url = img.preview || img.src;
+        if (!url) return;
+
+        if (!variantImageMap[url]) variantImageMap[url] = [];
+        variantImageMap[url].push(variant.id);
+      });
     });
-    setIsChanged(true);
-  };
 
-  //   const handleSubmit = async (e) => {
-  //     e.preventDefault();
-  //     const userId = localStorage.getItem("userid");
-  //     const apiKey = localStorage.getItem("apiKey");
-  //     const apiSecretKey = localStorage.getItem("apiSecretKey");
-  //     console.log("🧠 DEBUG PAYLOAD", {
-  //       isEditing,
-  //       loggedInUserId: userId,
-  //       productOwnerId: product?.userId,
-  //       finalUserIdSent: isEditing ? product?.userId : userId,
-  //     });
-  //     if (!userId) {
-  //       setMessage({
-  //         type: "error",
-  //         text: "User ID is missing. Cannot submit form.",
-  //       });
-  //       return;
-  //     }
-  //     if (enableMetafields) {
-  //       const invalid = metafields.some(
-  //         (m) => !m.label.trim() || !m.value.trim(),
-  //       );
-  //     }
+    const uploadedVariantImages = Object.entries(variantImageMap).map(
+      ([url, variantIds]) => ({ url, variantIds })
+    );
 
-  //     setLoading(true);
-  //     setMessage(null);
+    /* =======================
+       6. SUCCESS → REDIRECT FAST
+    ======================= */
+    setMessage({
+      type: "success",
+      text: isEditing
+        ? "Product updated successfully!"
+        : "Product created successfully!",
+    });
+
+    navigate("/manage-product");
+
+    /* =======================
+       7. BACKGROUND IMAGE UPLOAD (NO AWAIT)
+    ======================= */
+uploadImagesInBackground({
+  productId,
+  apiKey,
+  apiSecretKey,
+  mediaImageUrls,
+  uploadedVariantImages,
+  groupImages,
+  addNotification,
+  productTitle: title,
+});
+
+  } catch (err) {
+    console.error("❌ handleSubmit error:", err);
+    setMessage({ type: "error", text: err.message });
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   const userId = localStorage.getItem("userid");
+  //   const apiKey = localStorage.getItem("apiKey");
+  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+  //   if (!userId) {
+  //     setMessage({ type: "error", text: "User ID missing" });
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   setMessage(null);
+
+  //   try {
 
   //     const rawContentState = convertToRaw(editorState.getCurrentContent());
   //     const htmlContent = draftToHtml(rawContentState);
-  //     const modifiedContent = htmlContent
+  //     const description = htmlContent
   //       .replace(/<p>/g, "")
   //       .replace(/<\/p>/g, "<br />")
   //       .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
   //       .replace(/&nbsp;/g, " ");
 
-  //     const prepareVariantPrices = () =>
-  //       combinations.flatMap((combination, index) =>
-  //         combination.children.map((child) => {
-  //           const key = `${index}-${child}`;
-  //           return variantPrices[key] ?? null;
-  //         }),
-  //       );
 
-  //     const prepareVariantCompareAtPrices = () =>
-  //       combinations.flatMap((combination, index) =>
-  //         combination.children.map((child) => {
-  //           const key = `${index}-${child}`;
-  //           return variantCompareAtPrices[key] ?? null;
-  //         }),
-  //       );
-
-  //     const defaultQuantity = parseFloat(quantity) || 0;
-  //     const prepareVariantQuantities = () =>
-  //       combinations.flatMap((combination, index) =>
-  //         combination.children.map((child) => {
-  //           const key = `${index}-${child}`;
-  //           const val = parseFloat(variantQuantities[key]);
-  //           return !isNaN(val) && val > 0 ? val : defaultQuantity;
-  //         }),
-  //       );
-
-  //     const prepareVariantSku = () =>
-  //       combinations.flatMap((combination, index) =>
-  //         combination.children.map((child) => {
-  //           const key = `${index}-${child}`;
-  //           return variantSku[key] ?? null;
-  //         }),
-  //       );
-
-  //     const categoryTags = finalCategoryPayload.map((c) => c.catNo);
-
-  //     const combinedKeywords = [...categoryTags, ...keywordsList].join(", ");
-
-  //     let selectedShippingData = null;
-
-  //     if (enableFreeShipping) {
-  //       selectedShippingData = {
-  //         profileName: "Free Shipping",
-  //         rateName: "Free",
-  //         ratePrice: 0,
-  //       };
-  //     } else if (enableShippingPlans && selectedShippingPlan) {
-  //       selectedShippingData = shippingPlans.find(
-  //         (p) => p.profileId === selectedShippingPlan,
-  //       );
-  //     }
-  //     const cleanHandle = seoHandle
-  //       .replace(/^https?:\/\/[^/]+\/products\//, "")
-  //       .trim();
-  //     const autoHandle = title
-  //       .toLowerCase()
-  //       .replace(/[^a-z0-9]+/g, "-")
-  //       .replace(/(^-|-$)/g, "");
   //     const payload = {
-  //       keyWord: combinedKeywords,
+  //       keyWord: [
+  //         ...finalCategoryPayload.map((c) => c.catNo),
+  //         ...keywordsList,
+  //       ].join(", "),
   //       title,
-  //       description: modifiedContent,
+  //       description,
   //       productType,
-  //       price: parseFloat(price),
-  //       compare_at_price: compareAtPrice ? parseFloat(compareAtPrice) : undefined,
+  //       price: Number(price),
+  //       compare_at_price: compareAtPrice ? Number(compareAtPrice) : undefined,
   //       track_quantity: trackQuantity,
-  //       quantity: trackQuantity ? parseFloat(quantity) : 0,
+  //       quantity: trackQuantity ? Number(quantity) : 0,
   //       continue_selling: continueSelling,
   //       has_sku: hasSKU,
-  //       sku: hasSKU && sku ? sku : undefined,
-  //       barcode: hasSKU && barcode ? barcode : undefined,
+  //       sku: hasSKU ? sku : undefined,
+  //       barcode: hasSKU ? barcode : undefined,
   //       track_shipping: trackShipping,
-  //       weight: trackShipping && weight ? parseFloat(weight) : undefined,
-  //       weight_unit: trackShipping && unit ? unit : undefined,
+  //       weight: trackShipping ? Number(weight) : undefined,
+  //       weight_unit: trackShipping ? unit : undefined,
   //       status,
-  //       // userId,
   //       userId: isEditing ? product?.userId : userId,
-
   //       vendor,
   //       seoTitle,
   //       seoDescription,
-  //       seoHandle: seoHandle ? cleanHandle : autoHandle,
+  //       seoHandle,
   //       options,
   //       variants,
-  //       variantPrices: prepareVariantPrices(),
-  //       variantCompareAtPrices: prepareVariantCompareAtPrices(),
-  //       variantQuantites: prepareVariantQuantities(),
-  //       variantSku: prepareVariantSku(),
   //       categories: finalCategoryPayload.map((c) => c.title),
-  //       shippingProfileData: selectedShippingData,
   //     };
+
   //     if (enableMetafields) {
   //       payload.metafields = metafields.filter(
-  //         (m) => m.label.trim() !== "" && m.value.trim() !== "",
+  //         (m) => m.label.trim() && m.value.trim(),
   //       );
   //     }
-  //     if (enableSizeChart && selectedSizeChart) {
-  //       const chartData = sizeCharts.find((c) => c._id === selectedSizeChart);
-  //       payload.size_chart_id = selectedSizeChart;
 
-  //       payload.size_chart = selectedSizeChart;
-  //       payload.size_chart_image = chartData?.image || null;
-  //     }
-  //     console.log("📦 Payload being sent:", payload);
 
-  //     try {
-  //       const url = isEditing
+  //     const productRes = await fetch(
+  //       isEditing
   //         ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
-  //         : `https://multi-vendor-marketplace.vercel.app/product/createProduct`;
-
-  //       const method = isEditing ? "PATCH" : "POST";
-
-  //       const response = await fetch(url, {
-  //         method,
+  //         : `https://multi-vendor-marketplace.vercel.app/product/createProduct`,
+  //       {
+  //         method: isEditing ? "PATCH" : "POST",
   //         headers: {
   //           "x-api-key": apiKey,
   //           "x-api-secret": apiSecretKey,
   //           "Content-Type": "application/json",
   //         },
   //         body: JSON.stringify(payload),
-  //       });
+  //       },
+  //     );
 
-  //       const data = await response.json();
-  //       if (!response.ok) {
-  //         setMessage({
-  //           type: "error",
-  //           text: data.error || "Something went wrong!",
-  //         });
-  //         setLoading(false);
-  //         return;
-  //       }
+  //     const productData = await productRes.json();
+  //     if (!productRes.ok) throw new Error(productData.error);
 
-  //       const productId = data.product?.id;
+  //     const productId = productData.product.id;
+  //     const shopifyVariants = productData.product.variants;
 
-  //       if (productId) {
-  //         const variantUpdates = combinations.flatMap((combination, index) =>
-  //           combination.children.map((child) => {
-  //             const key = `${index}-${child}`;
-  //             const matchingVariant = data.product?.variants?.find(
-  //               (v) =>
-  //                 v.title.trim().toLowerCase() === child.trim().toLowerCase(),
-  //             );
-
-  //             return {
-  //               variantId: matchingVariant?.id,
-  //               price: variantPrices[key] || price || 0,
-  //               compare_at_price:
-  //                 variantCompareAtPrices[key] || compareAtPrice || 0,
-  //               sku: variantSku[key] || "",
-  //               inventory_quantity: variantQuantities[key] || quantity || 0,
-  //               option1: matchingVariant?.option1 || null,
-  //               option2: matchingVariant?.option2 || null,
-  //               option3: matchingVariant?.option3 || null,
-  //             };
-  //           }),
-  //         );
-
-  //         for (const variant of variantUpdates) {
-  //           if (!variant.variantId) continue;
-
-  //           await fetch(
-  //             `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variant.variantId}`,
-  //             {
-  //               method: "PUT",
-  //               headers: {
-  //                 Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
-  //                 "x-api-key": apiKey,
-  //                 "x-api-secret": apiSecretKey,
-  //                 "Content-Type": "application/json",
-  //               },
-  //               body: JSON.stringify({ variant }),
-  //             },
-  //           );
-  //         }
-  //       }
-
-  //       const usedVariantImageUrls = new Set();
-
-  //       Object.values(variantImages).forEach((imgs) => {
-  //         if (Array.isArray(imgs)) {
-  //           imgs.forEach((img) => {
-  //             if (img.preview) {
-  //               usedVariantImageUrls.add(img.preview);
-  //             }
-  //           });
-  //         }
-  //       });
-
-  //       const mediaImageUrls = selectedImages
-  //         .filter((img) => img.cloudUrl)
-  //         .map((img) => img.cloudUrl);
-
-  //       const finalProductImages = mediaImageUrls.filter(
-  //         (url) => !usedVariantImageUrls.has(url),
-  //       );
-
-  //       // const uploadedVariantImages = Object.entries(variantImages).flatMap(
-  //       //   ([key, images]) => {
-  //       //     const parts = key.split("/").map((p) => p.trim());
-
-  //       //     // 👇 first option always primary (Shopify standard)
-  //       //     const optionName = options[0]?.name || "option";
-  //       //     const optionValue = parts[0];
-
-  //       //     const safeImages = Array.isArray(images)
-  //       //       ? images
-  //       //       : images
-  //       //         ? [images]
-  //       //         : [];
-
-  //       //     return safeImages.map((img) => ({
-  //       //       key,
-  //       //       url: img.preview || img.src,
-
-  //       //       // ✅ NEW FIELDS
-  //       //       optionName,
-  //       //       optionValue,
-  //       //     }));
-  //       //   },
-  //       // );
-
-  //       const uploadedVariantImages = Object.entries(variantImages).flatMap(
-  //   ([key, images]) => {
-  //     if (!Array.isArray(images) || images.length === 0) return [];
-
-  //     return images.map((img) => ({
-  //       key,
-  //       url: img.preview || img.src,
-  //     }));
-  //   }
-  // );
-
-  //       const hasVariantImages = uploadedVariantImages.length > 0;
-
-  //       const imageSaveResponse = await fetch(
-  //         `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
+  //     for (const v of shopifyVariants) {
+  //       await fetch(
+  //         `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
   //         {
   //           method: "PUT",
   //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
   //             "x-api-key": apiKey,
   //             "x-api-secret": apiSecretKey,
   //             "Content-Type": "application/json",
   //           },
-  //           body: JSON.stringify({
-  //             images: finalProductImages,
-  //             ...(hasVariantImages && { variantImages: uploadedVariantImages }),
-  //           }),
+  //           body: JSON.stringify({ variant: v }),
   //         },
   //       );
-
-  //       const imageSaveJson = await imageSaveResponse.json();
-  //       if (!imageSaveResponse.ok) {
-  //         setMessage({
-  //           type: "error",
-  //           text: imageSaveJson.error || "Failed to save image URLs",
-  //         });
-  //         setLoading(false);
-  //         return;
-  //       }
-
-  //       setTitle("");
-  //       setDescription("");
-  //       setProductType("");
-  //       setPrice("");
-  //       setCompareAtPrice("");
-  //       setTrackQuantity(false);
-  //       setQuantity(0);
-  //       setContinueSelling(false);
-  //       setHasSKU(false);
-  //       setSKU("");
-  //       setBarcode("");
-  //       setTrackShipping(false);
-  //       setWeight("");
-  //       setUnit("kg");
-  //       setOptions([]);
-  //       setVariants([]);
-  //       setVendor("");
-  //       setKeyWord("");
-  //       setIsChanged(false);
-
-  //       setMessage({
-  //         type: "success",
-  //         text: isEditing
-  //           ? "Product updated successfully!"
-  //           : "Product created successfully!",
-  //       });
-
-  //       navigate("/manage-product");
-  //     } catch (error) {
-  //       console.error("❌ Error uploading product:", error);
-  //       setMessage({ type: "error", text: "Failed to connect to server." });
-  //     } finally {
-  //       setLoading(false);
   //     }
-  //   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    const userId = localStorage.getItem("userid");
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+  //     const mediaImageUrls = selectedImages
+  //       .map((img) => img.cloudUrl || img.localUrl)
+  //       .filter(Boolean);
 
-    if (!userId) {
-      setMessage({ type: "error", text: "User ID missing" });
-      return;
-    }
+  //     const variantImageMap = {}; 
 
-    setLoading(true);
-    setMessage(null);
+  //     Object.entries(variantImages).forEach(([variantKey, images]) => {
+  //       if (!Array.isArray(images)) return;
 
-    try {
-      /* =======================
-       1. DESCRIPTION
-    ======================= */
-      const rawContentState = convertToRaw(editorState.getCurrentContent());
-      const htmlContent = draftToHtml(rawContentState);
-      const description = htmlContent
-        .replace(/<p>/g, "")
-        .replace(/<\/p>/g, "<br />")
-        .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
-        .replace(/&nbsp;/g, " ");
+  //       const variant = shopifyVariants.find(
+  //         (v) =>
+  //           v.title.replace(/['"]/g, "").trim().toLowerCase() ===
+  //           variantKey.replace(/['"]/g, "").trim().toLowerCase(),
+  //       );
 
-      /* =======================
-       2. PAYLOAD
-    ======================= */
-      const payload = {
-        keyWord: [
-          ...finalCategoryPayload.map((c) => c.catNo),
-          ...keywordsList,
-        ].join(", "),
-        title,
-        description,
-        productType,
-        price: Number(price),
-        compare_at_price: compareAtPrice ? Number(compareAtPrice) : undefined,
-        track_quantity: trackQuantity,
-        quantity: trackQuantity ? Number(quantity) : 0,
-        continue_selling: continueSelling,
-        has_sku: hasSKU,
-        sku: hasSKU ? sku : undefined,
-        barcode: hasSKU ? barcode : undefined,
-        track_shipping: trackShipping,
-        weight: trackShipping ? Number(weight) : undefined,
-        weight_unit: trackShipping ? unit : undefined,
-        status,
-        userId: isEditing ? product?.userId : userId,
-        vendor,
-        seoTitle,
-        seoDescription,
-        seoHandle,
-        options,
-        variants,
-        categories: finalCategoryPayload.map((c) => c.title),
-      };
+  //       if (!variant?.id) return;
 
-      if (enableMetafields) {
-        payload.metafields = metafields.filter(
-          (m) => m.label.trim() && m.value.trim(),
-        );
-      }
+  //       images.forEach((img) => {
+  //         const url = img.preview || img.src;
+  //         if (!url) return;
 
-      /* =======================
-       3. CREATE / UPDATE PRODUCT
-    ======================= */
-      const productRes = await fetch(
-        isEditing
-          ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
-          : `https://multi-vendor-marketplace.vercel.app/product/createProduct`,
-        {
-          method: isEditing ? "PATCH" : "POST",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        },
-      );
+  //         if (!variantImageMap[url]) variantImageMap[url] = [];
+  //         variantImageMap[url].push(variant.id);
+  //       });
+  //     });
 
-      const productData = await productRes.json();
-      if (!productRes.ok) throw new Error(productData.error);
+  //     const uploadedVariantImages = Object.entries(variantImageMap).map(
+  //       ([url, variantIds]) => ({ url, variantIds }),
+  //     );
 
-      const productId = productData.product.id;
-      const shopifyVariants = productData.product.variants;
+  //     const usedVariantUrls = new Set(uploadedVariantImages.map((v) => v.url));
+  //     // const finalProductImages = mediaImageUrls.filter(
+  //     //   (url) => !usedVariantUrls.has(url),
+  //     // );
 
-      /* =======================
-       4. UPDATE VARIANTS
-    ======================= */
-      for (const v of shopifyVariants) {
-        await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
-          {
-            method: "PUT",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ variant: v }),
-          },
-        );
-      }
+  //     /* =======================
+  //      7. UPDATE IMAGES API
+  //   ======================= */
+  //     const imageRes = await fetch(
+  //       `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
+  //       {
+  //         method: "PUT",
+  //         headers: {
+  //           "x-api-key": apiKey,
+  //           "x-api-secret": apiSecretKey,
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           images: mediaImageUrls   ,
+  //           variantImages: uploadedVariantImages,
+  //           groupImages,
+  //         }),
+  //       },
+  //     );
 
-      /* =======================
-       5. PRODUCT IMAGES
-    ======================= */
-      const mediaImageUrls = selectedImages
-        .map((img) => img.cloudUrl || img.localUrl)
-        .filter(Boolean);
+  //     const imageJson = await imageRes.json();
+  //     if (!imageRes.ok) throw new Error(imageJson.error);
 
-      /* =======================
-       6. VARIANT IMAGE MAP
-    ======================= */
-      const variantImageMap = {}; // url → [variantIds]
+  //     /* =======================
+  //      8. SUCCESS
+  //   ======================= */
+  //     setMessage({
+  //       type: "success",
+  //       text: isEditing
+  //         ? "Product updated successfully!"
+  //         : "Product created successfully!",
+  //     });
 
-      Object.entries(variantImages).forEach(([variantKey, images]) => {
-        if (!Array.isArray(images)) return;
-
-        const variant = shopifyVariants.find(
-          (v) =>
-            v.title.replace(/['"]/g, "").trim().toLowerCase() ===
-            variantKey.replace(/['"]/g, "").trim().toLowerCase(),
-        );
-
-        if (!variant?.id) return;
-
-        images.forEach((img) => {
-          const url = img.preview || img.src;
-          if (!url) return;
-
-          if (!variantImageMap[url]) variantImageMap[url] = [];
-          variantImageMap[url].push(variant.id);
-        });
-      });
-
-      const uploadedVariantImages = Object.entries(variantImageMap).map(
-        ([url, variantIds]) => ({ url, variantIds }),
-      );
-
-      const usedVariantUrls = new Set(uploadedVariantImages.map((v) => v.url));
-      // const finalProductImages = mediaImageUrls.filter(
-      //   (url) => !usedVariantUrls.has(url),
-      // );
-
-      /* =======================
-       7. UPDATE IMAGES API
-    ======================= */
-      const imageRes = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
-        {
-          method: "PUT",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            images: mediaImageUrls,
-            variantImages: uploadedVariantImages,
-            groupImages,
-          }),
-        },
-      );
-
-      const imageJson = await imageRes.json();
-      if (!imageRes.ok) throw new Error(imageJson.error);
-
-      /* =======================
-       8. SUCCESS
-    ======================= */
-      setMessage({
-        type: "success",
-        text: isEditing
-          ? "Product updated successfully!"
-          : "Product created successfully!",
-      });
-
-      navigate("/manage-product");
-    } catch (err) {
-      console.error("❌ handleSubmit error:", err);
-      setMessage({ type: "error", text: err.message });
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     navigate("/manage-product");
+  //   } catch (err) {
+  //     console.error("❌ handleSubmit error:", err);
+  //     setMessage({ type: "error", text: err.message });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handlePriceChange = (index, child, value) => {
     const key = `${index}-${child}`;
@@ -2177,134 +2083,66 @@ if (product.variantImages?.length) {
       setLoading(false);
     }
   };
-  // const handleVariantImageUpload = async (e) => {
-  //   const files = Array.from(e.target.files);
-  //   if (!files.length || !currentVariant) return;
-
-  //   const parent = combinations[currentVariant.index]?.parent;
-  //   const key =
-  //     options.length === 1
-  //       ? currentVariant.child
-  //       : `${parent} / ${currentVariant.child}`;
-
-  //   const normalizedKey = key.replace(/['"]/g, "").trim();
-
-  //   for (const file of files) {
-  //     // 1️⃣ Local preview (loader)
-  //     const tempPreview = URL.createObjectURL(file);
-
-  //     setVariantImages((prev) => ({
-  //       ...prev,
-  //       [normalizedKey]: [
-  //         { preview: tempPreview, loading: true },
-  //         ...(prev[normalizedKey] || []),
-  //       ],
-  //     }));
-
-  //     try {
-  //       // 2️⃣ Upload to Cloudinary
-  //       const formData = new FormData();
-  //       formData.append("file", file);
-  //       formData.append("upload_preset", "images");
-
-  //       const res = await fetch(
-  //         "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-  //         {
-  //           method: "POST",
-  //           body: formData,
-  //         },
-  //       );
-
-  //       const data = await res.json();
-  //       if (!data.secure_url) throw new Error("Upload failed");
-
-  //       const finalUrl = data.secure_url;
-
-  //       // 3️⃣ Add to PRODUCT MEDIA
-  //       setSelectedImages((prev) => [
-  //         { cloudUrl: finalUrl, loading: false },
-  //         ...prev,
-  //       ]);
-
-  //       // 4️⃣ Assign ONLY to this variant
-  //       setVariantImages((prev) => ({
-  //         ...prev,
-  //         [normalizedKey]: [
-  //           {
-  //             preview: finalUrl,
-  //             alt: normalizedKey.replace(/\s*\/\s*/g, "-").toLowerCase(),
-  //             loading: false,
-  //           },
-  //           ...(prev[normalizedKey] || []).filter(
-  //             (img) => img.preview !== tempPreview,
-  //           ),
-  //         ],
-  //       }));
-  //     } catch (err) {
-  //       console.error("Variant image upload failed", err);
-
-  //       // remove failed preview
-  //       setVariantImages((prev) => ({
-  //         ...prev,
-  //         [normalizedKey]: prev[normalizedKey].filter(
-  //           (img) => img.preview !== tempPreview,
-  //         ),
-  //       }));
-  //     }
-  //   }
-
-  //   e.target.value = "";
-  // };
-
+ 
   const handleVariantImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file || !currentVariant) return;
+  const files = Array.from(e.target.files || []);
+  if (!files.length || !currentVariant) return;
 
-    const parent = combinations[currentVariant.index]?.parent;
-    const key =
-      options.length === 1
-        ? currentVariant.child
-        : `${parent} / ${currentVariant.child}`;
+  const parent = combinations[currentVariant.index]?.parent;
+  const key =
+    options.length === 1
+      ? currentVariant.child
+      : `${parent} / ${currentVariant.child}`;
 
-    const normalizedKey = key.replace(/['"]/g, "").trim();
-    const tempPreview = URL.createObjectURL(file);
+  const normalizedKey = key.replace(/['"]/g, "").trim();
+  const altText = normalizedKey.replace(/\s*\/\s*/g, "-").toLowerCase();
 
-    // 🔒 HARD REPLACE
-    setVariantImages((prev) => ({
-      ...prev,
-      [normalizedKey]: [{ preview: tempPreview, loading: true }],
-    }));
+  const previews = files.map((file) => ({
+    id: Date.now() + Math.random(),
+    preview: URL.createObjectURL(file),
+    alt: altText,
+    loading: true,
+  }));
+
+  // ✅ APPEND previews
+  setVariantImages((prev) => ({
+    ...prev,
+    [normalizedKey]: [
+      ...(prev[normalizedKey] || []),
+      ...previews,
+    ],
+  }));
+
+  for (let i = 0; i < files.length; i++) {
+    const formData = new FormData();
+    formData.append("file", files[i]);
+    formData.append("upload_preset", "images");
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "images");
-
       const res = await fetch(
         "https://api.cloudinary.com/v1_1/dt2fvngtp/image/upload",
-        { method: "POST", body: formData },
+        { method: "POST", body: formData }
       );
-
       const data = await res.json();
-      if (!data.secure_url) throw new Error("Upload failed");
 
-      setVariantImages((prev) => ({
-        ...prev,
-        [normalizedKey]: [
-          {
-            preview: data.secure_url,
-            alt: normalizedKey.replace(/\s*\/\s*/g, "-").toLowerCase(),
-            loading: false,
-          },
-        ],
-      }));
+      if (data.secure_url) {
+        setVariantImages((prev) => ({
+          ...prev,
+          [normalizedKey]: prev[normalizedKey].map((img) =>
+            img.preview === previews[i].preview
+              ? { ...img, preview: data.secure_url, loading: false }
+              : img
+          ),
+        }));
+      }
     } catch (err) {
       console.error(err);
-      handleRemoveVariantImage(normalizedKey);
     }
+  }
 
-    e.target.value = "";
-  };
+  e.target.value = "";
+};
+
 
   const [showDeleteOptionModal, setShowDeleteOptionModal] = useState(false);
   const [deleteOptionTarget, setDeleteOptionTarget] = useState(null);
@@ -2353,6 +2191,7 @@ if (product.variantImages?.length) {
       window.__blockerActive = false;
     };
   }, [isChanged]);
+
   const handleEditOptionValueChange = (index, value) => {
     const trimmedValue = value.trim();
 
@@ -4094,7 +3933,6 @@ if (product.variantImages?.length) {
               <button
                 onClick={handleSubmit}
                 type="submit"
-                // className="w-full bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
                 className="w-full bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
               >
                 {loading
@@ -4262,151 +4100,165 @@ if (product.variantImages?.length) {
               </div>
             </div>
           </div>
-          {isPopupVisible && currentVariant && (
-            <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
-              <div className="bg-white w-full max-w-5xl h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden">
-                {/* HEADER */}
-                <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    Select Image for Variant
-                  </h2>
-                  <button
-                    onClick={() => {
-                      setIsPopupVisible(false);
-                      setCurrentVariant(null);
-                    }}
-                    className="bg-black text-white px-5 py-2 rounded-md hover:bg-gray-800"
-                  >
-                    Done
-                  </button>
-                </div>
+         {isPopupVisible && currentVariant && (
+  <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
+    <div className="bg-white w-full max-w-5xl h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden">
+      
+      {/* HEADER */}
+      <div className="sticky top-0 bg-white z-20 border-b flex justify-between items-center px-6 py-4">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Select Images for Variant
+        </h2>
+        <button
+          onClick={() => {
+            setIsPopupVisible(false);
+            setCurrentVariant(null);
+          }}
+          className="bg-black text-white px-5 py-2 rounded-md hover:bg-gray-800"
+        >
+          Done
+        </button>
+      </div>
 
-                <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-                  {/* UPLOAD */}
-                  <div className="bg-white border-b px-6 py-4">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      id="variantUpload"
-                      className="hidden"
-                      onChange={handleVariantImageUpload}
+      <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+
+        {/* UPLOAD */}
+        <div className="bg-white border-b px-6 py-4">
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            id="variantUpload"
+            className="hidden"
+            onChange={handleVariantImageUpload}
+          />
+
+          <div className="border-2 border-dashed border-gray-300 rounded-lg h-40 flex items-center justify-center bg-gray-50">
+            <label
+              htmlFor="variantUpload"
+              className="bg-black text-white px-5 py-2 rounded-md text-sm font-medium cursor-pointer hover:bg-gray-800 transition"
+            >
+              Upload Images
+            </label>
+          </div>
+        </div>
+
+        {/* ASSIGNED IMAGES */}
+        <div className="mt-4 bg-white border rounded-lg p-5">
+          <h3 className="text-sm font-semibold mb-3 text-gray-700">
+            Assigned Images
+          </h3>
+
+          {(() => {
+            const parent = combinations[currentVariant.index]?.parent;
+            const key =
+              options.length === 1
+                ? currentVariant.child
+                : `${parent} / ${currentVariant.child}`;
+
+            const normalizedKey = key.replace(/['"]/g, "").trim();
+            const images = variantImages[normalizedKey] || [];
+
+            return images.length ? (
+              <div className="flex flex-wrap gap-3">
+                {images.map((img, i) => (
+                  <div key={i} className="relative w-28 h-28">
+                    <img
+                      src={img.preview}
+                      className="w-full h-full object-cover rounded border"
+                      alt="variant"
                     />
 
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg h-40 flex items-center justify-center bg-gray-50">
-                      <label
-                        htmlFor="variantUpload"
-                        className="bg-black text-white px-5 py-2 rounded-md text-sm font-medium cursor-pointer hover:bg-gray-800 transition"
-                      >
-                        Upload
-                      </label>
-                    </div>
+                    {img.loading && (
+                      <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                        <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin" />
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setVariantImages((prev) => ({
+                          ...prev,
+                          [normalizedKey]: prev[normalizedKey].filter(
+                            (_, idx) => idx !== i
+                          ),
+                        }));
+                        setIsChanged(true);
+                      }}
+                      className="absolute -top-2 -right-2 bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs"
+                    >
+                      ✕
+                    </button>
                   </div>
-
-                  {/* ASSIGNED IMAGE (ONLY ONE) */}
-                  <div className="mt-4 bg-white border rounded-lg p-5">
-                    <h3 className="text-sm font-semibold mb-3 text-gray-700">
-                      Assigned Image
-                    </h3>
-
-                    {(() => {
-                      const parent = combinations[currentVariant.index]?.parent;
-                      const key =
-                        options.length === 1
-                          ? currentVariant.child
-                          : `${parent} / ${currentVariant.child}`;
-
-                      const normalizedKey = key.replace(/['"]/g, "").trim();
-                      const img = variantImages[normalizedKey]?.[0];
-
-                      return img ? (
-                        <div className="relative w-28 h-28">
-                          <img
-                            src={img.preview}
-                            className="w-full h-full object-cover rounded border"
-                            alt="variant"
-                          />
-
-                          {img.loading && (
-                            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                              <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin" />
-                            </div>
-                          )}
-
-                          <button
-                            onClick={() =>
-                              handleRemoveVariantImage(normalizedKey)
-                            }
-                            className="absolute -top-2 -right-2 bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-400 italic">
-                          No image assigned
-                        </p>
-                      );
-                    })()}
-                  </div>
-
-                  {/* PRODUCT MEDIA */}
-                  <div className="mt-8 bg-white border rounded-lg p-5">
-                    <h3 className="text-sm font-semibold mb-3 text-gray-700">
-                      Product Media Images
-                    </h3>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {selectedImages.map((img) => {
-                        const imageUrl = img.cloudUrl || img.localUrl;
-
-                        return (
-                          <div
-                            key={imageUrl}
-                            className="border rounded-lg p-2 cursor-pointer hover:border-blue-500"
-                            onClick={() => {
-                              const parent =
-                                combinations[currentVariant.index]?.parent;
-
-                              const key =
-                                options.length === 1
-                                  ? currentVariant.child
-                                  : `${parent} / ${currentVariant.child}`;
-
-                              const normalizedKey = key
-                                .replace(/['"]/g, "")
-                                .trim();
-
-                              // 🔒 HARD REPLACE
-                              setVariantImages((prev) => ({
-                                ...prev,
-                                [normalizedKey]: [
-                                  {
-                                    preview: imageUrl,
-                                    alt: normalizedKey
-                                      .replace(/\s*\/\s*/g, "-")
-                                      .toLowerCase(),
-                                    loading: false,
-                                  },
-                                ],
-                              }));
-
-                              setIsChanged(true);
-                            }}
-                          >
-                            <img
-                              src={imageUrl}
-                              className="w-full h-28 object-cover rounded-md"
-                              alt="media"
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <p className="text-sm text-gray-400 italic">
+                No images assigned
+              </p>
+            );
+          })()}
+        </div>
+
+        {/* PRODUCT MEDIA */}
+        <div className="mt-8 bg-white border rounded-lg p-5">
+          <h3 className="text-sm font-semibold mb-3 text-gray-700">
+            Product Media Images
+          </h3>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {selectedImages.map((img) => {
+              const imageUrl = img.cloudUrl || img.localUrl;
+
+              return (
+                <div
+                  key={imageUrl}
+                  className="border rounded-lg p-2 cursor-pointer hover:border-blue-500"
+                  onClick={() => {
+                    const parent =
+                      combinations[currentVariant.index]?.parent;
+
+                    const key =
+                      options.length === 1
+                        ? currentVariant.child
+                        : `${parent} / ${currentVariant.child}`;
+
+                    const normalizedKey = key.replace(/['"]/g, "").trim();
+
+                    // ✅ APPEND image
+                    setVariantImages((prev) => ({
+                      ...prev,
+                      [normalizedKey]: [
+                        ...(prev[normalizedKey] || []),
+                        {
+                          preview: imageUrl,
+                          alt: normalizedKey
+                            .replace(/\s*\/\s*/g, "-")
+                            .toLowerCase(),
+                          loading: false,
+                        },
+                      ],
+                    }));
+
+                    setIsChanged(true);
+                  }}
+                >
+                  <img
+                    src={imageUrl}
+                    className="w-full h-28 object-cover rounded-md"
+                    alt="media"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+)}
+
 
           {isMediaModalVisible && (
             <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-2 sm:px-4">
@@ -4918,169 +4770,164 @@ if (product.variantImages?.length) {
             </div>
           )}
           {showBulkUploadModal && (
-            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-              <div className="bg-white w-[960px] max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden">
-                {/* HEADER */}
-                <div className="flex items-center justify-between px-6 py-4 border-b">
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    Bulk Variant Image Upload
-                  </h2>
-                  <button
-                    onClick={() => setShowBulkUploadModal(false)}
-                    className="text-gray-500 hover:text-gray-800 text-xl"
+  <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+    <div className="bg-white w-[960px] max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden">
+
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-6 py-4 border-b">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Bulk Variant Image Upload
+        </h2>
+        <button
+          onClick={() => setShowBulkUploadModal(false)}
+          className="text-gray-500 hover:text-gray-800 text-xl"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="flex h-[70vh]">
+
+        {/* LEFT — VARIANTS */}
+        <div className="w-1/2 border-r overflow-y-auto p-6">
+          <h3 className="text-sm font-semibold text-gray-700 mb-4">
+            Select Variants
+          </h3>
+
+          {combinations.map((combo, i) => (
+            <div key={i} className="mb-4">
+              <p className="text-sm font-medium text-gray-800 mb-2">
+                {combo.parent}
+              </p>
+
+              {combo.children.map((child, j) => {
+                const key = getVariantKey(combo.parent, child);
+                const imageCount = variantImages[key]?.length || 0;
+                const imagePreview = variantImages[key]?.[0]?.preview;
+
+                return (
+                  <label
+                    key={j}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
                   >
-                    ×
-                  </button>
-                </div>
+                    <input
+                      type="checkbox"
+                      checked={selectedBulkVariants.includes(key)}
+                      onChange={() => toggleBulkVariant(key)}
+                      className="accent-blue-600"
+                    />
 
-                <div className="flex h-[70vh]">
-                  {/* LEFT — VARIANTS */}
-                  <div className="w-1/2 border-r overflow-y-auto p-6">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-4">
-                      Select Variants
-                    </h3>
+                   <div className="w-10 h-10 rounded-md border overflow-hidden bg-gray-50 flex items-center justify-center relative">
+  {imagePreview ? (
+    <>
+      <img
+        src={imagePreview}
+        alt={key}
+        className={`w-full h-full object-cover ${
+          variantImages[key]?.some((img) => img.loading)
+            ? "opacity-60"
+            : ""
+        }`}
+      />
 
-                    {combinations.map((combo, i) => (
-                      <div key={i} className="mb-4">
-                        <p className="text-sm font-medium text-gray-800 mb-2">
-                          {combo.parent}
-                        </p>
+      {/* 🔄 LOADER */}
+      {variantImages[key]?.some((img) => img.loading) && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/60">
+          <div className="w-4 h-4 border-2 border-blue-500 border-dashed rounded-full animate-spin" />
+        </div>
+      )}
 
-                        {combo.children.map((child, j) => {
-                          const key = getVariantKey(combo.parent, child);
-                          const image = variantImages[key]?.[0]?.preview;
+      {imageCount > 1 && (
+        <span className="absolute bottom-0 right-0 bg-black/70 text-white text-[10px] px-1 rounded">
+          +{imageCount - 1}
+        </span>
+      )}
+    </>
+  ) : (
+    <span className="text-xs text-gray-400">No Image</span>
+  )}
+</div>
 
-                          return (
-                            <label
-                              key={j}
-                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selectedBulkVariants.includes(key)}
-                                onChange={() => toggleBulkVariant(key)}
-                                className="accent-blue-600"
-                              />
 
-                              <div className="w-10 h-10 rounded-md border overflow-hidden bg-gray-50 flex items-center justify-center">
-                                {image ? (
-                                  <img
-                                    src={image}
-                                    alt={key}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <span className="text-xs text-gray-400">
-                                    No Image
-                                  </span>
-                                )}
-                              </div>
+                    <span className="text-sm text-gray-700">{key}</span>
+                  </label>
+                );
+              })}
+            </div>
+          ))}
+        </div>
 
-                              <span className="text-sm text-gray-700">
-                                {key}
-                              </span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    ))}
-                  </div>
+        {/* RIGHT — UPLOAD + MEDIA */}
+        <div className="w-1/2 p-6 flex flex-col overflow-y-auto">
+          <h3 className="text-sm font-semibold text-gray-700 mb-4">
+            Upload Images
+          </h3>
 
-                  {/* RIGHT — UPLOAD + MEDIA */}
-                  <div className="w-1/2 p-6 flex flex-col overflow-y-auto">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-4">
-                      Upload Image
-                    </h3>
+          {/* UPLOAD */}
+          <label className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer hover:border-blue-500 transition h-48">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleBulkImageUpload}
+              className="hidden"
+            />
 
-                    {/* UPLOAD */}
-                    <label className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer hover:border-blue-500 transition h-48">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleBulkImageUpload}
-                        className="hidden"
-                      />
+            <span className="text-3xl text-gray-400">+</span>
+            <p className="text-sm text-gray-600 mt-2">
+              Upload images (applied to selected variants)
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              JPG, PNG supported
+            </p>
+          </label>
 
-                      {bulkUploadedImage ? (
-                        <img
-                          src={bulkUploadedImage}
-                          alt="Preview"
-                          className="w-40 h-40 object-cover rounded-lg shadow"
-                        />
-                      ) : (
-                        <>
-                          <span className="text-3xl text-gray-400">+</span>
-                          <p className="text-sm text-gray-600 mt-2">
-                            Click to upload image
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            JPG, PNG supported
-                          </p>
-                        </>
-                      )}
-                    </label>
+          {/* PRODUCT MEDIA */}
+          <div className="mt-8">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">
+              Product Media Images
+            </h4>
 
-                    {/* APPLY UPLOADED IMAGE */}
-                    {bulkUploadedImage && (
-                      <button
-                        onClick={() =>
-                          assignImageToSelectedVariants(bulkUploadedImage)
-                        }
-                        disabled={selectedBulkVariants.length === 0}
-                        className={`mt-4 px-4 py-2 rounded-lg text-sm text-white ${
-                          selectedBulkVariants.length > 0
-                            ? "bg-blue-600 hover:bg-blue-700"
-                            : "bg-gray-300 cursor-not-allowed"
-                        }`}
-                      >
-                        Apply Uploaded Image
-                      </button>
-                    )}
+            <div className="grid grid-cols-3 gap-4">
+              {selectedImages.map((img) => {
+                const imageUrl = img.cloudUrl || img.localUrl;
 
-                    {/* PRODUCT MEDIA */}
-                    <div className="mt-8">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                        Product Media Images
-                      </h4>
-
-                      <div className="grid grid-cols-3 gap-4">
-                        {selectedImages.map((img) => {
-                          const imageUrl = img.cloudUrl || img.localUrl;
-
-                          return (
-                            <div
-                              key={imageUrl}
-                              onClick={() =>
-                                assignImageToSelectedVariants(imageUrl)
-                              }
-                              className={`border rounded-lg p-2 transition
+                return (
+                  <div
+                    key={imageUrl}
+                    onClick={() =>
+                      selectedBulkVariants.length > 0 &&
+                      assignImageToSelectedVariants(imageUrl)
+                    }
+                    className={`border rounded-lg p-2 transition
                       ${
                         selectedBulkVariants.length === 0
                           ? "opacity-50 cursor-not-allowed"
                           : "cursor-pointer hover:border-blue-500"
                       }`}
-                            >
-                              <img
-                                src={imageUrl}
-                                className="w-full h-28 object-cover rounded-md"
-                                alt="media"
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {selectedBulkVariants.length === 0 && (
-                        <p className="text-xs text-gray-400 mt-2 italic">
-                          Select variants first to assign images
-                        </p>
-                      )}
-                    </div>
+                  >
+                    <img
+                      src={imageUrl}
+                      className="w-full h-28 object-cover rounded-md"
+                      alt="media"
+                    />
                   </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
-          )}
+
+            {selectedBulkVariants.length === 0 && (
+              <p className="text-xs text-gray-400 mt-2 italic">
+                Select variants first to assign images
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
         </div>
       </div>
     </main>

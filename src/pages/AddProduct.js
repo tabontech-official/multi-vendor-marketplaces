@@ -5115,11 +5115,48 @@ import { FiInfo } from "react-icons/fi";
 
 const CategorySelector = () => {
   const { id } = useParams();
+  const slides = [
+    {
+      title: "Uploading your product",
+      desc: "We’re getting everything ready for your store.",
+    },
+    {
+      title: "Saving product information",
+      desc: "Title, description, vendor, and product structure are being processed.",
+    },
+    {
+      title: "Configuring variants",
+      desc: "Sizes, colors, options, and availability are being set up.",
+    },
+    {
+      title: "Applying pricing & inventory",
+      desc: "Prices, compare-at values, and stock levels are being assigned.",
+    },
+    {
+      title: "Organizing your product",
+      desc: "Tags, collections, and categories are being applied.",
+    },
+    {
+      title: "Finalizing product setup",
+      desc: "Making sure everything is correctly linked and ready to go.",
+    },
+    {
+      title: "Almost there!",
+      desc: "Just a few final checks before completion.",
+    },
+    {
+      title: "Product uploaded successfully 🎉",
+      desc: "Your product is now available in your store.",
+    },
+  ];
+
   const { addNotification } = useNotification();
   const [variantImageModal, setVariantImageModal] = useState({
     open: false,
     variantKey: null,
   });
+  const [slideIndex, setSlideIndex] = useState(0);
+  const LAST_SLIDE_INDEX = slides.length - 1;
 
   const isEditing = Boolean(id);
   const [bulkUploading, setBulkUploading] = useState(false);
@@ -5498,6 +5535,15 @@ const CategorySelector = () => {
     EditorState.createEmpty(),
   );
   const [selectedShippingPlan, setSelectedShippingPlan] = useState("");
+  useEffect(() => {
+    if (!loading) return;
+
+    const interval = setInterval(() => {
+      setSlideIndex((prev) => (prev < LAST_SLIDE_INDEX ? prev + 1 : prev));
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [loading]);
 
   useEffect(() => {
     const fetchVendor = async () => {
@@ -6118,14 +6164,17 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
+      fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
         },
-      })
+      )
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data);
@@ -6507,19 +6556,22 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
+          await fetch(
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId,
+                images: [data.secure_url],
+              }),
             },
-            body: JSON.stringify({
-              userId,
-              images: [data.secure_url],
-            }),
-          });
+          );
 
           setVariantImages((prev) => ({
             ...prev,
@@ -6592,16 +6644,19 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
+            await fetch(
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "x-api-key": apiKey,
+                  "x-api-secret": apiSecretKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, images: [data.secure_url] }),
               },
-              body: JSON.stringify({ userId, images: [data.secure_url] }),
-            });
+            );
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -6751,79 +6806,77 @@ const CategorySelector = () => {
   //   }
   // };
 
-const uploadImagesInBackground = async ({
-  productId,
-  apiKey,
-  apiSecretKey,
-  mediaImageUrls,
-  uploadedVariantImages,
-  groupImages,
-  addNotification,
-  productTitle,
-}) => {
-  try {
-    addNotification(
-      `Image upload started for "${productTitle}"`,
-      "/manage-product",
-    );
+  const uploadImagesInBackground = async ({
+    productId,
+    apiKey,
+    apiSecretKey,
+    mediaImageUrls,
+    uploadedVariantImages,
+    groupImages,
+    addNotification,
+    productTitle,
+  }) => {
+    try {
+      addNotification(
+        `Image upload started for "${productTitle}"`,
+        "/manage-product",
+      );
 
-    const res = await fetch(
-      `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
-      {
-        method: "PUT",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
+        {
+          method: "PUT",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            images: mediaImageUrls,
+            variantImages: uploadedVariantImages,
+            groupImages,
+          }),
         },
-        body: JSON.stringify({
-          images: mediaImageUrls,
-          variantImages: uploadedVariantImages,
-          groupImages,
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data?.errors?.image?.[0] || data?.error || "Invalid image URLs",
+        );
+      }
+
+      addNotification(
+        `Images uploaded successfully for "${productTitle}"`,
+        "/manage-product",
+      );
+    } catch (err) {
+      console.error("❌ Background image upload failed", err);
+
+      sessionStorage.setItem(
+        "imageUploadError",
+        JSON.stringify({
+          message: err.message || "Images upload failed due to invalid URLs",
+          productTitle,
+          productId,
         }),
-      },
-    );
+      );
 
-    const data = await res.json();
+      addNotification(
+        `Image upload failed for "${productTitle}"`,
+        "/manage-product",
+      );
+    } finally {
+      sessionStorage.removeItem("imageUploadInProgress");
 
-    if (!res.ok) {
-      throw new Error(
-        data?.errors?.image?.[0] || data?.error || "Invalid image URLs",
+      window.dispatchEvent(
+        new CustomEvent("image-upload-finished", {
+          detail: { productId },
+        }),
       );
     }
-
-    addNotification(
-      `Images uploaded successfully for "${productTitle}"`,
-      "/manage-product",
-    );
-  } catch (err) {
-    console.error("❌ Background image upload failed", err);
-
-    sessionStorage.setItem(
-      "imageUploadError",
-      JSON.stringify({
-        message: err.message || "Images upload failed due to invalid URLs",
-        productTitle,
-        productId,
-      }),
-    );
-
-    addNotification(
-      `Image upload failed for "${productTitle}"`,
-      "/manage-product",
-    );
-  } finally {
-  sessionStorage.removeItem("imageUploadInProgress");
-
-  window.dispatchEvent(
-    new CustomEvent("image-upload-finished", {
-      detail: { productId },
-    })
-  );
-}
-
-};
-
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -6961,15 +7014,17 @@ const uploadImagesInBackground = async ({
           ? "Product updated successfully!"
           : "Product created successfully!",
       });
-sessionStorage.setItem(
-  "imageUploadInProgress",
-  JSON.stringify({
-    productId,
-    productTitle: title,
-    status: "uploading",
-    time: Date.now(),
-  })
-);
+      setSlideIndex(LAST_SLIDE_INDEX);
+
+      sessionStorage.setItem(
+        "imageUploadInProgress",
+        JSON.stringify({
+          productId,
+          productTitle: title,
+          status: "uploading",
+          time: Date.now(),
+        }),
+      );
       navigate("/manage-product");
 
       uploadImagesInBackground({
@@ -9167,13 +9222,43 @@ sessionStorage.setItem(
               )}
             </div>
 
-            {loading && (
+            {/* {loading && (
               <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60">
                 <div className="w-14 h-14 border-4 border-white border-t-transparent rounded-full animate-spin" />
 
                 <p className="mt-5 text-white text-sm font-medium tracking-wide">
                   please wait  while we {isEditing ? "update": "create"} your product...
                 </p>
+              </div>
+            )} */}
+            {loading && (
+              <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60 text-center px-4">
+                <div className="w-14 h-14 border-4 border-white border-t-transparent rounded-full animate-spin mb-6" />
+
+                <p className="text-white text-sm font-medium tracking-wide opacity-80 mb-2">
+                  Please wait while we {isEditing ? "update" : "create"} your
+                  product...
+                </p>
+
+                <h2 className="text-white text-lg font-semibold transition-all duration-500">
+                  {slides[slideIndex].title}
+                </h2>
+
+                <p className="text-white text-sm mt-1 opacity-90 transition-all duration-500 max-w-md">
+                  {slides[slideIndex].desc}
+                </p>
+
+                {/* Dots */}
+                <div className="flex gap-2 mt-4">
+                  {slides.map((_, i) => (
+                    <span
+                      key={i}
+                      className={`h-2 w-2 rounded-full ${
+                        i === slideIndex ? "bg-white" : "bg-white/40"
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             )}
 

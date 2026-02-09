@@ -274,23 +274,45 @@ const Dashboard = () => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
+  const [imageUploadStatus, setImageUploadStatus] = useState(null);
+
+useEffect(() => {
+  const data = sessionStorage.getItem("imageUploadInProgress");
+  if (data) {
+    setImageUploadStatus(JSON.parse(data));
+  }
+}, []);
+useEffect(() => {
+  const syncUploadStatus = () => {
+    const data = sessionStorage.getItem("imageUploadInProgress");
+    setImageUploadStatus(data ? JSON.parse(data) : null);
+  };
+
+  syncUploadStatus();
+
+  const handleUploadFinished = (event) => {
+    setImageUploadStatus(null);
+
+    showToast("success", "Images uploaded successfully");
+
+  };
+
+  window.addEventListener("image-upload-finished", handleUploadFinished);
+
+  return () => {
+    window.removeEventListener(
+      "image-upload-finished",
+      handleUploadFinished
+    );
+  };
+}, []);
+
+
   const [userRole, setUserRole] = useState(null);
   const [totalProducts, setTotalProducts] = useState(0);
   const totalPages = Math.ceil(totalProducts / limit);
- useEffect(() => {
-  const uploadData = sessionStorage.getItem("imageUploadInProgress");
 
-  if (uploadData) {
-    const { productTitle } = JSON.parse(uploadData);
 
-    showToast(
-      "success",
-      `Images for "${productTitle}" are being uploaded in the background. You can continue managing your products!`
-    );
-
-    sessionStorage.removeItem("imageUploadInProgress");
-  }
-}, []);
 
 
   useEffect(() => {
@@ -1347,7 +1369,7 @@ const Dashboard = () => {
                         </td>
                       )}
 
-                      <td className="p-3 whitespace-nowrap">
+                      {/* <td className="p-3 whitespace-nowrap">
                         <button
                           className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition"
                           onClick={() => OnEdit(product)}
@@ -1355,7 +1377,43 @@ const Dashboard = () => {
                           <MdEdit className="mr-1" />
                           Edit
                         </button>
-                      </td>
+                      </td> */}
+                      <td className="p-3 whitespace-nowrap">
+  {imageUploadStatus?.productId === product.id ? (
+    <div className="flex items-center gap-2 text-sm text-gray-500">
+      <svg
+        className="animate-spin h-4 w-4 text-blue-500"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        />
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+        />
+      </svg>
+      <span>Images uploading…</span>
+    </div>
+  ) : (
+    <button
+      className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition"
+      onClick={() => OnEdit(product)}
+    >
+      <MdEdit className="mr-1" />
+      Edit
+    </button>
+  )}
+</td>
+
                     </tr>
                   ))
                 ) : (

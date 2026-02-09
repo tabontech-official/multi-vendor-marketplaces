@@ -6685,69 +6685,145 @@ const CategorySelector = () => {
     return url.startsWith("http://") || url.startsWith("https://");
   };
 
-  const uploadImagesInBackground = async ({
-    productId,
-    apiKey,
-    apiSecretKey,
-    mediaImageUrls,
-    uploadedVariantImages,
-    groupImages,
-    addNotification,
-    productTitle,
-  }) => {
-    try {
-      addNotification(
-        `Image upload started for "${productTitle}"`,
-        "/manage-product",
-      );
+  // const uploadImagesInBackground = async ({
+  //   productId,
+  //   apiKey,
+  //   apiSecretKey,
+  //   mediaImageUrls,
+  //   uploadedVariantImages,
+  //   groupImages,
+  //   addNotification,
+  //   productTitle,
+  // }) => {
+  //   try {
+  //     addNotification(
+  //       `Image upload started for "${productTitle}"`,
+  //       "/manage-product",
+  //     );
 
-      const res = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
-        {
-          method: "PUT",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            images: mediaImageUrls,
-            variantImages: uploadedVariantImages,
-            groupImages,
-          }),
+  //     const res = await fetch(
+  //       `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
+  //       {
+  //         method: "PUT",
+  //         headers: {
+  //           "x-api-key": apiKey,
+  //           "x-api-secret": apiSecretKey,
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           images: mediaImageUrls,
+  //           variantImages: uploadedVariantImages,
+  //           groupImages,
+  //         }),
+  //       },
+  //     );
+
+  //     const data = await res.json();
+
+  //     if (!res.ok) {
+  //       throw new Error(
+  //         data?.errors?.image?.[0] || data?.error || "Invalid image URLs",
+  //       );
+  //     }
+
+  //     addNotification(
+  //       `Images uploaded successfully for "${productTitle}"`,
+  //       "/manage-product",
+  //     );
+  //     sessionStorage.removeItem("imageUploadInProgress");
+
+  //   } catch (err) {
+  //     console.error("❌ Background image upload failed", err);
+
+  //     // 🔴 SAVE ERROR FOR MANAGE PRODUCT PAGE
+  //     sessionStorage.setItem(
+  //       "imageUploadError",
+  //       JSON.stringify({
+  //         message: err.message || "Images upload failed due to invalid URLs",
+  //         productTitle,
+  //       }),
+  //     );
+
+  //     addNotification(
+  //       `Image upload failed for "${productTitle}"`,
+  //       "/manage-product",
+  //     );
+  //   }
+  // };
+
+const uploadImagesInBackground = async ({
+  productId,
+  apiKey,
+  apiSecretKey,
+  mediaImageUrls,
+  uploadedVariantImages,
+  groupImages,
+  addNotification,
+  productTitle,
+}) => {
+  try {
+    addNotification(
+      `Image upload started for "${productTitle}"`,
+      "/manage-product",
+    );
+
+    const res = await fetch(
+      `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
+      {
+        method: "PUT",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
         },
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(
-          data?.errors?.image?.[0] || data?.error || "Invalid image URLs",
-        );
-      }
-
-      addNotification(
-        `Images uploaded successfully for "${productTitle}"`,
-        "/manage-product",
-      );
-    } catch (err) {
-      console.error("❌ Background image upload failed", err);
-
-      // 🔴 SAVE ERROR FOR MANAGE PRODUCT PAGE
-      sessionStorage.setItem(
-        "imageUploadError",
-        JSON.stringify({
-          message: err.message || "Images upload failed due to invalid URLs",
-          productTitle,
+        body: JSON.stringify({
+          images: mediaImageUrls,
+          variantImages: uploadedVariantImages,
+          groupImages,
         }),
-      );
+      },
+    );
 
-      addNotification(
-        `Image upload failed for "${productTitle}"`,
-        "/manage-product",
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        data?.errors?.image?.[0] || data?.error || "Invalid image URLs",
       );
     }
-  };
+
+    addNotification(
+      `Images uploaded successfully for "${productTitle}"`,
+      "/manage-product",
+    );
+  } catch (err) {
+    console.error("❌ Background image upload failed", err);
+
+    sessionStorage.setItem(
+      "imageUploadError",
+      JSON.stringify({
+        message: err.message || "Images upload failed due to invalid URLs",
+        productTitle,
+        productId,
+      }),
+    );
+
+    addNotification(
+      `Image upload failed for "${productTitle}"`,
+      "/manage-product",
+    );
+  } finally {
+  sessionStorage.removeItem("imageUploadInProgress");
+
+  window.dispatchEvent(
+    new CustomEvent("image-upload-finished", {
+      detail: { productId },
+    })
+  );
+}
+
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -6888,7 +6964,9 @@ const CategorySelector = () => {
 sessionStorage.setItem(
   "imageUploadInProgress",
   JSON.stringify({
+    productId,
     productTitle: title,
+    status: "uploading",
     time: Date.now(),
   })
 );

@@ -5089,7 +5089,7 @@
 
 // export default CategorySelector;
 import React, { useState, useEffect, useRef } from "react";
-import { FaTrash, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaTrash, FaChevronDown, FaChevronUp, FaInfo } from "react-icons/fa";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import "react-quill/dist/quill.snow.css";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
@@ -5111,6 +5111,7 @@ import {
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 import { jwtDecode } from "jwt-decode";
 import { useNotification } from "../context api/NotificationContext";
+import { FiInfo } from "react-icons/fi";
 
 const CategorySelector = () => {
   const { id } = useParams();
@@ -5424,6 +5425,7 @@ const CategorySelector = () => {
 
   const locationData = useLocation();
   const { product } = locationData.state || {};
+  // console.log("product data",product)
   const [editing, setEditing] = useState(false);
   const [mongooseProductId, setMongooseProductId] = useState();
   const [title, setTitle] = useState("");
@@ -5436,6 +5438,7 @@ const CategorySelector = () => {
   const [isChanged, setIsChanged] = useState(false);
   const [popupMode, setPopupMode] = useState("variant");
   const [isMediaModalVisible, setIsMediaModalVisible] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState(null);
 
   const [vendor, setVendor] = useState([]);
   const [keyWord, setKeyWord] = useState([]);
@@ -6144,7 +6147,6 @@ const CategorySelector = () => {
 
   useEffect(() => {
     if (product) {
-      
       const normalizeString = (str) => String(str).replace(/['"]/g, "").trim();
 
       const allVariants = product.variants;
@@ -6430,23 +6432,23 @@ const CategorySelector = () => {
       }
     }
   }, [product]);
-useEffect(() => {
-  if (selectedImages.length === 0) {
-    const firstVariantImage = Object.values(variantImages || {})
-      .flat()
-      .find((img) => img?.preview || img?.src);
+  useEffect(() => {
+    if (selectedImages.length === 0) {
+      const firstVariantImage = Object.values(variantImages || {})
+        .flat()
+        .find((img) => img?.preview || img?.src);
 
-    if (firstVariantImage) {
-      setSelectedImages([
-        {
-          cloudUrl: firstVariantImage.preview || firstVariantImage.src,
-          loading: false,
-          fromVariant: true, 
-        },
-      ]);
+      if (firstVariantImage) {
+        setSelectedImages([
+          {
+            cloudUrl: firstVariantImage.preview || firstVariantImage.src,
+            loading: false,
+            fromVariant: true,
+          },
+        ]);
+      }
     }
-  }
-}, [variantImages, selectedImages.length]);
+  }, [variantImages, selectedImages.length]);
 
   const handleImageChange = async (event) => {
     const apiKey = localStorage.getItem("apiKey");
@@ -6673,84 +6675,79 @@ useEffect(() => {
   // };
 
   const isValidImageUrl = (url) => {
-  if (!url || typeof url !== "string") return false;
+    if (!url || typeof url !== "string") return false;
 
-  // ❌ reject blob & base64
-  if (url.startsWith("blob:")) return false;
-  if (url.startsWith("data:")) return false;
+    // ❌ reject blob & base64
+    if (url.startsWith("blob:")) return false;
+    if (url.startsWith("data:")) return false;
 
-  // ✅ allow only http(s)
-  return url.startsWith("http://") || url.startsWith("https://");
-};
+    // ✅ allow only http(s)
+    return url.startsWith("http://") || url.startsWith("https://");
+  };
 
-const uploadImagesInBackground = async ({
-  productId,
-  apiKey,
-  apiSecretKey,
-  mediaImageUrls,
-  uploadedVariantImages,
-  groupImages,
-  addNotification,
-  productTitle,
-}) => {
-  try {
-    addNotification(
-      `Image upload started for "${productTitle}"`,
-      "/manage-product"
-    );
+  const uploadImagesInBackground = async ({
+    productId,
+    apiKey,
+    apiSecretKey,
+    mediaImageUrls,
+    uploadedVariantImages,
+    groupImages,
+    addNotification,
+    productTitle,
+  }) => {
+    try {
+      addNotification(
+        `Image upload started for "${productTitle}"`,
+        "/manage-product",
+      );
 
-    const res = await fetch(
-      `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
-      {
-        method: "PUT",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
+        {
+          method: "PUT",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            images: mediaImageUrls,
+            variantImages: uploadedVariantImages,
+            groupImages,
+          }),
         },
-        body: JSON.stringify({
-          images: mediaImageUrls,
-          variantImages: uploadedVariantImages,
-          groupImages,
-        }),
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data?.errors?.image?.[0] || data?.error || "Invalid image URLs",
+        );
       }
-    );
 
-    const data = await res.json();
+      addNotification(
+        `Images uploaded successfully for "${productTitle}"`,
+        "/manage-product",
+      );
+    } catch (err) {
+      console.error("❌ Background image upload failed", err);
 
-    if (!res.ok) {
-      throw new Error(
-        data?.errors?.image?.[0] ||
-        data?.error ||
-        "Invalid image URLs"
+      // 🔴 SAVE ERROR FOR MANAGE PRODUCT PAGE
+      sessionStorage.setItem(
+        "imageUploadError",
+        JSON.stringify({
+          message: err.message || "Images upload failed due to invalid URLs",
+          productTitle,
+        }),
+      );
+
+      addNotification(
+        `Image upload failed for "${productTitle}"`,
+        "/manage-product",
       );
     }
-
-    addNotification(
-      `Images uploaded successfully for "${productTitle}"`,
-      "/manage-product"
-    );
-  } catch (err) {
-    console.error("❌ Background image upload failed", err);
-
-    // 🔴 SAVE ERROR FOR MANAGE PRODUCT PAGE
-    sessionStorage.setItem(
-      "imageUploadError",
-      JSON.stringify({
-        message:
-          err.message ||
-          "Images upload failed due to invalid URLs",
-        productTitle,
-      })
-    );
-
-    addNotification(
-      `Image upload failed for "${productTitle}"`,
-      "/manage-product"
-    );
-  }
-};
-
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -6852,9 +6849,9 @@ const uploadImagesInBackground = async ({
       // const mediaImageUrls = selectedImages
       //   .map((img) => img.cloudUrl || img.localUrl)
       //   .filter(Boolean);
-const mediaImageUrls = selectedImages
-  .map((img) => img.cloudUrl || img.localUrl)
-  .filter(isValidImageUrl);
+      const mediaImageUrls = selectedImages
+        .map((img) => img.cloudUrl || img.localUrl)
+        .filter(isValidImageUrl);
 
       const variantImageMap = {};
 
@@ -7475,6 +7472,7 @@ const mediaImageUrls = selectedImages
     navigate("/manage-product");
   };
   const [groupImages, setGroupImages] = useState(false);
+  const [showGroupInfoModal, setShowGroupInfoModal] = useState(false);
 
   return (
     <main className="bg-gray-100 p-6">
@@ -7547,7 +7545,7 @@ const mediaImageUrls = selectedImages
                   Media
                 </label>
 
-                <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+                <label className="flex items-center gap-2 text-sm text-gray-600 select-none">
                   <input
                     type="checkbox"
                     checked={groupImages}
@@ -7557,7 +7555,30 @@ const mediaImageUrls = selectedImages
                     }}
                     className="w-4 h-4 accent-blue-600 cursor-pointer"
                   />
-                  Group images
+
+                  <span className="cursor-pointer">Group Variant images</span>
+
+                  <div className="relative group">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowGroupInfoModal(true);
+                      }}
+                      className="text-gray-400 hover:text-blue-600 transition"
+                    >
+                      <FaInfo size={16} />
+                    </button>
+
+                    {/* TOOLTIP */}
+                    <div
+                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+                  hidden group-hover:block whitespace-nowrap
+                  bg-black text-white text-xs px-2 py-1 rounded shadow-lg"
+                    >
+                      What does this do?
+                    </div>
+                  </div>
                 </label>
               </div>
 
@@ -10115,7 +10136,32 @@ const mediaImageUrls = selectedImages
                     (img, index) => (
                       <div
                         key={index}
-                        className="relative border rounded-lg overflow-hidden group"
+                        draggable
+                        onDragStart={() => setDraggedIndex(index)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => {
+                          if (draggedIndex === null || draggedIndex === index)
+                            return;
+
+                          setVariantImages((prev) => {
+                            const updated = { ...prev };
+                            const images = [
+                              ...updated[variantImageModal.variantKey],
+                            ];
+
+                            const [moved] = images.splice(draggedIndex, 1);
+                            images.splice(index, 0, moved);
+
+                            updated[variantImageModal.variantKey] = images;
+                            return updated;
+                          });
+
+                          setDraggedIndex(null);
+                          setIsChanged(true);
+                        }}
+                        className={`relative border rounded-lg overflow-hidden group cursor-move transition
+              ${draggedIndex === index ? "ring-2 ring-blue-500 opacity-70" : ""}
+            `}
                       >
                         <img
                           src={img.preview || img.src}
@@ -10124,6 +10170,13 @@ const mediaImageUrls = selectedImages
                             img.loading ? "opacity-60" : ""
                           }`}
                         />
+
+                        {/* FEATURED BADGE (first image) */}
+                        {index === 0 && !img.loading && (
+                          <span className="absolute bottom-1 left-1 bg-black/80 text-white text-[10px] px-1.5 py-0.5 rounded">
+                            Primary
+                          </span>
+                        )}
 
                         {/* LOADER */}
                         {img.loading && (
@@ -10138,6 +10191,7 @@ const mediaImageUrls = selectedImages
                             onClick={() => {
                               setVariantImages((prev) => {
                                 const updated = { ...prev };
+
                                 updated[variantImageModal.variantKey] = updated[
                                   variantImageModal.variantKey
                                 ].filter((_, i) => i !== index);
@@ -10165,6 +10219,69 @@ const mediaImageUrls = selectedImages
                       </div>
                     ),
                   )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showGroupInfoModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              {/* Darker, blurred backdrop for focus */}
+              <div
+                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-fadeIn"
+                onClick={() => setShowGroupInfoModal(false)}
+              />
+
+              {/* Modal Card */}
+              <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all animate-scaleIn ring-1 ring-black/5">
+                {/* Top Decorative Gradient Bar */}
+                <div className="h-2 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+
+                <div className="p-8">
+                  {/* Visual Icon */}
+                  <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-5">
+                    <svg
+                      className="w-6 h-6 text-indigo-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+
+                  <h2 className="text-xl font-bold text-slate-900 mb-2 tracking-tight">
+                    Group Variant Images
+                  </h2>
+
+                  <p className="text-slate-500 text-[15px] leading-relaxed">
+                    Streamline your gallery. By enabling this, only
+                    <span className="mx-1 font-semibold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md">
+                      variant images
+                    </span>
+                    will be visible to customers in the marketplace.
+                  </p>
+
+                  <div className="mt-8">
+                    <button
+                      onClick={() => setShowGroupInfoModal(false)}
+                      className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-indigo-100 active:scale-[0.98]"
+                    >
+                      Understood
+                    </button>
+
+                    <button
+                      onClick={() => setShowGroupInfoModal(false)}
+                      className="w-full mt-3 py-2 text-sm font-medium text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

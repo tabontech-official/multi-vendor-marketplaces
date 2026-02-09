@@ -277,25 +277,21 @@ const Dashboard = () => {
   const [userRole, setUserRole] = useState(null);
   const [totalProducts, setTotalProducts] = useState(0);
   const totalPages = Math.ceil(totalProducts / limit);
-  useEffect(() => {
-    const errorData = sessionStorage.getItem("imageUploadError");
+ useEffect(() => {
+  const uploadData = sessionStorage.getItem("imageUploadInProgress");
 
-    if (errorData) {
-      const { message, productTitle } = JSON.parse(errorData);
+  if (uploadData) {
+    const { productTitle } = JSON.parse(uploadData);
 
-      // showToast(
-      //   "Failed",
-      //   `Image upload failed for "${productTitle}": ${message}`,
-      //   {
-      //     position: "top-right",
-      //     autoClose: 6000,
-      //   }
-      // );
+    showToast(
+      "success",
+      `Images for "${productTitle}" are being uploaded in the background. You can continue managing your products!`
+    );
 
-      // 🔥 clear after showing
-      sessionStorage.removeItem("imageUploadError");
-    }
-  }, []);
+    sessionStorage.removeItem("imageUploadInProgress");
+  }
+}, []);
+
 
   useEffect(() => {
     const token = localStorage.getItem("usertoken");

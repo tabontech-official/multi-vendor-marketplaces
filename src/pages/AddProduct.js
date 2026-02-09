@@ -6885,7 +6885,13 @@ const CategorySelector = () => {
           ? "Product updated successfully!"
           : "Product created successfully!",
       });
-
+sessionStorage.setItem(
+  "imageUploadInProgress",
+  JSON.stringify({
+    productTitle: title,
+    time: Date.now(),
+  })
+);
       navigate("/manage-product");
 
       uploadImagesInBackground({

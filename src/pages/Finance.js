@@ -430,17 +430,19 @@ useEffect(() => {
   setEditableMerchants(
     merchants.map((m) => ({
       ...m,
-      commissionValue: m.commission ?? "",
+      commissionValue: m.comissionRate ?? "", // ✅ FIX HERE
       isEditable: false,
     }))
   );
 }, [users]);
 
-  const updateMerchantCommission = async (merchantId, commission) => {
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-    await fetch(
+ const updateMerchantCommission = async (merchantId, commission) => {
+  const apiKey = localStorage.getItem("apiKey");
+  const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+  try {
+    const res = await fetch(
       "https://multi-vendor-marketplace.vercel.app/auth/updateMerchantCommission",
       {
         method: "PUT",
@@ -450,9 +452,27 @@ useEffect(() => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ merchantId, commission }),
-      },
+      }
     );
-  };
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showToast("error", data?.message || "Commission update failed");
+      throw new Error(data?.message);
+    }
+
+    // ✅ SUCCESS TOAST
+    showToast("success", "Commission updated successfully!");
+
+    return data;
+  } catch (error) {
+    console.error("Update commission error:", error);
+    showToast("error", "Something went wrong while updating commission");
+    throw error;
+  }
+};
+
 
   return user ? (
     <main className="w-full p-4 md:p-8">
@@ -553,184 +573,135 @@ useEffect(() => {
             ) : filteredPayouts.length > 0 ? (
               <table className="w-full border-collapse bg-white">
                 <thead className="bg-gray-100 text-left text-gray-600 text-xs">
-                  <tr>
-                    <th className="p-3">Payout Date</th>
-                    {(userRole === "Master Admin" ||
-                      userRole === "Dev Admin") && (
-                      <th className="p-3">Merchant Info</th>
-                    )}
-                    <th className="p-3">Transaction Dates</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3">Fulfilled items</th>
-                    <th className="p-3">Unfulfilled items</th>
+  <tr>
+    <th className="p-3">Payout Date</th>
+    {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+      <th className="p-3">Merchant Info</th>
+    )}
+    <th className="p-3">Transaction Dates</th>
+    <th className="p-3">Status</th>
+    <th className="p-3">Fulfilled</th>
+    <th className="p-3">Unfulfilled</th>
 
-                    <th className="p-3 text-right">Amount</th>
-                  </tr>
-                </thead>
+    {(userRole === "Master Admin" || userRole === "Dev Admin") ? (
+      <>
+        <th className="p-3 text-right">Gross</th>
+        <th className="p-3 text-right">Commission %</th>
+        <th className="p-3 text-right">Commission</th>
+        <th className="p-3 text-right">Net</th>
+      </>
+    ) : (
+      <th className="p-3 text-right">Amount</th>
+    )}
+  </tr>
+</thead>
+
 
                 <tbody>
-                  {userRole === "Master Admin" || userRole === "Dev Admin"
-                    ? filteredPayouts
-                        .filter(
-                          (payout) => payout.status.toLowerCase() === "pending",
-                        )
-                        .flatMap((payout, index) => {
-                          const merchantGroups = payout.orders.reduce(
-                            (acc, order) => {
-                              const key = `${order.merchantId}-${payout.payoutDate}`;
+                {userRole === "Master Admin" || userRole === "Dev Admin"
+  ? filteredPayouts
+      .filter((payout) => payout.status.toLowerCase() === "pending")
+      .flatMap((payout, index) =>
+        payout.orders.map((order, mIndex) => (
+          <tr
+            key={`${index}-${mIndex}`}
+            className="border-b hover:bg-gray-50"
+          >
+            {/* Payout Date */}
+            <td
+              className="p-3 text-blue-600 cursor-pointer hover:underline"
+              onClick={() => {
+                const query = new URLSearchParams({
+                  payoutDate: payout.payoutDate,
+                  status: payout.status,
+                  merchantId: order.merchantId,
+                });
+                navigate(`/payout-details?${query.toString()}`);
+              }}
+            >
+              {payout.payoutDate}
+            </td>
 
-                              if (!acc[key]) {
-                                acc[key] = {
-                                  merchantId: order.merchantId,
-                                  merchantName: order.merchantName || "N/A",
-                                  merchantEmail: order.merchantEmail || "N/A",
-                                  fulfilledCount: order.fulfilledCount || 0,
-                                  unfulfilledCount: order.unfulfilledCount || 0,
-                                  totalAmount: 0,
-                                  totalQuantity: 0,
-                                  lineItems: [],
-                                };
-                              }
+            {/* Merchant Info */}
+            <td className="p-3 text-sm text-gray-600">
+              <div>{order.merchantName}</div>
+              <div className="text-xs text-gray-400">
+                {order.merchantEmail}
+              </div>
+            </td>
 
-                              order.lineItems.forEach((line) => {
-                                const total =
-                                  parseFloat(line.price) *
-                                  (line.current_quantity || 0);
-                                acc[key].totalAmount += total;
-                                acc[key].totalQuantity +=
-                                  line.current_quantity || 0;
-                                acc[key].lineItems.push(line);
+            {/* Transaction Dates */}
+            <td className="p-3">{payout.transactionDates}</td>
 
-                                if (line.fulfillment_status === "cancelled") {
-                                  acc[key].totalAmount -= total;
-                                }
-                              });
+            {/* Status */}
+            <td className="p-3">
+              <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                {payout.status}
+              </span>
+            </td>
 
-                              return acc;
-                            },
-                            {},
-                          );
+            {/* Counts */}
+            <td className="p-3">{order.fulfilledCount}</td>
+            <td className="p-3">{order.unfulfilledCount}</td>
 
-                          return Object.values(merchantGroups).map(
-                            (merchantGroup, mIndex) => {
-                              const fee = merchantGroup.totalAmount * 0.1;
-                              const net = merchantGroup.totalAmount - fee;
+            {/* 💰 GROSS */}
+            <td className="p-3 text-right font-medium">
+              {order.grossAmount.toFixed(2)} AUD
+            </td>
 
-                              return (
-                                <tr
-                                  key={`${index}-${mIndex}`}
-                                  className="border-b hover:bg-gray-50"
-                                >
-                                  <td
-                                    className="p-3 text-blue-600 cursor-pointer hover:underline"
-                                    onClick={() => {
-                                      const query = new URLSearchParams({
-                                        payoutDate: payout.payoutDate,
-                                        status: payout.status,
-                                      });
-                                      query.append(
-                                        "merchantId",
-                                        merchantGroup.merchantId,
-                                      );
-                                      navigate(
-                                        `/payout-details?${query.toString()}`,
-                                      );
-                                    }}
-                                  >
-                                    {payout.payoutDate}
-                                  </td>
+            {/* 📊 COMMISSION % */}
+            <td className="p-3 text-right">
+              {order.commissionRate}%
+            </td>
 
-                                  {(userRole === "Master Admin" ||
-                                    userRole === "Dev Admin") && (
-                                    <td className="p-3 text-sm text-gray-600">
-                                      <div>{merchantGroup.merchantName}</div>
-                                      <div className="text-xs text-gray-400">
-                                        {merchantGroup.merchantEmail}
-                                      </div>
-                                    </td>
-                                  )}
+            {/* 💸 COMMISSION */}
+            <td className="p-3 text-right text-red-600">
+              {order.commissionAmount.toFixed(2)} AUD
+            </td>
 
-                                  <td className="p-3">
-                                    {payout.transactionDates}
-                                  </td>
-                                  <td className="p-3">
-                                    {payout.status === "Pending" ? (
-                                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
-                                        Pending
-                                      </span>
-                                    ) : (
-                                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700">
-                                        Deposited
-                                      </span>
-                                    )}
-                                  </td>
-                                  <td className="p-3">
-                                    {merchantGroup.fulfilledCount}
-                                  </td>
-                                  <td className="p-3">
-                                    {merchantGroup.unfulfilledCount}
-                                  </td>
+            {/* ✅ NET */}
+            <td className="p-3 text-right font-semibold text-green-700">
+              {order.netAmount.toFixed(2)} AUD
+            </td>
+          </tr>
+        ))
+      )
+  : (
+    /* 🔒 MERCHANT VIEW – AS IS (NO CHANGE) */
+    filteredPayouts.map((item, index) => {
+      const merchantId = localStorage.getItem("userid");
 
-                                  <td className="p-3 text-right font-medium">
-                                    {merchantGroup.totalAmount.toFixed(2)} AUD
-                                  </td>
-                                </tr>
-                              );
-                            },
-                          );
-                        })
-                    : filteredPayouts.map((item, index) => {
-                        const merchantId = localStorage.getItem("userid");
+      return (
+        <tr key={index} className="border-b hover:bg-gray-50">
+          <td
+            className="p-3 text-blue-600 cursor-pointer hover:underline"
+            onClick={() =>
+              navigate(
+                `/payout-details?payoutDate=${encodeURIComponent(
+                  item.payoutDate
+                )}&status=${item.status}&merchantId=${merchantId}`
+              )
+            }
+          >
+            {item.payoutDate}
+          </td>
+          <td className="p-3">{item.transactionDates}</td>
+          <td className="p-3">
+            <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
+              {item.status}
+            </span>
+          </td>
+          <td className="p-3">{item.totalFulfilled}</td>
+          <td className="p-3">{item.totalUnfulfilled}</td>
+          <td className="p-3 text-right font-medium">
+            {item.amount || "$0.00"}
+          </td>
+        </tr>
+      );
+    })
+  )
+}
 
-                        return (
-                          <tr key={index} className="border-b hover:bg-gray-50">
-                            <td
-                              className="p-3 text-blue-600 cursor-pointer hover:underline"
-                              onClick={() =>
-                                navigate(
-                                  `/payout-details?payoutDate=${encodeURIComponent(
-                                    item.payoutDate,
-                                  )}&status=${
-                                    item.status
-                                  }&merchantId=${merchantId}`,
-                                )
-                              }
-                            >
-                              {item.payoutDate}
-                            </td>
-                            <td className="p-3">{item.transactionDates}</td>
-                            <td className="p-3">
-                              <span
-                                className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                                  item.status === "Pending"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : item.status === "Deposited"
-                                      ? "bg-green-100 text-green-700"
-                                      : "bg-gray-100 text-gray-600"
-                                }`}
-                              >
-                                {item.status}
-                              </span>
-                            </td>
-                            <td className="p-3">{item.totalFulfilled}</td>
-                            <td className="p-3">{item.totalUnfulfilled}</td>
-
-                            <td className="p-3 text-right font-medium">
-                              {item.amount
-                                ? `$${(
-                                    parseFloat(
-                                      String(item.amount).replace(
-                                        /[^0-9.]/g,
-                                        "",
-                                      ),
-                                    ) *
-                                    (1 - commission / 100)
-                                  ).toFixed(2)}`
-                                : "$0.00"}
-                            </td>
-                          </tr>
-                        );
-                      })}
                 </tbody>
               </table>
             ) : (

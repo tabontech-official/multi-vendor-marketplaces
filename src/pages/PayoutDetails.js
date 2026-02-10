@@ -49,30 +49,30 @@ const PayoutDetails = () => {
     country: "",
   });
   const navigate = useNavigate();
-useEffect(() => {
-  const token = localStorage.getItem("usertoken");
-  if (token) {
-    const decoded = jwtDecode(token);
-    const role = decoded?.payLoad?.role || "";
-    setUserRole(role);
+  useEffect(() => {
+    const token = localStorage.getItem("usertoken");
+    if (token) {
+      const decoded = jwtDecode(token);
+      const role = decoded?.payLoad?.role || "";
+      setUserRole(role);
 
-    if (role === "Merchant") {
-      const userId = localStorage.getItem("userid");
-      if (!userId) return;
+      if (role === "Merchant") {
+        const userId = localStorage.getItem("userid");
+        if (!userId) return;
 
-      fetch(`https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data?.data) {
-            setMerchantAccount(data.data);
-          }
-        })
-        .catch((err) =>
-          console.error("Error fetching merchant account details:", err)
-        );
+        fetch(`https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data?.data) {
+              setMerchantAccount(data.data);
+            }
+          })
+          .catch((err) =>
+            console.error("Error fetching merchant account details:", err),
+          );
+      }
     }
-  }
-}, []);
+  }, []);
   const showToast = (type, message) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
@@ -216,7 +216,7 @@ useEffect(() => {
             UserIds,
             referenceNo: tempReferenceNo,
           }),
-        }
+        },
       );
 
       const result = await res.json();
@@ -336,11 +336,11 @@ useEffect(() => {
         let url = "";
         if (userRole === "Merchant") {
           url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByQuery?payoutDate=${encodeURIComponent(
-            payoutDate
+            payoutDate,
           )}&status=${status}&userId=${merchantId}`;
         } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
           url = `https://multi-vendor-marketplace.vercel.app/order/getAllPayouts?payoutDate=${encodeURIComponent(
-            payoutDate
+            payoutDate,
           )}&status=${status}`;
         } else {
           console.warn("Unauthorized user role:", userRole);
@@ -366,27 +366,37 @@ useEffect(() => {
         const fetchedOrders = json?.payouts?.[0]?.orders || [];
 
         const updatedOrders = fetchedOrders.map((o) => {
-          const fee = Number((o.amount * 0.1).toFixed(2));
-          const net = Number((o.amount - fee).toFixed(2));
-          return { ...o, fee, net };
+          const gross = o.products.reduce((sum, p) => sum + (p.total || 0), 0);
+
+          const fee = o.products.reduce(
+            (sum, p) => sum + (p.commissionAmount || 0),
+            0,
+          );
+
+          const net = o.products.reduce(
+            (sum, p) => sum + (p.netAmount || 0),
+            0,
+          );
+
+          return {
+            ...o,
+            gross,
+            fee,
+            net,
+          };
         });
 
-        const charges = updatedOrders.reduce(
-          (sum, o) => sum + (o.amount || 0),
-          0
-        );
-        const fees = updatedOrders.reduce((sum, o) => sum + (o.fee || 0), 0);
-        const refunds = updatedOrders.reduce(
-          (sum, o) => sum + (o.refund || 0),
-          0
-        );
-        const net = charges - fees;
+        const charges = updatedOrders.reduce((s, o) => s + o.gross, 0);
+        const fees = updatedOrders.reduce((s, o) => s + o.fee, 0);
+        const refunds = updatedOrders.reduce((s, o) => s + (o.refund || 0), 0);
+        const net = updatedOrders.reduce((s, o) => s + o.net, 0);
 
         const referenceNo = updatedOrders[0]?.referenceNo || "";
         const paypalAccount = updatedOrders[0]?.paypalAccount || "";
 
         setOrders(updatedOrders);
         setSummary({ charges, refunds, fees, net, referenceNo, paypalAccount });
+
         setReferenceNo(referenceNo);
         setTempReferenceNo(referenceNo);
         setTempBankAccount(paypalAccount);
@@ -439,7 +449,7 @@ useEffect(() => {
             UserIds,
             referenceNo: reference,
           }),
-        }
+        },
       );
 
       const result = await res.json();
@@ -513,7 +523,7 @@ useEffect(() => {
             "x-api-secret": apiSecretKey,
           },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       const data = await res.json();
@@ -534,7 +544,6 @@ useEffect(() => {
 
   return (
     <div className="p-6 bg-[#f6f6f7] min-h-screen">
-     
       <div className="flex justify-end mb-2">
         {(userRole === "Master Admin" || userRole === "Dev Admin") && (
           <button
@@ -562,7 +571,6 @@ useEffect(() => {
         </div>
 
         {/* Body */}
-    
 
         {/* Footer Save Button */}
         <div className="border-t px-4 py-3">
@@ -581,124 +589,63 @@ useEffect(() => {
           <h1 className="text-2xl font-bold mb-1">
             ${summary.net.toFixed(2)} AUD
           </h1>
-     {userRole === "Merchant" && merchantAccount && (
-  <div className="text-sm text-gray-700 space-y-2">
-    {merchantAccount.paypalAccount && (
-      <p>
-        <strong>PayPal Account:</strong> {merchantAccount.paypalAccount}
-      </p>
-    )}
+          {userRole === "Merchant" && merchantAccount && (
+            <div className="text-sm text-gray-700 space-y-2">
+              {merchantAccount.paypalAccount && (
+                <p>
+                  <strong>PayPal Account:</strong>{" "}
+                  {merchantAccount.paypalAccount}
+                </p>
+              )}
 
-    {merchantAccount.paypalAccountNo && (
-      <p>
-        <strong>PayPal Account No:</strong> {merchantAccount.paypalAccountNo}
-      </p>
-    )}
+              {merchantAccount.paypalAccountNo && (
+                <p>
+                  <strong>PayPal Account No:</strong>{" "}
+                  {merchantAccount.paypalAccountNo}
+                </p>
+              )}
 
-    {merchantAccount.paypalReferenceNo && (
-      <p>
-        <strong>PayPal Reference No:</strong> {merchantAccount.paypalReferenceNo}
-      </p>
-    )}
+              {merchantAccount.paypalReferenceNo && (
+                <p>
+                  <strong>PayPal Reference No:</strong>{" "}
+                  {merchantAccount.paypalReferenceNo}
+                </p>
+              )}
 
-    {merchantAccount.bankDetails &&
-      Object.keys(merchantAccount.bankDetails).length > 0 && (
-        <div className="mt-2 space-y-2">
-          {merchantAccount.bankDetails.bankName && (
-            <p>
-              <strong>Bank Name:</strong> {merchantAccount.bankDetails.bankName}
-            </p>
-          )}
-          {merchantAccount.bankDetails.accountNumber && (
-            <p>
-              <strong>Account Number:</strong> {merchantAccount.bankDetails.accountNumber}
-            </p>
-          )}
-          {merchantAccount.bankDetails.accountHolderName && (
-            <p>
-              <strong>Account Holder:</strong> {merchantAccount.bankDetails.accountHolderName}
-            </p>
-          )}
-          {merchantAccount.bankDetails.ifscCode && (
-            <p>
-              <strong>IFSC:</strong> {merchantAccount.bankDetails.ifscCode}
-            </p>
-          )}
-        </div>
-      )}
-  </div>
-)}
-
-      
-          {(userRole === "Dev Admin" || userRole === "Master Admin") && (
-            <div className="text-sm text-gray-600 space-y-4">
-              {/* <div className="flex items-center">
-                <strong className="w-40">Account info:</strong>
-                <div className="relative w-64 flex items-center">
-                  <input
-                    type="text"
-                    value={tempBankAccount}
-                    readOnly={!isEditingBank || isLoading}
-                    onChange={(e) => setTempBankAccount(e.target.value)}
-                    className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
-                      isEditingBank && !isLoading ? "bg-white" : "bg-gray-100"
-                    } text-black pr-12`}
-                  />
-
-                  <div className="absolute right-2 flex gap-1 items-center">
-                    {!isEditingBank ? (
-                      <FaEdit
-                        className="text-gray-400 cursor-pointer"
-                        onClick={() => !isLoading && setIsEditingBank(true)}
-                      />
-                    ) : (
-                      <>
-                        <button
-                          className="text-green-600 text-sm flex items-center justify-center"
-                          disabled={isLoading}
-                          onClick={saveBankAccount}
-                        >
-                          {isLoading ? (
-                            <svg
-                              className="animate-spin h-4 w-4 text-green-600"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                              />
-                            </svg>
-                          ) : (
-                            "✔"
-                          )}
-                        </button>
-                        <button
-                          className="text-red-600 text-sm"
-                          disabled={isLoading}
-                          onClick={() => {
-                            setTempBankAccount(bankAccount);
-                            setIsEditingBank(false);
-                          }}
-                        >
-                          ✖
-                        </button>
-                      </>
+              {merchantAccount.bankDetails &&
+                Object.keys(merchantAccount.bankDetails).length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {merchantAccount.bankDetails.bankName && (
+                      <p>
+                        <strong>Bank Name:</strong>{" "}
+                        {merchantAccount.bankDetails.bankName}
+                      </p>
+                    )}
+                    {merchantAccount.bankDetails.accountNumber && (
+                      <p>
+                        <strong>Account Number:</strong>{" "}
+                        {merchantAccount.bankDetails.accountNumber}
+                      </p>
+                    )}
+                    {merchantAccount.bankDetails.accountHolderName && (
+                      <p>
+                        <strong>Account Holder:</strong>{" "}
+                        {merchantAccount.bankDetails.accountHolderName}
+                      </p>
+                    )}
+                    {merchantAccount.bankDetails.ifscCode && (
+                      <p>
+                        <strong>IFSC:</strong>{" "}
+                        {merchantAccount.bankDetails.ifscCode}
+                      </p>
                     )}
                   </div>
-                </div>
-              </div>
-*/}
+                )}
+            </div>
+          )}
+
+          {(userRole === "Dev Admin" || userRole === "Master Admin") && (
+            <div className="text-sm text-gray-600 space-y-4">
               <div className="flex items-center">
                 <strong className="w-40">Bank reference:</strong>
                 <div className="relative w-64 flex items-center">
@@ -771,13 +718,12 @@ useEffect(() => {
         <div className="w-full md:w-[240px] border-l md:pl-6 mt-6 md:mt-0">
           <h2 className="text-sm font-semibold mb-2">Summary</h2>
           <div className="text-sm text-gray-700 space-y-1">
-            <p>Charges: ${summary.charges.toFixed(2)}</p>
+            <p>Gross: ${summary.charges.toFixed(2)}</p>
             <p>Refunds: ${summary.refunds.toFixed(2)}</p>
-            <p>Fees: ${summary.fees.toFixed(2)}</p>
-            {/* <p>
-              Net charges: $
-              {summary.charges.toFixed(2) - summary.fees.toFixed(2)}
-            </p> */}
+            <p>Commission: ${summary.fees.toFixed(2)}</p>
+            <p className="font-semibold">
+              Net Payout: ${summary.net.toFixed(2)} AUD
+            </p>
           </div>
         </div>
       </div>
@@ -795,135 +741,7 @@ useEffect(() => {
               <th className="p-3">Net</th>
             </tr>
           </thead>
-          {/* <tbody>
-            {orders.length > 0 ? (
-              orders.map((item, i) => (
-                <tr key={i} className="border-b hover:bg-gray-50">
-                  <td className="p-3">
-                    {dayjs(item.createdAt).format("MMM D, YYYY")}
-                  </td>
-                  <td className="p-3 text-blue-600 underline cursor-pointer">
-                    #{item.shopifyOrderNo}
-                  </td>
-                  <td className="p-3">${item.amount.toFixed(2)}</td>
-                  <td className="p-3">${item.fee.toFixed(2)}</td>
-                  <td className="p-3">${item.net.toFixed(2)} AUD</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="p-4 text-center text-gray-500">
-                  No orders found for this payout.
-                </td>
-              </tr>
-            )}
-          </tbody> */}
 
-          {/* <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="5" className="py-10 text-center text-gray-500">
-                  <div className="inline-flex items-center gap-2 justify-center">
-                    <HiOutlineRefresh className="animate-spin text-xl" />
-                    Loading...
-                  </div>
-                </td>
-              </tr>
-            ) : orders.length > 0 ? (
-              Object.values(
-                orders.reduce((acc, order) => {
-                  if (!acc[order.shopifyOrderNo]) {
-                    acc[order.shopifyOrderNo] = { ...order, total: 0 };
-                  }
-                  order.products.forEach((product) => {
-                    acc[order.shopifyOrderNo].total += product.total;
-                  });
-                  return acc;
-                }, {})
-              ).map((order, i) => (
-                <tr
-                  key={i}
-                  className={`border-b hover:bg-gray-50 ${
-                    order.products.some((product) => product.cancelled)
-                      ? "line-through text-gray-400"
-                      : ""
-                  }`}
-                >
-                  <td className="p-3">
-                    {dayjs(order.createdAt).format("MMM D, YYYY")}
-                  </td>
-
-                  <td
-                    className="p-3 text-blue-600 hover:underline cursor-pointer"
-                    onClick={() => {
-                      console.log("Navigating with state:", {
-                        merchantId,
-                        shopifyOrderId: order.orderId,
-                        serialNo: order.orderId,
-                        order: subscriptions,
-                      });
-
-                      navigate(`/order/${order.orderId}`, {
-                        state: {
-                          merchantId,
-                          shopifyOrderId: order.orderId,
-                          serialNo: order.orderId,
-                          order: subscriptions,
-                        },
-                      });
-                    }}
-                  >
-                    #{order.shopifyOrderNo}
-                  </td>
-                  <td className="p-3">
-                    {order?.products?.map((product, index) => {
-                      let fulfillmentStatus = product.fulfillment_status;
-
-                      if (fulfillmentStatus === "cancelled") {
-                        fulfillmentStatus = "Refunded";
-                      }
-
-                      const uniqueStatuses = new Set();
-
-                      if (!uniqueStatuses.has(fulfillmentStatus)) {
-                        uniqueStatuses.add(fulfillmentStatus);
-                      }
-
-                      let bgColorClass = "";
-
-                      if (fulfillmentStatus === "Unfullfilled") {
-                        bgColorClass = "bg-yellow-100 text-yellow-700";
-                      } else if (fulfillmentStatus === "Refunded") {
-                        bgColorClass = "bg-red-100 text-red-700";
-                      } else if (fulfillmentStatus === "Deposited") {
-                        bgColorClass = "bg-green-100 text-green-700";
-                      } else {
-                        bgColorClass = "bg-gray-100 text-gray-600";
-                      }
-
-                      return (
-                        <div
-                          key={index}
-                          className={`inline-block px-2 py-1 text-xs font-medium rounded ${bgColorClass}`}
-                        >
-                          {fulfillmentStatus}
-                        </div>
-                      );
-                    })}
-                  </td>
-                  <td className="p-3">${(order.total * 0.1).toFixed(2)}</td>
-                  <td className="p-3">${(order.total * 0.9).toFixed(2)} AUD</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="p-4 text-center text-gray-500">
-                  No orders found for this payout.
-                </td>
-              </tr>
-            )}
-          
-        </tbody> */}
           <tbody>
             {loading ? (
               <tr>
@@ -944,7 +762,7 @@ useEffect(() => {
                     acc[order.shopifyOrderNo].total += product.total;
                   });
                   return acc;
-                }, {})
+                }, {}),
               ).map((order, i) => (
                 <tr
                   key={i}
@@ -981,44 +799,6 @@ useEffect(() => {
                     #{order.shopifyOrderNo}
                   </td>
 
-                  {/* <td className="p-3">
-                    {(() => {
-                      const uniqueStatuses = new Set();
-                      order.products.forEach((product) => {
-                        let fulfillmentStatus = product.fulfillment_status;
-
-                        if (fulfillmentStatus === "cancelled") {
-                          fulfillmentStatus = "Refunded";
-                        }
-
-                        uniqueStatuses.add(fulfillmentStatus);
-                      });
-
-                      return [...uniqueStatuses].map((status, idx) => {
-                        let bgColorClass = "";
-                        if (status === "Unfullfilled") {
-                          bgColorClass = "bg-yellow-100 text-yellow-700";
-                        } else if (status === "Refunded") {
-                          bgColorClass = "bg-red-100 text-red-700";
-                        } else if (status === "Deposited") {
-                          bgColorClass = "bg-green-100 text-green-700";
-                        } else if (status === "fulfilled") {
-                          bgColorClass = "bg-green-100 text-green-700";
-                        } else {
-                          bgColorClass = "bg-gray-100 text-gray-600";
-                        }
-
-                        return (
-                          <div
-                            key={idx}
-                            className={`inline-block px-2 py-1 text-xs font-medium rounded ${bgColorClass}`}
-                          >
-                            {status}
-                          </div>
-                        );
-                      });
-                    })()}
-                  </td> */}
                   <td className="p-3">
                     {(() => {
                       const products = order.products || [];
@@ -1029,17 +809,17 @@ useEffect(() => {
                             "unfulfilled" ||
                             p.fulfillment_status?.toLowerCase() ===
                               "unfullfilled") &&
-                          !p.cancelled
+                          !p.cancelled,
                       );
 
                       const allFulfilled = products.every(
                         (p) =>
                           p.fulfillment_status?.toLowerCase() === "fulfilled" &&
-                          !p.cancelled
+                          !p.cancelled,
                       );
 
                       const hasRefunded = products.some(
-                        (p) => p.fulfillment_status === "cancelled"
+                        (p) => p.fulfillment_status === "cancelled",
                       );
 
                       let displayStatus = "Unknown";
@@ -1065,10 +845,13 @@ useEffect(() => {
                       );
                     })()}
                   </td>
-                  <td className="p-3">${order.total.toFixed(2)}</td>
+                  <td className="p-3">${order.gross.toFixed(2)}</td>
 
-                  <td className="p-3">${(order.total * 0.1).toFixed(2)}</td>
-                  <td className="p-3">${(order.total * 0.9).toFixed(2)} AUD</td>
+                  <td className="p-3 text-red-600">${order.fee.toFixed(2)}</td>
+
+                  <td className="p-3 text-green-700 font-semibold">
+                    ${order.net.toFixed(2)} AUD
+                  </td>
                 </tr>
               ))
             ) : (

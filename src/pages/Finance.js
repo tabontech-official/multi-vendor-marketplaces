@@ -486,7 +486,7 @@ useEffect(() => {
         </div>
 
         {/* Center: Search */}
-        <div className="w-full md:w-1/3 md:absolute md:left-1/2 md:-translate-x-1/2">
+        {/* <div className="w-full md:w-1/3 md:absolute md:left-1/2 md:-translate-x-1/2">
           <input
             type="text"
             placeholder="Search..."
@@ -494,9 +494,9 @@ useEffect(() => {
             onChange={(e) => setSearchVal(e.target.value)}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
-        </div>
+        </div> */}
 
-        {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+        {/* {(userRole === "Master Admin" || userRole === "Dev Admin") && (
           <div className="flex gap-2 justify-end">
             <button className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm">
               <CiImport className="w-4 h-4" />
@@ -508,7 +508,7 @@ useEffect(() => {
               Export
             </button>
           </div>
-        )}
+        )} */}
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 border-b pb-2 gap-4">

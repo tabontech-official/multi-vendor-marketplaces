@@ -60,7 +60,9 @@ const PayoutDetails = () => {
         const userId = localStorage.getItem("userid");
         if (!userId) return;
 
-        fetch(`https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`)
+        fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`,
+        )
           .then((res) => res.json())
           .then((data) => {
             if (data?.data) {
@@ -155,10 +157,13 @@ const PayoutDetails = () => {
       }
 
       // Send PayPal update request
-      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
-        merchantIds,
-        payPal: account,
-      });
+      const res = await axios.post(
+        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
+        {
+          merchantIds,
+          payPal: account,
+        },
+      );
 
       if (res.status === 200) {
         setBankAccount(account);

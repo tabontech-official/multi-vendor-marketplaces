@@ -58,7 +58,7 @@
 //         }
 
 //         const response = await fetch(
-//           `https://multi-vendor-marketplace.vercel.app/auth/getUserByRole/${id}`
+//           `http://localhost:5000/auth/getUserByRole/${id}`
 //         );
 
 //         if (!response.ok) {
@@ -140,7 +140,7 @@
 
 //   //   try {
 //   //     const response = await fetch(
-//   //       "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+//   //       "http://localhost:5000/auth/createUserTagsModule",
 //   //       {
 //   //         method: "POST",
 //   //         headers: {
@@ -200,7 +200,7 @@
 //       }
 
 //       const response = await fetch(
-//         "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+//         "http://localhost:5000/auth/createUserTagsModule",
 //         {
 //           method: "POST",
 //           headers: {
@@ -291,7 +291,7 @@
 //       (userRole === "Dev Admin" || userRole === "Master Admin") &&
 //       role === "Merchant Staff"
 //     ) {
-//       fetch(`https://multi-vendor-marketplace.vercel.app/auth/getAllMerchant`)
+//       fetch(`http://localhost:5000/auth/getAllMerchant`)
 //         .then((res) => res.json())
 //         .then((data) => setMerchantList(data))
 //         .catch((err) => console.error("Failed to load merchants", err));
@@ -599,7 +599,7 @@ const ManageUser = () => {
       try {
         const id = localStorage.getItem("userid");
         if (!id) return;
-        const response = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/getUserByRole/${id}`);
+        const response = await fetch(`http://localhost:5000/auth/getUserByRole/${id}`);
         const data = await response.json();
         if (data.users && Array.isArray(data.users)) {
           const formattedUsers = data.users.map((user) => ({

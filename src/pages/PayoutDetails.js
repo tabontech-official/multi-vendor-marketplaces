@@ -60,9 +60,7 @@ const PayoutDetails = () => {
         const userId = localStorage.getItem("userid");
         if (!userId) return;
 
-        fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`,
-        )
+        fetch(`http://localhost:5000/auth/getMerchantAccountDetails/${userId}`)
           .then((res) => res.json())
           .then((data) => {
             if (data?.data) {
@@ -92,7 +90,7 @@ const PayoutDetails = () => {
     }
 
     try {
-      const url = `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`;
+      const url = `http://localhost:5000/order/order/${userId}`;
 
       const res = await fetch(url, {
         method: "GET",
@@ -157,13 +155,10 @@ const PayoutDetails = () => {
       }
 
       // Send PayPal update request
-      const res = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
-        {
-          merchantIds,
-          payPal: account,
-        },
-      );
+      const res = await axios.post("http://localhost:5000/order/addPaypal", {
+        merchantIds,
+        payPal: account,
+      });
 
       if (res.status === 200) {
         setBankAccount(account);
@@ -209,7 +204,7 @@ const PayoutDetails = () => {
 
       // Send reference number update to backend
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
+        "http://localhost:5000/order/addReferenceNumber",
         {
           method: "POST",
           headers: {
@@ -264,17 +259,17 @@ const PayoutDetails = () => {
 
   //       if (userRole === "Merchant") {
   //         res = await fetch(
-  //           `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+  //           `http://localhost:5000/order/getPayoutOrders?payoutDate=${encodeURIComponent(
   //             payoutDate
   //           )}&status=${status}&userId=${merchantId}`
   //         );
   //       } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
   //         // res = await fetch(
-  //         //   `https://multi-vendor-marketplace.vercel.app/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(
+  //         //   `http://localhost:5000/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(
   //         //     payoutDate
   //         //   )}&status=${status}`
   //         res = await fetch(
-  //           `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
+  //           `http://localhost:5000/order/getPayoutOrders?payoutDate=${encodeURIComponent(
   //             payoutDate
   //           )}&status=${status}&userId=${merchantId}`
   //         );
@@ -340,11 +335,11 @@ const PayoutDetails = () => {
       try {
         let url = "";
         if (userRole === "Merchant") {
-          url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByQuery?payoutDate=${encodeURIComponent(
+          url = `http://localhost:5000/order/getPayoutByQuery?payoutDate=${encodeURIComponent(
             payoutDate,
           )}&status=${status}&userId=${merchantId}`;
         } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
-          url = `https://multi-vendor-marketplace.vercel.app/order/getAllPayouts?payoutDate=${encodeURIComponent(
+          url = `http://localhost:5000/order/getAllPayouts?payoutDate=${encodeURIComponent(
             payoutDate,
           )}&status=${status}`;
         } else {
@@ -442,7 +437,7 @@ const PayoutDetails = () => {
       }
 
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
+        "http://localhost:5000/order/addReferenceNumber",
         {
           method: "POST",
           headers: {
@@ -519,7 +514,7 @@ const PayoutDetails = () => {
       };
 
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/addMerchantAccountDetails",
+        "http://localhost:5000/auth/addMerchantAccountDetails",
         {
           method: "POST",
           headers: {
@@ -791,9 +786,11 @@ const PayoutDetails = () => {
                         order: subscriptions,
                       });
 
-                      navigate(`/order/${order.orderId}`, {
+                      const firstMerchantId = order.products?.[0]?.userId;
+
+                      navigate(`/order/${order.orderId}/${firstMerchantId}`, {
                         state: {
-                          merchantId,
+                          merchantId: firstMerchantId,
                           shopifyOrderId: order.orderId,
                           serialNo: order.orderId,
                           order: subscriptions,

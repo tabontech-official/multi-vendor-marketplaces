@@ -55,7 +55,7 @@ const Finance = () => {
     setUsersLoading(true);
     try {
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/getAllUsers",
+        "http://localhost:5000/auth/getAllUsers",
         {
           method: "GET",
           headers: {
@@ -97,7 +97,7 @@ const Finance = () => {
 
     try {
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
+        "http://localhost:5000/order/addPayOutDates",
         {
           method: "POST",
           headers: {
@@ -136,7 +136,7 @@ const Finance = () => {
 
       try {
         const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates",
+          "http://localhost:5000/order/getPayoutsDates",
           {
             method: "GET",
             headers: {
@@ -205,7 +205,7 @@ const Finance = () => {
 
       try {
         const res = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/auth/user/${userId}`,
+          `http://localhost:5000/auth/user/${userId}`,
         );
         const user = res.data;
         const role = user?.role;
@@ -233,7 +233,7 @@ const Finance = () => {
     setPaypalLoading(true);
     try {
       const res = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/order/addPaypalAccountNo",
+        "http://localhost:5000/order/addPaypalAccountNo",
         {
           merchantId: userId,
           payPal: paypalAccountInput,
@@ -271,9 +271,9 @@ const Finance = () => {
   //           return;
   //         }
 
-  //         url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=${userId}`;
+  //         url = `http://localhost:5000/order/getPayoutByUserId?userId=${userId}`;
   //       } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
-  //         url = "https://multi-vendor-marketplace.vercel.app/order/getPayout";
+  //         url = "http://localhost:5000/order/getPayout";
   //       } else {
   //         console.warn("Unhandled role:", userRole);
   //         setLoading(false);
@@ -316,9 +316,9 @@ const Finance = () => {
             console.error("User ID not found in localStorage");
             return;
           }
-          url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=${userId}&limit=${limit}&page=${page}`;
+          url = `http://localhost:5000/order/getPayoutByUserId?userId=${userId}&limit=${limit}&page=${page}`;
         } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
-          url = `https://multi-vendor-marketplace.vercel.app/order/getPayout?limit=${limit}&page=${page}`;
+          url = `http://localhost:5000/order/getPayout?limit=${limit}&page=${page}`;
         } else {
           console.warn("Unhandled role:", userRole);
           return;
@@ -443,7 +443,7 @@ useEffect(() => {
 
   try {
     const res = await fetch(
-      "https://multi-vendor-marketplace.vercel.app/auth/updateMerchantCommission",
+      "http://localhost:5000/auth/updateMerchantCommission",
       {
         method: "PUT",
         headers: {

@@ -33,7 +33,7 @@
 
 //     try {
 //       const response = await fetch(
-//         "https://multi-vendor-marketplace.vercel.app/auth/signIn",
+//         "http://localhost:5000/auth/signIn",
 //         {
 //           method: "POST",
 //           headers: { "Content-Type": "application/json" },
@@ -201,7 +201,7 @@ const Auth = () => {
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/signIn",
+        "http://localhost:5000/auth/signIn",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

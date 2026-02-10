@@ -59,10 +59,10 @@ const ApprovalPage = () => {
       let url = "";
       if (activeTab === "products") {
         url = isAdmin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getProductWithApprovalStatus/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${userId}?page=${page}&limit=${limit}`;
+          ? `http://localhost:5000/product/getProductWithApprovalStatus/?page=${page}&limit=${limit}`
+          : `http://localhost:5000/product/getProduct/${userId}?page=${page}&limit=${limit}`;
       } else {
-        url = `https://multi-vendor-marketplace.vercel.app/users/getPendingUsers/?page=${page}&limit=${limit}`;
+        url = `http://localhost:5000/users/getPendingUsers/?page=${page}&limit=${limit}`;
       }
 
       const response = await fetch(url, {

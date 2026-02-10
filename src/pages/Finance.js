@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   HiOutlineCheckCircle,
+  HiOutlineDownload,
   HiOutlineRefresh,
+  HiOutlineUpload,
   HiOutlineXCircle,
 } from "react-icons/hi";
-import { CiCreditCard1 } from "react-icons/ci";
+import { CiCreditCard1, CiImport } from "react-icons/ci";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import UseFetchUserData from "../component/fetchUser";
@@ -13,12 +15,14 @@ import { useNotification } from "../context api/NotificationContext";
 import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import { useNavigate, useNavigation } from "react-router-dom";
+import { FaEdit, FaFileImport } from "react-icons/fa";
 dayjs.extend(minMax);
 const Finance = () => {
   const { addNotification } = useNotification();
   const { userData } = UseFetchUserData();
   const [commission, setCommission] = useState(0); // %
-
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState("");
   const [payouts, setPayouts] = useState([]);
@@ -42,36 +46,42 @@ const Finance = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10); // fixed page size
   const [totalPages, setTotalPages] = useState(1);
-  // const handleSavePayoutDates = async () => {
-  //   const payload = {
-  //     graceTime,
-  //     payoutFrequency,
-  //     firstDate: firstPayoutDate,
-  //     secondDate: payoutFrequency === "twice" ? secondPayoutDate : null,
-  //     weeklyDay: payoutFrequency === "weekly" ? weeklyDay : null,
-  //   };
+  const fetchAllUsers = async () => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-  //   try {
-  //     const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(payload),
-  //     });
+    if (!apiKey || !apiSecretKey) return;
 
-  //     const result = await res.json();
+    setUsersLoading(true);
+    try {
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/auth/getAllUsers",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
-  //     if (!res.ok) {
-  //       console.error(" Save failed:", result);
-  //       alert(result.message || "Failed to save payout config.");
-  //       return;
-  //     }
-
-  //     alert(result.message || "Saved");
-  //   } catch (err) {
-  //     console.error(" Network error:", err);
-  //     alert("Error saving payout configuration.");
-  //   }
-  // };
+      const data = await res.json();
+      setUsers(data || []);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+  useEffect(() => {
+    if (activeTab === "merchant-list") {
+      fetchAllUsers();
+    }
+  }, [activeTab]);
+  const merchantsOnly = users.filter(
+    (user) => user.role?.toLowerCase() === "merchant",
+  );
 
   const handleSavePayoutDates = async () => {
     const apiKey = localStorage.getItem("apiKey");
@@ -410,15 +420,75 @@ const Finance = () => {
   useEffect(() => {
     handleSearch();
   }, [searchVal, payouts]);
+  const [editableMerchants, setEditableMerchants] = useState([]);
+  const [savingId, setSavingId] = useState(null);
+useEffect(() => {
+  const merchants = users.filter(
+    (u) => u.role?.toLowerCase() === "merchant"
+  );
+
+  setEditableMerchants(
+    merchants.map((m) => ({
+      ...m,
+      commissionValue: m.commission ?? "",
+      isEditable: false,
+    }))
+  );
+}, [users]);
+
+  const updateMerchantCommission = async (merchantId, commission) => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+    await fetch(
+      "https://multi-vendor-marketplace.vercel.app/auth/updateMerchantCommission",
+      {
+        method: "PUT",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ merchantId, commission }),
+      },
+    );
+  };
 
   return user ? (
     <main className="w-full p-4 md:p-8">
-      <div className="flex-1">
-        <h1 className="text-2xl font-semibold mb-1">Finance</h1>
-        <p className="text-sm text-gray-500">
-          Track payouts, commissions, and due amounts in one place to manage all
-          financial activities efficiently.
-        </p>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        {/* Left: Title */}
+        <div>
+          <h1 className="text-2xl font-semibold mb-1">Finance</h1>
+          <p className="text-sm text-gray-500">
+            Track payouts, commissions, and due amounts in one place.
+          </p>
+        </div>
+
+        {/* Center: Search */}
+        <div className="w-full md:w-1/3 md:absolute md:left-1/2 md:-translate-x-1/2">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchVal}
+            onChange={(e) => setSearchVal(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+        </div>
+
+        {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+          <div className="flex gap-2 justify-end">
+            <button className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm">
+              <CiImport className="w-4 h-4" />
+              Import
+            </button>
+
+            <button className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm">
+              <FaFileImport className="w-4 h-4" />
+              Export
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 border-b pb-2 gap-4">
@@ -457,16 +527,18 @@ const Finance = () => {
           >
             Due
           </button>
-        </div>
-
-        <div className="w-full md:w-1/3">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchVal}
-            onChange={(e) => setSearchVal(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-          />
+          {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+            <button
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+                activeTab === "merchant-list"
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-blue-600"
+              }`}
+              onClick={() => setActiveTab("merchant-list")}
+            >
+              Merchant List
+            </button>
+          )}
         </div>
       </div>
 
@@ -669,414 +741,6 @@ const Finance = () => {
           </div>
         )}
 
-        {/* {activeTab === "payouts" && (
-          <div className="p-4">
-            {loading ? (
-              <div className="flex justify-center items-center py-10">
-                <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
-                loading...
-              </div>
-            ) : filteredPayouts.length > 0 ? (
-              <table className="w-full border-collapse bg-white">
-                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-                  <tr>
-                    <th className="p-3">Payout Date</th>
-                    {(userRole === "Master Admin" ||
-                      userRole === "Dev Admin") && (
-                      <th className="p-3">Merchant Info</th>
-                    )}
-                    <th className="p-3">Transaction Dates</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3 text-right">Amount</th>
-                    {(userRole === "Master Admin" ||
-                      userRole === "Dev Admin") && (
-                      <>
-                        <th className="p-3 text-right">Qty</th>
-                        <th className="p-3 text-right">Net</th>
-                      </>
-                    )}
-                  </tr>
-                </thead>
-
-                <tbody>
-  {userRole === "Master Admin" || userRole === "Dev Admin"
-    ? filteredPayouts.flatMap((payout, index) =>
-        payout.orders.flatMap((order, oIndex) =>
-          order.lineItems.flatMap((line, liIndex) => {
-            const rows = [];
-
-            const isPartial =
-              line.payoutStatus === "partial" && line.nextScheduledPayoutDate;
-
-            const merchantInfo = (
-              <>
-                <div>{line.merchantName || "N/A"}</div>
-                <div className="text-xs text-gray-400">{line.merchantEmail || "N/A"}</div>
-              </>
-            );
-
-            const transactionDates = payout.transactionDates;
-
-            const merchantId = localStorage.getItem("userid");
-
-            if (line.newPaidQty && line.newPaidQty > 0) {
-              rows.push(
-                <tr key={`current-${index}-${oIndex}-${liIndex}`} className="border-b hover:bg-gray-50">
-                  <td
-                    className="p-3 text-blue-600 cursor-pointer hover:underline"
-                    onClick={() => {
-                      const query = new URLSearchParams({
-                        payoutDate: payout.payoutDate,
-                        status: payout.status,
-                      });
-                      if (userRole === "Merchant") {
-                        query.append("merchantId", line.merchantId || merchantId);
-                      }
-                      navigate(`/payout-details?${query.toString()}`);
-                    }}
-                  >
-                    {payout.payoutDate}
-                  </td>
-                  <td className="p-3 text-sm text-gray-600">{merchantInfo}</td>
-                  <td className="p-3">{transactionDates}</td>
-                  <td className="p-3">
-                    {line.fulfillment_status === "cancelled" ? (
-                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700">
-                        Refund
-                      </span>
-                    ) : (
-                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
-                        {payout.status}
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-3 text-right font-medium">{line.price} AUD</td>
-                  <td className="p-3 text-right font-medium">{line.newPaidQty}</td>
-                  <td className="p-3 text-right font-medium">
-                    {(line.payoutAmount || (line.newPaidQty * line.price)).toFixed(2)} AUD
-                  </td>
-                </tr>
-              );
-            }
-
-            if (isPartial) {
-              rows.push(
-                <tr key={`future-${index}-${oIndex}-${liIndex}`} className="border-b hover:bg-gray-50">
-                  <td
-                    className="p-3 text-blue-600 cursor-pointer hover:underline"
-                    onClick={() => {
-                      const query = new URLSearchParams({
-                        payoutDate: line.nextScheduledPayoutDate,
-                        status: "Partial",
-                      });
-                      if (userRole === "Merchant") {
-                        query.append("merchantId", line.merchantId || merchantId);
-                      }
-                      navigate(`/payout-details?${query.toString()}`);
-                    }}
-                  >
-                    {dayjs(line.nextScheduledPayoutDate).format("MMM D, YYYY")}
-                  </td>
-                  <td className="p-3 text-sm text-gray-600">{merchantInfo}</td>
-                  <td className="p-3">{transactionDates}</td>
-                  <td className="p-3">
-                    <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-700">
-                      Partial
-                    </span>
-                  </td>
-                  <td className="p-3 text-right font-medium">{line.price} AUD</td>
-                  <td className="p-3 text-right font-medium">{line.remainingQty}</td>
-                  <td className="p-3 text-right font-medium">
-                    {(line.remainingQty * line.price).toFixed(2)} AUD
-                  </td>
-                </tr>
-              );
-            }
-
-            // ✅ Row 3: Regular full payout (not partial and not newPaidQty)
-            if (!isPartial && !(line.newPaidQty > 0)) {
-              rows.push(
-                <tr key={`regular-${index}-${oIndex}-${liIndex}`} className="border-b hover:bg-gray-50">
-                  <td
-                    className="p-3 text-blue-600 cursor-pointer hover:underline"
-                    onClick={() => {
-                      const query = new URLSearchParams({
-                        payoutDate: payout.payoutDate,
-                        status: payout.status,
-                      });
-                      if (userRole === "Merchant") {
-                        query.append("merchantId", line.merchantId || merchantId);
-                      }
-                      navigate(`/payout-details?${query.toString()}`);
-                    }}
-                  >
-                    {payout.payoutDate}
-                  </td>
-                  <td className="p-3 text-sm text-gray-600">{merchantInfo}</td>
-                  <td className="p-3">{transactionDates}</td>
-                  <td className="p-3">
-                    <span
-                      className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                        payout.status === "Pending"
-                          ? "bg-blue-100 text-blue-700"
-                          : payout.status === "Deposited"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      {payout.status}
-                    </span>
-                  </td>
-                  <td className="p-3 text-right font-medium">{line.price} AUD</td>
-                  <td className="p-3 text-right font-medium">{line.current_quantity}</td>
-                  <td className="p-3 text-right font-medium">
-                    {(line.payoutAmount || (line.price * line.current_quantity)).toFixed(2)} AUD
-                  </td>
-                </tr>
-              );
-            }
-
-            return rows;
-          })
-        )
-      )
-    : filteredPayouts.map((item, index) => {
-        const merchantId = localStorage.getItem("userid");
-        return (
-          <tr key={index} className="border-b hover:bg-gray-50">
-            <td
-              className="p-3 text-blue-600 cursor-pointer hover:underline"
-              onClick={() =>
-                navigate(
-                  `/payout-details?payoutDate=${encodeURIComponent(item.payoutDate)}&status=${
-                    item.status
-                  }&merchantId=${merchantId}`
-                )
-              }
-            >
-              {item.payoutDate}
-            </td>
-            <td className="p-3">{item.transactionDates}</td>
-            <td className="p-3">
-              <span
-                className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                  item.status === "Pending"
-                    ? "bg-blue-100 text-blue-700"
-                    : item.status === "Deposited"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-600"
-                }`}
-              >
-                {item.status}
-              </span>
-            </td>
-            <td className="p-3 text-right font-medium">
-              {item.amount
-                ? `$${(parseFloat(String(item.amount).replace(/[^0-9.]/g, "")) * 0.9).toFixed(2)}`
-                : "$0.00"}
-            </td>
-          </tr>
-        );
-      })}
-</tbody>
-
-              </table>
-            ) : (
-              <div className="text-center py-10 text-gray-500">
-                No payouts found.
-              </div>
-            )}
-          </div>
-        )} */}
-
-        {/* {activeTab === "Due " && (
-          <div className="p-4">
-            {loading ? (
-              <div className="flex justify-center items-center py-10">
-                <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
-                loading...
-              </div>
-            ) : filteredPayouts.length > 0 ? (
-              <table className="w-full border-collapse bg-white">
-                <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-                  <tr>
-                    <th className="p-3">Payout Date</th>
-                    {(userRole === "Master Admin" ||
-                      userRole === "Dev Admin") && (
-                      <th className="p-3">Merchant Info</th>
-                    )}
-                    <th className="p-3">Payout Status</th>
-                    <th className="p-3 text-right">Amount</th>
-                    <th className="p-3 text-right">Fee</th>
-                    <th className="p-3 text-right">Net</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {userRole === "Master Admin" || userRole === "Dev Admin"
-                    ? filteredPayouts
-                        .filter(
-                          (payout) => payout.status.toLowerCase() === "pending"
-                        )
-                        .flatMap((payout, index) =>
-                          payout.orders.flatMap((order, oIndex) =>
-                            order.lineItems.map((line, liIndex) => {
-                              const price = Number(line.price) || 0;
-                              const qty = Number(
-                                line.quantity || line.current_quantity || 1
-                              );
-                              const total = price * qty;
-                              const isRefund =
-                                line.fulfillment_status === "cancelled";
-                              const fee = isRefund ? total * 0.1 : total * 0.1;
-                              const net = isRefund ? total - fee : total - fee;
-
-                              return (
-                                <tr
-                                  key={`${index}-${oIndex}-${liIndex}`}
-                                  className="border-b hover:bg-gray-50"
-                                >
-                                  <td
-                                    className="p-3 text-blue-600 cursor-pointer hover:underline"
-                                    onClick={() => {
-                                      const isMerchant =
-                                        userRole === "Merchant";
-                                      const query = new URLSearchParams({
-                                        payoutDate: payout.payoutDate,
-                                        status: payout.status,
-                                      });
-
-                                      if (isMerchant) {
-                                        query.append(
-                                          "merchantId",
-                                          line.merchantId
-                                        );
-                                      }
-
-                                      navigate(
-                                        `/payout-details?${query.toString()}`
-                                      );
-                                    }}
-                                  >
-                                    {payout.payoutDate}
-                                  </td>
-
-                                  <td className="p-3 text-sm text-gray-600">
-                                    <div>{line.merchantName || "N/A"}</div>
-                                    <div className="text-xs text-gray-400">
-                                      {line.merchantEmail || "N/A"}
-                                    </div>
-                                  </td>
-
-                                  <td className="p-3">
-                                    {isRefund ? (
-                                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700">
-                                        Refund
-                                      </span>
-                                    ) : (
-                                      <span
-                                        className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                                          payout.status === "Pending"
-                                            ? "bg-blue-100 text-blue-700"
-                                            : payout.status === "Deposited"
-                                            ? "bg-green-100 text-green-700"
-                                            : "bg-gray-100 text-gray-600"
-                                        }`}
-                                      >
-                                        {payout.status}
-                                      </span>
-                                    )}
-                                  </td>
-
-                                  <td className="p-3 text-right">
-                                    ${total.toFixed(2)}
-                                  </td>
-                                  <td className="p-3 text-right text-red-600">
-                                    -${fee.toFixed(2)}
-                                  </td>
-                                  <td className="p-3 text-right text-green-700 font-semibold">
-                                    ${net.toFixed(2)} AUD
-                                  </td>
-                                </tr>
-                              );
-                            })
-                          )
-                        )
-                    : payouts
-                        .filter(
-                          (item) => item.status.toLowerCase() === "pending"
-                        )
-                        .map((item, index) => {
-                          const lineItems = item.orders.flatMap(
-                            (order) => order.lineItems || []
-                          );
-                          const totalAmount = lineItems.reduce((sum, line) => {
-                            if (line.fulfillment_status === "cancelled")
-                              return sum;
-                            return (
-                              sum +
-                              (Number(line.price) || 0) *
-                                Number(
-                                  line.quantity || line.current_quantity || 1
-                                )
-                            );
-                          }, 0);
-                          const fee = totalAmount * 0.1;
-                          const net = totalAmount - fee;
-                          const merchantId = localStorage.getItem("userid");
-
-                          return (
-                            <tr
-                              key={index}
-                              className="border-b hover:bg-gray-50"
-                            >
-                              <td
-                                className="p-3 text-blue-600 cursor-pointer hover:underline"
-                                onClick={() =>
-                                  navigate(
-                                    `/payout-details?payoutDate=${encodeURIComponent(
-                                      item.payoutDate
-                                    )}&status=${
-                                      item.status
-                                    }&merchantId=${merchantId}`
-                                  )
-                                }
-                              >
-                                {item.payoutDate}
-                              </td>
-                              <td className="p-3">
-                                <span
-                                  className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                                    item.status === "Pending"
-                                      ? "bg-blue-100 text-blue-700"
-                                      : item.status === "Deposited"
-                                      ? "bg-green-100 text-green-700"
-                                      : "bg-gray-100 text-gray-600"
-                                  }`}
-                                >
-                                  {item.status}
-                                </span>
-                              </td>
-                              <td className="p-3 text-right">
-                                ${totalAmount.toFixed(2)}
-                              </td>
-                              <td className="p-3 text-right text-red-600">
-                                -${fee.toFixed(2)}
-                              </td>
-                              <td className="p-3 text-right text-green-700 font-semibold">
-                                ${net.toFixed(2)} AUD
-                              </td>
-                            </tr>
-                          );
-                        })}
-                </tbody>
-              </table>
-            ) : (
-              <div className="text-center py-10 text-gray-500">
-                No payouts found.
-              </div>
-            )}
-          </div>
-        )} */}
         {activeTab === "Due" && (
           <div className="p-4">
             {loading ? (
@@ -1394,6 +1058,125 @@ const Finance = () => {
                 Save Payout Dates
               </button>
             </div>
+          </div>
+        )}
+        {activeTab === "merchant-list" && (
+          <div className="p-4">
+            {usersLoading ? (
+              <div className="flex justify-center items-center py-10">
+                <HiOutlineRefresh className="animate-spin text-xl text-gray-500 mr-2" />
+                Loading users...
+              </div>
+            ) : users.length > 0 ? (
+              <table className="w-full border-collapse bg-white">
+                <thead className="bg-gray-100 text-left text-gray-600 text-xs">
+                  <tr>
+                    <th className="p-3">Name</th>
+                    <th className="p-3">Email</th>
+                    <th className="p-3">Role</th>
+                    <th className="p-3">Comission</th>
+                    <th className="p-3">Merchant ID</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {editableMerchants.map((user, index) => (
+                    <tr
+                      key={user._id || index}
+                      className="border-b hover:bg-gray-50 text-sm"
+                    >
+                      <td className="p-3">
+                        {user.firstName} {user.lastName}
+                      </td>
+
+                      <td className="p-3">{user.email}</td>
+
+                      <td className="p-3">
+                        <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-700">
+                          {user.role}
+                        </span>
+                      </td>
+
+                      {/* ✅ COMMISSION COLUMN */}
+                     <td className="p-3">
+  <div className="relative w-32 flex items-center">
+    <input
+      type="number"
+      value={user.commissionValue}
+      disabled={!user.isEditable}
+      onChange={(e) => {
+        const updated = [...editableMerchants];
+        updated[index].commissionValue = e.target.value;
+        setEditableMerchants(updated);
+      }}
+      className={`w-full text-sm px-2 py-1 border rounded-md pr-12 ${
+        user.isEditable
+          ? "bg-white border-gray-300"
+          : "bg-gray-100 text-gray-500 cursor-pointer"
+      }`}
+    />
+
+    <div className="absolute right-2 flex gap-1 items-center">
+      {!user.isEditable ? (
+        <FaEdit
+          className="text-gray-400 cursor-pointer hover:text-blue-600"
+          onClick={() => {
+            const updated = [...editableMerchants];
+            updated[index].isEditable = true;
+            setEditableMerchants(updated);
+          }}
+        />
+      ) : (
+        <>
+          <button
+            className="text-green-600 text-sm"
+            disabled={savingId === user._id}
+            onClick={async () => {
+              setSavingId(user._id);
+              try {
+                await updateMerchantCommission(
+                  user._id,
+                  user.commissionValue
+                );
+                const updated = [...editableMerchants];
+                updated[index].isEditable = false;
+                setEditableMerchants(updated);
+              } catch {
+                alert("Commission update failed");
+              }
+              setSavingId(null);
+            }}
+          >
+            {savingId === user._id ? "..." : "✔"}
+          </button>
+
+          <button
+            className="text-red-600 text-sm"
+            onClick={() => {
+              const updated = [...editableMerchants];
+              updated[index].isEditable = false;
+              updated[index].commissionValue = user.commission;
+              setEditableMerchants(updated);
+            }}
+          >
+            ✖
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+</td>
+
+
+                      <td className="p-3">{user.shopifyId || "N/A"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-10 text-gray-500">
+                No users found.
+              </div>
+            )}
           </div>
         )}
       </div>

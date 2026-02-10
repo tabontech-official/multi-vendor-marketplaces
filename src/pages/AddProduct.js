@@ -5145,7 +5145,7 @@ const CategorySelector = () => {
       desc: "Just a few final checks before completion.",
     },
     {
-      title: "Product uploaded successfully 🎉",
+      title: "Product uploaded successfully",
       desc: "Your product is now available in your store.",
     },
   ];
@@ -7697,24 +7697,24 @@ const CategorySelector = () => {
 
                   <span className="cursor-pointer">Group Variant images</span>
 
-                 <div className="relative group inline-block">
-  <button
-    type="button"
-    className="text-gray-400 hover:text-blue-600 transition"
-  >
-    <FaInfo size={16} />
-  </button>
+                  <div className="relative group inline-block">
+                    <button
+                      type="button"
+                      className="text-gray-400 hover:text-blue-600 transition"
+                    >
+                      <FaInfo size={16} />
+                    </button>
 
-  {/* TOOLTIP */}
-  <div
-    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+                    {/* TOOLTIP */}
+                    <div
+                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
     hidden group-hover:block whitespace-nowrap
     bg-black text-white text-xs px-2 py-1 rounded shadow-lg z-50"
-  >
-    by checking this checkbox you allow to only show variant images in the marketplace.
-  </div>
-</div>
-
+                    >
+                      by checking this checkbox you allow to only show variant
+                      images in the marketplace.
+                    </div>
+                  </div>
                 </label>
               </div>
 
@@ -9232,10 +9232,10 @@ const CategorySelector = () => {
               <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60 text-center px-4">
                 <div className="w-14 h-14 border-4 border-white border-t-transparent rounded-full animate-spin mb-6" />
 
-                <p className="text-white text-sm font-medium tracking-wide opacity-80 mb-2">
+                {/* <p className="text-white text-sm font-medium tracking-wide opacity-80 mb-2">
                   Please wait while we {isEditing ? "update" : "create"} your
                   product...
-                </p>
+                </p> */}
 
                 <h2 className="text-white text-lg font-semibold transition-all duration-500">
                   {slides[slideIndex].title}
@@ -9246,7 +9246,7 @@ const CategorySelector = () => {
                 </p>
 
                 {/* Dots */}
-                <div className="flex gap-2 mt-4">
+                {/* <div className="flex gap-2 mt-4">
                   {slides.map((_, i) => (
                     <span
                       key={i}
@@ -9255,7 +9255,7 @@ const CategorySelector = () => {
                       }`}
                     />
                   ))}
-                </div>
+                </div> */}
               </div>
             )}
 

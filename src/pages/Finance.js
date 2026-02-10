@@ -533,7 +533,7 @@ useEffect(() => {
               }`}
               onClick={() => setActiveTab("Timelines")}
             >
-              Timelines & Commission
+              Timelines & Config
             </button>
           )}
 
@@ -924,7 +924,7 @@ useEffect(() => {
                 onChange={(e) => setGraceTime(Number(e.target.value))}
               />
             </div>
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">
                 Commission (%)
               </label>
@@ -946,7 +946,7 @@ useEffect(() => {
               <p className="text-xs text-gray-500 mt-1">
                 Platform fee deducted from merchant payouts
               </p>
-            </div>
+            </div> */}
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">

@@ -204,10 +204,10 @@
 //         let url = "";
 
 //         if (role === "Dev Admin" || role === "Master Admin") {
-//           url = "http://localhost:5000/size-chart/all";
+//           url = "https://multi-vendor-marketplace.vercel.app/size-chart/all";
 //         } else {
 //           if (!userId) return;
-//           url = `http://localhost:5000/size-chart/all/${userId}`;
+//           url = `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`;
 //         }
 
 //         const res = await fetch(url);
@@ -242,7 +242,7 @@
 //         console.log("👤 Fetching active shipping profiles for user:", userId);
 
 //         const res = await fetch(
-//           `http://localhost:5000/shippingProfile/${userId}`,
+//           `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`,
 //           {
 //             method: "GET",
 //             headers: {
@@ -274,7 +274,7 @@
 //     const fetchDbOptions = async () => {
 //       try {
 //         const res = await fetch(
-//           "http://localhost:5000/variantOption/getOptions",
+//           "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions",
 //         );
 //         const data = await res.json();
 //         if (Array.isArray(data)) {
@@ -372,7 +372,7 @@
 //         if (!userId) return;
 
 //         const res = await fetch(
-//           `http://localhost:5000/auth/getUserWithModules
+//           `https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules
 // /${userId}`,
 //           {
 //             method: "GET",
@@ -433,7 +433,7 @@
 
 //       try {
 //         const response = await fetch(
-//           "http://localhost:5000/category/getCategoryForProduct",
+//           "https://multi-vendor-marketplace.vercel.app/category/getCategoryForProduct",
 //           {
 //             method: "GET",
 //             headers: {
@@ -987,7 +987,7 @@
 //     const productId = product?.id || "null";
 
 //     if ((isPopupVisible || isMediaModalVisible) && userId) {
-//       fetch(`http://localhost:5000/product/getImageGallery/${productId}`, {
+//       fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
 //         method: "GET",
 //         headers: {
 //           "x-api-key": apiKey,
@@ -1358,7 +1358,7 @@
 //         const data = await res.json();
 
 //         if (data.secure_url) {
-//           await fetch("http://localhost:5000/product/addImageGallery", {
+//           await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
 //             method: "POST",
 //             headers: {
 //               Authorization: `Bearer ${token}`,
@@ -1443,7 +1443,7 @@
 //           const data = await res.json();
 
 //           if (data.secure_url) {
-//             await fetch("http://localhost:5000/product/addImageGallery", {
+//             await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
 //               method: "POST",
 //               headers: {
 //                 Authorization: `Bearer ${token}`,
@@ -1639,8 +1639,8 @@
 
 //   //     try {
 //   //       const url = isEditing
-//   //         ? `http://localhost:5000/product/updateProducts/${mongooseProductId}`
-//   //         : `http://localhost:5000/product/createProduct`;
+//   //         ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
+//   //         : `https://multi-vendor-marketplace.vercel.app/product/createProduct`;
 
 //   //       const method = isEditing ? "PATCH" : "POST";
 
@@ -1693,7 +1693,7 @@
 //   //           if (!variant.variantId) continue;
 
 //   //           await fetch(
-//   //             `http://localhost:5000/product/updateVariant/${productId}/${variant.variantId}`,
+//   //             `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variant.variantId}`,
 //   //             {
 //   //               method: "PUT",
 //   //               headers: {
@@ -1767,7 +1767,7 @@
 //   //       const hasVariantImages = uploadedVariantImages.length > 0;
 
 //   //       const imageSaveResponse = await fetch(
-//   //         `http://localhost:5000/product/updateImages/${productId}`,
+//   //         `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
 //   //         {
 //   //           method: "PUT",
 //   //           headers: {
@@ -1899,8 +1899,8 @@
 //     ======================= */
 //       const productRes = await fetch(
 //         isEditing
-//           ? `http://localhost:5000/product/updateProducts/${mongooseProductId}`
-//           : `http://localhost:5000/product/createProduct`,
+//           ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
+//           : `https://multi-vendor-marketplace.vercel.app/product/createProduct`,
 //         {
 //           method: isEditing ? "PATCH" : "POST",
 //           headers: {
@@ -1923,7 +1923,7 @@
 //     ======================= */
 //       for (const v of shopifyVariants) {
 //         await fetch(
-//           `http://localhost:5000/product/updateVariant/${productId}/${v.id}`,
+//           `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
 //           {
 //             method: "PUT",
 //             headers: {
@@ -1982,7 +1982,7 @@
 //        7. UPDATE IMAGES API
 //     ======================= */
 //       const imageRes = await fetch(
-//         `http://localhost:5000/product/updateImages/${productId}`,
+//         `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
 //         {
 //           method: "PUT",
 //           headers: {
@@ -2060,7 +2060,7 @@
 
 //     try {
 //       const response = await fetch(
-//         `http://localhost:5000/product/duplicateProduct/${product.shopifyId}`,
+//         `https://multi-vendor-marketplace.vercel.app/product/duplicateProduct/${product.shopifyId}`,
 //         {
 //           method: "POST",
 //           headers: {
@@ -2150,7 +2150,7 @@
 //       //   const hasVariantImages = uploadedVariantImages.length > 0;
 
 //       //   await fetch(
-//       //     `http://localhost:5000/product/updateImages/${duplicatedProductId}`,
+//       //     `https://multi-vendor-marketplace.vercel.app/product/updateImages/${duplicatedProductId}`,
 //       //     {
 //       //       method: "PUT",
 //       //       headers: {
@@ -5376,10 +5376,10 @@ const CategorySelector = () => {
         let url = "";
 
         if (role === "Dev Admin" || role === "Master Admin") {
-          url = "http://localhost:5000/size-chart/all";
+          url = "https://multi-vendor-marketplace.vercel.app/size-chart/all";
         } else {
           if (!userId) return;
-          url = `http://localhost:5000/size-chart/all/${userId}`;
+          url = `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`;
         }
 
         const res = await fetch(url);
@@ -5414,7 +5414,7 @@ const CategorySelector = () => {
         console.log("👤 Fetching active shipping profiles for user:", userId);
 
         const res = await fetch(
-          `http://localhost:5000/shippingProfile/${userId}`,
+          `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`,
           {
             method: "GET",
             headers: {
@@ -5446,7 +5446,7 @@ const CategorySelector = () => {
     const fetchDbOptions = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/variantOption/getOptions",
+          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions",
         );
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -5555,7 +5555,7 @@ const CategorySelector = () => {
         if (!userId) return;
 
         const res = await fetch(
-          `http://localhost:5000/auth/getUserWithModules
+          `https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules
 /${userId}`,
           {
             method: "GET",
@@ -5616,7 +5616,7 @@ const CategorySelector = () => {
 
       try {
         const response = await fetch(
-          "http://localhost:5000/category/getCategoryForProduct",
+          "https://multi-vendor-marketplace.vercel.app/category/getCategoryForProduct",
           {
             method: "GET",
             headers: {
@@ -6165,7 +6165,7 @@ const CategorySelector = () => {
 
     if ((isPopupVisible || isMediaModalVisible) && userId) {
       fetch(
-        `http://localhost:5000/product/getImageGallery/${productId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
         {
           method: "GET",
           headers: {
@@ -6557,7 +6557,7 @@ const CategorySelector = () => {
 
         if (data.secure_url) {
           await fetch(
-            "http://localhost:5000/product/addImageGallery",
+            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
             {
               method: "POST",
               headers: {
@@ -6645,7 +6645,7 @@ const CategorySelector = () => {
 
           if (data.secure_url) {
             await fetch(
-              "http://localhost:5000/product/addImageGallery",
+              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
               {
                 method: "POST",
                 headers: {
@@ -6699,7 +6699,7 @@ const CategorySelector = () => {
   //       "/manage-product",
   //     );
 
-  //     await fetch(`http://localhost:5000/product/updateImages/${productId}`, {
+  //     await fetch(`https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`, {
   //       method: "PUT",
   //       headers: {
   //         "x-api-key": apiKey,
@@ -6757,7 +6757,7 @@ const CategorySelector = () => {
   //     );
 
   //     const res = await fetch(
-  //       `http://localhost:5000/product/updateImages/${productId}`,
+  //       `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
   //       {
   //         method: "PUT",
   //         headers: {
@@ -6823,7 +6823,7 @@ const CategorySelector = () => {
       );
 
       const res = await fetch(
-        `http://localhost:5000/product/updateImages/${productId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
         {
           method: "PUT",
           headers: {
@@ -6940,8 +6940,8 @@ const CategorySelector = () => {
 
       const productRes = await fetch(
         isEditing
-          ? `http://localhost:5000/product/updateProducts/${mongooseProductId}`
-          : `http://localhost:5000/product/createProduct`,
+          ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
+          : `https://multi-vendor-marketplace.vercel.app/product/createProduct`,
         {
           method: isEditing ? "PATCH" : "POST",
           headers: {
@@ -6961,7 +6961,7 @@ const CategorySelector = () => {
 
       for (const v of shopifyVariants) {
         await fetch(
-          `http://localhost:5000/product/updateVariant/${productId}/${v.id}`,
+          `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
           {
             method: "PUT",
             headers: {
@@ -7108,8 +7108,8 @@ const CategorySelector = () => {
 
   //     const productRes = await fetch(
   //       isEditing
-  //         ? `http://localhost:5000/product/updateProducts/${mongooseProductId}`
-  //         : `http://localhost:5000/product/createProduct`,
+  //         ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
+  //         : `https://multi-vendor-marketplace.vercel.app/product/createProduct`,
   //       {
   //         method: isEditing ? "PATCH" : "POST",
   //         headers: {
@@ -7129,7 +7129,7 @@ const CategorySelector = () => {
 
   //     for (const v of shopifyVariants) {
   //       await fetch(
-  //         `http://localhost:5000/product/updateVariant/${productId}/${v.id}`,
+  //         `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
   //         {
   //           method: "PUT",
   //           headers: {
@@ -7182,7 +7182,7 @@ const CategorySelector = () => {
   //      7. UPDATE IMAGES API
   //   ======================= */
   //     const imageRes = await fetch(
-  //       `http://localhost:5000/product/updateImages/${productId}`,
+  //       `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
   //       {
   //         method: "PUT",
   //         headers: {
@@ -7260,7 +7260,7 @@ const CategorySelector = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/product/duplicateProduct/${product.shopifyId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/duplicateProduct/${product.shopifyId}`,
         {
           method: "POST",
           headers: {
@@ -7350,7 +7350,7 @@ const CategorySelector = () => {
       //   const hasVariantImages = uploadedVariantImages.length > 0;
 
       //   await fetch(
-      //     `http://localhost:5000/product/updateImages/${duplicatedProductId}`,
+      //     `https://multi-vendor-marketplace.vercel.app/product/updateImages/${duplicatedProductId}`,
       //     {
       //       method: "PUT",
       //       headers: {

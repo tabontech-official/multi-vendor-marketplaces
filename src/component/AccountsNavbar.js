@@ -77,7 +77,7 @@ const AccountsNavbar = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/auth/editProfile/${userId}`,
+        `https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`,
         {
           method: "PUT",
           body: form,
@@ -165,7 +165,7 @@ const AccountsNavbar = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/auth/createUserTagsModule",
+        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {

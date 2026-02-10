@@ -37,7 +37,7 @@
 
 //       try {
 //         const res = await fetch(
-//           `http://localhost:5000/auth/getMerchantAccountDetails/${userId}`
+//           `https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`
 //         );
 //         const data = await res.json();
 
@@ -120,7 +120,7 @@
   //     };
 
   //     const res = await fetch(
-  //       "http://localhost:5000/auth/addMerchantAccountDetails",
+  //       "https://multi-vendor-marketplace.vercel.app/auth/addMerchantAccountDetails",
   //       {
   //         method: "POST",
   //         headers: {
@@ -406,7 +406,7 @@ const FinanceSetting = () => {
       };
 
       const res = await fetch(
-        "http://localhost:5000/auth/addMerchantAccountDetails",
+        "https://multi-vendor-marketplace.vercel.app/auth/addMerchantAccountDetails",
         {
           method: "POST",
           headers: {
@@ -437,7 +437,7 @@ const FinanceSetting = () => {
       const userId = localStorage.getItem("userid");
       if (!userId) return;
       try {
-        const res = await fetch(`http://localhost:5000/auth/getMerchantAccountDetails/${userId}`);
+        const res = await fetch(`https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`);
         const data = await res.json();
         if (res.ok && data?.data) {
           const { bankDetails, paypalAccount, paypalAccountNo, paypalReferenceNo } = data.data;

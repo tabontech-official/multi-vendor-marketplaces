@@ -20,6 +20,9 @@ const PayoutDetails = () => {
     fees: 0,
     net: 0,
   });
+  const [paymentDate, setPaymentDate] = useState("");
+  const [notes, setNotes] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState("");
   const [isEditingBank, setIsEditingBank] = useState(false);
@@ -368,15 +371,9 @@ const PayoutDetails = () => {
         const updatedOrders = fetchedOrders.map((o) => {
           const gross = o.products.reduce((sum, p) => sum + (p.total || 0), 0);
 
-          const fee = o.products.reduce(
-            (sum, p) => sum + (p.commissionAmount || 0),
-            0,
-          );
+          const fee = Number(o.commissionAmount || 0);
 
-          const net = o.products.reduce(
-            (sum, p) => sum + (p.netAmount || 0),
-            0,
-          );
+          const net = Number(o.amount || 0);
 
           return {
             ...o,
@@ -385,21 +382,23 @@ const PayoutDetails = () => {
             net,
           };
         });
+        const payoutData = json?.payouts?.[0];
+
+        setReferenceNo(payoutData?.referenceNo || "");
+        setPaymentMethod(payoutData?.paymentMethod || "");
+        setPaymentDate(
+          payoutData?.depositedDate
+            ? dayjs(payoutData.depositedDate).format("MMM D, YYYY")
+            : "",
+        );
 
         const charges = updatedOrders.reduce((s, o) => s + o.gross, 0);
         const fees = updatedOrders.reduce((s, o) => s + o.fee, 0);
         const refunds = updatedOrders.reduce((s, o) => s + (o.refund || 0), 0);
         const net = updatedOrders.reduce((s, o) => s + o.net, 0);
 
-        const referenceNo = updatedOrders[0]?.referenceNo || "";
-        const paypalAccount = updatedOrders[0]?.paypalAccount || "";
-
         setOrders(updatedOrders);
-        setSummary({ charges, refunds, fees, net, referenceNo, paypalAccount });
-
-        setReferenceNo(referenceNo);
-        setTempReferenceNo(referenceNo);
-        setTempBankAccount(paypalAccount);
+        setSummary({ charges, refunds, fees, net, referenceNo });
       } catch (err) {
         console.error("Error fetching payout orders:", err);
       } finally {
@@ -417,22 +416,25 @@ const PayoutDetails = () => {
   const closeReferencePopup = () => setOpen(false);
   const handleSave = async () => {
     try {
+      if (!reference || !paymentMethod) {
+        showToast("error", "Please enter reference and payment method");
+        return;
+      }
+
       const apiKey = localStorage.getItem("apiKey");
       const apiSecretKey = localStorage.getItem("apiSecretKey");
-      const userIdsSet = new Set();
 
-      orders.forEach((order) => {
-        order.products?.forEach((product) => {
-          if (product.userId) {
-            userIdsSet.add(product.userId);
-          }
-        });
-      });
+      // ✅ Collect unique merchantIds from orders
+      const merchantIds = [
+        ...new Set(
+          orders.flatMap((order) =>
+            order.products?.map((product) => product.userId),
+          ),
+        ),
+      ].filter(Boolean);
 
-      const UserIds = Array.from(userIdsSet);
-
-      if (UserIds.length === 0) {
-        showToast("error", "No user IDs found to update.");
+      if (merchantIds.length === 0) {
+        showToast("error", "No merchants found for this payout.");
         return;
       }
 
@@ -446,8 +448,11 @@ const PayoutDetails = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            UserIds,
+            payoutDate,
+            status,
             referenceNo: reference,
+            paymentMethod,
+            merchantIds, // 🔥 important
           }),
         },
       );
@@ -455,14 +460,19 @@ const PayoutDetails = () => {
       const result = await res.json();
 
       if (res.ok) {
-        showToast("success", "Reference number added successfully!");
+        showToast("success", "Payout marked as Deposited!");
         closeReferencePopup();
+
+        // 🔥 Better than window reload:
+        setTimeout(() => {
+          navigate(0); // refresh route cleanly
+        }, 1000);
       } else {
-        showToast("error", "Something went wrong.");
+        showToast("error", result.message || "Something went wrong.");
       }
     } catch (err) {
-      console.error("Failed to update reference numbers:", err);
-      alert("Error occurred while updating reference numbers.");
+      console.error(err);
+      showToast("error", "Server error.");
     }
   };
 
@@ -545,14 +555,15 @@ const PayoutDetails = () => {
   return (
     <div className="p-6 bg-[#f6f6f7] min-h-screen">
       <div className="flex justify-end mb-2">
-        {(userRole === "Master Admin" || userRole === "Dev Admin") && (
-          <button
-            className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
-            onClick={openReferencePopup}
-          >
-            Add reference
-          </button>
-        )}
+        {(userRole === "Master Admin" || userRole === "Dev Admin") &&
+          status !== "Deposited" && (
+            <button
+              className="bg-blue-600 text-white px-4 py-2 text-sm rounded-lg shadow hover:bg-blue-700 transition"
+              onClick={openReferencePopup}
+            >
+              Process Payout
+            </button>
+          )}
       </div>
 
       <div
@@ -644,76 +655,33 @@ const PayoutDetails = () => {
             </div>
           )}
 
-          {(userRole === "Dev Admin" || userRole === "Master Admin") && (
-            <div className="text-sm text-gray-600 space-y-4">
-              <div className="flex items-center">
-                <strong className="w-40">Bank reference:</strong>
-                <div className="relative w-64 flex items-center">
-                  <input
-                    type="text"
-                    value={isEditingRef ? tempReferenceNo : referenceNo}
-                    readOnly={!isEditingRef || isLoading}
-                    onChange={(e) => setTempReferenceNo(e.target.value)}
-                    className={`w-full text-sm px-2 py-1 border border-gray-300 rounded-md ${
-                      isEditingRef && !isLoading ? "bg-white" : "bg-gray-100"
-                    } text-black pr-12`}
-                  />
-
-                  <div className="absolute right-2 flex gap-1 items-center">
-                    {!isEditingRef ? (
-                      <FaEdit
-                        className="text-gray-400 cursor-pointer"
-                        onClick={() => !isLoading && setIsEditingRef(true)}
-                      />
-                    ) : (
-                      <>
-                        <button
-                          className="text-green-600 text-sm flex items-center justify-center"
-                          disabled={isLoading}
-                          onClick={saveReferenceNo}
-                        >
-                          {isLoading ? (
-                            <svg
-                              className="animate-spin h-4 w-4 text-green-600"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                              />
-                            </svg>
-                          ) : (
-                            "✔"
-                          )}
-                        </button>
-                        <button
-                          className="text-red-600 text-sm"
-                          disabled={isLoading}
-                          onClick={() => {
-                            setTempReferenceNo(referenceNo);
-                            setIsEditingRef(false);
-                          }}
-                        >
-                          ✖
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
+          {/* {(userRole === "Dev Admin" || userRole === "Master Admin") && ( */}
+          <div className="text-sm text-gray-700 space-y-3">
+            {/* Reference Number */}
+            <div className="flex items-center">
+              <strong className="w-40">Reference No:</strong>
+              <span className="bg-gray-100 px-3 py-1 rounded-md text-gray-800">
+                {referenceNo || "—"}
+              </span>
             </div>
-          )}
+
+            {/* Payment Method */}
+            <div className="flex items-center">
+              <strong className="w-40">Payment Method:</strong>
+              <span className="bg-gray-100 px-3 py-1 rounded-md text-gray-800">
+                {paymentMethod || "—"}
+              </span>
+            </div>
+
+            {/* Deposited Date */}
+            <div className="flex items-center">
+              <strong className="w-40">Deposited On:</strong>
+              <span className="bg-gray-100 px-3 py-1 rounded-md text-gray-800">
+                {paymentDate || "—"}
+              </span>
+            </div>
+          </div>
+          {/* )} */}
         </div>
         <div className="w-full md:w-[240px] border-l md:pl-6 mt-6 md:mt-0">
           <h2 className="text-sm font-semibold mb-2">Summary</h2>
@@ -897,36 +865,61 @@ const PayoutDetails = () => {
             </button>
 
             <div className="text-center">
-              <div className="text-3xl mb-3 text-blue-600">🏷️</div>
+              <div className="text-3xl mb-3 text-blue-600">💳</div>
               <h2 className="text-xl font-bold text-gray-800 mb-2">
-                Add Reference
+                Complete Payout Details
               </h2>
               <p className="text-sm text-gray-500 mb-6">
-                Enter the bank reference number for this payout group.
+                Enter payout reference and payment method details.
               </p>
+            </div>
 
+            {/* Reference Number */}
+            <div className="mb-4">
+              <label className="text-sm font-medium text-gray-700">
+                Reference Number
+              </label>
               <input
                 type="text"
-                placeholder="e.g. 12345678"
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition mb-6"
+                placeholder="e.g. TXN123456"
+                className="w-full border border-gray-300 rounded-md px-4 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
               />
+            </div>
 
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={closeReferencePopup}
-                  className="px-5 py-2 rounded-full bg-gray-200 hover:bg-gray-300 text-sm transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-6 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 text-sm transition"
-                >
-                  Save
-                </button>
-              </div>
+            {/* Payment Method */}
+            <div className="mb-4">
+              <label className="text-sm font-medium text-gray-700">
+                Payment Method
+              </label>
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-4 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select Method</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="PayPal">PayPal</option>
+                <option value="Stripe">Stripe</option>
+                <option value="Manual">Manual</option>
+              </select>
+            </div>
+
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={closeReferencePopup}
+                className="px-5 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-sm"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleSave}
+                className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-sm"
+              >
+                Confirm & Mark Deposited
+              </button>
             </div>
           </div>
         </div>

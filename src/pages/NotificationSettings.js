@@ -1,7 +1,12 @@
-
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { MdNotificationsActive, MdEmail, MdClose, MdAdd, MdArrowBack } from "react-icons/md";
+import {
+  MdNotificationsActive,
+  MdEmail,
+  MdClose,
+  MdAdd,
+  MdArrowBack,
+} from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import SettingsSidebar from "../component/SettingsSidebar";
 import axios from "axios";
@@ -11,61 +16,63 @@ const NotificationSettings = () => {
   const [allowed, setAllowed] = useState(false);
   const [staffEmail, setStaffEmail] = useState("");
   const [emailList, setEmailList] = useState(["admin-audit@store.com"]);
-const API_BASE_URL = "https://multi-vendor-marketplace.vercel.app/notificationSettings";
+  const API_BASE_URL = "https://multi-vendor-marketplace.vercel.app/notificationSettings";
 
   // Updated state for Approval Workflows
   const [settings, setSettings] = useState({
     userRegistrationApproval: true,
     productListingApproval: true,
     systemAlerts: false,
+    payoutNotification: false,
   });
 
-useEffect(() => {
-  const token = localStorage.getItem("usertoken");
-  if (!token) {
-    navigate("/login");
-    return;
-  }
-
-  try {
-    const decoded = jwtDecode(token);
-    const role = decoded?.payLoad?.role;
-    const userId = localStorage.getItem("userid")
-
-    if (role === "Dev Admin" || role === "Master Admin") {
-      setAllowed(true);
-
-      // 🔥 GET notification settings
-      axios
-        .get(`${API_BASE_URL}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-       .then((res) => {
-  const data = res.data;
-
-  setSettings({
-    userRegistrationApproval: data.approvals?.userRegistrationApproval ?? true,
-    productListingApproval: data.approvals?.productListingApproval ?? true,
-    systemAlerts: data.approvals?.systemAlerts ?? false,
-  });
-
-  setEmailList(data.recipientEmails || []);
-})
-
-        .catch((err) => {
-          console.error("Failed to load notification settings", err);
-        });
-
-    } else {
-      navigate("/unauthorized");
+  useEffect(() => {
+    const token = localStorage.getItem("usertoken");
+    if (!token) {
+      navigate("/login");
+      return;
     }
-  } catch (err) {
-    navigate("/login");
-  }
-}, [navigate]);
 
+    try {
+      const decoded = jwtDecode(token);
+      const role = decoded?.payLoad?.role;
+      const userId = localStorage.getItem("userid");
+
+      if (role === "Dev Admin" || role === "Master Admin") {
+        setAllowed(true);
+
+        // 🔥 GET notification settings
+        axios
+          .get(`${API_BASE_URL}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((res) => {
+            const data = res.data;
+
+            setSettings({
+              userRegistrationApproval:
+                data.approvals?.userRegistrationApproval ?? true,
+              productListingApproval:
+                data.approvals?.productListingApproval ?? true,
+              systemAlerts: data.approvals?.systemAlerts ?? false,
+              payoutNotification: data.approvals?.payoutNotification ?? false, // ✅ NEW
+            });
+
+            setEmailList(data.recipientEmails || []);
+          })
+
+          .catch((err) => {
+            console.error("Failed to load notification settings", err);
+          });
+      } else {
+        navigate("/unauthorized");
+      }
+    } catch (err) {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   if (!allowed) return null;
 
@@ -85,34 +92,29 @@ useEffect(() => {
     setEmailList(emailList.filter((email) => email !== emailToRemove));
   };
 
-const handleSave = async () => {
-  try {
-    const token = localStorage.getItem("usertoken");
-    const decoded = jwtDecode(token);
-    const userId = localStorage.getItem("userid")
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("usertoken");
+      const decoded = jwtDecode(token);
+      const userId = localStorage.getItem("userid");
 
-    const finalData = {
-      ...settings,
-      recipientEmails: emailList,
-    };
+      const finalData = {
+        ...settings,
+        recipientEmails: emailList,
+      };
 
-    await axios.post(
-      `${API_BASE_URL}`,
-      finalData,
-      {
+      await axios.post(`${API_BASE_URL}`, finalData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
-    );
+      });
 
-    alert("✅ Notification settings saved successfully!");
-  } catch (error) {
-    console.error("Save failed:", error);
-    alert("❌ Failed to save notification settings");
-  }
-};
-
+      alert("✅ Notification settings saved successfully!");
+    } catch (error) {
+      console.error("Save failed:", error);
+      alert("❌ Failed to save notification settings");
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-[#f1f1f1] font-sans text-[#303030]">
@@ -122,10 +124,15 @@ const handleSave = async () => {
         {/* Header */}
         <div className="sticky top-0 z-10 bg-[#f1f1f1] px-8 py-4 border-b border-gray-200 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} className="p-1 hover:bg-gray-200 rounded">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-1 hover:bg-gray-200 rounded"
+            >
               <MdArrowBack className="text-xl text-gray-600" />
             </button>
-            <h1 className="text-xl font-semibold text-gray-900">Notification Settings</h1>
+            <h1 className="text-xl font-semibold text-gray-900">
+              Notification Settings
+            </h1>
           </div>
           <button
             onClick={handleSave}
@@ -136,13 +143,15 @@ const handleSave = async () => {
         </div>
 
         <div className="max-w-[1000px] mx-auto mt-8 px-8 space-y-10">
-          
           {/* Section 1: Approval Workflows */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-1">
-              <h2 className="text-base font-semibold text-gray-900">Approval Workflows</h2>
+              <h2 className="text-base font-semibold text-gray-900">
+                Approval Workflows
+              </h2>
               <p className="text-sm text-gray-500 mt-1">
-                Control which events trigger a notification email to the admin and staff.
+                Control which events trigger a notification email to the admin
+                and staff.
               </p>
             </div>
             <div className="md:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -165,6 +174,12 @@ const handleSave = async () => {
                   enabled={settings.systemAlerts}
                   onChange={() => toggle("systemAlerts")}
                 />
+                <ToggleItem
+                  label="Payout notifications"
+                  desc="Receive notifications when a payout transaction is completed or failed."
+                  enabled={settings.payoutNotification}
+                  onChange={() => toggle("payoutNotification")}
+                />
               </div>
             </div>
           </div>
@@ -174,9 +189,12 @@ const handleSave = async () => {
           {/* Section 2: Recipient List */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-1">
-              <h2 className="text-base font-semibold text-gray-900">Staff Recipients</h2>
+              <h2 className="text-base font-semibold text-gray-900">
+                Staff Recipients
+              </h2>
               <p className="text-sm text-gray-500 mt-1">
-                Add staff emails to ensure approval requests are CC'd to the right team members.
+                Add staff emails to ensure approval requests are CC'd to the
+                right team members.
               </p>
             </div>
             <div className="md:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -197,11 +215,16 @@ const handleSave = async () => {
               </form>
 
               <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Notification List</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                  Notification List
+                </h3>
                 {emailList.map((email) => (
-                  <div key={email} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                  <div
+                    key={email}
+                    className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"
+                  >
                     <span className="text-sm text-gray-700">{email}</span>
-                    <button 
+                    <button
                       onClick={() => removeEmail(email)}
                       className="text-gray-400 hover:text-red-600 p-1"
                     >
@@ -210,21 +233,22 @@ const handleSave = async () => {
                   </div>
                 ))}
                 {emailList.length === 0 && (
-                  <p className="text-sm text-gray-400 italic">No additional staff emails configured.</p>
+                  <p className="text-sm text-gray-400 italic">
+                    No additional staff emails configured.
+                  </p>
                 )}
               </div>
             </div>
           </div>
 
           <div className="flex justify-end pt-4 border-t border-gray-200">
-             <button
+            <button
               onClick={handleSave}
               className="bg-[#18181b] hover:bg-gray-900 text-white px-6 py-2 rounded-md font-semibold text-sm transition shadow-sm"
             >
               Save
             </button>
           </div>
-
         </div>
       </div>
     </div>
@@ -235,7 +259,10 @@ export default NotificationSettings;
 
 const ToggleItem = ({ label, desc, enabled, onChange }) => {
   return (
-    <div className="flex items-start justify-between p-5 hover:bg-gray-50 transition-colors cursor-pointer" onClick={onChange}>
+    <div
+      className="flex items-start justify-between p-5 hover:bg-gray-50 transition-colors cursor-pointer"
+      onClick={onChange}
+    >
       <div className="pr-4">
         <h3 className="text-sm font-medium text-gray-900">{label}</h3>
         <p className="text-sm text-gray-500 mt-0.5 leading-relaxed">{desc}</p>

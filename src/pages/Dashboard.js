@@ -300,22 +300,22 @@ const Dashboard = () => {
     //   );
     //   // window.location.reload();
     // };
-const handleUploadFinished = (event) => {
-  const { productId } = event.detail || {};
+    const handleUploadFinished = (event) => {
+      const { productId } = event.detail || {};
 
-  if (!productId) return;
+      if (!productId) return;
 
-  setImageUploadStatus({
-    productId,
-    finished: true,
-  });
+      setImageUploadStatus({
+        productId,
+        finished: true,
+      });
 
-  showToast("success", "Images uploaded successfully");
-  addNotification(
-    "Product images uploaded successfully!",
-    "Manage product"
-  );
-};
+      showToast("success", "Images uploaded successfully");
+      addNotification(
+        "Product images uploaded successfully!",
+        "Manage product",
+      );
+    };
 
     window.addEventListener("image-upload-finished", handleUploadFinished);
     return () => {
@@ -1425,51 +1425,51 @@ const handleUploadFinished = (event) => {
                           </button>
                         )} */}
                         {imageUploadStatus?.productId === product.id ? (
-  imageUploadStatus.finished ? (
-    <button
- onClick={() => {
-        fetchProductData();
-        setImageUploadStatus(null);
-      }}      className="flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition"
-    >
-      <HiOutlineRefresh className="w-4 h-4" />
-      Refresh
-    </button>
-  ) : (
-    <div className="flex items-center gap-2 text-sm text-gray-500">
-      <svg
-        className="animate-spin h-4 w-4 text-blue-500"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        />
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-        />
-      </svg>
-      <span>Uploading…</span>
-    </div>
-  )
-) : (
-  <button
-    className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition"
-    onClick={() => OnEdit(product)}
-  >
-    <MdEdit className="mr-1" />
-    Edit
-  </button>
-)}
-
+                          imageUploadStatus.finished ? (
+                            <button
+                              onClick={() => {
+                                fetchProductData();
+                                setImageUploadStatus(null);
+                              }}
+                              className="flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition"
+                            >
+                              <HiOutlineRefresh className="w-4 h-4" />
+                              Refresh
+                            </button>
+                          ) : (
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                              <svg
+                                className="animate-spin h-4 w-4 text-blue-500"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                />
+                              </svg>
+                              <span>Uploading…</span>
+                            </div>
+                          )
+                        ) : (
+                          <button
+                            className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition"
+                            onClick={() => OnEdit(product)}
+                          >
+                            <MdEdit className="mr-1" />
+                            Edit
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))

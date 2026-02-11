@@ -158,14 +158,17 @@ const Finance = () => {
 
     setUsersLoading(true);
     try {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/auth/getAllUsers", {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/auth/getAllUsers",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       const data = await res.json();
       setUsers(data || []);
@@ -197,15 +200,18 @@ const Finance = () => {
     };
 
     try {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       const result = await res.json();
 
@@ -233,14 +239,17 @@ const Finance = () => {
       }
 
       try {
-        const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates", {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
+        const res = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
           },
-        });
+        );
 
         if (!res.ok) {
           console.error("Failed to fetch payout config:", res.statusText);
@@ -913,19 +922,20 @@ const Finance = () => {
                             <td className="p-3">{item.transactionDates}</td>
                             <td className="p-3">
                               <td className="p-3">
-  <span
-    className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-      item.orders?.[0]?.status?.toLowerCase() === "pending"
-        ? "bg-blue-100 text-blue-700"
-        : item.orders?.[0]?.status?.toLowerCase() === "due"
-        ? "bg-red-100 text-yellow-700"
-        : "bg-green-100 text-green-700"
-    }`}
-  >
-    {item.orders?.[0]?.status || item.status}
-  </span>
-</td>
-
+                                <span
+                                  className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                                    item.orders?.[0]?.status?.toLowerCase() ===
+                                    "pending"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : item.orders?.[0]?.status?.toLowerCase() ===
+                                          "due"
+                                        ? "bg-red-100 text-yellow-700"
+                                        : "bg-green-100 text-green-700"
+                                  }`}
+                                >
+                                  {item.orders?.[0]?.status || item.status}
+                                </span>
+                              </td>
                             </td>
                             <td className="p-3">{item.totalFulfilled}</td>
                             <td className="p-3">{item.totalUnfulfilled}</td>
@@ -1083,7 +1093,7 @@ const Finance = () => {
                     <th className="p-3">Name</th>
                     <th className="p-3">Email</th>
                     <th className="p-3">Role</th>
-                    <th className="p-3">Comission</th>
+                    <th className="p-3">Comission ( % )</th>
                     <th className="p-3">Merchant ID</th>
                   </tr>
                 </thead>

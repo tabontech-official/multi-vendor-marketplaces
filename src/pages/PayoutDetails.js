@@ -374,19 +374,46 @@ const PayoutDetails = () => {
         const fetchedOrders = json?.payouts?.[0]?.orders || [];
 
         const updatedOrders = fetchedOrders.map((o) => {
-          const gross = o.products.reduce((sum, p) => sum + (p.total || 0), 0);
+  let gross = 0;
+  let fee = 0;
+  let net = 0;
 
-          const fee = Number(o.commissionAmount || 0);
+  if (userRole === "Merchant") {
+    // 🔹 MERCHANT VIEW (simple structure)
+    gross = o.products?.reduce(
+      (sum, p) => sum + Number(p.total || 0),
+      0
+    );
 
-          const net = Number(o.amount || 0);
+    fee = Number(o.commissionAmount || 0);
 
-          return {
-            ...o,
-            gross,
-            fee,
-            net,
-          };
-        });
+    net = Number(o.amount || 0);
+  } else {
+    // 🔹 ADMIN VIEW (full commission breakdown)
+    gross = o.products?.reduce(
+      (sum, p) => sum + Number(p.total || 0),
+      0
+    );
+
+    fee = o.products?.reduce(
+      (sum, p) => sum + Number(p.commissionAmount || 0),
+      0
+    );
+
+    net = o.products?.reduce(
+      (sum, p) => sum + Number(p.netAmount || 0),
+      0
+    );
+  }
+
+  return {
+    ...o,
+    gross,
+    fee,
+    net,
+  };
+});
+
         const payoutData = json?.payouts?.[0];
 
         setReferenceNo(payoutData?.referenceNo || "");

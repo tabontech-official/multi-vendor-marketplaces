@@ -63,7 +63,9 @@ const PayoutDetails = () => {
         const userId = localStorage.getItem("userid");
         if (!userId) return;
 
-        fetch(`https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`)
+        fetch(
+          `https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`,
+        )
           .then((res) => res.json())
           .then((data) => {
             if (data?.data) {
@@ -158,10 +160,13 @@ const PayoutDetails = () => {
       }
 
       // Send PayPal update request
-      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
-        merchantIds,
-        payPal: account,
-      });
+      const res = await axios.post(
+        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
+        {
+          merchantIds,
+          payPal: account,
+        },
+      );
 
       if (res.status === 200) {
         setBankAccount(account);
@@ -554,11 +559,18 @@ const PayoutDetails = () => {
 
   return (
     <div className="p-6 bg-[#f6f6f7] min-h-screen">
-      <div className="flex justify-end mb-2">
+      <div className="flex justify-between items-center mb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 h-8 text-sm font-medium rounded-md shadow-sm"
+        >
+          ← Back
+        </button>
+
         {(userRole === "Master Admin" || userRole === "Dev Admin") &&
           status !== "Deposited" && (
             <button
-              className="bg-blue-600 text-white px-4 py-2 text-sm rounded-lg shadow hover:bg-blue-700 transition"
+              className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
               onClick={openReferencePopup}
             >
               Process Payout
@@ -656,31 +668,37 @@ const PayoutDetails = () => {
           )}
 
           {/* {(userRole === "Dev Admin" || userRole === "Master Admin") && ( */}
-          <div className="text-sm text-gray-700 space-y-3">
-            {/* Reference Number */}
-            <div className="flex items-center">
-              <strong className="w-40">Reference No:</strong>
-              <span className="bg-gray-100 px-3 py-1 rounded-md text-gray-800">
-                {referenceNo || "—"}
-              </span>
-            </div>
+          {(referenceNo || paymentMethod || paymentDate) && (
+            <div className="text-sm text-gray-700 space-y-3">
+              {referenceNo && (
+                <div className="flex items-center">
+                  <strong className="w-40">Reference No:</strong>
+                  <span className="bg-gray-100 px-3 py-1 rounded-md text-gray-800">
+                    {referenceNo}
+                  </span>
+                </div>
+              )}
 
-            {/* Payment Method */}
-            <div className="flex items-center">
-              <strong className="w-40">Payment Method:</strong>
-              <span className="bg-gray-100 px-3 py-1 rounded-md text-gray-800">
-                {paymentMethod || "—"}
-              </span>
-            </div>
+              {paymentMethod && (
+                <div className="flex items-center">
+                  <strong className="w-40">Payment Method:</strong>
+                  <span className="bg-gray-100 px-3 py-1 rounded-md text-gray-800">
+                    {paymentMethod}
+                  </span>
+                </div>
+              )}
 
-            {/* Deposited Date */}
-            <div className="flex items-center">
-              <strong className="w-40">Deposited On:</strong>
-              <span className="bg-gray-100 px-3 py-1 rounded-md text-gray-800">
-                {paymentDate || "—"}
-              </span>
+              {paymentDate && (
+                <div className="flex items-center">
+                  <strong className="w-40">Deposited On:</strong>
+                  <span className="bg-gray-100 px-3 py-1 rounded-md text-gray-800">
+                    {paymentDate}
+                  </span>
+                </div>
+              )}
             </div>
-          </div>
+          )}
+
           {/* )} */}
         </div>
         <div className="w-full md:w-[240px] border-l md:pl-6 mt-6 md:mt-0">

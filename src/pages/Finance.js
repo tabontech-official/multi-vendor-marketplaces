@@ -46,6 +46,56 @@ const Finance = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10); // fixed page size
   const [totalPages, setTotalPages] = useState(1);
+ const handleExport = () => {
+  if (activeTab !== "merchant-list") {
+    showToast("error", "Export is available only in Merchant List tab");
+    return;
+  }
+
+  if (!editableMerchants.length) {
+    showToast("error", "No data available to export");
+    return;
+  }
+
+  const headers = [
+    "Name",
+    "Email",
+    "Role",
+    "commission",
+    "merchantId",
+  ];
+
+  const rows = editableMerchants.map((user) => [
+    `${user.firstName || ""} ${user.lastName || ""}`,
+    user.email || "",
+    user.role || "",
+    user.commissionValue ?? user.comissionRate ?? "",
+    user.shopifyId || "",   // merchantId
+  ]);
+
+  const csvContent =
+    [headers, ...rows]
+      .map((row) =>
+        row
+          .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+          .join(",")
+      )
+      .join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute("download", "merchant_commissions.csv");
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  showToast("success", "CSV exported successfully!");
+};
+
+
   const fetchAllUsers = async () => {
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
@@ -436,6 +486,58 @@ useEffect(() => {
   );
 }, [users]);
 
+const [importModal, setImportModal] = useState(false);
+const [selectedFile, setSelectedFile] = useState(null);
+const [importLoading, setImportLoading] = useState(false);
+const handleBulkImport = async () => {
+  if (!selectedFile) {
+    showToast("error", "Please select a CSV file");
+    return;
+  }
+
+  const apiKey = localStorage.getItem("apiKey");
+  const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+  const formData = new FormData();
+  formData.append("file", selectedFile);
+
+  try {
+    setImportLoading(true);
+
+    const res = await fetch(
+      "https://multi-vendor-marketplace.vercel.app/auth/bulk-update-commission",
+      {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+        },
+        body: formData,
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showToast("error", data?.message || "Bulk update failed");
+      return;
+    }
+
+    showToast(
+      "success",
+      `Updated: ${data.modifiedCount} merchants successfully`
+    );
+
+    setImportModal(false);
+    setSelectedFile(null);
+    fetchAllUsers(); // refresh list
+  } catch (error) {
+    console.error("Bulk import error:", error);
+    showToast("error", "Something went wrong");
+  } finally {
+    setImportLoading(false);
+  }
+};
 
  const updateMerchantCommission = async (merchantId, commission) => {
   const apiKey = localStorage.getItem("apiKey");
@@ -486,7 +588,7 @@ useEffect(() => {
         </div>
 
         {/* Center: Search */}
-        {/* <div className="w-full md:w-1/3 md:absolute md:left-1/2 md:-translate-x-1/2">
+        <div className="w-full md:w-1/3 md:absolute md:left-1/2 md:-translate-x-1/2">
           <input
             type="text"
             placeholder="Search..."
@@ -494,22 +596,24 @@ useEffect(() => {
             onChange={(e) => setSearchVal(e.target.value)}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
-        </div> */}
+        </div>
 
-        {/* {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+        {(userRole === "Master Admin" || userRole === "Dev Admin") && (
           <div className="flex gap-2 justify-end">
-            <button className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm">
+            <button  onClick={() => setImportModal(true)} className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm">
               <CiImport className="w-4 h-4" />
               Import
             </button>
 
-            <button className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm">
+            <button   onClick={handleExport}
+ className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm">
               <FaFileImport className="w-4 h-4" />
               Export
             </button>
           </div>
-        )} */}
+        )}
       </div>
+
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 border-b pb-2 gap-4">
         <div className="flex space-x-4">
@@ -1166,6 +1270,102 @@ useEffect(() => {
           <span>{toast.message}</span>
         </div>
       )}
+{importModal && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+    onClick={() => {
+      setImportModal(false);
+      setSelectedFile(null);
+    }}
+  >
+    <div
+      className="bg-white w-full max-w-lg rounded-xl shadow-2xl p-6 relative animate-fadeIn"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Close Button */}
+      <button
+        onClick={() => {
+          setImportModal(false);
+          setSelectedFile(null);
+        }}
+        className="absolute top-4 right-4 text-gray-400 hover:text-black text-lg"
+      >
+        ✕
+      </button>
+
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="p-3 bg-blue-100 text-blue-600 rounded-full">
+          <HiOutlineUpload className="w-6 h-6" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold">
+            Import Commission Data
+          </h2>
+          <p className="text-sm text-gray-500">
+            Upload CSV file to bulk update merchant commissions.
+          </p>
+        </div>
+      </div>
+
+      {/* Upload Area */}
+      <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:border-blue-500 transition">
+        <input
+          type="file"
+          accept=".csv"
+          hidden
+          onChange={(e) => setSelectedFile(e.target.files[0])}
+        />
+
+        <HiOutlineUpload className="w-8 h-8 text-gray-400 mb-2" />
+        <span className="text-sm text-gray-600">
+          Click to select CSV file
+        </span>
+        <span className="text-xs text-gray-400 mt-1">
+          Only .csv files are supported
+        </span>
+      </label>
+
+      {/* Selected File Preview */}
+      {selectedFile && (
+        <div className="mt-4 bg-gray-50 border rounded-md p-3 text-sm flex justify-between items-center">
+          <span className="truncate">{selectedFile.name}</span>
+          <button
+            onClick={() => setSelectedFile(null)}
+            className="text-red-500 hover:underline text-xs"
+          >
+            Remove
+          </button>
+        </div>
+      )}
+
+      {/* Footer Buttons */}
+      <div className="flex justify-end gap-3 mt-6">
+        <button
+          onClick={() => {
+            setImportModal(false);
+            setSelectedFile(null);
+          }}
+          className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleBulkImport}
+          disabled={!selectedFile || importLoading}
+          className={`px-4 py-2 text-sm rounded-md text-white ${
+            importLoading
+              ? "bg-blue-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
+        >
+          {importLoading ? "Uploading..." : "Upload File"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* {paypalPopup && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">

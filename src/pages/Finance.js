@@ -785,7 +785,7 @@ const Finance = () => {
             {loading ? (
               <div className="flex justify-center items-center py-10">
                 <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
-                loading...
+                fetching data...
               </div>
             ) : filteredPayouts.length > 0 ? (
               <table className="w-full border-collapse bg-white">

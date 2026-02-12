@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   HiOutlineChartBar,
   HiOutlineCheckCircle,
+  HiOutlineClipboardCopy,
   HiOutlineClock,
   HiOutlineCurrencyDollar,
   HiOutlineDownload,
@@ -20,6 +21,12 @@ import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import { useNavigate, useNavigation } from "react-router-dom";
 import { FaEdit, FaFileImport } from "react-icons/fa";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
+
 dayjs.extend(minMax);
 const Finance = () => {
   const { addNotification } = useNotification();
@@ -36,12 +43,14 @@ const Finance = () => {
 
   const [searchVal, setSearchVal] = useState("");
   const [summary, setSummary] = useState({
-    available: 0,
-    pending: 0,
-    due: 0,
+    totalDue: 0,
+    dueToday: 0,
+    overdue: 0,
     deposited: 0,
   });
 
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [paypalPopup, setPaypalPopup] = useState(false);
   const [paypalAccountInput, setPaypalAccountInput] = useState("");
@@ -62,51 +71,60 @@ const Finance = () => {
   useEffect(() => {
     if (!payouts.length) {
       setSummary({
-        available: 0,
-        pending: 0,
-        due: 0,
+        totalDue: 0,
+        dueToday: 0,
+        overdue: 0,
         deposited: 0,
       });
       return;
     }
 
-    let pending = 0;
-    let due = 0;
+    let totalDue = 0;
+    let dueToday = 0;
+    let overdue = 0;
     let deposited = 0;
+
+    const today = dayjs();
 
     payouts.forEach((payout) => {
       const status = payout.status?.toLowerCase();
+      const payoutDate = dayjs(payout.sortKey || payout.payoutDate);
 
       let payoutTotal = 0;
 
-      // ✅ Merchant API structure
       if (payout.totalAmount !== undefined) {
         payoutTotal = Number(payout.totalAmount);
-      }
-
-      // ✅ If amount is string like "$257.30 AUD"
-      else if (payout.amount) {
+      } else if (payout.amount) {
         payoutTotal = parseFloat(payout.amount.replace(/[^0-9.-]+/g, ""));
-      }
-
-      // ✅ Admin API structure (fallback)
-      else if (payout.orders) {
+      } else if (payout.orders) {
         payoutTotal = payout.orders.reduce(
           (sum, order) => sum + (order.netAmount || order.amount || 0),
           0,
         );
       }
 
-      if (status === "pending") pending += payoutTotal;
-      if (status === "due") due += payoutTotal;
-      if (status === "deposited") deposited += payoutTotal;
+      if (status === "due") {
+        totalDue += payoutTotal;
+
+        if (payoutDate.isSame(today, "day")) {
+          dueToday += payoutTotal;
+        }
+
+        if (payoutDate.isBefore(today, "day")) {
+          overdue += payoutTotal;
+        }
+      }
+
+      if (status === "deposited") {
+        deposited += payoutTotal;
+      }
     });
 
     setSummary({
-      pending,
-      due,
+      totalDue,
+      dueToday,
+      overdue,
       deposited,
-      available: pending + due,
     });
   }, [payouts]);
 
@@ -158,17 +176,14 @@ const Finance = () => {
 
     setUsersLoading(true);
     try {
-      const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/getAllUsers",
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
+      const res = await fetch("https://multi-vendor-marketplace.vercel.app/auth/getAllUsers", {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       const data = await res.json();
       setUsers(data || []);
@@ -200,18 +215,15 @@ const Finance = () => {
     };
 
     try {
-      const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
-        {
-          method: "POST",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(payload),
+      });
 
       const result = await res.json();
 
@@ -239,17 +251,14 @@ const Finance = () => {
       }
 
       try {
-        const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates",
-          {
-            method: "GET",
-            headers: {
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
+        const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates", {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
           },
-        );
+        });
 
         if (!res.ok) {
           console.error("Failed to fetch payout config:", res.statusText);
@@ -392,17 +401,15 @@ const Finance = () => {
   const handleSearch = () => {
     let filteredData = [...payouts];
 
-    /* ------------------ STATUS FILTER ------------------ */
     if (statusFilter) {
       filteredData = filteredData.filter((p) => p.status === statusFilter);
     }
 
-    /* ------------------ DATE FILTER ------------------ */
-    if (dateFilter && dateFilter !== "All Time") {
+    if (dateFilter && dateFilter !== "All Time" && dateFilter !== "Custom") {
       const now = dayjs();
 
       filteredData = filteredData.filter((p) => {
-        const payoutDate = dayjs(p.sortKey);
+        const payoutDate = dayjs(p.sortKey || p.payoutDate);
 
         if (dateFilter === "Today") {
           return payoutDate.isSame(now, "day");
@@ -421,6 +428,18 @@ const Finance = () => {
         }
 
         return true;
+      });
+    }
+
+    /* ✅ CUSTOM DATE FILTER */
+    if (dateFilter === "Custom" && startDate && endDate) {
+      filteredData = filteredData.filter((p) => {
+        const payoutDate = dayjs(p.sortKey || p.payoutDate);
+
+        return (
+          payoutDate.isSameOrAfter(dayjs(startDate)) &&
+          payoutDate.isSameOrBefore(dayjs(endDate))
+        );
       });
     }
 
@@ -450,6 +469,7 @@ const Finance = () => {
             const matchingLineItems = order.lineItems?.filter((line) => {
               const nameMatch = regex.test(line.merchantName || "");
               const emailMatch = regex.test(line.merchantEmail || "");
+              const referenceMatch = regex.test(line.payoutReferenceId || "");
               const refundMatch =
                 regex.test("refund") &&
                 line.fulfillment_status?.toLowerCase() === "cancelled";
@@ -460,6 +480,7 @@ const Finance = () => {
               return (
                 nameMatch ||
                 emailMatch ||
+                referenceMatch || // ✅ NEW
                 refundMatch ||
                 statusMatch ||
                 payoutDateMatch
@@ -483,7 +504,7 @@ const Finance = () => {
 
   useEffect(() => {
     handleSearch();
-  }, [searchVal, payouts, statusFilter, dateFilter]);
+  }, [searchVal, payouts, statusFilter, dateFilter, startDate, endDate]);
 
   const [editableMerchants, setEditableMerchants] = useState([]);
   const [savingId, setSavingId] = useState(null);
@@ -587,115 +608,104 @@ const Finance = () => {
       throw error;
     }
   };
+  const handleCopy = (text) => {
+    if (!text) return;
+
+    navigator.clipboard.writeText(text);
+    showToast("success", "Reference copied!");
+  };
 
   return user ? (
     <main className="w-full p-4 md:p-8">
-      <div className="flex flex-col gap-4 mb-6">
-        {/* Top Row */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h1 className="text-lg font-semibold">Affiliate Payouts</h1>
+      <div className="flex flex-col gap-6 mb-6">
+        {/* ================= HEADER ROW ================= */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <h1 className="text-xl font-semibold text-gray-800">
+            Affiliate Payouts
+          </h1>
 
-          {/* Right: Filters + Buttons */}
-          <div className="flex items-center gap-3 flex-wrap">
+          {/* Right Side Controls */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Tabs (Admin Only) */}
             {(userRole === "Master Admin" || userRole === "Dev Admin") && (
-              <div className="relative">
-                <select
-                  value={activeTab}
-                  onChange={(e) => setActiveTab(e.target.value)}
-                  className="appearance-none bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 pr-10 h-8 text-sm font-medium rounded-md shadow-sm focus:outline-none"
-                >
-                  <option value="payouts">Payouts</option>
+              <select
+                value={activeTab}
+                onChange={(e) => setActiveTab(e.target.value)}
+                className="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="payouts">Payouts</option>
+                <option value="Timelines">Timelines & Config</option>
+                <option value="merchant-list">Merchant List</option>
+              </select>
+            )}
 
-                  {(userRole === "Master Admin" ||
-                    userRole === "Dev Admin") && (
-                    <>
-                      <option value="Timelines">Timelines & Config</option>
-                      <option value="merchant-list">Merchant List</option>
-                    </>
-                  )}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-                  <svg
-                    className="w-4 h-4 text-gray-700"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
+            {/* Status Filter */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              <option value="">All Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Due">Due</option>
+              <option value="Deposited">Deposited</option>
+            </select>
+
+            {/* Date Filter */}
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              <option value="Today">Today</option>
+              <option value="Last 7 days">Last 7 days</option>
+              <option value="Last 30 days">Last 30 days</option>
+              <option value="This Month">This Month</option>
+              <option value="All Time">All Time</option>
+              <option value="Custom">Custom</option>
+            </select>
+
+            {/* Custom Date Range */}
+            {dateFilter === "Custom" && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="h-9 px-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-gray-500 text-sm">to</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="h-9 px-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                />
               </div>
             )}
-            {/* Filter 1 */}
+
+            {/* Search */}
             <div className="relative">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="appearance-none bg-gray-400 border border-gray-300 hover:bg-gray-500 
-               text-gray-800 px-3 pr-10 h-8 text-sm font-medium 
-               rounded-md shadow-sm focus:outline-none"
+              <input
+                type="text"
+                placeholder="Search payouts..."
+                value={searchVal}
+                onChange={(e) => setSearchVal(e.target.value)}
+                className="h-9 w-60 px-3 pr-8 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <svg
+                className="w-4 h-4 absolute right-2 top-2.5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
               >
-                <option value="">All Status</option>
-                <option value="Pending">Pending</option>
-                <option value="Due">Due</option>
-                <option value="Deposited">Deposited</option>
-              </select>
-
-              {/* Custom Arrow Icon */}
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-                <svg
-                  className="w-4 h-4 text-gray-700"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            {/* Filter 2 */}
-            <div className="relative">
-              <select
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className="appearance-none bg-gray-400 border border-gray-300 hover:bg-gray-500 
-               text-gray-800 px-3 pr-10 h-8 text-sm font-medium 
-               rounded-md shadow-sm focus:outline-none"
-              >
-                <option value="Today">Today</option>
-                <option value="Last 7 days">Last 7 days</option>
-                <option value="Last 30 days">Last 30 days</option>
-                <option value="This Month">This Month</option>
-                <option value="All Time">All Time</option>
-              </select>
-
-              {/* Custom Arrow */}
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-                <svg
-                  className="w-4 h-4 text-gray-700"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-4.35-4.35m1.6-5.65a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
             </div>
 
             {/* Admin Buttons */}
@@ -703,17 +713,15 @@ const Finance = () => {
               <>
                 <button
                   onClick={() => setImportModal(true)}
-                  className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
+                  className="h-9 px-4 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
                 >
-                  <CiImport className="w-4 h-4" />
                   Import
                 </button>
 
                 <button
                   onClick={handleExport}
-                  className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
+                  className="h-9 px-4 text-sm bg-gray-800 text-white rounded-md hover:bg-gray-900 transition"
                 >
-                  <FaFileImport className="w-4 h-4" />
                   Export
                 </button>
               </>
@@ -721,57 +729,48 @@ const Finance = () => {
           </div>
         </div>
 
-        {/* Summary Cards */}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ">
+        {/* ================= SUMMARY CARDS ================= */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Card 1 */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
             <div className="flex justify-between items-center">
-              <p className="text-sm text-gray-500">Available Balance</p>
-              <div className="bg-green-100 p-2 rounded-lg">
-                <HiOutlineCurrencyDollar className="w-5 h-5 text-green-600" />
-              </div>
+              <p className="text-sm text-gray-500">
+                {userRole === "Merchant" ? "To be Paid" : "Total Due Balance"}
+              </p>
+              <HiOutlineCurrencyDollar className="w-6 h-6 text-green-600" />
             </div>
             <h2 className="text-2xl font-semibold mt-3">
-              ${summary.available.toFixed(2)}
+              ${summary.totalDue.toFixed(2)}
             </h2>
           </div>
 
           {/* Card 2 */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
             <div className="flex justify-between items-center">
-              <p className="text-sm text-gray-500">Pending Payouts</p>
-              <div className="bg-yellow-100 p-2 rounded-lg">
-                <HiOutlineClock className="w-5 h-5 text-yellow-600" />
-              </div>
+              <p className="text-sm text-gray-500">Due (Today)</p>
+              <HiOutlineClock className="w-6 h-6 text-yellow-600" />
             </div>
             <h2 className="text-2xl font-semibold mt-3">
-              ${summary.pending.toFixed(2)}
+              ${summary.dueToday.toFixed(2)}
             </h2>
           </div>
 
           {/* Card 3 */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
             <div className="flex justify-between items-center">
-              <p className="text-sm text-gray-500">Due</p>
-              <div className="bg-blue-100 p-2 rounded-lg">
-                <HiOutlineTrendingUp className="w-5 h-5 text-blue-600" />
-              </div>
+              <p className="text-sm text-gray-500">Overdue</p>
+              <HiOutlineTrendingUp className="w-6 h-6 text-blue-600" />
             </div>
             <h2 className="text-2xl font-semibold mt-3">
-              ${summary.due.toFixed(2)}
+              ${summary.overdue.toFixed(2)}
             </h2>
           </div>
 
           {/* Card 4 */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
             <div className="flex justify-between items-center">
-              <p className="text-sm text-gray-500">
-                {userRole === "Merchant" ? "Total Earned" : "Deposited"}
-              </p>
-              <div className="bg-purple-100 p-2 rounded-lg">
-                <HiOutlineChartBar className="w-5 h-5 text-purple-600" />
-              </div>
+              <p className="text-sm text-gray-500">Deposited</p>
+              <HiOutlineChartBar className="w-6 h-6 text-purple-600" />
             </div>
             <h2 className="text-2xl font-semibold mt-3">
               ${summary.deposited.toFixed(2)}
@@ -792,6 +791,7 @@ const Finance = () => {
               <table className="w-full border-collapse bg-white">
                 <thead className="bg-gray-100 text-left text-gray-600 text-xs">
                   <tr>
+                    <th className="p-3">Reference No</th>
                     <th className="p-3">Payout Date</th>
                     {(userRole === "Master Admin" ||
                       userRole === "Dev Admin") && (
@@ -832,7 +832,6 @@ const Finance = () => {
                               key={`${index}-${mIndex}`}
                               className="border-b hover:bg-gray-50"
                             >
-                              {/* Payout Date */}
                               <td
                                 className="p-3 text-blue-600 cursor-pointer hover:underline"
                                 onClick={() => {
@@ -845,6 +844,47 @@ const Finance = () => {
                                     `/payout-details?${query.toString()}`,
                                   );
                                 }}
+                              >
+                                {" "}
+                                {(() => {
+                                  const reference =
+                                    order.lineItems?.find(
+                                      (li) => li.payoutReferenceId,
+                                    )?.payoutReferenceId || "N/A";
+
+                                  return (
+                                    <div className="flex items-center gap-2">
+                                      <span>{reference}</span>
+
+                                      {reference !== "N/A" && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleCopy(reference);
+                                          }}
+                                          className="text-gray-400 hover:text-blue-600 text-xs"
+                                          title="Copy Reference"
+                                        >
+                                          <HiOutlineClipboardCopy className="w-4 h-4 text-green-700" />
+                                        </button>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+                              </td>
+                              {/* Payout Date */}
+                              <td
+                                className="p-3 "
+                                // onClick={() => {
+                                //   const query = new URLSearchParams({
+                                //     payoutDate: payout.payoutDate,
+                                //     status: payout.status,
+                                //     merchantId: order.merchantId,
+                                //   });
+                                //   navigate(
+                                //     `/payout-details?${query.toString()}`,
+                                //   );
+                                // }}
                               >
                                 {payout.payoutDate}
                               </td>
@@ -916,6 +956,42 @@ const Finance = () => {
                                   )}&status=${item.status}&merchantId=${merchantId}`,
                                 )
                               }
+                            >
+                              {(() => {
+                                const reference =
+                                  item.orders
+                                    ?.map((o) => o.payoutReferenceId)
+                                    ?.filter(Boolean)[0] || "N/A";
+
+                                return (
+                                  <div className="flex items-center gap-2">
+                                    <span>{reference}</span>
+
+                                    {reference !== "N/A" && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleCopy(reference);
+                                        }}
+                                        className="text-gray-400 hover:text-blue-600 text-xs"
+                                        title="Copy Reference"
+                                      >
+                                        <HiOutlineClipboardCopy className="w-4 h-4" />
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+                            </td>
+                            <td
+                              className="p-3"
+                              // onClick={() =>
+                              //   navigate(
+                              //     `/payout-details?payoutDate=${encodeURIComponent(
+                              //       item.payoutDate,
+                              //     )}&status=${item.status}&merchantId=${merchantId}`,
+                              //   )
+                              // }
                             >
                               {item.payoutDate}
                             </td>

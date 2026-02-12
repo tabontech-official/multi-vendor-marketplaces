@@ -63,9 +63,7 @@ const PayoutDetails = () => {
         const userId = localStorage.getItem("userid");
         if (!userId) return;
 
-        fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`,
-        )
+        fetch(`https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`)
           .then((res) => res.json())
           .then((data) => {
             if (data?.data) {
@@ -160,13 +158,10 @@ const PayoutDetails = () => {
       }
 
       // Send PayPal update request
-      const res = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/order/addPaypal",
-        {
-          merchantIds,
-          payPal: account,
-        },
-      );
+      const res = await axios.post("https://multi-vendor-marketplace.vercel.app/order/addPaypal", {
+        merchantIds,
+        payPal: account,
+      });
 
       if (res.status === 200) {
         setBankAccount(account);
@@ -256,75 +251,6 @@ const PayoutDetails = () => {
   };
   const [orders, setOrders] = useState([]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (!userRole) return;
-
-  //     setLoading(true);
-
-  //     try {
-  //       let res;
-
-  //       if (userRole === "Merchant") {
-  //         res = await fetch(
-  //           `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
-  //             payoutDate
-  //           )}&status=${status}&userId=${merchantId}`
-  //         );
-  //       } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
-  //         // res = await fetch(
-  //         //   `https://multi-vendor-marketplace.vercel.app/order/getPayoutForAllOrders?payoutDate=${encodeURIComponent(
-  //         //     payoutDate
-  //         //   )}&status=${status}`
-  //         res = await fetch(
-  //           `https://multi-vendor-marketplace.vercel.app/order/getPayoutOrders?payoutDate=${encodeURIComponent(
-  //             payoutDate
-  //           )}&status=${status}&userId=${merchantId}`
-  //         );
-  //       } else {
-  //         console.warn("Unauthorized user role:", userRole);
-  //         setLoading(false);
-  //         return;
-  //       }
-
-  //       const json = await res.json();
-
-  //       const fetchedOrders =
-  //         (json.payouts && json.payouts[0] && json.payouts[0].orders) || [];
-
-  //       fetchedOrders.forEach((o) => {
-  //         o.fee = Number((o.amount * 0.1).toFixed(2));
-  //         o.net = Number((o.amount - o.fee).toFixed(2));
-  //       });
-
-  //       const charges = fetchedOrders.reduce(
-  //         (sum, o) => sum + (o.amount || 0),
-  //         0
-  //       );
-  //       const fees = fetchedOrders.reduce((sum, o) => sum + (o.fee || 0), 0);
-  //       const refunds = fetchedOrders.reduce(
-  //         (sum, o) => sum + (o.refund || 0),
-  //         0
-  //       );
-  //       const net = charges - fees;
-  //       const referenceNo = fetchedOrders[0]?.referenceNo || "";
-  //       const paypalAccount = fetchedOrders[0]?.paypalAccount || "";
-
-  //       setOrders(fetchedOrders);
-  //       setSummary({ charges, refunds, fees, net, referenceNo, paypalAccount });
-  //       setReferenceNo(referenceNo);
-  //       setTempReferenceNo(referenceNo);
-  //       setTempBankAccount(paypalAccount);
-  //     } catch (err) {
-  //       console.error("Error fetching payout orders:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   if (payoutDate && status && userRole) fetchData();
-  // }, [payoutDate, status, userRole, merchantId]);
-
   useEffect(() => {
     const fetchData = async () => {
       if (!userRole || !payoutDate || !status) return;
@@ -342,11 +268,15 @@ const PayoutDetails = () => {
 
       try {
         let url = "";
-        if (userRole === "Merchant") {
+        if (
+          userRole === "Merchant" ||
+          userRole === "Dev Admin" ||
+          userRole === "Master Admin"
+        ) {
           url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByQuery?payoutDate=${encodeURIComponent(
             payoutDate,
           )}&status=${status}&userId=${merchantId}`;
-        } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
+        } else if (userRole === "Masters") {
           url = `https://multi-vendor-marketplace.vercel.app/order/getAllPayouts?payoutDate=${encodeURIComponent(
             payoutDate,
           )}&status=${status}`;
@@ -371,48 +301,57 @@ const PayoutDetails = () => {
         }
 
         const json = await res.json();
+        // ✅ IMPORTANT FIX
+        if (json?.merchantAccount) {
+          setMerchantAccount(json.merchantAccount);
+        }
+
         const fetchedOrders = json?.payouts?.[0]?.orders || [];
 
         const updatedOrders = fetchedOrders.map((o) => {
-  let gross = 0;
-  let fee = 0;
-  let net = 0;
+          let gross = 0;
+          let fee = 0;
+          let net = 0;
 
-  if (userRole === "Merchant") {
-    // 🔹 MERCHANT VIEW (simple structure)
-    gross = o.products?.reduce(
-      (sum, p) => sum + Number(p.total || 0),
-      0
-    );
+          if (
+            userRole === "Merchant" ||
+            userRole === "Dev Admin" ||
+            userRole === "Master Admin"
+          ) {
+            // 🔹 MERCHANT VIEW (simple structure)
+            gross = o.products?.reduce(
+              (sum, p) => sum + Number(p.total || 0),
+              0,
+            );
 
-    fee = Number(o.commissionAmount || 0);
+            fee = Number(o.commissionAmount || 0);
 
-    net = Number(o.amount || 0);
-  } else {
-    // 🔹 ADMIN VIEW (full commission breakdown)
-    gross = o.products?.reduce(
-      (sum, p) => sum + Number(p.total || 0),
-      0
-    );
+            net = Number(o.amount || 0);
+          } else {
+            // 🔹 ADMIN VIEW (full commission breakdown)
+            gross = o.products?.reduce(
+              (sum, p) => sum + Number(p.total || 0),
+              0,
+            );
 
-    fee = o.products?.reduce(
-      (sum, p) => sum + Number(p.commissionAmount || 0),
-      0
-    );
+            fee = o.products?.reduce(
+              (sum, p) => sum + Number(p.commissionAmount || 0),
+              0,
+            );
 
-    net = o.products?.reduce(
-      (sum, p) => sum + Number(p.netAmount || 0),
-      0
-    );
-  }
+            net = o.products?.reduce(
+              (sum, p) => sum + Number(p.netAmount || 0),
+              0,
+            );
+          }
 
-  return {
-    ...o,
-    gross,
-    fee,
-    net,
-  };
-});
+          return {
+            ...o,
+            gross,
+            fee,
+            net,
+          };
+        });
 
         const payoutData = json?.payouts?.[0];
 
@@ -457,18 +396,18 @@ const PayoutDetails = () => {
       const apiSecretKey = localStorage.getItem("apiSecretKey");
 
       // ✅ Collect unique merchantIds from orders
-      const merchantIds = [
-        ...new Set(
-          orders.flatMap((order) =>
-            order.products?.map((product) => product.userId),
-          ),
-        ),
-      ].filter(Boolean);
+      // const merchantIds = [
+      //   ...new Set(
+      //     orders.flatMap((order) =>
+      //       order.products?.map((product) => product.userId),
+      //     ),
+      //   ),
+      // ].filter(Boolean);
 
-      if (merchantIds.length === 0) {
-        showToast("error", "No merchants found for this payout.");
-        return;
-      }
+      // if (merchantIds.length === 0) {
+      //   showToast("error", "No merchants found for this payout.");
+      //   return;
+      // }
 
       const res = await fetch(
         "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
@@ -484,7 +423,7 @@ const PayoutDetails = () => {
             status,
             referenceNo: reference,
             paymentMethod,
-            merchantIds, // 🔥 important
+            merchantIds: merchantId,
           }),
         },
       );
@@ -494,10 +433,9 @@ const PayoutDetails = () => {
       if (res.ok) {
         showToast("success", "Payout marked as Deposited!");
         closeReferencePopup();
-
-        // 🔥 Better than window reload:
+        navigate("/finance");
         setTimeout(() => {
-          navigate(0); // refresh route cleanly
+          navigate(0);
         }, 1000);
       } else {
         showToast("error", result.message || "Something went wrong.");
@@ -583,6 +521,32 @@ const PayoutDetails = () => {
       setLoading(false);
     }
   };
+  const [message, setMessage] = useState("");
+  const handleNotifyMerchant = async () => {
+    try {
+      setLoading(true);
+
+      const res = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/auth/send-finance-reminder/${merchantId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to notify merchant");
+      }
+
+      showToast("success", "Merchant notified successfully.");
+    } catch (error) {
+      showToast("error", error.message || "Failed to notify merchant.");
+    } finally {
+      setLoading(false); // ✅ always stop loading
+    }
+  };
 
   return (
     <div className="p-6 bg-[#f6f6f7] min-h-screen">
@@ -639,94 +603,172 @@ const PayoutDetails = () => {
           <h1 className="text-2xl font-bold mb-1">
             ${summary.net.toFixed(2)} AUD
           </h1>
-          {userRole === "Merchant" && merchantAccount && (
+          {(userRole === "Merchant" ||
+            userRole === "Dev Admin" ||
+            userRole === "Master Admin") && (
             <div className="text-sm text-gray-700 space-y-2">
-              {merchantAccount.paypalAccount && (
-                <p>
-                  <strong>PayPal Account:</strong>{" "}
-                  {merchantAccount.paypalAccount}
-                </p>
-              )}
+              {(() => {
+                const hasPayPal =
+                  merchantAccount?.paypalAccount?.trim() ||
+                  merchantAccount?.paypalAccountNo?.trim() ||
+                  merchantAccount?.paypalReferenceNo?.trim();
 
-              {merchantAccount.paypalAccountNo && (
-                <p>
-                  <strong>PayPal Account No:</strong>{" "}
-                  {merchantAccount.paypalAccountNo}
-                </p>
-              )}
+                const hasBankDetails =
+                  merchantAccount?.bankDetails &&
+                  Object.values(merchantAccount.bankDetails).some(
+                    (value) => value && value.toString().trim() !== "",
+                  );
 
-              {merchantAccount.paypalReferenceNo && (
-                <p>
-                  <strong>PayPal Reference No:</strong>{" "}
-                  {merchantAccount.paypalReferenceNo}
-                </p>
-              )}
+                const hasPayoutDetails = hasPayPal || hasBankDetails;
 
-              {merchantAccount.bankDetails &&
-                Object.keys(merchantAccount.bankDetails).length > 0 && (
-                  <div className="mt-2 space-y-2">
-                    {merchantAccount.bankDetails.bankName && (
-                      <p>
-                        <strong>Bank Name:</strong>{" "}
-                        {merchantAccount.bankDetails.bankName}
-                      </p>
-                    )}
-                    {merchantAccount.bankDetails.accountNumber && (
-                      <p>
-                        <strong>Account Number:</strong>{" "}
-                        {merchantAccount.bankDetails.accountNumber}
-                      </p>
-                    )}
-                    {merchantAccount.bankDetails.accountHolderName && (
-                      <p>
-                        <strong>Account Holder:</strong>{" "}
-                        {merchantAccount.bankDetails.accountHolderName}
-                      </p>
-                    )}
-                    {merchantAccount.bankDetails.ifscCode && (
-                      <p>
-                        <strong>IFSC:</strong>{" "}
-                        {merchantAccount.bankDetails.ifscCode}
-                      </p>
-                    )}
-                  </div>
-                )}
+                // ================= IF DETAILS EXIST =================
+                if (hasPayoutDetails) {
+                  return (
+                    <div className="space-y-3 text-sm">
+                      {/* PayPal Account */}
+                      {merchantAccount.paypalAccount && (
+                        <div className="flex items-center justify-between gap-4">
+                          <label className="text-gray-600 font-medium w-40">
+                            PayPal Account
+                          </label>
+                          <input
+                            type="text"
+                            value={merchantAccount.paypalAccount}
+                            disabled
+                            className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
+                          />
+                        </div>
+                      )}
+
+                      {/* PayPal Account No */}
+                      {merchantAccount.paypalAccountNo && (
+                        <div className="flex items-center justify-between gap-4">
+                          <label className="text-gray-600 font-medium w-40">
+                            PayPal Account No
+                          </label>
+                          <input
+                            type="text"
+                            value={merchantAccount.paypalAccountNo}
+                            disabled
+                            className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
+                          />
+                        </div>
+                      )}
+
+                      {/* PayPal Reference */}
+                      {merchantAccount.paypalReferenceNo && (
+                        <div className="flex items-center justify-between gap-4">
+                          <label className="text-gray-600 font-medium w-40">
+                            PayPal Reference
+                          </label>
+                          <input
+                            type="text"
+                            value={merchantAccount.paypalReferenceNo}
+                            disabled
+                            className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
+                          />
+                        </div>
+                      )}
+
+                      {/* Bank Details */}
+                      {hasBankDetails && (
+                        <>
+                          {merchantAccount.bankDetails.bankName && (
+                            <div className="flex items-center justify-between gap-4">
+                              <label className="text-gray-600 font-medium w-40">
+                                Bank Name
+                              </label>
+                              <input
+                                type="text"
+                                value={merchantAccount.bankDetails.bankName}
+                                disabled
+                                className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
+                              />
+                            </div>
+                          )}
+
+                          {merchantAccount.bankDetails.accountNumber && (
+                            <div className="flex items-center justify-between gap-4">
+                              <label className="text-gray-600 font-medium w-40">
+                                Account No
+                              </label>
+                              <input
+                                type="text"
+                                value={
+                                  merchantAccount.bankDetails.accountNumber
+                                }
+                                disabled
+                                className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm "
+                              />
+                            </div>
+                          )}
+
+                          {merchantAccount.bankDetails.accountHolderName && (
+                            <div className="flex items-center justify-between gap-4">
+                              <label className="text-gray-600 font-medium w-40">
+                                Account Holder
+                              </label>
+                              <input
+                                type="text"
+                                value={
+                                  merchantAccount.bankDetails.accountHolderName
+                                }
+                                disabled
+                                className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm "
+                              />
+                            </div>
+                          )}
+
+                          {merchantAccount.bankDetails.ifscCode && (
+                            <div className="flex items-center justify-between gap-4">
+                              <label className="text-gray-600 font-medium w-40">
+                                IFSC
+                              </label>
+                              <input
+                                type="text"
+                                value={merchantAccount.bankDetails.ifscCode}
+                                disabled
+                                className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm "
+                              />
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  );
+                }
+
+                if (userRole === "Merchant") {
+                  return (
+                    <p className="text-sm text-gray-600 mt-2">
+                      You have not added your payout details yet. <br />
+                      Please add your PayPal or Bank details in{" "}
+                      <span
+                        onClick={() => navigate("/finance-setting")}
+                        className="text-blue-600 underline cursor-pointer hover:text-blue-700 font-medium"
+                      >
+                        Finance Settings
+                      </span>{" "}
+                      to receive your payouts.
+                    </p>
+                  );
+                }
+
+                return (
+                  <p className="text-sm text-gray-600 mt-2">
+                    This merchant has not added payout details yet. <br />
+                    <span
+                      onClick={() => handleNotifyMerchant()}
+                      className="text-blue-600 underline cursor-pointer hover:text-blue-700 font-medium"
+                    >
+                      Click here to notify the merchant
+                    </span>
+                    .
+                  </p>
+                );
+              })()}
             </div>
           )}
-
-          {/* {(userRole === "Dev Admin" || userRole === "Master Admin") && ( */}
-          {(referenceNo || paymentMethod || paymentDate) && (
-            <div className="text-sm text-gray-700 space-y-3">
-              {referenceNo && (
-                <div className="flex items-center">
-                  <strong className="w-40">Reference No:</strong>
-                  <span className="bg-gray-100 px-3 py-1 rounded-md text-gray-800">
-                    {referenceNo}
-                  </span>
-                </div>
-              )}
-
-              {paymentMethod && (
-                <div className="flex items-center">
-                  <strong className="w-40">Payment Method:</strong>
-                  <span className="bg-gray-100 px-3 py-1 rounded-md text-gray-800">
-                    {paymentMethod}
-                  </span>
-                </div>
-              )}
-
-              {paymentDate && (
-                <div className="flex items-center">
-                  <strong className="w-40">Deposited On:</strong>
-                  <span className="bg-gray-100 px-3 py-1 rounded-md text-gray-800">
-                    {paymentDate}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* )} */}
         </div>
         <div className="w-full md:w-[240px] border-l md:pl-6 mt-6 md:mt-0">
           <h2 className="text-sm font-semibold mb-2">Summary</h2>
@@ -801,7 +843,7 @@ const PayoutDetails = () => {
 
                       const firstMerchantId = order.products?.[0]?.userId;
 
-                      navigate(`/order/${order.orderId}/${firstMerchantId}`, {
+                      navigate(`/order/${order.orderId}/${merchantId}`, {
                         state: {
                           merchantId: firstMerchantId,
                           shopifyOrderId: order.orderId,
@@ -895,76 +937,159 @@ const PayoutDetails = () => {
       )}
       {open && (
         <div
-          className="fixed inset-0 bg-gradient-to-br from-black/80 to-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 p-4"
           onClick={closeReferencePopup}
         >
           <div
-            className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-fadeInUp p-8 relative border border-gray-200"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden relative border border-slate-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={closeReferencePopup}
-              className="absolute top-3 right-3 text-gray-400 hover:text-black transition"
-            >
-              ✕
-            </button>
-
-            <div className="text-center">
-              <div className="text-3xl mb-3 text-blue-600">💳</div>
-              <h2 className="text-xl font-bold text-gray-800 mb-2">
-                Complete Payout Details
-              </h2>
-              <p className="text-sm text-gray-500 mb-6">
-                Enter payout reference and payment method details.
-              </p>
-            </div>
-
-            {/* Reference Number */}
-            <div className="mb-4">
-              <label className="text-sm font-medium text-gray-700">
-                Reference Number
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. TXN123456"
-                className="w-full border border-gray-300 rounded-md px-4 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={reference}
-                onChange={(e) => setReference(e.target.value)}
-              />
-            </div>
-
-            {/* Payment Method */}
-            <div className="mb-4">
-              <label className="text-sm font-medium text-gray-700">
-                Payment Method
-              </label>
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-4 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Method</option>
-                <option value="Bank Transfer">Bank Transfer</option>
-                <option value="PayPal">PayPal</option>
-                <option value="Stripe">Stripe</option>
-                <option value="Manual">Manual</option>
-              </select>
-            </div>
-
-            <div className="flex justify-end gap-4">
+            {/* Header Area */}
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div>
+                <h2 className="text-xl font-bold text-slate-800">
+                  Payout Review
+                </h2>
+                <p className="text-xs text-slate-500 uppercase tracking-wider font-medium">
+                  Internal Processing
+                </p>
+              </div>
               <button
                 onClick={closeReferencePopup}
-                className="px-5 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-sm"
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
               >
-                Cancel
+                <span className="text-xl font-light">✕</span>
               </button>
+            </div>
 
-              <button
-                onClick={handleSave}
-                className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-sm"
-              >
-                Confirm & Mark Deposited
-              </button>
+            <div className="p-6">
+              {/* TOP ROW: STATUS & REFERENCE */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1.5 ml-1">
+                    Current Status
+                  </label>
+                  <div className="w-full border border-slate-200 rounded-lg px-3 py-2 bg-slate-50 text-slate-600 text-sm font-medium">
+                    {status}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1.5 ml-1">
+                    Reference No.
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter ID..."
+                    value={reference}
+                    onChange={(e) => setReference(e.target.value)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* FINANCIAL SUMMARY CARD */}
+              <div className="bg-slate-900 rounded-xl p-5 mb-6 text-white shadow-lg shadow-blue-900/10">
+                <div className="flex justify-between text-xs text-slate-400 mb-1">
+                  <span>Gross Revenue</span>
+                  <span>${summary.charges.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-xs text-rose-400 mb-4 pb-4 border-b border-slate-700/50">
+                  <span>Platform Commission</span>
+                  <span>-${summary.fees.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-end">
+                  <span className="text-sm font-medium text-slate-300">
+                    Total Net Payout
+                  </span>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold text-white tracking-tight">
+                      ${summary.net.toFixed(2)}
+                    </span>
+                    <span className="text-[10px] ml-1 text-slate-400 font-bold uppercase">
+                      AUD
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* MERCHANT ACCOUNT DETAILS */}
+              {merchantAccount && (
+                <div className="mb-6">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-2 ml-1">
+                    Destination Account
+                  </label>
+                  <div className="border border-slate-200 rounded-xl p-4 bg-white space-y-3 shadow-sm">
+                    {merchantAccount.paypalAccount && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded flex items-center justify-center text-xs font-bold">
+                          PP
+                        </div>
+                        <div className="text-sm">
+                          <p className="text-slate-400 text-[10px] leading-none uppercase font-bold">
+                            PayPal Email
+                          </p>
+                          <p className="font-medium text-slate-700">
+                            {merchantAccount.paypalAccount}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {merchantAccount.bankDetails?.bankName && (
+                      <div className="flex items-center gap-3 pt-1">
+                        <div className="w-8 h-8 bg-slate-100 text-slate-600 rounded flex items-center justify-center text-xs font-bold">
+                          BK
+                        </div>
+                        <div className="text-sm">
+                          <p className="font-bold text-slate-700 leading-tight">
+                            {merchantAccount.bankDetails.bankName}
+                          </p>
+                          <p className="text-slate-500 text-xs">
+                            {merchantAccount.bankDetails.accountHolderName} ••••
+                            {merchantAccount.bankDetails.accountNumber.slice(
+                              -4,
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* PAYMENT METHOD SELECTION */}
+              <div className="mb-8">
+                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1.5 ml-1">
+                  Payout Method
+                </label>
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 transition-all outline-none bg-white cursor-pointer"
+                >
+                  <option value="">Select Method</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="PayPal">PayPal</option>
+                  <option value="Stripe">Stripe</option>
+                  <option value="Manual">Manual</option>
+                </select>
+              </div>
+
+              {/* ACTION BUTTONS */}
+              <div className="flex gap-3">
+                <button
+                  onClick={closeReferencePopup}
+                  className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-sm font-semibold transition-colors"
+                >
+                  Discard
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="flex-[2] px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold shadow-md shadow-blue-200 transition-all active:scale-[0.98]"
+                >
+                  Confirm & Mark Deposited
+                </button>
+              </div>
             </div>
           </div>
         </div>

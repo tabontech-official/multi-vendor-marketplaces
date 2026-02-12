@@ -1,320 +1,3 @@
-// // src/pages/Auth.js
-// import React, { useState } from "react";
-// import { useNavigate, useLocation, Navigate } from "react-router-dom";
-// import { useAuthContext } from "./Hooks/useAuthContext";
-// import Dashboard from "./pages/Dashboard";
-// import { toast } from "react-toastify";
-
-// const AuthSignUp = () => {
-//   const location = useLocation();
-//   const navigate = useNavigate();
-//   const { dispatch, user } = useAuthContext();
-//   const [firstName, setFirstName] = useState("");
-//   const [lastName, setLastName] = useState("");
-//   const [sellerName, setSellerName] = useState("");
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [error, setError] = useState("");
-//   const [city, setCity] = useState("");
-//   const [state, setState] = useState("");
-//   const [zip, setZip] = useState("");
-//   const [phoneNumber, setNumber] = useState("");
-//   const [country, setCountry] = useState("");
-//   const [loading, setLoading] = useState(false);
-//   const [success, setSuccess] = useState("");
-//   const [agreedToPolicies, setAgreedToPolicies] = useState(false);
-//   const handleSellerNameChange = (e) => {
-//     const value = e.target.value;
-
-//     // Capital letters check
-//     if (/[A-Z]/.test(value)) {
-//       toast.error("Seller name must be in lowercase only");
-//       return;
-//     }
-
-//     // Space check
-//     if (/\s/.test(value)) {
-//       toast.error("Spaces are not allowed in seller name");
-//       return;
-//     }
-
-//     // Special character check
-//     if (!/^[a-z0-9]*$/.test(value)) {
-//       toast.error("Special characters are not allowed");
-//       return;
-//     }
-
-//     setSellerName(value);
-//   };
-
-//   const handleSignup = async (e) => {
-//     e.preventDefault();
-//     setError("");
-//     setSuccess("");
-//     setLoading(true);
-
-//     if (!firstName || !lastName || !email || !password) {
-//       setError("All fields are required.");
-//       setLoading(false);
-//       return;
-//     }
-
-//     if (!agreedToPolicies) {
-//       setError("You must agree to the policies and terms to sign up.");
-//       setLoading(false);
-//       return;
-//     }
-
-//     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//     if (!emailPattern.test(email)) {
-//       setError("Please enter a valid email address.");
-//       setLoading(false);
-//       return;
-//     }
-
-//     if (password.length < 6) {
-//       setError("Password must be at least 6 characters long.");
-//       setLoading(false);
-//       return;
-//     }
-
-//     try {
-//       const response = await fetch(
-//         "https://multi-vendor-marketplace.vercel.app/auth/signUp",
-//         {
-//           method: "POST",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify({
-//             firstName,
-//             lastName,
-//             email,
-//             sellerName,
-//             password,
-//             zip,
-//             country,
-//             state,
-//             phoneNumber,
-//             city,
-//           }),
-//         },
-//       );
-
-//       const json = await response.json();
-
-//       if (response.ok) {
-//         toast.success("Registration successful! Please log in.");
-//         navigate("/Login");
-//       } else {
-//         toast.error(json.error || "An error occurred during registration.");
-//       }
-//     } catch (error) {
-//       setError("An error occurred. Please try again.");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   if (user) {
-//     return <Dashboard />;
-//   }
-//   return (
-//     <section className="h-[84vh] flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
-//       <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg">
-//         <div className=" md:flex  flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white ">
-//           <img
-//             src="/png-logo.png"
-//             alt="Login"
-//             className="w-64 h-64 object-cover"
-//           />
-//           <p className="mt-4 text-center text-sm opacity-90">
-//             Join Aydi-Active Marketplace and start selling your products online.
-//             Create your vendor account, manage orders, and grow your business
-//             with our powerful multi-vendor platform.
-//           </p>
-//         </div>
-
-//         <div className="w-full md:w-1/2 p-8  h-[65vh] overflow-y-auto">
-//           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
-//             Create Your Vendor Account
-//           </h2>
-//           <p className="text-sm text-gray-600 text-center mb-6">
-//             Register as a seller on Aydi-Active Marketplace
-//           </p>
-
-//           <form onSubmit={handleSignup} className="space-y-4 ">
-//             <div>
-//               <input
-//                 type="text"
-//                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
-//                 placeholder="First Name*"
-//                 value={firstName}
-//                 onChange={(e) => setFirstName(e.target.value)}
-//                 required
-//               />
-//             </div>
-
-//             <div>
-//               <input
-//                 type="text"
-//                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
-//                 placeholder="Last Name*"
-//                 value={lastName}
-//                 onChange={(e) => setLastName(e.target.value)}
-//                 required
-//               />
-//             </div>
-//             <div>
-//               <input
-//                 type="text"
-//                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
-//                 placeholder="Seller Name* (lowercase only)"
-//                 value={sellerName}
-//                 onChange={handleSellerNameChange}
-//                 required
-//               />
-//             </div>
-
-//             <div>
-//               <input
-//                 type="email"
-//                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
-//                 placeholder="Email Address*"
-//                 value={email}
-//                 onChange={(e) => setEmail(e.target.value)}
-//                 required
-//               />
-//             </div>
-
-//             {/* Password */}
-//             <div>
-//               <input
-//                 type="password"
-//                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
-//                 placeholder="Password*"
-//                 value={password}
-//                 onChange={(e) => setPassword(e.target.value)}
-//                 required
-//               />
-//             </div>
-
-//             {/* Zip */}
-//             <div>
-//               <input
-//                 type="number"
-//                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
-//                 placeholder="Zip*"
-//                 value={zip}
-//                 onChange={(e) => setZip(e.target.value)}
-//                 required
-//               />
-//             </div>
-
-//             {/* Country */}
-//             <div>
-//               <input
-//                 type="text"
-//                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
-//                 placeholder="Country*"
-//                 value={country}
-//                 onChange={(e) => setCountry(e.target.value)}
-//                 required
-//               />
-//             </div>
-
-//             {/* State */}
-//             <div>
-//               <input
-//                 type="text"
-//                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
-//                 placeholder="State*"
-//                 value={state}
-//                 onChange={(e) => setState(e.target.value)}
-//                 required
-//               />
-//             </div>
-
-//             {/* City */}
-//             <div>
-//               <input
-//                 type="text"
-//                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
-//                 placeholder="City*"
-//                 value={city}
-//                 onChange={(e) => setCity(e.target.value)}
-//                 required
-//               />
-//             </div>
-
-//             {/* Phone Number */}
-//             <div>
-//               <input
-//                 type="number"
-//                 className="w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-indigo-400"
-//                 placeholder="Phone Number*"
-//                 value={phoneNumber}
-//                 onChange={(e) => setNumber(e.target.value)}
-//                 required
-//               />
-//             </div>
-
-//             {/* Policy Agreement */}
-//             <div className="flex items-center space-x-2 my-3">
-//               <input
-//                 type="checkbox"
-//                 id="policyAgreement"
-//                 checked={agreedToPolicies}
-//                 onChange={(e) => setAgreedToPolicies(e.target.checked)}
-//                 className="h-5 w-5 text-blue-500 border-gray-300 rounded"
-//               />
-//               <label
-//                 htmlFor="policyAgreement"
-//                 className="text-sm font-medium text-gray-700"
-//               >
-//                 I agree with the{" "}
-//                 <span
-//                   className="text-blue-600 cursor-pointer hover:underline"
-//                   onClick={() => window.open("/policy", "_blank")}
-//                 >
-//                   policies and terms
-//                 </span>
-//               </label>
-//             </div>
-
-//             {/* Error Message */}
-//             {error && <p className="text-red-500 text-sm">{error}</p>}
-
-//             {/* Signup Button */}
-//             <button
-//               type="submit"
-//               className="w-full bg-indigo-500 text-white py-3 rounded-md hover:bg-indigo-600 transition"
-//               disabled={loading}
-//             >
-//               {loading ? "Signing up..." : "Sign Up"}
-//             </button>
-//           </form>
-
-//           {/* <div className="mt-4 text-center text-sm">
-//             <a
-//               href="/ForgotPassword"
-//               className="text-indigo-500 hover:underline"
-//             >
-//               Forgot Password?
-//             </a>
-//           </div>
-//           <div className="mt-2 text-center text-sm">
-//             <span className="text-gray-600">Don't have an account? </span>
-//             <a href="/signup" className="text-indigo-500 hover:underline">
-//               Create Account
-//             </a>
-//           </div> */}
-//         </div>
-//       </div>
-//     </section>
-//   );
-// };
-
-// export default AuthSignUp;
-// src/pages/AuthSignUp.js
 import React, { useState } from "react";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useAuthContext } from "./Hooks/useAuthContext";
@@ -331,6 +14,8 @@ const AuthSignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zip, setZip] = useState("");
@@ -342,48 +27,126 @@ const AuthSignUp = () => {
 
   const handleSellerNameChange = (e) => {
     const value = e.target.value;
+
+    let fieldError = "";
+
     if (/[A-Z]/.test(value)) {
-      toast.error("Seller name must be in lowercase only");
-      return;
+      fieldError = "Seller name must be in lowercase only";
+    } else if (/\s/.test(value)) {
+      fieldError = "Spaces are not allowed in seller name";
+    } else if (!/^[a-z0-9]*$/.test(value)) {
+      fieldError = "Special characters are not allowed";
     }
-    if (/\s/.test(value)) {
-      toast.error("Spaces are not allowed in seller name");
-      return;
-    }
-    if (!/^[a-z0-9]*$/.test(value)) {
-      toast.error("Special characters are not allowed");
-      return;
-    }
+
     setSellerName(value);
+    setErrors((prev) => ({ ...prev, sellerName: fieldError }));
   };
+
+  // const handleSignup = async (e) => {
+  //   e.preventDefault();
+  //   setError("");
+  //   setSuccess("");
+  //   setLoading(true);
+
+  //   if (!firstName || !lastName || !email || !password) {
+  //     setError("All fields are required.");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   if (!agreedToPolicies) {
+  //     setError("You must agree to the policies and terms to sign up.");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  //   if (!emailPattern.test(email)) {
+  //     setError("Please enter a valid email address.");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   if (password.length < 6) {
+  //     setError("Password must be at least 6 characters long.");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch(
+  //       "https://multi-vendor-marketplace.vercel.app/auth/signUp",
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({
+  //           firstName,
+  //           lastName,
+  //           email,
+  //           sellerName,
+  //           password,
+  //           zip,
+  //           country,
+  //           state,
+  //           phoneNumber,
+  //           city,
+  //         }),
+  //       },
+  //     );
+
+  //     const json = await response.json();
+
+  //     if (response.ok) {
+  //       toast.success("Registration successful! Please log in.");
+  //       navigate("/Login");
+  //     } else {
+  //       toast.error(json.error || "An error occurred during registration.");
+  //     }
+  //   } catch (error) {
+  //     setError("An error occurred. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
     setLoading(true);
+    setErrors({}); // clear old errors
 
-    if (!firstName || !lastName || !email || !password) {
-      setError("All fields are required.");
-      setLoading(false);
-      return;
-    }
+    const newErrors = {};
 
-    if (!agreedToPolicies) {
-      setError("You must agree to the policies and terms to sign up.");
-      setLoading(false);
-      return;
-    }
+    // Required fields validation
+    if (!firstName) newErrors.firstName = "First name is required";
+    if (!lastName) newErrors.lastName = "Last name is required";
+    if (!sellerName) newErrors.sellerName = "Seller name is required";
+    if (!email) newErrors.email = "Email is required";
+    if (!password) newErrors.password = "Password is required";
+    if (!city) newErrors.city = "City is required";
+    if (!zip) newErrors.zip = "Zip code is required";
+    if (!state) newErrors.state = "State is required";
+    if (!country) newErrors.country = "Country is required";
+    if (!phoneNumber) newErrors.phoneNumber = "Phone number is required";
 
+    // Email validation
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      setError("Please enter a valid email address.");
-      setLoading(false);
-      return;
+    if (email && !emailPattern.test(email)) {
+      newErrors.email = "Please enter a valid email address";
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long.");
+    // Password validation
+    if (password && password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters long";
+    }
+
+    // Policy check
+    if (!agreedToPolicies) {
+      newErrors.policy = "You must agree to the policies and terms";
+    }
+
+    // If errors exist stop submission
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       setLoading(false);
       return;
     }
@@ -412,13 +175,25 @@ const AuthSignUp = () => {
       const json = await response.json();
 
       if (response.ok) {
-        toast.success("Registration successful! Please log in.");
         navigate("/Login");
       } else {
-        toast.error(json.error || "An error occurred during registration.");
+        setErrors({
+          api: json.error || "Registration failed. Please try again.",
+        });
+
+        // 2 second ke baad error remove
+        setTimeout(() => {
+          setErrors((prev) => ({ ...prev, api: "" }));
+        }, 2000);
       }
-    } catch (error) {
-      setError("An error occurred. Please try again.");
+    } catch (err) {
+      setErrors({
+        api: "Something went wrong. Please try again later.",
+      });
+
+      setTimeout(() => {
+        setErrors((prev) => ({ ...prev, api: "" }));
+      }, 2000);
     } finally {
       setLoading(false);
     }
@@ -460,6 +235,11 @@ const AuthSignUp = () => {
           </div>
 
           <div className="mt-24 flex flex-col h-[60vh]">
+            {errors.api && (
+              <div className="bg-red-500/10 border mb-3 border-red-500/20 text-red-400 p-3 rounded text-xs font-medium">
+                {errors.api}
+              </div>
+            )}
             <h2 className="text-2xl font-light text-white mb-8">
               Register as a vendor
             </h2>

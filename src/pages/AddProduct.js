@@ -1592,7 +1592,6 @@ const CategorySelector = () => {
     event.target.value = "";
   };
 
-
   const isValidImageUrl = (url) => {
     if (!url || typeof url !== "string") return false;
 
@@ -1603,7 +1602,6 @@ const CategorySelector = () => {
     // ✅ allow only http(s)
     return url.startsWith("http://") || url.startsWith("https://");
   };
-
 
   const uploadImagesInBackground = async ({
     productId,
@@ -1774,73 +1772,64 @@ const CategorySelector = () => {
       //   );
       // }
 
-
-
-      
       // const mediaImageUrls = selectedImages
       //   .map((img) => img.cloudUrl || img.localUrl)
       //   .filter(Boolean);
-      
-   for (let i = 0; i < shopifyVariants.length; i++) {
-  const v = shopifyVariants[i];
 
-  const shopifyTitle = v.title;
+      for (let i = 0; i < shopifyVariants.length; i++) {
+        const v = shopifyVariants[i];
 
-  let matchedQuantity;
+        const shopifyTitle = v.title;
 
-  combinations.forEach((combo, parentIndex) => {
-    combo.children.forEach((child) => {
-      const combinationString =
-        options.length === 1
-          ? child
-          : `${combo.parent} / ${child}`;
+        let matchedQuantity;
 
-      const normalizedKey = combinationString
-        .replace(/['"]/g, "")
-        .trim();
+        combinations.forEach((combo, parentIndex) => {
+          combo.children.forEach((child) => {
+            const combinationString =
+              options.length === 1 ? child : `${combo.parent} / ${child}`;
 
-      if (normalizedKey === shopifyTitle) {
-        const key = `${parentIndex}-${child}`;
+            const normalizedKey = combinationString.replace(/['"]/g, "").trim();
 
-        matchedQuantity = variantQuantities?.[key];
-      }
-    });
-  });
+            if (normalizedKey === shopifyTitle) {
+              const key = `${parentIndex}-${child}`;
 
-  // 🔥 FINAL FALLBACK LOGIC
-  const finalQuantity =
-    matchedQuantity !== undefined && matchedQuantity !== ""
-      ? Number(matchedQuantity)
-      : quantity !== undefined && quantity !== ""
-      ? Number(quantity)
-      : 0;
+              matchedQuantity = variantQuantities?.[key];
+            }
+          });
+        });
 
-  console.log("🟢 Variant:", shopifyTitle);
-  console.log("   Variant Qty:", matchedQuantity);
-  console.log("   Product Qty:", quantity);
-  console.log("   Final Sent:", finalQuantity);
+        // 🔥 FINAL FALLBACK LOGIC
+        const finalQuantity =
+          matchedQuantity !== undefined && matchedQuantity !== ""
+            ? Number(matchedQuantity)
+            : quantity !== undefined && quantity !== ""
+              ? Number(quantity)
+              : 0;
 
-  await fetch(
-    `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
-    {
-      method: "PUT",
-      headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
+        console.log("🟢 Variant:", shopifyTitle);
+        console.log("   Variant Qty:", matchedQuantity);
+        console.log("   Product Qty:", quantity);
+        console.log("   Final Sent:", finalQuantity);
+
+        await fetch(
+          `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              variant: {
+                ...v,
+                inventory_quantity: finalQuantity,
+              },
+            }),
           },
-      body: JSON.stringify({
-        variant: {
-          ...v,
-          inventory_quantity: finalQuantity,
-        },
-      }),
-    }
-  );
-}
+        );
+      }
 
-
-      
       const mediaImageUrls = selectedImages
         .map((img) => img.cloudUrl || img.localUrl)
         .filter(isValidImageUrl);

@@ -301,10 +301,10 @@ const PayoutDetails = () => {
         }
 
         const json = await res.json();
-        // ✅ IMPORTANT FIX
-        if (json?.merchantAccount) {
-          setMerchantAccount(json.merchantAccount);
-        }
+        // // ✅ IMPORTANT FIX
+        // if (json?.merchantAccount) {
+        //   setMerchantAccount(json.merchantAccount);
+        // }
 
         const fetchedOrders = json?.payouts?.[0]?.orders || [];
 
@@ -756,12 +756,12 @@ const PayoutDetails = () => {
 
                 return (
                   <p className="text-sm text-gray-600 mt-2">
-                    This merchant has not added payout details yet. <br />
+                    This merchant has not added payment details yet. <br />
                     <span
                       onClick={() => handleNotifyMerchant()}
                       className="text-blue-600 underline cursor-pointer hover:text-blue-700 font-medium"
                     >
-                      Click here to notify the merchant
+                      Remind Merchant to Add Details
                     </span>
                     .
                   </p>

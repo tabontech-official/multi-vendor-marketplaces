@@ -379,9 +379,7 @@ const CategorySelector = () => {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [productType, setProductType] = useState([]);
-  const [seoHandle, setSeoHandle] = useState(
-    `https://www.aydiactive.com/products/${product?.title || ""} `,
-  );
+  const [seoHandle, setSeoHandle] = useState(`${product?.title || ""} `);
   const [isChanged, setIsChanged] = useState(false);
   const [popupMode, setPopupMode] = useState("variant");
   const [isMediaModalVisible, setIsMediaModalVisible] = useState(false);
@@ -1778,10 +1776,11 @@ const CategorySelector = () => {
 
       for (let i = 0; i < shopifyVariants.length; i++) {
         const v = shopifyVariants[i];
-
         const shopifyTitle = v.title;
 
         let matchedQuantity;
+        let matchedPrice;
+        let matchedCompare;
 
         combinations.forEach((combo, parentIndex) => {
           combo.children.forEach((child) => {
@@ -1794,11 +1793,14 @@ const CategorySelector = () => {
               const key = `${parentIndex}-${child}`;
 
               matchedQuantity = variantQuantities?.[key];
+              matchedPrice = variantPrices?.[key];
+              matchedCompare = variantCompareAtPrices?.[key];
             }
           });
         });
 
-        // 🔥 FINAL FALLBACK LOGIC
+        // 🔥 FINAL FALLBACK SYSTEM
+
         const finalQuantity =
           matchedQuantity !== undefined && matchedQuantity !== ""
             ? Number(matchedQuantity)
@@ -1806,10 +1808,19 @@ const CategorySelector = () => {
               ? Number(quantity)
               : 0;
 
-        console.log("🟢 Variant:", shopifyTitle);
-        console.log("   Variant Qty:", matchedQuantity);
-        console.log("   Product Qty:", quantity);
-        console.log("   Final Sent:", finalQuantity);
+        const finalPrice =
+          matchedPrice !== undefined && matchedPrice !== ""
+            ? Number(matchedPrice)
+            : price !== undefined && price !== ""
+              ? Number(price)
+              : 0;
+
+        const finalCompare =
+          matchedCompare !== undefined && matchedCompare !== ""
+            ? Number(matchedCompare)
+            : compareAtPrice !== undefined && compareAtPrice !== ""
+              ? Number(compareAtPrice)
+              : 0;
 
         await fetch(
           `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
@@ -1822,7 +1833,8 @@ const CategorySelector = () => {
             },
             body: JSON.stringify({
               variant: {
-                ...v,
+                price: finalPrice,
+                compare_at_price: finalCompare,
                 inventory_quantity: finalQuantity,
               },
             }),
@@ -4071,23 +4083,9 @@ const CategorySelector = () => {
               )}
             </div>
 
-            {/* {loading && (
-              <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60">
-                <div className="w-14 h-14 border-4 border-white border-t-transparent rounded-full animate-spin" />
-
-                <p className="mt-5 text-white text-sm font-medium tracking-wide">
-                  please wait  while we {isEditing ? "update": "create"} your product...
-                </p>
-              </div>
-            )} */}
             {loading && (
               <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-60 text-center px-4">
                 <div className="w-14 h-14 border-4 border-white border-t-transparent rounded-full animate-spin mb-6" />
-
-                {/* <p className="text-white text-sm font-medium tracking-wide opacity-80 mb-2">
-                  Please wait while we {isEditing ? "update" : "create"} your
-                  product...
-                </p> */}
 
                 <h2 className="text-white text-lg font-semibold transition-all duration-500">
                   {slides[slideIndex].title}

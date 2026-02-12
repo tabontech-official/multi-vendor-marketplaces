@@ -988,24 +988,24 @@ const PayoutDetails = () => {
               </div>
 
               {/* FINANCIAL SUMMARY CARD */}
-              <div className="bg-slate-900 rounded-xl p-5 mb-6 text-white shadow-lg shadow-blue-900/10">
-                <div className="flex justify-between text-xs text-slate-400 mb-1">
+              <div className="bg-gray-300 rounded-xl p-5 mb-6 text-white shadow-lg shadow-blue-900/10">
+                <div className="flex justify-between text-xs text-slate-900 mb-1">
                   <span>Gross Revenue</span>
                   <span>${summary.charges.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-xs text-rose-400 mb-4 pb-4 border-b border-slate-700/50">
+                <div className="flex justify-between text-xs text-rose-500 mb-4 pb-4 border-b border-slate-700/50">
                   <span>Platform Commission</span>
                   <span>-${summary.fees.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-end">
-                  <span className="text-sm font-medium text-slate-300">
+                  <span className="text-sm font-medium text-slate-900">
                     Total Net Payout
                   </span>
                   <div className="text-right">
-                    <span className="text-2xl font-bold text-white tracking-tight">
+                    <span className="text-2xl font-bold text-slate-700 tracking-tight">
                       ${summary.net.toFixed(2)}
                     </span>
-                    <span className="text-[10px] ml-1 text-slate-400 font-bold uppercase">
+                    <span className="text-[10px] ml-1 text-slate-900 font-bold uppercase">
                       AUD
                     </span>
                   </div>
@@ -1045,10 +1045,9 @@ const PayoutDetails = () => {
                             {merchantAccount.bankDetails.bankName}
                           </p>
                           <p className="text-slate-500 text-xs">
-                            {merchantAccount.bankDetails.accountHolderName} ••••
-                            {merchantAccount.bankDetails.accountNumber.slice(
-                              -4,
-                            )}
+                            {merchantAccount.bankDetails.accountHolderName}<br/>  
+                            {merchantAccount.bankDetails.accountNumber
+                            }
                           </p>
                         </div>
                       </div>

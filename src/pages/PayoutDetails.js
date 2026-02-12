@@ -301,10 +301,10 @@ const PayoutDetails = () => {
         }
 
         const json = await res.json();
-        // // ✅ IMPORTANT FIX
-        // if (json?.merchantAccount) {
-        //   setMerchantAccount(json.merchantAccount);
-        // }
+        // ✅ IMPORTANT FIX
+        if (json?.merchantAccount) {
+          setMerchantAccount(json.merchantAccount);
+        }
 
         const fetchedOrders = json?.payouts?.[0]?.orders || [];
 
@@ -623,120 +623,114 @@ const PayoutDetails = () => {
 
                 // ================= IF DETAILS EXIST =================
                 if (hasPayoutDetails) {
-                  return (
-                    <div className="space-y-3 text-sm">
-                      {/* PayPal Account */}
-                      {merchantAccount.paypalAccount && (
-                        <div className="flex items-center justify-between gap-4">
-                          <label className="text-gray-600 font-medium w-40">
-                            PayPal Account
-                          </label>
-                          <input
-                            type="text"
-                            value={merchantAccount.paypalAccount}
-                            disabled
-                            className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
-                          />
-                        </div>
-                      )}
+  return (
+    <div className="space-y-3 text-sm">
 
-                      {/* PayPal Account No */}
-                      {merchantAccount.paypalAccountNo && (
-                        <div className="flex items-center justify-between gap-4">
-                          <label className="text-gray-600 font-medium w-40">
-                            PayPal Account No
-                          </label>
-                          <input
-                            type="text"
-                            value={merchantAccount.paypalAccountNo}
-                            disabled
-                            className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
-                          />
-                        </div>
-                      )}
+      {merchantAccount.paypalAccount && (
+        <div className="flex items-center gap-4">
+          <label className="text-gray-600 font-medium w-40">
+            PayPal Account
+          </label>
+          <input
+            type="text"
+            value={merchantAccount.paypalAccount}
+            disabled
+            className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
+          />
+        </div>
+      )}
 
-                      {/* PayPal Reference */}
-                      {merchantAccount.paypalReferenceNo && (
-                        <div className="flex items-center justify-between gap-4">
-                          <label className="text-gray-600 font-medium w-40">
-                            PayPal Reference
-                          </label>
-                          <input
-                            type="text"
-                            value={merchantAccount.paypalReferenceNo}
-                            disabled
-                            className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
-                          />
-                        </div>
-                      )}
+      {merchantAccount.paypalAccountNo && (
+        <div className="flex items-center gap-4">
+          <label className="text-gray-600 font-medium w-40">
+            PayPal Account No
+          </label>
+          <input
+            type="text"
+            value={merchantAccount.paypalAccountNo}
+            disabled
+            className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
+          />
+        </div>
+      )}
 
-                      {/* Bank Details */}
-                      {hasBankDetails && (
-                        <>
-                          {merchantAccount.bankDetails.bankName && (
-                            <div className="flex items-center justify-between gap-4">
-                              <label className="text-gray-600 font-medium w-40">
-                                Bank Name
-                              </label>
-                              <input
-                                type="text"
-                                value={merchantAccount.bankDetails.bankName}
-                                disabled
-                                className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
-                              />
-                            </div>
-                          )}
+      {merchantAccount.paypalReferenceNo && (
+        <div className="flex items-center gap-4">
+          <label className="text-gray-600 font-medium w-40">
+            PayPal Reference
+          </label>
+          <input
+            type="text"
+            value={merchantAccount.paypalReferenceNo}
+            disabled
+            className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
+          />
+        </div>
+      )}
 
-                          {merchantAccount.bankDetails.accountNumber && (
-                            <div className="flex items-center justify-between gap-4">
-                              <label className="text-gray-600 font-medium w-40">
-                                Account No
-                              </label>
-                              <input
-                                type="text"
-                                value={
-                                  merchantAccount.bankDetails.accountNumber
-                                }
-                                disabled
-                                className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm "
-                              />
-                            </div>
-                          )}
+      {hasBankDetails && (
+        <>
+          {merchantAccount.bankDetails.bankName && (
+            <div className="flex items-center gap-4">
+              <label className="text-gray-600 font-medium w-40">
+                Bank Name
+              </label>
+              <input
+                type="text"
+                value={merchantAccount.bankDetails.bankName}
+                disabled
+                className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
+              />
+            </div>
+          )}
 
-                          {merchantAccount.bankDetails.accountHolderName && (
-                            <div className="flex items-center justify-between gap-4">
-                              <label className="text-gray-600 font-medium w-40">
-                                Account Holder
-                              </label>
-                              <input
-                                type="text"
-                                value={
-                                  merchantAccount.bankDetails.accountHolderName
-                                }
-                                disabled
-                                className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm "
-                              />
-                            </div>
-                          )}
+          {merchantAccount.bankDetails.accountNumber && (
+            <div className="flex items-center gap-4">
+              <label className="text-gray-600 font-medium w-40">
+                Account No
+              </label>
+              <input
+                type="text"
+                value={merchantAccount.bankDetails.accountNumber}
+                disabled
+                className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
+              />
+            </div>
+          )}
 
-                          {merchantAccount.bankDetails.ifscCode && (
-                            <div className="flex items-center justify-between gap-4">
-                              <label className="text-gray-600 font-medium w-40">
-                                IFSC
-                              </label>
-                              <input
-                                type="text"
-                                value={merchantAccount.bankDetails.ifscCode}
-                                disabled
-                                className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm "
-                              />
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  );
-                }
+          {merchantAccount.bankDetails.accountHolderName && (
+            <div className="flex items-center gap-4">
+              <label className="text-gray-600 font-medium w-40">
+                Account Holder
+              </label>
+              <input
+                type="text"
+                value={merchantAccount.bankDetails.accountHolderName}
+                disabled
+                className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
+              />
+            </div>
+          )}
+
+          {merchantAccount.bankDetails.ifscCode && (
+            <div className="flex items-center gap-4">
+              <label className="text-gray-600 font-medium w-40">
+                IFSC
+              </label>
+              <input
+                type="text"
+                value={merchantAccount.bankDetails.ifscCode}
+                disabled
+                className="w-64 bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-md text-sm"
+              />
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 
                 if (userRole === "Merchant") {
                   return (
@@ -803,7 +797,7 @@ const PayoutDetails = () => {
                 <td colSpan="5" className="py-10 text-center text-gray-500">
                   <div className="inline-flex items-center gap-2 justify-center">
                     <HiOutlineRefresh className="animate-spin text-xl" />
-                    Loading...
+                    fething data...
                   </div>
                 </td>
               </tr>

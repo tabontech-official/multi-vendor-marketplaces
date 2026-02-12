@@ -61,12 +61,15 @@ const CategorySelector = () => {
   ];
 
   const { addNotification } = useNotification();
+  const [imagesChanged, setImagesChanged] = useState(false);
+
   const [variantImageModal, setVariantImageModal] = useState({
     open: false,
     variantKey: null,
   });
   const [slideIndex, setSlideIndex] = useState(0);
   const LAST_SLIDE_INDEX = slides.length - 1;
+const [variantsChanged, setVariantsChanged] = useState(false);
 
   const isEditing = Boolean(id);
   const [bulkUploading, setBulkUploading] = useState(false);
@@ -87,6 +90,7 @@ const CategorySelector = () => {
   const [duplicateTitle, setDuplicateTitle] = useState("");
   const assignImageToSelectedVariants = (imageUrl, isLoading = false) => {
     if (selectedBulkVariants.length === 0) return;
+   setVariantsChanged(true);
 
     setVariantImages((prev) => {
       const updated = { ...prev };
@@ -132,6 +136,7 @@ const CategorySelector = () => {
   const handleBulkImageUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length || selectedBulkVariants.length === 0) return;
+    setImagesChanged(true);
 
     setBulkUploading(true);
 
@@ -765,6 +770,8 @@ const CategorySelector = () => {
         parent: comb.parent,
         children: [...comb.children],
       }));
+         setVariantsChanged(true);
+
 
       const parentObj = updatedCombinations[parentIndex];
       if (!parentObj) return prevCombinations;
@@ -894,6 +901,7 @@ const CategorySelector = () => {
       ...prev,
       values: updatedValues,
     }));
+   setVariantsChanged(true);
 
     setVariants((prevVariants) => {
       const filtered = prevVariants.filter(
@@ -959,11 +967,15 @@ const CategorySelector = () => {
 
   const handleAddNewValue = () => {
     setNewOption({ ...newOption, values: [...newOption.values, ""] });
+       setVariantsChanged(true);
+
   };
 
   const handleDeleteNewValue = (index) => {
     let updatedValues = newOption.values.filter((_, i) => i !== index);
     setNewOption({ ...newOption, values: updatedValues });
+       setVariantsChanged(true);
+
   };
 
   const handleDone = () => {
@@ -999,6 +1011,8 @@ const CategorySelector = () => {
     setShowVariantForm(false);
     setNewOption({ name: "", values: [""] });
     setIsChanged(true);
+       setVariantsChanged(true);
+
   };
 
   const [editingOptionIndex, setEditingOptionIndex] = useState(null);
@@ -1537,6 +1551,7 @@ const CategorySelector = () => {
 
     setSelectedImages((prev) => [...newPreviews, ...prev]);
     setIsChanged(true);
+    setImagesChanged(true);
 
     await Promise.all(
       newPreviews.map(async (preview) => {
@@ -1646,6 +1661,7 @@ const CategorySelector = () => {
         `Images uploaded successfully for "${productTitle}"`,
         "/manage-product",
       );
+      setImagesChanged(false);
     } catch (err) {
       console.error("❌ Background image upload failed", err);
 
@@ -1774,6 +1790,9 @@ const CategorySelector = () => {
       //   .map((img) => img.cloudUrl || img.localUrl)
       //   .filter(Boolean);
 
+
+      const shouldUpdateVariants = !isEditing || variantsChanged;
+if (shouldUpdateVariants) {
       for (let i = 0; i < shopifyVariants.length; i++) {
         const v = shopifyVariants[i];
         const shopifyTitle = v.title;
@@ -1841,6 +1860,8 @@ const CategorySelector = () => {
           },
         );
       }
+       setVariantsChanged(false);
+}
 
       const mediaImageUrls = selectedImages
         .map((img) => img.cloudUrl || img.localUrl)
@@ -1880,27 +1901,57 @@ const CategorySelector = () => {
       });
       setSlideIndex(LAST_SLIDE_INDEX);
 
+      const shouldUploadImages = !isEditing || imagesChanged;
+
       sessionStorage.setItem(
         "imageUploadInProgress",
         JSON.stringify({
           productId,
           productTitle: title,
-          status: "uploading",
+          status: shouldUploadImages ? "uploading" : "skipped",
           time: Date.now(),
         }),
       );
-      navigate("/manage-product");
 
-      uploadImagesInBackground({
-        productId,
-        apiKey,
-        apiSecretKey,
-        mediaImageUrls,
-        uploadedVariantImages,
-        groupImages,
-        addNotification,
-        productTitle: title,
-      });
+      navigate("/manage-product");
+sessionStorage.setItem(
+  "productRefreshRequired",
+  JSON.stringify({
+    productId,
+    time: Date.now(),
+  })
+);
+      if (shouldUploadImages) {
+        uploadImagesInBackground({
+          productId,
+          apiKey,
+          apiSecretKey,
+          mediaImageUrls,
+          uploadedVariantImages,
+          groupImages,
+          addNotification,
+          productTitle: title,
+        });
+      } else {
+        sessionStorage.removeItem("imageUploadInProgress");
+
+        window.dispatchEvent(
+          new CustomEvent("image-upload-finished", {
+            detail: { productId },
+          }),
+        );
+      }
+
+      // uploadImagesInBackground({
+      //   productId,
+      //   apiKey,
+      //   apiSecretKey,
+      //   mediaImageUrls,
+      //   uploadedVariantImages,
+      //   groupImages,
+      //   addNotification,
+      //   productTitle: title,
+      // });
     } catch (err) {
       console.error("❌ handleSubmit error:", err);
       setMessage({ type: "error", text: err.message });
@@ -2289,6 +2340,7 @@ const CategorySelector = () => {
                 : img,
             ),
           }));
+          setImagesChanged(true);
         }
       } catch (err) {
         console.error(err);
@@ -2396,6 +2448,7 @@ const CategorySelector = () => {
 
     setOptions(updated);
     setEditingOptionIndex(null);
+   setVariantsChanged(true);
 
     regenerateVariants(updated);
   };
@@ -4056,17 +4109,17 @@ const CategorySelector = () => {
                       type="text"
                       value={seoHandle}
                       // onChange={(e) => setSeoHandle(e.target.value)}
- onChange={(e) => {
-    let value = e.target.value;
+                      onChange={(e) => {
+                        let value = e.target.value;
 
-    value = value
-      .toLowerCase()
-      .replace(/\s+/g, "-")        // space → -
-      .replace(/[^a-z0-9-]/g, "")  // special char remove
-      .replace(/-+/g, "-");        // multiple - ko single karo
+                        value = value
+                          .toLowerCase()
+                          .replace(/\s+/g, "-") // space → -
+                          .replace(/[^a-z0-9-]/g, "") // special char remove
+                          .replace(/-+/g, "-"); // multiple - ko single karo
 
-    setSeoHandle(value);
-  }}
+                        setSeoHandle(value);
+                      }}
                       className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -4384,6 +4437,7 @@ const CategorySelector = () => {
                                     ),
                                   }));
                                   setIsChanged(true);
+                                  setImagesChanged(true);
                                 }}
                                 className="absolute -top-2 -right-2 bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs"
                               >
@@ -4443,6 +4497,7 @@ const CategorySelector = () => {
                               }));
 
                               setIsChanged(true);
+                              setImagesChanged(true);
                             }}
                           >
                             <img
@@ -4958,6 +5013,7 @@ const CategorySelector = () => {
                       setIsChanged(true);
                       setShowBulkModal(false);
                       setBulkPrice("");
+                      setVariantsChanged(true); 
                       setBulkCompareAtPrice("");
                       setBulkQuantity("");
                     }}
@@ -5185,6 +5241,7 @@ const CategorySelector = () => {
 
                           setDraggedIndex(null);
                           setIsChanged(true);
+                          setVariantsChanged(true); 
                         }}
                         className={`relative border rounded-lg overflow-hidden group cursor-move transition
               ${draggedIndex === index ? "ring-2 ring-blue-500 opacity-70" : ""}
@@ -5236,6 +5293,8 @@ const CategorySelector = () => {
 
                                 return updated;
                               });
+                              setVariantsChanged(true);
+
                               setIsChanged(true);
                             }}
                             className="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
@@ -5314,7 +5373,7 @@ const CategorySelector = () => {
             </div>
           )}
         </div>
-      </div>
+      </div>  
     </main>
   );
 };

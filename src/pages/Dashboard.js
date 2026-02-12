@@ -77,41 +77,19 @@ const Dashboard = () => {
   };
   const togglePopup = () => setIsexportOpen(!isOpen);
 
-  // const getUniqueOptions = (criteria) => {
-  //   switch (criteria) {
-  //     case "listing_name":
-  //       return [...new Set(products.map((p) => p.title).filter(Boolean))];
-  //     case "approval":
-  //       return [
-  //         ...new Set(products.map((p) => p.approvalStatus).filter(Boolean)),
-  //       ];
-  //     case "sku":
-  //       return [
-  //         ...new Set(products.map((p) => p.variants?.[0]?.sku).filter(Boolean)),
-  //       ];
-  //     case "price":
-  //       return [
-  //         ...new Set(
-  //           products
-  //             .map((p) => p.variants?.[0]?.price?.toString())
-  //             .filter(Boolean)
-  //         ),
-  //       ];
-  //     case "product_type":
-  //       return [
-  //         ...new Set(products.map((p) => p.product_type).filter(Boolean)),
-  //       ];
-  //     case "vendor":
-  //       return [...new Set(products.map((p) => p.vendor).filter(Boolean))];
+  useEffect(() => {
+    const refreshData = sessionStorage.getItem("productRefreshRequired");
 
-  //     // ✅ Published By (unique publishers usernames)
-  //     case "published_by":
-  //       return [...new Set(products.map((p) => p.username).filter(Boolean))];
+    if (refreshData) {
+      const parsed = JSON.parse(refreshData);
 
-  //     default:
-  //       return [];
-  //   }
-  // };
+      setImageUploadStatus({
+        productId: parsed.productId,
+        finished: true,
+      });
+    }
+  }, []);
+
   const formatCurrency = (value) => {
     return `$${Number(value).toFixed(2)}`;
   };
@@ -276,33 +254,62 @@ const Dashboard = () => {
   };
   const [imageUploadStatus, setImageUploadStatus] = useState(null);
 
+  // useEffect(() => {
+  //   const data = sessionStorage.getItem("imageUploadInProgress");
+  //   if (data) {
+  //     setImageUploadStatus(JSON.parse(data));
+  //   }
+  // }, []);
+
+  //   useEffect(() => {
+  //     const syncUploadStatus = () => {
+  //       const data = sessionStorage.getItem("imageUploadInProgress");
+  //       setImageUploadStatus(data ? JSON.parse(data) : null);
+  //     };
+
+  //     syncUploadStatus();
+
+  //     // const handleUploadFinished = (event) => {
+  //     //   setImageUploadStatus(null);
+
+  //     //   showToast("success", "Images uploaded successfully");
+  //     //   addNotification(
+  //     //     "Product images uploaded successfully!",
+  //     //     "Manage product",
+  //     //   );
+  //     //   // window.location.reload();
+  //     // };
+  //     const handleUploadFinished = (event) => {
+  //       const { productId } = event.detail || {};
+
+  //       if (!productId) return;
+
+  //      setImageUploadStatus({
+  //   productId,
+  //   finished: true,
+  //   time: Date.now(),
+  // });
+
+  //       showToast("success", "Images uploaded successfully");
+  //       addNotification(
+  //         "Product images uploaded successfully!",
+  //         "Manage product",
+  //       );
+  //     };
+
+  //     window.addEventListener("image-upload-finished", handleUploadFinished);
+  //     return () => {
+  //       window.removeEventListener("image-upload-finished", handleUploadFinished);
+  //     };
+  //   }, []);
   useEffect(() => {
-    const data = sessionStorage.getItem("imageUploadInProgress");
-    if (data) {
-      setImageUploadStatus(JSON.parse(data));
+    const existing = sessionStorage.getItem("imageUploadInProgress");
+    if (existing) {
+      setImageUploadStatus(JSON.parse(existing));
     }
-  }, []);
-  useEffect(() => {
-    const syncUploadStatus = () => {
-      const data = sessionStorage.getItem("imageUploadInProgress");
-      setImageUploadStatus(data ? JSON.parse(data) : null);
-    };
 
-    syncUploadStatus();
-
-    // const handleUploadFinished = (event) => {
-    //   setImageUploadStatus(null);
-
-    //   showToast("success", "Images uploaded successfully");
-    //   addNotification(
-    //     "Product images uploaded successfully!",
-    //     "Manage product",
-    //   );
-    //   // window.location.reload();
-    // };
     const handleUploadFinished = (event) => {
       const { productId } = event.detail || {};
-
       if (!productId) return;
 
       setImageUploadStatus({
@@ -318,6 +325,7 @@ const Dashboard = () => {
     };
 
     window.addEventListener("image-upload-finished", handleUploadFinished);
+
     return () => {
       window.removeEventListener("image-upload-finished", handleUploadFinished);
     };
@@ -1430,6 +1438,9 @@ const Dashboard = () => {
                               onClick={() => {
                                 fetchProductData();
                                 setImageUploadStatus(null);
+                                sessionStorage.removeItem(
+                                  "imageUploadInProgress",
+                                );
                               }}
                               className="flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition"
                             >

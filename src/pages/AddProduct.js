@@ -1871,6 +1871,7 @@ const CategorySelector = () => {
           time: Date.now(),
         }),
       );
+  sessionStorage.setItem("uploadStartTime", Date.now());
 
       navigate("/manage-product");
       sessionStorage.setItem(
@@ -2379,6 +2380,7 @@ const CategorySelector = () => {
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsMediaModalVisible(true);
+                      setImagesChanged(true)
                     }}
                   >
                     Upload new

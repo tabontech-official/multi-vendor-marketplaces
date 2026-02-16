@@ -308,21 +308,37 @@ const Dashboard = () => {
       setImageUploadStatus(JSON.parse(existing));
     }
 
-    const handleUploadFinished = (event) => {
-      const { productId } = event.detail || {};
-      if (!productId) return;
+   const handleUploadFinished = async (event) => {
+  const { productId } = event.detail || {};
+  if (!productId) return;
 
-      setImageUploadStatus({
-        productId,
-        finished: true,
-      });
+  const uploadStartTime = Number(
+    sessionStorage.getItem("uploadStartTime")
+  );
 
-      showToast("success", "Images uploaded successfully");
-      addNotification(
-        "Product images uploaded successfully!",
-        "Manage product",
-      );
-    };
+  const now = Date.now();
+  const elapsed = now - uploadStartTime;
+
+  const minimumDuration = 6000; // 6 seconds
+
+  if (elapsed < minimumDuration) {
+    await new Promise((resolve) =>
+      setTimeout(resolve, minimumDuration - elapsed)
+    );
+  }
+
+  setImageUploadStatus({
+    productId,
+    finished: true,
+  });
+
+  showToast("success", "Images uploaded successfully");
+  addNotification(
+    "Product images uploaded successfully!",
+    "Manage product"
+  );
+};
+
 
     window.addEventListener("image-upload-finished", handleUploadFinished);
 

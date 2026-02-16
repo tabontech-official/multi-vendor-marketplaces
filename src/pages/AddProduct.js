@@ -1156,44 +1156,6 @@ const CategorySelector = () => {
         }),
       );
 
-      // const hydratedVariantImages = {};
-
-      // product.variants.forEach((variant, idx) => {
-      //   const titleKey = normalizeString(variant.title || "");
-      //   let matchedImages = [];
-
-      //   if (product.variantImages?.length) {
-      //     matchedImages = product.variantImages.filter((img) => {
-      //       const alt = normalizeString(img.alt || "").toLowerCase();
-      //       return (
-      //         alt.includes(titleKey.toLowerCase()) ||
-      //         alt.includes(titleKey.replace(/\s*\/\s*/g, "-").toLowerCase())
-      //       );
-      //     });
-      //   }
-
-      //   if (!matchedImages.length && variant.image_id) {
-      //     const found = product.images?.find(
-      //       (img) => String(img.id) === String(variant.image_id),
-      //     );
-      //     if (found) matchedImages = [found];
-      //   }
-
-      //   // if (!matchedImages.length && product.images?.length > 0) {
-      //   //   matchedImages = [product.images[0]];
-      //   // }
-
-      //   const combinationAlt = titleKey
-      //     .replace(/\s*\/\s*/g, "-")
-      //     .replace(/\s+/g, "-")
-      //     .toLowerCase();
-
-      //   hydratedVariantImages[titleKey] = matchedImages.map((img) => ({
-      //     preview: img.src,
-      //     alt: combinationAlt,
-      //     loading: false,
-      //   }));
-      // });
       const hydratedVariantImages = {};
 
       product.variantImages?.forEach((variantBlock) => {
@@ -1918,6 +1880,10 @@ const CategorySelector = () => {
           time: Date.now(),
         }),
       );
+      const hasVariants = generateVariants().length > 0;
+
+      const finalGroupImages = groupImages && hasVariants;
+
       if (shouldUploadImages) {
         uploadImagesInBackground({
           productId,
@@ -1925,7 +1891,8 @@ const CategorySelector = () => {
           apiSecretKey,
           mediaImageUrls,
           uploadedVariantImages,
-          groupImages,
+          // groupImages,
+          groupImages: finalGroupImages,
           addNotification,
           productTitle: title,
         });
@@ -1956,181 +1923,6 @@ const CategorySelector = () => {
       setLoading(false);
     }
   };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   const userId = localStorage.getItem("userid");
-  //   const apiKey = localStorage.getItem("apiKey");
-  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
-
-  //   if (!userId) {
-  //     setMessage({ type: "error", text: "User ID missing" });
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   setMessage(null);
-
-  //   try {
-
-  //     const rawContentState = convertToRaw(editorState.getCurrentContent());
-  //     const htmlContent = draftToHtml(rawContentState);
-  //     const description = htmlContent
-  //       .replace(/<p>/g, "")
-  //       .replace(/<\/p>/g, "<br />")
-  //       .replace(/<br\s*\/?>\s*<br\s*\/?>/g, "<br />")
-  //       .replace(/&nbsp;/g, " ");
-
-  //     const payload = {
-  //       keyWord: [
-  //         ...finalCategoryPayload.map((c) => c.catNo),
-  //         ...keywordsList,
-  //       ].join(", "),
-  //       title,
-  //       description,
-  //       productType,
-  //       price: Number(price),
-  //       compare_at_price: compareAtPrice ? Number(compareAtPrice) : undefined,
-  //       track_quantity: trackQuantity,
-  //       quantity: trackQuantity ? Number(quantity) : 0,
-  //       continue_selling: continueSelling,
-  //       has_sku: hasSKU,
-  //       sku: hasSKU ? sku : undefined,
-  //       barcode: hasSKU ? barcode : undefined,
-  //       track_shipping: trackShipping,
-  //       weight: trackShipping ? Number(weight) : undefined,
-  //       weight_unit: trackShipping ? unit : undefined,
-  //       status,
-  //       userId: isEditing ? product?.userId : userId,
-  //       vendor,
-  //       seoTitle,
-  //       seoDescription,
-  //       seoHandle,
-  //       options,
-  //       variants,
-  //       categories: finalCategoryPayload.map((c) => c.title),
-  //     };
-
-  //     if (enableMetafields) {
-  //       payload.metafields = metafields.filter(
-  //         (m) => m.label.trim() && m.value.trim(),
-  //       );
-  //     }
-
-  //     const productRes = await fetch(
-  //       isEditing
-  //         ? `https://multi-vendor-marketplace.vercel.app/product/updateProducts/${mongooseProductId}`
-  //         : `https://multi-vendor-marketplace.vercel.app/product/createProduct`,
-  //       {
-  //         method: isEditing ? "PATCH" : "POST",
-  //         headers: {
-  //           "x-api-key": apiKey,
-  //           "x-api-secret": apiSecretKey,
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify(payload),
-  //       },
-  //     );
-
-  //     const productData = await productRes.json();
-  //     if (!productRes.ok) throw new Error(productData.error);
-
-  //     const productId = productData.product.id;
-  //     const shopifyVariants = productData.product.variants;
-
-  //     for (const v of shopifyVariants) {
-  //       await fetch(
-  //         `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
-  //         {
-  //           method: "PUT",
-  //           headers: {
-  //             Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
-  //             "x-api-key": apiKey,
-  //             "x-api-secret": apiSecretKey,
-  //             "Content-Type": "application/json",
-  //           },
-  //           body: JSON.stringify({ variant: v }),
-  //         },
-  //       );
-  //     }
-
-  //     const mediaImageUrls = selectedImages
-  //       .map((img) => img.cloudUrl || img.localUrl)
-  //       .filter(Boolean);
-
-  //     const variantImageMap = {};
-
-  //     Object.entries(variantImages).forEach(([variantKey, images]) => {
-  //       if (!Array.isArray(images)) return;
-
-  //       const variant = shopifyVariants.find(
-  //         (v) =>
-  //           v.title.replace(/['"]/g, "").trim().toLowerCase() ===
-  //           variantKey.replace(/['"]/g, "").trim().toLowerCase(),
-  //       );
-
-  //       if (!variant?.id) return;
-
-  //       images.forEach((img) => {
-  //         const url = img.preview || img.src;
-  //         if (!url) return;
-
-  //         if (!variantImageMap[url]) variantImageMap[url] = [];
-  //         variantImageMap[url].push(variant.id);
-  //       });
-  //     });
-
-  //     const uploadedVariantImages = Object.entries(variantImageMap).map(
-  //       ([url, variantIds]) => ({ url, variantIds }),
-  //     );
-
-  //     const usedVariantUrls = new Set(uploadedVariantImages.map((v) => v.url));
-  //     // const finalProductImages = mediaImageUrls.filter(
-  //     //   (url) => !usedVariantUrls.has(url),
-  //     // );
-
-  //     /* =======================
-  //      7. UPDATE IMAGES API
-  //   ======================= */
-  //     const imageRes = await fetch(
-  //       `https://multi-vendor-marketplace.vercel.app/product/updateImages/${productId}`,
-  //       {
-  //         method: "PUT",
-  //         headers: {
-  //           "x-api-key": apiKey,
-  //           "x-api-secret": apiSecretKey,
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           images: mediaImageUrls   ,
-  //           variantImages: uploadedVariantImages,
-  //           groupImages,
-  //         }),
-  //       },
-  //     );
-
-  //     const imageJson = await imageRes.json();
-  //     if (!imageRes.ok) throw new Error(imageJson.error);
-
-  //     /* =======================
-  //      8. SUCCESS
-  //   ======================= */
-  //     setMessage({
-  //       type: "success",
-  //       text: isEditing
-  //         ? "Product updated successfully!"
-  //         : "Product created successfully!",
-  //     });
-
-  //     navigate("/manage-product");
-  //   } catch (err) {
-  //     console.error("❌ handleSubmit error:", err);
-  //     setMessage({ type: "error", text: err.message });
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const handlePriceChange = (index, child, value) => {
     const key = `${index}-${child}`;
@@ -2201,87 +1993,6 @@ const CategorySelector = () => {
           text: data.error || "Failed to duplicate product.",
         });
       }
-      // if (response.ok) {
-      //   setMessage({
-      //     type: "success",
-      //     // text: "Product duplicated successfully!",
-      //   });
-
-      //   const duplicatedProduct = data.product;
-      //   const duplicatedProductId =
-      //     duplicatedProduct.id || duplicatedProduct.shopifyId;
-
-      //   /* ================= IMAGE LOGIC (SAME AS ADD / UPDATE) ================= */
-
-      //   // 🔹 1. Collect all variant image URLs
-      //   const usedVariantImageUrls = new Set();
-
-      //   Object.values(variantImages).forEach((imgs) => {
-      //     if (Array.isArray(imgs)) {
-      //       imgs.forEach((img) => {
-      //         if (img.preview) {
-      //           usedVariantImageUrls.add(img.preview);
-      //         }
-      //       });
-      //     }
-      //   });
-
-      //   // 🔹 2. Collect product images
-      //   const mediaImageUrls = selectedImages
-      //     .filter((img) => img.cloudUrl)
-      //     .map((img) => img.cloudUrl);
-
-      //   // 🔹 3. Remove variant-used images from product images
-      //   const finalProductImages = mediaImageUrls.filter(
-      //     (url) => !usedVariantImageUrls.has(url),
-      //   );
-
-      //   // 🔹 4. Prepare variant images payload (Shopify compatible)
-      //   const uploadedVariantImages = Object.entries(variantImages).flatMap(
-      //     ([key, images]) => {
-      //       const parts = key.split("/").map((p) => p.trim());
-
-      //       const optionName = options[0]?.name || "option";
-      //       const optionValue = parts[0];
-
-      //       const safeImages = Array.isArray(images)
-      //         ? images
-      //         : images
-      //           ? [images]
-      //           : [];
-
-      //       return safeImages.map((img) => ({
-      //         key,
-      //         url: img.preview || img.src,
-      //         optionName,
-      //         optionValue,
-      //       }));
-      //     },
-      //   );
-
-      //   const hasVariantImages = uploadedVariantImages.length > 0;
-
-      //   await fetch(
-      //     `https://multi-vendor-marketplace.vercel.app/product/updateImages/${duplicatedProductId}`,
-      //     {
-      //       method: "PUT",
-      //       headers: {
-      //         "x-api-key": localStorage.getItem("apiKey"),
-      //         "x-api-secret": localStorage.getItem("apiSecretKey"),
-      //         "Content-Type": "application/json",
-      //       },
-      //       body: JSON.stringify({
-      //         images: finalProductImages,
-      //         ...(hasVariantImages && { variantImages: uploadedVariantImages }),
-      //       }),
-      //     },
-      //   );
-
-      //   navigate(`/manage-product`, {
-      //     state: { product: duplicatedProduct },
-      //     replace: true,
-      //   });
-      // }
     } catch (err) {
       console.error("Error duplicating product:", err);
       setMessage({ type: "error", text: "Server error while duplicating." });
@@ -2599,6 +2310,16 @@ const CategorySelector = () => {
                 </label>
 
                 <label className="flex items-center gap-2 text-sm text-gray-600 select-none">
+                  {/* <input
+                    type="checkbox"
+                    checked={groupImages}
+                    onChange={(e) => {
+                      setGroupImages(e.target.checked);
+                      setIsChanged(true);
+                      setImagesChanged(true);
+                    }}
+                    className="w-4 h-4 accent-blue-600 cursor-pointer"
+                  /> */}
                   <input
                     type="checkbox"
                     checked={groupImages}
@@ -2861,22 +2582,6 @@ const CategorySelector = () => {
                 </div>
               )}
 
-              {/* <div className="flex items-center mt-3">
-                <input
-                  type="checkbox"
-                  id="hasSKU"
-                  checked={hasSKU}
-                  onChange={() => {
-                    setHasSKU(!hasSKU);
-                    setIsChanged(true);
-                  }}
-                  className="h-4 w-4 text-blue-500"
-                />
-                <label htmlFor="hasSKU" className="ml-2 text-sm text-gray-700">
-                  This product has a SKU or barcode
-                </label>
-              </div> */}
-
               <div className="flex items-center mt-3">
                 <input
                   type="checkbox"
@@ -3106,15 +2811,6 @@ const CategorySelector = () => {
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-sm font-medium text-gray-700">Variants</h2>
 
-                {/* {combinations.length > 0 && (
-                  <button
-                    onClick={() => setShowBulkModal(true)}
-                    className="text-sm bg-[#18181b] font-medium text-white px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
-                  >
-                    Bulk Update
-                  </button>
-                  
-                )} */}
                 {combinations.length > 0 && (
                   <div className="flex gap-2">
                     {/* BULK UPDATE */}

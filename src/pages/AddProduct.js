@@ -69,7 +69,7 @@ const CategorySelector = () => {
   });
   const [slideIndex, setSlideIndex] = useState(0);
   const LAST_SLIDE_INDEX = slides.length - 1;
-const [variantsChanged, setVariantsChanged] = useState(false);
+  const [variantsChanged, setVariantsChanged] = useState(false);
 
   const isEditing = Boolean(id);
   const [bulkUploading, setBulkUploading] = useState(false);
@@ -90,7 +90,7 @@ const [variantsChanged, setVariantsChanged] = useState(false);
   const [duplicateTitle, setDuplicateTitle] = useState("");
   const assignImageToSelectedVariants = (imageUrl, isLoading = false) => {
     if (selectedBulkVariants.length === 0) return;
-   setVariantsChanged(true);
+    setVariantsChanged(true);
 
     setVariantImages((prev) => {
       const updated = { ...prev };
@@ -770,8 +770,7 @@ const [variantsChanged, setVariantsChanged] = useState(false);
         parent: comb.parent,
         children: [...comb.children],
       }));
-         setVariantsChanged(true);
-
+      setVariantsChanged(true);
 
       const parentObj = updatedCombinations[parentIndex];
       if (!parentObj) return prevCombinations;
@@ -901,7 +900,7 @@ const [variantsChanged, setVariantsChanged] = useState(false);
       ...prev,
       values: updatedValues,
     }));
-   setVariantsChanged(true);
+    setVariantsChanged(true);
 
     setVariants((prevVariants) => {
       const filtered = prevVariants.filter(
@@ -967,15 +966,13 @@ const [variantsChanged, setVariantsChanged] = useState(false);
 
   const handleAddNewValue = () => {
     setNewOption({ ...newOption, values: [...newOption.values, ""] });
-       setVariantsChanged(true);
-
+    setVariantsChanged(true);
   };
 
   const handleDeleteNewValue = (index) => {
     let updatedValues = newOption.values.filter((_, i) => i !== index);
     setNewOption({ ...newOption, values: updatedValues });
-       setVariantsChanged(true);
-
+    setVariantsChanged(true);
   };
 
   const handleDone = () => {
@@ -1011,8 +1008,7 @@ const [variantsChanged, setVariantsChanged] = useState(false);
     setShowVariantForm(false);
     setNewOption({ name: "", values: [""] });
     setIsChanged(true);
-       setVariantsChanged(true);
-
+    setVariantsChanged(true);
   };
 
   const [editingOptionIndex, setEditingOptionIndex] = useState(null);
@@ -1790,78 +1786,79 @@ const [variantsChanged, setVariantsChanged] = useState(false);
       //   .map((img) => img.cloudUrl || img.localUrl)
       //   .filter(Boolean);
 
-
       const shouldUpdateVariants = !isEditing || variantsChanged;
-if (shouldUpdateVariants) {
-      for (let i = 0; i < shopifyVariants.length; i++) {
-        const v = shopifyVariants[i];
-        const shopifyTitle = v.title;
+      if (shouldUpdateVariants) {
+        for (let i = 0; i < shopifyVariants.length; i++) {
+          const v = shopifyVariants[i];
+          const shopifyTitle = v.title;
 
-        let matchedQuantity;
-        let matchedPrice;
-        let matchedCompare;
+          let matchedQuantity;
+          let matchedPrice;
+          let matchedCompare;
 
-        combinations.forEach((combo, parentIndex) => {
-          combo.children.forEach((child) => {
-            const combinationString =
-              options.length === 1 ? child : `${combo.parent} / ${child}`;
+          combinations.forEach((combo, parentIndex) => {
+            combo.children.forEach((child) => {
+              const combinationString =
+                options.length === 1 ? child : `${combo.parent} / ${child}`;
 
-            const normalizedKey = combinationString.replace(/['"]/g, "").trim();
+              const normalizedKey = combinationString
+                .replace(/['"]/g, "")
+                .trim();
 
-            if (normalizedKey === shopifyTitle) {
-              const key = `${parentIndex}-${child}`;
+              if (normalizedKey === shopifyTitle) {
+                const key = `${parentIndex}-${child}`;
 
-              matchedQuantity = variantQuantities?.[key];
-              matchedPrice = variantPrices?.[key];
-              matchedCompare = variantCompareAtPrices?.[key];
-            }
+                matchedQuantity = variantQuantities?.[key];
+                matchedPrice = variantPrices?.[key];
+                matchedCompare = variantCompareAtPrices?.[key];
+              }
+            });
           });
-        });
 
-        // 🔥 FINAL FALLBACK SYSTEM
+          // 🔥 FINAL FALLBACK SYSTEM
 
-        const finalQuantity =
-          matchedQuantity !== undefined && matchedQuantity !== ""
-            ? Number(matchedQuantity)
-            : quantity !== undefined && quantity !== ""
-              ? Number(quantity)
-              : 0;
+          const finalQuantity =
+            matchedQuantity !== undefined && matchedQuantity !== ""
+              ? Number(matchedQuantity)
+              : quantity !== undefined && quantity !== ""
+                ? Number(quantity)
+                : 0;
 
-        const finalPrice =
-          matchedPrice !== undefined && matchedPrice !== ""
-            ? Number(matchedPrice)
-            : price !== undefined && price !== ""
-              ? Number(price)
-              : 0;
+          const finalPrice =
+            matchedPrice !== undefined && matchedPrice !== ""
+              ? Number(matchedPrice)
+              : price !== undefined && price !== ""
+                ? Number(price)
+                : 0;
 
-        const finalCompare =
-          matchedCompare !== undefined && matchedCompare !== ""
-            ? Number(matchedCompare)
-            : compareAtPrice !== undefined && compareAtPrice !== ""
-              ? Number(compareAtPrice)
-              : 0;
+          const finalCompare =
+            matchedCompare !== undefined && matchedCompare !== ""
+              ? Number(matchedCompare)
+              : compareAtPrice !== undefined && compareAtPrice !== ""
+                ? Number(compareAtPrice)
+                : 0;
 
-        await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              variant: {
-                price: finalPrice,
-                compare_at_price: finalCompare,
-                inventory_quantity: finalQuantity,
+          await fetch(
+            `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${v.id}`,
+            {
+              method: "PUT",
+              headers: {
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
               },
-            }),
-          },
-        );
+              body: JSON.stringify({
+                variant: {
+                  price: finalPrice,
+                  compare_at_price: finalCompare,
+                  inventory_quantity: finalQuantity,
+                },
+              }),
+            },
+          );
+        }
+        setVariantsChanged(false);
       }
-       setVariantsChanged(false);
-}
 
       const mediaImageUrls = selectedImages
         .map((img) => img.cloudUrl || img.localUrl)
@@ -1914,13 +1911,13 @@ if (shouldUpdateVariants) {
       );
 
       navigate("/manage-product");
-sessionStorage.setItem(
-  "productRefreshRequired",
-  JSON.stringify({
-    productId,
-    time: Date.now(),
-  })
-);
+      sessionStorage.setItem(
+        "productRefreshRequired",
+        JSON.stringify({
+          productId,
+          time: Date.now(),
+        }),
+      );
       if (shouldUploadImages) {
         uploadImagesInBackground({
           productId,
@@ -2448,7 +2445,7 @@ sessionStorage.setItem(
 
     setOptions(updated);
     setEditingOptionIndex(null);
-   setVariantsChanged(true);
+    setVariantsChanged(true);
 
     regenerateVariants(updated);
   };
@@ -2608,7 +2605,7 @@ sessionStorage.setItem(
                     onChange={(e) => {
                       setGroupImages(e.target.checked);
                       setIsChanged(true);
-                      setImagesChanged(true)
+                      setImagesChanged(true);
                     }}
                     className="w-4 h-4 accent-blue-600 cursor-pointer"
                   />
@@ -2864,6 +2861,22 @@ sessionStorage.setItem(
                 </div>
               )}
 
+              {/* <div className="flex items-center mt-3">
+                <input
+                  type="checkbox"
+                  id="hasSKU"
+                  checked={hasSKU}
+                  onChange={() => {
+                    setHasSKU(!hasSKU);
+                    setIsChanged(true);
+                  }}
+                  className="h-4 w-4 text-blue-500"
+                />
+                <label htmlFor="hasSKU" className="ml-2 text-sm text-gray-700">
+                  This product has a SKU or barcode
+                </label>
+              </div> */}
+
               <div className="flex items-center mt-3">
                 <input
                   type="checkbox"
@@ -2879,29 +2892,39 @@ sessionStorage.setItem(
                   This product has a SKU or barcode
                 </label>
               </div>
-
               {hasSKU && (
                 <div className="mt-3 grid grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    placeholder="SKU"
-                    value={sku}
-                    onChange={(e) => {
-                      setSKU(e.target.value);
-                      setIsChanged(true);
-                    }}
-                    className="w-full border p-2 rounded-md"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Barcode"
-                    value={barcode}
-                    onChange={(e) => {
-                      setBarcode(e.target.value);
-                      setIsChanged(true);
-                    }}
-                    className="w-full border p-2 rounded-md"
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      SKU
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="SKU"
+                      value={sku}
+                      onChange={(e) => {
+                        setSKU(e.target.value);
+                        setIsChanged(true);
+                      }}
+                      className="w-full border p-2 rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Barcode
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Barcode"
+                      value={barcode}
+                      onChange={(e) => {
+                        setBarcode(e.target.value);
+                        setIsChanged(true);
+                      }}
+                      className="w-full border p-2 rounded-md"
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -5014,7 +5037,7 @@ sessionStorage.setItem(
                       setIsChanged(true);
                       setShowBulkModal(false);
                       setBulkPrice("");
-                      setVariantsChanged(true); 
+                      setVariantsChanged(true);
                       setBulkCompareAtPrice("");
                       setBulkQuantity("");
                     }}
@@ -5242,7 +5265,7 @@ sessionStorage.setItem(
 
                           setDraggedIndex(null);
                           setIsChanged(true);
-                          setVariantsChanged(true); 
+                          setVariantsChanged(true);
                         }}
                         className={`relative border rounded-lg overflow-hidden group cursor-move transition
               ${draggedIndex === index ? "ring-2 ring-blue-500 opacity-70" : ""}
@@ -5374,7 +5397,7 @@ sessionStorage.setItem(
             </div>
           )}
         </div>
-      </div>  
+      </div>
     </main>
   );
 };

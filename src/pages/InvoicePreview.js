@@ -1,10 +1,12 @@
 
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { HiArrowLeft } from "react-icons/hi";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const PackagingSlip = () => {
   const location = useLocation();
   const order = location.state?.order;
+const navigate = useNavigate();
 
   if (!order) {
     return <div style={{ padding: 40 }}>No order data found.</div>;
@@ -37,6 +39,13 @@ const PackagingSlip = () => {
 
   return (
     <div style={styles.page} className="packing-slip">
+        <button
+              onClick={() => navigate(-1)}
+              className="inline-flex mb-5 items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition shadow-sm"
+            >
+              <HiArrowLeft className="text-lg" />
+              Back
+            </button>
       {/* ================= HEADER ================= */}
       <div style={styles.header}>
         <h1 style={styles.logo}>AYDI ACTIVE</h1>

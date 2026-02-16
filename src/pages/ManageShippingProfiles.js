@@ -10,9 +10,16 @@ import {
   FaChevronRight,
   FaPlus,
 } from "react-icons/fa";
-import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
+import {
+  HiArrowLeft,
+  HiOutlineCheckCircle,
+  HiOutlineXCircle,
+} from "react-icons/hi";
+import { useNavigate } from "react-router-dom";
 
 const ManageShippingProfiles = () => {
+    const navigate = useNavigate();
+
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
@@ -314,6 +321,13 @@ const ManageShippingProfiles = () => {
         </div>
       )}
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex mb-5 items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition shadow-sm"
+        >
+          <HiArrowLeft className="text-lg" />
+          Back
+        </button>
         <div className="flex justify-between items-center mb-6">
           <h1 className="flex items-center text-xl font-semibold text-gray-900 mb-0.5">
             <FaShippingFast className="text-gray-600 mr-3" />

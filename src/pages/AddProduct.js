@@ -2608,6 +2608,7 @@ sessionStorage.setItem(
                     onChange={(e) => {
                       setGroupImages(e.target.checked);
                       setIsChanged(true);
+                      setImagesChanged(true)
                     }}
                     className="w-4 h-4 accent-blue-600 cursor-pointer"
                   />

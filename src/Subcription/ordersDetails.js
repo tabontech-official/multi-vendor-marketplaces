@@ -85,33 +85,78 @@ const OrdersDetails = () => {
       return;
     }
 
-    const mappedItems = orderData.products.map((p) => {
-      const variant = p.variant || {};
-      const product = p.product || {};
+    // const mappedItems = orderData.products.map((p) => {
+    //   const variant = p.variant || {};
+    //   const product = p.product || {};
 
-      return {
-        id: p.lineItemId,
-        product_id: p.productId,
-        variant_id: p.variantId,
+    //   return {
+    //     id: p.lineItemId,
+    //     product_id: p.productId,
+    //     variant_id: p.variantId,
 
-        name: product.title || "N/A",
-        variant_title: variant.title || null,
-        sku: variant.sku || "N/A",
+    //     name: product.title || "N/A",
+    //     variant_title: variant.title || null,
+    //     sku: variant.sku || "N/A",
 
-        price: variant.price || "0",
+    //     price: variant.price || "0",
 
-        quantity: p.quantity,
-        fulfilled_quantity: p.fulfilled_quantity || 0,
-        fulfillable_quantity: p.fulfillable_quantity || 0,
-        fulfillment_status: p.fulfillment_status,
+    //     quantity: p.quantity,
+    //     fulfilled_quantity: p.fulfilled_quantity || 0,
+    //     fulfillable_quantity: p.fulfillable_quantity || 0,
+    //     fulfillment_status: p.fulfillment_status,
 
-        image: {
-          src:
-            product.images?.[0]?.src || product.variantImages?.[0]?.src || null,
-          alt: product.title || "Product image",
-        },
-      };
-    });
+    //     image: {
+    //       src:
+    //         product.images?.[0]?.src || product.variantImages?.[0]?.src || null,
+    //       alt: product.title || "Product image",
+    //     },
+    //   };
+    // });
+const mappedItems = orderData.products.map((p) => {
+  const variant = p.variant || {};
+  const product = p.product || {};
+
+  // 🔥 FIXED IMAGE LOGIC
+  let imageSrc = null;
+
+  // 1️⃣ Try product.images (if exists)
+  if (product.images?.length) {
+    imageSrc = product.images[0].src;
+  }
+
+  // 2️⃣ Try matching variant image
+  if (!imageSrc && product.variantImages?.length) {
+    const matchedVariantImage = product.variantImages.find(
+      (v) => String(v.variantId) === String(p.variantId)
+    );
+
+    if (matchedVariantImage?.images?.length) {
+      imageSrc = matchedVariantImage.images[0].src;
+    }
+  }
+
+  return {
+    id: p.lineItemId,
+    product_id: p.productId,
+    variant_id: p.variantId,
+
+    name: product.title || "N/A",
+    variant_title: variant.title || null,
+    sku: variant.sku || "N/A",
+    price: variant.price || "0",
+
+    quantity: p.quantity,
+    fulfilled_quantity: p.fulfilled_quantity || 0,
+    fulfillable_quantity: p.fulfillable_quantity || 0,
+    fulfillment_status: p.fulfillment_status,
+
+    image: {
+      src: imageSrc,
+      alt: product.title || "Product image",
+    },
+  };
+});
+
 
     setLineItems(mappedItems);
   }, [orderData]);

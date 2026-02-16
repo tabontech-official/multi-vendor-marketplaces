@@ -7,6 +7,7 @@ import { FaArrowRight } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import { MdManageAccounts } from "react-icons/md";
 import { Link } from "react-router-dom";
+import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 const AccountsNavbar = () => {
   const [selectedModule, setSelectedModule] = useState("Manage User");
   const [formData, setFormData] = useState({
@@ -36,7 +37,11 @@ const AccountsNavbar = () => {
   const [activeTab, setActiveTab] = useState("contactDetails");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!agreedToPolicies) {
@@ -200,6 +205,20 @@ const AccountsNavbar = () => {
   return (
     <div>
       <aside className="w-52 mt-2 mb-2 ml-2 rounded-r-2xl bg-blue-900 p-6 flex flex-col justify-between min-h-screen ">
+        {toast.show && (
+              <div
+                className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+                  toast.type === "success" ? "bg-green-500" : "bg-red-500"
+                } text-white`}
+              >
+                {toast.type === "success" ? (
+                  <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+                ) : (
+                  <HiOutlineXCircle className="w-6 h-6 mr-2" />
+                )}
+                <span>{toast.message}</span>
+              </div>
+            )}
         <div>
           <div className="flex flex-col items-center border-b-2">
             <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">

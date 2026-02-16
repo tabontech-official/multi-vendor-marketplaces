@@ -366,13 +366,13 @@ const AccountPage = () => {
 
       const data = await response.json();
       if (response.ok) {
-        alert(`All products updated to ${status}`);
+        showToast("success",`All products updated to ${status}`);
       } else {
-        alert(`Failed to update products: ${data.error}`);
+        showToast("error",`Failed to update products: ${data.error}`);
       }
     } catch (error) {
       console.error("Error updating products:", error);
-      alert("An error occurred while updating product status.");
+      showToast("error","An error occurred while updating product status.");
     }
   };
 
@@ -398,7 +398,7 @@ const AccountPage = () => {
 
   const handleUpdateTags = async () => {
     if (!email) {
-      alert("Email is required!");
+      showToast("error","Email is required!");
       return;
     }
 
@@ -424,7 +424,7 @@ const AccountPage = () => {
         throw new Error(data.error || "Failed to update user");
       }
 
-      alert("User updated successfully!");
+      showToast("success","User updated successfully!");
       setIsOpen(false);
       setName("");
       setEmail("");
@@ -432,7 +432,7 @@ const AccountPage = () => {
       setIsDropdownOpen(false);
     } catch (error) {
       console.error("Error updating user:", error);
-      alert("Error updating user: " + error.message);
+      showToast("error","Error updating user: " + error.message);
     }
   };
 

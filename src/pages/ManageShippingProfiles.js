@@ -62,7 +62,7 @@ const ManageShippingProfiles = () => {
       };
 
       const endpoint =
-        "https://multi-vendor-marketplace.vercel.app/shippingProfile/add-shipping-profiles";
+        "https://multi-vendor-marketplace.vercel.app/shippingProfile/add-shippings";
 
       const { data } = await axios.post(endpoint, payload, {
         headers: { "Content-Type": "application/json" },

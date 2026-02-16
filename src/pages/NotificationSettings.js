@@ -10,6 +10,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import SettingsSidebar from "../component/SettingsSidebar";
 import axios from "axios";
+import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
 
 const NotificationSettings = () => {
   const navigate = useNavigate();
@@ -17,7 +18,13 @@ const NotificationSettings = () => {
   const [staffEmail, setStaffEmail] = useState("");
   const [emailList, setEmailList] = useState(["admin-audit@store.com"]);
   const API_BASE_URL = "https://multi-vendor-marketplace.vercel.app/notificationSettings";
-
+ 
+   const [toast, setToast] = useState({ show: false, type: "", message: "" });
+ 
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+  };
   // Updated state for Approval Workflows
   const [settings, setSettings] = useState({
     userRegistrationApproval: true,
@@ -109,10 +116,10 @@ const NotificationSettings = () => {
         },
       });
 
-      alert("✅ Notification settings saved successfully!");
+      showToast("success","Notification settings saved successfully!");
     } catch (error) {
       console.error("Save failed:", error);
-      alert("❌ Failed to save notification settings");
+      showToast("error"," Failed to save notification settings");
     }
   };
 
@@ -121,6 +128,20 @@ const NotificationSettings = () => {
       <SettingsSidebar />
 
       <div className="flex-1 pb-20">
+      {toast.show && (
+            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-bounce-short">
+              <div className={`flex items-center gap-3 px-6 py-3 rounded-full shadow-2xl text-white font-medium
+                ${toast.type === "success" ? "bg-[#303030]" : "bg-red-600"}`}>
+                {toast.type === "success" ? (
+                  <HiOutlineCheckCircle className="text-green-400 text-lg" />
+                ) : (
+                  <HiOutlineXCircle className="text-white text-lg" />
+                )}
+                <span className="text-sm">{toast.message}</span>
+              </div>
+            </div>
+          )}
+
         {/* Header */}
         <div className="sticky top-0 z-10 bg-[#f1f1f1] px-8 py-4 border-b border-gray-200 flex justify-between items-center">
           <div className="flex items-center gap-4">

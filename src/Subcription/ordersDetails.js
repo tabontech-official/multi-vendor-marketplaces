@@ -4,9 +4,14 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { BsThreeDots } from "react-icons/bs";
-import { HiArrowLeft, HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi";
+import {
+  HiArrowLeft,
+  HiOutlineCheckCircle,
+  HiOutlineXCircle,
+} from "react-icons/hi";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { FiSend } from "react-icons/fi";
 const OrdersDetails = () => {
   const navigate = useNavigate();
   const { orderId, merchantId } = useParams();
@@ -112,51 +117,50 @@ const OrdersDetails = () => {
     //     },
     //   };
     // });
-const mappedItems = orderData.products.map((p) => {
-  const variant = p.variant || {};
-  const product = p.product || {};
+    const mappedItems = orderData.products.map((p) => {
+      const variant = p.variant || {};
+      const product = p.product || {};
 
-  // 🔥 FIXED IMAGE LOGIC
-  let imageSrc = null;
+      // 🔥 FIXED IMAGE LOGIC
+      let imageSrc = null;
 
-  // 1️⃣ Try product.images (if exists)
-  if (product.images?.length) {
-    imageSrc = product.images[0].src;
-  }
+      // 1️⃣ Try product.images (if exists)
+      if (product.images?.length) {
+        imageSrc = product.images[0].src;
+      }
 
-  // 2️⃣ Try matching variant image
-  if (!imageSrc && product.variantImages?.length) {
-    const matchedVariantImage = product.variantImages.find(
-      (v) => String(v.variantId) === String(p.variantId)
-    );
+      // 2️⃣ Try matching variant image
+      if (!imageSrc && product.variantImages?.length) {
+        const matchedVariantImage = product.variantImages.find(
+          (v) => String(v.variantId) === String(p.variantId),
+        );
 
-    if (matchedVariantImage?.images?.length) {
-      imageSrc = matchedVariantImage.images[0].src;
-    }
-  }
+        if (matchedVariantImage?.images?.length) {
+          imageSrc = matchedVariantImage.images[0].src;
+        }
+      }
 
-  return {
-    id: p.lineItemId,
-    product_id: p.productId,
-    variant_id: p.variantId,
+      return {
+        id: p.lineItemId,
+        product_id: p.productId,
+        variant_id: p.variantId,
 
-    name: product.title || "N/A",
-    variant_title: variant.title || null,
-    sku: variant.sku || "N/A",
-    price: variant.price || "0",
+        name: product.title || "N/A",
+        variant_title: variant.title || null,
+        sku: variant.sku || "N/A",
+        price: variant.price || "0",
 
-    quantity: p.quantity,
-    fulfilled_quantity: p.fulfilled_quantity || 0,
-    fulfillable_quantity: p.fulfillable_quantity || 0,
-    fulfillment_status: p.fulfillment_status,
+        quantity: p.quantity,
+        fulfilled_quantity: p.fulfilled_quantity || 0,
+        fulfillable_quantity: p.fulfillable_quantity || 0,
+        fulfillment_status: p.fulfillment_status,
 
-    image: {
-      src: imageSrc,
-      alt: product.title || "Product image",
-    },
-  };
-});
-
+        image: {
+          src: imageSrc,
+          alt: product.title || "Product image",
+        },
+      };
+    });
 
     setLineItems(mappedItems);
   }, [orderData]);
@@ -238,15 +242,18 @@ const mappedItems = orderData.products.map((p) => {
         }),
       });
 
-      await fetch(`https://multi-vendor-marketplace.vercel.app/order/updatetrackingShopify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fulfillmentId: selectedFulfillment.id,
-          tracking_number: trackingNumber,
-          tracking_company: shippingCarrier,
-        }),
-      });
+      await fetch(
+        `https://multi-vendor-marketplace.vercel.app/order/updatetrackingShopify`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fulfillmentId: selectedFulfillment.id,
+            tracking_number: trackingNumber,
+            tracking_company: shippingCarrier,
+          }),
+        },
+      );
 
       setShowTrackingModal(false);
     } catch (err) {
@@ -402,16 +409,15 @@ const mappedItems = orderData.products.map((p) => {
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
       <div className="w-full max-w-6xl grid grid-cols-12 gap-6">
         <div className="col-span-8 space-y-6">
-   <button
-  onClick={() => navigate(-1)}
-  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition shadow-sm"
->
-  <HiArrowLeft className="text-lg" />
-  Back
-</button>
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition shadow-sm"
+          >
+            <HiArrowLeft className="text-lg" />
+            Back
+          </button>
 
           <div class="flex space-x-8">
-            
             <div>
               <span class="text-gray-900 font-semibold block">
                 Orderno: #{orderData?.serialNumber || orderData?.serialNo}
@@ -569,9 +575,9 @@ const mappedItems = orderData.products.map((p) => {
                     >
                       Print packing slip
                     </button>
-                     <button
+                    <button
                       onClick={() => {
-                        console.log(orderData)
+                        console.log(orderData);
                         navigate("/invoice-preview", {
                           state: { order: orderData },
                         });
@@ -761,7 +767,7 @@ const mappedItems = orderData.products.map((p) => {
                       className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
                       onClick={() => setShowRequestPopup(true)}
                     >
-                      Cancel orderData
+                      Cancel order
                     </button>
                   </div>
                 ) : null}
@@ -957,7 +963,7 @@ const mappedItems = orderData.products.map((p) => {
           </div>
         </div>
       )}
-      {showRequestPopup && (
+      {/* {showRequestPopup && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 p-6 relative">
             <button
@@ -1037,6 +1043,107 @@ const mappedItems = orderData.products.map((p) => {
                   className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
                 >
                   Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )} */}
+      {showRequestPopup && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden transform transition-all scale-100">
+            {/* Header */}
+            <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-5 text-white">
+              <button
+                className="absolute top-3 right-4 text-white/80 hover:text-white transition text-lg"
+                onClick={() => setShowRequestPopup(false)}
+              >
+                ✕
+              </button>
+
+              <div className="flex flex-col items-center text-center">
+                <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-2xl mb-3 shadow-inner">
+                  <FiSend className="text-white text-2xl" />
+                </div>
+
+                <h2 className="text-xl font-semibold tracking-wide">
+                  Submit Cancellation Request
+                </h2>
+                <p className="text-sm text-white/80 mt-1">
+                  Please provide a reason for your request.
+                </p>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Request Message
+              </label>
+
+              <textarea
+                rows={4}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
+                placeholder="Enter your request message..."
+                value={requestMessage}
+                onChange={(e) => setRequestMessage(e.target.value)}
+              />
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={() => setShowRequestPopup(false)}
+                  className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={async () => {
+                    if (!requestMessage.trim()) {
+                      alert("Please enter a request message.");
+                      return;
+                    }
+
+                    const userId = localStorage.getItem("userid");
+                    const email = localStorage.getItem("email");
+
+                    try {
+                      const response = await fetch(
+                        `https://multi-vendor-marketplace.vercel.app/auth/addRequestForOrderCancellation/${userId}`,
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            request: requestMessage,
+                            orderNo: orderData?.name,
+                            orderId: String(orderData?.id),
+                            email,
+                            lineItemIds: lineItems.map((i) => i.id),
+                          }),
+                        },
+                      );
+
+                      const result = await response.json();
+
+                      if (response.ok) {
+                        setShowSubmitted(true);
+                        setShowRequestPopup(false);
+
+                        setTimeout(() => {
+                          setShowSubmitted(false);
+                        }, 1000);
+                      }
+                    } catch (err) {
+                      console.error("Error submitting request:", err);
+                      alert("Something went wrong. Try again.");
+                    }
+                  }}
+                  className="px-5 py-2 text-sm font-medium rounded-lg bg-black text-white hover:bg-gray-800 transition shadow-md"
+                >
+                  Submit Request
                 </button>
               </div>
             </div>

@@ -1434,12 +1434,29 @@ const Dashboard = () => {
                         )} */}
                         {imageUploadStatus?.productId === product.id ? (
                           imageUploadStatus.finished ? (
+                            // <button
+                            //   onClick={() => {
+                            //     fetchProductData();
+                            //     setImageUploadStatus(null);
+                            //     sessionStorage.removeItem(
+                            //       "imageUploadInProgress",
+                            //     );
+                            //   }}
+                            //   className="flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition"
+                            // >
+                            //   <HiOutlineRefresh className="w-4 h-4" />
+                            //   Refresh
+                            // </button>
                             <button
                               onClick={() => {
                                 fetchProductData();
+
                                 setImageUploadStatus(null);
                                 sessionStorage.removeItem(
                                   "imageUploadInProgress",
+                                );
+                                sessionStorage.removeItem(
+                                  "productRefreshRequired",
                                 );
                               }}
                               className="flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition"

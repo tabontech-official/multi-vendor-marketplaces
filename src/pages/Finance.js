@@ -176,14 +176,17 @@ const Finance = () => {
 
     setUsersLoading(true);
     try {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/auth/getAllUsers", {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/auth/getAllUsers",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       const data = await res.json();
       setUsers(data || []);
@@ -215,15 +218,18 @@ const Finance = () => {
     };
 
     try {
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/addPayOutDates", {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-          "Content-Type": "application/json",
+      const res = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       const result = await res.json();
 
@@ -251,14 +257,17 @@ const Finance = () => {
       }
 
       try {
-        const res = await fetch("https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates", {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
+        const res = await fetch(
+          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
           },
-        });
+        );
 
         if (!res.ok) {
           console.error("Failed to fetch payout config:", res.statusText);
@@ -628,19 +637,36 @@ const Finance = () => {
           <div className="flex flex-wrap items-center gap-3">
             {/* Tabs (Admin Only) */}
             {(userRole === "Master Admin" || userRole === "Dev Admin") && (
-              <select
-                value={activeTab}
-                onChange={(e) => setActiveTab(e.target.value)}
-                className="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              >
-                <option value="payouts">Payouts</option>
-                <option value="Timelines">Timelines & Config</option>
-                <option value="merchant-list">Merchant List</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={activeTab}
+                  onChange={(e) => setActiveTab(e.target.value)}
+                  className="h-9 px-3 pr-10 text-sm bg-white border border-gray-300 rounded-md shadow-sm 
+    focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
+                >
+                  <option value="payouts">Payouts</option>
+                  <option value="Timelines">Timelines & Config</option>
+                  <option value="merchant-list">Merchant List</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                  <svg
+                    className="h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
             )}
 
             {/* Status Filter */}
-            <select
+            {/* <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -649,21 +675,67 @@ const Finance = () => {
               <option value="Pending">Pending</option>
               <option value="Due">Due</option>
               <option value="Deposited">Deposited</option>
-            </select>
+            </select> */}
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="h-9 px-3 pr-10 text-sm bg-white border border-gray-300 rounded-md shadow-sm 
+    focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
+              >
+                <option value="">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Due">Due</option>
+                <option value="Deposited">Deposited</option>
+              </select>
+
+              {/* Custom Arrow */}
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                <svg
+                  className="h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
 
             {/* Date Filter */}
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            >
-              <option value="Today">Today</option>
-              <option value="Last 7 days">Last 7 days</option>
-              <option value="Last 30 days">Last 30 days</option>
-              <option value="This Month">This Month</option>
-              <option value="All Time">All Time</option>
-              <option value="Custom">Custom</option>
-            </select>
+            <div className="relative">
+              <select
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="h-9 px-3 pr-10 text-sm bg-white border border-gray-300 rounded-md shadow-sm 
+    focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
+              >
+                <option value="Today">Today</option>
+                <option value="Last 7 days">Last 7 days</option>
+                <option value="Last 30 days">Last 30 days</option>
+                <option value="This Month">This Month</option>
+                <option value="All Time">All Time</option>
+                <option value="Custom">Custom</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                <svg
+                  className="h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
 
             {/* Custom Date Range */}
             {dateFilter === "Custom" && (
@@ -684,30 +756,30 @@ const Finance = () => {
               </div>
             )}
 
-            {/* Search */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search payouts..."
-                value={searchVal}
-                onChange={(e) => setSearchVal(e.target.value)}
-                className="h-9 w-60 px-3 pr-8 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-              <svg
-                className="w-4 h-4 absolute right-2 top-2.5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-4.35-4.35m1.6-5.65a7 7 0 11-14 0 7 7 0 0114 0z"
+            {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search payouts..."
+                  value={searchVal}
+                  onChange={(e) => setSearchVal(e.target.value)}
+                  className="h-9 w-60 px-3 pr-8 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
-              </svg>
-            </div>
-
+                <svg
+                  className="w-4 h-4 absolute right-2 top-2.5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-4.35-4.35m1.6-5.65a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+            )}
             {/* Admin Buttons */}
             {(userRole === "Master Admin" || userRole === "Dev Admin") && (
               <>
@@ -1277,17 +1349,18 @@ const Finance = () => {
       </div>
 
       {toast.show && (
-        <div
-          className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
-            toast.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
-        >
-          {toast.type === "success" ? (
-            <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
-          ) : (
-            <HiOutlineXCircle className="w-6 h-6 mr-2" />
-          )}
-          <span>{toast.message}</span>
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 animate-bounce-short">
+          <div
+            className={`flex items-center gap-3 px-6 py-3 rounded-full shadow-2xl text-white font-medium
+                ${toast.type === "success" ? "bg-[#303030]" : "bg-red-600"}`}
+          >
+            {toast.type === "success" ? (
+              <HiOutlineCheckCircle className="text-green-400 text-lg" />
+            ) : (
+              <HiOutlineXCircle className="text-white text-lg" />
+            )}
+            <span className="text-sm">{toast.message}</span>
+          </div>
         </div>
       )}
       {importModal && (

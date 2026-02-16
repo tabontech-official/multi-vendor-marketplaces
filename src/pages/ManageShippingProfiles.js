@@ -17,10 +17,9 @@ const ManageShippingProfiles = () => {
   const [loading, setLoading] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
   const [user, setUser] = useState(null);
-  const [userId, setUserId] = useState(null);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
-
-  const [addingProfile, setAddingProfile] = useState(false); 
+  const userId = localStorage.getItem("userid");
+  const [addingProfile, setAddingProfile] = useState(false);
   const [deleteModal, setDeleteModal] = useState({
     open: false,
     id: null,
@@ -66,7 +65,7 @@ const ManageShippingProfiles = () => {
         showToast("success", "New shipping profile created successfully!");
         setAddingProfile(false);
         setNewProfile({ profileName: "", rateName: "", ratePrice: "" });
-        await fetchProfiles(user); 
+        await fetchProfiles(user);
       } else {
         showToast("error", "Shopify returned an issue. Check console.");
         console.error("Shopify API Error:", data);
@@ -76,7 +75,7 @@ const ManageShippingProfiles = () => {
       showToast(
         "error",
         err.response?.data?.error ||
-          "Failed to create shipping profile. Please try again."
+          "Failed to create shipping profile. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -97,7 +96,7 @@ const ManageShippingProfiles = () => {
       setLoading(true);
 
       await axios.delete(
-        `https://multi-vendor-marketplace.vercel.app/shippingProfile/shipping-profiles/${deleteModal.id}`
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/shipping-profiles/${deleteModal.id}`,
       );
 
       showToast("success", "Shipping profile deleted successfully!");
@@ -148,7 +147,7 @@ const ManageShippingProfiles = () => {
       const profilesData = isAdmin ? data.profiles : data;
 
       const unique = Array.from(
-        new Map(profilesData.map((p) => [p.profileId, p])).values()
+        new Map(profilesData.map((p) => [p.profileId, p])).values(),
       );
 
       let allProfiles = unique;
@@ -178,7 +177,7 @@ const ManageShippingProfiles = () => {
   const fetchUserActiveProfiles = async (userId) => {
     try {
       const { data } = await axios.get(
-        `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`,
       );
       setActiveProfiles(data.map((p) => p.profileId));
     } catch (err) {
@@ -198,28 +197,34 @@ const ManageShippingProfiles = () => {
   }, [user]);
   const handleUserToggle = async (profile, checked) => {
     try {
-      const profileUserId=localStorage.getItem("userid")
+      const profileUserId = localStorage.getItem("userid");
       setActiveProfiles((prev) =>
         checked
           ? [...prev, profile.profileId]
-          : prev.filter((id) => id !== profile.profileId)
+          : prev.filter((id) => id !== profile.profileId),
       );
 
       if (checked) {
-        await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/activate", {
-          userId: profileUserId,
-          profile: {
-            profileId: profile.profileId,
-            profileName: profile.profileName,
-            rateName: profile.rateName,
-            ratePrice: profile.ratePrice,
+        await axios.post(
+          "https://multi-vendor-marketplace.vercel.app/shippingProfile/activate",
+          {
+            userId: profileUserId,
+            profile: {
+              profileId: profile.profileId,
+              profileName: profile.profileName,
+              rateName: profile.rateName,
+              ratePrice: profile.ratePrice,
+            },
           },
-        });
+        );
       } else {
-        await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate", {
-          userId: profileUserId,
-          profileId: profile.profileId,
-        });
+        await axios.post(
+          "https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate",
+          {
+            userId: profileUserId,
+            profileId: profile.profileId,
+          },
+        );
       }
     } catch (err) {
       console.error("Toggle error:", err);
@@ -233,15 +238,15 @@ const ManageShippingProfiles = () => {
         prev.map((p) =>
           p._id === profile._id
             ? { ...p, status: checked ? "enabled" : "disabled" }
-            : p
-        )
+            : p,
+        ),
       );
 
       await axios.put(
         `https://multi-vendor-marketplace.vercel.app/shippingProfile/updateStatus/${profile._id}`,
         {
           status: checked ? "enabled" : "disabled",
-        }
+        },
       );
     } catch (err) {
       console.error("Error updating status:", err);
@@ -254,7 +259,7 @@ const ManageShippingProfiles = () => {
       setLoading(true);
       await axios.put(
         `https://multi-vendor-marketplace.vercel.app/shippingProfile/update/${editingProfile._id}`,
-        editingProfile
+        editingProfile,
       );
 
       showToast("success", "Shipping profile updated successfully!");
@@ -272,7 +277,7 @@ const ManageShippingProfiles = () => {
     if (!window.confirm("Delete this shipping profile?")) return;
     try {
       await axios.delete(
-        `https://multi-vendor-marketplace.vercel.app/shippingProfile/shipping-profiles/${id}`
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/shipping-profiles/${id}`,
       );
       fetchProfiles();
     } catch (err) {
@@ -318,7 +323,7 @@ const ManageShippingProfiles = () => {
             {isAdmin && (
               <button
                 onClick={() => setAddingProfile(true)}
-              className="flex items-center gap-2 bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
+                className="flex items-center gap-2 bg-[#18181b] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
               >
                 <FaPlus /> Add New
               </button>
@@ -335,7 +340,7 @@ const ManageShippingProfiles = () => {
 
         <div className="overflow-x-auto">
           <table className="min-w-full border border-gray-200 divide-y divide-gray-200">
-              <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0">
+            <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0">
               <tr>
                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
                   Profile Name
@@ -423,7 +428,7 @@ const ManageShippingProfiles = () => {
                         </>
                       ) : (
                         <span className="text-xs text-green-700 bg-green-100 px-3 py-1 rounded-md font-medium">
-                           Always Active
+                          Always Active
                         </span>
                       )}
                     </td>

@@ -1245,10 +1245,10 @@ const CategorySelector = () => {
           setEnableFreeShipping(true);
           setEnableShippingPlans(false);
           setSelectedShippingPlan("");
-        } else if (profile && profile.profileId) {
+        } else if (profile && profile.shortId) {
           setEnableShippingPlans(true);
           setEnableFreeShipping(false);
-          setSelectedShippingPlan(profile.profileId);
+          setSelectedShippingPlan(profile.shortId);
         } else {
           setEnableFreeShipping(false);
           setEnableShippingPlans(false);
@@ -1697,20 +1697,29 @@ const CategorySelector = () => {
         categories: finalCategoryPayload.map((c) => c.title),
         shippingProfileData:
           enableShippingPlans && selectedShippingPlan
-            ? {
-                profileId: selectedShippingPlan,
-                profileName: shippingPlans.find(
-                  (p) => p.profileId === selectedShippingPlan,
-                )?.profileName,
-                rateName: shippingPlans.find(
-                  (p) => p.profileId === selectedShippingPlan,
-                )?.rateName,
-                ratePrice: shippingPlans.find(
-                  (p) => p.profileId === selectedShippingPlan,
-                )?.ratePrice,
-              }
+            ? (() => {
+                const selected = shippingPlans.find(
+                  (p) => p.shortId === selectedShippingPlan,
+                );
+
+                if (!selected) return null;
+
+                return {
+                  shortId: selected.shortId, // ✅ internal
+                  profileId: selected.profileId, // ✅ Shopify GID
+                  profileName: selected.profileName,
+                  rateName: selected.rateName,
+                  ratePrice: selected.ratePrice,
+                };
+              })()
             : enableShippingPlans && enableFreeShipping
-              ? { profileName: "Free Shipping" }
+              ? {
+                  shortId: "0s625e2", // your free shipping shortId
+                  profileId: null, // no Shopify profile for free
+                  profileName: "Free Shipping",
+                  rateName: "Free Shipping",
+                  ratePrice: 0,
+                }
               : null,
       };
 
@@ -2779,8 +2788,14 @@ const CategorySelector = () => {
                   >
                     <option value="">Select a plan</option>
 
-                    {shippingPlans.map((plan) => (
+                    {/* {shippingPlans.map((plan) => (
                       <option key={plan._id} value={plan.profileId}>
+                        {plan.profileName.toUpperCase()} — {plan.rateName} ($
+                        {plan.ratePrice})
+                      </option>
+                    ))} */}
+                    {shippingPlans.map((plan) => (
+                      <option key={plan._id} value={plan.shortId}>
                         {plan.profileName.toUpperCase()} — {plan.rateName} ($
                         {plan.ratePrice})
                       </option>
@@ -2791,8 +2806,9 @@ const CategorySelector = () => {
                     <div className="mt-3 text-sm text-gray-700">
                       {(() => {
                         const selected = shippingPlans.find(
-                          (p) => p.profileId === selectedShippingPlan,
+                          (p) => p.shortId === selectedShippingPlan,
                         );
+
                         return selected ? (
                           <>
                             Selected plan:{" "}

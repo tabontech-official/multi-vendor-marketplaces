@@ -18,7 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 const ManageShippingProfiles = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -61,8 +61,7 @@ const ManageShippingProfiles = () => {
         ratePrice: parseFloat(newProfile.ratePrice),
       };
 
-      const endpoint =
-        "https://multi-vendor-marketplace.vercel.app/shippingProfile/add-shippings";
+      const endpoint = "https://multi-vendor-marketplace.vercel.app/shippingProfile/add-shippings";
 
       const { data } = await axios.post(endpoint, payload, {
         headers: { "Content-Type": "application/json" },
@@ -167,6 +166,7 @@ const ManageShippingProfiles = () => {
             rateName: "Free",
             ratePrice: 0,
             status: "enabled",
+            shortId:"0s625e2",
             isLocked: true,
           },
           ...unique,
@@ -212,26 +212,20 @@ const ManageShippingProfiles = () => {
       );
 
       if (checked) {
-        await axios.post(
-          "https://multi-vendor-marketplace.vercel.app/shippingProfile/activate",
-          {
-            userId: profileUserId,
-            profile: {
-              profileId: profile.profileId,
-              profileName: profile.profileName,
-              rateName: profile.rateName,
-              ratePrice: profile.ratePrice,
-            },
-          },
-        );
-      } else {
-        await axios.post(
-          "https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate",
-          {
-            userId: profileUserId,
+        await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/activate", {
+          userId: profileUserId,
+          profile: {
             profileId: profile.profileId,
+            profileName: profile.profileName,
+            rateName: profile.rateName,
+            ratePrice: profile.ratePrice,
           },
-        );
+        });
+      } else {
+        await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate", {
+          userId: profileUserId,
+          profileId: profile.profileId,
+        });
       }
     } catch (err) {
       console.error("Toggle error:", err);
@@ -353,104 +347,97 @@ const ManageShippingProfiles = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-200 divide-y divide-gray-200">
-            <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0">
-              <tr>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
-                  Profile Name
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
-                  Rate Name
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
-                  Rate Price ($)
-                </th>
-                {/* <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">
-                  {isAdmin ? "Linked Products" : "Active"}
-                </th> */}
-                {isAdmin && (
-                  <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">
-                    Actions
-                  </th>
-                )}
-              </tr>
-            </thead>
+         <div className="w-full overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+  <table className="min-w-full divide-y divide-gray-200">
+    
+    {/* ================= HEADER ================= */}
+    <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0 z-10">
+      <tr>
+        <th className="px-4 py-3 text-left font-semibold">
+          #Profile ID
+        </th>
+        <th className="px-4 py-3 text-left font-semibold">
+          Profile Name
+        </th>
+        <th className="px-4 py-3 text-left font-semibold">
+          Rate Name
+        </th>
+        <th className="px-4 py-3 text-left font-semibold">
+          Rate Price ($)
+        </th>
 
-            <tbody className="divide-y divide-gray-200">
-              {currentProfiles.map((profile) => (
-                <tr
-                  key={profile._id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-4 py-2 font-medium text-gray-800 flex items-center">
-                    <FaShippingFast className="text-blue-500 mr-2" />
-                    {profile.profileName}
-                  </td>
+        {isAdmin && (
+          <th className="px-4 py-3 text-center font-semibold">
+            Actions
+          </th>
+        )}
+      </tr>
+    </thead>
 
-                  <td className="px-4 py-2 text-gray-600">
-                    <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium">
-                      {profile.rateName}
-                    </span>
-                  </td>
+    {/* ================= BODY ================= */}
+    <tbody className="divide-y divide-gray-200 bg-white text-sm">
+      {currentProfiles.map((profile) => (
+        <tr
+          key={profile._id}
+          className="hover:bg-gray-50 transition"
+        >
+          {/* SHORT ID */}
+          <td className="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">
+            {profile.shortId}
+          </td>
 
-                  <td className="px-4 py-2 font-semibold text-green-600">
-                    ${profile.ratePrice?.toFixed(2) ?? "0.00"}
-                  </td>
+          {/* PROFILE NAME */}
+          <td className="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">
+            <div className="flex items-center gap-2">
+              <FaShippingFast className="text-blue-500" />
+              {profile.profileName}
+            </div>
+          </td>
 
-                  {/* <td className="px-4 py-2 text-center">
-                    {isAdmin ? (
-                      <span className="text-gray-800 font-semibold">
-                        {profile.productCount ?? 0}
-                      </span>
-                    ) : (
-                      <label className="inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={
-                            profile.isLocked
-                              ? true
-                              : activeProfiles.includes(profile.profileId)
-                          }
-                          disabled={profile.isLocked}
-                          onChange={(e) =>
-                            !profile.isLocked &&
-                            handleUserToggle(profile, e.target.checked)
-                          }
-                        />
-                        <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:h-5 after:w-5 after:rounded-full after:transition-all peer-checked:after:translate-x-full" />
-                      </label>
-                    )}
-                  </td> */}
+          {/* RATE NAME */}
+          <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+              {profile.rateName}
+            </span>
+          </td>
 
-                  {isAdmin && (
-                    <td className="px-4 py-2 text-center flex justify-center gap-3">
-                      {!profile.isLocked ? (
-                        <>
-                          <button
-                            onClick={() => setEditingProfile(profile)}
-                            className="p-2 rounded-md text-blue-600 hover:bg-blue-50 transition"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            onClick={() => confirmDelete(profile)}
-                            className="p-2 rounded-md text-red-600 hover:bg-red-50 transition"
-                          >
-                            <FaTrash />
-                          </button>
-                        </>
-                      ) : (
-                        <span className="text-xs text-green-700 bg-green-100 px-3 py-1 rounded-md font-medium">
-                          Always Active
-                        </span>
-                      )}
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* RATE PRICE */}
+          <td className="px-4 py-3 font-semibold text-green-600 whitespace-nowrap">
+            ${Number(profile.ratePrice || 0).toFixed(2)}
+          </td>
+
+          {/* ACTIONS */}
+          {isAdmin && (
+            <td className="px-4 py-3 text-center whitespace-nowrap">
+              {!profile.isLocked ? (
+                <div className="flex justify-center gap-3">
+                  <button
+                    onClick={() => setEditingProfile(profile)}
+                    className="p-2 rounded-md text-blue-600 hover:bg-blue-50 transition"
+                  >
+                    <FaEdit />
+                  </button>
+
+                  <button
+                    onClick={() => confirmDelete(profile)}
+                    className="p-2 rounded-md text-red-600 hover:bg-red-50 transition"
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+              ) : (
+                <span className="text-xs text-green-700 bg-green-100 px-3 py-1 rounded-md font-medium">
+                  Always Active
+                </span>
+              )}
+            </td>
+          )}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
         </div>
 
         {profiles.length > profilesPerPage && (

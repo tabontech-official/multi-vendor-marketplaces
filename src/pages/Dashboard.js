@@ -1496,7 +1496,9 @@ useEffect(() => {
                             Edit
                           </button>
                         )} */}
-             {imageUploadStatus?.productId === product.id && !imageUploadStatus.finished ? (
+{imageUploadStatus &&
+ imageUploadStatus.productId === product.id &&
+ !imageUploadStatus.finished ? (
 
   // 🔄 Image Upload Running
   <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -1550,7 +1552,10 @@ useEffect(() => {
     <span>Syncing…</span>
   </div>
 
-) : (imageUploadStatus?.productId === product.id && imageUploadStatus.finished) ||
+) : (imageUploadStatus &&
+ imageUploadStatus.productId === product.id &&
+ imageUploadStatus.finished)
+||
     syncCompletedId === product.id ? (
 
   // ✅ Single Refresh Button (for both cases)

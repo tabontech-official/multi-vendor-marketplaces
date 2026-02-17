@@ -365,9 +365,9 @@ const ManageShippingProfiles = () => {
                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
                   Rate Price ($)
                 </th>
-                <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">
+                {/* <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">
                   {isAdmin ? "Linked Products" : "Active"}
-                </th>
+                </th> */}
                 {isAdmin && (
                   <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">
                     Actions
@@ -397,7 +397,7 @@ const ManageShippingProfiles = () => {
                     ${profile.ratePrice?.toFixed(2) ?? "0.00"}
                   </td>
 
-                  <td className="px-4 py-2 text-center">
+                  {/* <td className="px-4 py-2 text-center">
                     {isAdmin ? (
                       <span className="text-gray-800 font-semibold">
                         {profile.productCount ?? 0}
@@ -421,7 +421,7 @@ const ManageShippingProfiles = () => {
                         <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:h-5 after:w-5 after:rounded-full after:transition-all peer-checked:after:translate-x-full" />
                       </label>
                     )}
-                  </td>
+                  </td> */}
 
                   {isAdmin && (
                     <td className="px-4 py-2 text-center flex justify-center gap-3">

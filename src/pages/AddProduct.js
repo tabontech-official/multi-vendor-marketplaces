@@ -329,7 +329,7 @@ const CategorySelector = () => {
         console.log("👤 Fetching active shipping profiles for user:", userId);
 
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`,
+          `https://multi-vendor-marketplace.vercel.app/shippingProfile/get/admin`,
           {
             method: "GET",
             headers: {
@@ -344,8 +344,13 @@ const CategorySelector = () => {
 
         const data = await res.json();
 
-        if (Array.isArray(data)) {
-          setShippingPlans(data);
+        // if (Array.isArray(data)) {
+        //   setShippingPlans(data);
+        // } else {
+        //   setShippingPlans([]);
+        // }
+        if (Array.isArray(data.profiles)) {
+          setShippingPlans(data.profiles);
         } else {
           setShippingPlans([]);
         }
@@ -1082,17 +1087,14 @@ const CategorySelector = () => {
     const productId = product?.id || "null";
 
     if ((isPopupVisible || isMediaModalVisible) && userId) {
-      fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
+      fetch(`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/${productId}`, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
         },
-      )
+      })
         .then((res) => res.json())
         .then((data) => {
           console.log("📸 Gallery data fetched:", data);
@@ -1436,22 +1438,19 @@ const CategorySelector = () => {
         const data = await res.json();
 
         if (data.secure_url) {
-          await fetch(
-            "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-api-key": apiKey,
-                "x-api-secret": apiSecretKey,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                images: [data.secure_url],
-              }),
+          await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
             },
-          );
+            body: JSON.stringify({
+              userId,
+              images: [data.secure_url],
+            }),
+          });
 
           setVariantImages((prev) => ({
             ...prev,
@@ -1525,19 +1524,16 @@ const CategorySelector = () => {
           const data = await res.json();
 
           if (data.secure_url) {
-            await fetch(
-              "https://multi-vendor-marketplace.vercel.app/product/addImageGallery",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "x-api-key": apiKey,
-                  "x-api-secret": apiSecretKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId, images: [data.secure_url] }),
+            await fetch("https://multi-vendor-marketplace.vercel.app/product/addImageGallery", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "x-api-key": apiKey,
+                "x-api-secret": apiSecretKey,
+                "Content-Type": "application/json",
               },
-            );
+              body: JSON.stringify({ userId, images: [data.secure_url] }),
+            });
 
             setSelectedImages((prev) =>
               prev.map((img) =>
@@ -1699,6 +1695,23 @@ const CategorySelector = () => {
         options,
         variants,
         categories: finalCategoryPayload.map((c) => c.title),
+        shippingProfileData:
+          enableShippingPlans && selectedShippingPlan
+            ? {
+                profileId: selectedShippingPlan,
+                profileName: shippingPlans.find(
+                  (p) => p.profileId === selectedShippingPlan,
+                )?.profileName,
+                rateName: shippingPlans.find(
+                  (p) => p.profileId === selectedShippingPlan,
+                )?.rateName,
+                ratePrice: shippingPlans.find(
+                  (p) => p.profileId === selectedShippingPlan,
+                )?.ratePrice,
+              }
+            : enableShippingPlans && enableFreeShipping
+              ? { profileName: "Free Shipping" }
+              : null,
       };
 
       if (enableMetafields) {
@@ -2700,9 +2713,19 @@ const CategorySelector = () => {
                   type="checkbox"
                   id="enableShippingPlans"
                   checked={enableShippingPlans}
+                  // onChange={() => {
+                  //   setEnableShippingPlans(!enableShippingPlans);
+                  //   setIsChanged(true);
+                  // }}
                   onChange={() => {
-                    setEnableShippingPlans(!enableShippingPlans);
+                    const newValue = !enableShippingPlans;
+                    setEnableShippingPlans(newValue);
                     setIsChanged(true);
+
+                    if (!newValue) {
+                      setSelectedShippingPlan("");
+                      setEnableFreeShipping(false);
+                    }
                   }}
                   className="h-4 w-4 text-blue-500"
                 />
@@ -2720,8 +2743,13 @@ const CategorySelector = () => {
                   id="enableFreeShipping"
                   checked={enableFreeShipping}
                   onChange={() => {
-                    setEnableFreeShipping(!enableFreeShipping);
+                    const newValue = !enableFreeShipping;
+                    setEnableFreeShipping(newValue);
                     setIsChanged(true);
+
+                    if (newValue) {
+                      setSelectedShippingPlan("");
+                    }
                   }}
                   className="h-4 w-4 text-blue-500"
                 />
@@ -2739,65 +2767,42 @@ const CategorySelector = () => {
                     Select Shipping Profile
                   </label>
 
-                  {shippingPlans.length > 0 ? (
-                    <>
-                      <select
-                        value={selectedShippingPlan}
-                        onChange={(e) => {
-                          setSelectedShippingPlan(e.target.value);
-                          setIsChanged(true);
-                        }}
-                        className="w-full border border-gray-300 p-2 rounded-md"
-                      >
-                        <option value="">Select a plan</option>
-                        {shippingPlans.map((plan) => (
-                          <option key={plan._id} value={plan.profileId}>
-                            {plan.profileName.toUpperCase()} — {plan.rateName}{" "}
-                            ($
-                            {plan.ratePrice})
-                          </option>
-                        ))}
-                      </select>
+                  <select
+                    value={selectedShippingPlan}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSelectedShippingPlan(value);
+                      setEnableFreeShipping(false); // disable free shipping
+                      setIsChanged(true);
+                    }}
+                    className="w-full border border-gray-300 p-2 rounded-md"
+                  >
+                    <option value="">Select a plan</option>
 
-                      {selectedShippingPlan && (
-                        <div className="mt-3 text-sm text-gray-700">
-                          Selected plan:{" "}
-                          <span className="font-medium">
-                            {
-                              shippingPlans.find(
-                                (p) => p.profileId === selectedShippingPlan,
-                              )?.profileName
-                            }{" "}
-                            (
-                            {
-                              shippingPlans.find(
-                                (p) => p.profileId === selectedShippingPlan,
-                              )?.rateName
-                            }{" "}
-                            - $
-                            {
-                              shippingPlans.find(
-                                (p) => p.profileId === selectedShippingPlan,
-                              )?.ratePrice
-                            }
-                            )
-                          </span>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-sm text-gray-700 bg-yellow-50 border border-yellow-300 rounded-md p-3">
-                      No active shipping profiles found.{" "}
-                      <button
-                        onClick={() => navigate("/manage-shipping")}
-                        className="text-blue-600 underline hover:text-blue-800 font-medium ml-1"
-                      >
-                        Click here to manage shipping.
-                      </button>
-                      <p className="mt-2 text-gray-600">
-                        Once you activate a profile, it will appear here. Until
-                        then, products will default to Free Shipping.
-                      </p>
+                    {shippingPlans.map((plan) => (
+                      <option key={plan._id} value={plan.profileId}>
+                        {plan.profileName.toUpperCase()} — {plan.rateName} ($
+                        {plan.ratePrice})
+                      </option>
+                    ))}
+                  </select>
+
+                  {selectedShippingPlan && (
+                    <div className="mt-3 text-sm text-gray-700">
+                      {(() => {
+                        const selected = shippingPlans.find(
+                          (p) => p.profileId === selectedShippingPlan,
+                        );
+                        return selected ? (
+                          <>
+                            Selected plan:{" "}
+                            <span className="font-medium">
+                              {selected.profileName} ({selected.rateName} - $
+                              {selected.ratePrice})
+                            </span>
+                          </>
+                        ) : null;
+                      })()}
                     </div>
                   )}
                 </div>
@@ -3644,7 +3649,20 @@ const CategorySelector = () => {
                       No size charts found.
                       <button
                         className="text-blue-600 underline ml-1"
-                        onClick={() => navigate("/create-size-chart")}
+                        onClick={(e) => {
+                          e.preventDefault();
+
+                          if (isChanged) {
+                            showToast(
+                              "error",
+                              "Please save the product before creating a size chart.",
+                              "warning",
+                            );
+                            return;
+                          }
+
+                          navigate("/create-size-chart");
+                        }}
                       >
                         Create one
                       </button>

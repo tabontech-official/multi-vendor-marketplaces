@@ -729,7 +729,7 @@ const Inventory = () => {
         <div className="p-4">
           {filteredProducts.length === 0 ? (
             <div className="text-center py-10 text-gray-500">
-              <h2>No products available.</h2>
+              <h2>No variants available.</h2>
             </div>
           ) : (
             <>

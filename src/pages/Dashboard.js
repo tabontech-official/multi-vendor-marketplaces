@@ -1700,7 +1700,7 @@ const Dashboard = () => {
                 )}
               </div>
               <a
-                href="/sample-product.xlsx"
+                href="/product_template.xlsx"
                 download
                 className="text-sm text-gray-800 underline cursor-pointer mb-4 inline-block"
               >

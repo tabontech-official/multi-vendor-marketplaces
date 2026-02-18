@@ -42,7 +42,6 @@ const SubscriptionHistory = () => {
 
   const togglePopup = () => setIsexportOpen(!isOpen);
 
- 
   const fetchSubscriptions = async () => {
     const userId = localStorage.getItem("userid");
     const token = localStorage.getItem("usertoken");
@@ -86,7 +85,6 @@ const SubscriptionHistory = () => {
         setSubscriptions(sortedSubscriptions);
         setFilteredSubscriptions(sortedSubscriptions);
 
-        // ✅ If backend sends totalPages
         if (json.totalPages) {
           setHasMore(page < json.totalPages);
         }
@@ -319,7 +317,6 @@ const SubscriptionHistory = () => {
       <div className="flex">
         <div className="pt-4 min-w-full px-3 bg-white  rounded-lg">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 pb-4 gap-4">
-            {/* LEFT: Title */}
             <div className="flex-1">
               <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
                 Manage orders
@@ -329,7 +326,6 @@ const SubscriptionHistory = () => {
               </p>
             </div>
 
-            {/* CENTER: Search */}
             <div className="flex-1 w-full max-w-sm mx-auto">
               <input
                 type="text"
@@ -341,7 +337,6 @@ const SubscriptionHistory = () => {
               />
             </div>
 
-            {/* RIGHT: Actions */}
             <div className="flex-1 flex items-center justify-end gap-2 w-full">
               <button
                 onClick={togglePopup}
@@ -364,7 +359,7 @@ const SubscriptionHistory = () => {
             ) : (
               <div className="max-sm:overflow-auto border rounded-lg">
                 <table className="w-full border-collapse bg-white">
-              <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0 text-left">
+                  <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0 text-left">
                     <tr>
                       <th scope="col" className="p-3">
                         #
@@ -443,14 +438,17 @@ const SubscriptionHistory = () => {
                                     className="p-3 cursor-pointer text-blue-600 hover:underline"
                                     onClick={() => {
                                       if (shopifyOrderId) {
-                                        navigate(`/order/${shopifyOrderId}/${merchantId}`, {
-                                          state: {
-                                            merchantId,
-                                            shopifyOrderId,
-                                            serialNo: orderId,
-                                            order: subscription,
+                                        navigate(
+                                          `/order/${shopifyOrderId}/${merchantId}`,
+                                          {
+                                            state: {
+                                              merchantId,
+                                              shopifyOrderId,
+                                              serialNo: orderId,
+                                              order: subscription,
+                                            },
                                           },
-                                        });
+                                        );
                                       } else {
                                       }
                                     }}
@@ -541,37 +539,37 @@ const SubscriptionHistory = () => {
                             >
                               <td
                                 className="p-3 text-blue-600 hover:underline cursor-pointer"
-                               onClick={() => {
-  const merchantId =
-    subscription.ProductSnapshot?.find(
-      (p) =>
-        String(p.variantId) === String(firstItem.variant_id)
-    )?.merchantId;
+                                onClick={() => {
+                                  const merchantId =
+                                    subscription.ProductSnapshot?.find(
+                                      (p) =>
+                                        String(p.variantId) ===
+                                        String(firstItem.variant_id),
+                                    )?.merchantId;
 
-  console.log("Navigating with data:", {
-    order: subscription,
-    productName: firstItem.name,
-    sku: firstItem.sku,
-    index: 101 + index,
-    serialNumber: subscription.orderId,
-    merchantId,
-  });
+                                  console.log("Navigating with data:", {
+                                    order: subscription,
+                                    productName: firstItem.name,
+                                    sku: firstItem.sku,
+                                    index: 101 + index,
+                                    serialNumber: subscription.orderId,
+                                    merchantId,
+                                  });
 
-  navigate(
-    `/order/${subscription.orderId}/${merchantId}`,
-    {
-      state: {
-        order: subscription,
-        productName: firstItem.name,
-        sku: firstItem.sku,
-        index: 101 + index,
-        serialNumber: subscription.orderId,
-        merchantId,
-      },
-    }
-  );
-}}
-
+                                  navigate(
+                                    `/order/${subscription.orderId}/${merchantId}`,
+                                    {
+                                      state: {
+                                        order: subscription,
+                                        productName: firstItem.name,
+                                        sku: firstItem.sku,
+                                        index: 101 + index,
+                                        serialNumber: subscription.orderId,
+                                        merchantId,
+                                      },
+                                    },
+                                  );
+                                }}
                               >
                                 #{subscription.shopifyOrderNo}
                               </td>

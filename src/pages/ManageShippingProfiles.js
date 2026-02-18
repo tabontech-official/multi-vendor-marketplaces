@@ -61,7 +61,8 @@ const ManageShippingProfiles = () => {
         ratePrice: parseFloat(newProfile.ratePrice),
       };
 
-      const endpoint = "https://multi-vendor-marketplace.vercel.app/shippingProfile/add-shippings";
+      const endpoint =
+        "https://multi-vendor-marketplace.vercel.app/shippingProfile/add-shippings";
 
       const { data } = await axios.post(endpoint, payload, {
         headers: { "Content-Type": "application/json" },
@@ -166,7 +167,7 @@ const ManageShippingProfiles = () => {
             rateName: "Free",
             ratePrice: 0,
             status: "enabled",
-            shortId:"0s625e2",
+            shortId: "0s625e2",
             isLocked: true,
           },
           ...unique,
@@ -212,20 +213,26 @@ const ManageShippingProfiles = () => {
       );
 
       if (checked) {
-        await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/activate", {
-          userId: profileUserId,
-          profile: {
-            profileId: profile.profileId,
-            profileName: profile.profileName,
-            rateName: profile.rateName,
-            ratePrice: profile.ratePrice,
+        await axios.post(
+          "https://multi-vendor-marketplace.vercel.app/shippingProfile/activate",
+          {
+            userId: profileUserId,
+            profile: {
+              profileId: profile.profileId,
+              profileName: profile.profileName,
+              rateName: profile.rateName,
+              ratePrice: profile.ratePrice,
+            },
           },
-        });
+        );
       } else {
-        await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate", {
-          userId: profileUserId,
-          profileId: profile.profileId,
-        });
+        await axios.post(
+          "https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate",
+          {
+            userId: profileUserId,
+            profileId: profile.profileId,
+          },
+        );
       }
     } catch (err) {
       console.error("Toggle error:", err);
@@ -347,97 +354,85 @@ const ManageShippingProfiles = () => {
         </div>
 
         <div className="overflow-x-auto">
-         <div className="w-full overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-  <table className="min-w-full divide-y divide-gray-200">
-    
-    {/* ================= HEADER ================= */}
-    <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0 z-10">
-      <tr>
-        <th className="px-4 py-3 text-left font-semibold">
-          #Profile ID
-        </th>
-        <th className="px-4 py-3 text-left font-semibold">
-          Profile Name
-        </th>
-        <th className="px-4 py-3 text-left font-semibold">
-          Rate Name
-        </th>
-        <th className="px-4 py-3 text-left font-semibold">
-          Rate Price ($)
-        </th>
+          <div className="w-full overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0 z-10">
+                <tr>
+                  <th className="px-4 py-3 text-left font-semibold">
+                    #Profile ID
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold">
+                    Profile Name
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold">
+                    Rate Name
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold">
+                    Rate Price ($)
+                  </th>
 
-        {isAdmin && (
-          <th className="px-4 py-3 text-center font-semibold">
-            Actions
-          </th>
-        )}
-      </tr>
-    </thead>
+                  {isAdmin && (
+                    <th className="px-4 py-3 text-center font-semibold">
+                      Actions
+                    </th>
+                  )}
+                </tr>
+              </thead>
 
-    {/* ================= BODY ================= */}
-    <tbody className="divide-y divide-gray-200 bg-white text-sm">
-      {currentProfiles.map((profile) => (
-        <tr
-          key={profile._id}
-          className="hover:bg-gray-50 transition"
-        >
-          {/* SHORT ID */}
-          <td className="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">
-            {profile.shortId}
-          </td>
+              <tbody className="divide-y divide-gray-200 bg-white text-sm">
+                {currentProfiles.map((profile) => (
+                  <tr key={profile._id} className="hover:bg-gray-50 transition">
+                    <td className="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">
+                      {profile.shortId}
+                    </td>
 
-          {/* PROFILE NAME */}
-          <td className="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">
-            <div className="flex items-center gap-2">
-              <FaShippingFast className="text-blue-500" />
-              {profile.profileName}
-            </div>
-          </td>
+                    <td className="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <FaShippingFast className="text-blue-500" />
+                        {profile.profileName}
+                      </div>
+                    </td>
 
-          {/* RATE NAME */}
-          <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-              {profile.rateName}
-            </span>
-          </td>
+                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                      <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+                        {profile.rateName}
+                      </span>
+                    </td>
 
-          {/* RATE PRICE */}
-          <td className="px-4 py-3 font-semibold text-green-600 whitespace-nowrap">
-            ${Number(profile.ratePrice || 0).toFixed(2)}
-          </td>
+                    <td className="px-4 py-3 font-semibold text-green-600 whitespace-nowrap">
+                      ${Number(profile.ratePrice || 0).toFixed(2)}
+                    </td>
 
-          {/* ACTIONS */}
-          {isAdmin && (
-            <td className="px-4 py-3 text-center whitespace-nowrap">
-              {!profile.isLocked ? (
-                <div className="flex justify-center gap-3">
-                  <button
-                    onClick={() => setEditingProfile(profile)}
-                    className="p-2 rounded-md text-blue-600 hover:bg-blue-50 transition"
-                  >
-                    <FaEdit />
-                  </button>
+                    {isAdmin && (
+                      <td className="px-4 py-3 text-center whitespace-nowrap">
+                        {!profile.isLocked ? (
+                          <div className="flex justify-center gap-3">
+                            <button
+                              onClick={() => setEditingProfile(profile)}
+                              className="p-2 rounded-md text-blue-600 hover:bg-blue-50 transition"
+                            >
+                              <FaEdit />
+                            </button>
 
-                  <button
-                    onClick={() => confirmDelete(profile)}
-                    className="p-2 rounded-md text-red-600 hover:bg-red-50 transition"
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              ) : (
-                <span className="text-xs text-green-700 bg-green-100 px-3 py-1 rounded-md font-medium">
-                  Always Active
-                </span>
-              )}
-            </td>
-          )}
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
-
+                            <button
+                              onClick={() => confirmDelete(profile)}
+                              className="p-2 rounded-md text-red-600 hover:bg-red-50 transition"
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-green-700 bg-green-100 px-3 py-1 rounded-md font-medium">
+                            Always Active
+                          </span>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {profiles.length > profilesPerPage && (

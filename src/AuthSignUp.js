@@ -25,22 +25,30 @@ const AuthSignUp = () => {
   const [success, setSuccess] = useState("");
   const [agreedToPolicies, setAgreedToPolicies] = useState(false);
 
-  const handleSellerNameChange = (e) => {
-    const value = e.target.value;
+const handleSellerNameChange = (e) => {
+  const value = e.target.value;
 
-    let fieldError = "";
+  // Capital letters check
+  if (/[A-Z]/.test(value)) {
+    toast.error("Seller name must be in lowercase only");
+    return;
+  }
 
-    if (/[A-Z]/.test(value)) {
-      fieldError = "Seller name must be in lowercase only";
-    } else if (/\s/.test(value)) {
-      fieldError = "Spaces are not allowed in seller name";
-    } else if (!/^[a-z0-9]*$/.test(value)) {
-      fieldError = "Special characters are not allowed";
-    }
+  // Space check
+  if (/\s/.test(value)) {
+    toast.error("Spaces are not allowed in seller name");
+    return;
+  }
 
-    setSellerName(value);
-    setErrors((prev) => ({ ...prev, sellerName: fieldError }));
-  };
+  // Special character check (only lowercase letters + numbers allowed)
+  if (!/^[a-z0-9]*$/.test(value)) {
+    toast.error("Special characters are not allowed");
+    return;
+  }
+
+  setSellerName(value);
+};
+
 
   // const handleSignup = async (e) => {
   //   e.preventDefault();

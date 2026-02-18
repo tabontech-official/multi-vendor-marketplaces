@@ -63,6 +63,7 @@ import { ToastContainer } from "react-toastify";
 import Settings from "./pages/settings";
 import NotificationSettings from "./pages/NotificationSettings";
 import InvoicePage from "./pages/invoice";
+import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -114,8 +115,7 @@ const App = () => {
   return (
     <NotificationProvider>
       <Router>
-        <ToastContainer position="top-right" autoClose={3000} />
-
+        <ToastContainer position="top-right" autoClose={2000} />
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route

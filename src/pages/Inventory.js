@@ -409,17 +409,14 @@ const Inventory = () => {
         "inventory",
       );
 
-      fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
-        {
-          method: "POST",
-          body: formData,
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-          },
+      fetch("https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory", {
+        method: "POST",
+        body: formData,
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
         },
-      )
+      })
         .then((res) => res.json())
         .then((result) => {
           if (result?.message) {
@@ -612,97 +609,97 @@ const Inventory = () => {
         )}
       </div> */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between  pb-4 gap-4">
-  {/* LEFT: Title */}
-  <div className="flex-1">
-    <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
-      Inventory
-    </h1>
-    <p className="text-sm text-gray-500">
-      Here is your total collection in inventory.
-    </p>
-  </div>
+        {/* LEFT: Title */}
+        <div className="flex-1">
+          <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
+            Inventory
+          </h1>
+          <p className="text-sm text-gray-500">
+            Here is your total collection in inventory.
+          </p>
+        </div>
 
-  {/* CENTER: Search */}
-  <div className="flex-1 w-full max-w-sm mx-auto">
-    <input
-      type="text"
-      placeholder="Search..."
-      value={searchVal}
-      onChange={(e) => setSearchVal(e.target.value)}
-      className="w-full p-1.5 text-sm border border-gray-300 rounded-md
+        {/* CENTER: Search */}
+        <div className="flex-1 w-full max-w-sm mx-auto">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchVal}
+            onChange={(e) => setSearchVal(e.target.value)}
+            className="w-full p-1.5 text-sm border border-gray-300 rounded-md
         focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
-    />
-  </div>
+          />
+        </div>
 
-  {/* RIGHT: Actions */}
-  <div className="flex-1 flex flex-wrap items-center justify-end gap-2 w-full">
-    {filteredProducts.some((v) => v.isEditable) && (
-      <button
-        onClick={() => {
-          const editableVariants = filteredProducts.filter(
-            (v) => v.isEditable,
-          );
+        {/* RIGHT: Actions */}
+        <div className="flex-1 flex flex-wrap items-center justify-end gap-2 w-full">
+          {filteredProducts.some((v) => v.isEditable) && (
+            <button
+              onClick={() => {
+                const editableVariants = filteredProducts.filter(
+                  (v) => v.isEditable,
+                );
 
-          if (editableVariants.length === 0) {
-            alert("Please edit at least one variant first.");
-            return;
-          }
+                if (editableVariants.length === 0) {
+                  alert("Please edit at least one variant first.");
+                  return;
+                }
 
-          const updated = [...filteredProducts];
+                const updated = [...filteredProducts];
 
-          editableVariants.forEach((editableVariant) => {
-            const index = updated.findIndex(
-              (v) => v.id === editableVariant.id,
-            );
-            if (index !== -1) {
-              if (activeTab === "price") {
-                updated[index].price = editableVariant.price;
-                updated[index].compare_at_price =
-                  editableVariant.compare_at_price;
-              } else if (activeTab === "quantity") {
-                updated[index].inventory_quantity =
-                  editableVariant.inventory_quantity;
-              }
-            }
-          });
+                editableVariants.forEach((editableVariant) => {
+                  const index = updated.findIndex(
+                    (v) => v.id === editableVariant.id,
+                  );
+                  if (index !== -1) {
+                    if (activeTab === "price") {
+                      updated[index].price = editableVariant.price;
+                      updated[index].compare_at_price =
+                        editableVariant.compare_at_price;
+                    } else if (activeTab === "quantity") {
+                      updated[index].inventory_quantity =
+                        editableVariant.inventory_quantity;
+                    }
+                  }
+                });
 
-          editableVariants.forEach((editableVariant, i) => {
-            setTimeout(() => {
-              if (activeTab === "price") {
-                handlePriceUpdate(editableVariant.id);
-              } else {
-                handleQuantityUpdate(editableVariant.id);
-              }
-            }, i * 100);
-          });
+                editableVariants.forEach((editableVariant, i) => {
+                  setTimeout(() => {
+                    if (activeTab === "price") {
+                      handlePriceUpdate(editableVariant.id);
+                    } else {
+                      handleQuantityUpdate(editableVariant.id);
+                    }
+                  }, i * 100);
+                });
 
-          editableVariants.forEach((v) => (v.isEditable = false));
-          setFilteredProducts(updated);
-          setSelectedProducts([]);
-        }}
-        className="bg-gray-800 hover:bg-gray-900 text-white px-3 h-8 text-sm font-medium rounded-md shadow-sm"
-      >
-        Update All
-      </button>
-    )}
+                editableVariants.forEach((v) => (v.isEditable = false));
+                setFilteredProducts(updated);
+                setSelectedProducts([]);
+              }}
+              className="bg-gray-800 hover:bg-gray-900 text-white px-3 h-8 text-sm font-medium rounded-md shadow-sm"
+            >
+              Update All
+            </button>
+          )}
 
-    <button
-      onClick={openPopupImport}
-      className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
-    >
-      <CiImport className="w-4 h-4" />
-      Import
-    </button>
+          <button
+            onClick={openPopupImport}
+            className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
+          >
+            <CiImport className="w-4 h-4" />
+            Import
+          </button>
 
-    <button
-      onClick={togglePopup}
-      className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
-    >
-      <FaFileImport className="w-4 h-4" />
-      Export
-    </button>
-  </div>
-</div>
+          <button
+            onClick={togglePopup}
+            className="bg-gray-400 border border-gray-300 hover:bg-gray-500 text-gray-800 px-3 h-8 text-sm font-medium rounded-md flex items-center gap-1.5 shadow-sm"
+          >
+            <FaFileImport className="w-4 h-4" />
+            Export
+          </button>
+        </div>
+      </div>
 
       <div className="flex items-center space-x-6 border-b border-gray-300 mb-4">
         <button
@@ -737,7 +734,7 @@ const Inventory = () => {
           ) : (
             <>
               <table className="w-full border-collapse bg-white">
-                  <thead className="bg-gray-100 text-gray-600 text-left  sticky top-0 text-sm">
+                <thead className="bg-gray-100 text-gray-600 text-left  sticky top-0 text-sm">
                   <tr>
                     <th className="p-3">Action</th>
                     <th className="p-3">Status</th>
@@ -815,21 +812,32 @@ const Inventory = () => {
                           </td>
 
                           <td className="p-3 text-center">
-                            {variant.finalImage?.src ? (
-                              <img
-                                src={variant.finalImage.src}
-                                alt={
-                                  variant.finalImage.alt ||
-                                  variant.title ||
-                                  "Variant image"
-                                }
-                                className="w-16 h-16 object-contain rounded border mx-auto"
-                              />
-                            ) : (
-                              <span className="text-gray-400 text-sm">
-                                No Image
-                              </span>
-                            )}
+                           {variant.images && variant.images.length > 0 ? (
+  <img
+    src={variant.images[0].src}
+    alt={
+      variant.images[0].alt ||
+      variant.title ||
+      "Variant image"
+    }
+    className="w-16 h-16 object-contain rounded border mx-auto"
+  />
+) : variant.productImages && variant.productImages.length > 0 ? (
+  <img
+    src={variant.productImages[0].src}
+    alt={
+      variant.productImages[0].alt ||
+      variant.title ||
+      "Product image"
+    }
+    className="w-16 h-16 object-contain rounded border mx-auto"
+  />
+) : (
+  <span className="text-gray-400 text-sm">
+    No Image
+  </span>
+)}
+
                           </td>
 
                           <td className="p-3">
@@ -1227,21 +1235,32 @@ const Inventory = () => {
                             </td>
 
                             <td className="p-3 text-center">
-                              {variant.finalImage?.src ? (
-                                <img
-                                  src={variant.finalImage.src}
-                                  alt={
-                                    variant.finalImage.alt ||
-                                    variant.title ||
-                                    "Variant image"
-                                  }
-                                  className="w-16 h-16 object-contain rounded border mx-auto"
-                                />
-                              ) : (
-                                <span className="text-gray-400 text-sm">
-                                  No Image
-                                </span>
-                              )}
+                             {variant.images && variant.images.length > 0 ? (
+  <img
+    src={variant.images[0].src}
+    alt={
+      variant.images[0].alt ||
+      variant.title ||
+      "Variant image"
+    }
+    className="w-16 h-16 object-contain rounded border mx-auto"
+  />
+) : variant.productImages && variant.productImages.length > 0 ? (
+  <img
+    src={variant.productImages[0].src}
+    alt={
+      variant.productImages[0].alt ||
+      variant.title ||
+      "Product image"
+    }
+    className="w-16 h-16 object-contain rounded border mx-auto"
+  />
+) : (
+  <span className="text-gray-400 text-sm">
+    No Image
+  </span>
+)}
+
                             </td>
 
                             <td className="p-3">

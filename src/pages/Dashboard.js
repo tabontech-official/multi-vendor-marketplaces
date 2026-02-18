@@ -13,7 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { CiImport } from "react-icons/ci";
 import { RxCross1 } from "react-icons/rx";
 import { useNotification } from "../context api/NotificationContext";
-import * as XLSX from "xlsx"; // Make sure you imported this at the top
+import * as XLSX from "xlsx"; 
 
 const Dashboard = () => {
   let admin;
@@ -308,37 +308,34 @@ const Dashboard = () => {
       setImageUploadStatus(JSON.parse(existing));
     }
 
-   const handleUploadFinished = async (event) => {
-  const { productId } = event.detail || {};
-  if (!productId) return;
+    const handleUploadFinished = async (event) => {
+      const { productId } = event.detail || {};
+      if (!productId) return;
 
-  const uploadStartTime = Number(
-    sessionStorage.getItem("uploadStartTime")
-  );
+      const uploadStartTime = Number(sessionStorage.getItem("uploadStartTime"));
 
-  const now = Date.now();
-  const elapsed = now - uploadStartTime;
+      const now = Date.now();
+      const elapsed = now - uploadStartTime;
 
-  const minimumDuration = 6000; // 6 seconds
+      const minimumDuration = 6000; // 6 seconds
 
-  if (elapsed < minimumDuration) {
-    await new Promise((resolve) =>
-      setTimeout(resolve, minimumDuration - elapsed)
-    );
-  }
+      if (elapsed < minimumDuration) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, minimumDuration - elapsed),
+        );
+      }
 
-  setImageUploadStatus({
-    productId,
-    finished: true,
-  });
+      setImageUploadStatus({
+        productId,
+        finished: true,
+      });
 
-  showToast("success", "Images uploaded successfully");
-  addNotification(
-    "Product images uploaded successfully!",
-    "Manage product"
-  );
-};
-
+      showToast("success", "Images uploaded successfully");
+      addNotification(
+        "Product images uploaded successfully!",
+        "Manage product",
+      );
+    };
 
     window.addEventListener("image-upload-finished", handleUploadFinished);
 
@@ -350,55 +347,53 @@ const Dashboard = () => {
   const [userRole, setUserRole] = useState(null);
   const [totalProducts, setTotalProducts] = useState(0);
   const totalPages = Math.ceil(totalProducts / limit);
-const [syncingProductId, setSyncingProductId] = useState(null);
-const [syncCompletedId, setSyncCompletedId] = useState(null);
+  const [syncingProductId, setSyncingProductId] = useState(null);
+  const [syncCompletedId, setSyncCompletedId] = useState(null);
 
-useEffect(() => {
-  const syncProduct = async () => {
-    const productId = sessionStorage.getItem("lastCreatedProductId");
-    if (!productId) return;
+  useEffect(() => {
+    const syncProduct = async () => {
+      const productId = sessionStorage.getItem("lastCreatedProductId");
+      if (!productId) return;
 
-    console.log("🔄 Sync Started:", productId);
+      console.log("🔄 Sync Started:", productId);
 
-    setSyncingProductId(productId);
+      setSyncingProductId(productId);
 
-    try {
-      const apiKey = localStorage.getItem("apiKey");
-      const apiSecretKey = localStorage.getItem("apiSecretKey");
+      try {
+        const apiKey = localStorage.getItem("apiKey");
+        const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-      const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/sync-product/${productId}`,
-        {
-          method: "GET",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
+        const response = await fetch(
+          `https://multi-vendor-marketplace.vercel.app/product/sync-product/${productId}`,
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": apiKey,
+              "x-api-secret": apiSecretKey,
+              "Content-Type": "application/json",
+            },
           },
+        );
+
+        if (response.ok) {
+          console.log("✅ Sync Done");
+
+          setSyncingProductId(null);
+          setSyncCompletedId(productId);
+
+          // ❌ remove id so it doesn't trigger again
+          sessionStorage.removeItem("lastCreatedProductId");
+        } else {
+          setSyncingProductId(null);
         }
-      );
-
-      if (response.ok) {
-        console.log("✅ Sync Done");
-
-        setSyncingProductId(null);
-        setSyncCompletedId(productId);
-
-        // ❌ remove id so it doesn't trigger again
-        sessionStorage.removeItem("lastCreatedProductId");
-      } else {
+      } catch (error) {
+        console.error("❌ Sync Error:", error.message);
         setSyncingProductId(null);
       }
-    } catch (error) {
-      console.error("❌ Sync Error:", error.message);
-      setSyncingProductId(null);
-    }
-  };
+    };
 
-  syncProduct();
-}, []);
-;
-
+    syncProduct();
+  }, []);
   useEffect(() => {
     const token = localStorage.getItem("usertoken");
     if (!token) return;
@@ -1496,101 +1491,91 @@ useEffect(() => {
                             Edit
                           </button>
                         )} */}
-{imageUploadStatus &&
- imageUploadStatus.productId === product.id &&
- !imageUploadStatus.finished ? (
+                        {imageUploadStatus &&
+                        imageUploadStatus.productId === product.id &&
+                        !imageUploadStatus.finished ? (
+                          // 🔄 Image Upload Running
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <svg
+                              className="animate-spin h-4 w-4 text-blue-500"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                              />
+                            </svg>
+                            <span>Uploading…</span>
+                          </div>
+                        ) : syncingProductId === product.id ? (
+                          // 🔄 Backend Sync Running
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <svg
+                              className="animate-spin h-4 w-4 text-blue-500"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                              />
+                            </svg>
+                            <span>Syncing…</span>
+                          </div>
+                        ) : (imageUploadStatus &&
+                            imageUploadStatus.productId === product.id &&
+                            imageUploadStatus.finished) ||
+                          syncCompletedId === product.id ? (
+                          <button
+                            onClick={() => {
+                              setImageUploadStatus(null);
+                              setSyncCompletedId(null);
 
-  // 🔄 Image Upload Running
-  <div className="flex items-center gap-2 text-sm text-gray-500">
-    <svg
-      className="animate-spin h-4 w-4 text-blue-500"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-      />
-    </svg>
-    <span>Uploading…</span>
-  </div>
+                              sessionStorage.removeItem(
+                                "imageUploadInProgress",
+                              );
+                              sessionStorage.removeItem(
+                                "productRefreshRequired",
+                              );
+                              sessionStorage.removeItem("lastCreatedProductId");
 
-) : syncingProductId === product.id ? (
-
-  // 🔄 Backend Sync Running
-  <div className="flex items-center gap-2 text-sm text-gray-500">
-    <svg
-      className="animate-spin h-4 w-4 text-blue-500"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-      />
-    </svg>
-    <span>Syncing…</span>
-  </div>
-
-) : (imageUploadStatus &&
- imageUploadStatus.productId === product.id &&
- imageUploadStatus.finished)
-||
-    syncCompletedId === product.id ? (
-
-  // ✅ Single Refresh Button (for both cases)
-  <button
-    onClick={() => {
-      // 🧹 Clean everything
-      setImageUploadStatus(null);
-      setSyncCompletedId(null);
-
-      sessionStorage.removeItem("imageUploadInProgress");
-      sessionStorage.removeItem("productRefreshRequired");
-      sessionStorage.removeItem("lastCreatedProductId");
-
-      // 🔄 Reload page
-      window.location.reload();
-    }}
-    className="flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition"
-  >
-    <HiOutlineRefresh className="w-4 h-4" />
-    Refresh
-  </button>
-
-) : (
-
-  // ✏ Default Edit Button
-  <button
-    className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition"
-    onClick={() => OnEdit(product)}
-  >
-    <MdEdit className="mr-1" />
-    Edit
-  </button>
-
-)}
-
+                              window.location.reload();
+                            }}
+                            className="flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition"
+                          >
+                            <HiOutlineRefresh className="w-4 h-4" />
+                            Refresh
+                          </button>
+                        ) : (
+                          <button
+                            className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition"
+                            onClick={() => OnEdit(product)}
+                          >
+                            <MdEdit className="mr-1" />
+                            Edit
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -1613,7 +1598,6 @@ useEffect(() => {
                   <span className="font-medium">{totalProducts}</span>
                 </div>
 
-                {/* Center: Page Numbers */}
                 <div className="flex items-center space-x-2 mb-2 md:mb-0">
                   <button
                     disabled={page === 1}
@@ -1656,7 +1640,6 @@ useEffect(() => {
                   </button>
                 </div>
 
-                {/* Right: Limit Selector */}
                 <div className="flex items-center space-x-2">
                   <label className="text-sm font-medium text-gray-700">
                     Products per page:
@@ -1666,7 +1649,7 @@ useEffect(() => {
                     value={limit}
                     onChange={(e) => {
                       setLimit(Number(e.target.value));
-                      setPage(1); // reset to page 1 on limit change
+                      setPage(1); 
                       setProducts([]);
                       setFilteredProducts([]);
                     }}

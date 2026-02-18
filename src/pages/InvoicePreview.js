@@ -1,4 +1,3 @@
-
 import React from "react";
 import { HiArrowLeft } from "react-icons/hi";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -6,32 +5,27 @@ import { useLocation, useNavigate } from "react-router-dom";
 const PackagingSlip = () => {
   const location = useLocation();
   const order = location.state?.order;
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   if (!order) {
     return <div style={{ padding: 40 }}>No order data found.</div>;
   }
 
   /* ================= CUSTOMER ================= */
-  const customer =
-    order.customers || order.customer || {};
+  const customer = order.customers || order.customer || {};
 
   /* ================= SHIPPING ADDRESS ================= */
-  const shipping =
-    order.shipping_address?.address1
-      ? order.shipping_address
-      : customer.default_address || {};
+  const shipping = order.shipping_address?.address1
+    ? order.shipping_address
+    : customer.default_address || {};
 
   /* ================= BILLING ADDRESS ================= */
-  const billing =
-    order.billing_address?.address1
-      ? order.billing_address
-      : customer.default_address || {};
+  const billing = order.billing_address?.address1
+    ? order.billing_address
+    : customer.default_address || {};
 
   /* ================= LINE ITEMS ================= */
-  const lineItems = Array.isArray(order.products)
-    ? order.products
-    : [];
+  const lineItems = Array.isArray(order.products) ? order.products : [];
 
   const formattedDate = order.created_at
     ? new Date(order.created_at).toLocaleDateString("en-GB")
@@ -39,14 +33,13 @@ const navigate = useNavigate();
 
   return (
     <div style={styles.page} className="packing-slip">
-        <button
-              onClick={() => navigate(-1)}
-              className="inline-flex mb-5 items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition shadow-sm"
-            >
-              <HiArrowLeft className="text-lg" />
-              Back
-            </button>
-      {/* ================= HEADER ================= */}
+      <button
+        onClick={() => navigate(-1)}
+        className="inline-flex mb-5 items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition shadow-sm"
+      >
+        <HiArrowLeft className="text-lg" />
+        Back
+      </button>
       <div style={styles.header}>
         <h1 style={styles.logo}>AYDI ACTIVE</h1>
 
@@ -59,7 +52,6 @@ const navigate = useNavigate();
         </div>
       </div>
 
-      {/* ================= ADDRESSES ================= */}
       <div style={styles.addressRow}>
         <div>
           <h4 style={styles.sectionTitle}>SHIP TO</h4>
@@ -92,7 +84,6 @@ const navigate = useNavigate();
 
       <hr />
 
-      {/* ================= PACKING ITEMS ================= */}
       <div style={styles.itemsHeader}>
         <span style={styles.sectionTitle}>ITEM</span>
         <span style={styles.sectionTitle}>QTY</span>
@@ -107,9 +98,7 @@ const navigate = useNavigate();
               <div style={styles.muted}>{item.variant.title}</div>
             )}
 
-            <div style={styles.muted}>
-              SKU: {item.variant?.sku || "N/A"}
-            </div>
+            <div style={styles.muted}>SKU: {item.variant?.sku || "N/A"}</div>
           </div>
 
           <div>{item.quantity}</div>
@@ -118,7 +107,6 @@ const navigate = useNavigate();
 
       <hr />
 
-      {/* ================= FOOTER ================= */}
       <div style={styles.footer}>
         <p>Thank you for shopping with us!</p>
 
@@ -137,7 +125,6 @@ const navigate = useNavigate();
         </button>
       </div>
 
-      {/* ================= PRINT STYLES ================= */}
       <style>
         {`
           @media print {
@@ -167,7 +154,6 @@ const navigate = useNavigate();
   );
 };
 
-/* ================= STYLES ================= */
 const styles = {
   page: {
     maxWidth: 800,
@@ -229,4 +215,3 @@ const styles = {
 };
 
 export default PackagingSlip;
-

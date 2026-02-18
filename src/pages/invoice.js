@@ -4,19 +4,17 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const InvoicePage = () => {
   const { state } = useLocation();
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const order = state?.order;
 
   if (!order) {
     return <div style={{ padding: 40 }}>No order data found.</div>;
   }
 
-  /* ================= CUSTOMER ================= */
   const customer = order.customers || order.customer || {};
 
   const defaultAddress = customer.default_address || {};
 
-  /* ================= ADDRESSES (SAFE) ================= */
   const shipping = {
     ...defaultAddress,
     ...order.shipping_address,
@@ -27,22 +25,15 @@ const InvoicePage = () => {
     ...order.billing_address,
   };
 
-  /* ================= LINE ITEMS ================= */
   const items = Array.isArray(order.products) ? order.products : [];
 
-  /* ================= PRICES ================= */
   const currency = order.currency || "AUD";
   const totalPrice = Number(order.total_price || 0);
 
-  const totalQty = items.reduce(
-    (sum, i) => sum + (i.quantity || 0),
-    0
-  );
+  const totalQty = items.reduce((sum, i) => sum + (i.quantity || 0), 0);
 
-  const unitPrice =
-    totalQty > 0 ? totalPrice / totalQty : 0;
+  const unitPrice = totalQty > 0 ? totalPrice / totalQty : 0;
 
-  /* ================= META ================= */
   const invoiceNo = `INV-${order.serialNumber}`;
   const orderNo = order.shopifyOrderNo || order.orderId;
   const date = order.created_at
@@ -51,42 +42,54 @@ const InvoicePage = () => {
 
   return (
     <div style={styles.page} className="invoice">
-       <button
-                    onClick={() => navigate(-1)}
-                    className="inline-flex mb-5 items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition shadow-sm"
-                  >
-                    <HiArrowLeft className="text-lg" />
-                    Back
-                  </button>
-      {/* HEADER */}
+      <button
+        onClick={() => navigate(-1)}
+        className="inline-flex mb-5 items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition shadow-sm"
+      >
+        <HiArrowLeft className="text-lg" />
+        Back
+      </button>
       <div style={styles.header}>
         <div>
           <h1 style={styles.logo}>AYDI ACTIVE</h1>
           <p style={styles.muted}>
-            PO Box 241, Doncaster Heights VIC 3109<br />
-            Australia<br />
-            contact@aydiactive.com<br />
+            PO Box 241, Doncaster Heights VIC 3109
+            <br />
+            Australia
+            <br />
+            contact@aydiactive.com
+            <br />
             www.aydiactive.com
           </p>
         </div>
 
         <div style={styles.right}>
           <h2>INVOICE</h2>
-          <div><strong>Invoice:</strong> {invoiceNo}</div>
-          <div><strong>Order:</strong> #{orderNo}</div>
-          <div><strong>Date:</strong> {date}</div>
-          <div><strong>Status:</strong> {order.financial_status}</div>
+          <div>
+            <strong>Invoice:</strong> {invoiceNo}
+          </div>
+          <div>
+            <strong>Order:</strong> #{orderNo}
+          </div>
+          <div>
+            <strong>Date:</strong> {date}
+          </div>
+          <div>
+            <strong>Status:</strong> {order.financial_status}
+          </div>
         </div>
       </div>
 
-      {/* ADDRESSES */}
       <div style={styles.addressRow}>
         <div>
           <h4>BILL TO</h4>
           <p>
-            {customer.first_name} {customer.last_name}<br />
-            {billing.address1 || "—"}<br />
-            {billing.city || billing.province}<br />
+            {customer.first_name} {customer.last_name}
+            <br />
+            {billing.address1 || "—"}
+            <br />
+            {billing.city || billing.province}
+            <br />
             {billing.country}
           </p>
         </div>
@@ -94,15 +97,17 @@ const InvoicePage = () => {
         <div>
           <h4>SHIP TO</h4>
           <p>
-            {customer.first_name} {customer.last_name}<br />
-            {shipping.address1 || "—"}<br />
-            {shipping.city || shipping.province}<br />
+            {customer.first_name} {customer.last_name}
+            <br />
+            {shipping.address1 || "—"}
+            <br />
+            {shipping.city || shipping.province}
+            <br />
             {shipping.country}
           </p>
         </div>
       </div>
 
-      {/* ITEMS */}
       <table style={styles.table}>
         <thead>
           <tr>
@@ -130,15 +135,12 @@ const InvoicePage = () => {
         </tbody>
       </table>
 
-      {/* TOTAL */}
       <div style={styles.totalBox}>
         <div>
-          <strong>Total:</strong>{" "}
-          {currency} {totalPrice.toFixed(2)}
+          <strong>Total:</strong> {currency} {totalPrice.toFixed(2)}
         </div>
       </div>
 
-      {/* FOOTER */}
       <div style={styles.footer}>
         <p>
           This invoice is generated electronically and is valid without
@@ -150,7 +152,6 @@ const InvoicePage = () => {
         </button>
       </div>
 
-      {/* PRINT */}
       <style>
         {`
           @media print {
@@ -165,7 +166,6 @@ const InvoicePage = () => {
   );
 };
 
-/* ================= STYLES ================= */
 const styles = {
   page: {
     maxWidth: 900,

@@ -1027,7 +1027,7 @@ const AccountPage = () => {
                 </button>
               </div>
 
-              <div className="mt-6 bg-gray-200 border border-gray-200 rounded-lg shadow-sm p-5">
+              {/* <div className="mt-6 bg-gray-200 border border-gray-200 rounded-lg shadow-sm p-5">
                 <div className="flex items-center gap-4 mb-4">
                   <label className="w-28 flex items-center text-sm font-semibold text-gray-600">
                     <CiCalendarDate className="mr-1 text-lg" />
@@ -1049,7 +1049,7 @@ const AccountPage = () => {
                     className="flex-1 p-2 border border-gray-300 rounded-md text-sm text-gray-800 bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
                   />
                 </div>
-              </div>
+              </div> */}
             </div>
           )}
         </div>

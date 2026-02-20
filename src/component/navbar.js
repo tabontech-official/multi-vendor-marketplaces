@@ -72,7 +72,7 @@
 //     try {
 //       const userid = localStorage.getItem("userid");
 //       if (userid) {
-//         await fetch(`http://localhost:5000/auth/logout/${userid}`, {
+//         await fetch(`https://multi-vendor-marketplace.vercel.app/auth/logout/${userid}`, {
 //           method: "POST",
 //         });
 //         dispatch({ type: "LOGOUT" });
@@ -362,7 +362,7 @@ const Navbar = () => {
       const userid = localStorage.getItem("userid");
       if (userid) {
         await fetch(
-          `http://localhost:5000/auth/logout/${userid}`,
+          `https://multi-vendor-marketplace.vercel.app/auth/logout/${userid}`,
           {
             method: "POST",
           },

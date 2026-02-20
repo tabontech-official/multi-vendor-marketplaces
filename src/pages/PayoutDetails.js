@@ -64,7 +64,7 @@ const PayoutDetails = () => {
         if (!userId) return;
 
         fetch(
-          `http://localhost:5000/auth/getMerchantAccountDetails/${userId}`,
+          `https://multi-vendor-marketplace.vercel.app/auth/getMerchantAccountDetails/${userId}`,
         )
           .then((res) => res.json())
           .then((data) => {
@@ -95,7 +95,7 @@ const PayoutDetails = () => {
     }
 
     try {
-      const url = `http://localhost:5000/order/order/${userId}`;
+      const url = `https://multi-vendor-marketplace.vercel.app/order/order/${userId}`;
 
       const res = await fetch(url, {
         method: "GET",
@@ -152,11 +152,11 @@ const PayoutDetails = () => {
           userRole === "Dev Admin" ||
           userRole === "Master Admin"
         ) {
-          url = `http://localhost:5000/order/getPayoutByQuery?payoutDate=${encodeURIComponent(
+          url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByQuery?payoutDate=${encodeURIComponent(
             payoutDate,
           )}&status=${status}&userId=${merchantId}`;
         } else if (userRole === "Masters") {
-          url = `http://localhost:5000/order/getAllPayouts?payoutDate=${encodeURIComponent(
+          url = `https://multi-vendor-marketplace.vercel.app/order/getAllPayouts?payoutDate=${encodeURIComponent(
             payoutDate,
           )}&status=${status}`;
         } else {
@@ -289,7 +289,7 @@ const PayoutDetails = () => {
       // }
 
       const res = await fetch(
-        "http://localhost:5000/order/addReferenceNumber",
+        "https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber",
         {
           method: "POST",
           headers: {
@@ -373,7 +373,7 @@ const PayoutDetails = () => {
       };
 
       const res = await fetch(
-        "http://localhost:5000/auth/addMerchantAccountDetails",
+        "https://multi-vendor-marketplace.vercel.app/auth/addMerchantAccountDetails",
         {
           method: "POST",
           headers: {
@@ -406,7 +406,7 @@ const PayoutDetails = () => {
       setLoading(true);
 
       const res = await fetch(
-        `http://localhost:5000/auth/send-finance-reminder/${merchantId}`,
+        `https://multi-vendor-marketplace.vercel.app/auth/send-finance-reminder/${merchantId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

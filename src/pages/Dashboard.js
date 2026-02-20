@@ -364,7 +364,7 @@ const Dashboard = () => {
         const apiSecretKey = localStorage.getItem("apiSecretKey");
 
         const response = await fetch(
-          `http://localhost:5000/product/sync-product/${productId}`,
+          `https://multi-vendor-marketplace.vercel.app/product/sync-product/${productId}`,
           {
             method: "GET",
             headers: {
@@ -418,8 +418,8 @@ const Dashboard = () => {
       const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
 
       const url = isAdmin
-        ? `http://localhost:5000/product/getAllProducts?page=${page}&limit=${limit}`
-        : `http://localhost:5000/product/getProduct/${id}?page=${page}&limit=${limit}`;
+        ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts?page=${page}&limit=${limit}`
+        : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
 
       const response = await fetch(url, {
         method: "GET",
@@ -496,7 +496,7 @@ const Dashboard = () => {
 
   //         try {
   //           const response = await fetch(
-  //             `http://localhost:5000/product/upload-product-csv`,
+  //             `https://multi-vendor-marketplace.vercel.app/product/upload-product-csv`,
   //             {
   //               method: "POST",
   //               body: formData,
@@ -608,7 +608,7 @@ const Dashboard = () => {
 
         try {
           const response = await fetch(
-            "http://localhost:5000/product/upload-product-csv",
+            "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
             {
               method: "POST",
               headers: {
@@ -726,7 +726,7 @@ const Dashboard = () => {
   //     await Promise.all(
   //       selectedProducts.map(async (id) => {
   //         const response = await fetch(
-  //           `http://localhost:5000/product/deleteProduct/${id}`,
+  //           `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
   //           {
   //             method: "DELETE",
   //             headers: {
@@ -766,7 +766,7 @@ const Dashboard = () => {
           const product = filteredProducts.find((p) => p._id === id);
 
           const response = await fetch(
-            `http://localhost:5000/product/deleteProduct/${id}`,
+            `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
             {
               method: "DELETE",
               headers: {
@@ -814,7 +814,7 @@ const Dashboard = () => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "draft") {
             const response = await fetch(
-              ` http://localhost:5000/product/publishedProduct/${id}`,
+              ` https://multi-vendor-marketplace.vercel.app/product/publishedProduct/${id}`,
               {
                 method: "PUT",
                 body: JSON.stringify({ userId }),
@@ -853,7 +853,7 @@ const Dashboard = () => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "active") {
             const response = await fetch(
-              ` http://localhost:5000/product/unpublished/${id}`,
+              ` https://multi-vendor-marketplace.vercel.app/product/unpublished/${id}`,
               {
                 method: "PUT",
                 headers: {
@@ -925,8 +925,8 @@ const Dashboard = () => {
   //       const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
 
   //       const url = isAdmin
-  //         ? `http://localhost:5000/product/getAllProducts/?page=${page}&limit=${limit}`
-  //         : `http://localhost:5000/product/getProduct/${id}?page=${page}&limit=${limit}`;
+  //         ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
+  //         : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
 
   //       const response = await fetch(url, {
   //         method: "GET",
@@ -1000,7 +1000,7 @@ const Dashboard = () => {
         queryParams.append("productIds", selectedProducts.join(","));
       }
 
-      const exportUrl = `http://localhost:5000/product/csvEportFile/?${queryParams.toString()}`;
+      const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvEportFile/?${queryParams.toString()}`;
 
       const response = await fetch(exportUrl);
 

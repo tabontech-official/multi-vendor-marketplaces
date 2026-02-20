@@ -83,7 +83,7 @@ const AccountPage = () => {
 
       try {
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getBrandAssets/${userId}`,
+          `http://localhost:5000/auth/getBrandAssets/${userId}`,
         );
         const json = await res.json();
 
@@ -120,7 +120,7 @@ const AccountPage = () => {
 
       try {
         const res = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getBrandAssets/${userId}`,
+          `http://localhost:5000/auth/getBrandAssets/${userId}`,
         );
         const json = await res.json();
 
@@ -159,7 +159,7 @@ const AccountPage = () => {
       }
 
       const response = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/auth/addBrandAsset",
+        "http://localhost:5000/auth/addBrandAsset",
         formData,
         {
           headers: {
@@ -192,7 +192,7 @@ const AccountPage = () => {
 
       try {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/user/${id}`,
+          `http://localhost:5000/auth/user/${id}`,
           {
             method: "GET",
           },
@@ -288,7 +288,7 @@ const AccountPage = () => {
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/auth/editProfile/${userId}`,
+        `http://localhost:5000/auth/editProfile/${userId}`,
         {
           method: "PUT",
           body: form,
@@ -352,7 +352,7 @@ const AccountPage = () => {
     const apiSecretKey = localStorage.getItem("apiSecretKey");
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/holiday",
+        "http://localhost:5000/product/holiday",
         {
           method: "POST",
           headers: {
@@ -366,13 +366,13 @@ const AccountPage = () => {
 
       const data = await response.json();
       if (response.ok) {
-        showToast("success",`All products updated to ${status}`);
+        showToast("success", `All products updated to ${status}`);
       } else {
-        showToast("error",`Failed to update products: ${data.error}`);
+        showToast("error", `Failed to update products: ${data.error}`);
       }
     } catch (error) {
       console.error("Error updating products:", error);
-      showToast("error","An error occurred while updating product status.");
+      showToast("error", "An error occurred while updating product status.");
     }
   };
 
@@ -398,13 +398,13 @@ const AccountPage = () => {
 
   const handleUpdateTags = async () => {
     if (!email) {
-      showToast("error","Email is required!");
+      showToast("error", "Email is required!");
       return;
     }
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+        "http://localhost:5000/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {
@@ -424,7 +424,7 @@ const AccountPage = () => {
         throw new Error(data.error || "Failed to update user");
       }
 
-      showToast("success","User updated successfully!");
+      showToast("success", "User updated successfully!");
       setIsOpen(false);
       setName("");
       setEmail("");
@@ -432,7 +432,7 @@ const AccountPage = () => {
       setIsDropdownOpen(false);
     } catch (error) {
       console.error("Error updating user:", error);
-      showToast("error","Error updating user: " + error.message);
+      showToast("error", "Error updating user: " + error.message);
     }
   };
 
@@ -613,7 +613,6 @@ const AccountPage = () => {
               </h1>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* First Name */}
                 <div className="flex flex-col">
                   <label className="text-sm text-gray-600 font-medium mb-1 block">
                     First Name *
@@ -629,7 +628,6 @@ const AccountPage = () => {
                   />
                 </div>
 
-                {/* Last Name */}
                 <div className="flex flex-col">
                   <label
                     htmlFor="lastName"
@@ -751,7 +749,6 @@ const AccountPage = () => {
                   />
                 </div>
 
-                {/* Seller GST */}
                 <div className="flex flex-col">
                   <label
                     htmlFor="sellerGst"
@@ -770,7 +767,6 @@ const AccountPage = () => {
                   />
                 </div>
 
-                {/* GST Registered */}
                 <div className="flex flex-col">
                   <label
                     htmlFor="gstRegistered"
@@ -789,7 +785,6 @@ const AccountPage = () => {
                   />
                 </div>
 
-                {/* Dispatch Address */}
                 <div className="flex flex-col">
                   <label
                     htmlFor="dispatchAddress"
@@ -808,7 +803,6 @@ const AccountPage = () => {
                   />
                 </div>
 
-                {/* Dispatch City */}
                 <div className="flex flex-col">
                   <label
                     htmlFor="dispatchCity"
@@ -827,7 +821,6 @@ const AccountPage = () => {
                   />
                 </div>
 
-                {/* Dispatch Country */}
                 <div className="flex flex-col">
                   <label
                     htmlFor="dispatchCountry"
@@ -846,7 +839,6 @@ const AccountPage = () => {
                   />
                 </div>
 
-                {/* Dispatch Zip */}
                 {/* <div className="flex flex-col">
                   <label
                     htmlFor="dispatchzip"
@@ -866,7 +858,6 @@ const AccountPage = () => {
                 </div> */}
               </div>
 
-              {/* Save Button */}
               <div className="flex justify-end mt-8">
                 <button
                   onClick={handleSubmit}
@@ -947,7 +938,6 @@ const AccountPage = () => {
                 </div>
               </div>
 
-              {/* Description Box */}
               <div>
                 <label className="text-sm text-gray-600 font-medium mb-1 block">
                   Description{" "}
@@ -962,9 +952,8 @@ const AccountPage = () => {
                 />
               </div>
 
-              {/* Where Photo Appears */}
               <div className="bg-white p-5 border border-gray-200 rounded-lg">
-          <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
+                <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
                   Where your photo appears
                 </h1>
                 <ul className="list-disc text-sm text-gray-600 space-y-1 pl-5">
@@ -974,7 +963,6 @@ const AccountPage = () => {
                 </ul>
               </div>
 
-              {/* Status Message */}
               {message && (
                 <p className="text-center text-sm font-medium text-green-600">
                   {message}
@@ -985,8 +973,8 @@ const AccountPage = () => {
 
           {activeTab === "holiday" && (
             <div className="bg-gray-100 p-6 rounded-xl shadow-sm border border-gray-200 space-y-8 ">
-          <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
-                Holiday Mode Settings 
+              <h1 className="text-xl font-semibold text-gray-900 mb-0.5">
+                Holiday Mode Settings
               </h1>
               <p className="text-sm text-gray-600 mt-2 leading-relaxed">
                 While holiday mode is on, all your products will be hidden, but
@@ -996,7 +984,6 @@ const AccountPage = () => {
                 <strong> inclusive</strong>.
               </p>
 
-              {/* ✅ Active / Inactive Buttons */}
               <div className="flex gap-4 mt-5">
                 <button
                   onClick={() => {

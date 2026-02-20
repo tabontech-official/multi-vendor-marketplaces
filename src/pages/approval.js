@@ -22,7 +22,7 @@ const ApprovalSetting = () => {
       try {
         const apiKey = localStorage.getItem("apiKey");
         const apiSecretKey = localStorage.getItem("apiSecretKey");
-        const res = await fetch("https://multi-vendor-marketplace.vercel.app/approval/getApproval", {
+        const res = await fetch("http://localhost:5000/approval/getApproval", {
           headers: {
             "x-api-key": apiKey,
             "x-api-secret": apiSecretKey,
@@ -49,7 +49,7 @@ const ApprovalSetting = () => {
     try {
       const apiKey = localStorage.getItem("apiKey");
       const apiSecretKey = localStorage.getItem("apiSecretKey");
-      const res = await fetch("https://multi-vendor-marketplace.vercel.app/approval/add-approval", {
+      const res = await fetch("http://localhost:5000/approval/add-approval", {
         method: "POST",
         headers: {
           "x-api-key": apiKey,

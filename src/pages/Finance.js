@@ -177,7 +177,7 @@ const Finance = () => {
     setUsersLoading(true);
     try {
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/getAllUsers",
+        "http://localhost:5000/auth/getAllUsers",
         {
           method: "GET",
           headers: {
@@ -219,7 +219,7 @@ const Finance = () => {
 
     try {
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
+        "http://localhost:5000/order/addPayOutDates",
         {
           method: "POST",
           headers: {
@@ -258,7 +258,7 @@ const Finance = () => {
 
       try {
         const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates",
+          "http://localhost:5000/order/getPayoutsDates",
           {
             method: "GET",
             headers: {
@@ -327,7 +327,7 @@ const Finance = () => {
 
       try {
         const res = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/auth/user/${userId}`,
+          `http://localhost:5000/auth/user/${userId}`,
         );
         const user = res.data;
         const role = user?.role;
@@ -370,9 +370,9 @@ const Finance = () => {
             console.error("User ID not found in localStorage");
             return;
           }
-          url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=${userId}&limit=${limit}&page=${page}`;
+          url = `http://localhost:5000/order/getPayoutByUserId?userId=${userId}&limit=${limit}&page=${page}`;
         } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
-          url = `https://multi-vendor-marketplace.vercel.app/order/getPayout?limit=${limit}&page=${page}`;
+          url = `http://localhost:5000/order/getPayout?limit=${limit}&page=${page}`;
         } else {
           console.warn("Unhandled role:", userRole);
           return;
@@ -548,7 +548,7 @@ const Finance = () => {
       setImportLoading(true);
 
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/bulk-update-commission",
+        "http://localhost:5000/auth/bulk-update-commission",
         {
           method: "POST",
           headers: {
@@ -588,7 +588,7 @@ const Finance = () => {
 
     try {
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/updateMerchantCommission",
+        "http://localhost:5000/auth/updateMerchantCommission",
         {
           method: "PUT",
           headers: {

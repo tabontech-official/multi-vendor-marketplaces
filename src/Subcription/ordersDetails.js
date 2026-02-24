@@ -390,19 +390,18 @@ const OrdersDetails = () => {
   const merchantLineItemIds =
     orderData?.products?.map((p) => String(p.lineItemId)) || [];
   const getProductSnapshot = (fulfillmentItem) => {
-  return orderData?.products?.find(
-    (p) =>
-      String(p.lineItemId) === String(fulfillmentItem.id)
-  );
-};
- const getValidFulfillmentItems = (fulfillment) => {
-  return (
-    fulfillment.line_items?.filter((item) => {
-      const snapshot = getProductSnapshot(item);
-      return snapshot; // only check existence
-    }) || []
-  );
-};
+    return orderData?.products?.find(
+      (p) => String(p.lineItemId) === String(fulfillmentItem.id),
+    );
+  };
+  const getValidFulfillmentItems = (fulfillment) => {
+    return (
+      fulfillment.line_items?.filter((item) => {
+        const snapshot = getProductSnapshot(item);
+        return snapshot; // only check existence
+      }) || []
+    );
+  };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
@@ -664,22 +663,23 @@ const OrdersDetails = () => {
                       className="flex items-center justify-between px-4 py-3 border-t"
                     >
                       <div className="flex items-center gap-3">
-                     <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
-  {snapshot?.product?.images?.[0]?.src || snapshot?.variant?.src ? (
-    <img
-      src={
-        snapshot?.product?.images?.[0]?.src ||
-        snapshot?.variant?.src
-      }
-      alt={snapshot?.product?.title || "Product"}
-      className="w-full h-full object-contain"
-    />
-  ) : (
-    <span className="text-gray-400 text-xs font-semibold">
-      No Image
-    </span>
-  )}
-</div>
+                        <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
+                          {snapshot?.product?.images?.[0]?.src ||
+                          snapshot?.variant?.src ? (
+                            <img
+                              src={
+                                snapshot?.product?.images?.[0]?.src ||
+                                snapshot?.variant?.src
+                              }
+                              alt={snapshot?.product?.title || "Product"}
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <span className="text-gray-400 text-xs font-semibold">
+                              No Image
+                            </span>
+                          )}
+                        </div>
 
                         <div>
                           <p className="text-sm font-medium text-gray-800">

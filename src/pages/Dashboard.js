@@ -13,7 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { CiImport } from "react-icons/ci";
 import { RxCross1 } from "react-icons/rx";
 import { useNotification } from "../context api/NotificationContext";
-import * as XLSX from "xlsx"; 
+import * as XLSX from "xlsx";
 
 const Dashboard = () => {
   let admin;
@@ -317,7 +317,7 @@ const Dashboard = () => {
       const now = Date.now();
       const elapsed = now - uploadStartTime;
 
-      const minimumDuration = 6000; // 6 seconds
+      const minimumDuration = 10000; // 6 seconds
 
       if (elapsed < minimumDuration) {
         await new Promise((resolve) =>
@@ -351,57 +351,13 @@ const Dashboard = () => {
   const [syncCompletedId, setSyncCompletedId] = useState(null);
 
   useEffect(() => {
-    const syncProduct = async () => {
-      const productId = sessionStorage.getItem("lastCreatedProductId");
-      if (!productId) return;
-
-      console.log("🔄 Sync Started:", productId);
-
-      setSyncingProductId(productId);
-
-      try {
-        const apiKey = localStorage.getItem("apiKey");
-        const apiSecretKey = localStorage.getItem("apiSecretKey");
-
-        const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/sync-product/${productId}`,
-          {
-            method: "GET",
-            headers: {
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        if (response.ok) {
-          console.log("✅ Sync Done");
-
-          setSyncingProductId(null);
-          setSyncCompletedId(productId);
-
-          // ❌ remove id so it doesn't trigger again
-          sessionStorage.removeItem("lastCreatedProductId");
-        } else {
-          setSyncingProductId(null);
-        }
-      } catch (error) {
-        console.error("❌ Sync Error:", error.message);
-        setSyncingProductId(null);
-      }
-    };
-
-    syncProduct();
-  }, []);
-  useEffect(() => {
     const token = localStorage.getItem("usertoken");
     if (!token) return;
 
     try {
       const decoded = jwtDecode(token);
       if (decoded?.payLoad?.role) {
-        setUserRole(decoded.payLoad.role); // store role in state
+        setUserRole(decoded.payLoad.role);
       }
     } catch (error) {
       console.error("Error decoding token:", error);
@@ -1649,7 +1605,7 @@ const Dashboard = () => {
                     value={limit}
                     onChange={(e) => {
                       setLimit(Number(e.target.value));
-                      setPage(1); 
+                      setPage(1);
                       setProducts([]);
                       setFilteredProducts([]);
                     }}

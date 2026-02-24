@@ -343,7 +343,21 @@ const Dashboard = () => {
       window.removeEventListener("image-upload-finished", handleUploadFinished);
     };
   }, []);
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (isUploading) {
+        event.preventDefault();
+        event.returnValue =
+          "Do not turn off your pc you uploading is being processed.";
+      }
+    };
 
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isUploading]);
   const [userRole, setUserRole] = useState(null);
   const [totalProducts, setTotalProducts] = useState(0);
   const totalPages = Math.ceil(totalProducts / limit);
@@ -410,113 +424,6 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-
-  // const handleUploadAndPreview = async () => {
-  //   if (!selectedFile) return;
-
-  //   setIsUploading(true);
-  //   setUploadStarted(true);
-  //   closePopup();
-
-  //   const userId = localStorage.getItem("userid");
-  //   const apiKey = localStorage.getItem("apiKey");
-  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
-
-  //   if (!userId) {
-  //     showToast("error", "User ID not found.");
-  //     return;
-  //   }
-
-  //   showToast("success", `Uploading "${selectedFile.name}" in background...`);
-  //   addNotification(
-  //     `Product CSV upload started for "${selectedFile.name}"`,
-  //     "Manage product"
-  //   );
-
-  //   Papa.parse(selectedFile, {
-  //     header: true,
-  //     skipEmptyLines: true,
-  //     complete: async function (results) {
-  //       const allRows = results.data;
-  //       const chunkSize = 25;
-
-  //       const totalChunks = Math.ceil(allRows.length / chunkSize);
-
-  //       for (let i = 0; i < allRows.length; i += chunkSize) {
-  //         const chunk = allRows.slice(i, i + chunkSize);
-  //         const chunkCsv = Papa.unparse(chunk);
-  //         const chunkBlob = new Blob([chunkCsv], { type: "text/csv" });
-
-  //         const formData = new FormData();
-  //         formData.append("file", chunkBlob, `chunk_${i / chunkSize + 1}.csv`);
-
-  //         try {
-  //           const response = await fetch(
-  //             `https://multi-vendor-marketplace.vercel.app/product/upload-product-csv`,
-  //             {
-  //               method: "POST",
-  //               body: formData,
-  //               headers: {
-  //                 "x-api-key": apiKey,
-  //                 "x-api-secret": apiSecretKey,
-  //               },
-  //             }
-  //           );
-
-  //           const result = await response.json();
-
-  //           if (response.ok) {
-  //             showToast("success", ` Chunk ${i / chunkSize + 1} uploaded.`);
-  //             addNotification(
-  //               `Chunk ${i / chunkSize + 1} of uploaded.`,
-  //               "Manage product"
-  //             );
-  //           } else {
-  //             showToast(
-  //               "error",
-  //               ` Chunk ${i / chunkSize + 1} failed: ${
-  //                 result.message || "Unknown error"
-  //               }`
-  //             );
-  //             addNotification(
-  //               ` Chunk ${i / chunkSize + 1} failed.`,
-  //               "Manage product"
-  //             );
-  //           }
-  //         } catch (error) {
-  //           showToast(
-  //             "error",
-  //             `Error in chunk ${i / chunkSize + 1}: ${error.message}`
-  //           );
-  //           addNotification(
-  //             ` Upload error in chunk ${i / chunkSize + 1}`,
-  //             "Manage product"
-  //           );
-  //         }
-
-  //         await new Promise((resolve) => setTimeout(resolve, 2000));
-  //       }
-
-  //       showToast(
-  //         "success",
-  //         ` File "${selectedFile.name}" uploaded successfully in ${totalChunks} chunks!`
-  //       );
-  //       addNotification(
-  //         ` Upload complete: "${selectedFile.name}" processed`,
-  //         "Manage product"
-  //       );
-
-  //       setIsUploading(false);
-  //       setUploadStarted(false);
-  //       setSelectedFile(null);
-  //     },
-  //     error: function (err) {
-  //       showToast("error", ` CSV parsing failed: ${err.message}`);
-  //       setIsUploading(false);
-  //       setUploadStarted(false);
-  //     },
-  //   });
-  // };
 
   const handleUploadAndPreview = async () => {
     if (!selectedFile) return;
@@ -611,11 +518,9 @@ const Dashboard = () => {
           );
         }
 
-        // Delay between chunks
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
-      // ----------- UPLOAD DONE -----------
       showToast(
         "success",
         `Excel "${selectedFile.name}" uploaded successfully (${totalChunks} chunks)`,
@@ -624,6 +529,7 @@ const Dashboard = () => {
         `Upload complete: "${selectedFile.name}"`,
         "Manage product",
       );
+      fetchProductData();
     } catch (error) {
       showToast("error", "Excel file parsing failed: " + error.message);
     }
@@ -867,70 +773,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (userRole) {
-      fetchProductData(); // this already handles page + limit
+      fetchProductData();
     }
   }, [userRole, page, limit]);
-
-  // useEffect(() => {
-  //   const fetchProductData2 = async () => {
-  //     const id = localStorage.getItem("userid");
-  //     const apiKey = localStorage.getItem("apiKey");
-  //     const apiSecretKey = localStorage.getItem("apiSecretKey");
-
-  //     try {
-  //       const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
-
-  //       const url = isAdmin
-  //         ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts/?page=${page}&limit=${limit}`
-  //         : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
-
-  //       const response = await fetch(url, {
-  //         method: "GET",
-  //         headers: {
-  //           "x-api-key": apiKey,
-  //           "x-api-secret": apiSecretKey,
-  //           "Content-Type": "application/json",
-  //         },
-  //       });
-
-  //       if (response.ok) {
-  //         const data = await response.json();
-  //         console.log("Second Product render", data);
-
-  //         const sortedProducts = data.products.sort(
-  //           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  //         );
-
-  //         setProducts((prev) => [
-  //           ...prev,
-  //           ...sortedProducts.filter(
-  //             (newProduct) =>
-  //               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-  //           ),
-  //         ]);
-
-  //         setFilteredProducts((prev) => [
-  //           ...prev,
-  //           ...sortedProducts.filter(
-  //             (newProduct) =>
-  //               !prev.some((prevProduct) => prevProduct.id === newProduct.id)
-  //           ),
-  //         ]);
-
-  //         setHasMore(page < data.totalPages);
-  //         console.log("Has more:", page < data.totalPages);
-  //       } else {
-  //         console.error("Unauthorized or error status:", response.status);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching products:", error);
-  //     }
-  //   };
-
-  //   if (userRole) {
-  //     fetchProductData2(); // Trigger only after role is known
-  //   }
-  // }, [page, userRole]);
 
   const handleExport = async () => {
     try {
@@ -1019,8 +864,8 @@ const Dashboard = () => {
     setLimit(urlLimit);
   }, [location.search]);
 
-  const [sortField, setSortField] = useState(null); // "title" ya "sku"
-  const [sortOrder, setSortOrder] = useState("asc"); // "asc" ya "desc"
+  const [sortField, setSortField] = useState(null);
+  const [sortOrder, setSortOrder] = useState("asc");
 
   const handleSort = (field, order) => {
     setSortField(field);
@@ -1065,7 +910,6 @@ const Dashboard = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -1076,12 +920,10 @@ const Dashboard = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   const getProductPreviewImage = (product) => {
-    // 1️⃣ Product media image
     if (product.images?.length > 0) {
       return product.images[0].src;
     }
 
-    // 2️⃣ Variant images (first available)
     if (product.variantImages?.length > 0) {
       for (const variantBlock of product.variantImages) {
         if (variantBlock.images?.length > 0) {
@@ -1090,7 +932,6 @@ const Dashboard = () => {
       }
     }
 
-    // 3️⃣ Nothing found
     return null;
   };
 
@@ -1108,6 +949,12 @@ const Dashboard = () => {
             <HiOutlineXCircle className="w-6 h-6 mr-2" />
           )}
           <span>{toast.message}</span>
+        </div>
+      )}
+      {isUploading && (
+        <div className="fixed top-16 bg-green-500 right-5 flex text-white items-center p-4 rounded-lg shadow-lg transition-all">
+          Excel upload is in progress. Please do not close this browser until
+          the upload is completed.
         </div>
       )}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 pb-4 gap-4">

@@ -425,24 +425,130 @@ const Dashboard = () => {
     }
   };
 
+  // const handleUploadAndPreview = async () => {
+  //   if (!selectedFile) return;
+
+  //   setIsUploading(true);
+  //   closePopup();
+
+  //   const userId = localStorage.getItem("userid");
+  //   const apiKey = localStorage.getItem("apiKey");
+  //   const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+  //   showToast("success", `Uploading "${selectedFile.name}" in background...`);
+  //   addNotification(
+  //     `Excel upload started for "${selectedFile.name}"`,
+  //     "Manage product",
+  //   );
+
+  //   try {
+  //     // ----------- READ EXCEL FILE -----------
+  //     const fileBuffer = await selectedFile.arrayBuffer();
+  //     const workbook = XLSX.read(fileBuffer, { type: "array" });
+
+  //     const sheetName = workbook.SheetNames[0];
+  //     const sheet = workbook.Sheets[sheetName];
+
+  //     const allRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+  //     const chunkSize = 25;
+
+  //     const totalChunks = Math.ceil(allRows.length / chunkSize);
+
+  //     // ----------- PROCESS CHUNKS -----------
+  //     for (let i = 0; i < allRows.length; i += chunkSize) {
+  //       const chunk = allRows.slice(i, i + chunkSize);
+
+  //       // Convert JSON → CSV because your backend expects CSV
+  //       const csvData = Papa.unparse(chunk);
+  //       const chunkBlob = new Blob([csvData], { type: "text/csv" });
+
+  //       const formData = new FormData();
+  //       formData.append(
+  //         "file",
+  //         chunkBlob,
+  //         `excel_chunk_${Math.floor(i / chunkSize) + 1}.csv`,
+  //       );
+
+  //       try {
+  //         const response = await fetch(
+  //           "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
+  //           {
+  //             method: "POST",
+  //             headers: {
+  //               "x-api-key": apiKey,
+  //               "x-api-secret": apiSecretKey,
+  //             },
+  //             body: formData,
+  //           },
+  //         );
+
+  //         const result = await response.json();
+
+  //         if (response.ok) {
+  //           showToast(
+  //             "success",
+  //             `Chunk ${Math.floor(i / chunkSize) + 1} uploaded successfully`,
+  //           );
+  //           addNotification(
+  //             `Chunk ${Math.floor(i / chunkSize) + 1} uploaded`,
+  //             "Manage product",
+  //           );
+  //         } else {
+  //           showToast(
+  //             "error",
+  //             `Chunk ${Math.floor(i / chunkSize) + 1} failed: ${
+  //               result.message || "Unknown error"
+  //             }`,
+  //           );
+  //           addNotification(
+  //             `Chunk ${Math.floor(i / chunkSize) + 1} failed`,
+  //             "Manage product",
+  //           );
+  //         }
+  //       } catch (err) {
+  //         showToast(
+  //           "error",
+  //           `Error uploading chunk ${Math.floor(i / chunkSize) + 1}: ${
+  //             err.message
+  //           }`,
+  //         );
+  //         addNotification(
+  //           `Upload error in chunk ${Math.floor(i / chunkSize) + 1}`,
+  //           "Manage product",
+  //         );
+  //       }
+
+  //       await new Promise((resolve) => setTimeout(resolve, 1000));
+  //     }
+
+  //     showToast(
+  //       "success",
+  //       `Excel "${selectedFile.name}" uploaded successfully (${totalChunks} chunks)`,
+  //     );
+  //     addNotification(
+  //       `Upload complete: "${selectedFile.name}"`,
+  //       "Manage product",
+  //     );
+  //     fetchProductData();
+  //   } catch (error) {
+  //     showToast("error", "Excel file parsing failed: " + error.message);
+  //   }
+
+  //   setIsUploading(false);
+  //   setSelectedFile(null);
+  // };
+  const [showUploadBanner, setShowUploadBanner] = useState(false);
   const handleUploadAndPreview = async () => {
     if (!selectedFile) return;
 
     setIsUploading(true);
     closePopup();
 
-    const userId = localStorage.getItem("userid");
     const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-    showToast("success", `Uploading "${selectedFile.name}" in background...`);
-    addNotification(
-      `Excel upload started for "${selectedFile.name}"`,
-      "Manage product",
-    );
-
     try {
-      // ----------- READ EXCEL FILE -----------
+      // -------- READ ORIGINAL EXCEL --------
       const fileBuffer = await selectedFile.arrayBuffer();
       const workbook = XLSX.read(fileBuffer, { type: "array" });
 
@@ -450,24 +556,55 @@ const Dashboard = () => {
       const sheet = workbook.Sheets[sheetName];
 
       const allRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-      const chunkSize = 25;
+      const totalProducts = allRows.length;
 
-      const totalChunks = Math.ceil(allRows.length / chunkSize);
+      if (totalProducts === 0) {
+        showToast("error", "Excel file is empty");
+        setIsUploading(false);
+        return;
+      }
 
-      // ----------- PROCESS CHUNKS -----------
-      for (let i = 0; i < allRows.length; i += chunkSize) {
+      const chunkSize = totalProducts > 10 ? 10 : totalProducts;
+      const totalChunks = Math.ceil(totalProducts / chunkSize);
+
+      showToast(
+        "info",
+        `Total ${totalProducts} products found. Uploading in ${totalChunks} chunks...`,
+      );
+
+      addNotification(
+        `Excel upload started (${totalProducts} products)`,
+        "Manage product",
+      );
+
+      // -------- PROCESS CHUNKS --------
+      for (let i = 0; i < totalProducts; i += chunkSize) {
+        const chunkNumber = Math.floor(i / chunkSize) + 1;
+
+        triggerUploadBanner(`Uploading chunk ${chunkNumber} of ${totalChunks}`);
+
+        addNotification(
+          `Uploading chunk ${chunkNumber} of ${totalChunks}`,
+          "Manage product",
+        );
+
         const chunk = allRows.slice(i, i + chunkSize);
 
-        // Convert JSON → CSV because your backend expects CSV
-        const csvData = Papa.unparse(chunk);
-        const chunkBlob = new Blob([csvData], { type: "text/csv" });
+        const newWorkbook = XLSX.utils.book_new();
+        const newSheet = XLSX.utils.json_to_sheet(chunk);
+        XLSX.utils.book_append_sheet(newWorkbook, newSheet, "Products");
+
+        const excelBuffer = XLSX.write(newWorkbook, {
+          bookType: "xlsx",
+          type: "array",
+        });
+
+        const chunkBlob = new Blob([excelBuffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
 
         const formData = new FormData();
-        formData.append(
-          "file",
-          chunkBlob,
-          `excel_chunk_${Math.floor(i / chunkSize) + 1}.csv`,
-        );
+        formData.append("file", chunkBlob, `excel_chunk_${chunkNumber}.xlsx`);
 
         try {
           const response = await fetch(
@@ -484,36 +621,28 @@ const Dashboard = () => {
 
           const result = await response.json();
 
-          if (response.ok) {
-            showToast(
-              "success",
-              `Chunk ${Math.floor(i / chunkSize) + 1} uploaded successfully`,
-            );
-            addNotification(
-              `Chunk ${Math.floor(i / chunkSize) + 1} uploaded`,
-              "Manage product",
-            );
-          } else {
+          if (!response.ok) {
             showToast(
               "error",
-              `Chunk ${Math.floor(i / chunkSize) + 1} failed: ${
+              `Chunk ${chunkNumber} failed: ${
                 result.message || "Unknown error"
               }`,
             );
+
+            addNotification(`Chunk ${chunkNumber} failed`, "Manage product");
+          } else {
+            showToast("success", `Chunk ${chunkNumber} uploaded successfully`);
+
             addNotification(
-              `Chunk ${Math.floor(i / chunkSize) + 1} failed`,
+              `Chunk ${chunkNumber} uploaded successfully`,
               "Manage product",
             );
           }
         } catch (err) {
-          showToast(
-            "error",
-            `Error uploading chunk ${Math.floor(i / chunkSize) + 1}: ${
-              err.message
-            }`,
-          );
+          showToast("error", `Error uploading chunk ${chunkNumber}`);
+
           addNotification(
-            `Upload error in chunk ${Math.floor(i / chunkSize) + 1}`,
+            `Chunk ${chunkNumber} upload error`,
             "Manage product",
           );
         }
@@ -521,23 +650,27 @@ const Dashboard = () => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
-      showToast(
-        "success",
-        `Excel "${selectedFile.name}" uploaded successfully (${totalChunks} chunks)`,
-      );
-      addNotification(
-        `Upload complete: "${selectedFile.name}"`,
-        "Manage product",
-      );
+      showToast("success", "Excel uploaded successfully");
+
+      addNotification(`Excel upload completed successfully`, "Manage product");
+
       fetchProductData();
     } catch (error) {
-      showToast("error", "Excel file parsing failed: " + error.message);
+      showToast("error", "Excel processing failed: " + error.message);
+
+      addNotification(`Excel upload failed`, "Manage product");
     }
 
     setIsUploading(false);
     setSelectedFile(null);
   };
+  const triggerUploadBanner = () => {
+    setShowUploadBanner(true);
 
+    setTimeout(() => {
+      setShowUploadBanner(false);
+    }, 3000); // 3 seconds
+  };
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -951,10 +1084,9 @@ const Dashboard = () => {
           <span>{toast.message}</span>
         </div>
       )}
-      {isUploading && (
+      {showUploadBanner && (
         <div className="fixed top-16 bg-green-500 right-5 flex text-white items-center p-4 rounded-lg shadow-lg transition-all">
-          Excel upload is in progress. Please do not close this browser until
-          the upload is completed.
+          Excel upload is in progress. Please do not close this browser.
         </div>
       )}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 pb-4 gap-4">

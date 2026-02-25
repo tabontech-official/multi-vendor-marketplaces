@@ -669,7 +669,7 @@ const Dashboard = () => {
 
     setTimeout(() => {
       setShowUploadBanner(false);
-    }, 3000); // 3 seconds
+    }, 3000);
   };
   useEffect(() => {
     const handleClickOutside = (event) => {

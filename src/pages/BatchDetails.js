@@ -14,11 +14,14 @@ const BatchDetails = () => {
 
   const fetchBatch = async () => {
     try {
-      const res = await axios.get(`https://multi-vendor-marketplace.vercel.app/product/batch/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
+      const res = await axios.get(
+        `https://multi-vendor-marketplace.vercel.app/product/batch/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
+          },
         },
-      });
+      );
 
       setBatch(res.data.data);
     } catch (err) {

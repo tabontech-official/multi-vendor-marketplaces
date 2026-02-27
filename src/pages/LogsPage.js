@@ -22,7 +22,7 @@ const LogsPage = () => {
 
       if (userRole === "Merchant") {
         fetchUserBatches(id);
-      } else if (userRole === "master" || userRole === "dev") {
+      } else if (userRole === "Master Admin" || userRole === "Dev Admin") {
         fetchAllBatches();
       }
     } catch (error) {
@@ -65,7 +65,7 @@ const LogsPage = () => {
       setLoading(false);
     }
   };
-const navigate = useNavigate();
+  const navigate = useNavigate();
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">System Logs</h1>
@@ -131,13 +131,13 @@ const navigate = useNavigate();
                       {new Date(batch.createdAt).toLocaleString()}
                     </td>
                     <td className="px-4 py-3">
-  <button
-    onClick={() => navigate(`/batch/${batch._id}`)}
-    className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
-  >
-    View
-  </button>
-</td>
+                      <button
+                        onClick={() => navigate(`/batch/${batch._id}`)}
+                        className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+                      >
+                        View
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}

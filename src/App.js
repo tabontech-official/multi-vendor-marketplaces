@@ -64,6 +64,8 @@ import Settings from "./pages/settings";
 import NotificationSettings from "./pages/NotificationSettings";
 import InvoicePage from "./pages/invoice";
 import "react-toastify/dist/ReactToastify.css";
+import LogsPage from "./pages/LogsPage";
+import BatchDetails from "./pages/BatchDetails";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -131,9 +133,10 @@ const App = () => {
               element={<PrivateRoute element={<ManageRequests />} />}
             />
             <Route path="/docs" element={<ApiMainPage />} />
+            <Route path="/import-logs" element={<LogsPage />} />
             <Route path="/api-docs" element={<ApiDocs />} />
             <Route path="/api-reference" element={<ApiDocsPage />} />
-
+ <Route path="/batch/:id" element={<BatchDetails />} />
             <Route
               path="/create-categories"
               element={<PrivateRoute element={<CreateCategory />} />}

@@ -68,14 +68,10 @@ const LogsPage = () => {
   const navigate = useNavigate();
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">System Logs</h1>
+      <h1 className="text-xl font-semibold mb-4">System Logs</h1>
 
       {/* Role Badge */}
-      <div className="mb-4">
-        <span className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-full">
-          Role: {role}
-        </span>
-      </div>
+      
 
       {loading ? (
         <p>Loading logs...</p>

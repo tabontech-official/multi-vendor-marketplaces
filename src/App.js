@@ -133,7 +133,7 @@ const App = () => {
               element={<PrivateRoute element={<ManageRequests />} />}
             />
             <Route path="/docs" element={<ApiMainPage />} />
-            <Route path="/import-logs" element={<LogsPage />} />
+            <Route path="/status-logs" element={<LogsPage />} />
             <Route path="/api-docs" element={<ApiDocs />} />
             <Route path="/api-reference" element={<ApiDocsPage />} />
  <Route path="/batch/:id" element={<BatchDetails />} />

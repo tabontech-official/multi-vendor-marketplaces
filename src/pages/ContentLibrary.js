@@ -48,7 +48,7 @@ const ContentLibrary = () => {
   try {
     for (let file of selectedFiles) {
       await axios.delete(
-        "https://multi-vendor-marketplace.vercel.app/api/content/delete-file",
+        "http://localhost:5000/api/content/delete-file",
         {
           data: { id: file._id }, 
         }
@@ -70,11 +70,11 @@ const ContentLibrary = () => {
 
       if (role === "Dev Admin" || role === "Master Admin") {
         res = await axios.get(
-          "https://multi-vendor-marketplace.vercel.app/api/content/get-all-files",
+          "http://localhost:5000/api/content/get-all-files",
         );
       } else {
         res = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/api/content/get-by-user/${userId}`,
+          `http://localhost:5000/api/content/get-by-user/${userId}`,
         );
       }
 
@@ -103,7 +103,7 @@ const ContentLibrary = () => {
     try {
       setUploading(true);
       await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/api/content/upload-content",
+        "http://localhost:5000/api/content/upload-content",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -196,7 +196,7 @@ const ContentLibrary = () => {
                     />
                   </th>
                   <th className="p-4">File</th>
-                  <th className="p-4">Date Added</th>
+                  {/* <th className="p-4">Date Added</th> */}
                   <th className="p-4">Size</th>
                   <th className="p-4 text-right"></th>
                 </tr>
@@ -254,9 +254,9 @@ const ContentLibrary = () => {
                           <span className="font-semibold text-[#1a1a1a]">
                             {file.originalName}
                           </span>
-                          <span className="text-xs text-gray-500">
+                          {/* <span className="text-xs text-gray-500">
                             Resource ID: {index}
-                          </span>
+                          </span> */}
                         </div>
 
                         {/* Hover Action Button - Classic Shopify style */}

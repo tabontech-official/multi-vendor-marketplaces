@@ -657,7 +657,11 @@ const Dashboard = () => {
               },
             },
           );
+          setProducts((prev) =>
+            prev.filter((p) => !selectedProducts.includes(p._id)),
+          );
 
+          setSelectedProducts([]);
           if (!response.ok) throw new Error("Failed to delete product");
 
           if (product) {
@@ -665,8 +669,8 @@ const Dashboard = () => {
               `${product.title} deleted successfully!`,
               "Manage product",
             );
+            showToast("success", "Products deleted successfully");
           }
-          window.location.reload();
         }),
       );
 

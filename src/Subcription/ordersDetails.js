@@ -62,7 +62,7 @@ const OrdersDetails = () => {
         const apiSecretKey = localStorage.getItem("apiSecretKey");
 
         const res = await axios.get(
-          `http://localhost:5000/order/getOrderFromShopify/${orderId}/${merchantId}`,
+          `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${orderId}/${merchantId}`,
           {
             headers: {
               "x-api-key": apiKey,
@@ -243,7 +243,7 @@ const OrdersDetails = () => {
       });
 
       await fetch(
-        `http://localhost:5000/order/updatetrackingShopify`,
+        `https://multi-vendor-marketplace.vercel.app/order/updatetrackingShopify`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -294,7 +294,7 @@ const OrdersDetails = () => {
       }
 
       const response = await fetch(
-        "http://localhost:5000/orderData/cancelOrder",
+        "https://multi-vendor-marketplace.vercel.app/orderData/cancelOrder",
         {
           method: "POST",
           headers: {
@@ -360,7 +360,7 @@ const OrdersDetails = () => {
     const fetchLineItemCount = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/orderData/lineItemCount/${orderId}`,
+          `https://multi-vendor-marketplace.vercel.app/orderData/lineItemCount/${orderId}`,
         );
         const data = await res.json();
 
@@ -1011,7 +1011,7 @@ const OrdersDetails = () => {
 
                     try {
                       const response = await fetch(
-                        `http://localhost:5000/auth/addRequestForOrderCancellation/${userId}`,
+                        `https://multi-vendor-marketplace.vercel.app/auth/addRequestForOrderCancellation/${userId}`,
                         {
                           method: "POST",
                           headers: {
@@ -1118,7 +1118,7 @@ const OrdersDetails = () => {
 
                     try {
                       const response = await fetch(
-                        `http://localhost:5000/auth/addRequestForOrderCancellation/${userId}`,
+                        `https://multi-vendor-marketplace.vercel.app/auth/addRequestForOrderCancellation/${userId}`,
                         {
                           method: "POST",
                           headers: {

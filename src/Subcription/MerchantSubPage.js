@@ -33,7 +33,7 @@ const fetchSubscriptions = async () => {
    const apiKey = localStorage.getItem("apiKey");
     const apiSecretKey = localStorage.getItem("apiSecretKey");
   try {
-    const res = await fetch(`http://localhost:5000/order/order/${merchantId}`, {
+    const res = await fetch(`https://multi-vendor-marketplace.vercel.app/order/order/${merchantId}`, {
       method: "GET",
        headers: {
           "x-api-key": apiKey,
@@ -87,7 +87,7 @@ useEffect(() => {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/product/getProduct/${id}`,
+          `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}`,
           { method: "GET",
              headers: {
           "x-api-key": apiKey,

@@ -20,9 +20,11 @@ import { useNotification } from "../context api/NotificationContext";
 import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import { useNavigate, useNavigation } from "react-router-dom";
-import { FaEdit, FaFileImport } from "react-icons/fa";
+import { FaDollarSign, FaEdit, FaFileImport } from "react-icons/fa";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import SettingsSidebar from "../component/SettingsSidebar";
+import { IoSettingsOutline } from "react-icons/io5";
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -177,7 +179,7 @@ const Finance = () => {
     setUsersLoading(true);
     try {
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/getAllUsers",
+        "http://localhost:5000/auth/getAllUsers",
         {
           method: "GET",
           headers: {
@@ -219,7 +221,7 @@ const Finance = () => {
 
     try {
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/order/addPayOutDates",
+        "http://localhost:5000/order/addPayOutDates",
         {
           method: "POST",
           headers: {
@@ -258,7 +260,7 @@ const Finance = () => {
 
       try {
         const res = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/order/getPayoutsDates",
+          "http://localhost:5000/order/getPayoutsDates",
           {
             method: "GET",
             headers: {
@@ -327,7 +329,7 @@ const Finance = () => {
 
       try {
         const res = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/auth/user/${userId}`,
+          `http://localhost:5000/auth/user/${userId}`,
         );
         const user = res.data;
         const role = user?.role;
@@ -370,9 +372,9 @@ const Finance = () => {
             console.error("User ID not found in localStorage");
             return;
           }
-          url = `https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=${userId}&limit=${limit}&page=${page}`;
+          url = `http://localhost:5000/order/getPayoutByUserId?userId=${userId}&limit=${limit}&page=${page}`;
         } else if (userRole === "Dev Admin" || userRole === "Master Admin") {
-          url = `https://multi-vendor-marketplace.vercel.app/order/getPayout?limit=${limit}&page=${page}`;
+          url = `http://localhost:5000/order/getPayout?limit=${limit}&page=${page}`;
         } else {
           console.warn("Unhandled role:", userRole);
           return;
@@ -548,7 +550,7 @@ const Finance = () => {
       setImportLoading(true);
 
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/bulk-update-commission",
+        "http://localhost:5000/auth/bulk-update-commission",
         {
           method: "POST",
           headers: {
@@ -588,7 +590,7 @@ const Finance = () => {
 
     try {
       const res = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/updateMerchantCommission",
+        "http://localhost:5000/auth/updateMerchantCommission",
         {
           method: "PUT",
           headers: {
@@ -625,28 +627,113 @@ const Finance = () => {
   };
 
   return user ? (
-    <main className="w-full p-4 md:p-8">
-      <div className="flex flex-col gap-6 mb-6">
-        {/* ================= HEADER ROW ================= */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <h1 className="text-xl font-semibold text-gray-800">
-            Affiliate Payouts
-          </h1>
-
+    <div className="flex min-h-screen bg-[#f1f1f1] font-sans text-[#303030]">
+      <SettingsSidebar />
+      <div className="flex-1">
+        <div className="sticky top-0 z-20 bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="bg-gray-100 p-2 rounded-lg text-gray-600">
+              <FaDollarSign size={20} />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold text-gray-900">
+                Affiliate Payouts
+              </h1>
+              <p className="text-xs text-gray-500">
+                Track payouts, manage timelines and control merchant commissions
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="mx-auto px-8 py-8 space-y-8">
           {/* Right Side Controls */}
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Tabs (Admin Only) */}
-            {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Tabs (Admin Only) */}
+              {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+                <div className="relative">
+                  <select
+                    value={activeTab}
+                    onChange={(e) => setActiveTab(e.target.value)}
+                    className="h-9 px-3 pr-10 text-sm bg-white border border-gray-300 rounded-md shadow-sm 
+    focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
+                  >
+                    <option value="payouts">Payouts</option>
+                    <option value="Timelines">Timelines & Config</option>
+                    <option value="merchant-list">Merchant List</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                    <svg
+                      className="h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              )}
+
+              {/* Status Filter */}
+              {/* <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              <option value="">All Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Due">Due</option>
+              <option value="Deposited">Deposited</option>
+            </select> */}
               <div className="relative">
                 <select
-                  value={activeTab}
-                  onChange={(e) => setActiveTab(e.target.value)}
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                   className="h-9 px-3 pr-10 text-sm bg-white border border-gray-300 rounded-md shadow-sm 
     focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
                 >
-                  <option value="payouts">Payouts</option>
-                  <option value="Timelines">Timelines & Config</option>
-                  <option value="merchant-list">Merchant List</option>
+                  <option value="">All Status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Due">Due</option>
+                  <option value="Deposited">Deposited</option>
+                </select>
+
+                {/* Custom Arrow */}
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                  <svg
+                    className="h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Date Filter */}
+              <div className="relative">
+                <select
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="h-9 px-3 pr-10 text-sm bg-white border border-gray-300 rounded-md shadow-sm 
+    focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
+                >
+                  <option value="Today">Today</option>
+                  <option value="Last 7 days">Last 7 days</option>
+                  <option value="Last 30 days">Last 30 days</option>
+                  <option value="This Month">This Month</option>
+                  <option value="All Time">All Time</option>
+                  <option value="Custom">Custom</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
                   <svg
@@ -663,147 +750,73 @@ const Finance = () => {
                   </svg>
                 </div>
               </div>
-            )}
 
-            {/* Status Filter */}
-            {/* <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            >
-              <option value="">All Status</option>
-              <option value="Pending">Pending</option>
-              <option value="Due">Due</option>
-              <option value="Deposited">Deposited</option>
-            </select> */}
-            <div className="relative">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-9 px-3 pr-10 text-sm bg-white border border-gray-300 rounded-md shadow-sm 
-    focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
-              >
-                <option value="">All Status</option>
-                <option value="Pending">Pending</option>
-                <option value="Due">Due</option>
-                <option value="Deposited">Deposited</option>
-              </select>
-
-              {/* Custom Arrow */}
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
-                <svg
-                  className="h-4 w-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-                    clipRule="evenodd"
+              {/* Custom Date Range */}
+              {dateFilter === "Custom" && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="h-9 px-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                   />
-                </svg>
-              </div>
+                  <span className="text-gray-500 text-sm">to</span>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="h-9 px-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+
+              {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search payouts..."
+                    value={searchVal}
+                    onChange={(e) => setSearchVal(e.target.value)}
+                    className="h-9 w-60 px-3 pr-8 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                  <svg
+                    className="w-4 h-4 absolute right-2 top-2.5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 21l-4.35-4.35m1.6-5.65a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+              )}
+              {/* Admin Buttons */}
+              {(userRole === "Master Admin" || userRole === "Dev Admin") && (
+                <>
+                  <button
+                    onClick={() => setImportModal(true)}
+                    className="h-9 px-4 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                  >
+                    Import
+                  </button>
+
+                  <button
+                    onClick={handleExport}
+                    className="h-9 px-4 text-sm bg-gray-800 text-white rounded-md hover:bg-gray-900 transition"
+                  >
+                    Export
+                  </button>
+                </>
+              )}
             </div>
-
-            {/* Date Filter */}
-            <div className="relative">
-              <select
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className="h-9 px-3 pr-10 text-sm bg-white border border-gray-300 rounded-md shadow-sm 
-    focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
-              >
-                <option value="Today">Today</option>
-                <option value="Last 7 days">Last 7 days</option>
-                <option value="Last 30 days">Last 30 days</option>
-                <option value="This Month">This Month</option>
-                <option value="All Time">All Time</option>
-                <option value="Custom">Custom</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
-                <svg
-                  className="h-4 w-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            {/* Custom Date Range */}
-            {dateFilter === "Custom" && (
-              <div className="flex items-center gap-2">
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="h-9 px-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-                <span className="text-gray-500 text-sm">to</span>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="h-9 px-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            )}
-
-            {(userRole === "Master Admin" || userRole === "Dev Admin") && (
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search payouts..."
-                  value={searchVal}
-                  onChange={(e) => setSearchVal(e.target.value)}
-                  className="h-9 w-60 px-3 pr-8 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-                <svg
-                  className="w-4 h-4 absolute right-2 top-2.5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 21l-4.35-4.35m1.6-5.65a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
-            )}
-            {/* Admin Buttons */}
-            {(userRole === "Master Admin" || userRole === "Dev Admin") && (
-              <>
-                <button
-                  onClick={() => setImportModal(true)}
-                  className="h-9 px-4 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                >
-                  Import
-                </button>
-
-                <button
-                  onClick={handleExport}
-                  className="h-9 px-4 text-sm bg-gray-800 text-white rounded-md hover:bg-gray-900 transition"
-                >
-                  Export
-                </button>
-              </>
-            )}
           </div>
         </div>
-
         {/* ================= SUMMARY CARDS ================= */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Card 1 */}
+        <div className=" mx-auto px-8   grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-500">
@@ -849,503 +862,526 @@ const Finance = () => {
             </h2>
           </div>
         </div>
-      </div>
 
-      <div className="mt-6">
-        {activeTab === "payouts" && (
-          <div className="p-4">
-            {loading ? (
-              <div className="flex justify-center items-center py-10">
-                <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
-                fetching data...
-              </div>
-            ) : filteredPayouts.length > 0 ? (
-              <table className="w-full border-collapse bg-white">
-                <thead className="bg-gray-100 text-left text-gray-600 text-xs">
-                  <tr>
-                    <th className="p-3">Reference No</th>
-                    <th className="p-3">Payout Date</th>
-                    {(userRole === "Master Admin" ||
-                      userRole === "Dev Admin") && (
-                      <th className="p-3">Merchant Info</th>
-                    )}
-                    <th className="p-3">Transaction Dates</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3">Fulfilled</th>
-                    <th className="p-3">Unfulfilled</th>
+        <div className=" mx-auto px-8 py-8">
+          {" "}
+          {activeTab === "payouts" && (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                {loading ? (
+                  <div className="flex justify-center items-center py-10">
+                    <HiOutlineRefresh className="animate-spin text-xl text-gray-500" />
+                    fetching data...
+                  </div>
+                ) : filteredPayouts.length > 0 ? (
+                  <table className="w-full border-collapse bg-white">
+                    <thead className="bg-gray-100 text-left text-gray-600 text-xs">
+                      <tr>
+                        <th className="p-2">Reference No</th>
+                        <th className="p-2">Payout Date</th>
+                        {(userRole === "Master Admin" ||
+                          userRole === "Dev Admin") && (
+                          <th className="p-2">Merchant Info</th>
+                        )}
+                        <th className="p-2">Transaction Dates</th>
+                        <th className="p-2">Status</th>
+                        <th className="p-2">Fulfilled</th>
+                        <th className="p-2">Unfulfilled</th>
 
-                    {userRole === "Master Admin" || userRole === "Dev Admin" ? (
-                      <>
-                        <th className="p-3 text-right">Gross</th>
-                        <th className="p-3 text-right">Commission %</th>
-                        <th className="p-3 text-right">Commission</th>
-                        <th className="p-3 text-right">Net</th>
-                      </>
-                    ) : (
-                      <th className="p-3 text-right">Amount</th>
-                    )}
-                  </tr>
-                </thead>
+                        {userRole === "Master Admin" ||
+                        userRole === "Dev Admin" ? (
+                          <>
+                            <th className="p-2 text-right">Gross</th>
+                            <th className="p-2 text-right">Commission </th>
+                            <th className="p-2 text-right">Commission</th>
+                            <th className="p-2 text-right">Net</th>
+                          </>
+                        ) : (
+                          <th className="p-2 text-right">Amount</th>
+                        )}
+                      </tr>
+                    </thead>
 
-                <tbody>
-                  {userRole === "Master Admin" || userRole === "Dev Admin"
-                    ? [...filteredPayouts]
-                        .sort((a, b) => {
-                          const order = { pending: 1, due: 2, deposited: 3 };
+                    <tbody>
+                      {userRole === "Master Admin" || userRole === "Dev Admin"
+                        ? [...filteredPayouts]
+                            .sort((a, b) => {
+                              const order = {
+                                pending: 1,
+                                due: 2,
+                                deposited: 3,
+                              };
 
-                          return (
-                            order[a.status?.toLowerCase()] -
-                            order[b.status?.toLowerCase()]
-                          );
-                        })
-                        .flatMap((payout, index) =>
-                          payout.orders.map((order, mIndex) => (
-                            <tr
-                              key={`${index}-${mIndex}`}
-                              className="border-b hover:bg-gray-50"
-                            >
-                              <td
-                                className="p-3 text-blue-600 cursor-pointer hover:underline"
-                                onClick={() => {
-                                  const query = new URLSearchParams({
-                                    payoutDate: payout.payoutDate,
-                                    status: payout.status,
-                                    merchantId: order.merchantId,
-                                  });
-                                  navigate(
-                                    `/payout-details?${query.toString()}`,
-                                  );
-                                }}
-                              >
-                                {" "}
-                                {(() => {
-                                  const reference =
-                                    order.lineItems?.find(
-                                      (li) => li.payoutReferenceId,
-                                    )?.payoutReferenceId || "N/A";
+                              return (
+                                order[a.status?.toLowerCase()] -
+                                order[b.status?.toLowerCase()]
+                              );
+                            })
+                            .flatMap((payout, index) =>
+                              payout.orders.map((order, mIndex) => (
+                                <tr
+                                  key={`${index}-${mIndex}`}
+                                  className="border-b hover:bg-gray-50"
+                                >
+                                  <td
+                                    className="p-2 text-blue-600 cursor-pointer hover:underline"
+                                    onClick={() => {
+                                      const query = new URLSearchParams({
+                                        payoutDate: payout.payoutDate,
+                                        status: payout.status,
+                                        merchantId: order.merchantId,
+                                      });
+                                      navigate(
+                                        `/payout-details?${query.toString()}`,
+                                      );
+                                    }}
+                                  >
+                                    {" "}
+                                    {(() => {
+                                      const reference =
+                                        order.lineItems?.find(
+                                          (li) => li.payoutReferenceId,
+                                        )?.payoutReferenceId || "N/A";
 
-                                  return (
-                                    <div className="flex items-center gap-2">
-                                      <span>{reference}</span>
+                                      return (
+                                        <div className="flex items-center gap-2">
+                                          <span>{reference}</span>
 
-                                      {reference !== "N/A" && (
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleCopy(reference);
-                                          }}
-                                          className="text-gray-400 hover:text-blue-600 text-xs"
-                                          title="Copy Reference"
-                                        >
-                                          <HiOutlineClipboardCopy className="w-4 h-4 text-green-700" />
-                                        </button>
-                                      )}
+                                          {reference !== "N/A" && (
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleCopy(reference);
+                                              }}
+                                              className="text-gray-400 hover:text-blue-600 text-xs"
+                                              title="Copy Reference"
+                                            >
+                                              <HiOutlineClipboardCopy className="w-4 h-4 text-green-700" />
+                                            </button>
+                                          )}
+                                        </div>
+                                      );
+                                    })()}
+                                  </td>
+                                  {/* Payout Date */}
+                                  <td
+                                    className="p-2 "
+                                    // onClick={() => {
+                                    //   const query = new URLSearchParams({
+                                    //     payoutDate: payout.payoutDate,
+                                    //     status: payout.status,
+                                    //     merchantId: order.merchantId,
+                                    //   });
+                                    //   navigate(
+                                    //     `/payout-details?${query.toString()}`,
+                                    //   );
+                                    // }}
+                                  >
+                                    {payout.payoutDate}
+                                  </td>
+
+                                  {/* Merchant Info */}
+                                  <td className="p-2 text-sm text-gray-600">
+                                    <div>{order.merchantName}</div>
+                                    <div className="text-xs text-gray-400">
+                                      {order.merchantEmail}
                                     </div>
-                                  );
-                                })()}
-                              </td>
-                              {/* Payout Date */}
-                              <td
-                                className="p-3 "
-                                // onClick={() => {
-                                //   const query = new URLSearchParams({
-                                //     payoutDate: payout.payoutDate,
-                                //     status: payout.status,
-                                //     merchantId: order.merchantId,
-                                //   });
-                                //   navigate(
-                                //     `/payout-details?${query.toString()}`,
-                                //   );
-                                // }}
+                                  </td>
+
+                                  {/* Transaction Dates */}
+                                  <td className="p-2">
+                                    {payout.transactionDates}
+                                  </td>
+
+                                  {/* Status */}
+                                  <td className="p-2">
+                                    <span
+                                      className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                                        payout.status.toLowerCase() ===
+                                        "pending"
+                                          ? "bg-blue-100 text-blue-700"
+                                          : payout.status.toLowerCase() ===
+                                              "due"
+                                            ? "bg-red-100 text-red-700"
+                                            : "bg-green-100 text-green-700"
+                                      }`}
+                                    >
+                                      {payout.status}
+                                    </span>
+                                  </td>
+
+                                  {/* Counts */}
+                                  <td className="p-2">
+                                    {order.fulfilledCount}
+                                  </td>
+                                  <td className="p-2">
+                                    {order.unfulfilledCount}
+                                  </td>
+
+                                  {/* 💰 GROSS */}
+                                  <td className="p-2 text-right font-medium">
+                                    {order.grossAmount.toFixed(2)} AUD
+                                  </td>
+
+                                  {/* 📊 COMMISSION % */}
+                                  <td className="p-2 text-right">
+                                    {order.commissionRate}%
+                                  </td>
+
+                                  {/* 💸 COMMISSION */}
+                                  <td className="p-2 text-right text-red-600">
+                                    {order.commissionAmount.toFixed(2)} AUD
+                                  </td>
+
+                                  {/* ✅ NET */}
+                                  <td className="p-2 text-right font-semibold text-green-700">
+                                    {order.netAmount.toFixed(2)} AUD
+                                  </td>
+                                </tr>
+                              )),
+                            )
+                        : /* 🔒 MERCHANT VIEW – AS IS (NO CHANGE) */
+                          filteredPayouts.map((item, index) => {
+                            const merchantId = localStorage.getItem("userid");
+
+                            return (
+                              <tr
+                                key={index}
+                                className="border-b hover:bg-gray-50"
                               >
-                                {payout.payoutDate}
-                              </td>
-
-                              {/* Merchant Info */}
-                              <td className="p-3 text-sm text-gray-600">
-                                <div>{order.merchantName}</div>
-                                <div className="text-xs text-gray-400">
-                                  {order.merchantEmail}
-                                </div>
-                              </td>
-
-                              {/* Transaction Dates */}
-                              <td className="p-3">{payout.transactionDates}</td>
-
-                              {/* Status */}
-                              <td className="p-3">
-                                <span
-                                  className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                                    payout.status.toLowerCase() === "pending"
-                                      ? "bg-blue-100 text-blue-700"
-                                      : payout.status.toLowerCase() === "due"
-                                        ? "bg-red-100 text-red-700"
-                                        : "bg-green-100 text-green-700"
-                                  }`}
+                                <td
+                                  className="p-2 text-blue-600 cursor-pointer hover:underline"
+                                  onClick={() =>
+                                    navigate(
+                                      `/payout-details?payoutDate=${encodeURIComponent(
+                                        item.payoutDate,
+                                      )}&status=${item.status}&merchantId=${merchantId}`,
+                                    )
+                                  }
                                 >
-                                  {payout.status}
-                                </span>
-                              </td>
+                                  {(() => {
+                                    const reference =
+                                      item.orders
+                                        ?.map((o) => o.payoutReferenceId)
+                                        ?.filter(Boolean)[0] || "N/A";
 
-                              {/* Counts */}
-                              <td className="p-3">{order.fulfilledCount}</td>
-                              <td className="p-3">{order.unfulfilledCount}</td>
+                                    return (
+                                      <div className="flex items-center gap-2">
+                                        <span>{reference}</span>
 
-                              {/* 💰 GROSS */}
-                              <td className="p-3 text-right font-medium">
-                                {order.grossAmount.toFixed(2)} AUD
-                              </td>
-
-                              {/* 📊 COMMISSION % */}
-                              <td className="p-3 text-right">
-                                {order.commissionRate}%
-                              </td>
-
-                              {/* 💸 COMMISSION */}
-                              <td className="p-3 text-right text-red-600">
-                                {order.commissionAmount.toFixed(2)} AUD
-                              </td>
-
-                              {/* ✅ NET */}
-                              <td className="p-3 text-right font-semibold text-green-700">
-                                {order.netAmount.toFixed(2)} AUD
-                              </td>
-                            </tr>
-                          )),
-                        )
-                    : /* 🔒 MERCHANT VIEW – AS IS (NO CHANGE) */
-                      filteredPayouts.map((item, index) => {
-                        const merchantId = localStorage.getItem("userid");
-
-                        return (
-                          <tr key={index} className="border-b hover:bg-gray-50">
-                            <td
-                              className="p-3 text-blue-600 cursor-pointer hover:underline"
-                              onClick={() =>
-                                navigate(
-                                  `/payout-details?payoutDate=${encodeURIComponent(
-                                    item.payoutDate,
-                                  )}&status=${item.status}&merchantId=${merchantId}`,
-                                )
-                              }
-                            >
-                              {(() => {
-                                const reference =
-                                  item.orders
-                                    ?.map((o) => o.payoutReferenceId)
-                                    ?.filter(Boolean)[0] || "N/A";
-
-                                return (
-                                  <div className="flex items-center gap-2">
-                                    <span>{reference}</span>
-
-                                    {reference !== "N/A" && (
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleCopy(reference);
-                                        }}
-                                        className="text-gray-400 hover:text-blue-600 text-xs"
-                                        title="Copy Reference"
-                                      >
-                                        <HiOutlineClipboardCopy className="w-4 h-4" />
-                                      </button>
-                                    )}
-                                  </div>
-                                );
-                              })()}
-                            </td>
-                            <td
-                              className="p-3"
-                              // onClick={() =>
-                              //   navigate(
-                              //     `/payout-details?payoutDate=${encodeURIComponent(
-                              //       item.payoutDate,
-                              //     )}&status=${item.status}&merchantId=${merchantId}`,
-                              //   )
-                              // }
-                            >
-                              {item.payoutDate}
-                            </td>
-                            <td className="p-3">{item.transactionDates}</td>
-                            <td className="p-3">
-                              <td className="p-3">
-                                <span
-                                  className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                                    item.orders?.[0]?.status?.toLowerCase() ===
-                                    "pending"
-                                      ? "bg-blue-100 text-blue-700"
-                                      : item.orders?.[0]?.status?.toLowerCase() ===
-                                          "due"
-                                        ? "bg-red-100 text-yellow-700"
-                                        : "bg-green-100 text-green-700"
-                                  }`}
+                                        {reference !== "N/A" && (
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleCopy(reference);
+                                            }}
+                                            className="text-gray-400 hover:text-blue-600 text-xs"
+                                            title="Copy Reference"
+                                          >
+                                            <HiOutlineClipboardCopy className="w-4 h-4" />
+                                          </button>
+                                        )}
+                                      </div>
+                                    );
+                                  })()}
+                                </td>
+                                <td
+                                  className="p-2"
+                                  // onClick={() =>
+                                  //   navigate(
+                                  //     `/payout-details?payoutDate=${encodeURIComponent(
+                                  //       item.payoutDate,
+                                  //     )}&status=${item.status}&merchantId=${merchantId}`,
+                                  //   )
+                                  // }
                                 >
-                                  {item.orders?.[0]?.status || item.status}
-                                </span>
-                              </td>
-                            </td>
-                            <td className="p-3">{item.totalFulfilled}</td>
-                            <td className="p-3">{item.totalUnfulfilled}</td>
-                            <td className="p-3 text-right font-medium">
-                              {item.amount || "$0.00"}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                </tbody>
-              </table>
-            ) : (
-              <div className="text-center py-10 text-gray-500">
-                No payouts found.
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "Timelines" && (
-          <div className="p-4">
-            <h2 className="text-lg font-semibold mb-4 text-gray-700">
-              Finance Timelines
-            </h2>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Grace Period (in days)
-              </label>
-              <input
-                type="number"
-                className="border px-3 py-2 rounded-md text-sm w-40 no-spinner"
-                value={graceTime}
-                onChange={(e) => setGraceTime(Number(e.target.value))}
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Default Commission (%)
-              </label>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={commission}
-                  onChange={(e) => setCommission(Number(e.target.value))}
-                  className="border px-3 py-2 rounded-md text-sm w-40 no-spinner"
-                  placeholder="e.g. 10"
-                />
-                <span className="text-sm text-gray-600">%</span>
-              </div>
-
-              <p className="text-xs text-gray-500 mt-1">
-                Platform fee deducted from merchant payouts
-              </p>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Payout Frequency
-              </label>
-              <select
-                value={payoutFrequency}
-                onChange={(e) => setPayoutFrequency(e.target.value)}
-                className="border px-3 py-2 rounded-md text-sm w-60"
-              >
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="once">Once a Month</option>
-                <option value="twice">Twice a Month</option>
-              </select>
-            </div>
-
-            {payoutFrequency === "weekly" && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Day of the Week
-                </label>
-                <select
-                  value={weeklyDay}
-                  onChange={(e) => setWeeklyDay(e.target.value)}
-                  className="border px-3 py-2 rounded-md text-sm w-60"
-                >
-                  {[
-                    "Monday",
-                    "Tuesday",
-                    "Wednesday",
-                    "Thursday",
-                    "Friday",
-                    "Saturday",
-                    "Sunday",
-                  ].map((day) => (
-                    <option key={day} value={day}>
-                      {day}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {["daily", "once", "twice"].includes(payoutFrequency) && (
-              <div className="flex flex-col sm:flex-row gap-6 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Payout Date 1
-                  </label>
-                  <input
-                    type="number"
-                    value={firstPayoutDate}
-                    onChange={(e) => setFirstPayoutDate(e.target.value)}
-                    className="border px-3 py-2 rounded-md text-sm no-spinner"
-                  />
-                </div>
-
-                {payoutFrequency === "twice" && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Payout Date 2
-                    </label>
-                    <input
-                      type="number"
-                      value={secondPayoutDate}
-                      onChange={(e) => setSecondPayoutDate(e.target.value)}
-                      className="border px-3 py-2 rounded-md text-sm no-spinner"
-                    />
+                                  {item.payoutDate}
+                                </td>
+                                <td className="p-2">{item.transactionDates}</td>
+                                <td className="p-2">
+                                  <td className="p-2">
+                                    <span
+                                      className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                                        item.orders?.[0]?.status?.toLowerCase() ===
+                                        "pending"
+                                          ? "bg-blue-100 text-blue-700"
+                                          : item.orders?.[0]?.status?.toLowerCase() ===
+                                              "due"
+                                            ? "bg-red-100 text-yellow-700"
+                                            : "bg-green-100 text-green-700"
+                                      }`}
+                                    >
+                                      {item.orders?.[0]?.status || item.status}
+                                    </span>
+                                  </td>
+                                </td>
+                                <td className="p-2">{item.totalFulfilled}</td>
+                                <td className="p-2">{item.totalUnfulfilled}</td>
+                                <td className="p-2 text-right font-medium">
+                                  {item.amount || "$0.00"}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="text-center py-10 text-gray-500">
+                    No payouts found.
                   </div>
                 )}
               </div>
-            )}
-
-            <div className="flex justify-end">
-              <button
-                onClick={handleSavePayoutDates}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
-              >
-                Save Payout Dates
-              </button>
             </div>
-          </div>
-        )}
-        {activeTab === "merchant-list" && (
-          <div className="p-4">
-            {usersLoading ? (
-              <div className="flex justify-center items-center py-10">
-                <HiOutlineRefresh className="animate-spin text-xl text-gray-500 mr-2" />
-                Loading users...
+          )}
+          {activeTab === "Timelines" && (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+              <h2 className="text-lg font-semibold mb-4 text-gray-700">
+                Finance Timelines
+              </h2>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Grace Period (in days)
+                </label>
+                <input
+                  type="number"
+                  className="border px-3 py-2 rounded-md text-sm w-40 no-spinner"
+                  value={graceTime}
+                  onChange={(e) => setGraceTime(Number(e.target.value))}
+                />
               </div>
-            ) : users.length > 0 ? (
-              <table className="w-full border-collapse bg-white">
-                <thead className="bg-gray-100 text-left text-gray-600 text-xs">
-                  <tr>
-                    <th className="p-3">Name</th>
-                    <th className="p-3">Email</th>
-                    <th className="p-3">Role</th>
-                    <th className="p-3">Comission ( % )</th>
-                    <th className="p-3">Merchant ID</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {editableMerchants.map((user, index) => (
-                    <tr
-                      key={user._id || index}
-                      className="border-b hover:bg-gray-50 text-sm"
-                    >
-                      <td className="p-3">
-                        {user.firstName} {user.lastName}
-                      </td>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Default Commission (%)
+                </label>
 
-                      <td className="p-3">{user.email}</td>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={commission}
+                    onChange={(e) => setCommission(Number(e.target.value))}
+                    className="border px-3 py-2 rounded-md text-sm w-40 no-spinner"
+                    placeholder="e.g. 10"
+                  />
+                  <span className="text-sm text-gray-600">%</span>
+                </div>
 
-                      <td className="p-3">
-                        <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-700">
-                          {user.role}
-                        </span>
-                      </td>
+                <p className="text-xs text-gray-500 mt-1">
+                  Platform fee deducted from merchant payouts
+                </p>
+              </div>
 
-                      {/* ✅ COMMISSION COLUMN */}
-                      <td className="p-3">
-                        <div className="relative w-32 flex items-center">
-                          <input
-                            type="number"
-                            value={user.commissionValue}
-                            disabled={!user.isEditable}
-                            onChange={(e) => {
-                              const updated = [...editableMerchants];
-                              updated[index].commissionValue = e.target.value;
-                              setEditableMerchants(updated);
-                            }}
-                            className={`w-full text-sm px-2 py-1 border rounded-md pr-12 ${
-                              user.isEditable
-                                ? "bg-white border-gray-300"
-                                : "bg-gray-100 text-gray-500 cursor-pointer"
-                            }`}
-                          />
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Payout Frequency
+                </label>
+                <select
+                  value={payoutFrequency}
+                  onChange={(e) => setPayoutFrequency(e.target.value)}
+                  className="border px-3 py-2 rounded-md text-sm w-60"
+                >
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="once">Once a Month</option>
+                  <option value="twice">Twice a Month</option>
+                </select>
+              </div>
 
-                          <div className="absolute right-2 flex gap-1 items-center">
-                            {!user.isEditable ? (
-                              <FaEdit
-                                className="text-gray-400 cursor-pointer hover:text-blue-600"
-                                onClick={() => {
+              {payoutFrequency === "weekly" && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Day of the Week
+                  </label>
+                  <select
+                    value={weeklyDay}
+                    onChange={(e) => setWeeklyDay(e.target.value)}
+                    className="border px-3 py-2 rounded-md text-sm w-60"
+                  >
+                    {[
+                      "Monday",
+                      "Tuesday",
+                      "Wednesday",
+                      "Thursday",
+                      "Friday",
+                      "Saturday",
+                      "Sunday",
+                    ].map((day) => (
+                      <option key={day} value={day}>
+                        {day}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {["daily", "once", "twice"].includes(payoutFrequency) && (
+                <div className="flex flex-col sm:flex-row gap-6 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Payout Date 1
+                    </label>
+                    <input
+                      type="number"
+                      value={firstPayoutDate}
+                      onChange={(e) => setFirstPayoutDate(e.target.value)}
+                      className="border px-3 py-2 rounded-md text-sm no-spinner"
+                    />
+                  </div>
+
+                  {payoutFrequency === "twice" && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Payout Date 2
+                      </label>
+                      <input
+                        type="number"
+                        value={secondPayoutDate}
+                        onChange={(e) => setSecondPayoutDate(e.target.value)}
+                        className="border px-3 py-2 rounded-md text-sm no-spinner"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex justify-end">
+                <button
+                  onClick={handleSavePayoutDates}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
+                >
+                  Save Payout Dates
+                </button>
+              </div>
+            </div>
+          )}
+          {activeTab === "merchant-list" && (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                {usersLoading ? (
+                  <div className="flex justify-center items-center py-10">
+                    <HiOutlineRefresh className="animate-spin text-xl text-gray-500 mr-2" />
+                    Loading users...
+                  </div>
+                ) : users.length > 0 ? (
+                  <table className="w-full border-collapse bg-white">
+                    <thead className="bg-gray-100 text-left text-gray-600 text-xs">
+                      <tr>
+                        <th className="p-3">Name</th>
+                        <th className="p-3">Email</th>
+                        <th className="p-3">Role</th>
+                        <th className="p-3">Comission ( % )</th>
+                        <th className="p-3">Merchant ID</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {editableMerchants.map((user, index) => (
+                        <tr
+                          key={user._id || index}
+                          className="border-b hover:bg-gray-50 text-sm"
+                        >
+                          <td className="p-3">
+                            {user.firstName} {user.lastName}
+                          </td>
+
+                          <td className="p-3">{user.email}</td>
+
+                          <td className="p-3">
+                            <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-700">
+                              {user.role}
+                            </span>
+                          </td>
+
+                          {/* ✅ COMMISSION COLUMN */}
+                          <td className="p-3">
+                            <div className="relative w-32 flex items-center">
+                              <input
+                                type="number"
+                                value={user.commissionValue}
+                                disabled={!user.isEditable}
+                                onChange={(e) => {
                                   const updated = [...editableMerchants];
-                                  updated[index].isEditable = true;
+                                  updated[index].commissionValue =
+                                    e.target.value;
                                   setEditableMerchants(updated);
                                 }}
+                                className={`w-full text-sm px-2 py-1 border rounded-md pr-12 ${
+                                  user.isEditable
+                                    ? "bg-white border-gray-300"
+                                    : "bg-gray-100 text-gray-500 cursor-pointer"
+                                }`}
                               />
-                            ) : (
-                              <>
-                                <button
-                                  className="text-green-600 text-sm"
-                                  disabled={savingId === user._id}
-                                  onClick={async () => {
-                                    setSavingId(user._id);
-                                    try {
-                                      await updateMerchantCommission(
-                                        user._id,
-                                        user.commissionValue,
-                                      );
+
+                              <div className="absolute right-2 flex gap-1 items-center">
+                                {!user.isEditable ? (
+                                  <FaEdit
+                                    className="text-gray-400 cursor-pointer hover:text-blue-600"
+                                    onClick={() => {
                                       const updated = [...editableMerchants];
-                                      updated[index].isEditable = false;
+                                      updated[index].isEditable = true;
                                       setEditableMerchants(updated);
-                                    } catch {
-                                      alert("Commission update failed");
-                                    }
-                                    setSavingId(null);
-                                  }}
-                                >
-                                  {savingId === user._id ? "..." : "✔"}
-                                </button>
+                                    }}
+                                  />
+                                ) : (
+                                  <>
+                                    <button
+                                      className="text-green-600 text-sm"
+                                      disabled={savingId === user._id}
+                                      onClick={async () => {
+                                        setSavingId(user._id);
+                                        try {
+                                          await updateMerchantCommission(
+                                            user._id,
+                                            user.commissionValue,
+                                          );
+                                          const updated = [
+                                            ...editableMerchants,
+                                          ];
+                                          updated[index].isEditable = false;
+                                          setEditableMerchants(updated);
+                                        } catch {
+                                          alert("Commission update failed");
+                                        }
+                                        setSavingId(null);
+                                      }}
+                                    >
+                                      {savingId === user._id ? "..." : "✔"}
+                                    </button>
 
-                                <button
-                                  className="text-red-600 text-sm"
-                                  onClick={() => {
-                                    const updated = [...editableMerchants];
-                                    updated[index].isEditable = false;
-                                    updated[index].commissionValue =
-                                      user.commission;
-                                    setEditableMerchants(updated);
-                                  }}
-                                >
-                                  ✖
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </td>
+                                    <button
+                                      className="text-red-600 text-sm"
+                                      onClick={() => {
+                                        const updated = [...editableMerchants];
+                                        updated[index].isEditable = false;
+                                        updated[index].commissionValue =
+                                          user.commission;
+                                        setEditableMerchants(updated);
+                                      }}
+                                    >
+                                      ✖
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </td>
 
-                      <td className="p-3">{user.shopifyId || "N/A"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="text-center py-10 text-gray-500">
-                No users found.
+                          <td className="p-3">{user.shopifyId || "N/A"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="text-center py-10 text-gray-500">
+                    No users found.
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
 
       {toast.show && (
@@ -1459,7 +1495,7 @@ const Finance = () => {
           </div>
         </div>
       )}
-    </main>
+    </div>
   ) : null;
 };
 

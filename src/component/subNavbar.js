@@ -59,7 +59,7 @@ const SubNavbar = () => {
     const fetchUserModules = async () => {
       try {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/auth/getUserWithModules/${userId}`,
+          `http://localhost:5000/auth/getUserWithModules/${userId}`,
         );
 
         if (!response.ok) {
@@ -97,6 +97,7 @@ const SubNavbar = () => {
         { name: "Manage Size Charts", path: "/manage-size-chart" },
         { name: "Manage Shipping", path: "/manage-shipping" },
         { name: "Status & Logs", path: "/status-logs" },
+        { name: "Content Management", path: "/content" },
       ],
     },
     {

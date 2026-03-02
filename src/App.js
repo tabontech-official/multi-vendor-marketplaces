@@ -66,6 +66,7 @@ import InvoicePage from "./pages/invoice";
 import "react-toastify/dist/ReactToastify.css";
 import LogsPage from "./pages/LogsPage";
 import BatchDetails from "./pages/BatchDetails";
+import ContentLibrary from "./pages/ContentLibrary";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -136,7 +137,7 @@ const App = () => {
             <Route path="/status-logs" element={<LogsPage />} />
             <Route path="/api-docs" element={<ApiDocs />} />
             <Route path="/api-reference" element={<ApiDocsPage />} />
- <Route path="/batch/:id" element={<BatchDetails />} />
+            <Route path="/batch/:id" element={<BatchDetails />} />
             <Route
               path="/create-categories"
               element={<PrivateRoute element={<CreateCategory />} />}
@@ -232,15 +233,19 @@ const App = () => {
             />
             <Route
               path="/payout-details"
-              element={<ProtectedForms element={<PayoutDetails />} />}
+              element={<PrivateRoute element={<PayoutDetails />} />}
+            />
+              <Route
+              path="/content"
+              element={<PrivateRoute element={<ContentLibrary />} />}
             />
             <Route
               path="/merchant-payout-details"
               element={<ProtectedForms element={<MerchantPayoutDetails />} />}
             />
             <Route
-              path="/finance"
-              element={<ProtectedForms element={<Finance />} />}
+              path="/payout"
+              element={<PrivateRoute element={<Finance />} />}
             />
             <Route
               path="/manage-approvals"

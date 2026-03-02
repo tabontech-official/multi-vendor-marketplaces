@@ -47,7 +47,7 @@ const ContentLibrary = () => {
   const handleDelete = async () => {
     try {
       for (let file of selectedFiles) {
-        await axios.delete("http://localhost:5000/api/content/delete-file", {
+        await axios.delete("https://multi-vendor-marketplace.vercel.app/api/content/delete-file", {
           data: {
             userId: file.userId || userId,
             public_id: file.public_id,
@@ -70,11 +70,11 @@ const ContentLibrary = () => {
 
       if (role === "Dev Admin" || role === "Master Admin") {
         res = await axios.get(
-          "http://localhost:5000/api/content/get-all-files",
+          "https://multi-vendor-marketplace.vercel.app/api/content/get-all-files",
         );
       } else {
         res = await axios.get(
-          `http://localhost:5000/api/content/get-by-user/${userId}`,
+          `https://multi-vendor-marketplace.vercel.app/api/content/get-by-user/${userId}`,
         );
       }
 
@@ -103,7 +103,7 @@ const ContentLibrary = () => {
     try {
       setUploading(true);
       await axios.post(
-        "http://localhost:5000/api/content/upload-content",
+        "https://multi-vendor-marketplace.vercel.app/api/content/upload-content",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

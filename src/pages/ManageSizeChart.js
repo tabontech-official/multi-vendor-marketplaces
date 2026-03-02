@@ -54,9 +54,9 @@ const ManageSizeChart = () => {
 
       if (role === "Dev Admin" || role === "Master Admin") {
         url =
-          "http://localhost:5000/size-chart/admin/all";
+          "https://multi-vendor-marketplace.vercel.app/size-chart/admin/all";
       } else {
-        url = `http://localhost:5000/size-chart/all/${userId}`;
+        url = `https://multi-vendor-marketplace.vercel.app/size-chart/all/${userId}`;
       }
 
       const res = await axios.get(url);
@@ -77,7 +77,7 @@ const ManageSizeChart = () => {
       setLoadingDelete(true);
 
       await axios.delete(
-        `http://localhost:5000/size-chart/delete/${deleteId}`,
+        `https://multi-vendor-marketplace.vercel.app/size-chart/delete/${deleteId}`,
       );
 
       showToast("success", "Size chart deleted successfully");

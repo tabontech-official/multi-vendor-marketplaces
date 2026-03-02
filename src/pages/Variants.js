@@ -24,7 +24,7 @@ const Variants = () => {
   //     const token=localStorage.getItem('usertoken')
   //     try {
   //       const response = await axios.get(
-  //         `http://localhost:5000/product/getSingleProductForVariants/${productId}`
+  //         `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`
   //       );
   //       setProduct(response.data);
   //       setLoading(false);
@@ -43,7 +43,7 @@ const Variants = () => {
       const apiSecretKey = localStorage.getItem("apiSecretKey");
       try {
         const response = await axios.get(
-          `http://localhost:5000/product/getSingleProductForVariants/${productId}`,
+          `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`,
           {
             headers: {
               "x-api-key": apiKey,
@@ -77,7 +77,7 @@ const Variants = () => {
       const apiSecretKey = localStorage.getItem("apiSecretKey");
       try {
         const response = await axios.get(
-          `http://localhost:5000/product/getVariant/${productId}/variants/${variantId}`,
+          `https://multi-vendor-marketplace.vercel.app/product/getVariant/${productId}/variants/${variantId}`,
           {
             headers: {
               "x-api-key": apiKey,
@@ -112,7 +112,7 @@ const Variants = () => {
   //     setIsLoading(true);
 
   //     const response = await axios.put(
-  //       `http://localhost:5000/product/updateVariant/${productId}/${variantId}`,
+  //       `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
   //       {
   //         variant: updatedVariant,
   //       },
@@ -141,7 +141,7 @@ const Variants = () => {
       setIsLoading(true);
 
       await axios.put(
-        `http://localhost:5000/product/updateVariant/${productId}/${variantId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
         { variant: updatedVariant },
         {
           headers: {
@@ -155,7 +155,7 @@ const Variants = () => {
       toast.success("Variant updated successfully!");
 
       const refreshedProduct = await axios.get(
-        `http://localhost:5000/product/getSingleProductForVariants/${productId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`,
         {
           headers: {
             "x-api-key": apiKey,

@@ -276,7 +276,7 @@ const LogsPage = () => {
               ) : (
                 displayedBatches.map((batch) => (
                   <tr key={batch._id} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium">{batch.batchNo}</td>
+                    <td  onClick={() => navigate(`/batch/${batch._id}`)} className="px-4 py-3 hover:text-blue-600 hover:underline cursor-pointer text-blue-500 font-medium">{batch.batchNo}</td>
                     <td className="px-4 py-3">{batch.fileName}</td>
                     <td className="px-4 py-3">
                       <span

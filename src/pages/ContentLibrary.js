@@ -44,24 +44,24 @@ const ContentLibrary = () => {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      for (let file of selectedFiles) {
-        await axios.delete("https://multi-vendor-marketplace.vercel.app/api/content/delete-file", {
-          data: {
-            userId: file.userId || userId,
-            public_id: file.public_id,
-          },
-        });
-      }
-
-      setShowDeleteModal(false);
-      setSelectedFiles([]);
-      fetchFiles();
-    } catch (error) {
-      console.error("Delete failed:", error);
+ const handleDelete = async () => {
+  try {
+    for (let file of selectedFiles) {
+      await axios.delete(
+        "https://multi-vendor-marketplace.vercel.app/api/content/delete-file",
+        {
+          data: { id: file._id }, 
+        }
+      );
     }
-  };
+
+    setShowDeleteModal(false);
+    setSelectedFiles([]);
+    fetchFiles();
+  } catch (error) {
+    console.error("Delete failed:", error);
+  }
+};
 
   const fetchFiles = async () => {
     setLoading(true);
@@ -179,23 +179,21 @@ const ContentLibrary = () => {
               <thead className="bg-[#f7f7f7] text-[#616161] font-medium border-b border-[#e3e3e3]">
                 <tr>
                   <th className="p-4 w-10">
-                    <th className="p-4 w-10">
-                      <input
-                        type="checkbox"
-                        checked={
-                          filteredFiles.length > 0 &&
-                          selectedFiles.length === filteredFiles.length
+                    <input
+                      type="checkbox"
+                      checked={
+                        filteredFiles.length > 0 &&
+                        selectedFiles.length === filteredFiles.length
+                      }
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedFiles(filteredFiles);
+                        } else {
+                          setSelectedFiles([]);
                         }
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedFiles(filteredFiles);
-                          } else {
-                            setSelectedFiles([]);
-                          }
-                        }}
-                        className="rounded border-gray-300"
-                      />
-                    </th>
+                      }}
+                      className="rounded border-gray-300"
+                    />
                   </th>
                   <th className="p-4">File</th>
                   <th className="p-4">Date Added</th>
@@ -225,7 +223,7 @@ const ContentLibrary = () => {
                             <input
                               type="checkbox"
                               checked={selectedFiles.some(
-                                (f) => f.public_id === file.public_id,
+                                (f) => f._id === file._id,
                               )}
                               onChange={() => handleSelect(file)}
                               className="rounded border-gray-300"

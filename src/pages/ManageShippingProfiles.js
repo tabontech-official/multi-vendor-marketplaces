@@ -61,8 +61,7 @@ const ManageShippingProfiles = () => {
         ratePrice: parseFloat(newProfile.ratePrice),
       };
 
-      const endpoint =
-        "https://multi-vendor-marketplace.vercel.app/shippingProfile/add-shippings";
+      const endpoint = "http://localhost:5000/shippingProfile/add-shippings";
 
       const { data } = await axios.post(endpoint, payload, {
         headers: { "Content-Type": "application/json" },
@@ -103,7 +102,7 @@ const ManageShippingProfiles = () => {
       setLoading(true);
 
       await axios.delete(
-        `https://multi-vendor-marketplace.vercel.app/shippingProfile/shipping-profiles/${deleteModal.id}`,
+        `http://localhost:5000/shippingProfile/shipping-profiles/${deleteModal.id}`,
       );
 
       showToast("success", "Shipping profile deleted successfully!");
@@ -145,8 +144,8 @@ const ManageShippingProfiles = () => {
         userData.role === "Dev Admin" || userData.role === "Master Admin";
 
       const endpoint = isAdmin
-        ? "https://multi-vendor-marketplace.vercel.app/shippingProfile/get/admin"
-        : "https://multi-vendor-marketplace.vercel.app/shippingProfile/getProfiles";
+        ? "http://localhost:5000/shippingProfile/get/admin"
+        : "http://localhost:5000/shippingProfile/getProfiles";
 
       console.log("📡 Fetching profiles from:", endpoint);
 
@@ -185,7 +184,7 @@ const ManageShippingProfiles = () => {
   const fetchUserActiveProfiles = async (userId) => {
     try {
       const { data } = await axios.get(
-        `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`,
+        `http://localhost:5000/shippingProfile/${userId}`,
       );
       setActiveProfiles(data.map((p) => p.profileId));
     } catch (err) {
@@ -213,26 +212,20 @@ const ManageShippingProfiles = () => {
       );
 
       if (checked) {
-        await axios.post(
-          "https://multi-vendor-marketplace.vercel.app/shippingProfile/activate",
-          {
-            userId: profileUserId,
-            profile: {
-              profileId: profile.profileId,
-              profileName: profile.profileName,
-              rateName: profile.rateName,
-              ratePrice: profile.ratePrice,
-            },
-          },
-        );
-      } else {
-        await axios.post(
-          "https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate",
-          {
-            userId: profileUserId,
+        await axios.post("http://localhost:5000/shippingProfile/activate", {
+          userId: profileUserId,
+          profile: {
             profileId: profile.profileId,
+            profileName: profile.profileName,
+            rateName: profile.rateName,
+            ratePrice: profile.ratePrice,
           },
-        );
+        });
+      } else {
+        await axios.post("http://localhost:5000/shippingProfile/deactivate", {
+          userId: profileUserId,
+          profileId: profile.profileId,
+        });
       }
     } catch (err) {
       console.error("Toggle error:", err);
@@ -251,7 +244,7 @@ const ManageShippingProfiles = () => {
       );
 
       await axios.put(
-        `https://multi-vendor-marketplace.vercel.app/shippingProfile/updateStatus/${profile._id}`,
+        `http://localhost:5000/shippingProfile/updateStatus/${profile._id}`,
         {
           status: checked ? "enabled" : "disabled",
         },
@@ -266,7 +259,7 @@ const ManageShippingProfiles = () => {
     try {
       setLoading(true);
       await axios.put(
-        `https://multi-vendor-marketplace.vercel.app/shippingProfile/update/${editingProfile._id}`,
+        `http://localhost:5000/shippingProfile/update/${editingProfile._id}`,
         editingProfile,
       );
 
@@ -285,7 +278,7 @@ const ManageShippingProfiles = () => {
     if (!window.confirm("Delete this shipping profile?")) return;
     try {
       await axios.delete(
-        `https://multi-vendor-marketplace.vercel.app/shippingProfile/shipping-profiles/${id}`,
+        `http://localhost:5000/shippingProfile/shipping-profiles/${id}`,
       );
       fetchProfiles();
     } catch (err) {
@@ -321,19 +314,26 @@ const ManageShippingProfiles = () => {
           <span>{toast.message}</span>
         </div>
       )}
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
-        <button
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 pb-4 gap-4">
+        <div className="flex-1">
+          <h1 className="flex items-center text-xl font-semibold text-gray-900 mb-0.5">
+            <FaShippingFast className="text-gray-600 mr-3" />
+            Manage Shipping Profiles
+          </h1>
+          <p className="text-sm ml-9 text-gray-500">
+            Manage your shipping profiles here.
+          </p>
+        </div>
+      </div>
+      <div className=" mx-auto bg-white rounded-xl shadow-md p-6">
+        {/* <button
           onClick={() => navigate(-1)}
           className="inline-flex mb-5 items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition shadow-sm"
         >
           <HiArrowLeft className="text-lg" />
           Back
-        </button>
+        </button> */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="flex items-center text-xl font-semibold text-gray-900 mb-0.5">
-            <FaShippingFast className="text-gray-600 mr-3" />
-            Manage Shipping Profiles
-          </h1>
           <div className="flex gap-2">
             {isAdmin && (
               <button

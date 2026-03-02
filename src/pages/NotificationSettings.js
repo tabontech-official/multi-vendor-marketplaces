@@ -17,7 +17,7 @@ const NotificationSettings = () => {
   const [allowed, setAllowed] = useState(false);
   const [staffEmail, setStaffEmail] = useState("");
   const [emailList, setEmailList] = useState(["admin-audit@store.com"]);
-  const API_BASE_URL = "https://multi-vendor-marketplace.vercel.app/notificationSettings";
+  const API_BASE_URL = "http://localhost:5000/notificationSettings";
  
    const [toast, setToast] = useState({ show: false, type: "", message: "" });
  

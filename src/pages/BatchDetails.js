@@ -15,7 +15,7 @@
 //   const fetchBatch = async () => {
 //     try {
 //       const res = await axios.get(
-//         `https://multi-vendor-marketplace.vercel.app/product/batch/${id}`,
+//         `http://localhost:5000/product/batch/${id}`,
 //         {
 //           headers: {
 //             Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
@@ -175,7 +175,7 @@ const BatchDetails = () => {
 
   const fetchBatch = async () => {
     try {
-      const res = await axios.get(`https://multi-vendor-marketplace.vercel.app/product/batch/${id}`, {
+      const res = await axios.get(`http://localhost:5000/product/batch/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
         },
@@ -364,7 +364,7 @@ const BatchDetails = () => {
                     </td>
 
                     {/* Message Column */}
-                    <td className="px-4 py-3 max-w-md">
+                    {/* <td className="px-4 py-3 max-w-md">
                       {item.status === "error" ? (
                         <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded-md">
                           {formatErrorMessage(item.message)}
@@ -382,8 +382,49 @@ const BatchDetails = () => {
                           )}
                         </div>
                       )}
-                    </td>
+                    </td> */}
 
+                    <td className="px-4 py-3 max-w-md">
+                      {item.status === "error" ? (
+                        <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded-md">
+                          {formatErrorMessage(item.message)}
+                        </div>
+                      ) : (
+                        <div
+                          className={`border text-xs px-3 py-3 rounded-md ${
+                            item.warnings?.length > 0
+                              ? "bg-yellow-50 border-yellow-300 text-yellow-800"
+                              : "bg-green-50 border-green-200 text-green-700"
+                          }`}
+                        >
+                          <div className="font-semibold">
+                            {item.warnings?.length > 0
+                              ? "Completed with Warning"
+                              : "Successfully Completed"}
+                          </div>
+
+                          {duration !== null && (
+                            <div className="mt-1 text-xs opacity-80">
+                              Completed in{" "}
+                              {duration > 60
+                                ? `${Math.floor(duration / 60)}m ${duration % 60}s`
+                                : `${duration}s`}
+                            </div>
+                          )}
+
+                          {item.warnings?.length > 0 && (
+                            <ul className="mt-2 list-disc list-inside space-y-1">
+                              {item.warnings.map((warn, index) => (
+                                <li key={index}>
+                                  Invalid category:{" "}
+                                  <span className="font-medium">{warn}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      )}
+                    </td>
                     {/* Started */}
                     <td className="px-4 py-3 text-gray-500 text-xs">
                       {item.startedAt

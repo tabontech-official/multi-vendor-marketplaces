@@ -46,7 +46,7 @@
 
 //   useEffect(() => {
 //     fetch(
-//       "http://localhost:5000/order/getCancellationRequests"
+//       "https://multi-vendor-marketplace.vercel.app/order/getCancellationRequests"
 //     )
 //       .then((res) => res.json())
 //       .then((data) => {
@@ -205,7 +205,7 @@ const ManageRequests = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/order/getCancellationRequests")
+    fetch("https://multi-vendor-marketplace.vercel.app/order/getCancellationRequests")
       .then(res => res.json())
       .then(data => {
         if (data.success) setGroupedData(data.data);

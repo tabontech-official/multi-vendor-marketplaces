@@ -65,7 +65,7 @@
 //     const nestedCategories = buildCategoryTree(categories);
 
 //     try {
-//       const response = await fetch("http://localhost:5000/category/createCategory", {
+//       const response = await fetch("https://multi-vendor-marketplace.vercel.app/category/createCategory", {
 //         method: "POST",
 //         headers: { "Content-Type": "application/json" },
 //         body: JSON.stringify({ categories: nestedCategories, description })

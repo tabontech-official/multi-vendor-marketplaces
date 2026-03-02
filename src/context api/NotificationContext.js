@@ -19,7 +19,7 @@ export const NotificationProvider = ({ children }) => {
     if (!userId) return;
     try {
       const res = await axios.get(
-        `http://localhost:5000/notifications/getNotificationByUserId/${userId}`
+        `https://multi-vendor-marketplace.vercel.app/notifications/getNotificationByUserId/${userId}`
       );
       setNotifications(res.data || []);
       console.log(res.data)
@@ -41,7 +41,7 @@ export const NotificationProvider = ({ children }) => {
 
       setNotifications((prev) => [newNotification, ...prev.slice(0, 9)]);
 
-      await axios.post("http://localhost:5000/notifications/addNotofication", {
+      await axios.post("https://multi-vendor-marketplace.vercel.app/notifications/addNotofication", {
         userId,
         message,
         source,
@@ -59,7 +59,7 @@ export const NotificationProvider = ({ children }) => {
       setNotifications(updated);
       setHasUnseenNotifications(false);
 
-      await axios.put(`http://localhost:5000/notifications/markAllSeen/${userId}`);
+      await axios.put(`https://multi-vendor-marketplace.vercel.app/notifications/markAllSeen/${userId}`);
     } catch (err) {
       console.error("Failed to mark notifications as seen:", err);
     }

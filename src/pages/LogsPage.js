@@ -34,7 +34,7 @@
 //     const userid = localStorage.getItem("userid");
 //     try {
 //       const res = await axios.get(
-//         `http://localhost:5000/product/batches/${userid}`,
+//         `https://multi-vendor-marketplace.vercel.app/product/batches/${userid}`,
 //         {
 //           headers: {
 //             Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
@@ -52,7 +52,7 @@
 
 //   const fetchAllBatches = async () => {
 //     try {
-//       const res = await axios.get(`http://localhost:5000/product/batches`, {
+//       const res = await axios.get(`https://multi-vendor-marketplace.vercel.app/product/batches`, {
 //         headers: {
 //           Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
 //         },
@@ -179,7 +179,7 @@ const LogsPage = () => {
   const fetchUserBatches = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/product/batches/${userId}`,
+        `https://multi-vendor-marketplace.vercel.app/product/batches/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
@@ -196,7 +196,7 @@ const LogsPage = () => {
 
   const fetchAllBatches = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/product/batches`, {
+      const res = await axios.get(`https://multi-vendor-marketplace.vercel.app/product/batches`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
         },

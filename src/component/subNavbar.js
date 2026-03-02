@@ -132,16 +132,16 @@ const SubNavbar = () => {
       icon: <FiUsers className="text-green-600" />,
       path: "/on-board-users",
     },
-    {
-      name: "Finance",
-      icon: <FiDollarSign className="text-purple-600" />,
-      path: "/finance",
-    },
-    {
-      name: "Documentation",
-      icon: <FiFileText className="text-green-600" />,
-      path: "/api-docs",
-    },
+    // {
+    //   name: "Finance",
+    //   icon: <FiDollarSign className="text-purple-600" />,
+    //   path: "/finance",
+    // },
+    // {
+    //   name: "Documentation",
+    //   icon: <FiFileText className="text-green-600" />,
+    //   path: "/api-docs",
+    // },
   ];
   return (
     <div className="flex items-center bg-white border border-gray-300 px-4 py-2 shadow-sm relative ">

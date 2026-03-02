@@ -14,7 +14,9 @@ import { useNotification } from "../context api/NotificationContext";
 
 const Inventory = () => {
   const { addNotification } = useNotification();
-
+const [currentBatchNo, setCurrentBatchNo] = useState(null);
+const [batchStatus, setBatchStatus] = useState(null);
+const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   let admin;
 
   const isAdmin = () => {
@@ -387,66 +389,112 @@ const Inventory = () => {
     }
   };
 
-  const handleUploadAndPreview = async () => {
-    if (!selectedFile) return;
+  // const handleUploadAndPreview = async () => {
+  //   if (!selectedFile) return;
 
-    setIsUploading(true);
+  //   setIsUploading(true);
 
-    try {
-      const userId = localStorage.getItem("userid");
-      const apiKey = localStorage.getItem("apiKey");
-      const apiSecretKey = localStorage.getItem("apiSecretKey");
-      if (!userId) {
-        alert("User ID not found");
-        return;
-      }
+  //   try {
+  //     const userId = localStorage.getItem("userid");
+  //     const apiKey = localStorage.getItem("apiKey");
+  //     const apiSecretKey = localStorage.getItem("apiSecretKey");
+  //     if (!userId) {
+  //       alert("User ID not found");
+  //       return;
+  //     }
 
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      formData.append("userId", userId);
-      addNotification(
-        "Inventory CSV upload triggered. Processing in background.",
-        "inventory",
-      );
+  //     const formData = new FormData();
+  //     formData.append("file", selectedFile);
+  //     formData.append("userId", userId);
+  //     addNotification(
+  //       "Inventory CSV upload triggered. Processing in background.",
+  //       "inventory",
+  //     );
 
-      fetch("https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory", {
+  //     fetch("https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory", {
+  //       method: "POST",
+  //       body: formData,
+  //       headers: {
+  //         "x-api-key": apiKey,
+  //         "x-api-secret": apiSecretKey,
+  //       },
+  //     })
+  //       .then((res) => res.json())
+  //       .then((result) => {
+  //         if (result?.message) {
+  //           showToast("success", result.message);
+  //           addNotification(result.message, "inventory");
+  //         } else {
+  //           showToast(
+  //             "info",
+  //             "CSV upload triggered. Processing in background.",
+  //           );
+  //           addNotification(
+  //             "CSV upload triggered. Processing in background.",
+  //             "inventory",
+  //           );
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         console.error("Upload error:", error);
+  //         showToast("error", "Upload triggered but failed to track result.");
+  //       });
+
+  //     closePopupImport();
+  //     setSelectedFile(null);
+  //   } catch (error) {
+  //     console.error("Upload trigger error:", error);
+  //     showToast("error", "Upload triggered but failed to track result.");
+  //   } finally {
+  //     setIsUploading(false);
+  //   }
+  // };
+
+const handleUploadAndPreview = async () => {
+  if (!selectedFile) return;
+
+  setIsUploading(true);
+
+  try {
+    const userId = localStorage.getItem("userid");
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("userId", userId);
+
+    const response = await fetch(
+      "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
+      {
         method: "POST",
         body: formData,
         headers: {
           "x-api-key": apiKey,
           "x-api-secret": apiSecretKey,
         },
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          if (result?.message) {
-            showToast("success", result.message);
-            addNotification(result.message, "inventory");
-          } else {
-            showToast(
-              "info",
-              "CSV upload triggered. Processing in background.",
-            );
-            addNotification(
-              "CSV upload triggered. Processing in background.",
-              "inventory",
-            );
-          }
-        })
-        .catch((error) => {
-          console.error("Upload error:", error);
-          showToast("error", "Upload triggered but failed to track result.");
-        });
+      }
+    );
 
-      closePopupImport();
-      setSelectedFile(null);
-    } catch (error) {
-      console.error("Upload trigger error:", error);
-      showToast("error", "Upload triggered but failed to track result.");
-    } finally {
-      setIsUploading(false);
+    const result = await response.json();
+
+    if (result?.batchNo) {
+      setCurrentBatchNo(result.batchNo);
+      setBatchStatus(result.status);
+      showToast("success", `Batch ${result.batchNo} started`);
+      addNotification(`Inventory batch ${result.batchNo} started`, "inventory");
     }
-  };
+
+    closePopupImport();
+    setSelectedFile(null);
+
+  } catch (error) {
+    console.error("Upload error:", error);
+    showToast("error", "Upload failed");
+  } finally {
+    setIsUploading(false);
+  }
+};
 
   const handleExport = async () => {
     try {
@@ -1752,7 +1800,7 @@ const Inventory = () => {
                     Exporting...
                   </>
                 ) : (
-                  "Export products"
+                  "Export File"
                 )}
               </button>
             </div>

@@ -67,6 +67,7 @@ import "react-toastify/dist/ReactToastify.css";
 import LogsPage from "./pages/LogsPage";
 import BatchDetails from "./pages/BatchDetails";
 import ContentLibrary from "./pages/ContentLibrary";
+import ProductOther from "./pages/ProductOther";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -165,6 +166,10 @@ const App = () => {
             <Route
               path="/manage-shipping"
               element={<PrivateRoute element={<ManageShippingProfiles />} />}
+            />
+             <Route
+              path="/product-other"
+              element={<PrivateRoute element={<ProductOther />} />}
             />
             <Route
               path="/collection/:id"

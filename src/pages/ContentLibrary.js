@@ -50,7 +50,7 @@ const ContentLibrary = () => {
       await axios.delete(
         "https://multi-vendor-marketplace.vercel.app/api/content/delete-file",
         {
-          data: { id: file._id }, 
+          data: { id: file._id },
         }
       );
     }
@@ -197,8 +197,10 @@ const ContentLibrary = () => {
                   </th>
                   <th className="p-4">File</th>
                   {/* <th className="p-4">Date Added</th> */}
-                  <th className="p-4">Size</th>
-                  <th className="p-4 text-right"></th>
+                  {/* <th className="p-4">Size</th>
+                  <th className="p-4 text-right"></th> */}
+                                    <th className="p-4 text-right"></th>
+
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f1f1f1]">
@@ -261,15 +263,15 @@ const ContentLibrary = () => {
 
                         {/* Hover Action Button - Classic Shopify style */}
                       </td>
-                      <td className="p-4 text-[#616161]">
+                      {/* <td className="p-4 text-[#616161]">
                         {new Date(file.createdAt).toLocaleDateString(
                           undefined,
                           { month: "short", day: "numeric", year: "numeric" },
                         )}
-                      </td>
-                      <td className="p-4 text-[#616161]">
+                      </td> */}
+                      {/* <td className="p-4 text-[#616161]">
                         {(file.bytes / 1024).toFixed(1)} KB
-                      </td>
+                      </td> */}
                       <td className="p-4 text-right">
                         <button
                           onClick={() => handleCopy(file.url, index)}
@@ -347,3 +349,310 @@ const ContentLibrary = () => {
 };
 
 export default ContentLibrary;
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import {
+//   HiOutlineUpload,
+//   HiOutlineSearch,
+//   HiOutlineRefresh,
+//   HiCheck,
+//   HiOutlineClipboardCopy,
+// } from "react-icons/hi";
+// import { jwtDecode } from "jwt-decode";
+
+// const ContentLibrary = () => {
+//   const [files, setFiles] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const [uploading, setUploading] = useState(false);
+//   const [search, setSearch] = useState("");
+//   const [copiedId, setCopiedId] = useState(null);
+//   const [role, setRole] = useState("");
+//   const [selectedFiles, setSelectedFiles] = useState([]);
+//   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+//   const [activeTab, setActiveTab] = useState("files");
+//   const [showExcelModal, setShowExcelModal] = useState(false);
+//   const [excelType, setExcelType] = useState("products");
+//   const [excelFile, setExcelFile] = useState(null);
+
+//   const userId = localStorage.getItem("userid");
+
+//   useEffect(() => {
+//     const token = localStorage.getItem("usertoken");
+//     if (!token) return;
+
+//     try {
+//       const decoded = jwtDecode(token);
+//       setRole(decoded?.payLoad?.role || "");
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     fetchFiles();
+//   }, [role, activeTab]);
+
+//   const fetchFiles = async () => {
+//     setLoading(true);
+//     try {
+//       let res;
+
+//       if (activeTab === "downloadable") {
+//         res = await axios.get(
+//           "https://multi-vendor-marketplace.vercel.app/admin-file/get-downloadable",
+//         );
+//       } else {
+//         if (role === "Dev Admin" || role === "Master Admin") {
+//           res = await axios.get(
+//             "https://multi-vendor-marketplace.vercel.app/api/content/get-all-files",
+//           );
+//         } else {
+//           res = await axios.get(
+//             `https://multi-vendor-marketplace.vercel.app/api/content/get-by-user/${userId}`,
+//           );
+//         }
+//       }
+
+//       setFiles(res.data.data || []);
+//     } catch (err) {
+//       console.error(err);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleNormalUpload = async (e) => {
+//     const selectedFiles = e.target.files;
+//     if (!selectedFiles.length) return;
+
+//     const formData = new FormData();
+//     formData.append("userId", userId);
+//     for (let i = 0; i < selectedFiles.length; i++) {
+//       formData.append("files", selectedFiles[i]);
+//     }
+
+//     try {
+//       setUploading(true);
+//       await axios.post(
+//         "https://multi-vendor-marketplace.vercel.app/api/content/upload-content",
+//         formData,
+//       );
+//       fetchFiles();
+//     } catch (error) {
+//       alert("Upload failed");
+//     } finally {
+//       setUploading(false);
+//     }
+//   };
+
+//   const handleExcelUpload = async () => {
+//     if (!excelFile) return alert("Select file first");
+
+//     const formData = new FormData();
+//     formData.append("file", excelFile);
+//     formData.append("userId", userId);
+
+//     try {
+//       setUploading(true);
+//       await axios.post(
+//         `https://multi-vendor-marketplace.vercel.app/admin-file/upload-downloadable/${excelType}`,
+//         formData,
+//       );
+
+//       setShowExcelModal(false);
+//       setExcelFile(null);
+//       fetchFiles();
+//     } catch (error) {
+//       alert("Excel upload failed");
+//     } finally {
+//       setUploading(false);
+//     }
+//   };
+
+//   const handleCopy = (url, index) => {
+//     navigator.clipboard.writeText(url);
+//     setCopiedId(index);
+//     setTimeout(() => setCopiedId(null), 2000);
+//   };
+
+//   const filteredFiles = files.filter((file) =>
+//     file.originalName?.toLowerCase().includes(search.toLowerCase()),
+//   );
+//   return (
+//     <div className="min-h-screen bg-[#f1f1f1] p-8">
+//       <div className="mx-auto">
+//         {/* Tabs */}
+//         {(role === "Master Admin" || role === "Dev Admin") && (
+//           <div className="flex gap-6 mb-6 border-b">
+//             <button
+//               onClick={() => setActiveTab("files")}
+//               className={`pb-2 text-sm font-medium ${
+//                 activeTab === "files"
+//                   ? "border-b-2 border-[#008060] text-[#008060]"
+//                   : "text-gray-500"
+//               }`}
+//             >
+//               All Files
+//             </button>
+//             <button
+//               onClick={() => setActiveTab("downloadable")}
+//               className={`pb-2 text-sm font-medium ${
+//                 activeTab === "downloadable"
+//                   ? "border-b-2 border-[#008060] text-[#008060]"
+//                   : "text-gray-500"
+//               }`}
+//             >
+//               Downloadable Excel Files
+//             </button>
+//           </div>
+//         )}
+
+//         {/* Header */}
+//         <div className="flex justify-between items-center mb-5">
+//           <h1 className="text-xl font-bold">Content Library</h1>
+
+//           <div className="flex gap-3">
+//             <button
+//               onClick={fetchFiles}
+//               className="bg-white border p-2 rounded-md"
+//             >
+//               <HiOutlineRefresh />
+//             </button>
+
+//             {activeTab === "files" ? (
+//               <label className="bg-[#008060] text-white px-4 py-2 rounded-md cursor-pointer flex items-center gap-2">
+//                 <HiOutlineUpload />
+//                 {uploading ? "Uploading..." : "Add file"}
+//                 <input
+//                   type="file"
+//                   hidden
+//                   multiple
+//                   onChange={handleNormalUpload}
+//                 />
+//               </label>
+//             ) : (
+//               <button
+//                 onClick={() => setShowExcelModal(true)}
+//                 className="bg-[#008060] text-white px-4 py-2 rounded-md"
+//               >
+//                 Add Excel
+//               </button>
+//             )}
+//           </div>
+//         </div>
+
+//         {/* Table */}
+//         <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+//           <div className="p-3 border-b">
+//             <div className="relative">
+//               <HiOutlineSearch className="absolute left-3 top-2.5 text-gray-400" />
+//               <input
+//                 type="text"
+//                 placeholder="Filter files"
+//                 value={search}
+//                 onChange={(e) => setSearch(e.target.value)}
+//                 className="pl-9 pr-3 py-1.5 w-full border rounded-md text-sm"
+//               />
+//             </div>
+//           </div>
+
+//           <div className="overflow-x-auto">
+//             <table className="w-full text-sm">
+//               <thead className="bg-gray-50 border-b">
+//                 <tr>
+//                   <th className="p-4 text-left">Image</th>
+
+//                   <th className="p-4 text-left">File</th>
+//                   <th className="p-4 text-left">Type</th>
+//                   <th className="p-4 text-right">Action</th>
+//                 </tr>
+//               </thead>
+
+//               <tbody>
+//                 {loading ? (
+//                   <tr>
+//                     <td colSpan="3" className="text-center py-10">
+//                       Loading...
+//                     </td>
+//                   </tr>
+//                 ) : filteredFiles.length > 0 ? (
+//                   filteredFiles.map((file, index) => (
+//                     <tr key={file._id} className="border-t hover:bg-gray-50">
+//                       <td className="p-4">
+//                         <img
+//                           src={file.url}
+//                           className="w-10 h-10 object-cover rounded"
+//                         />
+//                       </td>
+//                       <td className="p-4">{file.originalName}</td>
+//                       <td className="p-4">{file.type || "Normal"}</td>
+//                       <td className="p-4 text-right">
+//                         <button
+//                           onClick={() => handleCopy(file.url, index)}
+//                           className="text-sm border px-3 py-1 rounded"
+//                         >
+//                           {copiedId === index ? "Copied" : "Copy Link"}
+//                         </button>
+//                       </td>
+//                     </tr>
+//                   ))
+//                 ) : (
+//                   <tr>
+//                     <td colSpan="3" className="text-center py-10">
+//                       No files found
+//                     </td>
+//                   </tr>
+//                 )}
+//               </tbody>
+//             </table>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Excel Modal */}
+//       {showExcelModal && (
+//         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+//           <div className="bg-white p-6 rounded-lg w-96">
+//             <h2 className="font-semibold mb-4">Upload Downloadable Excel</h2>
+
+//             <select
+//               value={excelType}
+//               onChange={(e) => setExcelType(e.target.value)}
+//               className="w-full border p-2 rounded mb-4"
+//             >
+//               <option value="products">Products</option>
+//               <option value="inventory">Inventory</option>
+//               <option value="categories">Categories</option>
+//             </select>
+
+//             <input
+//               type="file"
+//               accept=".xlsx,.xls,.csv"
+//               onChange={(e) => setExcelFile(e.target.files[0])}
+//               className="mb-4"
+//             />
+
+//             <div className="flex justify-end gap-3">
+//               <button
+//                 onClick={() => setShowExcelModal(false)}
+//                 className="border px-4 py-2 rounded"
+//               >
+//                 Cancel
+//               </button>
+
+//               <button
+//                 onClick={handleExcelUpload}
+//                 className="bg-[#008060] text-white px-4 py-2 rounded"
+//               >
+//                 Upload
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default ContentLibrary;

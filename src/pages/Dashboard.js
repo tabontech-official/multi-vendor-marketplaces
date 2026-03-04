@@ -1525,7 +1525,7 @@ const Dashboard = () => {
                 )}
               </div>
               <a
-                href="https://multi-vendor-marketplace.vercel.app/admin-file/download/products"
+                href="https://multi-vendor-marketplace.vercel.app/admin-file/download/Products"
                 className="text-sm border px-3 py-1 rounded hover:bg-gray-100"
               >
                 Download sample Excel file

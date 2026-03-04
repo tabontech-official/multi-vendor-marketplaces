@@ -255,17 +255,17 @@ const SubNavbar = () => {
         { name: "Manage Product", path: "/manage-product" },
         { name: "Add Product", path: "/add-product" },
         { name: "Inventory", path: "/inventory" },
-
+        { name: "Status & Logs", path: "/status-logs" },
         {
-          name: "Other Configurations",
+          name: "Configurations",
           subModules: [
-            { name: "Manage Approval", path: "/manage-approvals" },
-            { name: "Manage Categories", path: "/manage-categories" },
-            { name: "Manage Options", path: "/manage-options" },
-            { name: "Manage Size Charts", path: "/manage-size-chart" },
-            { name: "Manage Shipping", path: "/manage-shipping" },
-            { name: "Status & Logs", path: "/status-logs" },
-            { name: "Content Management", path: "/content" },
+            { name: "Approval", path: "/manage-approvals" },
+            { name: "Categories", path: "/manage-categories" },
+            { name: "Options", path: "/manage-options" },
+            { name: "Size Charts", path: "/manage-size-chart" },
+            { name: "Shipping", path: "/manage-shipping" },
+
+            { name: "Content & Files", path: "/content" },
           ],
         },
       ],

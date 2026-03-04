@@ -1525,9 +1525,8 @@ const Dashboard = () => {
                 )}
               </div>
               <a
-                href="/product_template.xlsx"
-                download
-                className="text-sm text-gray-800 underline cursor-pointer mb-4 inline-block"
+                href="https://multi-vendor-marketplace.vercel.app/admin-file/download/products"
+                className="text-sm border px-3 py-1 rounded hover:bg-gray-100"
               >
                 Download sample Excel file
               </a>

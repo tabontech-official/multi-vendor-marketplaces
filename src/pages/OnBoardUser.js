@@ -294,43 +294,90 @@ const OnBoard = () => {
       alert("Error updating user: " + error.message);
     }
   };
-  const modules = [
-    { name: "Dashboard", subModules: [] },
-    {
-      name: "Products",
-      subModules: [
-        "Manage Product",
-        "Add Product",
-        "Inventory",
-        "Manage Categories",
-        "Manage Shipping",
-        "Manage Approval",
-        "Manage Options",
-        "Manage Size Charts"
-      ],
-    },
-    {
-      name: "Orders",
-      subModules: ["ManageOrders"],
-    },
-    {
-      name: "Promotions",
-      subModules: ["All Promotions"],
-    },
-    {
-      name: "Reports",
-      subModules: ["eCommerence Consultion"],
-    },
-    {
-      name: "OnBoardUser",
-      subModules: [],
-    },
-    {
-      name: "Finance",
-      subModules: [],
-    },
-  ];
-
+  // const modules = [
+  //   { name: "Dashboard", subModules: [] },
+  //   {
+  //     name: "Products",
+  //     subModules: [
+  //       "Manage Product",
+  //       "Add Product",
+  //       "Inventory",
+  //       "Manage Categories",
+  //       "Manage Shipping",
+  //       "Manage Approval",
+  //       "Manage Options",
+  //       "Manage Size Charts"
+  //     ],
+  //   },
+  //   {
+  //     name: "Orders",
+  //     subModules: ["ManageOrders"],
+  //   },
+  //   {
+  //     name: "Promotions",
+  //     subModules: ["All Promotions"],
+  //   },
+  //   {
+  //     name: "Reports",
+  //     subModules: ["eCommerence Consultion"],
+  //   },
+  //   {
+  //     name: "OnBoardUser",
+  //     subModules: [],
+  //   },
+  //   {
+  //     name: "Finance",
+  //     subModules: [],
+  //   },
+  // ];
+const modules = [
+  {
+    name: "Dashboard",
+    subModules: [],
+  },
+  {
+    name: "Products",
+    subModules: [
+      "Manage Product",
+      "Add Product",
+      "Inventory",
+      "Status & Logs",
+      "Approval",
+      "Categories",
+      "Options",
+      "Size Charts",
+      "Shipping",
+      "Content & Files",
+      "Configurations"
+    ],
+  },
+  {
+    name: "Orders",
+    subModules: [
+      "ManageOrders",
+      "Manage Requests",
+    ],
+  },
+  {
+    name: "Promotions",
+    subModules: [
+      "My Promotions",
+      "All Promotions",
+    ],
+  },
+  {
+    name: "Reports",
+    subModules: [
+      "Catalog Performance",
+      "Consultation",
+      "Seller Rating",
+    ],
+  },
+  {
+    name: "OnBoardUser",
+    subModules: [],
+  },
+];
   const handleModuleSelection = (moduleName) => {
     setSelectedModules((prev) =>
       prev.includes(moduleName)
@@ -663,10 +710,10 @@ const OnBoard = () => {
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
           onClick={() => setIsOpenPopup(false)}
         >
-          <div
-            className="bg-white p-4 rounded-lg shadow-lg w-2/4"
-            onClick={(e) => e.stopPropagation()}
-          >
+         <div
+  className="bg-white p-4 rounded-lg shadow-lg w-2/4 max-h-[90vh] overflow-y-auto"
+  onClick={(e) => e.stopPropagation()}
+>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <h2 className="text-sm">Manage User</h2>
@@ -747,8 +794,7 @@ const OnBoard = () => {
                   </label>
                 </div>
                 {/* <label className="text-sm text-gray-700 mb-1">Modules *</label> */}
-                <div className="border px-3 py-2 rounded-md">
-                  {modules
+<div className="border px-3 py-2 rounded-md max-h-60 overflow-y-auto">                  {modules
                     .filter((module) => {
                       if (
                         (role === "Merchant" || role === "Merchant Staff") &&

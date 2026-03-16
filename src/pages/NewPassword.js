@@ -80,75 +80,112 @@ const NewPassword = () => {
   }
 
   return (
-    <section className="h-[82vh] flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-500">
-      <div className="flex w-full  max-w-4xl bg-white rounded-lg shadow-lg mx-auto">
-        <div className=" md:flex  flex-col w-1/2 bg-gradient-to-br from-purple-600 to-indigo-500 p-8 justify-center items-center text-white">
+  <section className="h-[88vh] flex items-center justify-center bg-black p-4 font-sans">
+    <div className="flex w-full max-w-5xl bg-[#121212] rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] mx-auto overflow-hidden min-h-[500px] border border-white/5">
+
+      {/* LEFT SIDE */}
+      <div className="hidden md:flex flex-col w-7/12 bg-gradient-to-br from-[#1a1a1a] via-[#0a0a0a] to-black p-12 justify-between items-center text-white relative">
+        <div className="flex flex-col items-center justify-center flex-grow">
+          <div className="absolute w-72 h-72 bg-white/5 rounded-full blur-[100px]"></div>
+
           <img
             src="/png-logo.png"
-            alt="Login"
-            className="w-64 h-64 object-cover"
+            alt="Marketplace"
+            className="w-64 h-64 object-contain z-10 brightness-110"
           />
-          <p className="mt-4 text-center text-sm opacity-90">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis at
-            velit maximus, molestie est a, tempor magna.
-          </p>
         </div>
 
-        <div className="w-full md:w-1/2 p-8">
-          <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
-            Welcome Back
-          </h2>
-          <p className="text-sm text-gray-600 text-center mb-6">
-            Create your password
-          </p>
+        <p className="text-center text-xs tracking-widest uppercase opacity-40 max-w-sm leading-relaxed z-10">
+          Aydi Active Marketplace • Secure Password Setup
+        </p>
+      </div>
 
-          <form onSubmit={handleResetPassword} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                New password
+      {/* RIGHT SIDE */}
+      <div className="w-full md:w-5/12 p-8 md:p-12 flex flex-col relative bg-[#181818]">
+
+        <div className="absolute top-8 left-0">
+          <div className="bg-white text-black px-10 py-3 rounded-r-full shadow-lg shadow-white/10">
+            <span className="text-lg font-bold tracking-tight">
+              Create Password
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-28 flex flex-col flex-grow">
+
+          {error && (
+            <p className="text-red-400 mb-3 text-xs bg-red-400/10 p-3 rounded border border-red-400/20">
+              {error}
+            </p>
+          )}
+
+          {success && (
+            <p className="text-green-400 mb-3 text-xs bg-green-400/10 p-3 rounded border border-green-400/20">
+              {success}
+            </p>
+          )}
+
+          <h2 className="text-2xl font-light text-white mb-12">
+            Set your new password
+          </h2>
+
+          <form onSubmit={handleResetPassword} className="space-y-12">
+
+            <div className="relative border-b border-white/20 focus-within:border-white transition-all duration-300">
+              <label className="block text-[13px] font-medium text-slate-300 mb-1">
+                New Password
               </label>
+
               <input
                 type="password"
-                className="mt-1 w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                placeholder="New Password"
+                placeholder="••••••••"
+                className="w-full py-2 bg-transparent focus:outline-none text-white placeholder:text-gray-600"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Password
+            <div className="relative border-b border-white/20 focus-within:border-white transition-all duration-300">
+              <label className="block text-[13px] font-medium text-slate-300 mb-1">
+                Confirm Password
               </label>
+
               <input
                 type="password"
-                className="mt-1 w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                placeholder="Confirm New Password"
+                placeholder="••••••••"
+                className="w-full py-2 bg-transparent focus:outline-none text-white placeholder:text-gray-600"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
             </div>
-            {error && (
-              <div className="mb-4 text-red-500 dark:text-red-400">{error}</div>
-            )}
-            {success && (
-              <div className="mb-4 text-green-500 dark:text-green-400">
-                {success}
-              </div>
-            )}
-            <button
-              type="submit"
-              className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50"
-            >
-              Create Password
-            </button>
+
+            <div className="flex justify-center ">
+              <button
+                type="submit"
+                className="w-52 bg-white text-black py-3 rounded-full hover:bg-slate-200 transition-all shadow-xl shadow-white/5 font-bold text-sm active:scale-95"
+              >
+                Create Password
+              </button>
+            </div>
+
           </form>
+{/* 
+          <div className="mt-auto flex justify-center">
+            <a
+              href="/Login"
+              className="text-gray-400 hover:text-white text-xs font-semibold tracking-wide transition-colors"
+            >
+              BACK TO LOGIN
+            </a>
+          </div> */}
+
         </div>
       </div>
-    </section>
-  );
+    </div>
+  </section>
+);
 };
 
 export default NewPassword;

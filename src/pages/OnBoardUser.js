@@ -13,6 +13,7 @@ const OnBoard = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenPopup, setIsOpenPopup] = useState(false);
   const [selectedModules, setSelectedModules] = useState([]);
@@ -207,12 +208,12 @@ const OnBoard = () => {
       return [
         "DevAdmin",
         "MasterAdmin",
-        "Support Staff",
+        // "Support Staff",
         "Merchant",
         "Merchant Staff",
       ];
     } else if (userRole === "Master Admin") {
-      return ["Support Staff", "Merchant", "Merchant Staff"];
+      return ["Merchant", "Merchant Staff"];
     } else if (userRole === "Support Staf") {
       return ["Merchant", "Merchant Staff"];
     } else if (userRole === "Merchant") {
@@ -235,11 +236,73 @@ const OnBoard = () => {
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
 
+  // const handleUpdateTags = async () => {
+  //   if (!email) {
+  //     alert("Email is required!");
+  //     return;
+  //   }
+
+  //   const loggedInUserId = localStorage.getItem("userid");
+  //   const token = localStorage.getItem("usertoken");
+
+  //   let creatorIdToSend = loggedInUserId;
+
+  //   try {
+  //     const decoded = jwtDecode(token);
+  //     const userRole = decoded?.payLoad?.role;
+
+  //     if (
+  //       role === "Merchant Staff" &&
+  //       (userRole === "Dev Admin" || userRole === "Master Admin")
+  //     ) {
+  //       if (!selectedMerchantId) {
+  //         alert("Please select a merchant for this Merchant Staff.");
+  //         return;
+  //       }
+  //       creatorIdToSend = selectedMerchantId;
+  //     }
+
+  //     const response = await fetch(
+  //       "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           email,
+  //           role,
+  //           modules: selectedModules,
+  //           creatorId: creatorIdToSend,
+  //         }),
+  //       },
+  //     );
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(data.error || "Failed to update user");
+  //     }
+
+  //     showToast("success", `${role} created successfully`);
+  //     setIsOpen(false);
+  //     setName("");
+  //     setEmail("");
+  //     setSelectedModules([]);
+  //     setIsDropdownOpen(false);
+  //   } catch (error) {
+  //     console.error("Error updating user:", error);
+  //     alert("Error updating user: " + error.message);
+  //   }
+  // };
+
   const handleUpdateTags = async () => {
     if (!email) {
-      alert("Email is required!");
+      showToast("error", "Email is required!");
       return;
     }
+
+    setIsSubmitting(true);
 
     const loggedInUserId = localStorage.getItem("userid");
     const token = localStorage.getItem("usertoken");
@@ -255,14 +318,15 @@ const OnBoard = () => {
         (userRole === "Dev Admin" || userRole === "Master Admin")
       ) {
         if (!selectedMerchantId) {
-          alert("Please select a merchant for this Merchant Staff.");
+          showToast("error", "Please select a merchant.");
+          setIsSubmitting(false);
           return;
         }
         creatorIdToSend = selectedMerchantId;
       }
 
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
+        "http://localhost:5000/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {
@@ -284,100 +348,67 @@ const OnBoard = () => {
       }
 
       showToast("success", `${role} created successfully`);
-      setIsOpen(false);
-      setName("");
+
+      // reset form
       setEmail("");
+      setName("");
       setSelectedModules([]);
+      setRole("");
+      setSelectedMerchantId("");
       setIsDropdownOpen(false);
+
+      // close modal
+      setIsOpenPopup(false);
     } catch (error) {
       console.error("Error updating user:", error);
-      alert("Error updating user: " + error.message);
+
+      showToast("error", error.message || "Something went wrong");
+
+      // modal close on error
+      setIsOpenPopup(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
-  // const modules = [
-  //   { name: "Dashboard", subModules: [] },
-  //   {
-  //     name: "Products",
-  //     subModules: [
-  //       "Manage Product",
-  //       "Add Product",
-  //       "Inventory",
-  //       "Manage Categories",
-  //       "Manage Shipping",
-  //       "Manage Approval",
-  //       "Manage Options",
-  //       "Manage Size Charts"
-  //     ],
-  //   },
-  //   {
-  //     name: "Orders",
-  //     subModules: ["ManageOrders"],
-  //   },
-  //   {
-  //     name: "Promotions",
-  //     subModules: ["All Promotions"],
-  //   },
-  //   {
-  //     name: "Reports",
-  //     subModules: ["eCommerence Consultion"],
-  //   },
-  //   {
-  //     name: "OnBoardUser",
-  //     subModules: [],
-  //   },
-  //   {
-  //     name: "Finance",
-  //     subModules: [],
-  //   },
-  // ];
-const modules = [
-  {
-    name: "Dashboard",
-    subModules: [],
-  },
-  {
-    name: "Products",
-    subModules: [
-      "Manage Product",
-      "Add Product",
-      "Inventory",
-      "Status & Logs",
-      "Approval",
-      "Categories",
-      "Options",
-      "Size Charts",
-      "Shipping",
-      "Content & Files",
-      "Configurations"
-    ],
-  },
-  {
-    name: "Orders",
-    subModules: [
-      "ManageOrders",
-      "Manage Requests",
-    ],
-  },
-  {
-    name: "Promotions",
-    subModules: [
-      "My Promotions",
-      "All Promotions",
-    ],
-  },
-  {
-    name: "Reports",
-    subModules: [
-      "Catalog Performance",
-      "Consultation",
-      "Seller Rating",
-    ],
-  },
-  {
-    name: "OnBoardUser",
-    subModules: [],
-  },
-];
+
+  const modules = [
+    {
+      name: "Dashboard",
+      subModules: [],
+    },
+    {
+      name: "Products",
+      subModules: [
+        "Manage Product",
+        "Add Product",
+        "Inventory",
+        "Status & Logs",
+        "Approval",
+        "Categories",
+        "Options",
+        "Size Charts",
+        "Shipping",
+        "Content & Files",
+        "Configurations",
+      ],
+    },
+    {
+      name: "Orders",
+      subModules: ["ManageOrders", "Manage Requests"],
+    },
+    {
+      name: "Promotions",
+      subModules: ["My Promotions", "All Promotions"],
+    },
+    {
+      name: "Reports",
+      subModules: ["Catalog Performance", "Consultation", "Seller Rating"],
+    },
+    {
+      name: "OnBoardUser",
+      subModules: [],
+    },
+  ];
   const handleModuleSelection = (moduleName) => {
     setSelectedModules((prev) =>
       prev.includes(moduleName)
@@ -507,18 +538,18 @@ const modules = [
 
         <div className="overflow-x-auto border rounded-lg mt-5">
           <table className="w-full table-fixed border-collapse bg-white">
-           <thead className="bg-gray-100 text-left text-gray-600 text-sm">
-  <tr>
-    <th className="p-3 font-medium">Name</th>
-    <th className="p-3 font-medium">Email</th>
-    <th className="p-3 font-medium">Status</th>
-    <th className="p-3 font-medium">Added On</th>
-    <th className="p-3 font-medium">Customer ID</th>
-    <th className="p-3 font-medium">Role</th>
-    <th className="p-3 font-medium">Details</th>
-    <th className="p-3 font-medium text-right">Action</th>
-  </tr>
-</thead>
+            <thead className="bg-gray-100 text-left text-gray-600 text-sm">
+              <tr>
+                <th className="p-3 font-medium">Name</th>
+                <th className="p-3 font-medium">Email</th>
+                <th className="p-3 font-medium">Status</th>
+                <th className="p-3 font-medium">Added On</th>
+                <th className="p-3 font-medium">Customer ID</th>
+                <th className="p-3 font-medium">Role</th>
+                <th className="p-3 font-medium">Details</th>
+                <th className="p-3 font-medium text-right">Action</th>
+              </tr>
+            </thead>
 
             <tbody>
               {filteredUsers.merchantGroups?.map((group) => {
@@ -710,10 +741,10 @@ const modules = [
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
           onClick={() => setIsOpenPopup(false)}
         >
-         <div
-  className="bg-white p-4 rounded-lg shadow-lg w-2/4 max-h-[90vh] overflow-y-auto"
-  onClick={(e) => e.stopPropagation()}
->
+          <div
+            className="bg-white p-4 rounded-lg shadow-lg w-2/4 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <h2 className="text-sm">Manage User</h2>
@@ -794,7 +825,9 @@ const modules = [
                   </label>
                 </div>
                 {/* <label className="text-sm text-gray-700 mb-1">Modules *</label> */}
-<div className="border px-3 py-2 rounded-md max-h-60 overflow-y-auto">                  {modules
+                <div className="border px-3 py-2 rounded-md max-h-60 overflow-y-auto">
+                  {" "}
+                  {modules
                     .filter((module) => {
                       if (
                         (role === "Merchant" || role === "Merchant Staff") &&
@@ -845,12 +878,27 @@ const modules = [
                     ))}
                 </div>
               </div>
-              <button
+              {/* <button
                 onClick={handleUpdateTags}
                 className="w-full px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
               >
                 Create User
-              </button>
+              </button> */}
+              <button
+                onClick={handleUpdateTags}
+                disabled={isSubmitting}
+                className={`w-full px-4 py-2 text-white rounded-xl flex justify-center items-center gap-2
+  ${isSubmitting ? "bg-blue-300 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"}`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                    Creating...
+                  </>
+                ) : (
+                  "Create User"
+                )}
+              </button>{" "}
             </div>
           </div>
         </div>

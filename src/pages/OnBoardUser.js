@@ -326,7 +326,7 @@ const OnBoard = () => {
       }
 
       const response = await fetch(
-        "http://localhost:5000/auth/createUserTagsModule",
+        "https://multi-vendor-marketplace.vercel.app/auth/createUserTagsModule",
         {
           method: "POST",
           headers: {

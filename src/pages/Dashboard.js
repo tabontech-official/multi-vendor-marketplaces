@@ -1491,62 +1491,92 @@ const Dashboard = () => {
       </div>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fadeIn">
           <div
             ref={modalRef}
-            className="bg-white rounded-xl shadow-2xl w-full max-w-lg relative transform scale-95 animate-zoomIn transition-all duration-300"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-zoomIn"
           >
-            <div className="border-b px-4 py-3 flex justify-between items-center">
-              <h2 className="text-sm font-semibold text-gray-800">
-                Import products by Excel
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <h2 className="text-lg font-semibold text-gray-800">
+                Upload CSV File
               </h2>
               <button
                 onClick={closePopup}
-                className="text-gray-500 hover:text-red-600 text-xl font-bold"
+                className="text-gray-400 hover:text-red-500 text-xl font-bold"
               >
                 ×
               </button>
             </div>
+
+            {/* Warning / Info */}
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 px-6 py-3 text-sm text-yellow-800">
+              <p>
+                <strong>Important:</strong> Only <strong>CSV (.csv)</strong>{" "}
+                files are supported.
+              </p>
+              <p className="mt-1">
+                Excel files (.xlsx, .xls) or other formats will be rejected.
+              </p>
+            </div>
+
+            {/* Body */}
             <div className="p-6">
-              <div className="border-2 border-dashed border-gray-300 rounded-md flex justify-center items-center h-32 mb-4 relative">
+              {/* Upload Box */}
+              <div className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center h-36 relative hover:border-gray-400 transition">
                 <input
                   type="file"
-                  accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                  accept=".csv"
                   onChange={handleCSVUpload}
                   className="absolute w-full h-full opacity-0 cursor-pointer"
                 />
-                <span className="px-4 py-2 text-sm text-white font-semibold bg-[#18181b] border border-gray-300 rounded-lg hover:bg-blue-700">
-                  Add file
-                </span>
-                {selectedFile && (
-                  <span className="absolute bottom-2 text-sm text-gray-600">
-                    {selectedFile.name}
+
+                <div className="flex flex-col items-center gap-2">
+                  <span className="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800">
+                    Select CSV File
                   </span>
+
+                  <p className="text-xs text-gray-500">
+                    Click or drag & drop your file here
+                  </p>
+                </div>
+
+                {selectedFile && (
+                  <p className="absolute bottom-2 text-sm text-gray-700">
+                    📄 {selectedFile.name}
+                  </p>
                 )}
               </div>
-              <a
-                href="https://multi-vendor-marketplace.vercel.app/admin-file/download/Products"
-                className="text-sm border px-3 py-1 rounded hover:bg-gray-100"
-              >
-                Download sample Excel file
-              </a>
-              <div className="flex justify-end gap-2">
+
+              {/* Sample Download */}
+              <div className="mt-4 flex justify-between items-center">
+                <a
+                  href="https://multi-vendor-marketplace.vercel.app/admin-file/download/Products"
+                  className="text-sm border px-3 py-1 rounded hover:bg-gray-100"
+                >
+                  Download sample file
+                </a>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 mt-6">
                 <button
                   onClick={closePopup}
-                  className="px-4 py-1 text-sm border font-semibold text-white  bg-red-600 border-gray-300 rounded-lg hover:bg-red-700"
+                  className="px-4 py-2 text-sm font-medium border rounded-lg hover:bg-gray-100"
                 >
                   Cancel
                 </button>
+
                 <button
                   onClick={handleUploadAndPreview}
                   disabled={!selectedFile || isUploading}
-                  className={`px-4 py-2 text-sm rounded-lg transition ${
+                  className={`px-5 py-2 text-sm font-semibold rounded-lg transition ${
                     selectedFile && !isUploading
-                      ? "bg-[#18181b] text-white hover:bg-gray-900 font-semibold"
-                      : "bg-gray-400 text-white cursor-not-allowed"
+                      ? "bg-black text-white hover:bg-gray-900"
+                      : "bg-gray-300 text-white cursor-not-allowed"
                   }`}
                 >
-                  {isUploading ? "Uploading..." : "Upload and preview"}
+                  {isUploading ? "Uploading..." : "Upload & Preview"}
                 </button>
               </div>
             </div>

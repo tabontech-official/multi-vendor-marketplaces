@@ -71,10 +71,30 @@ const Dashboard = () => {
   const [sortBy, setSortBy] = useState("");
   const [sortValue, setSortValue] = useState("");
   const [exportAs, setExportAs] = useState("csv");
-  const handleCSVUpload = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
-  };
+  // const handleCSVUpload = (e) => {
+  //   const file = e.target.files[0];
+  //   setSelectedFile(file);
+  // };
+  const [fileError, setFileError] = useState('');
+
+const handleCSVUpload = (e) => {
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+  const fileName = file.name.toLowerCase();
+
+  // ❌ Reject non-CSV
+  if (!fileName.endsWith('.csv')) {
+    setSelectedFile(null);
+    setFileError('Only CSV files are allowed. Excel files are not supported.');
+    return;
+  }
+
+  // ✅ Accept CSV
+  setSelectedFile(file);
+  setFileError('');
+};
   const togglePopup = () => setIsexportOpen(!isOpen);
 
   useEffect(() => {

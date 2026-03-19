@@ -68,6 +68,7 @@ import LogsPage from "./pages/LogsPage";
 import BatchDetails from "./pages/BatchDetails";
 import ContentLibrary from "./pages/ContentLibrary";
 import ProductOther from "./pages/ProductOther";
+import TopProductsHistory from "./pages/TopProductStats";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -166,6 +167,11 @@ const App = () => {
             <Route
               path="/manage-shipping"
               element={<PrivateRoute element={<ManageShippingProfiles />} />}
+            />
+            
+            <Route
+              path="/top-product-history"
+              element={<PrivateRoute element={<TopProductsHistory />} />}
             />
              <Route
               path="/product-other"

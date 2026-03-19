@@ -2209,7 +2209,7 @@ const CategorySelector = () => {
       localStorage.setItem("edit_product_backup", JSON.stringify(product));
     }
   }, [product, isEditing]);
-console.log(product)
+// console.log(product)
   useEffect(() => {
     if (!locationData.state?.product && isEditing) {
       const cachedProduct = localStorage.getItem("edit_product_backup");

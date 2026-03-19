@@ -1808,69 +1808,98 @@ const handleUploadAndPreview = async () => {
         </div>
       )}
       {isOpenImport && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
-          <div
-            ref={modalRef}
-            className="bg-white rounded-xl shadow-2xl w-full max-w-lg relative transform scale-95 animate-zoomIn transition-all duration-300"
-          >
-            <div className="border-b px-4 py-3 flex justify-between items-center">
-              <h2 className="text-sm font-semibold text-blue-700">
-                Import Inventory by CSV
-              </h2>
-              <button
-                onClick={closePopupImport}
-                className="text-gray-500 hover:text-red-600 text-xl font-bold"
-              >
-                ×
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="border-2 border-dashed border-gray-300 rounded-md flex justify-center items-center h-32 mb-4 relative">
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleCSVUpload}
-                  className="absolute w-full h-full opacity-0 cursor-pointer"
-                />
-                <span className="px-4 py-2 text-sm text-white bg-blue-600 border border-gray-300 rounded hover:bg-blue-700">
-                  Add file
-                </span>
-                {selectedFile && (
-                  <span className="absolute bottom-2 text-sm text-gray-600">
-                    {selectedFile.name}
-                  </span>
-                )}
-              </div>
-              <a
-                href="/sample-inventory.csv"
-                download
-                className="text-sm text-blue-600 underline cursor-pointer mb-4 inline-block"
-              >
-                Download sample CSV
-              </a>
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={closePopupImport}
-                  className="px-4 py-1 text-sm border text-white bg-red-500 border-gray-300 rounded hover:bg-red-600"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleUploadAndPreview}
-                  disabled={!selectedFile || isUploading}
-                  className={`px-4 py-2 text-sm rounded transition ${
-                    selectedFile && !isUploading
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  }`}
-                >
-                  {isUploading ? "Uploading..." : "Upload and preview"}
-                </button>
-              </div>
-            </div>
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fadeIn">
+    <div
+      ref={modalRef}
+      className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-zoomIn"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Import Inventory (CSV)
+        </h2>
+        <button
+          onClick={closePopupImport}
+          className="text-gray-400 hover:text-red-500 text-xl font-bold"
+        >
+          ×
+        </button>
+      </div>
+
+      {/* Info Banner */}
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 px-6 py-3 text-sm text-yellow-800">
+        <p>
+          <strong>Important:</strong> Only <strong>CSV (.csv)</strong> files are supported.
+        </p>
+        <p className="mt-1">
+          Ensure your file follows the correct format before uploading.
+        </p>
+      </div>
+
+      {/* Body */}
+      <div className="p-6">
+        {/* Upload Box */}
+        <div className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center h-36 relative hover:border-gray-400 transition">
+          <input
+            type="file"
+            accept=".csv"
+            onChange={handleCSVUpload}
+            className="absolute w-full h-full opacity-0 cursor-pointer"
+          />
+
+          <div className="flex flex-col items-center gap-2">
+            <span className="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800">
+              Select CSV File
+            </span>
+
+            <p className="text-xs text-gray-500">
+              Click or drag & drop your file here
+            </p>
           </div>
+
+          {selectedFile && (
+            <p className="absolute bottom-2 text-sm text-gray-700">
+              📄 {selectedFile.name}
+            </p>
+          )}
         </div>
-      )}
+
+        {/* Sample Download */}
+        <div className="mt-4 flex justify-between items-center">
+          <a
+            href="/sample-inventory.csv"
+            download
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Download sample CSV
+          </a>
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-3 mt-6">
+          <button
+            onClick={closePopupImport}
+            className="px-4 py-2 text-sm font-medium border rounded-lg hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={handleUploadAndPreview}
+            disabled={!selectedFile || isUploading}
+            className={`px-5 py-2 text-sm font-semibold rounded-lg transition ${
+              selectedFile && !isUploading
+                ? "bg-black text-white hover:bg-gray-900"
+                : "bg-gray-300 text-white cursor-not-allowed"
+            }`}
+          >
+            {isUploading ? "Uploading..." : "Upload & Preview"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </main>
   ) : null;
 };

@@ -11,11 +11,26 @@ import { RxCross1 } from "react-icons/rx";
 import { useNotification } from "../context api/NotificationContext";
 import { CiImport } from "react-icons/ci";
 import { FaFileImport } from "react-icons/fa6";
+import {
+  RiArrowDownSLine,
+  RiArrowUpSLine,
+  RiCheckboxCircleLine,
+  RiExchangeDollarLine,
+  RiOrderPlayLine,
+  RiRefund2Line,
+} from "react-icons/ri";
 
 const SubscriptionHistory = () => {
   const { userData, loading, error, variantId } = UseFetchUserData();
   const { addNotification } = useNotification();
   const [exportStatus, setExportStatus] = useState("");
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    fulfilled: 0,
+    refunded: 0,
+    aov: 0,
+    fulfillmentRate: 0,
+  });
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(50);
   const [hasMore, setHasMore] = useState(false);
@@ -82,6 +97,65 @@ const SubscriptionHistory = () => {
         const sortedSubscriptions = json.data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
+        const orders = sortedSubscriptions;
+
+        let totalOrders = orders.length;
+        let fulfilled = 0;
+        let refunded = 0;
+        let totalRevenue = 0;
+
+        orders.forEach((order) => {
+          let isFulfilled = true;
+          let isRefunded = false;
+          let orderTotal = 0;
+
+          // 🔥 HANDLE BOTH STRUCTURES
+          let allItems = [];
+
+          if (order.lineItems && order.lineItems.length) {
+            // ✅ User API
+            allItems = order.lineItems;
+          } else if (order.lineItemsByMerchant) {
+            // ✅ Admin API
+            allItems = Object.values(order.lineItemsByMerchant).flat();
+          }
+
+          allItems.forEach((item) => {
+            const qty = parseInt(item.quantity || 0);
+            const price = parseFloat(item.price || 0);
+
+            orderTotal += price * qty;
+
+            // Fulfilled logic
+            if (item.fulfillment_status !== "fulfilled") {
+              isFulfilled = false;
+            }
+
+            // Refunded = cancelled
+            if (item.fulfillment_status === "cancelled") {
+              isRefunded = true;
+            }
+          });
+
+          if (isFulfilled && allItems.length) fulfilled++;
+          if (isRefunded) refunded++;
+
+          totalRevenue += orderTotal;
+        });
+
+        const aov = totalOrders ? totalRevenue / totalOrders : 0;
+        const fulfillmentRate = totalOrders
+          ? ((fulfilled / totalOrders) * 100).toFixed(1)
+          : 0;
+
+        setStats({
+          totalOrders,
+          fulfilled,
+          refunded,
+          aov,
+          fulfillmentRate, // 👈 new
+        });
+
         setSubscriptions(sortedSubscriptions);
         setFilteredSubscriptions(sortedSubscriptions);
 
@@ -349,7 +423,105 @@ const SubscriptionHistory = () => {
               </button>
             </div>
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 mt-3">
+            {/* --- Total Orders --- */}
+            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-2.5 bg-gray-50 rounded-xl group-hover:bg-blue-50 transition-colors">
+                  <RiOrderPlayLine
+                    className="text-gray-400 group-hover:text-blue-600"
+                    size={22}
+                  />
+                </div>
+                
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                  Total Orders
+                </p>
+                <h2 className="text-2xl font-bold text-gray-900 leading-none">
+                  {stats.totalOrders?.toLocaleString() || 0}
+                </h2>
+              </div>
+            </div>
 
+            {/* --- Fulfilled Orders --- */}
+            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-2.5 bg-gray-50 rounded-xl group-hover:bg-emerald-50 transition-colors">
+                  <RiCheckboxCircleLine
+                    className="text-gray-400 group-hover:text-emerald-600"
+                    size={22}
+                  />
+                </div>
+                <div className="h-1.5 w-16 bg-gray-100 rounded-full mt-3 overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500 rounded-full"
+                    style={{ width: `${stats.fulfillmentRate}%` }}
+                  />
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                  Fulfilled
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <h2 className="text-2xl font-bold text-gray-900 leading-none">
+                    {stats.fulfilled || 0}
+                  </h2>
+                  <span className="text-[10px] font-bold text-emerald-600">
+                    ({stats.fulfillmentRate}%)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* --- Refunded Orders --- */}
+            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-2.5 bg-gray-50 rounded-xl group-hover:bg-red-50 transition-colors">
+                  <RiRefund2Line
+                    className="text-gray-400 group-hover:text-red-600"
+                    size={22}
+                  />
+                </div>
+                <span className="flex items-center text-[11px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-lg">
+                  <RiArrowDownSLine size={14} /> 2%
+                </span>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                  Refunded
+                </p>
+                <h2 className="text-2xl font-bold text-gray-900 leading-none">
+                  {stats.refunded || 0}
+                </h2>
+              </div>
+            </div>
+
+            {/* --- AOV (Average Order Value) --- */}
+            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-2.5 bg-gray-50 rounded-xl group-hover:bg-indigo-50 transition-colors">
+                  <RiExchangeDollarLine
+                    className="text-gray-400 group-hover:text-indigo-600"
+                    size={22}
+                  />
+                </div>
+                <div className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">
+                  AVG
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                  Avg. Order Value
+                </p>
+                <h2 className="text-2xl font-bold text-gray-900 leading-none">
+                  ${stats.aov?.toFixed(2) || "0.00"}
+                </h2>
+              </div>
+            </div>
+          </div>
           <div className="w-full  max-sm:w-auto  max-sm:flex items-center mt-2">
             {isLoading ? (
               <div className="flex justify-center items-center py-10">
@@ -364,9 +536,7 @@ const SubscriptionHistory = () => {
                       <th scope="col" className="p-3">
                         #
                       </th>
-                      {/* <th scope="col" className="p-3">
-                        Image
-                      </th> */}
+
                       <th scope="col" className="p-3">
                         Date Purchased
                       </th>
@@ -380,7 +550,9 @@ const SubscriptionHistory = () => {
                       <th scope="col" className="p-3">
                         Item
                       </th>
-
+                      <th scope="col" className="p-3">
+                        Units Sold
+                      </th>
                       <th scope="col" className="p-3">
                         Status
                       </th>
@@ -407,8 +579,7 @@ const SubscriptionHistory = () => {
                               const customer = merchantItems[0]?.customer?.[0];
                               const orderDate = customer?.created_at;
                               const shopifyOrderId = merchantItems[0]?.orderId;
-                              // const fulfillment_status =
-                              //   merchantItems[0]?.fulfillment_status;
+
                               const orderStatus = getOrderStatus(merchantItems);
 
                               const totalQuantity = merchantItems.reduce(
@@ -479,7 +650,7 @@ const SubscriptionHistory = () => {
                                     {merchant.info?.name || "N/A"}
                                   </td>
                                   <td className="p-3">{totalQuantity} items</td>
-
+                                  <td className="p-3">{totalQuantity}</td>
                                   {/* <td className="p-3">
                                     <span
                                       className={`px-2 py-1 rounded text-xs font-medium ${
@@ -598,28 +769,13 @@ const SubscriptionHistory = () => {
                                     : "items"}
                                 </div>
                               </td>
+                              <td className="p-3">
+                                {subscription.lineItems.reduce(
+                                  (sum, item) => sum + (item.quantity || 0),
+                                  0,
+                                )}
+                              </td>
 
-                              {/* <td className="p-3">
-                                <span
-                                  className={`px-2 py-1 rounded text-xs font-medium ${
-                                    subscription?.lineItems[0]
-                                      ?.fulfillment_status === "fulfilled"
-                                      ? "bg-green-200 text-green-800"
-                                      : subscription?.lineItems[0]
-                                            ?.fulfillment_status === "cancelled"
-                                        ? "bg-red-200 text-red-800"
-                                        : "bg-yellow-200 text-yellow-800"
-                                  }`}
-                                >
-                                  {subscription?.lineItems[0]
-                                    ?.fulfillment_status === "fulfilled"
-                                    ? "Fulfilled"
-                                    : subscription?.lineItems[0]
-                                          ?.fulfillment_status === "cancelled"
-                                      ? "Cancelled"
-                                      : "Unfulfilled"}
-                                </span>
-                              </td> */}
                               <td className="p-3">
                                 <span
                                   className={`px-2 py-1 rounded text-xs font-medium ${
@@ -636,13 +792,6 @@ const SubscriptionHistory = () => {
                                 </span>
                               </td>
 
-                              {/* <td className="p-3">
-                                $
-                                {(
-                                  parseFloat(firstItem.price || 0) *
-                                  (firstItem.quantity || 1)
-                                ).toFixed(2)}
-                              </td> */}
                               <td className="p-3">
                                 $
                                 {subscription.lineItems
@@ -705,11 +854,7 @@ const SubscriptionHistory = () => {
                 </div>
 
                 <p className="text-sm mb-3 mt-3">
-                  This CSV file can export all order information.
-                  {/* <a href="#" className="text-blue-600 underline">
-                    CSV file for orders
-                  </a> */}
-                  .
+                  This CSV file can export all order information. .
                 </p>
 
                 <div className="mb-4">

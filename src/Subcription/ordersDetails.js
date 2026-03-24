@@ -12,6 +12,8 @@ import {
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { FiSend } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+import { RiAlertFill, RiCheckboxCircleFill, RiCloseLine, RiLoader4Line } from "react-icons/ri"
 const OrdersDetails = () => {
   const navigate = useNavigate();
   const { orderId, merchantId } = useParams();
@@ -762,7 +764,7 @@ const OrdersDetails = () => {
           {Array.isArray(lineItems) &&
             lineItems.some((i) => i.fulfillment_status === null) && (
               <>
-                {showCancelButton ? (
+                {(role === "Dev Admin" || role === "Master Admin" || showCancelButton) ? (
                   <button
                     className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
                     onClick={() => setShowCancelPopup(true)}
@@ -930,47 +932,92 @@ const OrdersDetails = () => {
           </div>
         </div>
       )}
-      {showCancelPopup && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+      <AnimatePresence>
+  {showCancelPopup && (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+        onClick={() => !cancelLoading && setShowCancelPopup(false)}
+      />
+
+      {/* Modal Content */}
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0, y: 10 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 10 }}
+        className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-gray-100"
+      >
+        {/* Close Icon (Disabled during loading) */}
+        {!cancelLoading && (
+          <button
+            className="absolute top-4 right-4 p-1 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            onClick={() => setShowCancelPopup(false)}
+          >
+            <RiCloseLine size={24} />
+          </button>
+        )}
+
+        <div className="p-8 text-center">
+          {/* Warning Icon Container */}
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-red-50 rounded-full mb-6">
+            <RiAlertFill className="text-red-500" size={48} />
+          </div>
+
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Confirm Cancellation
+          </h2>
+          <p className="text-sm text-gray-500 leading-relaxed mb-8">
+            Are you sure you want to cancel this order? This action will notify the customer and cannot be undone.
+          </p>
+
+          <div className="flex flex-col gap-3">
+            {/* Primary Action: Yes, Cancel */}
             <button
-              className="absolute top-3 right-3 text-gray-400 hover:text-black"
-              onClick={() => setShowCancelPopup(false)}
+              disabled={cancelLoading}
+              className={`w-full py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-100 
+                ${cancelLoading 
+                  ? "bg-red-400 cursor-not-allowed text-white/80" 
+                  : "bg-red-600 text-white hover:bg-red-700 active:scale-[0.98]"
+                }`}
+              onClick={async () => {
+                setCancelLoading(true);
+                await handleCancelOrder();
+                setCancelLoading(false);
+                setShowCancelPopup(false);
+              }}
             >
-              ✕
+              {cancelLoading ? (
+                <>
+                  <RiLoader4Line className="animate-spin" size={20} />
+                  Processing...
+                </>
+              ) : (
+                "Yes, Confirm Cancellation"
+              )}
             </button>
-            <div className="text-center">
-              <div className="text-4xl mb-2 text-red-500">⚠️</div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-1">
-                Confirm Cancellation
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Are you sure you want to cancel this orderData?
-              </p>
-              <div className="flex justify-center gap-3">
-                <button
-                  className="px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 text-gray-800"
-                  onClick={() => setShowCancelPopup(false)}
-                >
-                  No, Go Back
-                </button>
-                <button
-                  className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700"
-                  onClick={async () => {
-                    setCancelLoading(true);
-                    await handleCancelOrder();
-                    setCancelLoading(false);
-                    setShowCancelPopup(false);
-                  }}
-                  disabled={cancelLoading}
-                >
-                  {cancelLoading ? "Cancelling..." : "Yes, Cancel"}
-                </button>
-              </div>
-            </div>
+
+            {/* Secondary Action: Go Back */}
+            {!cancelLoading && (
+              <button
+                onClick={() => setShowCancelPopup(false)}
+                className="w-full py-3.5 bg-gray-50 text-gray-600 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all active:scale-[0.98]"
+              >
+                No, Keep Order
+              </button>
+            )}
           </div>
         </div>
-      )}
+
+        {/* Decorative Top Line */}
+        <div className="h-1.5 w-full bg-red-600" />
+      </motion.div>
+    </div>
+  )}
+</AnimatePresence>
       {/* {showRequestPopup && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 p-6 relative">
@@ -1127,7 +1174,7 @@ const OrdersDetails = () => {
                           body: JSON.stringify({
                             request: requestMessage,
                             orderNo: orderData?.name,
-                            orderId: String(orderData?.id),
+                            orderId: orderId,
                             email,
                             lineItemIds: lineItems.map((i) => i.id),
                           }),
@@ -1159,26 +1206,69 @@ const OrdersDetails = () => {
         </div>
       )}
 
-      {showSubmitted && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 p-6 text-center relative">
-            <button
-              className="absolute top-3 right-3 text-gray-400 hover:text-black transition"
-              onClick={() => setShowSubmitted(false)}
-            >
-              ✕
-            </button>
+     <AnimatePresence>
+  {showSubmitted && (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={() => setShowSubmitted(false)}
+        className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+      />
 
-            <div className="text-4xl text-green-500 mb-2">✅</div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">
-              Request Submitted
-            </h2>
-            <p className="text-gray-600">
-              Your cancellation request has been sent to the Master Admin.
-            </p>
+      {/* Modal Content */}
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-gray-100"
+      >
+        {/* Close Button */}
+        <button
+          className="absolute top-4 right-4 p-1 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          onClick={() => setShowSubmitted(false)}
+        >
+          <RiCloseLine size={24} />
+        </button>
+
+        <div className="p-8 text-center">
+          {/* Animated Icon Container */}
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-50 rounded-full mb-6 relative">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+            >
+              <RiCheckboxCircleFill className="text-emerald-500" size={56} />
+            </motion.div>
+            {/* Soft Pulse Effect */}
+            <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
           </div>
+
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Request Submitted
+          </h2>
+          <p className="text-sm text-gray-500 leading-relaxed mb-8">
+            Your cancellation request has been successfully sent to the{" "}
+            <span className="font-semibold text-gray-700">Master Admin</span> for review.
+          </p>
+
+          <button
+            onClick={() => setShowSubmitted(false)}
+            className="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-semibold text-sm hover:bg-gray-800 transition-all active:scale-[0.98] shadow-lg shadow-gray-200"
+          >
+            Got it, thanks!
+          </button>
         </div>
-      )}
+
+        {/* Bottom Decorative Bar */}
+        <div className="h-1.5 w-full bg-emerald-500" />
+      </motion.div>
+    </div>
+  )}
+</AnimatePresence>
     </div>
   );
 };

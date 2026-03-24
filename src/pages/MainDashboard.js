@@ -799,13 +799,13 @@ const MainDashboard = () => {
                   This Month
                 </span>
               </div>
-
+{/* 
               <button
                 onClick={() => navigate("/top-product-history")}
                 className="text-[14px] font-semibold text-blue-600 hover:underline"
               >
                 View History →
-              </button>
+              </button> */}
             </div>
 
             <div className="flex-1 overflow-auto">

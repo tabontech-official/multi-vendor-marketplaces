@@ -176,7 +176,8 @@ const MainDashboard = () => {
 
       let apiUrl = "";
       if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
-        apiUrl = "https://multi-vendor-marketplace.vercel.app/order/monthlyRevenue";
+        apiUrl =
+          "https://multi-vendor-marketplace.vercel.app/order/monthlyRevenue";
       } else if (
         decodedRole === "Merchant" ||
         decodedRole === "Merchant Staff"
@@ -286,7 +287,8 @@ const MainDashboard = () => {
       let apiUrl = "";
 
       if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
-        apiUrl = "https://multi-vendor-marketplace.vercel.app/product/getProductCount";
+        apiUrl =
+          "https://multi-vendor-marketplace.vercel.app/product/getProductCount";
       } else if (decodedRole === "Merchant") {
         const userId = localStorage.getItem("userid");
         apiUrl = `https://multi-vendor-marketplace.vercel.app/product/getProductForCharts/${userId}`;
@@ -339,7 +341,8 @@ const MainDashboard = () => {
       let apiUrl = "";
 
       if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
-        apiUrl = "https://multi-vendor-marketplace.vercel.app/order/recurringFinance";
+        apiUrl =
+          "https://multi-vendor-marketplace.vercel.app/order/recurringFinance";
       } else if (decodedRole === "Merchant") {
         const userId = localStorage.getItem("userid");
         apiUrl = `https://multi-vendor-marketplace.vercel.app/order/getFinanceSummaryForUser/${userId}`;

@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { FaArrowTrendUp, FaArrowTrendDown } from "react-icons/fa6";
-import { RiArrowUpSLine, RiStore3Line } from "react-icons/ri";
+import {
+  RiArrowUpSLine,
+  RiInboxLine,
+  RiLoader4Line,
+  RiShieldFlashLine,
+  RiStore3Line,
+} from "react-icons/ri";
 import { MdOutlineProductionQuantityLimits } from "react-icons/md";
 import { MdPreview } from "react-icons/md";
+import { motion } from "framer-motion";
 import { Bar } from "react-chartjs-2";
 
 import {
@@ -14,90 +21,127 @@ import {
   Legend,
 } from "chart.js";
 import { jwtDecode } from "jwt-decode";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const MainDashboard = () => {
   const navigate = useNavigate();
   const [topProducts, setTopProducts] = useState([]);
-  useEffect(() => {
-    const fetchTopProducts = async () => {
-      try {
-        const token = localStorage.getItem("usertoken");
-        const apiKey = localStorage.getItem("apiKey");
-        const apiSecretKey = localStorage.getItem("apiSecretKey");
-        const userId = localStorage.getItem("userid");
+  const { setDashboardLoading } = useOutletContext();
+  const hasLoadedBefore = localStorage.getItem("dashboardLoaded");
+  const [loading, setLoading] = useState(!hasLoadedBefore);
+  const [alerts, setAlerts] = useState([]);
+  const fetchAlerts = async () => {
+    try {
+      const token = localStorage.getItem("usertoken");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-        let decodedRole = null;
+      let decodedRole = null;
 
-        if (token) {
-          const decoded = jwtDecode(token);
-          decodedRole = decoded.payLoad.role;
-        }
+      if (token) {
+        const decoded = jwtDecode(token);
+        decodedRole = decoded.payLoad.role;
+      }
 
-        let apiUrl = "";
+      let apiUrl = "";
 
-        // ✅ ADMIN
-        if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
-          apiUrl =
-            "https://multi-vendor-marketplace.vercel.app/product/topProducts?limit=4&period=month";
-        } else if (
-          decodedRole === "Merchant" ||
-          decodedRole === "Merchant Staff"
-        ) {
-          apiUrl = `https://multi-vendor-marketplace.vercel.app/product/topProductsForMerchants/?limit=4&period=month`;
-        }
+      if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
+        apiUrl = "https://multi-vendor-marketplace.vercel.app/alert";
+      } else if (
+        decodedRole === "Merchant" ||
+        decodedRole === "Merchant Staff"
+      ) {
+        apiUrl = "https://multi-vendor-marketplace.vercel.app/alert/alerts";
+      }
 
-        if (!apiUrl) return;
+      if (!apiUrl) return;
 
-        const response = await fetch(apiUrl, {
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-          },
+      const response = await fetch(apiUrl, {
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // ✅ unique + latest logic
+        const uniqueMap = new Map();
+
+        (data.data || []).forEach((item) => {
+          const key = `${item.productId}-${item.type}`;
+
+          if (
+            !uniqueMap.has(key) ||
+            new Date(item.createdAt) > new Date(uniqueMap.get(key).createdAt)
+          ) {
+            uniqueMap.set(key, item);
+          }
         });
 
-        const data = await response.json();
+        const finalAlerts = Array.from(uniqueMap.values())
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 3); // 🔥 only top 3
 
-        if (response.ok) {
-          setTopProducts(data.data || []);
-        } else {
-          console.error("Top Products API failed");
-        }
-      } catch (error) {
-        console.error("Top Products Error:", error);
+        setAlerts(finalAlerts);
       }
-    };
+    } catch (error) {
+      console.error("Dashboard Alerts Error:", error);
+    }
+  };
+  // useEffect(() => {
+  const fetchTopProducts = async () => {
+    try {
+      const token = localStorage.getItem("usertoken");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+      const userId = localStorage.getItem("userid");
 
-    fetchTopProducts();
-  }, []);
-  const alerts = [
-    {
-      title: "Low Stock",
-      message: "Product A – Only 6 left",
-      bg: "bg-yellow-50 border-yellow-200 text-yellow-700",
-    },
-    {
-      title: "Out of Stock",
-      message: "Product B is out of stock",
-      bg: "bg-red-50 border-red-200 text-red-600",
-    },
-    {
-      title: "Low Conversion",
-      message: "2 products below 1.5%",
-      bg: "bg-blue-50 border-blue-200 text-blue-600",
-    },
-    {
-      title: "High Refund Rate",
-      message: "Returns higher than average",
-      bg: "bg-purple-50 border-purple-200 text-purple-600",
-    },
-    {
-      title: "Shipping Issue",
-      message: "12% orders shipped late",
-      bg: "bg-gray-50 border-gray-200 text-gray-700",
-    },
-  ];
+      let decodedRole = null;
+
+      if (token) {
+        const decoded = jwtDecode(token);
+        decodedRole = decoded.payLoad.role;
+      }
+
+      let apiUrl = "";
+
+      // ✅ ADMIN
+      if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
+        apiUrl =
+          "https://multi-vendor-marketplace.vercel.app/product/topProducts?limit=4&period=month";
+      } else if (
+        decodedRole === "Merchant" ||
+        decodedRole === "Merchant Staff"
+      ) {
+        apiUrl = `https://multi-vendor-marketplace.vercel.app/product/topProductsForMerchants/?limit=4&period=month`;
+      }
+
+      if (!apiUrl) return;
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setTopProducts(data.data || []);
+      } else {
+        console.error("Top Products API failed");
+      }
+    } catch (error) {
+      console.error("Top Products Error:", error);
+    }
+  };
+
+  //   fetchTopProducts();
+  // }, []);
 
   const visibleAlerts = alerts.slice(0, 3);
   const [summary, setSummary] = useState({
@@ -116,65 +160,65 @@ const MainDashboard = () => {
     labels: [],
     datasets: [],
   });
-  useEffect(() => {
-    const fetchMonthlyRevenue = async () => {
-      try {
-        const token = localStorage.getItem("usertoken");
-        const apiKey = localStorage.getItem("apiKey");
-        const apiSecretKey = localStorage.getItem("apiSecretKey");
-        const userId = localStorage.getItem("userid");
-        let decodedRole = null;
+  // useEffect(() => {
+  const fetchMonthlyRevenue = async () => {
+    try {
+      const token = localStorage.getItem("usertoken");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+      const userId = localStorage.getItem("userid");
+      let decodedRole = null;
 
-        if (token) {
-          const decoded = jwtDecode(token);
-          decodedRole = decoded.payLoad.role;
-        }
-
-        let apiUrl = "";
-        if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
-          apiUrl = "https://multi-vendor-marketplace.vercel.app/order/monthlyRevenue";
-        } else if (
-          decodedRole === "Merchant" ||
-          decodedRole === "Merchant Staff"
-        ) {
-          apiUrl = `https://multi-vendor-marketplace.vercel.app/order/monthlyRevenue/${userId}`;
-        }
-
-        const response = await fetch(apiUrl, {
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch monthly revenue");
-        }
-
-        const data = await response.json();
-
-        const revenueObj = data.revenue || {};
-        const labels = Object.keys(revenueObj);
-        const incomeData = Object.values(revenueObj);
-
-        setChartData({
-          labels,
-          datasets: [
-            {
-              label: "Income",
-              data: incomeData,
-              backgroundColor: "#06b6d4",
-              borderRadius: 6,
-            },
-          ],
-        });
-      } catch (error) {
-        console.error("Error fetching monthly revenue:", error);
+      if (token) {
+        const decoded = jwtDecode(token);
+        decodedRole = decoded.payLoad.role;
       }
-    };
 
-    fetchMonthlyRevenue();
-  }, []);
+      let apiUrl = "";
+      if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
+        apiUrl = "https://multi-vendor-marketplace.vercel.app/order/monthlyRevenue";
+      } else if (
+        decodedRole === "Merchant" ||
+        decodedRole === "Merchant Staff"
+      ) {
+        apiUrl = `https://multi-vendor-marketplace.vercel.app/order/monthlyRevenue/${userId}`;
+      }
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch monthly revenue");
+      }
+
+      const data = await response.json();
+
+      const revenueObj = data.revenue || {};
+      const labels = Object.keys(revenueObj);
+      const incomeData = Object.values(revenueObj);
+
+      setChartData({
+        labels,
+        datasets: [
+          {
+            label: "Income",
+            data: incomeData,
+            backgroundColor: "#06b6d4",
+            borderRadius: 6,
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("Error fetching monthly revenue:", error);
+    }
+  };
+
+  //   fetchMonthlyRevenue();
+  // }, []);
 
   const data = {
     labels: ["Dec 22", "Jan 23", "Feb 23", "Mar 23", "Apr 23"],
@@ -226,93 +270,93 @@ const MainDashboard = () => {
     },
   };
 
-  useEffect(() => {
-    const getProductCount = async () => {
-      try {
-        const apiKey = localStorage.getItem("apiKey");
-        const token = localStorage.getItem("usertoken");
+  // useEffect(() => {
+  const getProductCount = async () => {
+    try {
+      const apiKey = localStorage.getItem("apiKey");
+      const token = localStorage.getItem("usertoken");
 
-        const apiSecretKey = localStorage.getItem("apiSecretKey");
-        let decodedRole = null;
-        if (token) {
-          const decoded = jwtDecode(token);
-          decodedRole = decoded.payLoad.role;
-        }
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+      let decodedRole = null;
+      if (token) {
+        const decoded = jwtDecode(token);
+        decodedRole = decoded.payLoad.role;
+      }
 
-        let apiUrl = "";
+      let apiUrl = "";
 
-        if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
-          apiUrl = "https://multi-vendor-marketplace.vercel.app/product/getProductCount";
-        } else if (decodedRole === "Merchant") {
-          const userId = localStorage.getItem("userid");
-          apiUrl = `https://multi-vendor-marketplace.vercel.app/product/getProductForCharts/${userId}`;
-        }
+      if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
+        apiUrl = "https://multi-vendor-marketplace.vercel.app/product/getProductCount";
+      } else if (decodedRole === "Merchant") {
+        const userId = localStorage.getItem("userid");
+        apiUrl = `https://multi-vendor-marketplace.vercel.app/product/getProductForCharts/${userId}`;
+      }
 
-        if (apiUrl) {
-          const response = await fetch(apiUrl, {
-            method: "GET",
-            headers: {
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
+      if (apiUrl) {
+        const response = await fetch(apiUrl, {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          const dataMap = {};
+          data.forEach((item) => {
+            dataMap[item.status.toLowerCase()] = item.count;
           });
 
-          const data = await response.json();
-          if (response.ok) {
-            const dataMap = {};
-            data.forEach((item) => {
-              dataMap[item.status.toLowerCase()] = item.count;
-            });
-
-            setProductCount(dataMap.total || 0);
-            setActiveProductCount(dataMap.active || 0);
-            setInActiveProductCount(dataMap.inactive || 0);
-          } else {
-            console.error("Failed to fetch count:", data.message);
-          }
+          setProductCount(dataMap.total || 0);
+          setActiveProductCount(dataMap.active || 0);
+          setInActiveProductCount(dataMap.inactive || 0);
+        } else {
+          console.error("Failed to fetch count:", data.message);
         }
-      } catch (error) {
-        console.error("Error fetching product count:", error);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching product count:", error);
+    }
+  };
 
-    getProductCount();
-  }, []);
+  //   getProductCount();
+  // }, []);
 
-  useEffect(() => {
-    const fetchSummary = async () => {
-      try {
-        const token = localStorage.getItem("usertoken");
-        const userRole = localStorage.getItem("userRole");
+  // useEffect(() => {
+  const fetchSummary = async () => {
+    try {
+      const token = localStorage.getItem("usertoken");
+      const userRole = localStorage.getItem("userRole");
 
-        let decodedRole = null;
-        if (token) {
-          const decoded = jwtDecode(token);
-          decodedRole = decoded.payLoad.role;
-        }
-        console.log(decodedRole);
-        let apiUrl = "";
-
-        if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
-          apiUrl = "https://multi-vendor-marketplace.vercel.app/order/recurringFinance";
-        } else if (decodedRole === "Merchant") {
-          const userId = localStorage.getItem("userid");
-          apiUrl = `https://multi-vendor-marketplace.vercel.app/order/getFinanceSummaryForUser/${userId}`;
-        }
-
-        if (apiUrl) {
-          const response = await fetch(apiUrl);
-          const data = await response.json();
-          setSummary(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch finance summary:", error);
+      let decodedRole = null;
+      if (token) {
+        const decoded = jwtDecode(token);
+        decodedRole = decoded.payLoad.role;
       }
-    };
+      console.log(decodedRole);
+      let apiUrl = "";
 
-    fetchSummary();
-  }, []);
+      if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
+        apiUrl = "https://multi-vendor-marketplace.vercel.app/order/recurringFinance";
+      } else if (decodedRole === "Merchant") {
+        const userId = localStorage.getItem("userid");
+        apiUrl = `https://multi-vendor-marketplace.vercel.app/order/getFinanceSummaryForUser/${userId}`;
+      }
+
+      if (apiUrl) {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        setSummary(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch finance summary:", error);
+    }
+  };
+
+  //   fetchSummary();
+  // }, []);
 
   const [viewCount, setViewCount] = useState(0);
   const [perDayCount, setPerDayCount] = useState(0);
@@ -320,51 +364,153 @@ const MainDashboard = () => {
 
   const userId = localStorage.getItem("userid");
 
-  useEffect(() => {
-    const fetchUserViewCount = async () => {
-      try {
-        const token = localStorage.getItem("usertoken");
-        let role = null;
+  // useEffect(() => {
+  const fetchUserViewCount = async () => {
+    try {
+      const token = localStorage.getItem("usertoken");
+      let role = null;
 
-        if (token) {
-          const decoded = jwtDecode(token);
-          role = decoded.payLoad.role;
-        }
+      if (token) {
+        const decoded = jwtDecode(token);
+        role = decoded.payLoad.role;
+      }
 
-        let url = "";
+      let url = "";
+
+      if (role === "Merchant" || role === "Merchant Staff") {
+        url = `https://multi-vendor-marketplace.vercel.app/product/trackingViews/${userId}`;
+      } else if (role === "Master Admin" || role === "Dev Admin") {
+        url = `https://multi-vendor-marketplace.vercel.app/product/trackingViews`;
+      }
+
+      if (!url) return;
+
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
 
         if (role === "Merchant" || role === "Merchant Staff") {
-          url = `https://multi-vendor-marketplace.vercel.app/product/trackingViews/${userId}`;
-        } else if (role === "Master Admin" || role === "Dev Admin") {
-          url = `https://multi-vendor-marketplace.vercel.app/product/trackingViews`;
-        }
-
-        if (!url) return;
-
-        const response = await fetch(url);
-        if (response.ok) {
-          const data = await response.json();
-
-          if (role === "Merchant" || role === "Merchant Staff") {
-            setViewCount(data.totalViews);
-            setPerDayCount(data.weeklyViews);
-            setHourCount(data.monthlyViews);
-          } else {
-            setViewCount(data.totalViews);
-            setPerDayCount(data.weeklyViews);
-            setHourCount(data.monthlyViews);
-          }
+          setViewCount(data.totalViews);
+          setPerDayCount(data.weeklyViews);
+          setHourCount(data.monthlyViews);
         } else {
-          console.error("Failed to fetch user view count");
+          setViewCount(data.totalViews);
+          setPerDayCount(data.weeklyViews);
+          setHourCount(data.monthlyViews);
         }
+      } else {
+        console.error("Failed to fetch user view count");
+      }
+    } catch (error) {
+      console.error("Error fetching user view count:", error);
+    }
+  };
+
+  //   fetchUserViewCount();
+  // }, [userId]);
+
+  useEffect(() => {
+    const loadAllData = async () => {
+      const hasLoadedBefore = localStorage.getItem("dashboardLoaded");
+
+      try {
+        console.log("START LOADING");
+
+        // 🔥 Sirf pehli dafa full loader
+        if (!hasLoadedBefore) {
+          setLoading(true);
+          setDashboardLoading(true);
+        }
+
+        await Promise.all([
+          fetchTopProducts(),
+          fetchMonthlyRevenue(),
+          getProductCount(),
+          fetchSummary(),
+          fetchUserViewCount(),
+          fetchAlerts(),
+        ]);
+
+        // 🔥 Mark as loaded
+        localStorage.setItem("dashboardLoaded", "true");
       } catch (error) {
-        console.error("Error fetching user view count:", error);
+        console.error(error);
+      } finally {
+        console.log("STOP LOADING");
+
+        // 🔥 Sirf pehli dafa loader band karo
+        if (!hasLoadedBefore) {
+          setLoading(false);
+          setDashboardLoading(false);
+          localStorage.removeItem("initialLoad");
+        }
       }
     };
 
-    fetchUserViewCount();
-  }, [userId]);
+    loadAllData();
+  }, []);
+  if (loading) {
+    return (
+      <div className="relative w-full h-screen flex items-center justify-center bg-[#050505] overflow-hidden">
+        {/* Background Decorative Gradients */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/10 blur-[120px] rounded-full" />
 
+        <div className="relative z-10 flex flex-col items-center">
+          {/* Brand Icon with Pulse Effect */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="relative mb-8"
+          >
+            <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full animate-pulse" />
+            <div className="relative bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-md shadow-2xl">
+              <RiShieldFlashLine className="text-4xl text-blue-500" />
+            </div>
+          </motion.div>
+
+          {/* Animated Loading Spinner */}
+          <div className="flex flex-col items-center gap-6">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+            >
+              <RiLoader4Line className="text-3xl text-gray-400" />
+            </motion.div>
+
+            <div className="text-center">
+              {/* Animated Text */}
+              <motion.h2
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-white text-lg font-semibold tracking-wide"
+              >
+                Aydi <span className="text-blue-500">Active</span>
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="text-gray-500 text-xs mt-2 uppercase tracking-[0.2em]"
+              >
+                Initializing Marketplace...
+              </motion.p>
+            </div>
+          </div>
+        </div>
+
+        {/* Subtle Bottom Progress Bar (Optional) */}
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: "30%" }}
+          transition={{ duration: 3, ease: "easeInOut" }}
+          className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50"
+        />
+      </div>
+    );
+  }
   return (
     <main className="w-full p-4 ">
       <div className="flex flex-col md:flex-row md:justify-between items-start border-b-2 border-gray-200 pb-4">
@@ -639,21 +785,18 @@ const MainDashboard = () => {
             <div className="w-24 h-24 bg-blue-500 rounded-full blur-3xl" />
           </div>
 
-          <div className="relative z-10 flex flex-col h-full">
-            {/* Header */}
+          <div className="relative z-10 flex flex-col h-full font-sans">
+            {/* --- Header Section --- */}
             <div className="flex justify-between items-center mb-6">
-              {/* LEFT: Heading + Badge */}
               <div className="flex items-center gap-3">
                 <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest">
                   Top Selling Products
                 </h2>
-
-                <span className="text-[10px] font-bold bg-gray-300 px-3 py-1 rounded-full text-gray-500">
+                <span className="text-[10px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md border border-gray-200">
                   This Month
                 </span>
               </div>
 
-              {/* RIGHT: View History */}
               <button
                 onClick={() => navigate("/top-product-history")}
                 className="text-[14px] font-semibold text-blue-600 hover:underline"
@@ -662,57 +805,63 @@ const MainDashboard = () => {
               </button>
             </div>
 
-            {/* Table */}
             <div className="flex-1 overflow-auto">
-              <table className="w-full text-sm">
-                <thead className="text-gray-400 text-[10px] uppercase tracking-widest">
-                  <tr>
-                    <th className="text-left pb-3">Product</th>
-                    <th className="text-center">Units</th>
-                    <th className="text-center">Revenue</th>
-                    <th className="text-center">Conv.</th>
-                    <th className="text-center">Trend</th>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="text-gray-400 text-[11px] uppercase font-semibold border-b border-gray-100">
+                    <th className="pb-3 pr-2">Product</th>
+                    <th className="text-center pb-3 px-2">Units</th>
+                    <th className="text-center pb-3 px-2">Revenue</th>
+                    <th className="text-center pb-3 px-2">Conv.</th>
+                    <th className="text-right pb-3 pl-2">Trend</th>
                   </tr>
                 </thead>
 
-                <tbody className="text-gray-700">
+                <tbody className="text-sm">
                   {topProducts.length > 0 ? (
                     topProducts.map((item, i) => (
                       <tr
                         key={i}
-                        className="border-t border-gray-300 hover:bg-gray-100/60 transition"
+                        className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
                       >
-                        <td className="py-3 font-semibold">
-                          {item.productName || "N/A"}
+                        <td className="py-4 pr-2">
+                          <span className="font-medium text-gray-800 line-clamp-1">
+                            {item.productName || "N/A"}
+                          </span>
                         </td>
 
-                        <td className="text-center font-medium">
-                          {item.totalUnitsSold || 0}
+                        <td className="text-center py-4 px-2 text-gray-600">
+                          {item.totalUnitsSold?.toLocaleString() || 0}
                         </td>
 
-                        <td className="text-center font-medium">
-                          ${item.totalRevenue?.toFixed(2) || 0}
+                        <td className="text-center py-4 px-2 font-medium text-gray-900">
+                          $
+                          {item.totalRevenue?.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                          }) || "0.00"}
                         </td>
 
-                        <td className="text-center">
+                        <td className="text-center py-4 px-2 text-gray-500">
                           {item.conversionRate
                             ? `${item.conversionRate}%`
                             : "0%"}
                         </td>
 
-                        <td
-                          className={`text-center flex items-center justify-center gap-1 font-semibold ${
-                            item.trend >= 0
-                              ? "text-emerald-600"
-                              : "text-red-500"
-                          }`}
-                        >
-                          {item.trend >= 0 ? (
-                            <FaArrowTrendUp />
-                          ) : (
-                            <FaArrowTrendDown />
-                          )}
-                          {Math.abs(item.trend)}%
+                        <td className="text-right py-4 pl-2">
+                          <div
+                            className={`inline-flex items-center gap-1 font-medium ${
+                              item.trend >= 0
+                                ? "text-emerald-600"
+                                : "text-red-500"
+                            }`}
+                          >
+                            {item.trend >= 0 ? (
+                              <FaArrowTrendUp size={12} />
+                            ) : (
+                              <FaArrowTrendDown size={12} />
+                            )}
+                            <span>{Math.abs(item.trend)}%</span>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -720,9 +869,9 @@ const MainDashboard = () => {
                     <tr>
                       <td
                         colSpan="5"
-                        className="text-center py-6 text-gray-400"
+                        className="text-center py-10 text-gray-400 text-xs italic"
                       >
-                        No top products found
+                        No top products found for this period.
                       </td>
                     </tr>
                   )}
@@ -732,13 +881,10 @@ const MainDashboard = () => {
           </div>
         </div>
 
-        {/* --- RIGHT: Alerts --- */}
         <div className="group relative rounded-3xl bg-gray-200 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-300 hover:shadow-md transition-all flex flex-col">
-          {/* Glow */}
           <div className="absolute top-0 right-0 w-24 h-24 bg-red-400/10 blur-3xl opacity-20 group-hover:opacity-30 transition" />
 
           <div className="relative z-10 flex flex-col h-full">
-            {/* Header */}
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest">
                 Alerts & Issues
@@ -752,25 +898,80 @@ const MainDashboard = () => {
               </button>
             </div>
 
-            {/* Alerts */}
             <div className="space-y-3 flex-1 overflow-auto">
-              {visibleAlerts.map((alert, index) => (
-                <div
-                  key={index}
-                  className={`p-4 rounded-2xl border border-gray-300 bg-gray-100 flex items-start gap-3 hover:bg-gray-50 transition`}
-                >
-                  <div className="w-2 h-2 mt-1 rounded-full bg-current opacity-70"></div>
+              {alerts.length > 0 ? (
+                alerts.map((alert, index) => {
+                  const isOutOfStock = alert.type === "out_of_stock";
+                  const isLowStock = alert.type === "low_stock";
 
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800">
-                      {alert.title}
-                    </p>
-                    <p className="text-xs text-gray-500 leading-tight">
-                      {alert.message}
-                    </p>
+                  return (
+                    <div
+                      key={index}
+                      className={`p-4 rounded-2xl border transition-all flex items-start gap-3 hover:shadow-sm ${
+                        isOutOfStock
+                          ? "border-red-200 bg-red-50/30 hover:bg-red-50/50"
+                          : isLowStock
+                            ? "border-amber-200 bg-amber-50/30 hover:bg-amber-50/50"
+                            : "border-gray-200 bg-gray-50 hover:bg-white"
+                      }`}
+                    >
+                      <div
+                        className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${
+                          isOutOfStock
+                            ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
+                            : isLowStock
+                              ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                              : "bg-emerald-500"
+                        }`}
+                      />
+
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <p
+                            className={`text-[11px] font-bold uppercase tracking-wider ${
+                              isOutOfStock
+                                ? "text-red-600"
+                                : isLowStock
+                                  ? "text-amber-600"
+                                  : "text-emerald-600"
+                            }`}
+                          >
+                            {alert.type?.replace("_", " ") || "Alert"}
+                          </p>
+
+                          {alert.createdAt && (
+                            <span className="text-[10px] text-gray-400 font-medium">
+                              {new Date(alert.createdAt).toLocaleTimeString(
+                                [],
+                                { hour: "2-digit", minute: "2-digit" },
+                              )}
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-sm font-semibold text-gray-800 leading-snug">
+                          {alert.message}
+                        </p>
+
+                        {alert.productId && (
+                          <p className="text-[10px] mt-1 font-mono text-gray-400">
+                            ID: {alert.productId}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="flex flex-col items-center justify-center py-10 opacity-60">
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                    <RiInboxLine className="text-gray-400" size={24} />
                   </div>
+                  <p className="text-xs font-medium text-gray-400 text-center">
+                    No system alerts found
+                  </p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>

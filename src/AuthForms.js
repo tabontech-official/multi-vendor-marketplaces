@@ -68,80 +68,76 @@ const Auth = () => {
   //   }
   // };
 
-const handleLogin = async (e) => {
-  e.preventDefault();
-  setError("");
-  setLoading(true);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-  if (!email || !password) {
-    setError("All fields are required.");
-
-    setTimeout(() => {
-      setError("");
-    }, 2000);
-
-    setLoading(false);
-    return;
-  }
-
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailPattern.test(email)) {
-    setError("Please enter a valid email address.");
-
-    setTimeout(() => {
-      setError("");
-    }, 2000);
-
-    setLoading(false);
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      "https://multi-vendor-marketplace.vercel.app/auth/signIn",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      }
-    );
-
-    const json = await response.json();
-    const path = localStorage.getItem("path") || "/";
-
-    if (response.ok && json.token && json.user) {
-      localStorage.setItem("usertoken", json.token);
-      localStorage.setItem("userid", json.user._id);
-      localStorage.setItem("email", json.user.email);
-      localStorage.setItem("showApprovalPopup", "true");
-
-      if (json.apiKey && json.apiSecretKey) {
-        localStorage.setItem("apiKey", json.apiKey);
-        localStorage.setItem("apiSecretKey", json.apiSecretKey);
-      }
-
-      dispatch({ type: "LOGIN", payload: json });
-      localStorage.removeItem("path");
-
-      window.location.href = path;
-    } else {
-      setError(json.error || json.message || "Login failed.");
+    if (!email || !password) {
+      setError("All fields are required.");
 
       setTimeout(() => {
         setError("");
       }, 2000);
+
+      setLoading(false);
+      return;
     }
-  } catch (err) {
-    setError("Something went wrong. Please try again.");
 
-    setTimeout(() => {
-      setError("");
-    }, 2000);
-  } finally {
-    setLoading(false);
-  }
-};
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      setError("Please enter a valid email address.");
 
+      setTimeout(() => {
+        setError("");
+      }, 2000);
+
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/auth/signIn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const json = await response.json();
+      const path = localStorage.getItem("path") || "/";
+
+      if (response.ok && json.token && json.user) {
+        localStorage.setItem("usertoken", json.token);
+        localStorage.setItem("userid", json.user._id);
+        localStorage.setItem("email", json.user.email);
+        localStorage.setItem("showApprovalPopup", "true");
+        localStorage.setItem("initialLoad", "true");
+
+        if (json.apiKey && json.apiSecretKey) {
+          localStorage.setItem("apiKey", json.apiKey);
+          localStorage.setItem("apiSecretKey", json.apiSecretKey);
+        }
+
+        dispatch({ type: "LOGIN", payload: json });
+        localStorage.removeItem("path");
+        navigate(path);
+      } else {
+        setError(json.error || json.message || "Login failed.");
+
+        setTimeout(() => {
+          setError("");
+        }, 2000);
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+
+      setTimeout(() => {
+        setError("");
+      }, 2000);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (user) {
     return <MainDashboard />;

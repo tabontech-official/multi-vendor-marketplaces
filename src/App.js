@@ -69,6 +69,7 @@ import BatchDetails from "./pages/BatchDetails";
 import ContentLibrary from "./pages/ContentLibrary";
 import ProductOther from "./pages/ProductOther";
 import TopProductsHistory from "./pages/TopProductStats";
+import AlertPage from "./pages/Alerts";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -160,6 +161,10 @@ const App = () => {
             <Route
               path="/manage-options"
               element={<PrivateRoute element={<ManageVariantOptions />} />}
+            />
+              <Route
+              path="/alerts"
+              element={<PrivateRoute element={<AlertPage />} />}
             />
             <Route path="/packaging-slip" element={<InvoicePreview />} />
             <Route path="/invoice-preview" element={<InvoicePage />} />

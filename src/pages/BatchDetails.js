@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
@@ -16,11 +15,14 @@ const BatchDetails = () => {
 
   const fetchBatch = async () => {
     try {
-      const res = await axios.get(`https://multi-vendor-marketplace.vercel.app/product/batch/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
+      const res = await axios.get(
+        `https://multi-vendor-marketplace.vercel.app/product/batch/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
+          },
         },
-      });
+      );
 
       setBatch(res.data.data);
     } catch (err) {
@@ -41,9 +43,9 @@ const BatchDetails = () => {
     if (lower.includes("trim is not a function")) {
       return "Invalid SKU format in uploaded file.";
     }
-if (lower.includes("exceeded 2 calls per second")) {
-  return "Request limit exceeded. Please retry this product or upload it again after a short wait.";
-}
+    if (lower.includes("exceeded 2 calls per second")) {
+      return "Request limit exceeded. Please retry this product or upload it again after a short wait.";
+    }
     // 2️⃣ Socket hang up / timeout
     if (lower.includes("socket hang up")) {
       return "Connection to Shopify timed out. Please try again.";

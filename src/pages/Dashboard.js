@@ -1538,6 +1538,10 @@ const handleCSVUpload = (e) => {
               <p className="mt-1">
                 Excel files (.xlsx, .xls) or other formats will be rejected.
               </p>
+               <p className="mt-1">
+                Maximum 50 products allowed per file.
+
+              </p>
             </div>
 
             {/* Body */}

@@ -200,7 +200,6 @@ const App = () => {
               path="/notification-setting"
               element={<NotificationSettings />}
             />
-
             <Route
               path="/user-requests/:id"
               element={<PrivateRoute element={<UserRequest />} />}

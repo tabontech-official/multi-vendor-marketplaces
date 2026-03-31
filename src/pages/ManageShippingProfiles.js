@@ -61,7 +61,7 @@ const ManageShippingProfiles = () => {
         ratePrice: parseFloat(newProfile.ratePrice),
       };
 
-      const endpoint = "http://localhost:5000/shippingProfile/add-shippings";
+      const endpoint = "https://multi-vendor-marketplace.vercel.app/shippingProfile/add-shippings";
 
       const { data } = await axios.post(endpoint, payload, {
         headers: { "Content-Type": "application/json" },
@@ -102,7 +102,7 @@ const ManageShippingProfiles = () => {
       setLoading(true);
 
       await axios.delete(
-        `http://localhost:5000/shippingProfile/shipping-profiles/${deleteModal.id}`,
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/shipping-profiles/${deleteModal.id}`,
       );
 
       showToast("success", "Shipping profile deleted successfully!");
@@ -144,8 +144,8 @@ const ManageShippingProfiles = () => {
         userData.role === "Dev Admin" || userData.role === "Master Admin";
 
       const endpoint = isAdmin
-        ? "http://localhost:5000/shippingProfile/get/admin"
-        : "http://localhost:5000/shippingProfile/getProfiles";
+        ? "https://multi-vendor-marketplace.vercel.app/shippingProfile/get/admin"
+        : "https://multi-vendor-marketplace.vercel.app/shippingProfile/getProfiles";
 
       console.log("📡 Fetching profiles from:", endpoint);
 
@@ -184,7 +184,7 @@ const ManageShippingProfiles = () => {
   const fetchUserActiveProfiles = async (userId) => {
     try {
       const { data } = await axios.get(
-        `http://localhost:5000/shippingProfile/${userId}`,
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/${userId}`,
       );
       setActiveProfiles(data.map((p) => p.profileId));
     } catch (err) {
@@ -212,7 +212,7 @@ const ManageShippingProfiles = () => {
       );
 
       if (checked) {
-        await axios.post("http://localhost:5000/shippingProfile/activate", {
+        await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/activate", {
           userId: profileUserId,
           profile: {
             profileId: profile.profileId,
@@ -222,7 +222,7 @@ const ManageShippingProfiles = () => {
           },
         });
       } else {
-        await axios.post("http://localhost:5000/shippingProfile/deactivate", {
+        await axios.post("https://multi-vendor-marketplace.vercel.app/shippingProfile/deactivate", {
           userId: profileUserId,
           profileId: profile.profileId,
         });
@@ -244,7 +244,7 @@ const ManageShippingProfiles = () => {
       );
 
       await axios.put(
-        `http://localhost:5000/shippingProfile/updateStatus/${profile._id}`,
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/updateStatus/${profile._id}`,
         {
           status: checked ? "enabled" : "disabled",
         },
@@ -259,7 +259,7 @@ const ManageShippingProfiles = () => {
     try {
       setLoading(true);
       await axios.put(
-        `http://localhost:5000/shippingProfile/update/${editingProfile._id}`,
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/update/${editingProfile._id}`,
         editingProfile,
       );
 
@@ -278,7 +278,7 @@ const ManageShippingProfiles = () => {
     if (!window.confirm("Delete this shipping profile?")) return;
     try {
       await axios.delete(
-        `http://localhost:5000/shippingProfile/shipping-profiles/${id}`,
+        `https://multi-vendor-marketplace.vercel.app/shippingProfile/shipping-profiles/${id}`,
       );
       fetchProfiles();
     } catch (err) {

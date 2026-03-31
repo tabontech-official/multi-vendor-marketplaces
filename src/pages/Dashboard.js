@@ -408,8 +408,8 @@ const handleCSVUpload = (e) => {
       const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
 
       const url = isAdmin
-        ? `http://localhost:5000/product/getAllProducts?page=${page}&limit=${limit}`
-        : `http://localhost:5000/product/getProduct/${id}?page=${page}&limit=${limit}`;
+        ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts?page=${page}&limit=${limit}`
+        : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
 
       const response = await fetch(url, {
         method: "GET",
@@ -516,7 +516,7 @@ const handleCSVUpload = (e) => {
 
   //       try {
   //         const response = await fetch(
-  //           "http://localhost:5000/product/upload-product-csv",
+  //           "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
   //           {
   //             method: "POST",
   //             headers: {
@@ -587,7 +587,7 @@ const handleCSVUpload = (e) => {
       formData.append("file", selectedFile);
 
       const response = await fetch(
-        "http://localhost:5000/product/upload-product-csv",
+        "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
         {
           method: "POST",
           headers: {
@@ -667,7 +667,7 @@ const handleCSVUpload = (e) => {
           const product = filteredProducts.find((p) => p._id === id);
 
           const response = await fetch(
-            `http://localhost:5000/product/deleteProduct/${id}`,
+            `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
             {
               method: "DELETE",
               headers: {
@@ -719,7 +719,7 @@ const handleCSVUpload = (e) => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "draft") {
             const response = await fetch(
-              ` http://localhost:5000/product/publishedProduct/${id}`,
+              ` https://multi-vendor-marketplace.vercel.app/product/publishedProduct/${id}`,
               {
                 method: "PUT",
                 body: JSON.stringify({ userId }),
@@ -758,7 +758,7 @@ const handleCSVUpload = (e) => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "active") {
             const response = await fetch(
-              ` http://localhost:5000/product/unpublished/${id}`,
+              ` https://multi-vendor-marketplace.vercel.app/product/unpublished/${id}`,
               {
                 method: "PUT",
                 headers: {
@@ -844,7 +844,7 @@ const handleCSVUpload = (e) => {
         queryParams.append("productIds", selectedProducts.join(","));
       }
 
-      const exportUrl = `http://localhost:5000/product/csvEportFile/?${queryParams.toString()}`;
+      const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvEportFile/?${queryParams.toString()}`;
 
       const response = await fetch(exportUrl);
 
@@ -1575,7 +1575,7 @@ const handleCSVUpload = (e) => {
               {/* Sample Download */}
               <div className="mt-4 flex justify-between items-center">
                 <a
-                  href="http://localhost:5000/admin-file/download/Products"
+                  href="https://multi-vendor-marketplace.vercel.app/admin-file/download/Products"
                   className="text-sm border px-3 py-1 rounded hover:bg-gray-100"
                 >
                   Download sample file

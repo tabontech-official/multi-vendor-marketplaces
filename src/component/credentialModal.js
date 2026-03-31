@@ -17,7 +17,7 @@ const CredentialCheckModal = () => {
       const userId = localStorage.getItem("userid");
 
       const res = await fetch(
-        "http://localhost:5000/generateAcessKeys/generate-keys",
+        "https://multi-vendor-marketplace.vercel.app/generateAcessKeys/generate-keys",
         {
           method: "POST",
           headers: {

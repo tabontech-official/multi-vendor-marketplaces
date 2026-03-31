@@ -26,7 +26,7 @@
 //       const userId = localStorage.getItem("userid");
 
 //       const res = await fetch(
-//         "http://localhost:5000/generateAcessKeys/generate-keys",
+//         "https://multi-vendor-marketplace.vercel.app/generateAcessKeys/generate-keys",
 //         {
 //           method: "POST",
 //           headers: {
@@ -60,7 +60,7 @@
 
 //       try {
 //         const res = await fetch(
-//           `http://localhost:5000/generateAcessKeys/getApiCredentialByUserId/${userId}`
+//           `https://multi-vendor-marketplace.vercel.app/generateAcessKeys/getApiCredentialByUserId/${userId}`
 //         );
 
 //         if (!res.ok) {
@@ -221,7 +221,7 @@ const ApiCredentials = () => {
   const generateCredentials = async () => {
     try {
       const userId = localStorage.getItem("userid");
-      const res = await fetch("http://localhost:5000/generateAcessKeys/generate-keys", {
+      const res = await fetch("https://multi-vendor-marketplace.vercel.app/generateAcessKeys/generate-keys", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),
@@ -243,7 +243,7 @@ const ApiCredentials = () => {
       const userId = localStorage.getItem("userid");
       if (!userId) return;
       try {
-        const res = await fetch(`http://localhost:5000/generateAcessKeys/getApiCredentialByUserId/${userId}`);
+        const res = await fetch(`https://multi-vendor-marketplace.vercel.app/generateAcessKeys/getApiCredentialByUserId/${userId}`);
         const data = await res.json();
         setApiKey(data.apiKey || "");
         setSecretKey(data.apiSecretKey || "");

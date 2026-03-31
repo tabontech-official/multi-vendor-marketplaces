@@ -47,12 +47,12 @@ const MainDashboard = () => {
       let apiUrl = "";
 
       if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
-        apiUrl = "http://localhost:5000/alert";
+        apiUrl = "https://multi-vendor-marketplace.vercel.app/alert";
       } else if (
         decodedRole === "Merchant" ||
         decodedRole === "Merchant Staff"
       ) {
-        apiUrl = "http://localhost:5000/alert/alerts";
+        apiUrl = "https://multi-vendor-marketplace.vercel.app/alert/alerts";
       }
 
       if (!apiUrl) return;
@@ -111,12 +111,12 @@ const MainDashboard = () => {
       // ✅ ADMIN
       if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
         apiUrl =
-          "http://localhost:5000/product/topProducts?limit=4&period=month";
+          "https://multi-vendor-marketplace.vercel.app/product/topProducts?limit=4&period=month";
       } else if (
         decodedRole === "Merchant" ||
         decodedRole === "Merchant Staff"
       ) {
-        apiUrl = `http://localhost:5000/product/topProductsForMerchants/?limit=4&period=month`;
+        apiUrl = `https://multi-vendor-marketplace.vercel.app/product/topProductsForMerchants/?limit=4&period=month`;
       }
 
       if (!apiUrl) return;
@@ -177,12 +177,12 @@ const MainDashboard = () => {
       let apiUrl = "";
       if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
         apiUrl =
-          "http://localhost:5000/order/monthlyRevenue";
+          "https://multi-vendor-marketplace.vercel.app/order/monthlyRevenue";
       } else if (
         decodedRole === "Merchant" ||
         decodedRole === "Merchant Staff"
       ) {
-        apiUrl = `http://localhost:5000/order/monthlyRevenue/${userId}`;
+        apiUrl = `https://multi-vendor-marketplace.vercel.app/order/monthlyRevenue/${userId}`;
       }
 
       const response = await fetch(apiUrl, {
@@ -288,10 +288,10 @@ const MainDashboard = () => {
 
       if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
         apiUrl =
-          "http://localhost:5000/product/getProductCount";
+          "https://multi-vendor-marketplace.vercel.app/product/getProductCount";
       } else if (decodedRole === "Merchant") {
         const userId = localStorage.getItem("userid");
-        apiUrl = `http://localhost:5000/product/getProductForCharts/${userId}`;
+        apiUrl = `https://multi-vendor-marketplace.vercel.app/product/getProductForCharts/${userId}`;
       }
 
       if (apiUrl) {
@@ -342,10 +342,10 @@ const MainDashboard = () => {
 
       if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
         apiUrl =
-          "http://localhost:5000/order/recurringFinance";
+          "https://multi-vendor-marketplace.vercel.app/order/recurringFinance";
       } else if (decodedRole === "Merchant") {
         const userId = localStorage.getItem("userid");
-        apiUrl = `http://localhost:5000/order/getFinanceSummaryForUser/${userId}`;
+        apiUrl = `https://multi-vendor-marketplace.vercel.app/order/getFinanceSummaryForUser/${userId}`;
       }
 
       if (apiUrl) {
@@ -381,9 +381,9 @@ const MainDashboard = () => {
       let url = "";
 
       if (role === "Merchant" || role === "Merchant Staff") {
-        url = `http://localhost:5000/product/trackingViews/${userId}`;
+        url = `https://multi-vendor-marketplace.vercel.app/product/trackingViews/${userId}`;
       } else if (role === "Master Admin" || role === "Dev Admin") {
-        url = `http://localhost:5000/product/trackingViews`;
+        url = `https://multi-vendor-marketplace.vercel.app/product/trackingViews`;
       }
 
       if (!url) return;

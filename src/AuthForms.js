@@ -32,7 +32,7 @@ const Auth = () => {
 
   //   try {
   //     const response = await fetch(
-  //       "http://localhost:5000/auth/signIn",
+  //       "https://multi-vendor-marketplace.vercel.app/auth/signIn",
   //       {
   //         method: "POST",
   //         headers: { "Content-Type": "application/json" },
@@ -97,7 +97,7 @@ const Auth = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/auth/signIn", {
+      const response = await fetch("https://multi-vendor-marketplace.vercel.app/auth/signIn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

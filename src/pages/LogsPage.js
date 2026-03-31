@@ -33,7 +33,7 @@ const LogsPage = () => {
   const fetchUserBatches = async () => {
     try {
       const res = await axios.get(
-        `https://multi-vendor-marketplace.vercel.app/product/batches/${userId}`,
+        `http://localhost:5000/product/batches/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
@@ -50,7 +50,7 @@ const LogsPage = () => {
 
   const fetchAllBatches = async () => {
     try {
-      const res = await axios.get(`https://multi-vendor-marketplace.vercel.app/product/batches`, {
+      const res = await axios.get(`http://localhost:5000/product/batches`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("usertoken")}`,
         },

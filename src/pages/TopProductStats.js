@@ -31,8 +31,8 @@ const TopProductsHistory = () => {
 
     const url =
       role === "Master Admin" || role === "Dev Admin"
-        ? "https://multi-vendor-marketplace.vercel.app/product/top-products-history-admin"
-        : "https://multi-vendor-marketplace.vercel.app/product/top-products-history";
+        ? "http://localhost:5000/product/top-products-history-admin"
+        : "http://localhost:5000/product/top-products-history";
 
     const res = await fetch(url, {
       method: "GET",

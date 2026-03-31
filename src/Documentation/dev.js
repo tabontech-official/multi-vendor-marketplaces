@@ -73,7 +73,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/auth/signIn`}
+                    {`http://localhost:5000/auth/signIn`}
                   </pre>
                 </div>
 
@@ -204,7 +204,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/fetchAllProducts`}
+                    {`http://localhost:5000/product/fetchAllProducts`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -362,7 +362,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/getProduct/687b...`}
+                    {`http://localhost:5000/product/getProduct/687b...`}
                   </pre>
                 </div>
                 {/* Response Example */}
@@ -607,7 +607,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/createProduct`}
+                    {`http://localhost:5000/product/createProduct`}
                   </pre>
                 </div>
                 {/* Request Body */}
@@ -860,7 +860,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app//product/updateProducts/687b....`}
+                    {`http://localhost:5000//product/updateProducts/687b....`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
@@ -1069,7 +1069,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/publishedProduct/64acbe...`}
+                    {`http://localhost:5000/product/publishedProduct/64acbe...`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -1229,7 +1229,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/unpublished/64acbe...`}
+                    {`http://localhost:5000/product/unpublished/64acbe...`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -1420,7 +1420,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/updateImages/98755`}
+                    {`http://localhost:5000/product/updateImages/98755`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -1612,7 +1612,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/deleteProduct/687b...`}
+                    {`http://localhost:5000/product/deleteProduct/687b...`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -1768,7 +1768,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/addImageGallery`}
+                    {`http://localhost:5000/product/addImageGallery`}
                   </pre>
                 </div>
                 {/* Request Example */}
@@ -1897,7 +1897,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/getImageGallery/65b431....`}
+                    {`http://localhost:5000/product/getImageGallery/65b431....`}
                   </pre>
                 </div>
                 {/* Example Response */}
@@ -2061,7 +2061,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/upload-product-csv`}
+                    {`http://localhost:5000/product/upload-product-csv`}
                   </pre>
                 </div>
                 {/* Example Response */}
@@ -2205,7 +2205,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/getVariant/987645/variants/34643809`}
+                    {`http://localhost:5000/product/getVariant/987645/variants/34643809`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -2397,7 +2397,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/updateVariant/987654321/98765423`}
+                    {`http://localhost:5000/product/updateVariant/987654321/98765423`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
@@ -2551,7 +2551,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/87856567`}
+                    {`http://localhost:5000/product/updateInventoryPrice/87856567`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
@@ -2687,7 +2687,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/5678653889`}
+                    {`http://localhost:5000/product/updateInventoryQuantity/5678653889`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
@@ -2848,7 +2848,7 @@ export default function ApiDocsPage() {
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory`}
+                    {`http://localhost:5000/product/upload-csv-for-inventory`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
@@ -3016,7 +3016,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/category/createCategory`}
+                    {`http://localhost:5000/category/createCategory`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
@@ -3128,7 +3128,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/category/getCategory`}
+                    {`http://localhost:5000/category/getCategory`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -3245,7 +3245,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/category/category/64acb...`}
+                    {`http://localhost:5000/category/category/64acb...`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -3351,7 +3351,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/category/deleteCategory`}
+                    {`http://localhost:5000/category/deleteCategory`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -3445,7 +3445,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/order/order`}
+                    {`http://localhost:5000/order/order`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -3563,7 +3563,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/getOrderByOrderId/1234567890`}
+                    {`http://localhost:5000/getOrderByOrderId/1234567890`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -3666,7 +3666,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/order/getCancellationRequests`}
+                    {`http://localhost:5000/order/getCancellationRequests`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -3792,7 +3792,7 @@ SKU-GREEN-S,5,,,archived`}</pre>
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/order/cancelOrder`}
+                    {`http://localhost:5000/order/cancelOrder`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -4037,7 +4037,7 @@ Each CSV row includes:
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/order/addPayOutDates`}
+                    {`http://localhost:5000/order/addPayOutDates`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
@@ -4160,7 +4160,7 @@ Each CSV row includes:
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/order/addReferenceNumber`}
+                    {`http://localhost:5000/order/addReferenceNumber`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#f5f5f5]">
@@ -4280,7 +4280,7 @@ Each CSV row includes:
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/order/getPayout?page=1&limit=5`}
+                    {`http://localhost:5000/order/getPayout?page=1&limit=5`}
                   </pre>
                 </div>
 
@@ -4407,7 +4407,7 @@ Each CSV row includes:
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/order/getPayoutByQuery?userId=64abf1a12b9...&status=pending`}
+                    {`http://localhost:5000/order/getPayoutByQuery?userId=64abf1a12b9...&status=pending`}
                   </pre>
                 </div>
 
@@ -4542,7 +4542,7 @@ Each CSV row includes:
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/order/getAllPayouts?payoutDate=Jul 21, 2025&status=pending`}
+                    {`http://localhost:5000/order/getAllPayouts?payoutDate=Jul 21, 2025&status=pending`}
                   </pre>
                 </div>
 
@@ -4675,7 +4675,7 @@ Each CSV row includes:
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/order/getPayoutByUserId?userId=64acbe...`}
+                    {`http://localhost:5000/order/getPayoutByUserId?userId=64acbe...`}
                   </pre>
                 </div>
 
@@ -4798,7 +4798,7 @@ Each CSV row includes:
                     </span>
                   </div>
                   <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-                    {`https://multi-vendor-marketplace.vercel.app/order/getPendingOrder`}
+                    {`http://localhost:5000/order/getPendingOrder`}
                   </pre>
                 </div>
                 <div className="rounded-md overflow-hidden shadow border border-gray-300 bg-[#1e1e1e]">
@@ -4897,7 +4897,7 @@ Each CSV row includes:
           </span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-          {`https://multi-vendor-marketplace.vercel.app/promo`}
+          {`http://localhost:5000/promo`}
         </pre>
       </div>
 
@@ -5044,7 +5044,7 @@ Each CSV row includes:
           <strong>Note:</strong> First, fetch all products using:
           <br />
           <code className="text-purple-700 font-medium break-words text-xs">
-            GET https://multi-vendor-marketplace.vercel.app/product/getAllProducts
+            GET http://localhost:5000/product/getAllProducts
           </code>
           <br />
           Then extract the desired <strong>variant ID</strong> from the <code>variants</code> array inside each product.
@@ -5066,7 +5066,7 @@ Each CSV row includes:
           </span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-          {`https://multi-vendor-marketplace.vercel.app/promo/VARIANT_ID`}
+          {`http://localhost:5000/promo/VARIANT_ID`}
         </pre>
       </div>
 
@@ -5207,7 +5207,7 @@ Each CSV row includes:
           </span>
         </div>
         <pre className="text-sm p-4 font-mono text-gray-800 whitespace-pre-wrap">
-          {`https://multi-vendor-marketplace.vercel.app/promo/endPromotions/64e7f223dc67c123456789ab`}
+          {`http://localhost:5000/promo/endPromotions/64e7f223dc67c123456789ab`}
         </pre>
       </div>
 

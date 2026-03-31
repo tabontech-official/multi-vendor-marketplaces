@@ -27,7 +27,7 @@ const ContentLibrary = () => {
 
   const userId = localStorage.getItem("userid");
   const handleDownload = (id, name) => {
-    const url = `https://multi-vendor-marketplace.vercel.app/admin-file/download-file/${id}`;
+    const url = `http://localhost:5000/admin-file/download-file/${id}`;
 
     const link = document.createElement("a");
     link.href = url;
@@ -60,16 +60,16 @@ const ContentLibrary = () => {
 
       if (activeTab === "downloadable") {
         res = await axios.get(
-          "https://multi-vendor-marketplace.vercel.app/admin-file/get-downloadable",
+          "http://localhost:5000/admin-file/get-downloadable",
         );
       } else {
         if (role === "Dev Admin" || role === "Master Admin") {
           res = await axios.get(
-            "https://multi-vendor-marketplace.vercel.app/api/content/get-all-files",
+            "http://localhost:5000/api/content/get-all-files",
           );
         } else {
           res = await axios.get(
-            `https://multi-vendor-marketplace.vercel.app/api/content/get-by-user/${userId}`,
+            `http://localhost:5000/api/content/get-by-user/${userId}`,
           );
         }
       }
@@ -111,7 +111,7 @@ const ContentLibrary = () => {
     try {
       const fileId = selectedFiles[0]._id;
 
-      await axios.put(`https://multi-vendor-marketplace.vercel.app/admin-file/set-active/${fileId}`);
+      await axios.put(`http://localhost:5000/admin-file/set-active/${fileId}`);
 
       fetchFiles();
       setSelectedFiles([]);
@@ -125,10 +125,10 @@ const ContentLibrary = () => {
       for (let file of selectedFiles) {
         if (activeTab === "downloadable") {
           await axios.delete(
-            `https://multi-vendor-marketplace.vercel.app/admin-file/delete/${file._id}`,
+            `http://localhost:5000/admin-file/delete/${file._id}`,
           );
         } else {
-          await axios.delete("https://multi-vendor-marketplace.vercel.app/api/content/delete-file", {
+          await axios.delete("http://localhost:5000/api/content/delete-file", {
             data: { id: file._id },
           });
         }
@@ -162,7 +162,7 @@ const ContentLibrary = () => {
       setUploading(true);
 
       await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/api/content/upload-content",
+        "http://localhost:5000/api/content/upload-content",
         formData,
       );
 
@@ -188,7 +188,7 @@ const ContentLibrary = () => {
       setUploading(true);
 
       await axios.post(
-        `https://multi-vendor-marketplace.vercel.app/admin-file/upload-downloadable/${excelType}`,
+        `http://localhost:5000/admin-file/upload-downloadable/${excelType}`,
         formData,
       );
 

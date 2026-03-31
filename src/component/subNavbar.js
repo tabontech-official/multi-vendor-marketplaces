@@ -275,7 +275,7 @@ const SubNavbar = () => {
       icon: <FaTags className="text-blue-600" />,
       path: "#",
       subModules: [
-        { name: "ManageOrders", path: "/Order_Details" },
+        { name: "Manage Orders", path: "/Order_Details" },
         { name: "Manage Requests", path: "/manage-requests" },
       ],
     },

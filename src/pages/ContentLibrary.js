@@ -74,7 +74,11 @@ const ContentLibrary = () => {
         }
       }
 
-      setFiles(res.data.data || []);
+      setFiles(
+        (res.data.data || []).sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+        ),
+      );
     } catch (err) {
       console.error(err);
     } finally {
@@ -111,7 +115,9 @@ const ContentLibrary = () => {
     try {
       const fileId = selectedFiles[0]._id;
 
-      await axios.put(`https://multi-vendor-marketplace.vercel.app/admin-file/set-active/${fileId}`);
+      await axios.put(
+        `https://multi-vendor-marketplace.vercel.app/admin-file/set-active/${fileId}`,
+      );
 
       fetchFiles();
       setSelectedFiles([]);
@@ -128,9 +134,12 @@ const ContentLibrary = () => {
             `https://multi-vendor-marketplace.vercel.app/admin-file/delete/${file._id}`,
           );
         } else {
-          await axios.delete("https://multi-vendor-marketplace.vercel.app/api/content/delete-file", {
-            data: { id: file._id },
-          });
+          await axios.delete(
+            "https://multi-vendor-marketplace.vercel.app/api/content/delete-file",
+            {
+              data: { id: file._id },
+            },
+          );
         }
       }
 

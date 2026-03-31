@@ -299,7 +299,7 @@ const SubNavbar = () => {
       ],
     },
     {
-      name: "OnBoardUser",
+      name: "On Board User",
       icon: <FiUsers className="text-green-600" />,
       path: "/on-board-users",
     },

@@ -29,6 +29,10 @@ const LogsPage = () => {
       console.error("Token decode error:", error);
     }
   }, []);
+  const getDisplayStatus = (status) => {
+  if (status === "queued") return "processing";
+  return status;
+};
 
   const fetchUserBatches = async () => {
     try {
@@ -146,7 +150,7 @@ const LogsPage = () => {
                               : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
-                        {batch.status}
+                        {getDisplayStatus(batch.status)}
                       </span>
                     </td>
                     <td className="px-4 py-3">{batch.summary?.total || 0}</td>

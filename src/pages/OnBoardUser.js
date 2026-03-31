@@ -544,10 +544,12 @@ const OnBoard = () => {
                 <th className="p-3 font-medium">Email</th>
                 <th className="p-3 font-medium">Status</th>
                 <th className="p-3 font-medium">Added On</th>
-                <th className="p-3 font-medium">Customer ID</th>
+                <th className="p-3 font-medium">Shopify Customer ID</th>
                 <th className="p-3 font-medium">Role</th>
                 <th className="p-3 font-medium">Details</th>
-                <th className="p-3 font-medium text-right">Action</th>
+                {/* <th className="p-3 font-medium text-right">Action</th> */}
+                <th className="p-3 font-medium text-right"></th>
+
               </tr>
             </thead>
 

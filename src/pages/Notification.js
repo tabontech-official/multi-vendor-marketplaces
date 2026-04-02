@@ -60,39 +60,68 @@
 // export default Notification;
 import React, { useEffect, useState, useMemo } from "react";
 import { useNotification } from "../context api/NotificationContext";
+import { jwtDecode } from "jwt-decode";
 
 const Notification = () => {
   const { notifications, fetchNotifications } = useNotification();
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState("All");
   const [selectedSource, setSelectedSource] = useState("All");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState("");
 
+  useEffect(() => {
+    const token = localStorage.getItem("usertoken");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(token);
+
+      if (decoded?.payLoad?.role) {
+        setRole(decoded.payLoad.role);
+      } else {
+        setRole("");
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
   useEffect(() => {
     fetchNotifications();
   }, []);
-
+  const isAdmin = role === "Master Admin" || role === "Dev Admin";
   const uniqueUsers = useMemo(() => {
-    const users = notifications.map(note => 
-      note.firstName || note.lastName 
-        ? `${note.firstName} ${note.lastName}`.trim() 
-        : "System Admin"
+    const users = notifications.map((note) =>
+      note.firstName || note.lastName
+        ? `${note.firstName} ${note.lastName}`.trim()
+        : "System Admin",
     );
     return ["All", ...new Set(users)];
   }, [notifications]);
 
   const filteredNotifications = notifications.filter((note) => {
-    const fullName = `${note.firstName} ${note.lastName}`.trim() || "System Admin";
+    const fullName =
+      `${note.firstName} ${note.lastName}`.trim() || "System Admin";
     const noteDate = new Date(note.createdAt).toISOString().split("T")[0];
     const message = note.message.toLowerCase();
     const search = searchTerm.toLowerCase();
 
-    const matchesSearch = message.includes(search) || fullName.toLowerCase().includes(search);
+    const matchesSearch =
+      message.includes(search) || fullName.toLowerCase().includes(search);
     const matchesUser = selectedUser === "All" || fullName === selectedUser;
-    const matchesSource = selectedSource === "All" || note.source === selectedSource;
-    const matchesDate = (!startDate || noteDate >= startDate) && (!endDate || noteDate <= endDate);
+    const matchesSource =
+      selectedSource === "All" || note.source === selectedSource;
+    const matchesDate =
+      (!startDate || noteDate >= startDate) &&
+      (!endDate || noteDate <= endDate);
 
     return matchesSearch && matchesUser && matchesSource && matchesDate;
   });
@@ -101,12 +130,15 @@ const Notification = () => {
     // Default Font Family (Sans) is used here for a standard professional look
     <div className="bg-[#fcfcfd] min-h-screen py-10 font-sans antialiased text-slate-900">
       <div className="max-w-5xl mx-auto px-6">
-        
         {/* Header Section */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Notifications</h1>
-            <p className="text-sm text-slate-500 mt-1">Monitor all system activities and logs.</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+              Notifications
+            </h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Monitor all system activities and logs.
+            </p>
           </div>
           <div className="bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
             <span className="text-xs font-medium text-slate-600">
@@ -118,13 +150,14 @@ const Notification = () => {
         {/* Filters Container */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            
             {/* Search */}
             <div className="md:col-span-2">
-              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Search</label>
+              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">
+                Search
+              </label>
               <div className="relative">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="By name, message or batch..."
                   className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-4 py-2 text-sm focus:bg-white focus:ring-1 focus:ring-slate-400 outline-none transition-all placeholder:text-slate-400"
                   value={searchTerm}
@@ -134,7 +167,7 @@ const Notification = () => {
             </div>
 
             {/* User Filter */}
-            <div>
+            {/* <div>
               <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">User</label>
               <select 
                 className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none cursor-pointer focus:bg-white"
@@ -143,12 +176,32 @@ const Notification = () => {
               >
                 {uniqueUsers.map((user, idx) => <option key={idx} value={user}>{user}</option>)}
               </select>
-            </div>
+            </div> */}
 
+            {isAdmin && (
+              <div>
+                <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">
+                  User
+                </label>
+                <select
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none cursor-pointer focus:bg-white"
+                  value={selectedUser}
+                  onChange={(e) => setSelectedUser(e.target.value)}
+                >
+                  {uniqueUsers.map((user, idx) => (
+                    <option key={idx} value={user}>
+                      {user}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             {/* Source Filter */}
             <div>
-              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Source</label>
-              <select 
+              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">
+                Source
+              </label>
+              <select
                 className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none cursor-pointer focus:bg-white"
                 value={selectedSource}
                 onChange={(e) => setSelectedSource(e.target.value)}
@@ -165,16 +218,32 @@ const Notification = () => {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-400">From</span>
-                <input type="date" className="bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-xs outline-none" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                <input
+                  type="date"
+                  className="bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-xs outline-none"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-400">To</span>
-                <input type="date" className="bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-xs outline-none" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                <input
+                  type="date"
+                  className="bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-xs outline-none"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
               </div>
             </div>
 
-            <button 
-              onClick={() => {setSearchTerm(""); setSelectedUser("All"); setSelectedSource("All"); setStartDate(""); setEndDate("");}}
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedUser("All");
+                setSelectedSource("All");
+                setStartDate("");
+                setEndDate("");
+              }}
               className="text-xs font-medium text-slate-400 hover:text-slate-900 transition-colors"
             >
               Reset Filters
@@ -186,18 +255,24 @@ const Notification = () => {
         <div className="space-y-2">
           {filteredNotifications.length > 0 ? (
             filteredNotifications.map((note) => (
-              <div key={note._id} className="bg-white border border-slate-200 px-5 py-4 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:border-slate-300">
-                
+              <div
+                key={note._id}
+                className="bg-white border border-slate-200 px-5 py-4 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:border-slate-300"
+              >
                 <div className="flex items-start md:items-center gap-4">
                   {/* Visual Dot/Indicator */}
-                  <div className={`mt-1 md:mt-0 h-2 w-2 rounded-full shrink-0 ${note.source === 'Manage product' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
-                  
+                  <div
+                    className={`mt-1 md:mt-0 h-2 w-2 rounded-full shrink-0 ${note.source === "Manage product" ? "bg-purple-500" : "bg-blue-500"}`}
+                  ></div>
+
                   <div>
                     <h3 className="text-[14px] font-medium text-slate-900 leading-tight">
-                      {note.message.split('\n')[0]}
+                      {note.message.split("\n")[0]}
                     </h3>
                     <p className="text-[13px] text-slate-500 mt-1 line-clamp-1">
-                      {note.message.includes('\n') ? note.message.split('\n').slice(1).join(' ') : 'Activity completed successfully.'}
+                      {note.message.includes("\n")
+                        ? note.message.split("\n").slice(1).join(" ")
+                        : "Activity completed successfully."}
                     </p>
                   </div>
                 </div>
@@ -212,7 +287,12 @@ const Notification = () => {
                     </span>
                   </div>
                   <span className="text-[11px] text-slate-400 font-medium whitespace-nowrap">
-                    {new Date(note.createdAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    {new Date(note.createdAt).toLocaleString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </span>
                 </div>
               </div>

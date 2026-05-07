@@ -259,7 +259,7 @@ const OrdersDetails = () => {
 
       setShowTrackingModal(false);
     } catch (err) {
-      alert("Failed to update tracking.");
+      showToast("error","Failed to update tracking.");
     }
   };
 
@@ -291,7 +291,7 @@ const OrdersDetails = () => {
       }
 
       if (!orderId || lineItemIds.length === 0) {
-        alert("Missing orderData details or line items to cancel.");
+        showToast("error","Missing orderData details or line items to cancel.");
         return;
       }
 
@@ -769,7 +769,7 @@ const OrdersDetails = () => {
                     className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
                     onClick={() => setShowCancelPopup(true)}
                   >
-                    Cancel orderData
+                    Cancel order
                   </button>
                 ) : role === "Merchant" ? (
                   <div className="text-sm text-gray-300-600 font-medium">
@@ -1156,7 +1156,7 @@ const OrdersDetails = () => {
                 <button
                   onClick={async () => {
                     if (!requestMessage.trim()) {
-                      alert("Please enter a request message.");
+                      showToast("success","Please enter a request message.");
                       return;
                     }
 
@@ -1193,7 +1193,7 @@ const OrdersDetails = () => {
                       }
                     } catch (err) {
                       console.error("Error submitting request:", err);
-                      alert("Something went wrong. Try again.");
+                      showToast("error","Something went wrong. Try again.");
                     }
                   }}
                   className="px-5 py-2 text-sm font-medium rounded-lg bg-black text-white hover:bg-gray-800 transition shadow-md"

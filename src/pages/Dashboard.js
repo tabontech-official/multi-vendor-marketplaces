@@ -446,6 +446,7 @@ const handleCSVUpload = (e) => {
   };
 
   const [showUploadBanner, setShowUploadBanner] = useState(false);
+ 
   // const handleUploadAndPreview = async () => {
   //   if (!selectedFile) return;
 
@@ -456,173 +457,119 @@ const handleCSVUpload = (e) => {
   //   const apiSecretKey = localStorage.getItem("apiSecretKey");
 
   //   try {
-  //     // -------- READ ORIGINAL EXCEL --------
-  //     const fileBuffer = await selectedFile.arrayBuffer();
-  //     const workbook = XLSX.read(fileBuffer, { type: "array" });
+  //     const formData = new FormData();
+  //     formData.append("file", selectedFile);
 
-  //     const sheetName = workbook.SheetNames[0];
-  //     const sheet = workbook.Sheets[sheetName];
+  //     const response = await fetch(
+  //       "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "x-api-key": apiKey,
+  //           "x-api-secret": apiSecretKey,
+  //         },
+  //         body: formData,
+  //       },
+  //     );
 
-  //     const allRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-  //     const totalProducts = allRows.length;
+  //     const result = await response.json();
 
-  //     if (totalProducts === 0) {
-  //       showToast("error", "Excel file is empty");
-  //       setIsUploading(false);
-  //       return;
+  //     if (!response.ok) {
+  //       throw new Error(result.message || "Upload failed");
   //     }
 
-  //     const chunkSize = totalProducts > 10 ? 10 : totalProducts;
-  //     const totalChunks = Math.ceil(totalProducts / chunkSize);
-
   //     showToast(
-  //       "info",
-  //       `Total ${totalProducts} products found. Uploading in ${totalChunks} chunks...`,
+  //       "success",
+  //       `File uploaded successfully. Batch No: ${result.batchNo}`,
   //     );
 
   //     addNotification(
-  //       `Excel upload started (${totalProducts} products)`,
+  //       `Import started (Batch: ${result.batchNo})`,
   //       "Manage product",
   //     );
 
-  //     // -------- PROCESS CHUNKS --------
-  //     for (let i = 0; i < totalProducts; i += chunkSize) {
-  //       const chunkNumber = Math.floor(i / chunkSize) + 1;
-
-  //       triggerUploadBanner(`Uploading chunk ${chunkNumber} of ${totalChunks}`);
-
-  //       addNotification(
-  //         `Uploading chunk ${chunkNumber} of ${totalChunks}`,
-  //         "Manage product",
-  //       );
-
-  //       const chunk = allRows.slice(i, i + chunkSize);
-
-  //       const newWorkbook = XLSX.utils.book_new();
-  //       const newSheet = XLSX.utils.json_to_sheet(chunk);
-  //       XLSX.utils.book_append_sheet(newWorkbook, newSheet, "Products");
-
-  //       const excelBuffer = XLSX.write(newWorkbook, {
-  //         bookType: "xlsx",
-  //         type: "array",
-  //       });
-
-  //       const chunkBlob = new Blob([excelBuffer], {
-  //         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  //       });
-
-  //       const formData = new FormData();
-  //       formData.append("file", chunkBlob, `excel_chunk_${chunkNumber}.xlsx`);
-
-  //       try {
-  //         const response = await fetch(
-  //           "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
-  //           {
-  //             method: "POST",
-  //             headers: {
-  //               "x-api-key": apiKey,
-  //               "x-api-secret": apiSecretKey,
-  //             },
-  //             body: formData,
-  //           },
-  //         );
-
-  //         const result = await response.json();
-
-  //         if (!response.ok) {
-  //           showToast(
-  //             "error",
-  //             `Chunk ${chunkNumber} failed: ${
-  //               result.message || "Unknown error"
-  //             }`,
-  //           );
-
-  //           addNotification(`Chunk ${chunkNumber} failed`, "Manage product");
-  //         } else {
-  //           showToast("success", `Chunk ${chunkNumber} uploaded successfully`);
-
-  //           addNotification(
-  //             `Chunk ${chunkNumber} uploaded successfully`,
-  //             "Manage product",
-  //           );
-  //         }
-  //       } catch (err) {
-  //         showToast("error", `Error uploading chunk ${chunkNumber}`);
-
-  //         addNotification(
-  //           `Chunk ${chunkNumber} upload error`,
-  //           "Manage product",
-  //         );
-  //       }
-
-  //       await new Promise((resolve) => setTimeout(resolve, 1000));
-  //     }
-
-  //     showToast("success", "Excel uploaded successfully");
-
-  //     addNotification(`Excel upload completed successfully`, "Manage product");
-
-  //     fetchProductData();
+  //     setSelectedFile(null);
   //   } catch (error) {
-  //     showToast("error", "Excel processing failed: " + error.message);
-
-  //     addNotification(`Excel upload failed`, "Manage product");
+  //     showToast("error", error.message);
+  //     addNotification("Import failed", "Manage product");
+  //   } finally {
+  //     setIsUploading(false);
   //   }
-
-  //   setIsUploading(false);
-  //   setSelectedFile(null);
   // };
 
   const handleUploadAndPreview = async () => {
-    if (!selectedFile) return;
+  if (!selectedFile) {
+    showToast("error", "Please select a CSV file first.");
+    return;
+  }
 
-    setIsUploading(true);
-    closePopup();
+  // CSV Validation
+  const fileName = selectedFile.name.toLowerCase();
 
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+  if (!fileName.endsWith(".csv")) {
+    showToast(
+      "error",
+      "Invalid file format. Only CSV files are allowed.",
+    );
 
-    try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
+    addNotification(
+      "Upload failed: Only CSV format is supported",
+      "Manage product",
+    );
 
-      const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
-        {
-          method: "POST",
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-          },
-          body: formData,
+    return;
+  }
+
+  setIsUploading(true);
+  closePopup();
+
+  const apiKey = localStorage.getItem("apiKey");
+  const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+  try {
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    const response = await fetch(
+      "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
+      {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
         },
-      );
+        body: formData,
+      },
+    );
 
-      const result = await response.json();
+    const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.message || "Upload failed");
-      }
-
-      showToast(
-        "success",
-        `File uploaded successfully. Batch No: ${result.batchNo}`,
-      );
-
-      addNotification(
-        `Import started (Batch: ${result.batchNo})`,
-        "Manage product",
-      );
-
-      setSelectedFile(null);
-    } catch (error) {
-      showToast("error", error.message);
-      addNotification("Import failed", "Manage product");
-    } finally {
-      setIsUploading(false);
+    if (!response.ok) {
+      throw new Error(result.message || "Upload failed");
     }
-  };
 
+    showToast(
+      "success",
+      `File uploaded successfully. Batch No: ${result.batchNo}`,
+    );
+
+    addNotification(
+      `Import started (Batch: ${result.batchNo})`,
+      "Manage product",
+    );
+
+    setSelectedFile(null);
+  } catch (error) {
+    showToast("error", error.message);
+
+    addNotification(
+      `Import failed: ${error.message}`,
+      "Manage product",
+    );
+  } finally {
+    setIsUploading(false);
+  }
+};
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {

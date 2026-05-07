@@ -50,19 +50,45 @@ const RequestDetails = () => {
           </div>
 
           {/* Quick Merchant Info Badge */}
-          {state && (
-            <div className="flex items-center gap-3 bg-white border border-gray-200 p-3 rounded-2xl shadow-sm">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-                <RiUser3Line size={20} />
-              </div>
-              <div className="text-left">
-                <p className="text-xs font-bold text-gray-400 uppercase leading-none mb-1">
-                  Requested By
-                </p>
-                <p className="text-sm font-bold text-gray-900 leading-none">
-                  {state.fullName}
-                </p>
-                <p className="text-[10px] text-gray-500 mt-1">{state.email}</p>
+          {request?.merchant && (
+            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 min-w-[280px]">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+                  <RiUser3Line size={22} />
+                </div>
+
+                <div className="flex-1">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                    Merchant Information
+                  </p>
+
+                  <h3 className="text-base font-bold text-gray-900 leading-none">
+                    {request.merchant.name || "N/A"}
+                  </h3>
+
+                  <div className="mt-3 space-y-1">
+                    <p className="text-xs text-gray-600">
+                      <span className="font-semibold text-gray-800">
+                        Seller Name:
+                      </span>{" "}
+                      {request.merchant.sellerName || "N/A"}
+                    </p>
+
+                    <p className="text-xs text-gray-600">
+                      <span className="font-semibold text-gray-800">
+                        Username:
+                      </span>{" "}
+                      {request.merchant.userName || "N/A"}
+                    </p>
+
+                    <p className="text-xs text-gray-600 break-all">
+                      <span className="font-semibold text-gray-800">
+                        Email:
+                      </span>{" "}
+                      {request.merchant.email || "N/A"}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -108,7 +134,7 @@ const RequestDetails = () => {
                 <div
                   onClick={() =>
                     navigate(
-                      `/order/${request?.orderNo || request?.orderId}/${request.userId}`,
+                      `/order/${request?.orderNo || request?.orderId}/${request?.merchant?.id}`,
                     )
                   }
                 >

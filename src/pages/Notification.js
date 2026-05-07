@@ -283,7 +283,9 @@ const Notification = () => {
                       {note.source}
                     </span>
                     <span className="text-[10px] font-semibold text-slate-700 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
-                      {note.firstName} {note.lastName}
+                      {note.firstName && note.lastName
+                        ? `${note.firstName} ${note.lastName}`
+                        : "SYSTEM"}
                     </span>
                   </div>
                   <span className="text-[11px] text-slate-400 font-medium whitespace-nowrap">

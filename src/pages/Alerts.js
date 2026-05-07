@@ -111,12 +111,47 @@ const AlertPage = () => {
   const columnCount = isAdmin ? 5 : 4;
 
   // Helper for Status Badge Styling
-  const getStatusStyles = (type) => {
-    if (type === "out_of_stock") return "bg-red-50 border-red-100 text-red-600";
-    if (type === "low_stock") return "bg-amber-50 border-amber-100 text-amber-600";
-    return "bg-gray-50 border-gray-100 text-gray-600";
-  };
+ const getStatusStyles = (type) => {
+  if (type === "critical") {
+    return "bg-red-100 border-red-200 text-red-700";
+  }
 
+  if (type === "out_of_stock") {
+    return "bg-red-50 border-red-100 text-red-600";
+  }
+
+  if (type === "low_stock") {
+    return "bg-amber-50 border-amber-100 text-amber-600";
+  }
+
+  return "bg-gray-50 border-gray-100 text-gray-600";
+};
+const formatAlertMessage = (message) => {
+  if (!message) return "Unknown system alert";
+
+  // Redis limit error
+  if (message.includes("max requests limit exceeded")) {
+    return `
+Redis request quota exceeded.
+
+Marketplace background processing may be temporarily affected.
+
+Recommended Action:
+Please upgrade the active Upstash Redis plan.
+    `;
+  }
+
+  // Scheduler failure
+  if (message.includes("Scheduler processing failed")) {
+    return `
+Critical scheduler processing issue detected.
+
+Queue operations and feed imports may experience interruptions.
+    `;
+  }
+
+  return message;
+};
   return (
     <main className="w-full p-6 antialiased min-h-screen font-sans bg-gray-50 text-gray-900">
       {/* Header */}
@@ -157,6 +192,7 @@ const AlertPage = () => {
             <option value="All">All Inventory Levels</option>
             <option value="low_stock">Low Stock Alerts</option>
             <option value="out_of_stock">Out of Stock</option>
+            <option value="critical">Critical Alerts</option>
           </select>
         </div>
 
@@ -222,13 +258,21 @@ const AlertPage = () => {
                       </td>
                       <td className="px-6 py-5">
                         <div className="flex items-start gap-3 max-w-md">
-                          <RiErrorWarningLine className={`mt-0.5 shrink-0 ${alert.type === 'out_of_stock' ? 'text-red-400' : 'text-amber-400'}`} size={16} />
-                          <span className="text-sm text-gray-700 font-semibold leading-relaxed">{alert.message}</span>
+<RiErrorWarningLine
+  className={`mt-0.5 shrink-0 ${
+    alert.type === 'critical'
+      ? 'text-red-600'
+      : alert.type === 'out_of_stock'
+      ? 'text-red-400'
+      : 'text-amber-400'
+  }`}
+  size={16}
+/>                          <span className="text-sm text-gray-700 font-semibold leading-relaxed">{formatAlertMessage(alert.message)}</span>
                         </div>
                       </td>
                       <td className="px-6 py-5">
                         <span className="text-[11px] font-mono font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded border border-gray-200">
-                          {alert.productId || "SYS-GEN"}
+                          {alert.productId || "SCHEDULER"}
                         </span>
                       </td>
                       <td className="px-6 py-5">

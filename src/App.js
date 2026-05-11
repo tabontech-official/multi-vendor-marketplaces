@@ -70,6 +70,7 @@ import ContentLibrary from "./pages/ContentLibrary";
 import ProductOther from "./pages/ProductOther";
 import TopProductsHistory from "./pages/TopProductStats";
 import AlertPage from "./pages/Alerts";
+import RefundPage from "./pages/refundOrder";
 
 const App = () => {
   const [role, setRole] = useState("");
@@ -162,7 +163,7 @@ const App = () => {
               path="/manage-options"
               element={<PrivateRoute element={<ManageVariantOptions />} />}
             />
-              <Route
+            <Route
               path="/alerts"
               element={<PrivateRoute element={<AlertPage />} />}
             />
@@ -173,12 +174,12 @@ const App = () => {
               path="/manage-shipping"
               element={<PrivateRoute element={<ManageShippingProfiles />} />}
             />
-            
+
             <Route
               path="/top-product-history"
               element={<PrivateRoute element={<TopProductsHistory />} />}
             />
-             <Route
+            <Route
               path="/product-other"
               element={<PrivateRoute element={<ProductOther />} />}
             />
@@ -250,7 +251,7 @@ const App = () => {
               path="/payout-details"
               element={<PrivateRoute element={<PayoutDetails />} />}
             />
-              <Route
+            <Route
               path="/content"
               element={<PrivateRoute element={<ContentLibrary />} />}
             />
@@ -273,6 +274,10 @@ const App = () => {
             <Route
               path="/notifications"
               element={<ProtectedForms element={<Notification />} />}
+            />
+            <Route
+              path="/refund/:orderId/:merchantId"
+              element={<RefundPage />}
             />
             <Route
               path="/on-board-users"

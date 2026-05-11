@@ -132,17 +132,37 @@ const RequestDetails = () => {
                   </div>
                 </div>
                 <div
-                  onClick={() =>
-                    navigate(
-                      `/order/${request?.orderNo || request?.orderId}/${request?.merchant?.id}`,
-                    )
-                  }
+                  onClick={() => {
+                    const linkedOrderId = request?.orderId;
+                    const userId = request?.userId || state?.userId;
+
+                    if (!linkedOrderId || !userId) {
+                      console.error("Missing linked order data", {
+                        linkedOrderId,
+                        userId,
+                        request,
+                        state,
+                      });
+                      return;
+                    }
+
+                    navigate(`/order/${linkedOrderId}/${userId}`, {
+                      state: {
+                        userId,
+                        orderId: linkedOrderId,
+                        orderNo: request?.orderNo,
+                        requestId: request?._id,
+                        fullName: state?.fullName,
+                        email: state?.email,
+                      },
+                    });
+                  }}
                 >
-                  {" "}
                   <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">
                     Linked Order
                   </p>
-                  <div className="flex items-center gap-2 text-sm font-bold text-blue-600 cursor-pointer hover:underline bg-blue-50 px-3 py-1.5 rounded-lg w-fit">
+
+                  <div className="flex items-center gap-2 text-sm font-bold text-blue-600 cursor-pointer underline bg-blue-50 px-3 py-1.5 rounded-lg w-fit">
                     <RiHashtag size={16} />
                     {request?.orderNo || request?.orderId}
                   </div>

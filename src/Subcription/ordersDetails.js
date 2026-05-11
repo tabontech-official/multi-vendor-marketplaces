@@ -86,55 +86,116 @@ const OrdersDetails = () => {
       fetchOrderData();
     }
   }, [orderId, merchantId]);
+  // useEffect(() => {
+  //   if (!orderData?.products) {
+  //     setLineItems([]);
+  //     return;
+  //   }
+
+  //   // const mappedItems = orderData.products.map((p) => {
+  //   //   const variant = p.variant || {};
+  //   //   const product = p.product || {};
+
+  //   //   return {
+  //   //     id: p.lineItemId,
+  //   //     product_id: p.productId,
+  //   //     variant_id: p.variantId,
+
+  //   //     name: product.title || "N/A",
+  //   //     variant_title: variant.title || null,
+  //   //     sku: variant.sku || "N/A",
+
+  //   //     price: variant.price || "0",
+
+  //   //     quantity: p.quantity,
+  //   //     fulfilled_quantity: p.fulfilled_quantity || 0,
+  //   //     fulfillable_quantity: p.fulfillable_quantity || 0,
+  //   //     fulfillment_status: p.fulfillment_status,
+
+  //   //     image: {
+  //   //       src:
+  //   //         product.images?.[0]?.src || product.variantImages?.[0]?.src || null,
+  //   //       alt: product.title || "Product image",
+  //   //     },
+  //   //   };
+  //   // });
+  //   const mappedItems = orderData.products.map((p) => {
+  //     const variant = p.variant || {};
+  //     const product = p.product || {};
+
+  //     // 🔥 FIXED IMAGE LOGIC
+  //     let imageSrc = null;
+
+  //     // 1️⃣ Try product.images (if exists)
+  //     if (product.images?.length) {
+  //       imageSrc = product.images[0].src;
+  //     }
+
+  //     // 2️⃣ Try matching variant image
+  //     if (!imageSrc && product.variantImages?.length) {
+  //       const matchedVariantImage = product.variantImages.find(
+  //         (v) => String(v.variantId) === String(p.variantId),
+  //       );
+
+  //       if (matchedVariantImage?.images?.length) {
+  //         imageSrc = matchedVariantImage.images[0].src;
+  //       }
+  //     }
+
+  //     return {
+  //       id: p.lineItemId,
+  //       product_id: p.productId,
+  //       variant_id: p.variantId,
+
+  //       name: product.title || "N/A",
+  //       variant_title: variant.title || null,
+  //       sku: variant.sku || "N/A",
+  //       price: variant.price || "0",
+
+  //       quantity: p.quantity,
+  //       fulfilled_quantity: p.fulfilled_quantity || 0,
+  //       fulfillable_quantity: p.fulfillable_quantity || 0,
+  //       fulfillment_status: p.fulfillment_status,
+
+  //       image: {
+  //         src: imageSrc,
+  //         alt: product.title || "Product image",
+  //       },
+  //     };
+  //   });
+
+  //   setLineItems(mappedItems);
+  // }, [orderData]);
+
   useEffect(() => {
     if (!orderData?.products) {
       setLineItems([]);
       return;
     }
 
-    // const mappedItems = orderData.products.map((p) => {
-    //   const variant = p.variant || {};
-    //   const product = p.product || {};
+    const getRefundedQtyByLineItemId = (lineItemId) => {
+      return (orderData?.refunds || []).reduce((total, refund) => {
+        const matchedRefundItem = refund.refundItems?.find(
+          (item) => String(item.lineItemId) === String(lineItemId)
+        );
 
-    //   return {
-    //     id: p.lineItemId,
-    //     product_id: p.productId,
-    //     variant_id: p.variantId,
+        return total + Number(matchedRefundItem?.quantity || 0);
+      }, 0);
+    };
 
-    //     name: product.title || "N/A",
-    //     variant_title: variant.title || null,
-    //     sku: variant.sku || "N/A",
-
-    //     price: variant.price || "0",
-
-    //     quantity: p.quantity,
-    //     fulfilled_quantity: p.fulfilled_quantity || 0,
-    //     fulfillable_quantity: p.fulfillable_quantity || 0,
-    //     fulfillment_status: p.fulfillment_status,
-
-    //     image: {
-    //       src:
-    //         product.images?.[0]?.src || product.variantImages?.[0]?.src || null,
-    //       alt: product.title || "Product image",
-    //     },
-    //   };
-    // });
     const mappedItems = orderData.products.map((p) => {
       const variant = p.variant || {};
       const product = p.product || {};
 
-      // 🔥 FIXED IMAGE LOGIC
       let imageSrc = null;
 
-      // 1️⃣ Try product.images (if exists)
       if (product.images?.length) {
         imageSrc = product.images[0].src;
       }
 
-      // 2️⃣ Try matching variant image
       if (!imageSrc && product.variantImages?.length) {
         const matchedVariantImage = product.variantImages.find(
-          (v) => String(v.variantId) === String(p.variantId),
+          (v) => String(v.variantId) === String(p.variantId)
         );
 
         if (matchedVariantImage?.images?.length) {
@@ -142,6 +203,12 @@ const OrdersDetails = () => {
         }
       }
 
+      const originalQty = Number(p.quantity || 0);
+      const fulfilledQty = Number(p.fulfilled_quantity || 0);
+      const refundedQty = getRefundedQtyByLineItemId(p.lineItemId);
+
+      const unfulfilledQty = Math.max(originalQty - fulfilledQty, 0);
+      const remainingQty = Math.max(originalQty - fulfilledQty - refundedQty, 0);
       return {
         id: p.lineItemId,
         product_id: p.productId,
@@ -152,9 +219,17 @@ const OrdersDetails = () => {
         sku: variant.sku || "N/A",
         price: variant.price || "0",
 
-        quantity: p.quantity,
-        fulfilled_quantity: p.fulfilled_quantity || 0,
-        fulfillable_quantity: p.fulfillable_quantity || 0,
+        // original qty bhi rakho
+        original_quantity: originalQty,
+
+        // refunded qty
+        refunded_quantity: refundedQty,
+
+        // ab quantity remaining hogi
+        quantity: remainingQty,
+
+        fulfilled_quantity: fulfilledQty,
+        fulfillable_quantity: remainingQty,
         fulfillment_status: p.fulfillment_status,
 
         image: {
@@ -166,15 +241,14 @@ const OrdersDetails = () => {
 
     setLineItems(mappedItems);
   }, [orderData]);
-
   const totalPrice = Array.isArray(lineItems)
     ? lineItems
-        .reduce((acc, item) => {
-          const price = parseFloat(item.price);
-          const qty = Number(item.quantity);
-          return acc + (isNaN(price) || isNaN(qty) ? 0 : price * qty);
-        }, 0)
-        .toFixed(2)
+      .reduce((acc, item) => {
+        const price = parseFloat(item.price);
+        const qty = Number(item.quantity);
+        return acc + (isNaN(price) || isNaN(qty) ? 0 : price * qty);
+      }, 0)
+      .toFixed(2)
     : "0.00";
   let orderCreatedAt = null;
 
@@ -199,10 +273,10 @@ const OrdersDetails = () => {
 
   const formattedDate = orderCreatedAt
     ? new Date(orderCreatedAt).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
     : "N/A";
 
   const [openMenu, setOpenMenu] = useState(null);
@@ -259,7 +333,7 @@ const OrdersDetails = () => {
 
       setShowTrackingModal(false);
     } catch (err) {
-      showToast("error","Failed to update tracking.");
+      showToast("error", "Failed to update tracking.");
     }
   };
 
@@ -291,7 +365,7 @@ const OrdersDetails = () => {
       }
 
       if (!orderId || lineItemIds.length === 0) {
-        showToast("error","Missing orderData details or line items to cancel.");
+        showToast("error", "Missing orderData details or line items to cancel.");
         return;
       }
 
@@ -380,8 +454,12 @@ const OrdersDetails = () => {
 
     if (orderId && lineItems.length) fetchLineItemCount();
   }, [orderId, lineItems]);
-  const hasUnfulfilledItems = lineItems.some((i) => i.fulfillable_quantity > 0);
-
+  const hasUnfulfilledItems = lineItems.some(
+    (i) => Number(i.quantity || 0) > 0
+  );
+  const unfulfilledTotalQty = lineItems.reduce((total, item) => {
+    return total + Number(item.quantity || 0);
+  }, 0);
   const shipping = orderData?.shipping_address?.address1
     ? orderData.shipping_address
     : customer?.default_address || {};
@@ -404,6 +482,65 @@ const OrdersDetails = () => {
       }) || []
     );
   };
+
+  const getRefundedProductSnapshot = (refundItem) => {
+    return orderData?.products?.find(
+      (p) => String(p.lineItemId) === String(refundItem.lineItemId)
+    );
+  };
+
+  const getRefundedItemImage = (refundItem) => {
+    const snapshot = getRefundedProductSnapshot(refundItem);
+
+    return (
+      snapshot?.product?.images?.[0]?.src ||
+      snapshot?.variant?.src ||
+      null
+    );
+  };
+const [requestSubmitted, setRequestSubmitted] = useState(false);
+const [checkingRequest, setCheckingRequest] = useState(true);
+useEffect(() => {
+  const checkRequestStatus = async () => {
+    try {
+      const userId = localStorage.getItem("userid");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+      if (!userId || !orderId) {
+        setCheckingRequest(false);
+        return;
+      }
+
+      const response = await fetch(
+        `https://multi-vendor-marketplace.vercel.app/auth/check/${orderId}?userId=${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.submitted) {
+        setRequestSubmitted(true);
+      } else {
+        setRequestSubmitted(false);
+      }
+    } catch (error) {
+      console.error("Check request status error:", error);
+      setRequestSubmitted(false);
+    } finally {
+      setCheckingRequest(false);
+    }
+  };
+
+  checkRequestStatus();
+}, [orderId]);
+
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
@@ -432,9 +569,8 @@ const OrdersDetails = () => {
           </div>
           {toast.show && (
             <div
-              className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
-                toast.type === "success" ? "bg-green-500" : "bg-red-500"
-              } text-white`}
+              className={`fixed bottom-5 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${toast.type === "success" ? "bg-green-500" : "bg-red-500"
+                } text-white`}
             >
               {toast.type === "success" ? (
                 <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
@@ -449,12 +585,7 @@ const OrdersDetails = () => {
             <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-2">
               <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max mb-2 bg-yellow-300 text-yellow-900">
                 <span>
-                  Unfulfilled (
-                  {
-                    lineItems.filter((i) => i.fulfillment_status === null)
-                      .length
-                  }
-                  )
+                  Unfulfilled ({unfulfilledTotalQty})
                 </span>
               </div>
 
@@ -476,20 +607,10 @@ const OrdersDetails = () => {
 
                 <div className="divide-y border rounded mb-4">
                   {lineItems
-                    .filter(
-                      (item) =>
-                        item.fulfillment_status === null ||
-                        item.fulfillment_status === "cancelled",
-                    )
+                    .filter((item) => Number(item.quantity || 0) > 0)
                     .map((item, index) => {
-                      const pendingQty =
-                        item.quantity - (item.fulfilled_quantity || 0);
-
-                      const displayQty =
-                        item.fulfilled_quantity > 0
-                          ? item.fulfilled_quantity
-                          : pendingQty;
-
+                      const displayQty = Number(item.quantity || 0);
+                      const price = Number(item.price || 0);
                       return (
                         <div
                           key={index}
@@ -529,14 +650,13 @@ const OrdersDetails = () => {
 
                           <div className="text-right">
                             <p className="text-sm text-gray-800 font-medium">
-                              ${parseFloat(item.price).toFixed(2)} ×{" "}
-                              {displayQty}
+                              ${price.toFixed(2)} × {displayQty}
                             </p>
 
                             <p className="text-sm font-semibold text-gray-900">
                               $
-                              {(parseFloat(item.price) * displayQty).toFixed(2)}
-                            </p>
+                              ${(price * displayQty).toFixed(2)}                            </p>
+
                           </div>
                         </div>
                       );
@@ -546,48 +666,174 @@ const OrdersDetails = () => {
                 {!lineItems.some(
                   (i) => i.fulfillment_status === "cancelled",
                 ) && (
-                  <div className="flex space-x-2 justify-end">
-                    <button
-                      onClick={() => {
-                        console.log("✅ Fulfill button clicked");
+                    <div className="flex space-x-2 justify-end">
+                      <button
+                        onClick={() => {
+                          console.log("Fulfill button clicked");
 
-                        navigate(`/order/${orderId}/fulfillment_orders`, {
-                          state: {
-                            orderId,
-                            merchantId,
-                            order: orderData,
-                            index: 1,
-                          },
-                        });
-                      }}
-                      className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
-                    >
-                      Fulfill item
-                    </button>
+                          navigate(`/order/${orderId}/fulfillment_orders`, {
+                            state: {
+                              orderId,
+                              merchantId,
+                              order: orderData,
+                              index: 1,
+                            },
+                          });
+                        }}
+                        className="px-4 py-1 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition"
+                      >
+                        Fulfill item
+                      </button>
 
-                    <button
-                      onClick={() => {
-                        navigate("/packaging-slip", {
-                          state: { order: orderData },
-                        });
-                      }}
-                      className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition"
-                    >
-                      Print packing slip
-                    </button>
-                    <button
-                      onClick={() => {
-                        console.log(orderData);
-                        navigate("/invoice-preview", {
-                          state: { order: orderData },
-                        });
-                      }}
-                      className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition"
-                    >
-                      Print invoice
-                    </button>
+                      <button
+                        onClick={() => {
+                          navigate("/packaging-slip", {
+                            state: { order: orderData },
+                          });
+                        }}
+                        className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition"
+                      >
+                        Print packing slip
+                      </button>
+                      <button
+                        onClick={() => {
+                          console.log(orderData);
+                          navigate("/invoice-preview", {
+                            state: { order: orderData },
+                          });
+                        }}
+                        className="px-4 py-1 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition"
+                      >
+                        Print invoice
+                      </button>
+                    </div>
+                  )}
+              </div>
+            </div>
+          )}
+
+          {Array.isArray(orderData?.refunds) && orderData.refunds.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-300 shadow p-6 space-y-4">
+              <div className="inline-flex items-center space-x-2 text-xs font-semibold rounded px-2 py-1 w-max bg-gray-200 text-gray-700">
+                <span>Removed</span>
+              </div>
+
+              <div className="space-y-3">
+                {orderData.refunds.map((refund, refundIndex) => (
+                  <div
+                    key={refund._id || refund.refundId || refundIndex}
+                    className="border border-gray-200 rounded-xl overflow-hidden"
+                  >
+                    {(refund.refundItems || []).map((refundItem, itemIndex) => {
+                      const snapshot = getRefundedProductSnapshot(refundItem);
+                      const imageSrc = getRefundedItemImage(refundItem);
+
+                      const title =
+                        snapshot?.product?.title || "Product";
+
+                      const variantTitle =
+                        snapshot?.variant?.title || "";
+
+                      const sku =
+                        snapshot?.variant?.sku || "";
+
+                      const price =
+                        Number(refundItem.amount || 0) /
+                        Number(refundItem.quantity || 1);
+
+                      const qty = Number(refundItem.quantity || 0);
+
+                      const total = Number(refundItem.amount || price * qty || 0);
+
+                      return (
+                        <div
+                          key={`${refund.refundId}-${refundItem.lineItemId}-${itemIndex}`}
+                          className="flex items-center justify-between px-4 py-3"
+                        >
+                          {/* LEFT */}
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-gray-100 rounded-lg border flex items-center justify-center overflow-hidden">
+                              {imageSrc ? (
+                                <img
+                                  src={imageSrc}
+                                  alt={title}
+                                  className="w-full h-full object-contain"
+                                />
+                              ) : (
+                                <span className="text-gray-400 text-[10px] font-semibold">
+                                  No Image
+                                </span>
+                              )}
+                            </div>
+
+                            <div>
+                              <p className="text-sm font-medium text-gray-800">
+                                {title}
+                              </p>
+
+                              <div className="flex items-center gap-2 mt-1">
+                                {variantTitle && (
+                                  <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                                    {variantTitle}
+                                  </span>
+                                )}
+
+                                {sku && (
+                                  <span className="text-xs text-gray-500">
+                                    {sku}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* RIGHT */}
+                          <div className="flex items-center gap-8 text-sm">
+                            <p className="text-gray-800">
+                              ${price.toFixed(2)} ×{" "}
+                              <span className="inline-flex items-center justify-center min-w-6 h-6 bg-gray-100 rounded-full text-gray-700 font-semibold">
+                                {qty}
+                              </span>
+                            </p>
+
+                            <p className="w-16 text-right font-semibold text-gray-900">
+                              ${total.toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {refund.shippingRefunded && (
+                      <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50 text-sm">
+                        <span className="text-gray-700">
+                          Shipping refunded
+                        </span>
+
+                        <span className="font-semibold text-gray-900">
+                          ${Number(refund.shippingAmount || 0).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50 text-xs text-gray-500">
+                      <span>
+                        Refunded on{" "}
+                        {refund.refundedAt
+                          ? new Date(refund.refundedAt).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
+                          : "N/A"}
+                      </span>
+
+                      <span className="font-semibold text-gray-700">
+                        Total refunded: ${Number(refund.refundAmount || 0).toFixed(2)}
+                      </span>
+                    </div>
                   </div>
-                )}
+                ))}
               </div>
             </div>
           )}
@@ -667,7 +913,7 @@ const OrdersDetails = () => {
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
                           {snapshot?.product?.images?.[0]?.src ||
-                          snapshot?.variant?.src ? (
+                            snapshot?.variant?.src ? (
                             <img
                               src={
                                 snapshot?.product?.images?.[0]?.src ||
@@ -761,29 +1007,73 @@ const OrdersDetails = () => {
         </div>
 
         <div className="col-span-4 space-y-4">
-          {Array.isArray(lineItems) &&
+          {/* {Array.isArray(lineItems) &&
             lineItems.some((i) => i.fulfillment_status === null) && (
               <>
                 {(role === "Dev Admin" || role === "Master Admin" || showCancelButton) ? (
                   <button
-                    className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
-                    onClick={() => setShowCancelPopup(true)}
+                    className="bg-white px-6 text-sm font-normal py-1 border border-gray-300 hover:bg-gray-300 rounded-lg"
+                    onClick={() => {
+                      navigate(
+                        `/refund/${orderId}/${merchantId}/${lineItems[0]?.product_id}`
+                      );
+                    }}
                   >
-                    Cancel order
+                    Refund
                   </button>
                 ) : role === "Merchant" ? (
                   <div className="text-sm text-gray-300-600 font-medium">
                     <button
-                      className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl"
-                      onClick={() => setShowRequestPopup(true)}
+                      className="bg-white px-6 text-sm font-normal py-1 border border-gray-300 hover:bg-gray-300 rounded-lg"
+                      onClick={() => {
+                        navigate(
+                          `/refund/${orderId}/${merchantId}`
+                        );
+                      }}
                     >
-                      Cancel order
+                      Refund
                     </button>
                   </div>
                 ) : null}
               </>
-            )}
-
+            )} */}
+          {Array.isArray(lineItems) && lineItems.length > 0 && (
+            <>
+      {role === "Dev Admin" || role === "Master Admin" ? (
+  <button
+    className="bg-white px-6 text-sm font-normal py-1 border border-gray-300 hover:bg-gray-300 rounded-lg"
+    onClick={() => {
+      navigate(`/refund/${orderId}/${merchantId}`);
+    }}
+  >
+    Refund
+  </button>
+) : role === "Merchant" ? (
+  checkingRequest ? (
+    <button
+      disabled
+      className="bg-gray-100 px-3 py-2 text-sm border border-gray-300 rounded-xl text-gray-500 cursor-not-allowed"
+    >
+      Checking...
+    </button>
+  ) : requestSubmitted ? (
+    <button
+      disabled
+      className="bg-green-100 px-3 py-2 text-sm border border-green-300 rounded-xl text-green-700 cursor-not-allowed"
+    >
+      Request Submitted
+    </button>
+  ) : (
+    <button
+      className="bg-white px-3 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-300"
+      onClick={() => setShowRequestPopup(true)}
+    >
+      Cancel order
+    </button>
+  )
+) : null}
+            </>
+          )}
           <div className="bg-white p-4 border border-gray-300 rounded-xl">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold text-gray-900">Notes</h3>
@@ -933,91 +1223,91 @@ const OrdersDetails = () => {
         </div>
       )}
       <AnimatePresence>
-  {showCancelPopup && (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
-        onClick={() => !cancelLoading && setShowCancelPopup(false)}
-      />
+        {showCancelPopup && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+              onClick={() => !cancelLoading && setShowCancelPopup(false)}
+            />
 
-      {/* Modal Content */}
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0, y: 10 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.95, opacity: 0, y: 10 }}
-        className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-gray-100"
-      >
-        {/* Close Icon (Disabled during loading) */}
-        {!cancelLoading && (
-          <button
-            className="absolute top-4 right-4 p-1 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-            onClick={() => setShowCancelPopup(false)}
-          >
-            <RiCloseLine size={24} />
-          </button>
-        )}
-
-        <div className="p-8 text-center">
-          {/* Warning Icon Container */}
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-red-50 rounded-full mb-6">
-            <RiAlertFill className="text-red-500" size={48} />
-          </div>
-
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
-            Confirm Cancellation
-          </h2>
-          <p className="text-sm text-gray-500 leading-relaxed mb-8">
-            Are you sure you want to cancel this order? This action will notify the customer and cannot be undone.
-          </p>
-
-          <div className="flex flex-col gap-3">
-            {/* Primary Action: Yes, Cancel */}
-            <button
-              disabled={cancelLoading}
-              className={`w-full py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-100 
-                ${cancelLoading 
-                  ? "bg-red-400 cursor-not-allowed text-white/80" 
-                  : "bg-red-600 text-white hover:bg-red-700 active:scale-[0.98]"
-                }`}
-              onClick={async () => {
-                setCancelLoading(true);
-                await handleCancelOrder();
-                setCancelLoading(false);
-                setShowCancelPopup(false);
-              }}
+            {/* Modal Content */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-gray-100"
             >
-              {cancelLoading ? (
-                <>
-                  <RiLoader4Line className="animate-spin" size={20} />
-                  Processing...
-                </>
-              ) : (
-                "Yes, Confirm Cancellation"
+              {/* Close Icon (Disabled during loading) */}
+              {!cancelLoading && (
+                <button
+                  className="absolute top-4 right-4 p-1 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  onClick={() => setShowCancelPopup(false)}
+                >
+                  <RiCloseLine size={24} />
+                </button>
               )}
-            </button>
 
-            {/* Secondary Action: Go Back */}
-            {!cancelLoading && (
-              <button
-                onClick={() => setShowCancelPopup(false)}
-                className="w-full py-3.5 bg-gray-50 text-gray-600 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all active:scale-[0.98]"
-              >
-                No, Keep Order
-              </button>
-            )}
+              <div className="p-8 text-center">
+                {/* Warning Icon Container */}
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-red-50 rounded-full mb-6">
+                  <RiAlertFill className="text-red-500" size={48} />
+                </div>
+
+                <h2 className="text-xl font-bold text-gray-900 mb-2">
+                  Confirm Cancellation
+                </h2>
+                <p className="text-sm text-gray-500 leading-relaxed mb-8">
+                  Are you sure you want to cancel this order? This action will notify the customer and cannot be undone.
+                </p>
+
+                <div className="flex flex-col gap-3">
+                  {/* Primary Action: Yes, Cancel */}
+                  <button
+                    disabled={cancelLoading}
+                    className={`w-full py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-100 
+                ${cancelLoading
+                        ? "bg-red-400 cursor-not-allowed text-white/80"
+                        : "bg-red-600 text-white hover:bg-red-700 active:scale-[0.98]"
+                      }`}
+                    onClick={async () => {
+                      setCancelLoading(true);
+                      await handleCancelOrder();
+                      setCancelLoading(false);
+                      setShowCancelPopup(false);
+                    }}
+                  >
+                    {cancelLoading ? (
+                      <>
+                        <RiLoader4Line className="animate-spin" size={20} />
+                        Processing...
+                      </>
+                    ) : (
+                      "Yes, Confirm Cancellation"
+                    )}
+                  </button>
+
+                  {/* Secondary Action: Go Back */}
+                  {!cancelLoading && (
+                    <button
+                      onClick={() => setShowCancelPopup(false)}
+                      className="w-full py-3.5 bg-gray-50 text-gray-600 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all active:scale-[0.98]"
+                    >
+                      No, Keep Order
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Decorative Top Line */}
+              <div className="h-1.5 w-full bg-red-600" />
+            </motion.div>
           </div>
-        </div>
-
-        {/* Decorative Top Line */}
-        <div className="h-1.5 w-full bg-red-600" />
-      </motion.div>
-    </div>
-  )}
-</AnimatePresence>
+        )}
+      </AnimatePresence>
       {/* {showRequestPopup && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 p-6 relative">
@@ -1156,7 +1446,7 @@ const OrdersDetails = () => {
                 <button
                   onClick={async () => {
                     if (!requestMessage.trim()) {
-                      showToast("success","Please enter a request message.");
+                      showToast("success", "Please enter a request message.");
                       return;
                     }
 
@@ -1193,7 +1483,7 @@ const OrdersDetails = () => {
                       }
                     } catch (err) {
                       console.error("Error submitting request:", err);
-                      showToast("error","Something went wrong. Try again.");
+                      showToast("error", "Something went wrong. Try again.");
                     }
                   }}
                   className="px-5 py-2 text-sm font-medium rounded-lg bg-black text-white hover:bg-gray-800 transition shadow-md"
@@ -1206,69 +1496,69 @@ const OrdersDetails = () => {
         </div>
       )}
 
-     <AnimatePresence>
-  {showSubmitted && (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={() => setShowSubmitted(false)}
-        className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
-      />
-
-      {/* Modal Content */}
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-gray-100"
-      >
-        {/* Close Button */}
-        <button
-          className="absolute top-4 right-4 p-1 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-          onClick={() => setShowSubmitted(false)}
-        >
-          <RiCloseLine size={24} />
-        </button>
-
-        <div className="p-8 text-center">
-          {/* Animated Icon Container */}
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-50 rounded-full mb-6 relative">
+      <AnimatePresence>
+        {showSubmitted && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSubmitted(false)}
+              className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-gray-100"
             >
-              <RiCheckboxCircleFill className="text-emerald-500" size={56} />
+              {/* Close Button */}
+              <button
+                className="absolute top-4 right-4 p-1 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                onClick={() => setShowSubmitted(false)}
+              >
+                <RiCloseLine size={24} />
+              </button>
+
+              <div className="p-8 text-center">
+                {/* Animated Icon Container */}
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-50 rounded-full mb-6 relative">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                  >
+                    <RiCheckboxCircleFill className="text-emerald-500" size={56} />
+                  </motion.div>
+                  {/* Soft Pulse Effect */}
+                  <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
+                </div>
+
+                <h2 className="text-xl font-bold text-gray-900 mb-2">
+                  Request Submitted
+                </h2>
+                <p className="text-sm text-gray-500 leading-relaxed mb-8">
+                  Your cancellation request has been successfully sent to the{" "}
+                  <span className="font-semibold text-gray-700">Master Admin</span> for review.
+                </p>
+
+                <button
+                  onClick={() => setShowSubmitted(false)}
+                  className="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-semibold text-sm hover:bg-gray-800 transition-all active:scale-[0.98] shadow-lg shadow-gray-200"
+                >
+                  Got it, thanks!
+                </button>
+              </div>
+
+              {/* Bottom Decorative Bar */}
+              <div className="h-1.5 w-full bg-emerald-500" />
             </motion.div>
-            {/* Soft Pulse Effect */}
-            <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
           </div>
-
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
-            Request Submitted
-          </h2>
-          <p className="text-sm text-gray-500 leading-relaxed mb-8">
-            Your cancellation request has been successfully sent to the{" "}
-            <span className="font-semibold text-gray-700">Master Admin</span> for review.
-          </p>
-
-          <button
-            onClick={() => setShowSubmitted(false)}
-            className="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-semibold text-sm hover:bg-gray-800 transition-all active:scale-[0.98] shadow-lg shadow-gray-200"
-          >
-            Got it, thanks!
-          </button>
-        </div>
-
-        {/* Bottom Decorative Bar */}
-        <div className="h-1.5 w-full bg-emerald-500" />
-      </motion.div>
-    </div>
-  )}
-</AnimatePresence>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

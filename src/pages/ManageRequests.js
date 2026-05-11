@@ -89,7 +89,7 @@
 
 
 //       {/* Search */}
-    
+
 //       {/* Table */}
 //       {isLoading ? (
 //         <div className="flex justify-center items-center py-10 text-gray-500">
@@ -175,11 +175,11 @@
 
 // export default ManageRequests;
 import React, { useEffect, useState } from "react";
-import { 
-  RiShoppingBasketLine, 
-  RiSearchLine, 
-  RiLoader4Line, 
-  RiArrowRightUpLine, 
+import {
+  RiShoppingBasketLine,
+  RiSearchLine,
+  RiLoader4Line,
+  RiArrowRightUpLine,
   RiStackLine,
   RiCalendarLine,
   RiMailLine,
@@ -226,7 +226,6 @@ const ManageRequests = () => {
 
   return (
     <div className="min-h-screen bg-gray-50/50 p-4 md:p-8 font-sans">
-      {/* --- Header Section --- */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-blue-600 mb-1">
@@ -238,7 +237,6 @@ const ManageRequests = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-4">
-          {/* Search Bar */}
           <div className="relative w-full sm:w-80 group">
             <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
             <input
@@ -250,7 +248,6 @@ const ManageRequests = () => {
             />
           </div>
 
-          {/* Stats Badge */}
           <div className="flex items-center gap-3 bg-white border border-gray-200 px-4 py-2.5 rounded-xl shadow-sm">
             <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
               <RiStackLine size={18} />
@@ -263,7 +260,6 @@ const ManageRequests = () => {
         </div>
       </div>
 
-      {/* --- Table Container --- */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="flex flex-col justify-center items-center py-24 text-gray-400 gap-3">
@@ -292,12 +288,16 @@ const ManageRequests = () => {
                         <td className="px-6 py-5">
                           <button
                             onClick={() => navigate(`/user-requests/${req._id}`, {
-                              state: { userId: user._id, fullName: `${user.firstName} ${user.lastName}`, email: user.email }
+                              state: {
+                                userId: user._id,
+                                fullName: `${user.firstName} ${user.lastName}`,
+                                email: user.email
+                              }
                             })}
                             className="flex items-center gap-2 group/btn"
                           >
                             <span className="text-sm font-bold text-blue-600 group-hover/btn:underline decoration-2 underline-offset-4">
-                              #{req.orderNo}
+                              # {req.orderNo || req.orderId}
                             </span>
                             <RiArrowRightUpLine className="text-blue-400 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
                           </button>

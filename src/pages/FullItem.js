@@ -7,84 +7,83 @@ const FullItem = () => {
   const navigate = useNavigate();
 
   const { order: rawOrder, orderId, merchantId } = location.state || {};
-  console.log("FULL ORDER 👉", rawOrder);
 
   const customer = rawOrder?.customers || {};
-
   const shipping = customer?.default_address || {};
   const billing = customer?.default_address || {};
 
-  // const allLineItems = useMemo(() => {
-  //   return (rawOrder?.products || []).map((item, index) => ({
-  //     id: item.lineItemId || index,
-  //     name: item.product?.title || "Product",
-  //     sku: item.variant?.sku || "N/A",
+  const getRefundedQtyByLineItemId = (lineItemId) => {
+    return (rawOrder?.refunds || []).reduce((total, refund) => {
+      const matchedRefundItem = refund.refundItems?.find(
+        (item) => String(item.lineItemId) === String(lineItemId)
+      );
 
-  //     quantity: item.quantity,
-  //     fulfillable_quantity: item.fulfillable_quantity ?? item.quantity,
+      return total + Number(matchedRefundItem?.quantity || 0);
+    }, 0);
+  };
 
-  //     image: {
-  //       src: item.product?.images?.[0]?.src,
-  //       alt: item.product?.title,
-  //     },
-
-  //     price: item.variant?.price,
-  //     variant_title: item.variant?.title,
-  //   }));
-  // }, [rawOrder?.products]);
   const allLineItems = useMemo(() => {
-    return (rawOrder?.products || []).map((item, index) => {
-      const product = item.product || {};
-      const variant = item.variant || {};
+    return (rawOrder?.products || [])
+      .map((item, index) => {
+        const product = item.product || {};
+        const variant = item.variant || {};
 
-      let imageSrc = null;
+        let imageSrc = null;
 
-      // 1️⃣ Try normal product images
-      if (product.images?.length) {
-        imageSrc = product.images[0].src;
-      }
+        if (product.images?.length) {
+          imageSrc = product.images[0].src;
+        }
 
-      // 2️⃣ Try matching variant image
-      if (!imageSrc && product.variantImages?.length) {
-        const matchedVariant = product.variantImages.find(
-          (v) => String(v.variantId) === String(item.variantId),
+        if (!imageSrc && product.variantImages?.length) {
+          const matchedVariant = product.variantImages.find(
+            (v) => String(v.variantId) === String(item.variantId)
+          );
+
+          if (matchedVariant?.images?.length) {
+            imageSrc = matchedVariant.images[0].src;
+          }
+        }
+
+        const lineItemId = item.lineItemId || index;
+
+        const originalQty = Number(item.quantity || 0);
+        const fulfilledQty = Number(item.fulfilled_quantity || 0);
+        const refundedQty = getRefundedQtyByLineItemId(lineItemId);
+
+        const baseFulfillableQty =
+          item.fulfillable_quantity !== undefined
+            ? Number(item.fulfillable_quantity || 0)
+            : Math.max(originalQty - fulfilledQty, 0);
+
+        const finalFulfillableQty = Math.max(
+          baseFulfillableQty - refundedQty,
+          0
         );
 
-        if (matchedVariant?.images?.length) {
-          imageSrc = matchedVariant.images[0].src;
-        }
-      }
+        return {
+          id: lineItemId,
+          name: product.title || "Product",
+          sku: variant.sku || "N/A",
 
-      return {
-        id: item.lineItemId || index,
-        name: product.title || "Product",
-        sku: variant.sku || "N/A",
+          original_quantity: originalQty,
+          fulfilled_quantity: fulfilledQty,
+          refunded_quantity: refundedQty,
 
-        quantity: item.quantity,
-        fulfillable_quantity: item.fulfillable_quantity ?? item.quantity,
+          quantity: finalFulfillableQty,
+          fulfillable_quantity: finalFulfillableQty,
 
-        image: {
-          src: imageSrc,
-          alt: product.title,
-        },
+          image: {
+            src: imageSrc,
+            alt: product.title,
+          },
 
-        price: variant.price,
-        variant_title: variant.title,
-      };
-    });
-  }, [rawOrder?.products]);
+          price: variant.price,
+          variant_title: variant.title,
+        };
+      })
+      .filter((item) => Number(item.fulfillable_quantity || 0) > 0);
+  }, [rawOrder]);
 
-  useEffect(() => {
-    const initial = {};
-    allLineItems.forEach((item) => {
-      initial[item.id] = item.fulfillable_quantity;
-    });
-    setQuantities(initial);
-  }, [allLineItems]);
-
-  /* =========================
-     STATE
-     ========================= */
   const [quantities, setQuantities] = useState({});
   const [trackingNumber, setTrackingNumber] = useState("");
   const [carrier, setCarrier] = useState("");
@@ -94,19 +93,47 @@ const FullItem = () => {
 
   useEffect(() => {
     const initial = {};
+
     allLineItems.forEach((item) => {
       initial[item.id] = item.fulfillable_quantity;
     });
+
     setQuantities(initial);
   }, [allLineItems]);
 
-  const handleQuantityChange = (id, qty) => {
-    setQuantities((prev) => ({ ...prev, [id]: qty }));
+  const handleQuantityChange = (id, qty, maxQty) => {
+    let value = Number(qty);
+
+    if (Number.isNaN(value)) value = 0;
+    if (value < 0) value = 0;
+    if (value > maxQty) value = maxQty;
+
+    setQuantities((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
   };
 
-  /* =========================
-     FULFILL
-     ========================= */
+  const handleMinus = (item) => {
+    const currentQty = Number(quantities[item.id] || 0);
+
+    handleQuantityChange(
+      item.id,
+      Math.max(0, currentQty - 1),
+      item.fulfillable_quantity
+    );
+  };
+
+  const handlePlus = (item) => {
+    const currentQty = Number(quantities[item.id] || 0);
+
+    handleQuantityChange(
+      item.id,
+      Math.min(item.fulfillable_quantity, currentQty + 1),
+      item.fulfillable_quantity
+    );
+  };
+
   const handleFulfill = async () => {
     setLoading(true);
     setMessage("");
@@ -116,7 +143,7 @@ const FullItem = () => {
         lineItemId: item.id,
         quantity: quantities[item.id] || 0,
       }))
-      .filter((i) => i.quantity > 0);
+      .filter((i) => Number(i.quantity) > 0);
 
     if (!itemsToFulfill.length) {
       setMessage("No valid items selected.");
@@ -144,6 +171,7 @@ const FullItem = () => {
 
       if (res.ok) {
         setMessage("Items fulfilled successfully!");
+
         navigate(`/order/${orderId}/${merchantId}`, {
           state: { refresh: true, merchantId },
         });
@@ -159,9 +187,6 @@ const FullItem = () => {
 
   const displaySerialNo = rawOrder?.serialNumber || "N/A";
 
-  /* =========================
-     RENDER
-     ========================= */
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* HEADER */}
@@ -178,6 +203,7 @@ const FullItem = () => {
           #{displaySerialNo} ›{" "}
           <span className="text-gray-900 font-semibold">Fulfill items</span>
         </div>
+
         <h1 className="text-xl font-semibold mt-1">Order #{orderId}</h1>
       </div>
 
@@ -187,64 +213,111 @@ const FullItem = () => {
           <div className="bg-white border rounded shadow-sm">
             <div className="px-5 py-4 border-b flex justify-between">
               <span className="text-xs bg-yellow-100 px-2 py-1 rounded">
-                Unfulfilled
+                Unfulfilled ({allLineItems.length})
               </span>
+
               <span className="text-sm text-gray-600">
                 {customer.first_name} {customer.last_name}
               </span>
             </div>
 
             <div className="p-5 space-y-5">
-              {allLineItems.map((item) => (
-                <div key={item.id} className="flex gap-4 border-b pb-5">
-                  {item.image?.src ? (
-                    <img
-                      src={item.image.src}
-                      alt={item.image.alt}
-                      className="w-16 h-16 border rounded object-cover"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 border rounded flex items-center justify-center text-xs text-gray-400">
-                      No Image
-                    </div>
-                  )}
+              {allLineItems.length === 0 ? (
+                <div className="text-sm text-gray-500 text-center py-8">
+                  No fulfillable items available.
+                </div>
+              ) : (
+                allLineItems.map((item) => (
+                  <div key={item.id} className="flex gap-4 border-b pb-5">
+                    {item.image?.src ? (
+                      <img
+                        src={item.image.src}
+                        alt={item.image.alt}
+                        className="w-16 h-16 border rounded object-cover"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 border rounded flex items-center justify-center text-xs text-gray-400">
+                        No Image
+                      </div>
+                    )}
 
-                  <div className="flex-1 flex justify-between">
-                    <div>
-                      <div className="font-medium">{item.name}</div>
-                      <div className="text-xs text-gray-500">
-                        SKU: {item.sku}
+                    <div className="flex-1 flex justify-between gap-4">
+                      <div>
+                        <div className="font-medium">{item.name}</div>
+
+                        {item.variant_title && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            {item.variant_title}
+                          </div>
+                        )}
+
+                        <div className="text-xs text-gray-500">
+                          SKU: {item.sku}
+                        </div>
+
+                        {item.refunded_quantity > 0 && (
+                          <div className="text-xs text-red-500 mt-1">
+                            Refunded: {item.refunded_quantity}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white">
+                          <button
+                            type="button"
+                            onClick={() => handleMinus(item)}
+                            disabled={Number(quantities[item.id] || 0) <= 0}
+                            className={`w-9 h-9 flex items-center justify-center text-lg font-semibold ${
+                              Number(quantities[item.id] || 0) <= 0
+                                ? "text-gray-300 cursor-not-allowed"
+                                : "text-gray-700 hover:bg-gray-100"
+                            }`}
+                          >
+                            -
+                          </button>
+
+                          <input
+                            type="number"
+                            min={0}
+                            max={item.fulfillable_quantity}
+                            value={quantities[item.id] ?? 0}
+                            onChange={(e) =>
+                              handleQuantityChange(
+                                item.id,
+                                e.target.value,
+                                item.fulfillable_quantity
+                              )
+                            }
+                            className="w-14 h-9 border-x border-gray-300 text-center text-sm outline-none"
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => handlePlus(item)}
+                            disabled={
+                              Number(quantities[item.id] || 0) >=
+                              item.fulfillable_quantity
+                            }
+                            className={`w-9 h-9 flex items-center justify-center text-lg font-semibold ${
+                              Number(quantities[item.id] || 0) >=
+                              item.fulfillable_quantity
+                                ? "text-gray-300 cursor-not-allowed"
+                                : "text-gray-700 hover:bg-gray-100"
+                            }`}
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                          of {item.fulfillable_quantity}
+                        </span>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        min={0}
-                        max={item.fulfillable_quantity}
-                        value={quantities[item.id] ?? 0}
-                        onChange={(e) => {
-                          let value = Number(e.target.value);
-
-                          if (value < 0) value = 0;
-
-                          // ❌ zyada quantity block
-                          if (value > item.fulfillable_quantity) {
-                            value = item.fulfillable_quantity;
-                          }
-
-                          handleQuantityChange(item.id, value);
-                        }}
-                        className="w-16 border rounded px-2 py-1 text-center"
-                      />
-
-                      <span className="text-xs">
-                        of {item.fulfillable_quantity}
-                      </span>
-                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
@@ -320,9 +393,11 @@ const FullItem = () => {
           <div className="bg-white border rounded p-5">
             <button
               onClick={handleFulfill}
-              disabled={loading}
+              disabled={loading || allLineItems.length === 0}
               className={`w-full py-2 text-white rounded ${
-                loading ? "bg-gray-400" : "bg-black hover:bg-gray-900"
+                loading || allLineItems.length === 0
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-black hover:bg-gray-900"
               }`}
             >
               {loading ? "Fulfilling..." : "Fulfill items"}

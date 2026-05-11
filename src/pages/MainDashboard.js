@@ -4,6 +4,7 @@ import {
   RiArrowUpSLine,
   RiInboxLine,
   RiLoader4Line,
+  RiRefund2Line,
   RiShieldFlashLine,
   RiStore3Line,
 } from "react-icons/ri";
@@ -28,6 +29,7 @@ const MainDashboard = () => {
   const navigate = useNavigate();
   const [topProducts, setTopProducts] = useState([]);
   const { setDashboardLoading } = useOutletContext();
+  const [highRefundedProducts, setHighRefundedProducts] = useState([]);
   const hasLoadedBefore = localStorage.getItem("dashboardLoaded");
   const [loading, setLoading] = useState(!hasLoadedBefore);
   const [alerts, setAlerts] = useState([]);
@@ -137,6 +139,52 @@ const MainDashboard = () => {
       }
     } catch (error) {
       console.error("Top Products Error:", error);
+    }
+  };
+
+
+  const fetchHighRefundedProducts = async () => {
+    try {
+      const token = localStorage.getItem("usertoken");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+      let decodedRole = null;
+
+      if (token) {
+        const decoded = jwtDecode(token);
+        decodedRole = decoded.payLoad.role;
+      }
+
+      let apiUrl = "";
+
+      if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
+        apiUrl = "https://multi-vendor-marketplace.vercel.app/order/highRefundedProducts?limit=5";
+      } else if (
+        decodedRole === "Merchant" ||
+        decodedRole === "Merchant Staff"
+      ) {
+        apiUrl = "https://multi-vendor-marketplace.vercel.app/order/highRefundedProductsForMerchant?limit=5";
+      }
+
+      if (!apiUrl) return;
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setHighRefundedProducts(data.data || []);
+      } else {
+        console.error("High refunded products API failed:", data);
+      }
+    } catch (error) {
+      console.error("High Refunded Products Error:", error);
     }
   };
 
@@ -428,6 +476,8 @@ const MainDashboard = () => {
         await Promise.all([
           fetchTopProducts(),
           fetchMonthlyRevenue(),
+          fetchHighRefundedProducts(),
+
           getProductCount(),
           fetchSummary(),
           fetchUserViewCount(),
@@ -550,11 +600,10 @@ const MainDashboard = () => {
                 ${summary.netProfit?.toLocaleString() || 0}
               </h2>
               <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  summary.revenueGrowth >= 0
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${summary.revenueGrowth >= 0
                     ? "bg-emerald-100 text-emerald-800"
                     : "bg-red-100 text-red-600"
-                }`}
+                  }`}
               >
                 {summary.revenueGrowth >= 0 ? "↑" : "↓"}{" "}
                 {Math.abs(summary.revenueGrowth)}% vs last month
@@ -719,13 +768,12 @@ const MainDashboard = () => {
             {/* 🔥 Growth */}
             <span
               className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-2
-    ${
-      summary.lastMonthAOV === "0.00"
-        ? "bg-gray-700 text-gray-300"
-        : summary.aovGrowth >= 0
-          ? "bg-emerald-900 text-emerald-400"
-          : "bg-red-900 text-red-400"
-    }`}
+    ${summary.lastMonthAOV === "0.00"
+                  ? "bg-gray-700 text-gray-300"
+                  : summary.aovGrowth >= 0
+                    ? "bg-emerald-900 text-emerald-400"
+                    : "bg-red-900 text-red-400"
+                }`}
             >
               {summary.lastMonthAOV === "0.00"
                 ? "New"
@@ -779,9 +827,8 @@ const MainDashboard = () => {
         </div>
       </div>
 
-      {/* LEFT CARD - TOP PRODUCTS */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 p-4">
-        {/* --- LEFT: Top Products (Main Card) --- */}
+
         <div className="xl:col-span-2 group relative overflow-hidden rounded-3xl bg-gray-200 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-300 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all">
           {/* Background glow */}
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
@@ -799,7 +846,7 @@ const MainDashboard = () => {
                   This Month
                 </span>
               </div>
-{/* 
+              {/* 
               <button
                 onClick={() => navigate("/top-product-history")}
                 className="text-[14px] font-semibold text-blue-600 hover:underline"
@@ -852,11 +899,10 @@ const MainDashboard = () => {
 
                         <td className="text-right py-4 pl-2">
                           <div
-                            className={`inline-flex items-center gap-1 font-medium ${
-                              item.trend >= 0
+                            className={`inline-flex items-center gap-1 font-medium ${item.trend >= 0
                                 ? "text-emerald-600"
                                 : "text-red-500"
-                            }`}
+                              }`}
                           >
                             {item.trend >= 0 ? (
                               <FaArrowTrendUp size={12} />
@@ -890,7 +936,7 @@ const MainDashboard = () => {
           <div className="relative z-10 flex flex-col h-full">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest">
-                Alerts & Issues
+                Operational Issues
               </h2>
 
               <button
@@ -910,34 +956,31 @@ const MainDashboard = () => {
                   return (
                     <div
                       key={index}
-                      className={`p-4 rounded-2xl border transition-all flex items-start gap-3 hover:shadow-sm ${
-                        isOutOfStock
+                      className={`p-4 rounded-2xl border transition-all flex items-start gap-3 hover:shadow-sm ${isOutOfStock
                           ? "border-red-200 bg-red-50/30 hover:bg-red-50/50"
                           : isLowStock
                             ? "border-amber-200 bg-amber-50/30 hover:bg-amber-50/50"
                             : "border-gray-200 bg-gray-50 hover:bg-white"
-                      }`}
+                        }`}
                     >
                       <div
-                        className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${
-                          isOutOfStock
+                        className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${isOutOfStock
                             ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
                             : isLowStock
                               ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
                               : "bg-emerald-500"
-                        }`}
+                          }`}
                       />
 
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
                           <p
-                            className={`text-[11px] font-bold uppercase tracking-wider ${
-                              isOutOfStock
+                            className={`text-[11px] font-bold uppercase tracking-wider ${isOutOfStock
                                 ? "text-red-600"
                                 : isLowStock
                                   ? "text-amber-600"
                                   : "text-emerald-600"
-                            }`}
+                              }`}
                           >
                             {alert.type?.replace("_", " ") || "Alert"}
                           </p>
@@ -978,7 +1021,103 @@ const MainDashboard = () => {
             </div>
           </div>
         </div>
+
+
+
       </div>
+      {/* <div className="xl:col-span-2 group relative overflow-hidden rounded-3xl bg-gray-200 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-300 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all">
+  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+    <div className="w-24 h-24 bg-red-500 rounded-full blur-3xl" />
+  </div>
+
+  <div className="relative z-10 flex flex-col h-full font-sans">
+    <div className="flex justify-between items-center mb-6">
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-xl bg-red-50 text-red-600">
+          <RiRefund2Line size={20} />
+        </div>
+
+        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest">
+          High Refunded Products
+        </h2>
+
+        <span className="text-[10px] font-medium bg-red-50 text-red-600 px-2 py-0.5 rounded-md border border-red-100">
+          Risk
+        </span>
+      </div>
+    </div>
+
+    <div className="flex-1 overflow-auto">
+      <table className="w-full text-left">
+        <thead>
+          <tr className="text-gray-400 text-[11px] uppercase font-semibold border-b border-gray-100">
+            <th className="pb-3 pr-2">Product</th>
+            <th className="text-center pb-3 px-2">Refund Qty</th>
+            <th className="text-center pb-3 px-2">Refund Amount</th>
+            <th className="text-center pb-3 px-2">Orders</th>
+            <th className="text-right pb-3 pl-2">Rate</th>
+          </tr>
+        </thead>
+
+        <tbody className="text-sm">
+          {highRefundedProducts.length > 0 ? (
+            highRefundedProducts.map((item, index) => (
+              <tr
+                key={index}
+                className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+              >
+                <td className="py-4 pr-2">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-800 line-clamp-1">
+                      {item.productName || "N/A"}
+                    </span>
+
+                    {item.variantTitle && (
+                      <span className="text-xs text-gray-500 mt-0.5">
+                        {item.variantTitle}
+                      </span>
+                    )}
+                  </div>
+                </td>
+
+                <td className="text-center py-4 px-2 text-red-600 font-bold">
+                  {item.totalRefundedQty || 0}
+                </td>
+
+                <td className="text-center py-4 px-2 font-medium text-gray-900">
+                  $
+                  {Number(item.totalRefundedAmount || 0).toLocaleString(
+                    undefined,
+                    { minimumFractionDigits: 2 }
+                  )}
+                </td>
+
+                <td className="text-center py-4 px-2 text-gray-600">
+                  {item.refundOrdersCount || 0}
+                </td>
+
+                <td className="text-right py-4 pl-2">
+                  <span className="inline-flex items-center px-2 py-1 rounded-lg bg-red-50 text-red-600 text-xs font-bold">
+                    {Number(item.refundRate || 0).toFixed(1)}%
+                  </span>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan="5"
+                className="text-center py-10 text-gray-400 text-xs italic"
+              >
+                No refunded products found.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div> */}
     </main>
   );
 };

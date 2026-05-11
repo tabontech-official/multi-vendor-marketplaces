@@ -22,36 +22,36 @@ const TopProductsHistory = () => {
     }
   }, []);
 
- const fetchData = async () => {
-  try {
-    setLoading(true);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
 
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+      const apiKey = localStorage.getItem("apiKey");
+      const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-    const url =
-      role === "Master Admin" || role === "Dev Admin"
-        ? "https://multi-vendor-marketplace.vercel.app/product/top-products-history-admin"
-        : "https://multi-vendor-marketplace.vercel.app/product/top-products-history";
+      const url =
+        role === "Master Admin" || role === "Dev Admin"
+          ? "https://multi-vendor-marketplace.vercel.app/product/top-products-history-admin"
+          : "https://multi-vendor-marketplace.vercel.app/product/top-products-history";
 
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        "x-api-key": apiKey,
-        "x-api-secret": apiSecretKey,
-        "Content-Type": "application/json",
-      },
-    });
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
+        },
+      });
 
-    const result = await res.json();
+      const result = await res.json();
 
-    setData(result.data || []);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoading(false);
-  }
-};
+      setData(result.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ✅ LOAD ON PAGE MOUNT
   useEffect(() => {

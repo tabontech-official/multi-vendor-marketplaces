@@ -28,6 +28,10 @@ const SubscriptionHistory = () => {
     totalOrders: 0,
     fulfilled: 0,
     refunded: 0,
+    totalRevenue: 0,
+    totalRefundedValue: 0,
+    totalRemainingValue: 0,
+    fulfilledQty: 0,
     aov: 0,
     fulfillmentRate: 0,
   });
@@ -55,8 +59,7 @@ const SubscriptionHistory = () => {
   const [exportAs, setExportAs] = useState("csv");
   const [exportOption, setExportOption] = useState("all");
 
-  const togglePopup = () => setIsexportOpen(!isOpen);
-
+  const togglePopup = () => setIsexportOpen((prev) => !prev);
   const fetchSubscriptions = async () => {
     const userId = localStorage.getItem("userid");
     const token = localStorage.getItem("usertoken");
@@ -98,49 +101,86 @@ const SubscriptionHistory = () => {
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
         const orders = sortedSubscriptions;
-
         let totalOrders = orders.length;
         let fulfilled = 0;
         let refunded = 0;
         let totalRevenue = 0;
-
+        let totalRefundedValue = 0;
+        let totalRemainingValue = 0;
+        let fulfilledQty = 0;
         orders.forEach((order) => {
           let isFulfilled = true;
           let isRefunded = false;
-          let orderTotal = 0;
+          let orderOriginalTotal = 0;
+          let orderRemainingTotal = 0;
+          let orderRefundedTotal = 0;
 
-          // 🔥 HANDLE BOTH STRUCTURES
           let allItems = [];
 
+          // User side structure
           if (order.lineItems && order.lineItems.length) {
-            // ✅ User API
             allItems = order.lineItems;
-          } else if (order.lineItemsByMerchant) {
-            // ✅ Admin API
+          }
+
+          // Admin side structure
+          else if (order.lineItemsByMerchant) {
             allItems = Object.values(order.lineItemsByMerchant).flat();
           }
 
           allItems.forEach((item) => {
-            const qty = parseInt(item.quantity || 0);
-            const price = parseFloat(item.price || 0);
+            const price = Number(item.price || 0);
 
-            orderTotal += price * qty;
+            const originalQty = Number(
+              item.original_quantity ?? item.current_quantity ?? item.quantity ?? 0
+            );
 
-            // Fulfilled logic
-            if (item.fulfillment_status !== "fulfilled") {
+            const itemFulfilledQty = Number(item.fulfilled_quantity || 0);
+            const refundedQty = Number(item.refunded_quantity || 0);
+
+            const handledQty = itemFulfilledQty + refundedQty;
+            const remainingQty = Math.max(originalQty - handledQty, 0);
+
+            const refundedAmount = Number(
+              item.refunded_amount || price * refundedQty || 0
+            );
+
+            orderOriginalTotal += price * originalQty;
+            orderRemainingTotal += price * remainingQty;
+            orderRefundedTotal += refundedAmount;
+
+            fulfilledQty += itemFulfilledQty;
+
+            if (originalQty <= 0 || handledQty < originalQty) {
               isFulfilled = false;
             }
 
-            // Refunded = cancelled
-            if (item.fulfillment_status === "cancelled") {
+            if (
+              refundedQty > 0 ||
+              refundedAmount > 0 ||
+              item.refund_status === "partially_refunded" ||
+              item.refund_status === "fully_refunded"
+            ) {
               isRefunded = true;
             }
           });
 
+          // Fallback: agar backend ne order.refunds bheja ho
+          if (orderRefundedTotal === 0 && Array.isArray(order.refunds)) {
+            orderRefundedTotal = order.refunds.reduce((sum, refund) => {
+              return sum + Number(refund.refundAmount || 0);
+            }, 0);
+
+            if (orderRefundedTotal > 0) {
+              isRefunded = true;
+            }
+          }
+
           if (isFulfilled && allItems.length) fulfilled++;
           if (isRefunded) refunded++;
 
-          totalRevenue += orderTotal;
+          totalRevenue += orderOriginalTotal;
+          totalRefundedValue += orderRefundedTotal;
+          totalRemainingValue += orderRemainingTotal;
         });
 
         const aov = totalOrders ? totalRevenue / totalOrders : 0;
@@ -152,10 +192,13 @@ const SubscriptionHistory = () => {
           totalOrders,
           fulfilled,
           refunded,
+          totalRevenue,
+          totalRefundedValue,
+          totalRemainingValue,
+          fulfilledQty,
           aov,
-          fulfillmentRate, // 👈 new
+          fulfillmentRate,
         });
-
         setSubscriptions(sortedSubscriptions);
         setFilteredSubscriptions(sortedSubscriptions);
 
@@ -197,17 +240,33 @@ const SubscriptionHistory = () => {
       const decoded = jwtDecode(token);
       const role = decoded?.payLoad?.role;
       const isTokenValid = decoded?.exp * 1000 > Date.now();
-      const isAdmin =
-        isTokenValid && (role === "Master Admin" || role === "Dev Admin");
 
-      const queryParams = new URLSearchParams({
-        type: exportOption,
-        ...(exportOption === "current" && { limit: 10 }),
-        ...(exportStatus && { status: exportStatus }),
-        // ...(isAdmin ? {} : { userId }),
-      });
+      if (!isTokenValid) {
+        alert("Session expired. Please login again.");
+        return;
+      }
 
-      const exportUrl = isAdmin
+      const isAdminUser =
+        role === "Master Admin" || role === "Dev Admin";
+
+      const queryParams = new URLSearchParams();
+
+      queryParams.append("type", exportOption);
+
+      if (exportOption === "current") {
+        queryParams.append("page", String(page));
+        queryParams.append("limit", String(limit));
+      }
+
+      if (exportStatus) {
+        queryParams.append("status", exportStatus);
+      }
+
+      if (!isAdminUser) {
+        queryParams.append("userId", userId);
+      }
+
+      const exportUrl = isAdminUser
         ? `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`
         : `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
 
@@ -220,25 +279,44 @@ const SubscriptionHistory = () => {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Export failed");
+        let message = "Export failed";
+
+        try {
+          const error = await response.json();
+          message = error.message || message;
+        } catch {
+          message = response.statusText || message;
+        }
+
+        throw new Error(message);
       }
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+
+      if (!blob || blob.size === 0) {
+        throw new Error("No data found for export");
+      }
+
+      const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `orders-${exportOption}-${Date.now()}.csv`);
+
+      const statusPart = exportStatus || "all-status";
+      const fileName = `orders-${exportOption}-${statusPart}-${Date.now()}.csv`;
+
+      link.href = downloadUrl;
+      link.download = fileName;
+
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(url);
+
+      window.URL.revokeObjectURL(downloadUrl);
 
       addNotification("Orders exported successfully", "Orders");
       setIsexportOpen(false);
     } catch (error) {
-      alert("Export failed: " + error.message);
       console.error("Export error:", error);
+      alert("Export failed: " + error.message);
     } finally {
       setIsExporting(false);
     }
@@ -278,85 +356,54 @@ const SubscriptionHistory = () => {
   const [filteredSubscriptions, setFilteredSubscriptions] = useState([]);
 
   const handleSearch = () => {
-    const value = searchVal.trim();
+    const value = searchVal.toLowerCase().trim();
+
     if (!value) {
       setFilteredSubscriptions(subscriptions);
       return;
     }
 
-    let regexSafe;
-    try {
-      regexSafe = new RegExp(value);
-    } catch (e) {
-      console.error("Invalid regex input:", e);
-      return;
-    }
-
     const filtered = subscriptions.filter((subscription) => {
-      const orderMatch =
-        regexSafe.test(subscription.shopifyOrderNo?.toString()) ||
-        regexSafe.test(subscription.serialNo?.toString());
+      const adminItems = Object.values(
+        subscription.lineItemsByMerchant || {}
+      ).flat();
 
-      const merchantMatch = subscription.merchants?.some((merchant) =>
-        regexSafe.test(merchant.info?.name || ""),
-      );
+      const userItems = subscription.lineItems || [];
+      const allItems = adminItems.length > 0 ? adminItems : userItems;
 
-      const merchantEmailMatch = subscription.merchants?.some((merchant) =>
-        regexSafe.test(merchant.info?.email || ""),
-      );
+      const searchableText = [
+        subscription.shopifyOrderNo,
+        subscription.serialNo,
+        subscription.orderId,
+        subscription.createdAt
+          ? formatDate(subscription.createdAt)
+          : "",
 
-      const statusMatch = Object.values(
-        subscription.lineItemsByMerchant || {},
-      ).some((items) =>
-        items.some((item) => {
-          const status = item.fulfillment_status;
+        ...(subscription.merchants || []).flatMap((merchant) => [
+          merchant.info?.name,
+          merchant.info?.email,
+        ]),
 
-          if (value === "unfulfilled") return status === null;
-          if (value === "fulfilled") return status === "fulfilled";
-          if (value === "cancelled") return status === "cancelled";
+        getOrderStatus(allItems),
 
-          return regexSafe.test(status || "unfulfilled");
-        }),
-      );
+        ...allItems.flatMap((item) => [
+          item.name,
+          item.title,
+          item.sku,
+          item.fulfillment_status || "unfulfilled",
+          item.refund_status,
+          item.price,
+          item.quantity,
+          item.customer?.[0]?.created_at
+            ? formatDate(item.customer[0].created_at)
+            : "",
+        ]),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
 
-      const dateMatchFromLineItems = Object.values(
-        subscription.lineItemsByMerchant || {},
-      ).some((items) =>
-        items.some((item) => {
-          const date = item?.customer?.[0]?.created_at;
-          const formattedDate =
-            date &&
-            new Date(date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            });
-          return (
-            formattedDate &&
-            formattedDate.toLowerCase().includes(value.toLowerCase())
-          );
-        }),
-      );
-
-      const dateMatchUserSide = (() => {
-        if (!subscription.createdAt) return false;
-        const formattedDate = new Date(
-          subscription.createdAt,
-        ).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-        return formattedDate.toLowerCase().includes(value.toLowerCase());
-      })();
-      return (
-        orderMatch ||
-        merchantMatch ||
-        merchantEmailMatch ||
-        statusMatch ||
-        dateMatchFromLineItems ||
-        dateMatchUserSide
-      );
+      return searchableText.includes(value);
     });
 
     setFilteredSubscriptions(filtered);
@@ -364,29 +411,117 @@ const SubscriptionHistory = () => {
 
   useEffect(() => {
     handleSearch();
-  }, [searchVal]);
+  }, [searchVal, subscriptions]);
+
+  // const getOrderStatus = (items) => {
+  //   if (!items || !items.length) return "Unfulfilled";
+
+  //   const hasCancelled = items.some(
+  //     (item) => item.fulfillment_status === "cancelled"
+  //   );
+
+  //   if (hasCancelled) return "Cancelled";
+
+  //   const statusChecks = items.map((item) => {
+  //     const originalQty = Number(
+  //       item.original_quantity ?? item.current_quantity ?? item.quantity ?? 0
+  //     );
+
+  //     const fulfilledQty = Number(item.fulfilled_quantity || 0);
+  //     const refundedQty = Number(item.refunded_quantity || 0);
+
+  //     const handledQty = fulfilledQty + refundedQty;
+
+  //     return {
+  //       originalQty,
+  //       fulfilledQty,
+  //       refundedQty,
+  //       handledQty,
+  //       isFullyHandled: originalQty > 0 && handledQty >= originalQty,
+  //       isPartiallyHandled: handledQty > 0 && handledQty < originalQty,
+  //     };
+  //   });
+
+  //   const allFullyHandled = statusChecks.every((item) => item.isFullyHandled);
+  //   const someHandled = statusChecks.some(
+  //     (item) => item.isFullyHandled || item.isPartiallyHandled
+  //   );
+
+  //   if (allFullyHandled) return "Fulfilled";
+  //   if (someHandled) return "Partial";
+
+  //   return "Unfulfilled";
+  // };
+
 
   const getOrderStatus = (items) => {
     if (!items || !items.length) return "Unfulfilled";
 
-    const statuses = items.map((i) => i.fulfillment_status);
+    const hasCancelled = items.some(
+      (item) => item.fulfillment_status === "cancelled"
+    );
 
-    if (statuses.includes("cancelled")) return "Cancelled";
+    if (hasCancelled) return "Cancelled";
 
-    const fulfilledCount = statuses.filter((s) => s === "fulfilled").length;
-    const unfulfilledCount = statuses.filter((s) => s === null).length;
+    const statusChecks = items.map((item) => {
+      const originalQty = Number(
+        item.original_quantity ?? item.current_quantity ?? item.quantity ?? 0
+      );
 
-    if (fulfilledCount > 0 && unfulfilledCount > 0) return "Partial";
-    if (fulfilledCount === statuses.length) return "Fulfilled";
+      const fulfilledQty = Number(item.fulfilled_quantity || 0);
+      const refundedQty = Number(item.refunded_quantity || 0);
+
+      const handledQty = fulfilledQty + refundedQty;
+
+      return {
+        originalQty,
+        fulfilledQty,
+        refundedQty,
+        handledQty,
+
+        isFullyRefunded: originalQty > 0 && refundedQty >= originalQty,
+
+        isPartiallyRefunded:
+          originalQty > 0 && refundedQty > 0 && refundedQty < originalQty,
+
+        isFullyHandled: originalQty > 0 && handledQty >= originalQty,
+
+        isPartiallyHandled: handledQty > 0 && handledQty < originalQty,
+      };
+    });
+
+    const allFullyRefunded = statusChecks.every((item) => item.isFullyRefunded);
+
+    const someRefunded = statusChecks.some(
+      (item) => item.isFullyRefunded || item.isPartiallyRefunded
+    );
+
+    const allFullyHandled = statusChecks.every((item) => item.isFullyHandled);
+
+    const someHandled = statusChecks.some(
+      (item) => item.isFullyHandled || item.isPartiallyHandled
+    );
+
+    // 1. Agar har product ki full quantity refund ho gayi
+    if (allFullyRefunded) return "Refunded";
+
+    // 2. Agar kuch refund hua hai aur baqi fulfilled/handled hai
+    if (someRefunded && allFullyHandled) return "Fulfilled";
+
+    // 3. Agar koi refund hua hai lekin order abhi fully handled nahi
+    if (someRefunded && !allFullyHandled) return "Partial";
+
+    // 4. Normal fulfilled logic
+    if (allFullyHandled) return "Fulfilled";
+
+    if (someHandled) return "Partial";
 
     return "Unfulfilled";
   };
-
   return (
     <div
-      className={`flex flex-col bg-gray-50 px-3 py-6 ${
-        isDialogOpen ? "blur-background" : ""
-      }`}
+      className={`flex flex-col bg-gray-50 px-3 py-6 ${isDialogOpen ? "blur-background" : ""
+        }`}
     >
       <div className="flex">
         <div className="pt-4 min-w-full px-3 bg-white  rounded-lg">
@@ -412,7 +547,7 @@ const SubscriptionHistory = () => {
             </div>
 
             <div className="flex-1 flex items-center justify-end gap-2 w-full">
-              <button
+              {/* <button
                 onClick={togglePopup}
                 className="bg-gray-400 border border-gray-300 hover:bg-gray-500
         text-gray-800 px-3 h-8 text-sm font-medium rounded-md
@@ -420,7 +555,7 @@ const SubscriptionHistory = () => {
               >
                 <FaFileImport className="w-4 h-4" />
                 Export
-              </button>
+              </button> */}
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 mt-3">
@@ -433,7 +568,7 @@ const SubscriptionHistory = () => {
                     size={22}
                   />
                 </div>
-                
+
               </div>
               <div>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
@@ -493,9 +628,15 @@ const SubscriptionHistory = () => {
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
                   Refunded
                 </p>
-                <h2 className="text-2xl font-bold text-gray-900 leading-none">
-                  {stats.refunded || 0}
-                </h2>
+                <div className="flex flex-col gap-1">
+                  <h2 className="text-2xl font-bold text-gray-900 leading-none">
+                    {stats.refunded || 0}
+                  </h2>
+
+                  <p className="text-xs font-bold text-red-600">
+                    ${Number(stats.totalRefundedValue || 0).toFixed(2)} refunded
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -564,69 +705,68 @@ const SubscriptionHistory = () => {
                   <tbody>
                     {isAdmin
                       ? filteredSubscriptions.map((subscription, index) => {
-                          const orderId = subscription.serialNo;
+                        const orderId = subscription.serialNo;
 
-                          return subscription.merchants.map(
-                            (merchant, mIndex) => {
-                              const merchantId = merchant.id;
-                              const merchantItems =
-                                subscription.lineItemsByMerchant?.[
-                                  merchantId
-                                ] || [];
+                        return subscription.merchants.map(
+                          (merchant, mIndex) => {
+                            const merchantId = merchant.id;
+                            const merchantItems =
+                              subscription.lineItemsByMerchant?.[
+                              merchantId
+                              ] || [];
 
-                              if (!merchantItems.length) return null;
+                            if (!merchantItems.length) return null;
 
-                              const customer = merchantItems[0]?.customer?.[0];
-                              const orderDate = customer?.created_at;
-                              const shopifyOrderId = merchantItems[0]?.orderId;
+                            const customer = merchantItems[0]?.customer?.[0];
+                            const orderDate = customer?.created_at;
+                            const shopifyOrderId = merchantItems[0]?.orderId;
 
-                              const orderStatus = getOrderStatus(merchantItems);
+                            const orderStatus = getOrderStatus(merchantItems);
 
-                              const totalQuantity = merchantItems.reduce(
-                                (sum, item) => sum + (item.quantity || 0),
-                                0,
-                              );
+                            const totalQuantity = merchantItems.reduce(
+                              (sum, item) => sum + (item.quantity || 0),
+                              0,
+                            );
 
-                              const totalPrice = merchantItems.reduce(
-                                (sum, item) => {
-                                  const price = parseFloat(item.price || 0);
-                                  const qty = parseInt(item.quantity || 0);
-                                  return sum + price * qty;
-                                },
-                                0,
-                              );
+                            const totalPrice = merchantItems.reduce(
+                              (sum, item) => {
+                                const price = parseFloat(item.price || 0);
+                                const qty = parseInt(item.quantity || 0);
+                                return sum + price * qty;
+                              },
+                              0,
+                            );
 
-                              return (
-                                <tr
-                                  key={`${orderId}-${merchantId}`}
-                                  className={`border-b ${
-                                    (index + mIndex) % 2 === 0
-                                      ? "bg-white"
-                                      : "bg-gray-100"
+                            return (
+                              <tr
+                                key={`${orderId}-${merchantId}`}
+                                className={`border-b ${(index + mIndex) % 2 === 0
+                                  ? "bg-white"
+                                  : "bg-gray-100"
                                   } w-full`}
-                                >
-                                  <td
-                                    className="p-3 cursor-pointer text-blue-600 hover:underline"
-                                    onClick={() => {
-                                      if (shopifyOrderId) {
-                                        navigate(
-                                          `/order/${shopifyOrderId}/${merchantId}`,
-                                          {
-                                            state: {
-                                              merchantId,
-                                              shopifyOrderId,
-                                              serialNo: orderId,
-                                              order: subscription,
-                                            },
+                              >
+                                <td
+                                  className="p-3 cursor-pointer text-blue-600 hover:underline"
+                                  onClick={() => {
+                                    if (shopifyOrderId) {
+                                      navigate(
+                                        `/order/${shopifyOrderId}/${merchantId}`,
+                                        {
+                                          state: {
+                                            merchantId,
+                                            shopifyOrderId,
+                                            serialNo: orderId,
+                                            order: subscription,
                                           },
-                                        );
-                                      } else {
-                                      }
-                                    }}
-                                  >
-                                    #{orderId}
-                                  </td>
-                                  {/* <td className="p-3">
+                                        },
+                                      );
+                                    } else {
+                                    }
+                                  }}
+                                >
+                                  #{orderId}
+                                </td>
+                                {/* <td className="p-3">
                                     {merchantItems[0]?.image?.src ? (
                                       <img
                                         src={merchantItems[0].image.src}
@@ -642,16 +782,16 @@ const SubscriptionHistory = () => {
                                       </span>
                                     )}
                                   </td> */}
-                                  <td className="p-3">
-                                    {orderDate ? formatDate(orderDate) : "N/A"}
-                                  </td>
+                                <td className="p-3">
+                                  {orderDate ? formatDate(orderDate) : "N/A"}
+                                </td>
 
-                                  <td className="p-3 text-sm">
-                                    {merchant.info?.name || "N/A"}
-                                  </td>
-                                  <td className="p-3">{totalQuantity} items</td>
-                                  <td className="p-3">{totalQuantity}</td>
-                                  {/* <td className="p-3">
+                                <td className="p-3 text-sm">
+                                  {merchant.info?.name || "N/A"}
+                                </td>
+                                <td className="p-3">{totalQuantity} items</td>
+                                <td className="p-3">{totalQuantity}</td>
+                                {/* <td className="p-3">
                                     <span
                                       className={`px-2 py-1 rounded text-xs font-medium ${
                                         fulfillment_status === "fulfilled"
@@ -668,83 +808,83 @@ const SubscriptionHistory = () => {
                                           : "Unfulfilled"}
                                     </span>
                                   </td> */}
-                                  <td className="p-3">
-                                    <span
-                                      className={`px-2 py-1 rounded text-xs font-medium ${
-                                        orderStatus === "Fulfilled"
-                                          ? "bg-green-200 text-green-800"
-                                          : orderStatus === "Cancelled"
-                                            ? "bg-red-200 text-red-800"
-                                            : orderStatus === "Partial"
-                                              ? "bg-blue-200 text-blue-800"
-                                              : "bg-yellow-200 text-yellow-800"
+                                <td className="p-3">
+                                  <span
+                                    className={`px-2 py-1 rounded text-xs font-medium ${orderStatus === "Refunded"
+                                      ? "bg-purple-200 text-purple-800"
+                                      : orderStatus === "Fulfilled"
+                                        ? "bg-green-200 text-green-800"
+                                        : orderStatus === "Cancelled"
+                                          ? "bg-red-200 text-red-800"
+                                          : orderStatus === "Partial"
+                                            ? "bg-blue-200 text-blue-800"
+                                            : "bg-yellow-200 text-yellow-800"
                                       }`}
-                                    >
-                                      {orderStatus}
-                                    </span>
-                                  </td>
+                                  >
+                                    {orderStatus}
+                                  </span>
+                                </td>
 
-                                  <td className="p-3">
-                                    ${totalPrice.toFixed(2)}
-                                  </td>
-                                </tr>
-                              );
-                            },
-                          );
-                        })
+                                <td className="p-3">
+                                  ${totalPrice.toFixed(2)}
+                                </td>
+                              </tr>
+                            );
+                          },
+                        );
+                      })
                       : filteredSubscriptions.map((subscription, index) => {
-                          const address =
-                            subscription.customer?.default_address;
-                          const firstItem = subscription.lineItems?.[0];
-                          if (!firstItem) return null;
-                          const orderStatus = getOrderStatus(
-                            subscription.lineItems,
-                          );
+                        const address =
+                          subscription.customer?.default_address;
+                        const firstItem = subscription.lineItems?.[0];
+                        if (!firstItem) return null;
+                        const orderStatus = getOrderStatus(
+                          subscription.lineItems,
+                        );
 
-                          return (
-                            <tr
-                              key={subscription.orderId}
-                              className={`border-b ${
-                                index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                        return (
+                          <tr
+                            key={subscription.orderId}
+                            className={`border-b ${index % 2 === 0 ? "bg-white" : "bg-gray-100"
                               } w-full`}
-                            >
-                              <td
-                                className="p-3 text-blue-600 hover:underline cursor-pointer"
-                                onClick={() => {
-                                  const merchantId =
-                                    subscription.ProductSnapshot?.find(
-                                      (p) =>
-                                        String(p.variantId) ===
-                                        String(firstItem.variant_id),
-                                    )?.merchantId;
+                          >
+                            <td
+                              className="p-3 text-blue-600 hover:underline cursor-pointer"
+                              onClick={() => {
+                                const merchantId =
+                                  subscription.ProductSnapshot?.find(
+                                    (p) =>
+                                      String(p.variantId) ===
+                                      String(firstItem.variant_id),
+                                  )?.merchantId;
 
-                                  console.log("Navigating with data:", {
-                                    order: subscription,
-                                    productName: firstItem.name,
-                                    sku: firstItem.sku,
-                                    index: 101 + index,
-                                    serialNumber: subscription.orderId,
-                                    merchantId,
-                                  });
+                                console.log("Navigating with data:", {
+                                  order: subscription,
+                                  productName: firstItem.name,
+                                  sku: firstItem.sku,
+                                  index: 101 + index,
+                                  serialNumber: subscription.orderId,
+                                  merchantId,
+                                });
 
-                                  navigate(
-                                    `/order/${subscription.orderId}/${merchantId}`,
-                                    {
-                                      state: {
-                                        order: subscription,
-                                        productName: firstItem.name,
-                                        sku: firstItem.sku,
-                                        index: 101 + index,
-                                        serialNumber: subscription.orderId,
-                                        merchantId,
-                                      },
+                                navigate(
+                                  `/order/${subscription.orderId}/${merchantId}`,
+                                  {
+                                    state: {
+                                      order: subscription,
+                                      productName: firstItem.name,
+                                      sku: firstItem.sku,
+                                      index: 101 + index,
+                                      serialNumber: subscription.orderId,
+                                      merchantId,
                                     },
-                                  );
-                                }}
-                              >
-                                #{subscription.shopifyOrderNo}
-                              </td>
-                              {/* <td className="p-3">
+                                  },
+                                );
+                              }}
+                            >
+                              #{subscription.shopifyOrderNo}
+                            </td>
+                            {/* <td className="p-3">
                                 {firstItem?.image?.src ? (
                                   <img
                                     src={firstItem.image.src}
@@ -757,60 +897,59 @@ const SubscriptionHistory = () => {
                                   </span>
                                 )}
                               </td> */}
-                              <td className="p-3">
-                                {formatDate(subscription.createdAt)}
-                              </td>
+                            <td className="p-3">
+                              {formatDate(subscription.createdAt)}
+                            </td>
 
-                              <td className="p-3">
-                                <div className="text-xs text-blue-500 mt-1">
-                                  {subscription.lineItems.length}{" "}
-                                  {subscription.lineItems.length === 1
-                                    ? "item"
-                                    : "items"}
-                                </div>
-                              </td>
-                              <td className="p-3">
-                                {subscription.lineItems.reduce(
-                                  (sum, item) => sum + (item.quantity || 0),
-                                  0,
-                                )}
-                              </td>
+                            <td className="p-3">
+                              <div className="text-xs text-blue-500 mt-1">
+                                {subscription.lineItems.length}{" "}
+                                {subscription.lineItems.length === 1
+                                  ? "item"
+                                  : "items"}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              {subscription.lineItems.reduce(
+                                (sum, item) => sum + (item.quantity || 0),
+                                0,
+                              )}
+                            </td>
 
-                              <td className="p-3">
-                                <span
-                                  className={`px-2 py-1 rounded text-xs font-medium ${
-                                    orderStatus === "Fulfilled"
-                                      ? "bg-green-200 text-green-800"
-                                      : orderStatus === "Cancelled"
-                                        ? "bg-red-200 text-red-800"
-                                        : orderStatus === "Partial"
-                                          ? "bg-blue-200 text-blue-800"
-                                          : "bg-yellow-200 text-yellow-800"
+                            <td className="p-3">
+                              <span
+                                className={`px-2 py-1 rounded text-xs font-medium ${orderStatus === "Fulfilled"
+                                  ? "bg-green-200 text-green-800"
+                                  : orderStatus === "Cancelled"
+                                    ? "bg-red-200 text-red-800"
+                                    : orderStatus === "Partial"
+                                      ? "bg-blue-200 text-blue-800"
+                                      : "bg-yellow-200 text-yellow-800"
                                   }`}
-                                >
-                                  {orderStatus}
-                                </span>
-                              </td>
+                              >
+                                {orderStatus}
+                              </span>
+                            </td>
 
-                              <td className="p-3">
-                                $
-                                {subscription.lineItems
-                                  .reduce((total, item) => {
-                                    const price = parseFloat(item.price || 0);
-                                    const qty = parseInt(item.quantity || 0);
-                                    return total + price * qty;
-                                  }, 0)
-                                  .toFixed(2)}
-                              </td>
-                            </tr>
-                          );
-                        })}
+                            <td className="p-3">
+                              $
+                              {subscription.lineItems
+                                .reduce((total, item) => {
+                                  const price = parseFloat(item.price || 0);
+                                  const qty = parseInt(item.quantity || 0);
+                                  return total + price * qty;
+                                }, 0)
+                                .toFixed(2)}
+                            </td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center px-4 py-3 bg-gray-50 border border-gray-200">
                   <div className="text-sm text-gray-700 mb-2 md:mb-0">
                     Total Orders{" "}
-                    <span className="font-medium">{subscriptions.length}</span>
+                    <span className="font-medium">{filteredSubscriptions.length}</span>
                   </div>
 
                   <div className="flex items-center space-x-2">
@@ -930,6 +1069,16 @@ const SubscriptionHistory = () => {
                       />
                       Cancelled
                     </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="statusFilter"
+                        value="refunded"
+                        checked={exportStatus === "refunded"}
+                        onChange={() => setExportStatus("refunded")}
+                      />
+                      Refunded
+                    </label>
                   </div>
                 </div>
 
@@ -943,9 +1092,8 @@ const SubscriptionHistory = () => {
                   <button
                     onClick={handleExport}
                     disabled={isExporting}
-                    className={`px-4 py-2 rounded mt-2 flex items-center gap-2 ${
-                      isExporting ? "bg-gray-500" : "bg-gray-800"
-                    } text-white`}
+                    className={`px-4 py-2 rounded mt-2 flex items-center gap-2 ${isExporting ? "bg-gray-500" : "bg-gray-800"
+                      } text-white`}
                   >
                     {isExporting ? (
                       <>

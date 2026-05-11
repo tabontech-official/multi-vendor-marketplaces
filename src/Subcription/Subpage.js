@@ -558,7 +558,7 @@ const SubscriptionHistory = () => {
               </button> */}
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 mt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 mt-3">
             {/* --- Total Orders --- */}
             <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
               <div className="flex justify-between items-start mb-4">
@@ -598,7 +598,7 @@ const SubscriptionHistory = () => {
               </div>
               <div>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
-                  Fulfilled
+                 Total Fulfilled Items
                 </p>
                 <div className="flex items-baseline gap-2">
                   <h2 className="text-2xl font-bold text-gray-900 leading-none">
@@ -626,7 +626,7 @@ const SubscriptionHistory = () => {
               </div>
               <div>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
-                  Refunded
+                  Total Refunded Items
                 </p>
                 <div className="flex flex-col gap-1">
                   <h2 className="text-2xl font-bold text-gray-900 leading-none">
@@ -641,7 +641,7 @@ const SubscriptionHistory = () => {
             </div>
 
             {/* --- AOV (Average Order Value) --- */}
-            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
+            {/* <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
               <div className="flex justify-between items-start mb-4">
                 <div className="p-2.5 bg-gray-50 rounded-xl group-hover:bg-indigo-50 transition-colors">
                   <RiExchangeDollarLine
@@ -661,7 +661,7 @@ const SubscriptionHistory = () => {
                   ${stats.aov?.toFixed(2) || "0.00"}
                 </h2>
               </div>
-            </div>
+            </div> */}
           </div>
           <div className="w-full  max-sm:w-auto  max-sm:flex items-center mt-2">
             {isLoading ? (

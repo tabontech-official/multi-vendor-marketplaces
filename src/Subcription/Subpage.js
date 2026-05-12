@@ -32,6 +32,8 @@ const SubscriptionHistory = () => {
     totalRefundedValue: 0,
     totalRemainingValue: 0,
     fulfilledQty: 0,
+    refundedQty: 0,
+    totalItemsQty: 0,
     aov: 0,
     fulfillmentRate: 0,
   });
@@ -108,6 +110,8 @@ const SubscriptionHistory = () => {
         let totalRefundedValue = 0;
         let totalRemainingValue = 0;
         let fulfilledQty = 0;
+        let refundedQty = 0;
+        let totalItemsQty = 0;
         orders.forEach((order) => {
           let isFulfilled = true;
           let isRefunded = false;
@@ -135,13 +139,13 @@ const SubscriptionHistory = () => {
             );
 
             const itemFulfilledQty = Number(item.fulfilled_quantity || 0);
-            const refundedQty = Number(item.refunded_quantity || 0);
+            const itemRefundedQty = Number(item.refunded_quantity || 0);
 
-            const handledQty = itemFulfilledQty + refundedQty;
+            const handledQty = itemFulfilledQty + itemRefundedQty;
             const remainingQty = Math.max(originalQty - handledQty, 0);
 
             const refundedAmount = Number(
-              item.refunded_amount || price * refundedQty || 0
+              item.refunded_amount || price * itemRefundedQty || 0
             );
 
             orderOriginalTotal += price * originalQty;
@@ -149,13 +153,14 @@ const SubscriptionHistory = () => {
             orderRefundedTotal += refundedAmount;
 
             fulfilledQty += itemFulfilledQty;
-
+            refundedQty += itemRefundedQty;
+            totalItemsQty += originalQty;
             if (originalQty <= 0 || handledQty < originalQty) {
               isFulfilled = false;
             }
 
             if (
-              refundedQty > 0 ||
+              itemRefundedQty > 0 ||
               refundedAmount > 0 ||
               item.refund_status === "partially_refunded" ||
               item.refund_status === "fully_refunded"
@@ -184,18 +189,19 @@ const SubscriptionHistory = () => {
         });
 
         const aov = totalOrders ? totalRevenue / totalOrders : 0;
-        const fulfillmentRate = totalOrders
-          ? ((fulfilled / totalOrders) * 100).toFixed(1)
+        const fulfillmentRate = totalItemsQty
+          ? ((fulfilledQty / totalItemsQty) * 100).toFixed(1)
           : 0;
-
         setStats({
           totalOrders,
-          fulfilled,
-          refunded,
+          fulfilled: fulfilledQty,
+          refunded: refundedQty,
           totalRevenue,
           totalRefundedValue,
           totalRemainingValue,
           fulfilledQty,
+          refundedQty,
+          totalItemsQty,
           aov,
           fulfillmentRate,
         });
@@ -351,17 +357,43 @@ const SubscriptionHistory = () => {
       );
     }
   }, []);
+  const escapeRegex = (value) => {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  };
 
+  const buildSearchRegex = (value) => {
+    const trimmed = value.trim();
+
+    if (!trimmed) return null;
+
+    try {
+      return new RegExp(trimmed, "i");
+    } catch {
+      return new RegExp(escapeRegex(trimmed), "i");
+    }
+  };
+
+  const normalizeSearchText = (value) => {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  };
   const [searchVal, setSearchVal] = useState("");
   const [filteredSubscriptions, setFilteredSubscriptions] = useState([]);
 
   const handleSearch = () => {
-    const value = searchVal.toLowerCase().trim();
+    const value = searchVal.trim();
 
     if (!value) {
       setFilteredSubscriptions(subscriptions);
       return;
     }
+
+    const searchRegex = buildSearchRegex(value);
+    const normalizedValue = normalizeSearchText(value);
+    const normalizedRegex = buildSearchRegex(escapeRegex(normalizedValue));
 
     const filtered = subscriptions.filter((subscription) => {
       const adminItems = Object.values(
@@ -371,37 +403,150 @@ const SubscriptionHistory = () => {
       const userItems = subscription.lineItems || [];
       const allItems = adminItems.length > 0 ? adminItems : userItems;
 
-      const searchableText = [
-        subscription.shopifyOrderNo,
-        subscription.serialNo,
-        subscription.orderId,
-        subscription.createdAt
-          ? formatDate(subscription.createdAt)
-          : "",
+      const merchantTexts = (subscription.merchants || []).flatMap((merchant) => {
+        const merchantItems =
+          subscription.lineItemsByMerchant?.[merchant.id] || [];
 
-        ...(subscription.merchants || []).flatMap((merchant) => [
+        const merchantTotalQty = merchantItems.reduce(
+          (sum, item) => sum + getDisplayQty(item),
+          0
+        );
+
+        const merchantTotalPrice = merchantItems.reduce((sum, item) => {
+          const price = Number(item.price || 0);
+          const qty = getDisplayQty(item);
+          return sum + price * qty;
+        }, 0);
+
+        return [
+          merchant.id,
+          merchant.info?._id,
           merchant.info?.name,
           merchant.info?.email,
-        ]),
+          merchant.info?.role,
+          merchant.totalOrdersCount,
+          merchant.totalOrderValue,
+          merchant.totalRefundedValue,
+          merchant.totalRemainingValue,
+          merchant.totalRefundedQty,
+          merchant.totalRemainingQty,
+          merchantTotalQty,
+          merchantTotalPrice.toFixed(2),
+          getSearchableStatusText(merchantItems),
+        ];
+      });
 
-        getOrderStatus(allItems),
+      const itemTexts = allItems.flatMap((item) => {
+        const originalQty = getDisplayQty(item);
+        const fulfilledQty = getFulfilledQty(item);
+        const refundedQty = getRefundedQty(item);
+        const remainingQty = getRemainingQty(item);
 
-        ...allItems.flatMap((item) => [
+        return [
+          item.id,
+          item.orderId,
           item.name,
           item.title,
           item.sku,
+          item.vendor,
+          item.variant_title,
+          item.variant_id,
+          item.product_id,
           item.fulfillment_status || "unfulfilled",
           item.refund_status,
           item.price,
           item.quantity,
+          item.current_quantity,
+          item.original_quantity,
+          item.remaining_quantity,
+          item.refunded_quantity,
+          item.fulfilled_quantity,
+
+          originalQty,
+          fulfilledQty,
+          refundedQty,
+          remainingQty,
+
+          `items ${originalQty}`,
+          `${originalQty} items`,
+          `fulfilled ${fulfilledQty}`,
+          `${fulfilledQty} fulfilled`,
+          `refunded ${refundedQty}`,
+          `${refundedQty} refunded`,
+          `unfulfilled ${Math.max(originalQty - fulfilledQty - refundedQty, 0)}`,
+          `${Math.max(originalQty - fulfilledQty - refundedQty, 0)} unfulfilled`,
+
+          item.customer?.[0]?.first_name,
+          item.customer?.[0]?.last_name,
+          item.customer?.[0]?.email,
+          item.customer?.[0]?.phone,
           item.customer?.[0]?.created_at
             ? formatDate(item.customer[0].created_at)
             : "",
+
+          item.customer?.[0]?.default_address?.name,
+          item.customer?.[0]?.default_address?.address1,
+          item.customer?.[0]?.default_address?.city,
+          item.customer?.[0]?.default_address?.province,
+          item.customer?.[0]?.default_address?.country,
+          item.customer?.[0]?.default_address?.zip,
+        ];
+      });
+
+      const refundTexts = (subscription.refunds || []).flatMap((refund) => [
+        refund.refundId,
+        refund.status,
+        refund.reason,
+        refund.refundAmount,
+        refund.refundedAt ? formatDate(refund.refundedAt) : "",
+        ...(refund.refundItems || []).flatMap((refundItem) => [
+          refundItem.productId,
+          refundItem.variantId,
+          refundItem.lineItemId,
+          refundItem.quantity,
+          refundItem.amount,
+          `refunded ${refundItem.quantity}`,
+          `${refundItem.quantity} refunded`,
         ]),
+      ]);
+
+      const totalQty = allItems.reduce(
+        (sum, item) => sum + getDisplayQty(item),
+        0
+      );
+
+      const totalPrice = allItems.reduce((sum, item) => {
+        const price = Number(item.price || 0);
+        const qty = getDisplayQty(item);
+        return sum + price * qty;
+      }, 0);
+
+      const searchableText = [
+        subscription.shopifyOrderNo,
+        subscription.serialNo,
+        subscription.orderId,
+        subscription.createdAt ? formatDate(subscription.createdAt) : "",
+
+        totalQty,
+        `${totalQty} items`,
+        `items ${totalQty}`,
+        totalPrice.toFixed(2),
+
+        getSearchableStatusText(allItems),
+
+        ...merchantTexts,
+        ...itemTexts,
+        ...refundTexts,
       ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+        .filter((item) => item !== undefined && item !== null && item !== "")
+        .join(" ");
+
+      const normalizedSearchableText = normalizeSearchText(searchableText);
+
+      return (
+        searchRegex.test(searchableText) ||
+        normalizedRegex.test(normalizedSearchableText)
+      );
 
       return searchableText.includes(value);
     });
@@ -518,6 +663,213 @@ const SubscriptionHistory = () => {
 
     return "Unfulfilled";
   };
+  const getDisplayQty = (item) => {
+    return Number(
+      item.original_quantity ??
+      item.current_quantity ??
+      item.quantity ??
+      0
+    );
+  };
+
+  const getRemainingQty = (item) => {
+    return Number(
+      item.remaining_quantity ??
+      item.quantity ??
+      0
+    );
+  };
+
+  const getRefundedQty = (item) => {
+    return Number(item.refunded_quantity || 0);
+  };
+
+  const getFulfilledQty = (item) => {
+    return Number(item.fulfilled_quantity || 0);
+  };
+
+  const getItemStatuses = (items) => {
+    if (!items || !items.length) return ["Unfulfilled"];
+
+    const statuses = new Set();
+
+    const hasCancelled = items.some(
+      (item) => item.fulfillment_status === "cancelled"
+    );
+
+    if (hasCancelled) {
+      statuses.add("Cancelled");
+    }
+
+    const hasRefunded = items.some((item) => {
+      const refundedQty = getRefundedQty(item);
+      const refundedAmount = Number(item.refunded_amount || 0);
+
+      return (
+        refundedQty > 0 ||
+        refundedAmount > 0 ||
+        item.refund_status === "partially_refunded" ||
+        item.refund_status === "fully_refunded"
+      );
+    });
+
+    const hasFulfilled = items.some((item) => {
+      return (
+        getFulfilledQty(item) > 0 ||
+        item.fulfillment_status === "fulfilled" ||
+        item.fulfillment_status === "partial"
+      );
+    });
+
+    const hasUnfulfilled = items.some((item) => {
+      const originalQty = getDisplayQty(item);
+      const fulfilledQty = getFulfilledQty(item);
+      const refundedQty = getRefundedQty(item);
+      const handledQty = fulfilledQty + refundedQty;
+
+      return originalQty > handledQty;
+    });
+
+    if (hasFulfilled) statuses.add("Fulfilled");
+    if (hasUnfulfilled) statuses.add("Unfulfilled");
+    if (hasRefunded) statuses.add("Refunded");
+
+    return Array.from(statuses);
+  };
+
+  const getStatusClass = (status) => {
+    if (status === "Refunded") return "bg-purple-200 text-purple-800";
+    if (status === "Fulfilled") return "bg-green-200 text-green-800";
+    if (status === "Cancelled") return "bg-red-200 text-red-800";
+    if (status === "Partial") return "bg-blue-200 text-blue-800";
+    return "bg-yellow-200 text-yellow-800";
+  };
+  const getStatusCounts = (items) => {
+    const counts = {
+      fulfilled: 0,
+      unfulfilled: 0,
+      refunded: 0,
+      cancelled: 0,
+    };
+
+    if (!items || !items.length) return counts;
+
+    items.forEach((item) => {
+      const originalQty = getDisplayQty(item);
+      const fulfilledQty = getFulfilledQty(item);
+      const refundedQty = getRefundedQty(item);
+
+      const cancelledQty =
+        item.fulfillment_status === "cancelled" ? originalQty : 0;
+
+      const handledQty = fulfilledQty + refundedQty + cancelledQty;
+      const unfulfilledQty = Math.max(originalQty - handledQty, 0);
+
+      counts.fulfilled += fulfilledQty;
+      counts.refunded += refundedQty;
+      counts.cancelled += cancelledQty;
+      counts.unfulfilled += unfulfilledQty;
+    });
+
+    return counts;
+  };
+
+  const getSearchableStatusText = (items) => {
+    const counts = getStatusCounts(items);
+
+    const statusWords = [];
+
+    if (counts.fulfilled > 0) {
+      statusWords.push(
+        "fulfilled",
+        `fulfilled ${counts.fulfilled}`,
+        `${counts.fulfilled} fulfilled`
+      );
+    }
+
+    if (counts.unfulfilled > 0) {
+      statusWords.push(
+        "unfulfilled",
+        `unfulfilled ${counts.unfulfilled}`,
+        `${counts.unfulfilled} unfulfilled`
+      );
+    }
+
+    if (counts.refunded > 0) {
+      statusWords.push(
+        "refunded",
+        `refunded ${counts.refunded}`,
+        `${counts.refunded} refunded`
+      );
+    }
+
+    if (counts.cancelled > 0) {
+      statusWords.push(
+        "cancelled",
+        `cancelled ${counts.cancelled}`,
+        `${counts.cancelled} cancelled`
+      );
+    }
+
+    return statusWords.join(" ");
+  };
+
+
+  const renderStatusBadges = (items) => {
+    const counts = getStatusCounts(items);
+
+    const badges = [];
+
+    if (counts.fulfilled > 0) {
+      badges.push({
+        label: "Fulfilled",
+        count: counts.fulfilled,
+      });
+    }
+
+    if (counts.unfulfilled > 0) {
+      badges.push({
+        label: "Unfulfilled",
+        count: counts.unfulfilled,
+      });
+    }
+
+    if (counts.refunded > 0) {
+      badges.push({
+        label: "Refunded",
+        count: counts.refunded,
+      });
+    }
+
+    if (counts.cancelled > 0) {
+      badges.push({
+        label: "Cancelled",
+        count: counts.cancelled,
+      });
+    }
+
+    if (!badges.length) {
+      badges.push({
+        label: "Unfulfilled",
+        count: 0,
+      });
+    }
+
+    return (
+      <div className="flex flex-wrap gap-1">
+        {badges.map((badge) => (
+          <span
+            key={badge.label}
+            className={`px-2 py-1 rounded text-xs font-medium ${getStatusClass(badge.label)}`}
+          >
+            {badge.label} {badge.count}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
+
   return (
     <div
       className={`flex flex-col bg-gray-50 px-3 py-6 ${isDialogOpen ? "blur-background" : ""
@@ -598,7 +950,7 @@ const SubscriptionHistory = () => {
               </div>
               <div>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
-                 Total Fulfilled Items
+                  Total Fulfilled Items
                 </p>
                 <div className="flex items-baseline gap-2">
                   <h2 className="text-2xl font-bold text-gray-900 leading-none">
@@ -723,15 +1075,20 @@ const SubscriptionHistory = () => {
 
                             const orderStatus = getOrderStatus(merchantItems);
 
-                            const totalQuantity = merchantItems.reduce(
-                              (sum, item) => sum + (item.quantity || 0),
+                            const totalItems = merchantItems.reduce(
+                              (sum, item) => sum + getDisplayQty(item),
+                              0,
+                            );
+
+                            const totalUnitsSold = merchantItems.reduce(
+                              (sum, item) => sum + getFulfilledQty(item),
                               0,
                             );
 
                             const totalPrice = merchantItems.reduce(
                               (sum, item) => {
                                 const price = parseFloat(item.price || 0);
-                                const qty = parseInt(item.quantity || 0);
+                                const qty = getDisplayQty(item);
                                 return sum + price * qty;
                               },
                               0,
@@ -789,8 +1146,8 @@ const SubscriptionHistory = () => {
                                 <td className="p-3 text-sm">
                                   {merchant.info?.name || "N/A"}
                                 </td>
-                                <td className="p-3">{totalQuantity} items</td>
-                                <td className="p-3">{totalQuantity}</td>
+                                <td className="p-3">{totalItems} items</td>
+                                <td className="p-3">{totalUnitsSold}</td>
                                 {/* <td className="p-3">
                                     <span
                                       className={`px-2 py-1 rounded text-xs font-medium ${
@@ -809,20 +1166,7 @@ const SubscriptionHistory = () => {
                                     </span>
                                   </td> */}
                                 <td className="p-3">
-                                  <span
-                                    className={`px-2 py-1 rounded text-xs font-medium ${orderStatus === "Refunded"
-                                      ? "bg-purple-200 text-purple-800"
-                                      : orderStatus === "Fulfilled"
-                                        ? "bg-green-200 text-green-800"
-                                        : orderStatus === "Cancelled"
-                                          ? "bg-red-200 text-red-800"
-                                          : orderStatus === "Partial"
-                                            ? "bg-blue-200 text-blue-800"
-                                            : "bg-yellow-200 text-yellow-800"
-                                      }`}
-                                  >
-                                    {orderStatus}
-                                  </span>
+                                  {renderStatusBadges(merchantItems)}
                                 </td>
 
                                 <td className="p-3">
@@ -903,32 +1247,27 @@ const SubscriptionHistory = () => {
 
                             <td className="p-3">
                               <div className="text-xs text-blue-500 mt-1">
-                                {subscription.lineItems.length}{" "}
-                                {subscription.lineItems.length === 1
+                                {subscription.lineItems.reduce(
+                                  (sum, item) => sum + getDisplayQty(item),
+                                  0
+                                )}{" "}
+                                {subscription.lineItems.reduce(
+                                  (sum, item) => sum + getDisplayQty(item),
+                                  0
+                                ) === 1
                                   ? "item"
                                   : "items"}
                               </div>
                             </td>
                             <td className="p-3">
                               {subscription.lineItems.reduce(
-                                (sum, item) => sum + (item.quantity || 0),
-                                0,
+                                (sum, item) => sum + getFulfilledQty(item),
+                                0
                               )}
                             </td>
 
                             <td className="p-3">
-                              <span
-                                className={`px-2 py-1 rounded text-xs font-medium ${orderStatus === "Fulfilled"
-                                  ? "bg-green-200 text-green-800"
-                                  : orderStatus === "Cancelled"
-                                    ? "bg-red-200 text-red-800"
-                                    : orderStatus === "Partial"
-                                      ? "bg-blue-200 text-blue-800"
-                                      : "bg-yellow-200 text-yellow-800"
-                                  }`}
-                              >
-                                {orderStatus}
-                              </span>
+                              {renderStatusBadges(subscription.lineItems)}
                             </td>
 
                             <td className="p-3">
@@ -936,7 +1275,7 @@ const SubscriptionHistory = () => {
                               {subscription.lineItems
                                 .reduce((total, item) => {
                                   const price = parseFloat(item.price || 0);
-                                  const qty = parseInt(item.quantity || 0);
+                                  const qty = getDisplayQty(item);
                                   return total + price * qty;
                                 }, 0)
                                 .toFixed(2)}

@@ -3,7 +3,7 @@ import { IoPricetagsOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-import { HiOutlineRefresh } from "react-icons/hi";
+import { HiOutlineCheckCircle, HiOutlineRefresh, HiOutlineXCircle } from "react-icons/hi";
 import { FaFileImport } from "react-icons/fa";
 const ManageCategory = () => {
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ const ManageCategory = () => {
   const handleReplaceMulti = async () => {
     for (let cat of conflictCategories) {
       if (!replacementNames[cat._id]) {
-        alert(`Please select replacement for "${cat.title}"`);
+        showToast("error", `Please select replacement for "${cat.title}"`);
         return;
       }
     }
@@ -63,12 +63,12 @@ const ManageCategory = () => {
         { replaceData },
       );
 
-      alert("Products moved & Categories deleted!");
+      showToast("success", "Products moved & Categories deleted!");
       setShowReplaceModal(false);
       window.location.reload();
     } catch (error) {
       console.error(error);
-      alert("Error replacing categories.");
+      showToast("error", "Error replacing categories.");
     }
   };
 
@@ -198,7 +198,7 @@ const ManageCategory = () => {
 
   const handleDeleteCategories = async () => {
     if (selectedCategoryIds.length === 0) {
-      alert("Please select at least one category.");
+      showToast("error", "Please select at least one category.");
       return;
     }
 
@@ -223,19 +223,19 @@ const ManageCategory = () => {
         },
       );
 
-      alert("Selected categories deleted successfully!");
+      showToast("success", "Selected categories deleted successfully!");
 
       setShowDeleteModal(false);
       window.location.reload();
     } catch (error) {
       console.error("Delete Error:", error);
-      alert("Error deleting categories.");
+      showToast("error", "Error deleting categories.");
     }
   };
 
   const handleReplaceAndUpdate = async () => {
     if (!replaceName.trim()) {
-      alert("Please enter replacement collection name.");
+      showToast("error", "Please enter replacement collection name.");
       return;
     }
 
@@ -248,12 +248,12 @@ const ManageCategory = () => {
         },
       );
 
-      alert("Collection updated successfully");
+      showToast("success", "Collection updated successfully");
 
       setShowReplaceModal(false);
       window.location.reload();
     } catch (error) {
-      alert("Error updating category");
+      showToast("error", "Error updating category");
       console.error(error);
     }
   };
@@ -273,7 +273,7 @@ const ManageCategory = () => {
   };
   const handleImportCsv = async () => {
     if (!importFile) {
-      alert("Please select a CSV file.");
+      showToast("error", "Please select a CSV file.");
       return;
     }
 
@@ -293,7 +293,7 @@ const ManageCategory = () => {
         },
       );
 
-      alert("CSV Imported Successfully!");
+      showToast("success", "CSV Imported Successfully!");
 
       setShowImportModal(false);
       setImportFile(null);
@@ -302,7 +302,7 @@ const ManageCategory = () => {
       window.location.reload();
     } catch (error) {
       console.error("CSV Upload Error:", error);
-      alert(error?.response?.data?.error || "Error importing CSV");
+      showToast("error", error?.response?.data?.error || "Error importing CSV");
       setIsImporting(false);
     }
   };
@@ -318,8 +318,28 @@ const ManageCategory = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importFile, setImportFile] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
+    const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  
+    const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+  };
   return (
     <div className="p-4">
+      {toast.show && (
+              <div
+                className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
+                  toast.type === "success" ? "bg-green-500" : "bg-red-500"
+                } text-white`}
+              >
+                {toast.type === "success" ? (
+                  <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+                ) : (
+                  <HiOutlineXCircle className="w-6 h-6 mr-2" />
+                )}
+                <span>{toast.message}</span>
+              </div>
+            )}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 p-4 gap-4">
         {/* LEFT: Title */}
         <div className="flex-1 flex items-center gap-2">
@@ -343,14 +363,16 @@ const ManageCategory = () => {
 
         {/* RIGHT: Actions */}
         <div className="flex-1 flex flex-wrap items-center justify-end gap-2 w-full">
-          {selectedCategoryIds.length > 0 && (
-            <button
-              onClick={handleDeleteCategories}
-              className="bg-red-500 hover:bg-red-600 text-white px-3 h-8 text-sm font-medium rounded-md shadow-sm"
-            >
-              Delete Collection
-            </button>
-          )}
+          {(role === "Master Admin" ||
+            role === "Dev Admin") &&
+            selectedCategoryIds.length > 0 && (
+              <button
+                onClick={handleDeleteCategories}
+                className="bg-red-500 hover:bg-red-600 text-white px-3 h-8 text-sm font-medium rounded-md shadow-sm"
+              >
+                Delete Collection
+              </button>
+            )}
 
           <button
             onClick={handleExport}
@@ -379,7 +401,7 @@ const ManageCategory = () => {
           <table className="w-full border-collapse bg-white border rounded-2xl">
             <thead className="bg-gray-100 text-gray-600 text-sm  sticky top-0 text-left">
               <tr>
-                <th className="p-1">
+                {/* <th className="p-1">
                   <input
                     type="checkbox"
                     checked={
@@ -396,7 +418,29 @@ const ManageCategory = () => {
                       }
                     }}
                   />
-                </th>
+                </th> */}
+                {(role === "Master Admin" ||
+                  role === "Dev Admin") && (
+                    <th className="p-1">
+                      <input
+                        type="checkbox"
+                        checked={
+                          categories.length > 0 &&
+                          selectedCategoryIds.length ===
+                          categories.length
+                        }
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedCategoryIds(
+                              categories.map((cat) => cat._id),
+                            );
+                          } else {
+                            setSelectedCategoryIds([]);
+                          }
+                        }}
+                      />
+                    </th>
+                  )}
                 <th className="p-1">Hierarchy</th>
 
                 <th className="p-1">Id</th>
@@ -414,7 +458,7 @@ const ManageCategory = () => {
             <tbody>
               {filteredCategories.map((cat, index) => (
                 <tr key={cat._id} className="border-b">
-                  <td className="p-1">
+                  {/* <td className="p-1">
                     <input
                       type="checkbox"
                       checked={selectedCategoryIds.includes(cat._id)}
@@ -428,12 +472,35 @@ const ManageCategory = () => {
                         }
                       }}
                     />
-                  </td>
+                  </td> */}
+                  {(role === "Master Admin" ||
+                    role === "Dev Admin") && (
+                      <td className="p-1">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategoryIds.includes(
+                            cat._id,
+                          )}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedCategoryIds((prev) => [
+                                ...prev,
+                                cat._id,
+                              ]);
+                            } else {
+                              setSelectedCategoryIds((prev) =>
+                                prev.filter((id) => id !== cat._id),
+                              );
+                            }
+                          }}
+                        />
+                      </td>
+                    )}
                   <td className="p-1 text-sm">{getHierarchy(cat)}</td>{" "}
                   <td className="p-1">{cat.catNo}</td>
                   <td className="p-1">{cat.level}</td>
-                  <td className="p-1">{cat.title}</td> 
-                 {/* Title  <td className="p-1">{cat.productCount}</td>*/}
+                  <td className="p-1">{cat.title}</td>
+                  {/* Title  <td className="p-1">{cat.productCount}</td>*/}
                   {/* <td className="p-1">
                     {cat.createdAt
                       ? new Date(cat.createdAt).toLocaleDateString()
@@ -458,11 +525,10 @@ const ManageCategory = () => {
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-                  className={`px-3 py-1 border rounded ${
-                    page === 1
+                  className={`px-3 py-1 border rounded ${page === 1
                       ? "text-gray-400 cursor-not-allowed"
                       : "hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   &lt;
                 </button>
@@ -472,11 +538,10 @@ const ManageCategory = () => {
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`px-3 py-1 border rounded ${
-                      page === p
+                    className={`px-3 py-1 border rounded ${page === p
                         ? "bg-blue-500 text-white"
                         : "hover:bg-gray-200 text-gray-700"
-                    }`}
+                      }`}
                   >
                     {p}
                   </button>
@@ -486,11 +551,10 @@ const ManageCategory = () => {
                 <button
                   disabled={page === totalPages}
                   onClick={() => setPage(page + 1)}
-                  className={`px-3 py-1 border rounded ${
-                    page === totalPages
+                  className={`px-3 py-1 border rounded ${page === totalPages
                       ? "text-gray-400 cursor-not-allowed"
                       : "hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   &gt;
                 </button>
@@ -684,9 +748,8 @@ const ManageCategory = () => {
               </button>
 
               <button
-                className={`px-4 py-1 text-white rounded ${
-                  isImporting ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"
-                }`}
+                className={`px-4 py-1 text-white rounded ${isImporting ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"
+                  }`}
                 disabled={isImporting || !importFile || !importLevel}
                 onClick={handleImportCsv}
               >

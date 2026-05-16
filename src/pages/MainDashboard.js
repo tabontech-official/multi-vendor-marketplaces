@@ -30,8 +30,9 @@ const MainDashboard = () => {
   const [topProducts, setTopProducts] = useState([]);
   const { setDashboardLoading } = useOutletContext();
   const [highRefundedProducts, setHighRefundedProducts] = useState([]);
-  const hasLoadedBefore = localStorage.getItem("dashboardLoaded");
-  const [loading, setLoading] = useState(!hasLoadedBefore);
+  // const hasLoadedBefore = localStorage.getItem("dashboardLoaded");
+  // const [loading, setLoading] = useState(!hasLoadedBefore);
+  const [loading, setLoading] = useState(false);
   const [alerts, setAlerts] = useState([]);
   const fetchAlerts = async () => {
     try {
@@ -462,16 +463,16 @@ const MainDashboard = () => {
 
   useEffect(() => {
     const loadAllData = async () => {
-      const hasLoadedBefore = localStorage.getItem("dashboardLoaded");
+      // const hasLoadedBefore = localStorage.getItem("dashboardLoaded");
 
       try {
         console.log("START LOADING");
 
         // 🔥 Sirf pehli dafa full loader
-        if (!hasLoadedBefore) {
-          setLoading(true);
-          setDashboardLoading(true);
-        }
+        // if (!hasLoadedBefore) {
+        //   setLoading(true);
+        //   setDashboardLoading(true);
+        // }
 
         await Promise.all([
           fetchTopProducts(),
@@ -492,11 +493,11 @@ const MainDashboard = () => {
         console.log("STOP LOADING");
 
         // 🔥 Sirf pehli dafa loader band karo
-        if (!hasLoadedBefore) {
-          setLoading(false);
-          setDashboardLoading(false);
-          localStorage.removeItem("initialLoad");
-        }
+        // if (!hasLoadedBefore) {
+        //   setLoading(false);
+        //   setDashboardLoading(false);
+        //   localStorage.removeItem("initialLoad");
+        // }
       }
     };
 

@@ -6,9 +6,7 @@ import ApprovalPopup from "./Approval";
 
 const Layout = () => {
   const location = useLocation();
-  const [dashboardLoading, setDashboardLoading] = useState(
-    localStorage.getItem("initialLoad") === "true",
-  ); 
+ const [dashboardLoading, setDashboardLoading] = useState(false);
   const currentPath = location.pathname.toLowerCase();
 
   const hideSubNavbarRoutes = [
@@ -19,13 +17,13 @@ const Layout = () => {
     "/new",
   ];
 
-  const hideSubNavbar =
-    hideSubNavbarRoutes.includes(currentPath) | dashboardLoading;
+ const hideSubNavbar =
+  hideSubNavbarRoutes.includes(currentPath) || dashboardLoading;
 
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      {!hideSubNavbar && !dashboardLoading && <SubNavbar />}{" "}
+      {!hideSubNavbar && <SubNavbar />}{" "}
       <div className="flex-1">
         <Outlet context={{ setDashboardLoading }} />{" "}
       </div>

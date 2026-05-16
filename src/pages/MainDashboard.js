@@ -485,7 +485,7 @@ const MainDashboard = () => {
         ]);
 
         // 🔥 Mark as loaded
-        localStorage.setItem("dashboardLoaded", "true");
+        // localStorage.setItem("dashboardLoaded", "true");
       } catch (error) {
         console.error(error);
       } finally {

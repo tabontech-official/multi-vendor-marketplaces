@@ -6,7 +6,7 @@ import ApprovalPopup from "./Approval";
 
 const Layout = () => {
   const location = useLocation();
- const [dashboardLoading, setDashboardLoading] = useState(false);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
   const currentPath = location.pathname.toLowerCase();
 
   const hideSubNavbarRoutes = [
@@ -17,8 +17,8 @@ const Layout = () => {
     "/new",
   ];
 
- const hideSubNavbar =
-  hideSubNavbarRoutes.includes(currentPath) || dashboardLoading;
+  const hideSubNavbar =
+    hideSubNavbarRoutes.includes(currentPath) || dashboardLoading;
 
   return (
     <div className="flex flex-col min-h-screen">

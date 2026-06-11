@@ -77,24 +77,24 @@ const Dashboard = () => {
   // };
   const [fileError, setFileError] = useState('');
 
-const handleCSVUpload = (e) => {
-  const file = e.target.files[0];
+  const handleCSVUpload = (e) => {
+    const file = e.target.files[0];
 
-  if (!file) return;
+    if (!file) return;
 
-  const fileName = file.name.toLowerCase();
+    const fileName = file.name.toLowerCase();
 
-  // ❌ Reject non-CSV
-  if (!fileName.endsWith('.csv')) {
-    setSelectedFile(null);
-    setFileError('Only CSV files are allowed. Excel files are not supported.');
-    return;
-  }
+    // ❌ Reject non-CSV
+    if (!fileName.endsWith('.csv')) {
+      setSelectedFile(null);
+      setFileError('Only CSV files are allowed. Excel files are not supported.');
+      return;
+    }
 
-  // ✅ Accept CSV
-  setSelectedFile(file);
-  setFileError('');
-};
+    // ✅ Accept CSV
+    setSelectedFile(file);
+    setFileError('');
+  };
   const togglePopup = () => setIsexportOpen(!isOpen);
 
   useEffect(() => {
@@ -113,7 +113,17 @@ const handleCSVUpload = (e) => {
   const formatCurrency = (value) => {
     return `$${Number(value).toFixed(2)}`;
   };
+const formatDateTime = (date) => {
+  if (!date) return "N/A";
 
+  return new Date(date).toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
   const predefinedRanges = [
     { min: 0, max: 50 },
     { min: 50, max: 100 },
@@ -162,8 +172,7 @@ const handleCSVUpload = (e) => {
           )
           .map(
             (range) =>
-              `${formatCurrency(range.min)} - ${
-                range.max === Infinity ? "Above" : formatCurrency(range.max)
+              `${formatCurrency(range.min)} - ${range.max === Infinity ? "Above" : formatCurrency(range.max)
               }`,
           );
       }
@@ -426,7 +435,7 @@ const handleCSVUpload = (e) => {
         const sortedProducts = data.products.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
-
+        
         setProducts(sortedProducts);
         setFilteredProducts(sortedProducts);
 
@@ -446,7 +455,7 @@ const handleCSVUpload = (e) => {
   };
 
   const [showUploadBanner, setShowUploadBanner] = useState(false);
- 
+
   // const handleUploadAndPreview = async () => {
   //   if (!selectedFile) return;
 
@@ -498,78 +507,78 @@ const handleCSVUpload = (e) => {
   // };
 
   const handleUploadAndPreview = async () => {
-  if (!selectedFile) {
-    showToast("error", "Please select a CSV file first.");
-    return;
-  }
-
-  // CSV Validation
-  const fileName = selectedFile.name.toLowerCase();
-
-  if (!fileName.endsWith(".csv")) {
-    showToast(
-      "error",
-      "Invalid file format. Only CSV files are allowed.",
-    );
-
-    addNotification(
-      "Upload failed: Only CSV format is supported",
-      "Manage product",
-    );
-
-    return;
-  }
-
-  setIsUploading(true);
-  closePopup();
-
-  const apiKey = localStorage.getItem("apiKey");
-  const apiSecretKey = localStorage.getItem("apiSecretKey");
-
-  try {
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    const response = await fetch(
-      "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
-      {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "x-api-secret": apiSecretKey,
-        },
-        body: formData,
-      },
-    );
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || "Upload failed");
+    if (!selectedFile) {
+      showToast("error", "Please select a CSV file first.");
+      return;
     }
 
-    showToast(
-      "success",
-      `File uploaded successfully. Batch No: ${result.batchNo}`,
-    );
+    // CSV Validation
+    const fileName = selectedFile.name.toLowerCase();
 
-    addNotification(
-      `Import started (Batch: ${result.batchNo})`,
-      "Manage product",
-    );
+    if (!fileName.endsWith(".csv")) {
+      showToast(
+        "error",
+        "Invalid file format. Only CSV files are allowed.",
+      );
 
-    setSelectedFile(null);
-  } catch (error) {
-    showToast("error", error.message);
+      addNotification(
+        "Upload failed: Only CSV format is supported",
+        "Manage product",
+      );
 
-    addNotification(
-      `Import failed: ${error.message}`,
-      "Manage product",
-    );
-  } finally {
-    setIsUploading(false);
-  }
-};
+      return;
+    }
+
+    setIsUploading(true);
+    closePopup();
+
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const response = await fetch(
+        "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+          },
+          body: formData,
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Upload failed");
+      }
+
+      showToast(
+        "success",
+        `File uploaded successfully. Batch No: ${result.batchNo}`,
+      );
+
+      addNotification(
+        `Import started (Batch: ${result.batchNo})`,
+        "Manage product",
+      );
+
+      setSelectedFile(null);
+    } catch (error) {
+      showToast("error", error.message);
+
+      addNotification(
+        `Import failed: ${error.message}`,
+        "Manage product",
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  };
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -740,19 +749,19 @@ const handleCSVUpload = (e) => {
       searchVal === ""
         ? products
         : products.filter((product) => {
-            const titleMatch = product.title
-              ?.toLowerCase()
-              .includes(searchVal.toLowerCase());
-            const typeMatch = product.product_type
-              ?.toLowerCase()
-              .includes(searchVal.toLowerCase());
+          const titleMatch = product.title
+            ?.toLowerCase()
+            .includes(searchVal.toLowerCase());
+          const typeMatch = product.product_type
+            ?.toLowerCase()
+            .includes(searchVal.toLowerCase());
 
-            const skuMatch = product.variants?.some((variant) =>
-              variant.sku?.toLowerCase().includes(searchVal.toLowerCase()),
-            );
+          const skuMatch = product.variants?.some((variant) =>
+            variant.sku?.toLowerCase().includes(searchVal.toLowerCase()),
+          );
 
-            return titleMatch || typeMatch || skuMatch;
-          });
+          return titleMatch || typeMatch || skuMatch;
+        });
 
     setFilteredProducts(filtered);
   };
@@ -929,9 +938,8 @@ const handleCSVUpload = (e) => {
     <main className="w-full p-4 ">
       {toast.show && (
         <div
-          className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
-            toast.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
+          className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${toast.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
         >
           {toast.type === "success" ? (
             <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
@@ -1090,10 +1098,10 @@ const handleCSVUpload = (e) => {
 
                   {(userRole === "Dev Admin" ||
                     userRole === "Master Admin") && (
-                    <th className="p-3 whitespace-nowrap text-left">
-                      Merchant
-                    </th>
-                  )}
+                      <th className="p-3 whitespace-nowrap text-left">
+                        Merchant
+                      </th>
+                    )}
                   <th className="p-3 whitespace-nowrap text-left">Approval</th>
                   {/* <th className="p-3 whitespace-nowrap text-left">SKU</th> */}
                   {/* <th className="p-3 whitespace-nowrap text-left">Price</th> */}
@@ -1101,6 +1109,7 @@ const handleCSVUpload = (e) => {
                   <th className="p-3 whitespace-nowrap text-left">Type</th>
                   <th className="p-3 whitespace-nowrap text-left">Inventory</th>
                   <th className="p-3 whitespace-nowrap text-left">Vendor</th>
+                  <th className="p-3 whitespace-nowrap text-left">Created At</th>
                   {admin && (
                     <th className="p-3 whitespace-nowrap text-left">
                       Publisher ID
@@ -1137,11 +1146,10 @@ const handleCSVUpload = (e) => {
 
                       <td className="p-3 whitespace-nowrap">
                         <span
-                          className={`inline-block w-3 h-3 rounded-full ${
-                            product.status === "active"
+                          className={`inline-block w-3 h-3 rounded-full ${product.status === "active"
                               ? "bg-green-500"
                               : "bg-red-500"
-                          }`}
+                            }`}
                         ></span>
                       </td>
 
@@ -1171,23 +1179,22 @@ const handleCSVUpload = (e) => {
 
                       {(userRole === "Dev Admin" ||
                         userRole === "Master Admin") && (
-                        <td className="p-3 text-gray-700 whitespace-nowrap">
-                          {product?.username}
-                        </td>
-                      )}
+                          <td className="p-3 text-gray-700 whitespace-nowrap">
+                            {product?.username}
+                          </td>
+                        )}
 
                       <td className="p-3 whitespace-nowrap">
                         {product?.approvalStatus ? (
                           <span
-                            className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${
-                              product.approvalStatus === "pending"
+                            className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${product.approvalStatus === "pending"
                                 ? "bg-yellow-100 text-yellow-700"
                                 : product.approvalStatus === "approved"
                                   ? "bg-green-100 text-green-700"
                                   : product.approvalStatus === "rejected"
                                     ? "bg-red-100 text-red-700"
                                     : "bg-gray-100 text-gray-600"
-                            }`}
+                              }`}
                           >
                             {product.approvalStatus}
                           </span>
@@ -1233,7 +1240,9 @@ const handleCSVUpload = (e) => {
                       <td className="p-3 whitespace-nowrap">
                         {product.vendor || "N/A"}
                       </td>
-
+                      <td className="p-3 whitespace-nowrap text-gray-600">
+  {formatDateTime(product.created_at)}
+                      </td>
                       {admin && (
                         <td className="p-3 text-gray-600 whitespace-nowrap font-mono text-xs">
                           #{product.shopifyId}
@@ -1284,8 +1293,8 @@ const handleCSVUpload = (e) => {
                           </button>
                         )} */}
                         {imageUploadStatus &&
-                        imageUploadStatus.productId === product.id &&
-                        !imageUploadStatus.finished ? (
+                          imageUploadStatus.productId === product.id &&
+                          !imageUploadStatus.finished ? (
                           // 🔄 Image Upload Running
                           <div className="flex items-center gap-2 text-sm text-gray-500">
                             <svg
@@ -1336,8 +1345,8 @@ const handleCSVUpload = (e) => {
                             <span>Syncing…</span>
                           </div>
                         ) : (imageUploadStatus &&
-                            imageUploadStatus.productId === product.id &&
-                            imageUploadStatus.finished) ||
+                          imageUploadStatus.productId === product.id &&
+                          imageUploadStatus.finished) ||
                           syncCompletedId === product.id ? (
                           <button
                             onClick={() => {
@@ -1394,11 +1403,10 @@ const handleCSVUpload = (e) => {
                   <button
                     disabled={page === 1}
                     onClick={() => setPage((prev) => prev - 1)}
-                    className={`px-3 py-1 border rounded ${
-                      page === 1
+                    className={`px-3 py-1 border rounded ${page === 1
                         ? "text-gray-400 cursor-not-allowed"
                         : "hover:bg-gray-200"
-                    }`}
+                      }`}
                   >
                     &lt;
                   </button>
@@ -1408,11 +1416,10 @@ const handleCSVUpload = (e) => {
                       <button
                         key={p}
                         onClick={() => setPage(p)}
-                        className={`px-3 py-1 border rounded ${
-                          page === p
+                        className={`px-3 py-1 border rounded ${page === p
                             ? "bg-blue-500 text-white"
                             : "hover:bg-gray-200 text-gray-700"
-                        }`}
+                          }`}
                       >
                         {p}
                       </button>
@@ -1422,11 +1429,10 @@ const handleCSVUpload = (e) => {
                   <button
                     disabled={page === totalPages}
                     onClick={() => setPage((prev) => prev + 1)}
-                    className={`px-3 py-1 border rounded ${
-                      page === totalPages
+                    className={`px-3 py-1 border rounded ${page === totalPages
                         ? "text-gray-400 cursor-not-allowed"
                         : "hover:bg-gray-200"
-                    }`}
+                      }`}
                   >
                     &gt;
                   </button>
@@ -1485,7 +1491,7 @@ const handleCSVUpload = (e) => {
               <p className="mt-1">
                 Excel files (.xlsx, .xls) or other formats will be rejected.
               </p>
-               <p className="mt-1">
+              <p className="mt-1">
                 Maximum 50 products allowed per file.
 
               </p>
@@ -1541,11 +1547,10 @@ const handleCSVUpload = (e) => {
                 <button
                   onClick={handleUploadAndPreview}
                   disabled={!selectedFile || isUploading}
-                  className={`px-5 py-2 text-sm font-semibold rounded-lg transition ${
-                    selectedFile && !isUploading
+                  className={`px-5 py-2 text-sm font-semibold rounded-lg transition ${selectedFile && !isUploading
                       ? "bg-black text-white hover:bg-gray-900"
                       : "bg-gray-300 text-white cursor-not-allowed"
-                  }`}
+                    }`}
                 >
                   {isUploading ? "Uploading..." : "Upload & Preview"}
                 </button>
@@ -1574,9 +1579,8 @@ const handleCSVUpload = (e) => {
 
               <button
                 onClick={deleteSelectedProducts}
-                className={`mt-6 inline-block px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition ${
-                  isLoading ? "opacity-50 cursor-wait" : ""
-                }`}
+                className={`mt-6 inline-block px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-full hover:opacity-90 transition ${isLoading ? "opacity-50 cursor-wait" : ""
+                  }`}
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -1695,9 +1699,8 @@ const handleCSVUpload = (e) => {
               <button
                 onClick={handleExport}
                 disabled={isExporting}
-                className={`px-4 py-2 rounded-lg mt-2 flex items-center gap-2 ${
-                  isExporting ? "bg-[#18181b]" : "bg-[#18181b]"
-                } text-white`}
+                className={`px-4 py-2 rounded-lg mt-2 flex items-center gap-2 ${isExporting ? "bg-[#18181b]" : "bg-[#18181b]"
+                  } text-white`}
               >
                 {isExporting ? (
                   <>

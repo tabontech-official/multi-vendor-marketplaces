@@ -446,12 +446,12 @@ const ManageCategory = () => {
                 <th className="p-1">Id</th>
                 <th className="p-1">Level</th>
                 <th className="p-1">Title</th>
-                {/* {(role === "Master Admin" || role === "Dev Admin") && ( */}
+                {(role === "Master Admin" || role === "Dev Admin") && (
                   <th className="p-1">Products</th>
-                {/* )} */}
-                {/* {(role === "Master Admin" || role === "Dev Admin") && ( */}
+                )}
+                {(role === "Master Admin" || role === "Dev Admin") && (
                   <th className="p-1">Published</th>
-                {/* )} */}
+                )}
               </tr>
             </thead>
 
@@ -500,12 +500,17 @@ const ManageCategory = () => {
                   <td className="p-1">{cat.catNo}</td>
                   <td className="p-1">{cat.level}</td>
                   <td className="p-1">{cat.title}</td>
-                    <td className="p-1">{cat.productCount}</td>
-                  <td className="p-1">
-                    {cat.createdAt
-                      ? new Date(cat.createdAt).toLocaleDateString()
-                      : "-"}
-                  </td>
+                   {(role === "Master Admin" || role === "Dev Admin") && (
+  <>
+    <td className="p-1">{cat.productCount}</td>
+
+    <td className="p-1">
+      {cat.createdAt
+        ? new Date(cat.createdAt).toLocaleDateString()
+        : "-"}
+    </td>
+  </>
+)}
                   {/* Hierarchy */}
                 </tr>
               ))}

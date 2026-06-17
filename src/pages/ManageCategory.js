@@ -500,12 +500,12 @@ const ManageCategory = () => {
                   <td className="p-1">{cat.catNo}</td>
                   <td className="p-1">{cat.level}</td>
                   <td className="p-1">{cat.title}</td>
-                  {/* Title  <td className="p-1">{cat.productCount}</td>*/}
-                  {/* <td className="p-1">
+                    <td className="p-1">{cat.productCount}</td>
+                  <td className="p-1">
                     {cat.createdAt
                       ? new Date(cat.createdAt).toLocaleDateString()
                       : "-"}
-                  </td> */}
+                  </td>
                   {/* Hierarchy */}
                 </tr>
               ))}

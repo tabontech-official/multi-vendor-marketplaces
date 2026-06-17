@@ -446,12 +446,12 @@ const ManageCategory = () => {
                 <th className="p-1">Id</th>
                 <th className="p-1">Level</th>
                 <th className="p-1">Title</th>
-                {(role === "Master Admin" || role === "Dev Admin") && (
+                {/* {(role === "Master Admin" || role === "Dev Admin") && ( */}
                   <th className="p-1">Products</th>
-                )}
-                {(role === "Master Admin" || role === "Dev Admin") && (
+                {/* )} */}
+                {/* {(role === "Master Admin" || role === "Dev Admin") && ( */}
                   <th className="p-1">Published</th>
-                )}
+                {/* )} */}
               </tr>
             </thead>
 

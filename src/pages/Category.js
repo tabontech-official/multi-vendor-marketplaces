@@ -54,8 +54,11 @@ const CreateCategory = () => {
       setSelectedLevel2Category("");
       setSelectedLevel3Category("");
     } else if (level === "level3") {
-      setFilteredCategories(
-        categories.filter((category) => category.level === "level2"),
+  setFilteredCategories(
+    (Array.isArray(categories) ? categories : []).filter(
+      (category) => category.level === "level2"
+    )
+
       );
       setSelectedLevel2Category("");
       setSelectedLevel3Category("");
@@ -117,10 +120,17 @@ const CreateCategory = () => {
         const data = await response.json();
 
         if (response.ok) {
-          setCategories(data);
-          setLevel1Categories(
-            data.filter((category) => category.level === "level1"),
-          );
+setCategories(Array.isArray(data.categories) ? data.categories : []);         
+ setLevel1Categories(
+  (Array.isArray(data.categories) ? data.categories : []).filter(
+    (category) => category.level === "level1"
+  )
+);
+setLevel2Categories(
+  (Array.isArray(data.categories) ? data.categories : []).filter(
+    (c) => c.level === "level2"
+  )
+);
         } else {
           setError(data.message || "Failed to fetch categories.");
         }

@@ -132,8 +132,12 @@ const ManageCategory = () => {
         const data = await response.json();
 
         if (response.ok) {
-          setCategories(data.categories || []);
-          setTotalPages(data.totalPages || 1);
+          setCategories(
+            (data.categories || []).map(cat => ({
+              ...cat,
+              level: cat.level.toLowerCase().replace(/\s+/g, "")
+            }))
+          ); setTotalPages(data.totalPages || 1);
 
           setTotalCategories(data.totalCategories || 0);
         } else {
@@ -151,20 +155,20 @@ const ManageCategory = () => {
   }, [page, limit]);
 
   const getHierarchy = (cat) => {
-    if (!cat.parentCatNo) return cat.title;
+    const all = Array.isArray(categories) ? categories : [];
 
-    const parent = categories.find((c) => c.catNo === cat.parentCatNo);
+    const parent = all.find(c => c.catNo === cat.parentCatNo);
     if (!parent) return cat.title;
 
-    if (!parent.parentCatNo) {
-      return `${parent.title} > ${cat.title}`;
+    const grandParent = parent.parentCatNo
+      ? all.find(c => c.catNo === parent.parentCatNo)
+      : null;
+
+    if (grandParent) {
+      return `${grandParent.title} > ${parent.title} > ${cat.title}`;
     }
 
-    const grandParent = categories.find((c) => c.catNo === parent.parentCatNo);
-
-    if (!grandParent) return `${parent.title} > ${cat.title}`;
-
-    return `${grandParent.title} > ${parent.title} > ${cat.title}`;
+    return `${parent.title} > ${cat.title}`;
   };
 
   const handleButtonClick = () => {
@@ -204,34 +208,40 @@ const ManageCategory = () => {
 
     setShowDeleteModal(true);
   };
-  const performDelete = async () => {
-    const apiKey = localStorage.getItem("apiKey");
-    const apiSecretKey = localStorage.getItem("apiSecretKey");
+ const performDelete = async () => {
+  const apiKey = localStorage.getItem("apiKey");
+  const apiSecretKey = localStorage.getItem("apiSecretKey");
 
-    try {
-      await axios.delete(
-        "https://multi-vendor-marketplace.vercel.app/category/deleteCategory",
-        {
-          headers: {
-            "x-api-key": apiKey,
-            "x-api-secret": apiSecretKey,
-            "Content-Type": "application/json",
-          },
-          data: {
-            categoryIds: selectedCategoryIds,
-          },
+  try {
+    setIsDeleting(true); // 🔥 start loading
+
+    await axios.delete(
+      "https://multi-vendor-marketplace.vercel.app/category/deleteCategory",
+      {
+        headers: {
+          "x-api-key": apiKey,
+          "x-api-secret": apiSecretKey,
+          "Content-Type": "application/json",
         },
-      );
+        data: {
+          categoryIds: selectedCategoryIds,
+        },
+      }
+    );
 
-      showToast("success", "Selected categories deleted successfully!");
+    showToast("success", "Selected categories deleted successfully!");
 
-      setShowDeleteModal(false);
-      window.location.reload();
-    } catch (error) {
-      console.error("Delete Error:", error);
-      showToast("error", "Error deleting categories.");
-    }
-  };
+    setShowDeleteModal(false);
+    setSelectedCategoryIds([]);
+    window.location.reload();
+
+  } catch (error) {
+    console.error("Delete Error:", error);
+    showToast("error", "Error deleting categories.");
+  } finally {
+    setIsDeleting(false); // 🔥 stop loading
+  }
+};
 
   const handleReplaceAndUpdate = async () => {
     if (!replaceName.trim()) {
@@ -318,28 +328,28 @@ const ManageCategory = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importFile, setImportFile] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
-    const [toast, setToast] = useState({ show: false, type: "", message: "" });
-  
-    const showToast = (type, message) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
+
+  const showToast = (type, message) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
   return (
     <div className="p-4">
       {toast.show && (
-              <div
-                className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${
-                  toast.type === "success" ? "bg-green-500" : "bg-red-500"
-                } text-white`}
-              >
-                {toast.type === "success" ? (
-                  <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
-                ) : (
-                  <HiOutlineXCircle className="w-6 h-6 mr-2" />
-                )}
-                <span>{toast.message}</span>
-              </div>
-            )}
+        <div
+          className={`fixed top-16 right-5 flex items-center p-4 rounded-lg shadow-lg transition-all ${toast.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
+        >
+          {toast.type === "success" ? (
+            <HiOutlineCheckCircle className="w-6 h-6 mr-2" />
+          ) : (
+            <HiOutlineXCircle className="w-6 h-6 mr-2" />
+          )}
+          <span>{toast.message}</span>
+        </div>
+      )}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 p-4 gap-4">
         {/* LEFT: Title */}
         <div className="flex-1 flex items-center gap-2">
@@ -500,17 +510,17 @@ const ManageCategory = () => {
                   <td className="p-1">{cat.catNo}</td>
                   <td className="p-1">{cat.level}</td>
                   <td className="p-1">{cat.title}</td>
-                   {(role === "Master Admin" || role === "Dev Admin") && (
-  <>
-    <td className="p-1">{cat.productCount}</td>
+                  {(role === "Master Admin" || role === "Dev Admin") && (
+                    <>
+                      <td className="p-1">{cat.productCount}</td>
 
-    <td className="p-1">
-      {cat.createdAt
-        ? new Date(cat.createdAt).toLocaleDateString()
-        : "-"}
-    </td>
-  </>
-)}
+                      <td className="p-1">
+                        {cat.createdAt
+                          ? new Date(cat.createdAt).toLocaleDateString()
+                          : "-"}
+                      </td>
+                    </>
+                  )}
                   {/* Hierarchy */}
                 </tr>
               ))}
@@ -531,8 +541,8 @@ const ManageCategory = () => {
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
                   className={`px-3 py-1 border rounded ${page === 1
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "hover:bg-gray-200"
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "hover:bg-gray-200"
                     }`}
                 >
                   &lt;
@@ -544,8 +554,8 @@ const ManageCategory = () => {
                     key={p}
                     onClick={() => setPage(p)}
                     className={`px-3 py-1 border rounded ${page === p
-                        ? "bg-blue-500 text-white"
-                        : "hover:bg-gray-200 text-gray-700"
+                      ? "bg-blue-500 text-white"
+                      : "hover:bg-gray-200 text-gray-700"
                       }`}
                   >
                     {p}
@@ -557,8 +567,8 @@ const ManageCategory = () => {
                   disabled={page === totalPages}
                   onClick={() => setPage(page + 1)}
                   className={`px-3 py-1 border rounded ${page === totalPages
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "hover:bg-gray-200"
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "hover:bg-gray-200"
                     }`}
                 >
                   &gt;
@@ -604,12 +614,22 @@ const ManageCategory = () => {
                 Cancel
               </button>
 
-              <button
-                className="px-4 py-1 bg-red-500 text-white rounded"
-                onClick={checkCategoryProductsBeforeDelete}
-              >
-                Yes, Delete
-              </button>
+           <button
+  className={`px-4 py-1 rounded text-white flex items-center gap-2 ${
+    isDeleting ? "bg-red-300 cursor-not-allowed" : "bg-red-500"
+  }`}
+  onClick={checkCategoryProductsBeforeDelete}
+  disabled={isDeleting}
+>
+  {isDeleting ? (
+    <>
+      <HiOutlineRefresh className="animate-spin" />
+      Deleting...
+    </>
+  ) : (
+    "Yes, Delete"
+  )}
+</button>
             </div>
           </div>
         </div>

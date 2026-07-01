@@ -16,7 +16,8 @@ const ManageVariantOptions = () => {
   const [editModal, setEditModal] = useState({ show: false, option: null });
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [loading, setLoading] = useState(true);
-
+const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
+const [deleteLoading, setDeleteLoading] = useState(false);
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -96,27 +97,33 @@ const ManageVariantOptions = () => {
   };
 
   const handleDeleteOptions = async () => {
-    if (selectedOptionIds.length === 0)
-      return showToast("error", "Please select at least one option to delete.");
+  if (selectedOptionIds.length === 0)
+    return showToast("error", "Please select at least one option to delete.");
 
-    try {
-      await axios.delete(
-        "https://multi-vendor-marketplace.vercel.app/variantOption/deleteOptions",
-        {
-          data: { optionIds: selectedOptionIds },
-        }
-      );
-      showToast("success", "Selected options deleted!");
-      setOptions((prev) =>
-        prev.filter((opt) => !selectedOptionIds.includes(opt._id))
-      );
-      setSelectedOptionIds([]);
-    } catch (error) {
-      console.error("Delete Error:", error);
-      showToast("error", "Error deleting options.");
-    }
-  };
+  setDeleteLoading(true);
 
+  try {
+    await axios.delete(
+      "https://multi-vendor-marketplace.vercel.app/variantOption/deleteOptions",
+      {
+        data: { optionIds: selectedOptionIds },
+      }
+    );
+
+    showToast("success", "Selected options deleted!");
+
+    setOptions((prev) =>
+      prev.filter((opt) => !selectedOptionIds.includes(opt._id))
+    );
+
+    setSelectedOptionIds([]);
+  } catch (error) {
+    console.error("Delete Error:", error);
+    showToast("error", "Error deleting options.");
+  } finally {
+    setDeleteLoading(false);
+  }
+};
 //  const handleEditSave = async () => {
 //   const { option } = editModal;
 
@@ -250,12 +257,17 @@ const [editOptionValuesText, setEditOptionValuesText] = useState("");
   {/* RIGHT: Actions */}
   <div className="flex flex-wrap items-center justify-end gap-2">
     {selectedOptionIds.length > 0 && (
-      <button
-        onClick={handleDeleteOptions}
-        className="h-8 px-3 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-md shadow-sm"
-      >
-        Delete
-      </button>
+     <button
+  onClick={() => setConfirmDeleteModal(true)}
+  disabled={deleteLoading}
+  className={`h-8 px-3 text-white text-sm font-medium rounded-md shadow-sm transition ${
+    deleteLoading
+      ? "bg-red-300 cursor-not-allowed"
+      : "bg-red-500 hover:bg-red-600"
+  }`}
+>
+  {deleteLoading ? "Deleting..." : "Delete"}
+</button>
     )}
 
     <button
@@ -583,6 +595,45 @@ const [editOptionValuesText, setEditOptionValuesText] = useState("");
           </motion.div>
         )}
       </AnimatePresence>
+      {confirmDeleteModal && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    
+    <div className="bg-white p-6 rounded-lg shadow-lg w-[350px]">
+
+      <h2 className="text-lg font-semibold text-gray-900">
+        Confirm Delete
+      </h2>
+
+      <p className="text-sm text-gray-600 mt-2">
+        Are you sure you want to delete selected options?
+        This action cannot be undone.
+      </p>
+
+      <div className="flex justify-end gap-3 mt-5">
+
+        <button
+          onClick={() => setConfirmDeleteModal(false)}
+          className="px-3 py-1.5 bg-gray-300 rounded-md text-sm"
+        >
+          Cancel
+        </button>
+
+       <button
+  onClick={async () => {
+    await handleDeleteOptions();
+    setConfirmDeleteModal(false);
+  }}
+  disabled={deleteLoading}
+  className="px-3 py-1.5 bg-red-600 text-white rounded-md text-sm disabled:opacity-50"
+>
+  {deleteLoading ? "Deleting..." : "Delete"}
+</button>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 };

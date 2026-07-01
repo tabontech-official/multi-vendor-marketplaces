@@ -109,8 +109,19 @@ const AddVariantOption = () => {
         setExistingMatch(null);
         setTimeout(() => navigate("/manage-options"), 1500);
       } else {
-        showToast("error", data.message || "Failed to save option.");
-      }
+let errorMessage = "Failed to save option.";
+
+if (data?.error) {
+  if (data.error.includes("optionName")) {
+    errorMessage = "At least one alias is required.";
+  } else {
+    errorMessage = data.error;
+  }
+} else if (data?.message) {
+  errorMessage = data.message;
+}
+
+showToast("error", errorMessage);      }
     } catch (error) {
       console.error("Add option error:", error);
       showToast("error", "Server error while saving option.");

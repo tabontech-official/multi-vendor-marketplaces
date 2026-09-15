@@ -138,7 +138,7 @@ const handleLevelChange = (e) => {
 
       try {
         const response = await fetch(
-          "http://localhost:8000/category/getCategory",
+          "https://multi-vendor-marketplace.vercel.app/category/getCategory",
           {
             method: "GET",
             headers: {
@@ -275,7 +275,7 @@ const checkHandleExists = () => {
       setSaving(true);
 
       const response = await fetch(
-        "http://localhost:8000/category/createCategory",
+        "https://multi-vendor-marketplace.vercel.app/category/createCategory",
         {
           method: "POST",
           headers: {

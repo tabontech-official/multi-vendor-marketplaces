@@ -16,7 +16,7 @@ const BatchDetails = () => {
   const fetchBatch = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/product/batch/${id}`,
+        `https://multi-vendor-marketplace.vercel.app/product/batch/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("usertoken")}`,

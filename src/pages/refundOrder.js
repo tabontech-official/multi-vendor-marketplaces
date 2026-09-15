@@ -37,7 +37,7 @@ const RefundPage = () => {
       const apiSecretKey = localStorage.getItem("apiSecretKey");
 
       const res = await axios.get(
-        `http://localhost:8000/order/getOrderFromShopify/${orderId}/${merchantId}`,
+        `https://multi-vendor-marketplace.vercel.app/order/getOrderFromShopify/${orderId}/${merchantId}`,
         {
           headers: {
             "x-api-key": apiKey,
@@ -120,7 +120,7 @@ const RefundPage = () => {
       const apiSecretKey = localStorage.getItem("apiSecretKey");
 
       await axios.post(
-        "http://localhost:8000/order/createRefund",
+        "https://multi-vendor-marketplace.vercel.app/order/createRefund",
         {
           orderId,
           merchantId,

@@ -417,8 +417,8 @@ const formatDateTime = (date) => {
       const isAdmin = userRole === "Dev Admin" || userRole === "Master Admin";
 
       const url = isAdmin
-        ? `https://multi-vendor-marketplace.vercel.app/product/getAllProducts?page=${page}&limit=${limit}`
-        : `https://multi-vendor-marketplace.vercel.app/product/getProduct/${id}?page=${page}&limit=${limit}`;
+        ? `http://localhost:8000/product/getAllProducts?page=${page}&limit=${limit}`
+        : `http://localhost:8000/product/getProduct/${id}?page=${page}&limit=${limit}`;
 
       const response = await fetch(url, {
         method: "GET",
@@ -470,7 +470,7 @@ const formatDateTime = (date) => {
   //     formData.append("file", selectedFile);
 
   //     const response = await fetch(
-  //       "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
+  //       "http://localhost:8000/product/upload-product-csv",
   //       {
   //         method: "POST",
   //         headers: {
@@ -540,7 +540,7 @@ const formatDateTime = (date) => {
       formData.append("file", selectedFile);
 
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/product/upload-product-csv",
+        "http://localhost:8000/product/upload-product-csv",
         {
           method: "POST",
           headers: {
@@ -623,7 +623,7 @@ const formatDateTime = (date) => {
           const product = filteredProducts.find((p) => p._id === id);
 
           const response = await fetch(
-            `https://multi-vendor-marketplace.vercel.app/product/deleteProduct/${id}`,
+            `http://localhost:8000/product/deleteProduct/${id}`,
             {
               method: "DELETE",
               headers: {
@@ -675,7 +675,7 @@ const formatDateTime = (date) => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "draft") {
             const response = await fetch(
-              ` https://multi-vendor-marketplace.vercel.app/product/publishedProduct/${id}`,
+              ` http://localhost:8000/product/publishedProduct/${id}`,
               {
                 method: "PUT",
                 body: JSON.stringify({ userId }),
@@ -714,7 +714,7 @@ const formatDateTime = (date) => {
           const product = filteredProducts.find((p) => p._id === id);
           if (product?.status === "active") {
             const response = await fetch(
-              ` https://multi-vendor-marketplace.vercel.app/product/unpublished/${id}`,
+              ` http://localhost:8000/product/unpublished/${id}`,
               {
                 method: "PUT",
                 headers: {
@@ -800,7 +800,7 @@ const formatDateTime = (date) => {
         queryParams.append("productIds", selectedProducts.join(","));
       }
 
-      const exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvEportFile/?${queryParams.toString()}`;
+      const exportUrl = `http://localhost:8000/product/csvEportFile/?${queryParams.toString()}`;
 
       const response = await fetch(exportUrl);
 
@@ -1528,7 +1528,7 @@ const formatDateTime = (date) => {
               {/* Sample Download */}
               <div className="mt-4 flex justify-between items-center">
                 <a
-                  href="https://multi-vendor-marketplace.vercel.app/admin-file/download/Products"
+                  href="http://localhost:8000/admin-file/download/Products"
                   className="text-sm border px-3 py-1 rounded hover:bg-gray-100"
                 >
                   Download sample file

@@ -59,7 +59,7 @@ const ManageCategory = () => {
 
     try {
       await axios.put(
-        "https://multi-vendor-marketplace.vercel.app/category/replaceAndDeleteCategory",
+        "http://localhost:8000/category/replaceAndDeleteCategory",
         { replaceData },
       );
 
@@ -118,7 +118,7 @@ const ManageCategory = () => {
 
       try {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/category/getCategory?page=${page}&limit=${limit}`,
+          `http://localhost:8000/category/getCategory?page=${page}&limit=${limit}`,
           {
             method: "GET",
             headers: {
@@ -177,7 +177,7 @@ const ManageCategory = () => {
   const handleExport = async () => {
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/category/getCsvForCategories",
+        "http://localhost:8000/category/getCsvForCategories",
         {
           method: "GET",
         },
@@ -216,7 +216,7 @@ const ManageCategory = () => {
     setIsDeleting(true); // 🔥 start loading
 
     await axios.delete(
-      "https://multi-vendor-marketplace.vercel.app/category/deleteCategory",
+      "http://localhost:8000/category/deleteCategory",
       {
         headers: {
           "x-api-key": apiKey,
@@ -251,7 +251,7 @@ const ManageCategory = () => {
 
     try {
       await axios.put(
-        "https://multi-vendor-marketplace.vercel.app/category/updateCategoryInsteadDelete",
+        "http://localhost:8000/category/updateCategoryInsteadDelete",
         {
           conflictCategoryIds: conflictCategories.map((c) => c._id),
           newName: replaceName,
@@ -294,7 +294,7 @@ const ManageCategory = () => {
       setIsImporting(true);
 
       const response = await axios.post(
-        "https://multi-vendor-marketplace.vercel.app/category/uploadCsvForCategories",
+        "http://localhost:8000/category/uploadCsvForCategories",
         formData,
         {
           headers: {

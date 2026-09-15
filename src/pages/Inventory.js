@@ -20,18 +20,35 @@ const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   let admin;
 
   const isAdmin = () => {
-    const token = localStorage.getItem("usertoken");
-    if (token) {
-      const decoded = jwtDecode(token);
-      if (
-        (decoded.payLoad.isAdmin || decoded.payLoad.role === "DevAdmin") &&
-        decoded.exp * 1000 > Date.now()
-      ) {
-        return true;
-      }
+  const token = localStorage.getItem("usertoken");
+
+  if (!token) return false;
+
+  try {
+    const decoded = jwtDecode(token);
+
+    const role = decoded?.payLoad?.role;
+
+    const isExpired =
+      decoded?.exp
+        ? decoded.exp * 1000 <= Date.now()
+        : false;
+
+    if (isExpired) {
+      return false;
     }
+
+    return (
+      decoded?.payLoad?.isAdmin === true ||
+      role === "Dev Admin" ||
+      role === "DevAdmin" ||
+      role === "Master Admin"
+    );
+  } catch (error) {
+    console.error("Admin role decode error:", error);
     return false;
-  };
+  }
+};
 
   admin = isAdmin();
 
@@ -138,11 +155,11 @@ const [isCheckingStatus, setIsCheckingStatus] = useState(false);
       const id = localStorage.getItem("userid");
       const response = await fetch(
         // admin
-        //   ? `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
-        //   : `https://multi-vendor-marketplace.vercel.app/product/getAllData/?page=${page}&limit=${limit}`,
+        //   ? `http://localhost:8000/product/getAllVariants/${id}/?page=${page}&limit=${limit}`
+        //   : `http://localhost:8000/product/getAllData/?page=${page}&limit=${limit}`,
         admin
-          ? `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/?page=${page}&limit=${limit}`
-          : `https://multi-vendor-marketplace.vercel.app/product/getAllVariants/${id}/?page=${page}&limit=${limit}`,
+          ? `http://localhost:8000/product/getAllVariants/?page=${page}&limit=${limit}`
+          : `http://localhost:8000/product/getAllVariants/${id}/?page=${page}&limit=${limit}`,
         {
           method: "GET",
           headers: {
@@ -240,7 +257,7 @@ const [isCheckingStatus, setIsCheckingStatus] = useState(false);
     try {
       const updatePromises = selectedProducts.map(async (variantId) => {
         const response = await fetch(
-          `https://multi-vendor-marketplace.vercel.app/product/${endpoint}/${variantId}`,
+          `http://localhost:8000/product/${endpoint}/${variantId}`,
           {
             method: "PUT",
             headers: {
@@ -303,7 +320,7 @@ const [isCheckingStatus, setIsCheckingStatus] = useState(false);
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryPrice/${variantId}`,
+        `http://localhost:8000/product/updateInventoryPrice/${variantId}`,
         {
           method: "PUT",
           headers: {
@@ -355,7 +372,7 @@ const [isCheckingStatus, setIsCheckingStatus] = useState(false);
 
     try {
       const response = await fetch(
-        `https://multi-vendor-marketplace.vercel.app/product/updateInventoryQuantity/${variantId}`,
+        `http://localhost:8000/product/updateInventoryQuantity/${variantId}`,
         {
           method: "PUT",
           headers: {
@@ -411,7 +428,7 @@ const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   //       "inventory",
   //     );
 
-  //     fetch("https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory", {
+  //     fetch("http://localhost:8000/product/upload-csv-for-inventory", {
   //       method: "POST",
   //       body: formData,
   //       headers: {
@@ -465,7 +482,7 @@ const handleUploadAndPreview = async () => {
     formData.append("userId", userId);
 
     const response = await fetch(
-      "https://multi-vendor-marketplace.vercel.app/product/upload-csv-for-inventory",
+      "http://localhost:8000/product/upload-csv-for-inventory",
       {
         method: "POST",
         body: formData,
@@ -497,55 +514,138 @@ const handleUploadAndPreview = async () => {
 };
 
   const handleExport = async () => {
-    try {
-      setIsExporting(true);
-      const userId = localStorage.getItem("userid");
-      if (!userId) {
-        alert("User ID not found in localStorage");
+  try {
+    setIsExporting(true);
+
+    const userId = localStorage.getItem("userid");
+    const token = localStorage.getItem("usertoken");
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+    if (!token) {
+      throw new Error("Authentication token not found.");
+    }
+
+    const queryParams = new URLSearchParams();
+
+    // userId bhej sakte ho;
+    // backend admin case mein isko ignore kar dega
+    if (userId) {
+      queryParams.append("userId", userId);
+    }
+
+    // =====================================================
+    // SELECTED VARIANTS
+    // =====================================================
+    if (exportOption === "selected") {
+      if (!selectedProducts.length) {
+        showToast("error", "No variants selected for export.");
         return;
       }
 
-      let exportUrl = `https://multi-vendor-marketplace.vercel.app/product/csvInventoryEportFile/`;
-
-      const queryParams = new URLSearchParams({ userId });
-
-      if (exportOption === "selected") {
-        if (!selectedProducts.length) {
-          showToast("No variants selected for export.");
-          setIsExporting(false);
-          return;
-        }
-        queryParams.append("variantIds", selectedProducts.join(","));
-      } else if (exportOption === "current") {
-      }
-
-      exportUrl += `?${queryParams.toString()}`;
-
-      const response = await fetch(exportUrl);
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Export failed");
-      }
-      addNotification("CSV export started successfully!", "inventory");
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-
-      link.setAttribute("download", `inventory-export-${Date.now()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      setIsexportOpen(false);
-    } catch (error) {
-      alert("Export failed: " + error.message);
-    } finally {
-      setIsExporting(false);
+      queryParams.append(
+        "variantIds",
+        selectedProducts.map(String).join(",")
+      );
     }
-  };
+
+    // =====================================================
+    // CURRENT PAGE
+    // =====================================================
+    else if (exportOption === "current") {
+      const currentPageVariantIds = filteredProducts
+        .map((variant) => variant.id)
+        .filter(Boolean);
+
+      if (!currentPageVariantIds.length) {
+        showToast("error", "No variants available on current page.");
+        return;
+      }
+
+      queryParams.append(
+        "variantIds",
+        currentPageVariantIds.map(String).join(",")
+      );
+    }
+
+    // =====================================================
+    // ALL PRODUCTS
+    // =====================================================
+    // exportOption === "all"
+    // variantIds send nahi hongi.
+    // Backend decide karega:
+    // Admin -> all users
+    // Normal user -> own products
+
+    const exportUrl =
+      `http://localhost:8000/product/csvInventoryEportFile/?${queryParams.toString()}`;
+
+    const response = await fetch(exportUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "x-api-key": apiKey,
+        "x-api-secret": apiSecretKey,
+      },
+    });
+
+    if (!response.ok) {
+      let message = "Export failed.";
+
+      try {
+        const errorData = await response.json();
+        message = errorData.message || message;
+      } catch {
+        // response JSON na ho to default message
+      }
+
+      throw new Error(message);
+    }
+
+    const blob = await response.blob();
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+
+    link.setAttribute(
+      "download",
+      `inventory-export-${Date.now()}.csv`
+    );
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+
+    addNotification(
+      "CSV export completed successfully!",
+      "inventory"
+    );
+
+    showToast(
+      "success",
+      "Inventory exported successfully!"
+    );
+
+    setIsexportOpen(false);
+
+  } catch (error) {
+    console.error("Export error:", error);
+
+    showToast(
+      "error",
+      error.message || "Export failed."
+    );
+  } finally {
+    setIsExporting(false);
+  }
+};
   const normalizeString = (str) => String(str).replace(/['"]/g, "").trim();
 
   return user ? (

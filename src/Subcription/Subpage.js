@@ -85,8 +85,8 @@ const SubscriptionHistory = () => {
       setIsAdmin(isAdminFlag);
 
       const url = isAdminFlag
-        ? `https://multi-vendor-marketplace.vercel.app/order/getAllOrder?page=${page}&limit=${limit}`
-        : `https://multi-vendor-marketplace.vercel.app/order/order?page=${page}&limit=${limit}`;
+        ? `http://localhost:8000/order/getAllOrder?page=${page}&limit=${limit}`
+        : `http://localhost:8000/order/order?page=${page}&limit=${limit}`;
 
       const res = await fetch(url, {
         method: "GET",
@@ -273,8 +273,8 @@ const SubscriptionHistory = () => {
       }
 
       const exportUrl = isAdminUser
-        ? `https://multi-vendor-marketplace.vercel.app/order/exportAllOrder?${queryParams.toString()}`
-        : `https://multi-vendor-marketplace.vercel.app/order/exportOrderByUserId?${queryParams.toString()}`;
+        ? `http://localhost:8000/order/exportAllOrder?${queryParams.toString()}`
+        : `http://localhost:8000/order/exportOrderByUserId?${queryParams.toString()}`;
 
       const response = await fetch(exportUrl, {
         method: "GET",

@@ -41,12 +41,12 @@ const AlertPage = () => {
       let apiUrl = "";
 
       if (decodedRole === "Master Admin" || decodedRole === "Dev Admin") {
-        apiUrl = "https://multi-vendor-marketplace.vercel.app/alert";
+        apiUrl = "http://localhost:8000/alert";
       } else if (
         decodedRole === "Merchant" ||
         decodedRole === "Merchant Staff"
       ) {
-        apiUrl = "https://multi-vendor-marketplace.vercel.app/alert/alerts";
+        apiUrl = "http://localhost:8000/alert/alerts";
       }
 
       if (!apiUrl) return;

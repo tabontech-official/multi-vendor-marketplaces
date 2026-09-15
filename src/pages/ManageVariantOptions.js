@@ -22,7 +22,7 @@ const [deleteLoading, setDeleteLoading] = useState(false);
     const fetchOptions = async () => {
       try {
         const response = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
+          "http://localhost:8000/variantOption/getOptions"
         );
         const data = await response.json();
         if (response.ok) setOptions(data);
@@ -45,7 +45,7 @@ const [deleteLoading, setDeleteLoading] = useState(false);
   const handleExport = async () => {
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/variantOption/getCsvForOptions"
+        "http://localhost:8000/variantOption/getCsvForOptions"
       );
       if (response.ok) {
         const blob = await response.blob();
@@ -71,7 +71,7 @@ const [deleteLoading, setDeleteLoading] = useState(false);
 
     try {
       const response = await fetch(
-        "https://multi-vendor-marketplace.vercel.app/variantOption/importOptions",
+        "http://localhost:8000/variantOption/importOptions",
         { method: "POST", body: formData }
       );
 
@@ -82,7 +82,7 @@ const [deleteLoading, setDeleteLoading] = useState(false);
         setFile(null);
 
         const updated = await fetch(
-          "https://multi-vendor-marketplace.vercel.app/variantOption/getOptions"
+          "http://localhost:8000/variantOption/getOptions"
         );
         setOptions(await updated.json());
       } else {
@@ -104,7 +104,7 @@ const [deleteLoading, setDeleteLoading] = useState(false);
 
   try {
     await axios.delete(
-      "https://multi-vendor-marketplace.vercel.app/variantOption/deleteOptions",
+      "http://localhost:8000/variantOption/deleteOptions",
       {
         data: { optionIds: selectedOptionIds },
       }
@@ -152,7 +152,7 @@ const [deleteLoading, setDeleteLoading] = useState(false);
 
 //   try {
 //     const response = await axios.put(
-//       "https://multi-vendor-marketplace.vercel.app/variantOption/updateOption",
+//       "http://localhost:8000/variantOption/updateOption",
 //       updatedOption
 //     );
 
@@ -200,7 +200,7 @@ const handleEditSave = async () => {
 
   try {
     const response = await axios.put(
-      "https://multi-vendor-marketplace.vercel.app/variantOption/updateOption",
+      "http://localhost:8000/variantOption/updateOption",
       updatedOption
     );
 

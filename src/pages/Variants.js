@@ -10,7 +10,7 @@ const Variants = () => {
   const [variantData, setVariantData] = useState(null);
   const [updatedVariant, setUpdatedVariant] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [trackQuantity, setTrackQuantity] = useState(true);
+  const [trackQuantity, setTrackQuantity] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [product, setProduct] = useState(null);

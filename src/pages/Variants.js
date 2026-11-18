@@ -69,33 +69,87 @@ const Variants = () => {
     setVariantId(id);
   };
 
-  useEffect(() => {
-    if (!variantId) return;
+  // useEffect(() => {
+  //   if (!variantId) return;
 
-    const fetchVariantData = async () => {
-      const apiKey = localStorage.getItem("apiKey");
-      const apiSecretKey = localStorage.getItem("apiSecretKey");
-      try {
-        const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/product/getVariant/${productId}/variants/${variantId}`,
-          {
-            headers: {
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
-              "Content-Type": "application/json",
-            },
+  //   const fetchVariantData = async () => {
+  //     const apiKey = localStorage.getItem("apiKey");
+  //     const apiSecretKey = localStorage.getItem("apiSecretKey");
+  //     try {
+  //       const response = await axios.get(
+  //         `https://multi-vendor-marketplace.vercel.app/product/getVariant/${productId}/variants/${variantId}`,
+  //         {
+  //           headers: {
+  //             "x-api-key": apiKey,
+  //             "x-api-secret": apiSecretKey,
+  //             "Content-Type": "application/json",
+  //           },
+  //         },
+  //       );
+
+  //       setVariantData(response.data);
+  //       setUpdatedVariant(response.data);
+  //     } catch (error) {
+  //       console.error("Error fetching variant data:", error);
+  //     }
+  //   };
+
+  //   fetchVariantData();
+  // }, [productId, variantId]);
+
+
+
+
+useEffect(() => {
+  if (!productId || !variantId) return;
+
+  const fetchVariantData = async () => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await axios.get(
+        `https://multi-vendor-marketplace.vercel.app/product/getVariant/${productId}/variants/${variantId}`,
+        {
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
           },
-        );
+        }
+      );
 
-        setVariantData(response.data);
-        setUpdatedVariant(response.data);
-      } catch (error) {
-        console.error("Error fetching variant data:", error);
-      }
-    };
+      const variant = response.data;
 
-    fetchVariantData();
-  }, [productId, variantId]);
+      setVariantData(variant);
+      setUpdatedVariant(variant);
+
+      // Get actual inventory tracking status
+      const trackingStatus =
+        variant.inventory_item?.tracked ??
+        variant.inventory_item_tracked ??
+        variant.track_quantity;
+
+      // Only enable checkbox if tracking is explicitly true
+      setTrackQuantity(trackingStatus === true);
+
+    } catch (error) {
+      console.error("Error fetching variant data:", error);
+
+      setError("Failed to fetch variant data.");
+      setTrackQuantity(false);
+      toast.error("Failed to load variant information");
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchVariantData();
+}, [productId, variantId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

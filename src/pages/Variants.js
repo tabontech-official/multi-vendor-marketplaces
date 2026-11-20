@@ -19,13 +19,26 @@ const Variants = () => {
   const { productId, variantId: initialVariantId } = location.state || {};
   const [variantId, setVariantId] = useState(initialVariantId);
 
+ 
+
   // useEffect(() => {
   //   const fetchProduct = async () => {
-  //     const token=localStorage.getItem('usertoken')
+  //     const token = localStorage.getItem("usertoken");
+  //     const apiKey = localStorage.getItem("apiKey");
+  //     const apiSecretKey = localStorage.getItem("apiSecretKey");
   //     try {
   //       const response = await axios.get(
-  //         `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`
+  //         `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`,
+  //         {
+  //           headers: {
+  //             "x-api-key": apiKey,
+  //             "x-api-secret": apiSecretKey,
+
+  //             "Content-Type": "application/json",
+  //           },
+  //         },
   //       );
+
   //       setProduct(response.data);
   //       setLoading(false);
   //     } catch (err) {
@@ -33,37 +46,61 @@ const Variants = () => {
   //       setLoading(false);
   //     }
   //   };
+
   //   fetchProduct();
   // }, [productId]);
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      const token = localStorage.getItem("usertoken");
-      const apiKey = localStorage.getItem("apiKey");
-      const apiSecretKey = localStorage.getItem("apiSecretKey");
-      try {
-        const response = await axios.get(
-          `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`,
-          {
-            headers: {
-              "x-api-key": apiKey,
-              "x-api-secret": apiSecretKey,
 
-              "Content-Type": "application/json",
-            },
+
+useEffect(() => {
+  if (!productId) return;
+
+  const fetchProduct = async () => {
+    const apiKey = localStorage.getItem("apiKey");
+    const apiSecretKey = localStorage.getItem("apiSecretKey");
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await axios.get(
+        `https://multi-vendor-marketplace.vercel.app/product/getSingleProductForVariants/${productId}`,
+        {
+          headers: {
+            "x-api-key": apiKey,
+            "x-api-secret": apiSecretKey,
+            "Content-Type": "application/json",
           },
-        );
+        }
+      );
 
-        setProduct(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to fetch product data.");
-        setLoading(false);
-      }
-    };
+      const productData = response.data;
 
-    fetchProduct();
-  }, [productId]);
+      // Store complete product data
+      setProduct(productData);
+
+      // Find currently selected variant
+      const selectedVariant = productData.variants?.find(
+        (variant) => String(variant.id) === String(variantId)
+      );
+
+      // Checkbox state from inventory_management
+      setTrackQuantity(
+        selectedVariant?.inventory_management === "shopify"
+      );
+
+    } catch (err) {
+      console.error("Error fetching product:", err);
+      setError("Failed to fetch product data.");
+      setTrackQuantity(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProduct();
+}, [productId, variantId]);
+
 
   const handleVariantClick = (id) => {
     setVariantId(id);
@@ -196,7 +233,13 @@ useEffect(() => {
 
       await axios.put(
         `https://multi-vendor-marketplace.vercel.app/product/updateVariant/${productId}/${variantId}`,
-        { variant: updatedVariant },
+        // { variant: updatedVariant },
+        {
+  variant: {
+    ...updatedVariant,
+    track_quantity: trackQuantity,
+  },
+},
         {
           headers: {
             "x-api-key": apiKey,
@@ -528,6 +571,8 @@ useEffect(() => {
                     placeholder="0"
                     pattern="\d*"
                     inputMode="numeric"
+                      disabled={!trackQuantity}
+
                     value={updatedVariant.inventory_quantity}
                     onChange={(e) => {
                       const value = e.target.value.replace(/[^0-9]/g, "");
